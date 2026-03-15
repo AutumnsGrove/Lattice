@@ -1,18 +1,21 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session.js";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory.js";
-import { thresholdCheckWithResult, thresholdHeaders } from "@autumnsgrove/lattice/threshold/adapters/sveltekit.js";
-import { validateEnv } from "@autumnsgrove/lattice/server/env-validation.js";
+import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
+import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
+import {
+	thresholdCheckWithResult,
+	thresholdHeaders,
+} from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
+import { validateEnv } from "@autumnsgrove/lattice/server/env-validation";
 import {
 	isAllowedImageType,
 	validateFileSignature,
 	MIME_TO_EXTENSIONS,
 	type AllowedImageType,
-} from "@autumnsgrove/lattice/utils/upload-validation.js";
-import { canUploadImages } from "@autumnsgrove/lattice/server/upload-gate.js";
-import { scanImage } from "@autumnsgrove/lattice/server/petal/index.js";
-import type { PetalEnv } from "@autumnsgrove/lattice/server/petal/types.js";
+} from "@autumnsgrove/lattice/utils/upload-validation";
+import { canUploadImages } from "@autumnsgrove/lattice/server/upload-gate";
+import { scanImage } from "@autumnsgrove/lattice/server/petal";
+import type { PetalEnv } from "@autumnsgrove/lattice/server/petal/types";
 import { API_ERRORS, logGroveError, throwGroveError } from "@autumnsgrove/lattice/errors";
 
 /** Maximum avatar file size (5MB — smaller than general 10MB) */

@@ -1,7 +1,10 @@
 <script lang="ts">
 	import GlassChat from "@autumnsgrove/lattice/ui/components/ui/glasschat/GlassChat.svelte";
 	import { createAIChatController } from "@autumnsgrove/lattice/ui/components/ui/glasschat/controller.svelte";
-	import type { ChatMessageData, ChatRoleMap } from "@autumnsgrove/lattice/ui/components/ui/glasschat/types";
+	import type {
+		ChatMessageData,
+		ChatRoleMap,
+	} from "@autumnsgrove/lattice/ui/components/ui/glasschat/types";
 	import { TierGate } from "@autumnsgrove/lattice/ui/vineyard";
 	import type { GroveTier } from "@autumnsgrove/lattice/ui/vineyard/types";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";

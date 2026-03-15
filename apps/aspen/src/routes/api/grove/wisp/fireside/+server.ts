@@ -13,13 +13,13 @@
 
 import { json, type RequestHandler } from "@sveltejs/kit";
 import { API_ERRORS, logGroveError } from "@autumnsgrove/lattice/errors";
-import { RATE_LIMIT } from "@autumnsgrove/lattice/config/wisp.js";
-import { secureUserContent } from "@autumnsgrove/lattice/server/inference-client.js";
-import { createLumenClient, type LumenClient } from "@autumnsgrove/lattice/lumen/index.js";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory.js";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit.js";
-import { checkFeatureAccess } from "@autumnsgrove/lattice/server/billing.js";
-import { execute } from "@autumnsgrove/lattice/server/services/database.js";
+import { RATE_LIMIT } from "@autumnsgrove/lattice/config/wisp";
+import { secureUserContent } from "@autumnsgrove/lattice/server/inference-client";
+import { createLumenClient, type LumenClient } from "@autumnsgrove/lattice/lumen";
+import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
+import { checkFeatureAccess } from "@autumnsgrove/lattice/server/billing";
+import { execute } from "@autumnsgrove/lattice/server/services/database";
 
 // Import pure functions from separate module (enables testing)
 import {

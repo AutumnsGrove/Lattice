@@ -1,6 +1,6 @@
-import { getAllPosts } from "@autumnsgrove/lattice/utils/markdown.js";
-import * as cache from "@autumnsgrove/lattice/server/services/cache.js";
-import { emailsMatch } from "@autumnsgrove/lattice/utils/user.js";
+import { getAllPosts } from "@autumnsgrove/lattice/utils/markdown";
+import * as cache from "@autumnsgrove/lattice/server/services/cache";
+import { emailsMatch } from "@autumnsgrove/lattice/utils/user";
 import type { PageServerLoad } from "./$types.js";
 
 // Disable prerendering - posts are fetched from D1 at runtime

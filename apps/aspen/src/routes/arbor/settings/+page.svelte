@@ -36,7 +36,10 @@
 		DEFAULT_ACCENT_COLOR,
 		DEFAULT_FONT,
 	} from "@autumnsgrove/lattice/config/presets";
-	import { CANOPY_CATEGORIES, CANOPY_CATEGORY_LABELS } from "@autumnsgrove/lattice/config/canopy-categories";
+	import {
+		CANOPY_CATEGORIES,
+		CANOPY_CATEGORY_LABELS,
+	} from "@autumnsgrove/lattice/config/canopy-categories";
 	import { enhance } from "$app/forms";
 	import { invalidateAll } from "$app/navigation";
 
@@ -825,7 +828,8 @@
 			<h2>Profile Photo</h2>
 		</div>
 		<p class="section-description">
-			Your photo appears in the <GroveTerm interactive term="canopy">Canopy</GroveTerm> directory and across your
+			Your photo appears in the <GroveTerm interactive term="canopy">Canopy</GroveTerm> directory and
+			across your
 			<GroveTerm interactive term="grove">grove</GroveTerm>.
 		</p>
 
@@ -1358,7 +1362,9 @@
 			<h2>Header Branding</h2>
 		</div>
 		<p class="section-description">
-			Customize what appears in the header of your <GroveTerm interactive term="grove">grove</GroveTerm>.
+			Customize what appears in the header of your <GroveTerm interactive term="grove"
+				>grove</GroveTerm
+			>.
 		</p>
 
 		<div class="canopy-field">
@@ -1453,7 +1459,8 @@
 			<Waystone slug="what-is-canopy" label="Learn about the Canopy" />
 		</div>
 		<p class="section-description">
-			Let other wanderers discover your <GroveTerm interactive term="grove">grove</GroveTerm> in the public directory.
+			Let other wanderers discover your <GroveTerm interactive term="grove">grove</GroveTerm> in the public
+			directory.
 			<a
 				href="https://grove.place/canopy"
 				target="_blank"
@@ -1557,7 +1564,8 @@
 			<Waystone slug="what-is-meadow" label="Learn about Meadow" />
 		</div>
 		<p class="section-description">
-			Share your published <GroveTerm interactive term="blooms">posts</GroveTerm> to the community feed at
+			Share your published <GroveTerm interactive term="blooms">posts</GroveTerm> to the community feed
+			at
 			<a
 				href="https://meadow.grove.place"
 				target="_blank"
@@ -1887,7 +1895,9 @@
 			<h2>Active Sessions</h2>
 		</div>
 		<p class="section-description">
-			Devices where you're currently signed in to your <GroveTerm interactive term="grove">grove</GroveTerm>.
+			Devices where you're currently signed in to your <GroveTerm interactive term="grove"
+				>grove</GroveTerm
+			>.
 		</p>
 
 		{#if loadingSessions}

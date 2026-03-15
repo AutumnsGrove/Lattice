@@ -1,5 +1,5 @@
 import { json } from "@sveltejs/kit";
-import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session.js";
+import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
 import type { RequestHandler } from "./$types.js";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 

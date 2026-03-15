@@ -8,7 +8,11 @@
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { safeParseInt, DEFAULT_MILESTONE_LIMIT, MAX_MILESTONE_LIMIT } from "@autumnsgrove/lattice/curios/journey";
+import {
+	safeParseInt,
+	DEFAULT_MILESTONE_LIMIT,
+	MAX_MILESTONE_LIMIT,
+} from "@autumnsgrove/lattice/curios/journey";
 import { safeParseJson } from "@autumnsgrove/lattice/utils/json";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 

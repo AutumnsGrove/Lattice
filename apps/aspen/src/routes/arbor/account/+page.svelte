@@ -189,7 +189,6 @@
 	</GlassCard>
 </div>
 
-
 <style>
 	.account-page {
 		max-width: 800px;

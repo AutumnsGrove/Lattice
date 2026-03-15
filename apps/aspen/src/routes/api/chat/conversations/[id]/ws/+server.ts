@@ -12,8 +12,8 @@
 
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, logGroveError, throwGroveError } from "@autumnsgrove/lattice/errors";
-import { isRedirect, isHttpError } from "@autumnsgrove/lattice/server/utils/type-guards.js";
-import { getUserHomeGrove } from "@autumnsgrove/lattice/server/services/users.js";
+import { isRedirect, isHttpError } from "@autumnsgrove/lattice/server/utils/type-guards";
+import { getUserHomeGrove } from "@autumnsgrove/lattice/server/services/users";
 import { getLoomDO } from "@autumnsgrove/lattice/loom/sveltekit";
 
 export const GET: RequestHandler = async ({ platform, locals, params, request }) => {

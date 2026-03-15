@@ -45,7 +45,8 @@
 		{
 			id: "guestbook",
 			name: "Guestbook",
-			description: "Let visitors leave notes on your site — classic personal web warmth with moderation built in",
+			description:
+				"Let visitors leave notes on your site — classic personal web warmth with moderation built in",
 			icon: BookOpen,
 			status: "greenhouse",
 			href: "/arbor/curios/guestbook",
@@ -69,7 +70,8 @@
 		{
 			id: "statusbadge",
 			name: "Status Badges",
-			description: "Small, expressive badges that signal the state of your site — online, away, creating, or custom",
+			description:
+				"Small, expressive badges that signal the state of your site — online, away, creating, or custom",
 			icon: Shield,
 			status: "greenhouse",
 			href: "/arbor/curios/statusbadge",
@@ -92,7 +94,8 @@
 		{
 			id: "shelves",
 			name: "Shelves",
-			description: "Collect and display anything — books you've read, links you love, or custom collections with ratings and notes",
+			description:
+				"Collect and display anything — books you've read, links you love, or custom collections with ratings and notes",
 			icon: BookMarked,
 			status: "greenhouse",
 			href: "/arbor/curios/shelves",
@@ -148,7 +151,8 @@
 		{
 			id: "artifacts",
 			name: "Weird Artifacts",
-			description: "Playful chaos objects — Magic 8-Ball, fortune cookies, dice rollers, and more weird fun",
+			description:
+				"Playful chaos objects — Magic 8-Ball, fortune cookies, dice rollers, and more weird fun",
 			icon: Wand2,
 			status: "greenhouse",
 			href: "/arbor/curios/artifacts",
@@ -255,7 +259,8 @@
 		{
 			id: "customuploads",
 			name: "Custom Uploads",
-			description: "Upload and manage images used across your curios — auto-resized with quota tracking",
+			description:
+				"Upload and manage images used across your curios — auto-resized with quota tracking",
 			icon: Upload,
 			status: "greenhouse",
 			href: "/arbor/curios/customuploads",
@@ -319,11 +324,14 @@
 				<Waystone slug="what-are-curios" label="Learn about Curios" />
 			</div>
 			{#if !groveModeStore.current}
-				<p class="text-sm text-foreground-subtle italic mt-1 mb-0">(<GroveTerm term="curios" displayOverride="grove" icon />)</p>
+				<p class="text-sm text-foreground-subtle italic mt-1 mb-0">
+					(<GroveTerm term="curios" displayOverride="grove" icon />)
+				</p>
 			{/if}
 			<p class="subtitle">
-				Fun, delightful tools that make your site feel alive. Developer <GroveTerm interactive term="curios"
-					>curios</GroveTerm
+				Fun, delightful tools that make your site feel alive. Developer <GroveTerm
+					interactive
+					term="curios">curios</GroveTerm
 				> help you showcase your work in unique ways.
 			</p>
 		</div>
@@ -331,7 +339,11 @@
 
 	<div class="curios-grid">
 		{#each curios as curio}
-			<GlassCard class="curio-card {curio.status === 'coming-soon' || curio.status === 'building' ? 'coming-soon' : ''}">
+			<GlassCard
+				class="curio-card {curio.status === 'coming-soon' || curio.status === 'building'
+					? 'coming-soon'
+					: ''}"
+			>
 				<div class="curio-header">
 					<div class="curio-icon">
 						<svelte:component this={curio.icon} />

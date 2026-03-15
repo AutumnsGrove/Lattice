@@ -8,18 +8,18 @@ import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 
 export const GET: RequestHandler = async ({ locals }) => {
-  if (!locals.user) {
-    return json({ authenticated: false }, { status: 401 });
-  }
+	if (!locals.user) {
+		return json({ authenticated: false }, { status: 401 });
+	}
 
-  return json({
-    authenticated: true,
-    user: {
-      id: locals.user.id,
-      email: locals.user.email,
-      name: locals.user.name,
-      picture: locals.user.picture,
-      provider: locals.user.provider,
-    },
-  });
+	return json({
+		authenticated: true,
+		user: {
+			id: locals.user.id,
+			email: locals.user.email,
+			name: locals.user.name,
+			picture: locals.user.picture,
+			provider: locals.user.provider,
+		},
+	});
 };

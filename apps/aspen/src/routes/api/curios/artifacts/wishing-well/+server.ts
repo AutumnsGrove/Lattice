@@ -22,9 +22,7 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 	}
 
 	const result = await db
-		.prepare(
-			`SELECT wish_count FROM wishing_well_counts WHERE tenant_id = ?`,
-		)
+		.prepare(`SELECT wish_count FROM wishing_well_counts WHERE tenant_id = ?`)
 		.bind(tenantId)
 		.first<{ wish_count: number }>();
 
@@ -60,9 +58,7 @@ export const POST: RequestHandler = async ({ platform, locals }) => {
 			.run();
 
 		const result = await db
-			.prepare(
-				`SELECT wish_count FROM wishing_well_counts WHERE tenant_id = ?`,
-			)
+			.prepare(`SELECT wish_count FROM wishing_well_counts WHERE tenant_id = ?`)
 			.bind(tenantId)
 			.first<{ wish_count: number }>();
 

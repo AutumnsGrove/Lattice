@@ -11,7 +11,7 @@
  */
 
 import { json } from "@sveltejs/kit";
-import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session.js";
+import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
 import { createSecretsManager } from "@autumnsgrove/lattice/server/secrets";
 import { API_ERRORS, throwGroveError, logGroveError } from "@autumnsgrove/lattice/errors";
 

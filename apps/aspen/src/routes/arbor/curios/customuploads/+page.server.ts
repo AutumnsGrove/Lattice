@@ -2,7 +2,11 @@ import type { PageServerLoad, Actions } from "./$types";
 import { fail } from "@sveltejs/kit";
 import { z } from "zod";
 import { ARBOR_ERRORS, logGroveError } from "@autumnsgrove/lattice/errors";
-import { MAX_FILE_SIZE, MAX_UPLOADS_PER_TENANT, formatFileSize } from "@autumnsgrove/lattice/curios/customuploads";
+import {
+	MAX_FILE_SIZE,
+	MAX_UPLOADS_PER_TENANT,
+	formatFileSize,
+} from "@autumnsgrove/lattice/curios/customuploads";
 import { parseFormData } from "@autumnsgrove/lattice/server/utils/form-data";
 
 interface UploadRow {

@@ -24,18 +24,18 @@
 
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory.js";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit.js";
-import { getClientIP } from "@autumnsgrove/lattice/threshold/adapters/worker.js";
-import { getEndpointLimitByKey } from "@autumnsgrove/lattice/threshold/config.js";
+import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
+import { getClientIP } from "@autumnsgrove/lattice/threshold/adapters/worker";
+import { getEndpointLimitByKey } from "@autumnsgrove/lattice/threshold/config";
 import { AUTH_COOKIE_NAMES } from "@autumnsgrove/lattice/grafts/login";
 import {
-  AUTH_ERRORS,
-  getAuthError,
-  logAuthError,
-  buildErrorParams,
+	AUTH_ERRORS,
+	getAuthError,
+	logAuthError,
+	buildErrorParams,
 } from "@autumnsgrove/lattice/heartwood/errors";
-import { sanitizeReturnTo } from "@autumnsgrove/lattice/utils/grove-url.js";
+import { sanitizeReturnTo } from "@autumnsgrove/lattice/utils/grove-url";
 
 /**
  * Migration deadline for legacy session cookies.
@@ -48,82 +48,74 @@ const LEGACY_SESSION_DEADLINE = new Date("2026-03-01T00:00:00Z");
 // Handler
 // =============================================================================
 
-export const GET: RequestHandler = async ({
-  url,
-  cookies,
-  platform,
-  request,
-}) => {
-  // Rate limiting
-  const threshold = createThreshold(platform?.env);
-  if (threshold) {
-    const clientIp = getClientIP(request);
-    const limitConfig = getEndpointLimitByKey("auth/callback");
-    const denied = await thresholdCheck(threshold, {
-      key: `auth/callback:${clientIp}`,
-      ...limitConfig,
-      failMode: "closed",
-    });
-    if (denied) {
-      console.warn("[Auth Callback] Rate limited:", { ip: clientIp });
-      return denied;
-    }
-  }
+export const GET: RequestHandler = async ({ url, cookies, platform, request }) => {
+	// Rate limiting
+	const threshold = createThreshold(platform?.env);
+	if (threshold) {
+		const clientIp = getClientIP(request);
+		const limitConfig = getEndpointLimitByKey("auth/callback");
+		const denied = await thresholdCheck(threshold, {
+			key: `auth/callback:${clientIp}`,
+			...limitConfig,
+			failMode: "closed",
+		});
+		if (denied) {
+			console.warn("[Auth Callback] Rate limited:", { ip: clientIp });
+			return denied;
+		}
+	}
 
-  // Check for error from OAuth provider
-  const errorParam = url.searchParams.get("error");
-  if (errorParam) {
-    const authError = getAuthError(errorParam);
-    logAuthError(authError, {
-      oauthError: errorParam,
-      ip: getClientIP(request),
-      path: url.pathname,
-    });
-    throw redirect(302, `/auth/login?${buildErrorParams(authError)}`);
-  }
+	// Check for error from OAuth provider
+	const errorParam = url.searchParams.get("error");
+	if (errorParam) {
+		const authError = getAuthError(errorParam);
+		logAuthError(authError, {
+			oauthError: errorParam,
+			ip: getClientIP(request),
+			path: url.pathname,
+		});
+		throw redirect(302, `/auth/login?${buildErrorParams(authError)}`);
+	}
 
-  // Get return URL from query params (set by LoginGraft), sanitized to prevent open redirects
-  const returnTo = sanitizeReturnTo(url.searchParams.get("returnTo"), "/arbor");
+	// Get return URL from query params (set by LoginGraft), sanitized to prevent open redirects
+	const returnTo = sanitizeReturnTo(url.searchParams.get("returnTo"), "/arbor");
 
-  // Verify Better Auth session cookie was set
-  // Better Auth uses __Secure- prefix in production (HTTPS)
-  // Check both prefixed and unprefixed names for compatibility
-  const sessionToken =
-    cookies.get(AUTH_COOKIE_NAMES.betterAuthSessionSecure) ||
-    cookies.get(AUTH_COOKIE_NAMES.betterAuthSession);
+	// Verify Better Auth session cookie was set
+	// Better Auth uses __Secure- prefix in production (HTTPS)
+	// Check both prefixed and unprefixed names for compatibility
+	const sessionToken =
+		cookies.get(AUTH_COOKIE_NAMES.betterAuthSessionSecure) ||
+		cookies.get(AUTH_COOKIE_NAMES.betterAuthSession);
 
-  if (!sessionToken) {
-    // No session cookie - check for legacy cookies during migration
-    const legacySession = cookies.get("access_token") || cookies.get("session");
+	if (!sessionToken) {
+		// No session cookie - check for legacy cookies during migration
+		const legacySession = cookies.get("access_token") || cookies.get("session");
 
-    // Check if migration period has expired
-    const migrationExpired = new Date() > LEGACY_SESSION_DEADLINE;
+		// Check if migration period has expired
+		const migrationExpired = new Date() > LEGACY_SESSION_DEADLINE;
 
-    if (!legacySession || migrationExpired) {
-      const authError =
-        migrationExpired && legacySession
-          ? AUTH_ERRORS.LEGACY_SESSION_EXPIRED
-          : AUTH_ERRORS.NO_SESSION;
+		if (!legacySession || migrationExpired) {
+			const authError =
+				migrationExpired && legacySession
+					? AUTH_ERRORS.LEGACY_SESSION_EXPIRED
+					: AUTH_ERRORS.NO_SESSION;
 
-      logAuthError(authError, {
-        ip: getClientIP(request),
-        path: url.pathname,
-      });
+			logAuthError(authError, {
+				ip: getClientIP(request),
+				path: url.pathname,
+			});
 
-      throw redirect(302, `/auth/login?${buildErrorParams(authError)}`);
-    }
-    // Legacy session exists and within migration window - allow through
-    console.warn(
-      "[Auth Callback] Using legacy session (migration period), redirecting to:",
-      returnTo,
-    );
-  } else {
-    console.warn(
-      "[Auth Callback] Better Auth session found, redirecting to:",
-      returnTo,
-    );
-  }
+			throw redirect(302, `/auth/login?${buildErrorParams(authError)}`);
+		}
+		// Legacy session exists and within migration window - allow through
+		console.warn(
+			"[Auth Callback] Using legacy session (migration period), redirecting to:",
+			returnTo,
+		);
+	} else {
+		console.warn("[Auth Callback] Better Auth session found, redirecting to:", returnTo);
+	}
 
-  // Success! Redirect to the requested destination
-  throw redirect(302, returnTo);
+	// Success! Redirect to the requested destination
+	throw redirect(302, returnTo);
 };

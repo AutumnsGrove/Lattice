@@ -10,9 +10,9 @@
 // ============================================================================
 
 export interface FiresideMessage {
-  role: "wisp" | "user";
-  content: string;
-  timestamp: string;
+	role: "wisp" | "user";
+	content: string;
+	timestamp: string;
 }
 
 // ============================================================================
@@ -45,22 +45,22 @@ export const MAX_CONVERSATION_TOKENS = 120000;
 // ============================================================================
 
 export const STARTER_PROMPTS = [
-  // Open & Warm
-  "What's been living in your head lately?",
-  "What surprised you this week?",
-  "What are you excited about right now?",
-  "What's something small that made you smile recently?",
-  // Reflective
-  "What's something you've been meaning to write about but haven't found the words for?",
-  "What would you tell a friend who asked how you're *really* doing?",
-  "What's a thought you keep turning over?",
-  // Creative & Playful
-  "If you could ramble about anything right now, what would it be?",
-  "What's something you wish more people understood?",
-  "What did you learn recently that you can't stop thinking about?",
-  // Returning Writers
-  "It's been a while. What's been happening in your world?",
-  "What are you working on that you'd love to talk about?",
+	// Open & Warm
+	"What's been living in your head lately?",
+	"What surprised you this week?",
+	"What are you excited about right now?",
+	"What's something small that made you smile recently?",
+	// Reflective
+	"What's something you've been meaning to write about but haven't found the words for?",
+	"What would you tell a friend who asked how you're *really* doing?",
+	"What's a thought you keep turning over?",
+	// Creative & Playful
+	"If you could ramble about anything right now, what would it be?",
+	"What's something you wish more people understood?",
+	"What did you learn recently that you can't stop thinking about?",
+	// Returning Writers
+	"It's been a while. What's been happening in your world?",
+	"What are you working on that you'd love to talk about?",
 ];
 
 // ============================================================================
@@ -72,13 +72,13 @@ export const STARTER_PROMPTS = [
  * Uses a basic djb2-style hash algorithm
  */
 export function hashString(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash; // Convert to 32-bit integer
-  }
-  return Math.abs(hash);
+	let hash = 0;
+	for (let i = 0; i < str.length; i++) {
+		const char = str.charCodeAt(i);
+		hash = (hash << 5) - hash + char;
+		hash = hash & hash; // Convert to 32-bit integer
+	}
+	return Math.abs(hash);
 }
 
 /**
@@ -86,9 +86,9 @@ export function hashString(str: string): number {
  * Same user sees same prompt on same day, different prompt each day
  */
 export function selectStarterPrompt(userId: string, date?: string): string {
-  const today = date || new Date().toISOString().slice(0, 10);
-  const seed = hashString(`${userId}:${today}`);
-  return STARTER_PROMPTS[seed % STARTER_PROMPTS.length];
+	const today = date || new Date().toISOString().slice(0, 10);
+	const seed = hashString(`${userId}:${today}`);
+	return STARTER_PROMPTS[seed % STARTER_PROMPTS.length];
 }
 
 /**
@@ -107,25 +107,21 @@ export function selectStarterPrompt(userId: string, date?: string): string {
  * use actual token counts from the inference response.
  */
 export function estimateTokens(text: string): number {
-  return Math.ceil(text.length / CHARS_PER_TOKEN);
+	return Math.ceil(text.length / CHARS_PER_TOKEN);
 }
 
 /**
  * Estimate total tokens in a conversation
  */
-export function estimateConversationTokens(
-  conversation: FiresideMessage[],
-): number {
-  return conversation.reduce((sum, m) => sum + estimateTokens(m.content), 0);
+export function estimateConversationTokens(conversation: FiresideMessage[]): number {
+	return conversation.reduce((sum, m) => sum + estimateTokens(m.content), 0);
 }
 
 /**
  * Check if conversation is approaching the token limit
  */
-export function isConversationTooLong(
-  conversation: FiresideMessage[],
-): boolean {
-  return estimateConversationTokens(conversation) > MAX_CONVERSATION_TOKENS;
+export function isConversationTooLong(conversation: FiresideMessage[]): boolean {
+	return estimateConversationTokens(conversation) > MAX_CONVERSATION_TOKENS;
 }
 
 /**
@@ -133,16 +129,10 @@ export function isConversationTooLong(
  * Requires minimum messages AND minimum token count from user
  */
 export function canDraft(conversation: FiresideMessage[]): boolean {
-  const userMessages = conversation.filter((m) => m.role === "user");
-  const totalUserTokens = userMessages.reduce(
-    (sum, m) => sum + estimateTokens(m.content),
-    0,
-  );
+	const userMessages = conversation.filter((m) => m.role === "user");
+	const totalUserTokens = userMessages.reduce((sum, m) => sum + estimateTokens(m.content), 0);
 
-  return (
-    userMessages.length >= MIN_MESSAGES_FOR_DRAFT &&
-    totalUserTokens >= MIN_TOKENS_FOR_DRAFT
-  );
+	return userMessages.length >= MIN_MESSAGES_FOR_DRAFT && totalUserTokens >= MIN_TOKENS_FOR_DRAFT;
 }
 
 /**
@@ -150,9 +140,9 @@ export function canDraft(conversation: FiresideMessage[]): boolean {
  * Format: timestamp-random (e.g., "1704067200000-abc123xyz")
  */
 export function generateConversationId(): string {
-  const timestamp = Date.now();
-  const random = Math.random().toString(36).substring(2, 15);
-  return `${timestamp}-${random}`;
+	const timestamp = Date.now();
+	const random = Math.random().toString(36).substring(2, 15);
+	return `${timestamp}-${random}`;
 }
 
 /**
@@ -162,12 +152,12 @@ export function generateConversationId(): string {
  * Valid format: timestamp-alphanumeric (e.g., "1704067200000-abc123xyz")
  */
 export function isValidConversationId(id: string | undefined): boolean {
-  if (!id || typeof id !== "string") return false;
+	if (!id || typeof id !== "string") return false;
 
-  // Format: 13-digit timestamp, dash, 11-13 alphanumeric chars
-  // Be lenient on random part length but strict on characters
-  const pattern = /^\d{13}-[a-z0-9]{8,15}$/;
-  return pattern.test(id);
+	// Format: 13-digit timestamp, dash, 11-13 alphanumeric chars
+	// Be lenient on random part length but strict on characters
+	const pattern = /^\d{13}-[a-z0-9]{8,15}$/;
+	return pattern.test(id);
 }
 
 /**
@@ -175,5 +165,5 @@ export function isValidConversationId(id: string | undefined): boolean {
  * Used to identify messages for removal on error (avoids timestamp collision)
  */
 export function generateMessageId(): string {
-  return crypto.randomUUID();
+	return crypto.randomUUID();
 }

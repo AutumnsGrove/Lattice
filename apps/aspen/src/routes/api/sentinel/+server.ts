@@ -18,7 +18,7 @@ import {
 	createSmokeTestProfile,
 	type LoadProfile,
 	type TargetSystem,
-} from "@autumnsgrove/lattice/sentinel/index.js";
+} from "@autumnsgrove/lattice/sentinel";
 import { API_ERRORS, throwGroveError, logGroveError } from "@autumnsgrove/lattice/errors";
 
 /**

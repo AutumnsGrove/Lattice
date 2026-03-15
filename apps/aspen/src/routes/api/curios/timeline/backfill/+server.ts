@@ -16,9 +16,12 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import type { Commit } from "@autumnsgrove/lattice/curios/timeline";
-import { getTimelineToken, TIMELINE_SECRET_KEYS } from "@autumnsgrove/lattice/curios/timeline/secrets.server";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory.js";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit.js";
+import {
+	getTimelineToken,
+	TIMELINE_SECRET_KEYS,
+} from "@autumnsgrove/lattice/curios/timeline/secrets.server";
+import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
 import { API_ERRORS, throwGroveError, logGroveError } from "@autumnsgrove/lattice/errors";
 
 interface ConfigRow {

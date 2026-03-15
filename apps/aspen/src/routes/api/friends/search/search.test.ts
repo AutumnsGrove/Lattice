@@ -11,24 +11,24 @@ import { GET } from "./+server";
 
 // ── Mocks ───────────────────────────────────────────────────────────────────
 
-vi.mock("@autumnsgrove/lattice/server/services/users.js", () => ({
+vi.mock("@autumnsgrove/lattice/server/services/users", () => ({
 	getUserHomeGrove: vi.fn(),
 }));
 
-vi.mock("@autumnsgrove/lattice/threshold/factory.js", () => ({
+vi.mock("@autumnsgrove/lattice/threshold/factory", () => ({
 	createThreshold: vi.fn(() => null),
 }));
 
-vi.mock("@autumnsgrove/lattice/threshold/adapters/sveltekit.js", () => ({
+vi.mock("@autumnsgrove/lattice/threshold/adapters/sveltekit", () => ({
 	thresholdCheck: vi.fn(),
 }));
 
-vi.mock("@autumnsgrove/lattice/server/services/friends.js", () => ({
+vi.mock("@autumnsgrove/lattice/server/services/friends", () => ({
 	searchTenants: vi.fn(),
 }));
 
-import { getUserHomeGrove } from "@autumnsgrove/lattice/server/services/users.js";
-import { searchTenants } from "@autumnsgrove/lattice/server/services/friends.js";
+import { getUserHomeGrove } from "@autumnsgrove/lattice/server/services/users";
+import { searchTenants } from "@autumnsgrove/lattice/server/services/friends";
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 

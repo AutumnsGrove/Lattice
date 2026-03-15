@@ -7,7 +7,7 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, buildErrorJson, logGroveError } from "@autumnsgrove/lattice/errors";
-import { isInGreenhouse, isFeatureEnabled } from "@autumnsgrove/lattice/feature-flags/index.js";
+import { isInGreenhouse, isFeatureEnabled } from "@autumnsgrove/lattice/feature-flags";
 
 export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	if (!locals.user) {

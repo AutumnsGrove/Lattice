@@ -5,73 +5,54 @@
  */
 
 import { json } from "@sveltejs/kit";
-import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session.js";
+import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
-import { isInGreenhouse, isFeatureEnabled } from "@autumnsgrove/lattice/feature-flags/index.js";
-import { unblockCommenter } from "@autumnsgrove/lattice/server/services/reeds.js";
+import { isInGreenhouse, isFeatureEnabled } from "@autumnsgrove/lattice/feature-flags";
+import { unblockCommenter } from "@autumnsgrove/lattice/server/services/reeds";
 import type { RequestHandler } from "./$types.js";
 
 /** Check if the reeds_comments graft is enabled for this tenant. */
 async function isReedsEnabled(
-  db: D1Database,
-  kv: KVNamespace | undefined,
-  tenantId: string,
+	db: D1Database,
+	kv: KVNamespace | undefined,
+	tenantId: string,
 ): Promise<boolean> {
-  if (!kv) return false;
-  const flagsEnv = { DB: db, FLAGS_KV: kv };
-  const inGreenhouse = await isInGreenhouse(tenantId, flagsEnv).catch(
-    () => false,
-  );
-  if (!inGreenhouse) return false;
-  return isFeatureEnabled(
-    "reeds_comments",
-    { tenantId, inGreenhouse: true },
-    flagsEnv,
-  ).catch(() => false);
+	if (!kv) return false;
+	const flagsEnv = { DB: db, FLAGS_KV: kv };
+	const inGreenhouse = await isInGreenhouse(tenantId, flagsEnv).catch(() => false);
+	if (!inGreenhouse) return false;
+	return isFeatureEnabled("reeds_comments", { tenantId, inGreenhouse: true }, flagsEnv).catch(
+		() => false,
+	);
 }
 
-export const DELETE: RequestHandler = async ({
-  params,
-  request,
-  platform,
-  locals,
-}) => {
-  if (!locals.user) {
-    throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
-  }
+export const DELETE: RequestHandler = async ({ params, request, platform, locals }) => {
+	if (!locals.user) {
+		throwGroveError(401, API_ERRORS.UNAUTHORIZED, "API");
+	}
 
-  if (!platform?.env?.DB || !locals.tenantId) {
-    throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
-  }
+	if (!platform?.env?.DB || !locals.tenantId) {
+		throwGroveError(500, API_ERRORS.DB_NOT_CONFIGURED, "API");
+	}
 
-  // Gate: reeds_comments graft
-  if (
-    !(await isReedsEnabled(
-      platform.env.DB,
-      platform?.env?.CACHE_KV,
-      locals.tenantId,
-    ))
-  ) {
-    throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
-  }
+	// Gate: reeds_comments graft
+	if (!(await isReedsEnabled(platform.env.DB, platform?.env?.CACHE_KV, locals.tenantId))) {
+		throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
+	}
 
-  const { userId } = params;
+	const { userId } = params;
 
-  try {
-    const tenantId = await getVerifiedTenantId(
-      platform.env.DB,
-      locals.tenantId,
-      locals.user,
-    );
+	try {
+		const tenantId = await getVerifiedTenantId(platform.env.DB, locals.tenantId, locals.user);
 
-    await unblockCommenter(platform.env.DB, tenantId, userId);
+		await unblockCommenter(platform.env.DB, tenantId, userId);
 
-    return json({
-      success: true,
-      message: "User unblocked.",
-    });
-  } catch (err) {
-    if ((err as { status?: number }).status) throw err;
-    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
-  }
+		return json({
+			success: true,
+			message: "User unblocked.",
+		});
+	} catch (err) {
+		if ((err as { status?: number }).status) throw err;
+		throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
+	}
 };

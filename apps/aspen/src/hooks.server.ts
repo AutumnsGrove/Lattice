@@ -4,15 +4,15 @@ import {
 	generateSessionCSRFToken,
 	validateCSRFToken,
 	validateCSRF,
-} from "@autumnsgrove/lattice/utils/csrf.js";
+} from "@autumnsgrove/lattice/utils/csrf";
 import { error, redirect } from "@sveltejs/kit";
 import { SITE_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import {
 	TURNSTILE_COOKIE_NAME,
 	validateVerificationCookie,
-} from "@autumnsgrove/lattice/server/services/turnstile.js";
-import type { TenantConfig } from "@autumnsgrove/lattice/durable-objects/TenantDO.js";
-import { TIERS, type TierKey } from "@autumnsgrove/lattice/config/tiers.js";
+} from "@autumnsgrove/lattice/server/services/turnstile";
+import type { TenantConfig } from "@autumnsgrove/lattice/durable-objects/TenantDO";
+import { TIERS, type TierKey } from "@autumnsgrove/lattice/config/tiers";
 
 /**
  * Parse a specific cookie by name from the cookie header
@@ -668,9 +668,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// Fails open if neither backend is available.
 	if (event.url.pathname.startsWith("/api/")) {
 		const [{ createThreshold }, { thresholdCheck }, { getClientIP }] = await Promise.all([
-			import("@autumnsgrove/lattice/threshold/factory.js"),
-			import("@autumnsgrove/lattice/threshold/adapters/sveltekit.js"),
-			import("@autumnsgrove/lattice/threshold/adapters/worker.js"),
+			import("@autumnsgrove/lattice/threshold/factory"),
+			import("@autumnsgrove/lattice/threshold/adapters/sveltekit"),
+			import("@autumnsgrove/lattice/threshold/adapters/worker"),
 		]);
 		const clientIp = getClientIP(event.request);
 		// Authenticated users: rate limit per user ID so limits follow sessions, not IPs.

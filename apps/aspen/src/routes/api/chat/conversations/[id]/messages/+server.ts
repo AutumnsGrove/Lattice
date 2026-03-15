@@ -8,11 +8,15 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, logGroveError, throwGroveError } from "@autumnsgrove/lattice/errors";
-import { isRedirect, isHttpError } from "@autumnsgrove/lattice/server/utils/type-guards.js";
-import { getUserHomeGrove } from "@autumnsgrove/lattice/server/services/users.js";
-import { getMessages, createMessage, isParticipant } from "@autumnsgrove/lattice/server/services/chat.js";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory.js";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit.js";
+import { isRedirect, isHttpError } from "@autumnsgrove/lattice/server/utils/type-guards";
+import { getUserHomeGrove } from "@autumnsgrove/lattice/server/services/users";
+import {
+	getMessages,
+	createMessage,
+	isParticipant,
+} from "@autumnsgrove/lattice/server/services/chat";
+import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
 import { getLoomDO } from "@autumnsgrove/lattice/loom/sveltekit";
 
 export const GET: RequestHandler = async ({ platform, locals, params, url }) => {

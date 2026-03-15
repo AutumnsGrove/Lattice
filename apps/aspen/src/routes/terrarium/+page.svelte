@@ -17,8 +17,8 @@
 -->
 
 <script lang="ts">
-	import { Monitor } from '@lucide/svelte';
-	import Terrarium from '@autumnsgrove/lattice/ui/components/terrarium/Terrarium.svelte';
+	import { Monitor } from "@lucide/svelte";
+	import Terrarium from "@autumnsgrove/lattice/ui/components/terrarium/Terrarium.svelte";
 
 	let isMobileViewport = $state(false);
 
@@ -29,10 +29,10 @@
 		};
 
 		checkViewport();
-		window.addEventListener('resize', checkViewport);
+		window.addEventListener("resize", checkViewport);
 
 		return () => {
-			window.removeEventListener('resize', checkViewport);
+			window.removeEventListener("resize", checkViewport);
 		};
 	});
 </script>

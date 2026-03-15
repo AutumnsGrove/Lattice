@@ -1,10 +1,13 @@
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { z } from "zod";
-import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session.js";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory.js";
-import { thresholdCheckWithResult, thresholdHeaders } from "@autumnsgrove/lattice/threshold/adapters/sveltekit.js";
-import { validateEnv, hasAnyEnv } from "@autumnsgrove/lattice/server/env-validation.js";
+import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
+import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
+import {
+	thresholdCheckWithResult,
+	thresholdHeaders,
+} from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
+import { validateEnv, hasAnyEnv } from "@autumnsgrove/lattice/server/env-validation";
 import {
 	ALLOWED_IMAGE_TYPES,
 	ALLOWED_TYPES_DISPLAY,
@@ -12,13 +15,18 @@ import {
 	isAllowedImageType,
 	validateFileSignature,
 	type AllowedImageType,
-} from "@autumnsgrove/lattice/utils/upload-validation.js";
-import { scanImage, type PetalEnv } from "@autumnsgrove/lattice/server/petal/index.js";
-import { canUploadImages } from "@autumnsgrove/lattice/server/upload-gate.js";
-import { API_ERRORS, buildErrorJson, logGroveError, throwGroveError } from "@autumnsgrove/lattice/errors";
-import { updateLastActivity } from "@autumnsgrove/lattice/server/activity-tracking.js";
+} from "@autumnsgrove/lattice/utils/upload-validation";
+import { scanImage, type PetalEnv } from "@autumnsgrove/lattice/server/petal";
+import { canUploadImages } from "@autumnsgrove/lattice/server/upload-gate";
+import {
+	API_ERRORS,
+	buildErrorJson,
+	logGroveError,
+	throwGroveError,
+} from "@autumnsgrove/lattice/errors";
+import { updateLastActivity } from "@autumnsgrove/lattice/server/activity-tracking";
 import { generateGalleryId, parseImageFilename } from "@autumnsgrove/lattice/curios/gallery";
-import { parseFormData } from "@autumnsgrove/lattice/server/utils/form-data.js";
+import { parseFormData } from "@autumnsgrove/lattice/server/utils/form-data";
 
 /** Maximum file size (10MB) */
 const MAX_SIZE = 10 * 1024 * 1024;

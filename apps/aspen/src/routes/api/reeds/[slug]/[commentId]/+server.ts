@@ -4,16 +4,16 @@
  */
 
 import { json } from "@sveltejs/kit";
-import { sanitizeObject } from "@autumnsgrove/lattice/utils/validation.js";
-import { getTenantDb } from "@autumnsgrove/lattice/server/services/database.js";
-import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session.js";
+import { sanitizeObject } from "@autumnsgrove/lattice/utils/validation";
+import { getTenantDb } from "@autumnsgrove/lattice/server/services/database";
+import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import {
 	getCommentById,
 	editComment,
 	deleteComment,
 	isWithinEditWindow,
-} from "@autumnsgrove/lattice/server/services/reeds.js";
+} from "@autumnsgrove/lattice/server/services/reeds";
 import type { RequestHandler } from "./$types.js";
 
 const MAX_CONTENT_LENGTH = 10_000;

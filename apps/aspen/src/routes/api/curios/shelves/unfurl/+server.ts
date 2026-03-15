@@ -10,10 +10,10 @@
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types.js";
-import { fetchOGMetadata } from "@autumnsgrove/lattice/server/services/og-fetcher.js";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory.js";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit.js";
-import { getClientIP } from "@autumnsgrove/lattice/threshold/adapters/worker.js";
+import { fetchOGMetadata } from "@autumnsgrove/lattice/server/services/og-fetcher";
+import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
+import { getClientIP } from "@autumnsgrove/lattice/threshold/adapters/worker";
 import { API_ERRORS, buildErrorJson } from "@autumnsgrove/lattice/errors";
 import { isValidUrl } from "@autumnsgrove/lattice/curios/shelves";
 

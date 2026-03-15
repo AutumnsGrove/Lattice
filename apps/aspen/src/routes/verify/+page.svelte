@@ -25,7 +25,8 @@
 		status = "verifying";
 
 		try {
-			const response = await fetch("/api/verify/turnstile", { // csrf-ok — Turnstile verification runs before auth
+			const response = await fetch("/api/verify/turnstile", {
+				// csrf-ok — Turnstile verification runs before auth
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -77,9 +78,9 @@
 
 		{#if status === "waiting" || status === "verifying"}
 			<p class="subtitle">
-				This site uses <strong><GroveTerm interactive term="shade">Shade</GroveTerm></strong> to protect the author's
-				writing from AI scrapers and automated harvesting. We're just making sure you're a real person
-				here to read, not a bot here to collect.
+				This site uses <strong><GroveTerm interactive term="shade">Shade</GroveTerm></strong> to protect
+				the author's writing from AI scrapers and automated harvesting. We're just making sure you're
+				a real person here to read, not a bot here to collect.
 			</p>
 
 			<div class="widget-container">

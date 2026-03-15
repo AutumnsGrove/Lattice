@@ -1,5 +1,5 @@
 <script>
-	import ContentWithGutter from '@autumnsgrove/lattice/components/custom/ContentWithGutter.svelte';
+	import ContentWithGutter from "@autumnsgrove/lattice/components/custom/ContentWithGutter.svelte";
 
 	let { data } = $props();
 </script>

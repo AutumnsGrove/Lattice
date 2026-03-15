@@ -10,9 +10,9 @@
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session.js";
+import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
 import { API_ERRORS, throwGroveError, buildErrorJson } from "@autumnsgrove/lattice/errors";
-import { validateUUID } from "@autumnsgrove/lattice/utils/validation.js";
+import { validateUUID } from "@autumnsgrove/lattice/utils/validation";
 
 const ACTIVE_PHASES = ["pending", "querying", "assembling", "uploading", "notifying"];
 

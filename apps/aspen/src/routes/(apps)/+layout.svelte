@@ -8,7 +8,7 @@
 	let { children, data } = $props();
 
 	// Access app info from context (set in hooks.server.ts)
-	const appContext = $derived(data.context?.type === 'app' ? data.context : null);
+	const appContext = $derived(data.context?.type === "app" ? data.context : null);
 </script>
 
 <!--

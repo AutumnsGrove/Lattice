@@ -5,7 +5,10 @@
 	import GlassChat from "@autumnsgrove/lattice/ui/components/ui/glasschat/GlassChat.svelte";
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import { createConversationalChatController } from "@autumnsgrove/lattice/ui/components/ui/glasschat/controller.svelte";
-	import type { ChatRoleMap, ChatMessageData } from "@autumnsgrove/lattice/ui/components/ui/glasschat/types";
+	import type {
+		ChatRoleMap,
+		ChatMessageData,
+	} from "@autumnsgrove/lattice/ui/components/ui/glasschat/types";
 	import { createChatConnection } from "@autumnsgrove/lattice/ui/chat/connection.svelte";
 	import type {
 		ChatWSServerMessage,
@@ -15,7 +18,7 @@
 	import type {
 		ChatConversationWithMeta,
 		ChatMessageData as ChatMessageWireData,
-	} from "@autumnsgrove/lattice/server/services/chat.types.js";
+	} from "@autumnsgrove/lattice/server/services/chat.types";
 	import { chatStore } from "@autumnsgrove/lattice/ui/stores/chat.svelte";
 	import { cn } from "@autumnsgrove/lattice/ui/utils";
 	import { api } from "@autumnsgrove/lattice/utils/api";

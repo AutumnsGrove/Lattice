@@ -33,30 +33,32 @@ vi.mock("@sveltejs/kit", () => ({
 	},
 }));
 
-vi.mock("@autumnsgrove/lattice/utils/csrf.js", () => ({
+vi.mock("@autumnsgrove/lattice/utils/csrf", () => ({
 	validateCSRF: () => mockValidateCSRF(),
 }));
 
-vi.mock("@autumnsgrove/lattice/auth/session.js", () => ({
+vi.mock("@autumnsgrove/lattice/auth/session", () => ({
 	getVerifiedTenantId: (...args: unknown[]) => mockGetVerifiedTenantId(...args),
 }));
 
-vi.mock("@autumnsgrove/lattice/server/billing.js", () => ({
+vi.mock("@autumnsgrove/lattice/server/billing", () => ({
 	getTenantSubscription: (...args: unknown[]) => mockGetTenantSubscription(...args),
 }));
 
-vi.mock("@autumnsgrove/lattice/server/env-validation.js", () => ({
+vi.mock("@autumnsgrove/lattice/server/env-validation", () => ({
 	validateEnv: () => mockValidateEnv(),
 }));
 
-vi.mock("@autumnsgrove/lattice/lumen/client.js", () => ({
+vi.mock("@autumnsgrove/lattice/lumen/client", () => ({
 	createLumenClient: () => ({
 		transcribe: mockTranscribe,
 	}),
 }));
 
 vi.mock("@autumnsgrove/lattice/errors", async () => {
-	const actual = await vi.importActual<typeof import("@autumnsgrove/lattice/errors")>("@autumnsgrove/lattice/errors");
+	const actual = await vi.importActual<typeof import("@autumnsgrove/lattice/errors")>(
+		"@autumnsgrove/lattice/errors",
+	);
 	return {
 		...actual,
 		throwGroveError: (

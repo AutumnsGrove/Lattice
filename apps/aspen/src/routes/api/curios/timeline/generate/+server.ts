@@ -22,10 +22,13 @@ import {
 	type CustomVoiceConfig,
 	type PromptContextInput,
 } from "@autumnsgrove/lattice/curios/timeline";
-import { getTimelineToken, TIMELINE_SECRET_KEYS } from "@autumnsgrove/lattice/curios/timeline/secrets.server";
-import { createLumenClient } from "@autumnsgrove/lattice/lumen/index.js";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory.js";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit.js";
+import {
+	getTimelineToken,
+	TIMELINE_SECRET_KEYS,
+} from "@autumnsgrove/lattice/curios/timeline/secrets.server";
+import { createLumenClient } from "@autumnsgrove/lattice/lumen";
+import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 
 /** Maximum concurrent GitHub API requests to avoid rate limiting */

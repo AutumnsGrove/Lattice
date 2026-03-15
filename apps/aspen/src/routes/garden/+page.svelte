@@ -52,7 +52,11 @@
 		{#if groveModeStore.current}
 			<GroveTerm term="your-garden" displayOverride="grove" icon />
 		{:else}
-			<GroveTerm term="your-garden" displayOverride="standard" /> · <GroveTerm term="your-garden" displayOverride="grove" icon />
+			<GroveTerm term="your-garden" displayOverride="standard" /> · <GroveTerm
+				term="your-garden"
+				displayOverride="grove"
+				icon
+			/>
 		{/if}
 	</p>
 	<p class="blog-header-text">Thoughts, ideas, and explorations.</p>

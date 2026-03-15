@@ -79,6 +79,14 @@
 			"svelte": "./dist/index.js",
 			"types": "./dist/index.d.ts"
 		},
+		"./styles/tokens.css": "./dist/styles/tokens.css",
+		"./styles/vine-pattern.css": "./dist/styles/vine-pattern.css",
+		"./styles/fonts-optional.css": "./dist/styles/fonts-optional.css",
+		"./styles/*": "./dist/styles/*",
+		"./actions/*": {
+			"default": "./dist/actions/*.js",
+			"types": "./dist/actions/*.d.ts"
+		},
 		"./amber": {
 			"default": "./dist/amber/index.js",
 			"types": "./dist/amber/index.d.ts"
@@ -101,13 +109,30 @@
 			"svelte": "./dist/blazes/components/index.js",
 			"types": "./dist/blazes/components/index.d.ts"
 		},
-		"./components/admin/*": {
+		"./components/admin/*.svelte": {
 			"svelte": "./dist/components/admin/*.svelte",
+			"default": "./dist/components/admin/*.svelte",
 			"types": "./dist/components/admin/*.svelte.d.ts"
 		},
-		"./components/custom/*": {
+		"./components/chrome/*.svelte": {
+			"svelte": "./dist/components/chrome/*.svelte",
+			"default": "./dist/components/chrome/*.svelte",
+			"types": "./dist/components/chrome/*.svelte.d.ts"
+		},
+		"./components/custom/*.svelte": {
 			"svelte": "./dist/components/custom/*.svelte",
+			"default": "./dist/components/custom/*.svelte",
 			"types": "./dist/components/custom/*.svelte.d.ts"
+		},
+		"./components/reeds/*.svelte": {
+			"svelte": "./dist/components/reeds/*.svelte",
+			"default": "./dist/components/reeds/*.svelte",
+			"types": "./dist/components/reeds/*.svelte.d.ts"
+		},
+		"./components/terminology/*.svelte": {
+			"svelte": "./dist/components/terminology/*.svelte",
+			"default": "./dist/components/terminology/*.svelte",
+			"types": "./dist/components/terminology/*.svelte.d.ts"
 		},
 		"./config": {
 			"default": "./dist/config/index.js",
@@ -125,6 +150,39 @@
 			"default": "./dist/curios/index.js",
 			"types": "./dist/curios/index.d.ts"
 		},
+		"./curios/*": {
+			"default": "./dist/curios/*/index.js",
+			"types": "./dist/curios/*/index.d.ts"
+		},
+		"./curios/components/artifacts/*.svelte": {
+			"svelte": "./dist/curios/components/artifacts/*.svelte",
+			"default": "./dist/curios/components/artifacts/*.svelte"
+		},
+		"./curios/components/*": {
+			"default": "./dist/curios/components/*/index.js",
+			"svelte": "./dist/curios/components/*/index.js",
+			"types": "./dist/curios/components/*/index.d.ts"
+		},
+		"./curios/sanitize": {
+			"default": "./dist/curios/sanitize.js",
+			"types": "./dist/curios/sanitize.d.ts"
+		},
+		"./curios/guestbook": {
+			"default": "./dist/curios/guestbook/index.js",
+			"types": "./dist/curios/guestbook/index.d.ts"
+		},
+		"./curios/guestbook/*.svelte": {
+			"svelte": "./dist/curios/guestbook/*.svelte",
+			"default": "./dist/curios/guestbook/*.svelte"
+		},
+		"./curios/shrines": {
+			"default": "./dist/curios/shrines/index.js",
+			"types": "./dist/curios/shrines/index.d.ts"
+		},
+		"./curios/shrines/*.svelte": {
+			"svelte": "./dist/curios/shrines/*.svelte",
+			"default": "./dist/curios/shrines/*.svelte"
+		},
 		"./curios/gallery": {
 			"default": "./dist/curios/gallery/index.js",
 			"types": "./dist/curios/gallery/index.d.ts"
@@ -136,6 +194,10 @@
 		"./curios/timeline/voices": {
 			"default": "./dist/curios/timeline/voices/index.js",
 			"types": "./dist/curios/timeline/voices/index.d.ts"
+		},
+		"./curios/timeline/secrets.server": {
+			"default": "./dist/curios/timeline/secrets.server.js",
+			"types": "./dist/curios/timeline/secrets.server.d.ts"
 		},
 		"./db": {
 			"default": "./dist/server/db/index.js",
@@ -189,6 +251,10 @@
 			"default": "./dist/errors/index.js",
 			"types": "./dist/errors/index.d.ts"
 		},
+		"./errors/*": {
+			"default": "./dist/errors/*.js",
+			"types": "./dist/errors/*.d.ts"
+		},
 		"./reverie": {
 			"default": "./dist/reverie/index.js",
 			"types": "./dist/reverie/index.d.ts"
@@ -196,6 +262,10 @@
 		"./feature-flags": {
 			"default": "./dist/feature-flags/index.js",
 			"types": "./dist/feature-flags/index.d.ts"
+		},
+		"./feature-flags/*": {
+			"default": "./dist/feature-flags/*.js",
+			"types": "./dist/feature-flags/*.d.ts"
 		},
 		"./firefly": {
 			"default": "./dist/firefly/index.js",
@@ -220,6 +290,10 @@
 			"default": "./dist/grafts/login/server/index.js",
 			"types": "./dist/grafts/login/server/index.d.ts"
 		},
+		"./grafts/login/*": {
+			"default": "./dist/grafts/login/*.js",
+			"types": "./dist/grafts/login/*.d.ts"
+		},
 		"./grafts/pricing": {
 			"default": "./dist/grafts/pricing/index.js",
 			"svelte": "./dist/grafts/pricing/index.js",
@@ -229,6 +303,10 @@
 			"default": "./dist/grafts/upgrades/index.js",
 			"svelte": "./dist/grafts/upgrades/index.js",
 			"types": "./dist/grafts/upgrades/index.d.ts"
+		},
+		"./grafts/upgrades/server/api/*": {
+			"default": "./dist/grafts/upgrades/server/api/*.js",
+			"types": "./dist/grafts/upgrades/server/api/*.d.ts"
 		},
 		"./grafts/uploads": {
 			"default": "./dist/grafts/uploads/index.js",
@@ -242,6 +320,30 @@
 		"./heartwood": {
 			"default": "./dist/heartwood/index.js",
 			"types": "./dist/heartwood/index.d.ts"
+		},
+		"./heartwood/*": {
+			"default": "./dist/heartwood/*.js",
+			"types": "./dist/heartwood/*.d.ts"
+		},
+		"./durable-objects": {
+			"default": "./dist/durable-objects/index.js",
+			"types": "./dist/durable-objects/index.d.ts"
+		},
+		"./durable-objects/*": {
+			"default": "./dist/durable-objects/*.js",
+			"types": "./dist/durable-objects/*.d.ts"
+		},
+		"./git": {
+			"default": "./dist/git/index.js",
+			"types": "./dist/git/index.d.ts"
+		},
+		"./sentinel": {
+			"default": "./dist/sentinel/index.js",
+			"types": "./dist/sentinel/index.d.ts"
+		},
+		"./sentinel/*": {
+			"default": "./dist/sentinel/*.js",
+			"types": "./dist/sentinel/*.d.ts"
 		},
 		"./loom": {
 			"default": "./dist/loom/index.js",
@@ -263,6 +365,10 @@
 			"default": "./dist/lumen/index.js",
 			"types": "./dist/lumen/index.d.ts"
 		},
+		"./lumen/*": {
+			"default": "./dist/lumen/*.js",
+			"types": "./dist/lumen/*.d.ts"
+		},
 		"./payments": {
 			"default": "./dist/payments/index.js",
 			"types": "./dist/payments/index.d.ts"
@@ -278,6 +384,30 @@
 		"./server/*": {
 			"default": "./dist/server/*.js",
 			"types": "./dist/server/*.d.ts"
+		},
+		"./server/services": {
+			"default": "./dist/server/services/index.js",
+			"types": "./dist/server/services/index.d.ts"
+		},
+		"./server/services/*": {
+			"default": "./dist/server/services/*.js",
+			"types": "./dist/server/services/*.d.ts"
+		},
+		"./server/utils": {
+			"default": "./dist/server/utils/index.js",
+			"types": "./dist/server/utils/index.d.ts"
+		},
+		"./server/utils/*": {
+			"default": "./dist/server/utils/*.js",
+			"types": "./dist/server/utils/*.d.ts"
+		},
+		"./server/petal": {
+			"default": "./dist/server/petal/index.js",
+			"types": "./dist/server/petal/index.d.ts"
+		},
+		"./server/petal/*": {
+			"default": "./dist/server/petal/*.js",
+			"types": "./dist/server/petal/*.d.ts"
 		},
 		"./server/observability": {
 			"default": "./dist/server/observability/index.js",
@@ -295,9 +425,21 @@
 			"default": "./dist/thorn/index.js",
 			"types": "./dist/thorn/index.d.ts"
 		},
+		"./thorn/*": {
+			"default": "./dist/thorn/*.js",
+			"types": "./dist/thorn/*.d.ts"
+		},
 		"./threshold": {
 			"default": "./dist/threshold/index.js",
 			"types": "./dist/threshold/index.d.ts"
+		},
+		"./threshold/*": {
+			"default": "./dist/threshold/*.js",
+			"types": "./dist/threshold/*.d.ts"
+		},
+		"./threshold/adapters/*": {
+			"default": "./dist/threshold/adapters/*.js",
+			"types": "./dist/threshold/adapters/*.d.ts"
 		},
 		"./threshold/hono": {
 			"default": "./dist/threshold/adapters/hono.js",
@@ -315,6 +457,43 @@
 			"default": "./dist/ui/index.js",
 			"svelte": "./dist/ui/index.js",
 			"types": "./dist/ui/index.d.ts"
+		},
+		"./ui/season-meta": {
+			"default": "./dist/ui/season-meta.js",
+			"types": "./dist/ui/season-meta.d.ts"
+		},
+		"./ui/chat": {
+			"default": "./dist/ui/chat/index.js",
+			"types": "./dist/ui/chat/index.d.ts"
+		},
+		"./ui/chat/*": {
+			"default": "./dist/ui/chat/*.js",
+			"types": "./dist/ui/chat/*.d.ts"
+		},
+		"./ui/types/*": {
+			"default": "./dist/ui/types/*.js",
+			"types": "./dist/ui/types/*.d.ts"
+		},
+		"./ui/tokens/*": {
+			"default": "./dist/ui/tokens/*.js",
+			"types": "./dist/ui/tokens/*.d.ts"
+		},
+		"./ui/stores/*": {
+			"default": "./dist/ui/stores/*.js",
+			"types": "./dist/ui/stores/*.d.ts"
+		},
+		"./ui/utils/*": {
+			"default": "./dist/ui/utils/*.js",
+			"types": "./dist/ui/utils/*.d.ts"
+		},
+		"./ui/vineyard": {
+			"default": "./dist/ui/vineyard/index.js",
+			"svelte": "./dist/ui/vineyard/index.js",
+			"types": "./dist/ui/vineyard/index.d.ts"
+		},
+		"./ui/vineyard/types": {
+			"default": "./dist/ui/vineyard/types.js",
+			"types": "./dist/ui/vineyard/types.d.ts"
 		},
 		"./ui/arbor": {
 			"default": "./dist/ui/components/arbor/index.js",
@@ -336,14 +515,126 @@
 			"svelte": "./dist/ui/components/ui/index.js",
 			"types": "./dist/ui/components/ui/index.d.ts"
 		},
+		"./ui/components/arbor": {
+			"default": "./dist/ui/components/arbor/index.js",
+			"svelte": "./dist/ui/components/arbor/index.js",
+			"types": "./dist/ui/components/arbor/index.d.ts"
+		},
+		"./ui/components/chrome": {
+			"default": "./dist/ui/components/chrome/index.js",
+			"svelte": "./dist/ui/components/chrome/index.js",
+			"types": "./dist/ui/components/chrome/index.d.ts"
+		},
+		"./ui/components/chrome/*.svelte": {
+			"svelte": "./dist/ui/components/chrome/*.svelte",
+			"default": "./dist/ui/components/chrome/*.svelte"
+		},
+		"./ui/components/chrome/*": {
+			"default": "./dist/ui/components/chrome/*.js",
+			"types": "./dist/ui/components/chrome/*.d.ts"
+		},
+		"./ui/components/chrome/lantern/*.svelte": {
+			"svelte": "./dist/ui/components/chrome/lantern/*.svelte",
+			"default": "./dist/ui/components/chrome/lantern/*.svelte"
+		},
+		"./ui/components/chrome/lantern/*": {
+			"default": "./dist/ui/components/chrome/lantern/*.js",
+			"types": "./dist/ui/components/chrome/lantern/*.d.ts"
+		},
+		"./ui/components/domain": {
+			"default": "./dist/ui/components/domain/index.js",
+			"svelte": "./dist/ui/components/domain/index.js",
+			"types": "./dist/ui/components/domain/index.d.ts"
+		},
 		"./ui/components/ui/*.svelte": {
 			"svelte": "./dist/ui/components/ui/*.svelte",
 			"default": "./dist/ui/components/ui/*.svelte"
+		},
+		"./ui/components/ui/toast": {
+			"default": "./dist/ui/components/ui/toast.js",
+			"types": "./dist/ui/components/ui/toast.d.ts"
 		},
 		"./ui/components/ui/*": {
 			"svelte": "./dist/ui/components/ui/*/index.js",
 			"default": "./dist/ui/components/ui/*/index.js",
 			"types": "./dist/ui/components/ui/*/index.d.ts"
+		},
+		"./ui/components/ui/glasschat/*.svelte": {
+			"svelte": "./dist/ui/components/ui/glasschat/*.svelte",
+			"default": "./dist/ui/components/ui/glasschat/*.svelte"
+		},
+		"./ui/components/ui/glasschat/*": {
+			"default": "./dist/ui/components/ui/glasschat/*.js",
+			"types": "./dist/ui/components/ui/glasschat/*.d.ts"
+		},
+		"./ui/components/ui/groveicon": {
+			"default": "./dist/ui/components/ui/groveicon/index.js",
+			"types": "./dist/ui/components/ui/groveicon/index.d.ts"
+		},
+		"./ui/components/ui/groveicon/*.svelte": {
+			"svelte": "./dist/ui/components/ui/groveicon/*.svelte",
+			"default": "./dist/ui/components/ui/groveicon/*.svelte"
+		},
+		"./ui/components/ui/groveicon/*": {
+			"default": "./dist/ui/components/ui/groveicon/*.js",
+			"types": "./dist/ui/components/ui/groveicon/*.d.ts"
+		},
+		"./ui/components/ui/waystone/*.svelte": {
+			"svelte": "./dist/ui/components/ui/waystone/*.svelte",
+			"default": "./dist/ui/components/ui/waystone/*.svelte"
+		},
+		"./ui/components/ui/waystone/*": {
+			"default": "./dist/ui/components/ui/waystone/*.js",
+			"types": "./dist/ui/components/ui/waystone/*.d.ts"
+		},
+		"./ui/components/content/hum/*": {
+			"default": "./dist/ui/components/content/hum/*.js",
+			"types": "./dist/ui/components/content/hum/*.d.ts"
+		},
+		"./ui/components/nature/palette": {
+			"default": "./dist/ui/components/nature/palette.js",
+			"types": "./dist/ui/components/nature/palette.d.ts"
+		},
+		"./ui/components/forms/*.svelte": {
+			"svelte": "./dist/ui/components/forms/*.svelte",
+			"default": "./dist/ui/components/forms/*.svelte"
+		},
+		"./ui/components/forms/ContentSearch.svelte": {
+			"svelte": "./dist/ui/components/forms/ContentSearch.svelte",
+			"default": "./dist/ui/components/forms/ContentSearch.svelte"
+		},
+		"./ui/components/nature/*.svelte": {
+			"svelte": "./dist/ui/components/nature/*.svelte",
+			"default": "./dist/ui/components/nature/*.svelte"
+		},
+		"./ui/components/terrarium/*.svelte": {
+			"svelte": "./dist/ui/components/terrarium/*.svelte",
+			"default": "./dist/ui/components/terrarium/*.svelte"
+		},
+		"./ui/components/content": {
+			"default": "./dist/ui/components/content/index.js",
+			"svelte": "./dist/ui/components/content/index.js",
+			"types": "./dist/ui/components/content/index.d.ts"
+		},
+		"./ui/components/forms": {
+			"default": "./dist/ui/components/forms/index.js",
+			"svelte": "./dist/ui/components/forms/index.js",
+			"types": "./dist/ui/components/forms/index.d.ts"
+		},
+		"./ui/components/icons": {
+			"default": "./dist/ui/components/icons/index.js",
+			"svelte": "./dist/ui/components/icons/index.js",
+			"types": "./dist/ui/components/icons/index.d.ts"
+		},
+		"./ui/components/indicators": {
+			"default": "./dist/ui/components/indicators/index.js",
+			"svelte": "./dist/ui/components/indicators/index.js",
+			"types": "./dist/ui/components/indicators/index.d.ts"
+		},
+		"./ui/components/typography": {
+			"default": "./dist/ui/components/typography/index.js",
+			"svelte": "./dist/ui/components/typography/index.js",
+			"types": "./dist/ui/components/typography/index.d.ts"
 		},
 		"./ui/content": {
 			"default": "./dist/ui/components/content/index.js",

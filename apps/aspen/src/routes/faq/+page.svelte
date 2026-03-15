@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { FaqPage } from '@autumnsgrove/lattice/ui/components/content';
+	import { FaqPage } from "@autumnsgrove/lattice/ui/components/content";
 </script>
 
 <svelte:head>

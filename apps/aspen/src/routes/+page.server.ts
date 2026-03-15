@@ -4,7 +4,7 @@ import {
 	processAnchorTags,
 	renderMarkdown,
 	type GutterItem,
-} from "@autumnsgrove/lattice/utils/markdown.js";
+} from "@autumnsgrove/lattice/utils/markdown";
 import { SITE_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import type { PageServerLoad } from "./$types.js";
 

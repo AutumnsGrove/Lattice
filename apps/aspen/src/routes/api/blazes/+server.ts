@@ -1,8 +1,12 @@
 import { json } from "@sveltejs/kit";
-import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session.js";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory.js";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit.js";
-import { VALID_BLAZE_COLORS, VALID_BLAZE_ICONS, isValidBlazeHexColor } from "@autumnsgrove/lattice/blazes/index.js";
+import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
+import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
+import {
+	VALID_BLAZE_COLORS,
+	VALID_BLAZE_ICONS,
+	isValidBlazeHexColor,
+} from "@autumnsgrove/lattice/blazes";
 import type { RequestHandler } from "./$types.js";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 

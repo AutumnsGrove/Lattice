@@ -12,7 +12,7 @@
 
 import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { AUTH_HUB_URL } from "@autumnsgrove/lattice/config/auth.js";
+import { AUTH_HUB_URL } from "@autumnsgrove/lattice/config/auth";
 
 // GET → 302 to home: graceful fallback for bookmarks, stale links, etc.
 // Does NOT perform logout — that requires POST to prevent CSRF.

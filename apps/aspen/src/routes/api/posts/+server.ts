@@ -10,25 +10,21 @@ import { redirect } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types.js";
 
 export const GET: RequestHandler = async ({ url }) => {
-  const newPath =
-    url.pathname.replace("/api/posts", "/api/blooms") + url.search;
-  throw redirect(308, newPath);
+	const newPath = url.pathname.replace("/api/posts", "/api/blooms") + url.search;
+	throw redirect(308, newPath);
 };
 
 export const POST: RequestHandler = async ({ url }) => {
-  const newPath =
-    url.pathname.replace("/api/posts", "/api/blooms") + url.search;
-  throw redirect(308, newPath);
+	const newPath = url.pathname.replace("/api/posts", "/api/blooms") + url.search;
+	throw redirect(308, newPath);
 };
 
 export const PUT: RequestHandler = async ({ url }) => {
-  const newPath =
-    url.pathname.replace("/api/posts", "/api/blooms") + url.search;
-  throw redirect(308, newPath);
+	const newPath = url.pathname.replace("/api/posts", "/api/blooms") + url.search;
+	throw redirect(308, newPath);
 };
 
 export const DELETE: RequestHandler = async ({ url }) => {
-  const newPath =
-    url.pathname.replace("/api/posts", "/api/blooms") + url.search;
-  throw redirect(308, newPath);
+	const newPath = url.pathname.replace("/api/posts", "/api/blooms") + url.search;
+	throw redirect(308, newPath);
 };

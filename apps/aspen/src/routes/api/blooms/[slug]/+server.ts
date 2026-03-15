@@ -1,14 +1,14 @@
 import { json, error, isHttpError } from "@sveltejs/kit";
-import { getPostBySlug, renderMarkdown } from "@autumnsgrove/lattice/utils/markdown.js";
-import { sanitizeObject } from "@autumnsgrove/lattice/utils/validation.js";
-import { getTenantDb } from "@autumnsgrove/lattice/server/services/database.js";
-import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session.js";
-import * as cache from "@autumnsgrove/lattice/server/services/cache.js";
-import { moderatePublishedContent } from "@autumnsgrove/lattice/thorn/hooks.js";
-import { updateLastActivity } from "@autumnsgrove/lattice/server/activity-tracking.js";
+import { getPostBySlug, renderMarkdown } from "@autumnsgrove/lattice/utils/markdown";
+import { sanitizeObject } from "@autumnsgrove/lattice/utils/validation";
+import { getTenantDb } from "@autumnsgrove/lattice/server/services/database";
+import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
+import * as cache from "@autumnsgrove/lattice/server/services/cache";
+import { moderatePublishedContent } from "@autumnsgrove/lattice/thorn/hooks";
+import { updateLastActivity } from "@autumnsgrove/lattice/server/activity-tracking";
 import type { RequestHandler } from "./$types.js";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
-import { TIERS, type TierKey, isValidTier } from "@autumnsgrove/lattice/config/tiers.js";
+import { TIERS, type TierKey, isValidTier } from "@autumnsgrove/lattice/config/tiers";
 
 /**
  * Invalidate blog post caches after create/update/delete

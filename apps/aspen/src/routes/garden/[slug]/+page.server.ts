@@ -4,18 +4,18 @@ import {
 	extractHeaders,
 	renderMarkdown,
 	type GutterItem,
-} from "@autumnsgrove/lattice/utils/markdown.js";
+} from "@autumnsgrove/lattice/utils/markdown";
 import { SITE_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
-import { getTenantDb } from "@autumnsgrove/lattice/server/services/database.js";
-import * as cache from "@autumnsgrove/lattice/server/services/cache.js";
-import { emailsMatch } from "@autumnsgrove/lattice/utils/user.js";
+import { getTenantDb } from "@autumnsgrove/lattice/server/services/database";
+import * as cache from "@autumnsgrove/lattice/server/services/cache";
+import { emailsMatch } from "@autumnsgrove/lattice/utils/user";
 import {
 	getApprovedComments,
 	getCommentCount,
 	getCommentSettings,
 	buildCommentTree,
-} from "@autumnsgrove/lattice/server/services/reeds.js";
-import { isInGreenhouse, isFeatureEnabled } from "@autumnsgrove/lattice/feature-flags/index.js";
+} from "@autumnsgrove/lattice/server/services/reeds";
+import { isInGreenhouse, isFeatureEnabled } from "@autumnsgrove/lattice/feature-flags";
 import type { PageServerLoad } from "./$types.js";
 
 // Disable prerendering - D1 posts are fetched dynamically at runtime

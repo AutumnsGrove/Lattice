@@ -8,7 +8,12 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, throwGroveError, logGroveError } from "@autumnsgrove/lattice/errors";
-import { isValidSoundSet, isValidVolume, isValidUrl, DEFAULT_VOLUME } from "@autumnsgrove/lattice/curios/ambient";
+import {
+	isValidSoundSet,
+	isValidVolume,
+	isValidUrl,
+	DEFAULT_VOLUME,
+} from "@autumnsgrove/lattice/curios/ambient";
 
 interface AmbientRow {
 	tenant_id: string;

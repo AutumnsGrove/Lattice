@@ -2,7 +2,12 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
-	import { BarChart3, Calendar, Sparkles, MessageSquare } from "@autumnsgrove/lattice/ui/components/icons";
+	import {
+		BarChart3,
+		Calendar,
+		Sparkles,
+		MessageSquare,
+	} from "@autumnsgrove/lattice/ui/components/icons";
 
 	interface Props {
 		curiosCount?: number;
@@ -32,8 +37,9 @@
 					<Waystone slug="what-is-rings" label="Learn about Rings analytics" />
 				</div>
 				<p class="feature-description">
-					Privacy-first analytics showing how <GroveTerm interactive term="wanderer">Wanderers</GroveTerm> explore
-					your Grove.
+					Privacy-first analytics showing how <GroveTerm interactive term="wanderer"
+						>Wanderers</GroveTerm
+					> explore your Grove.
 				</p>
 			</div>
 		</a>

@@ -8,7 +8,7 @@
 
 import { json, error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types.js";
-import { SentinelRunner, getSentinelRun } from "@autumnsgrove/lattice/sentinel/index.js";
+import { SentinelRunner, getSentinelRun } from "@autumnsgrove/lattice/sentinel";
 import { API_ERRORS, throwGroveError, logGroveError } from "@autumnsgrove/lattice/errors";
 
 /**

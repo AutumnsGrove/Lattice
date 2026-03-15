@@ -8,7 +8,12 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, throwGroveError, logGroveError } from "@autumnsgrove/lattice/errors";
-import { isValidScale, isValidRotation, isValidPosition, isValidZIndex } from "@autumnsgrove/lattice/curios/clipart";
+import {
+	isValidScale,
+	isValidRotation,
+	isValidPosition,
+	isValidZIndex,
+} from "@autumnsgrove/lattice/curios/clipart";
 
 export const PATCH: RequestHandler = async ({ params, request, platform, locals }) => {
 	const db = platform?.env?.CURIO_DB;

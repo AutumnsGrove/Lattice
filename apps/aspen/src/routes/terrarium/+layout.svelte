@@ -17,7 +17,7 @@
 -->
 
 <script lang="ts">
-	import { type Snippet } from 'svelte';
+	import { type Snippet } from "svelte";
 
 	interface Props {
 		children: Snippet;
@@ -27,7 +27,10 @@
 </script>
 
 <svelte:head>
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+	<meta
+		name="viewport"
+		content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+	/>
 </svelte:head>
 
 <div class="min-h-screen">

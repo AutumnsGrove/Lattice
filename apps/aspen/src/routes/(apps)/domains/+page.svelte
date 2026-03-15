@@ -51,7 +51,8 @@
 			<!-- ASCII Art Header -->
 			<pre class="ascii-header" aria-label="Forage ASCII Art Logo">
 ┌─────────────────────────────────────────────┐
-│  <span class="tree">*</span> <span class="highlight">Forage</span> - Domain Discovery              │
+│  <span class="tree">*</span> <span class="highlight">Forage</span
+				> - Domain Discovery              │
 │     Find your perfect corner of the web     │
 └─────────────────────────────────────────────┘</pre>
 
@@ -123,12 +124,7 @@
 		align-items: center;
 		justify-content: center;
 		padding: 2rem;
-		background: linear-gradient(
-			135deg,
-			#0d1117 0%,
-			#161b22 50%,
-			#0d1117 100%
-		);
+		background: linear-gradient(135deg, #0d1117 0%, #161b22 50%, #0d1117 100%);
 	}
 
 	:global(.terminal-card) {
@@ -314,7 +310,8 @@
 	}
 
 	@keyframes pulse {
-		0%, 100% {
+		0%,
+		100% {
 			opacity: 1;
 		}
 		50% {

@@ -13,27 +13,26 @@ import type { RequestHandler } from "./$types.js";
  * @see packages/plant/src/routes/api/health/payments/+server.ts
  */
 export const GET: RequestHandler = async () => {
-  return json(
-    {
-      status: "healthy",
-      service: "grove-payments",
-      reason:
-        "Payments health check moved to Plant (plant.grove.place/api/health/payments)",
-      redirect: "https://plant.grove.place/api/health/payments",
-      checks: [
-        {
-          name: "redirect_notice",
-          status: "pass",
-          error: "This endpoint is deprecated — check Plant instead",
-        },
-      ],
-      timestamp: new Date().toISOString(),
-    },
-    {
-      status: 200,
-      headers: {
-        "Cache-Control": "no-cache, no-store, must-revalidate",
-      },
-    },
-  );
+	return json(
+		{
+			status: "healthy",
+			service: "grove-payments",
+			reason: "Payments health check moved to Plant (plant.grove.place/api/health/payments)",
+			redirect: "https://plant.grove.place/api/health/payments",
+			checks: [
+				{
+					name: "redirect_notice",
+					status: "pass",
+					error: "This endpoint is deprecated — check Plant instead",
+				},
+			],
+			timestamp: new Date().toISOString(),
+		},
+		{
+			status: 200,
+			headers: {
+				"Cache-Control": "no-cache, no-store, must-revalidate",
+			},
+		},
+	);
 };

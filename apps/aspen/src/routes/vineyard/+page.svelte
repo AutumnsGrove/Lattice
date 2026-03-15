@@ -24,7 +24,11 @@
 	import Skeleton from "@autumnsgrove/lattice/ui/components/ui/Skeleton.svelte";
 	import Spinner from "@autumnsgrove/lattice/ui/components/ui/Spinner.svelte";
 	import CollapsibleSection from "@autumnsgrove/lattice/ui/components/ui/CollapsibleSection.svelte";
-	import { StatusBadge, ScoreBar, CreditBalance } from "@autumnsgrove/lattice/ui/components/indicators";
+	import {
+		StatusBadge,
+		ScoreBar,
+		CreditBalance,
+	} from "@autumnsgrove/lattice/ui/components/indicators";
 	import { SearchInput } from "@autumnsgrove/lattice/ui/components/forms";
 	import {
 		// Typography components

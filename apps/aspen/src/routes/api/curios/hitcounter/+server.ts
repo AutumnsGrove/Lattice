@@ -15,7 +15,11 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, throwGroveError, logGroveError } from "@autumnsgrove/lattice/errors";
-import { generateHitCounterId, formatCount, toDigits } from "@autumnsgrove/lattice/curios/hitcounter";
+import {
+	generateHitCounterId,
+	formatCount,
+	toDigits,
+} from "@autumnsgrove/lattice/curios/hitcounter";
 
 interface CounterRow {
 	id: string;

@@ -1,10 +1,10 @@
 import { json, error } from "@sveltejs/kit";
-import { sanitizeObject } from "@autumnsgrove/lattice/utils/validation.js";
-import { renderMarkdown } from "@autumnsgrove/lattice/utils/markdown.js";
-import { getTenantDb, now } from "@autumnsgrove/lattice/server/services/database.js";
-import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session.js";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory.js";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit.js";
+import { sanitizeObject } from "@autumnsgrove/lattice/utils/validation";
+import { renderMarkdown } from "@autumnsgrove/lattice/utils/markdown";
+import { getTenantDb, now } from "@autumnsgrove/lattice/server/services/database";
+import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
+import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
 import type { RequestHandler } from "./$types.js";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 

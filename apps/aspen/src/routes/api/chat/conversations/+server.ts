@@ -8,13 +8,16 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, logGroveError, throwGroveError } from "@autumnsgrove/lattice/errors";
-import { isRedirect, isHttpError } from "@autumnsgrove/lattice/server/utils/type-guards.js";
-import { getUserHomeGrove } from "@autumnsgrove/lattice/server/services/users.js";
-import { listConversations, getOrCreateConversation } from "@autumnsgrove/lattice/server/services/chat.js";
-import { areMutualFriends } from "@autumnsgrove/lattice/server/services/friends.js";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory.js";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit.js";
-import { isInGreenhouse, isFeatureEnabled } from "@autumnsgrove/lattice/feature-flags/index.js";
+import { isRedirect, isHttpError } from "@autumnsgrove/lattice/server/utils/type-guards";
+import { getUserHomeGrove } from "@autumnsgrove/lattice/server/services/users";
+import {
+	listConversations,
+	getOrCreateConversation,
+} from "@autumnsgrove/lattice/server/services/chat";
+import { areMutualFriends } from "@autumnsgrove/lattice/server/services/friends";
+import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
+import { isInGreenhouse, isFeatureEnabled } from "@autumnsgrove/lattice/feature-flags";
 
 /**
  * Check if the chirp_enabled graft is enabled for this tenant.

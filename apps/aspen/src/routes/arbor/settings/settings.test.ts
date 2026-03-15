@@ -26,7 +26,7 @@ vi.mock("@autumnsgrove/lattice/config/tiers", () => ({
 	TierKey: {},
 }));
 
-vi.mock("@autumnsgrove/lattice/server/services/username.js", () => ({
+vi.mock("@autumnsgrove/lattice/server/services/username", () => ({
 	validateUsernameAvailability: vi.fn(async () => ({ available: true })),
 	canChangeUsername: vi.fn(async () => ({
 		allowed: true,
@@ -391,7 +391,7 @@ describe("Arbor Settings Page", () => {
 			// Arrange
 			const { load } = await import("./+page.server.js");
 			const { canChangeUsername, getUsernameHistory } =
-				await import("@autumnsgrove/lattice/server/services/username.js");
+				await import("@autumnsgrove/lattice/server/services/username");
 			vi.mocked(canChangeUsername).mockResolvedValueOnce({
 				allowed: true,
 				nextAllowedAt: undefined,
@@ -560,7 +560,8 @@ describe("Arbor Settings Page", () => {
 		it("should reject unavailable username → fail(400)", async () => {
 			// Arrange
 			const { actions } = await import("./+page.server.js");
-			const { validateUsernameAvailability } = await import("@autumnsgrove/lattice/server/services/username.js");
+			const { validateUsernameAvailability } =
+				await import("@autumnsgrove/lattice/server/services/username");
 			vi.mocked(validateUsernameAvailability).mockResolvedValueOnce({
 				available: false,
 				error: "Username taken",
@@ -578,7 +579,7 @@ describe("Arbor Settings Page", () => {
 		it("should reject rate-limited changes → fail(429)", async () => {
 			// Arrange
 			const { actions } = await import("./+page.server.js");
-			const { canChangeUsername } = await import("@autumnsgrove/lattice/server/services/username.js");
+			const { canChangeUsername } = await import("@autumnsgrove/lattice/server/services/username");
 			vi.mocked(canChangeUsername).mockResolvedValueOnce({
 				allowed: false,
 				reason: "You can change username once per year",
@@ -597,7 +598,7 @@ describe("Arbor Settings Page", () => {
 			// Arrange
 			const { actions } = await import("./+page.server.js");
 			const { validateUsernameAvailability, canChangeUsername, changeUsername } =
-				await import("@autumnsgrove/lattice/server/services/username.js");
+				await import("@autumnsgrove/lattice/server/services/username");
 			vi.mocked(validateUsernameAvailability).mockResolvedValueOnce({ available: true } as any);
 			vi.mocked(canChangeUsername).mockResolvedValueOnce({ allowed: true } as any);
 			vi.mocked(changeUsername).mockResolvedValueOnce({
@@ -618,7 +619,7 @@ describe("Arbor Settings Page", () => {
 		it("should handle service failure → fail(500)", async () => {
 			// Arrange
 			const { actions } = await import("./+page.server.js");
-			const { changeUsername } = await import("@autumnsgrove/lattice/server/services/username.js");
+			const { changeUsername } = await import("@autumnsgrove/lattice/server/services/username");
 			vi.mocked(changeUsername).mockResolvedValueOnce({ success: false, error: "DB error" } as any);
 			const event = createActionEvent({ formData: { newUsername: "newname" } });
 
@@ -634,7 +635,7 @@ describe("Arbor Settings Page", () => {
 			// Arrange
 			const { actions } = await import("./+page.server.js");
 			const { validateUsernameAvailability, canChangeUsername, changeUsername } =
-				await import("@autumnsgrove/lattice/server/services/username.js");
+				await import("@autumnsgrove/lattice/server/services/username");
 			vi.mocked(validateUsernameAvailability).mockResolvedValueOnce({ available: true } as any);
 			vi.mocked(canChangeUsername).mockResolvedValueOnce({ allowed: true } as any);
 			vi.mocked(changeUsername).mockResolvedValueOnce({
@@ -740,7 +741,8 @@ describe("Arbor Settings Page", () => {
 		it("should return enabled message on toggle true", async () => {
 			// Arrange
 			const { actions } = await import("./+page.server.js");
-			const { getGreenhouseTenant, setTenantGraftOverride } = await import("@autumnsgrove/lattice/feature-flags");
+			const { getGreenhouseTenant, setTenantGraftOverride } =
+				await import("@autumnsgrove/lattice/feature-flags");
 			vi.mocked(getGreenhouseTenant).mockResolvedValueOnce({
 				tenantId: TENANT_ID,
 				enabled: true,
@@ -760,7 +762,8 @@ describe("Arbor Settings Page", () => {
 		it("should return disabled message on toggle false", async () => {
 			// Arrange
 			const { actions } = await import("./+page.server.js");
-			const { getGreenhouseTenant, setTenantGraftOverride } = await import("@autumnsgrove/lattice/feature-flags");
+			const { getGreenhouseTenant, setTenantGraftOverride } =
+				await import("@autumnsgrove/lattice/feature-flags");
 			vi.mocked(getGreenhouseTenant).mockResolvedValueOnce({
 				tenantId: TENANT_ID,
 				enabled: true,
@@ -779,7 +782,8 @@ describe("Arbor Settings Page", () => {
 		it("should return fail on service failure → fail(500)", async () => {
 			// Arrange
 			const { actions } = await import("./+page.server.js");
-			const { getGreenhouseTenant, setTenantGraftOverride } = await import("@autumnsgrove/lattice/feature-flags");
+			const { getGreenhouseTenant, setTenantGraftOverride } =
+				await import("@autumnsgrove/lattice/feature-flags");
 			vi.mocked(getGreenhouseTenant).mockResolvedValueOnce({
 				tenantId: TENANT_ID,
 				enabled: true,
@@ -804,7 +808,8 @@ describe("Arbor Settings Page", () => {
 		it("should return count-aware message (singular vs plural)", async () => {
 			// Arrange
 			const { actions } = await import("./+page.server.js");
-			const { getGreenhouseTenant, resetTenantGraftOverrides } = await import("@autumnsgrove/lattice/feature-flags");
+			const { getGreenhouseTenant, resetTenantGraftOverrides } =
+				await import("@autumnsgrove/lattice/feature-flags");
 			vi.mocked(getGreenhouseTenant).mockResolvedValueOnce({
 				tenantId: TENANT_ID,
 				enabled: true,
@@ -824,7 +829,8 @@ describe("Arbor Settings Page", () => {
 		it("should return plural message for multiple grafts", async () => {
 			// Arrange
 			const { actions } = await import("./+page.server.js");
-			const { getGreenhouseTenant, resetTenantGraftOverrides } = await import("@autumnsgrove/lattice/feature-flags");
+			const { getGreenhouseTenant, resetTenantGraftOverrides } =
+				await import("@autumnsgrove/lattice/feature-flags");
 			vi.mocked(getGreenhouseTenant).mockResolvedValueOnce({
 				tenantId: TENANT_ID,
 				enabled: true,
@@ -843,7 +849,8 @@ describe("Arbor Settings Page", () => {
 		it("should return no custom preferences when count is 0", async () => {
 			// Arrange
 			const { actions } = await import("./+page.server.js");
-			const { getGreenhouseTenant, resetTenantGraftOverrides } = await import("@autumnsgrove/lattice/feature-flags");
+			const { getGreenhouseTenant, resetTenantGraftOverrides } =
+				await import("@autumnsgrove/lattice/feature-flags");
 			vi.mocked(getGreenhouseTenant).mockResolvedValueOnce({
 				tenantId: TENANT_ID,
 				enabled: true,

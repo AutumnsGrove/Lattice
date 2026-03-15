@@ -7,10 +7,10 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, throwGroveError, logGroveError } from "@autumnsgrove/lattice/errors";
-import { getUserHomeGrove } from "@autumnsgrove/lattice/server/services/users.js";
-import { searchTenants } from "@autumnsgrove/lattice/server/services/friends.js";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory.js";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit.js";
+import { getUserHomeGrove } from "@autumnsgrove/lattice/server/services/users";
+import { searchTenants } from "@autumnsgrove/lattice/server/services/friends";
+import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
 
 export const GET: RequestHandler = async ({ url, platform, locals }) => {
 	const db = platform?.env?.DB;

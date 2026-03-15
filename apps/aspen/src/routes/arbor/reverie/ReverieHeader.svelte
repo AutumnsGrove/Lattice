@@ -24,11 +24,7 @@
 		<span class="mood-label" id="mood-label">Quick moods:</span>
 		<div class="mood-scroll" aria-labelledby="mood-label">
 			{#each quickMoods as mood}
-				<button
-					type="button"
-					class="mood-pill"
-					onclick={() => onAtmospherePick(mood)}
-				>
+				<button type="button" class="mood-pill" onclick={() => onAtmospherePick(mood)}>
 					{mood}
 				</button>
 			{/each}
@@ -40,11 +36,7 @@
 	.reverie-header {
 		padding: 1rem 1rem 0.75rem;
 		border-bottom: 1px solid rgba(139, 92, 246, 0.12);
-		background: linear-gradient(
-			to bottom,
-			rgba(88, 28, 135, 0.06) 0%,
-			transparent 100%
-		);
+		background: linear-gradient(to bottom, rgba(88, 28, 135, 0.06) 0%, transparent 100%);
 	}
 
 	.header-top {

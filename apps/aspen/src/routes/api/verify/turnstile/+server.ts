@@ -10,95 +10,94 @@
 import { error } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import {
-  verifyTurnstileToken,
-  createVerificationCookie,
-  TURNSTILE_COOKIE_NAME,
+	verifyTurnstileToken,
+	createVerificationCookie,
+	TURNSTILE_COOKIE_NAME,
 } from "@autumnsgrove/lattice/server/services/turnstile";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory.js";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit.js";
-import { getClientIP } from "@autumnsgrove/lattice/threshold/adapters/worker.js";
+import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
+import { getClientIP } from "@autumnsgrove/lattice/threshold/adapters/worker";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 
 export const POST: RequestHandler = async ({ request, platform }) => {
-  // Get the token from the request body
-  let token: string;
+	// Get the token from the request body
+	let token: string;
 
-  try {
-    const body = (await request.json()) as Record<string, unknown>;
-    token = body.token as string;
-  } catch {
-    throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API");
-  }
+	try {
+		const body = (await request.json()) as Record<string, unknown>;
+		token = body.token as string;
+	} catch {
+		throwGroveError(400, API_ERRORS.INVALID_REQUEST_BODY, "API");
+	}
 
-  if (!token) {
-    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
-  }
+	if (!token) {
+		throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
+	}
 
-  // Rate limit Turnstile verification (each call hits Cloudflare API)
-  const threshold = createThreshold(platform?.env);
-  if (threshold) {
-    const denied = await thresholdCheck(threshold, {
-      key: `turnstile:${getClientIP(request)}`,
-      limit: 10,
-      windowSeconds: 60, // 1 minute
-      failMode: "open",
-    });
-    if (denied) return denied;
-  }
+	// Rate limit Turnstile verification (each call hits Cloudflare API)
+	const threshold = createThreshold(platform?.env);
+	if (threshold) {
+		const denied = await thresholdCheck(threshold, {
+			key: `turnstile:${getClientIP(request)}`,
+			limit: 10,
+			windowSeconds: 60, // 1 minute
+			failMode: "open",
+		});
+		if (denied) return denied;
+	}
 
-  // Get the secret key from environment
-  const secretKey = (platform?.env as Record<string, unknown>)
-    ?.TURNSTILE_SECRET_KEY as string | undefined;
+	// Get the secret key from environment
+	const secretKey = (platform?.env as Record<string, unknown>)?.TURNSTILE_SECRET_KEY as
+		| string
+		| undefined;
 
-  if (!secretKey) {
-    console.error("Turnstile: TURNSTILE_SECRET_KEY not configured");
-    throwGroveError(500, API_ERRORS.TURNSTILE_NOT_CONFIGURED, "API");
-  }
+	if (!secretKey) {
+		console.error("Turnstile: TURNSTILE_SECRET_KEY not configured");
+		throwGroveError(500, API_ERRORS.TURNSTILE_NOT_CONFIGURED, "API");
+	}
 
-  // Get the user's IP for additional validation
-  const remoteip =
-    request.headers.get("CF-Connecting-IP") ||
-    request.headers.get("X-Forwarded-For") ||
-    undefined;
+	// Get the user's IP for additional validation
+	const remoteip =
+		request.headers.get("CF-Connecting-IP") || request.headers.get("X-Forwarded-For") || undefined;
 
-  // Verify the token with Cloudflare
-  const result = await verifyTurnstileToken({
-    token,
-    secretKey,
-    remoteip,
-  });
+	// Verify the token with Cloudflare
+	const result = await verifyTurnstileToken({
+		token,
+		secretKey,
+		remoteip,
+	});
 
-  if (!result.success) {
-    console.warn("Turnstile verification failed:", result["error-codes"]);
-    throwGroveError(403, API_ERRORS.HUMAN_VERIFICATION_FAILED, "API");
-  }
+	if (!result.success) {
+		console.warn("Turnstile verification failed:", result["error-codes"]);
+		throwGroveError(403, API_ERRORS.HUMAN_VERIFICATION_FAILED, "API");
+	}
 
-  // Create the verification cookie
-  const cookieValue = await createVerificationCookie(secretKey);
+	// Create the verification cookie
+	const cookieValue = await createVerificationCookie(secretKey);
 
-  // Build Set-Cookie header manually to ensure it's correct
-  // Format: name=value; Path=/; Max-Age=604800; HttpOnly; Secure; SameSite=Lax; Domain=.grove.place
-  const cookieHeader = [
-    `${TURNSTILE_COOKIE_NAME}=${cookieValue}`,
-    "Path=/",
-    "Max-Age=604800", // 7 days
-    "HttpOnly",
-    "Secure",
-    "SameSite=Lax",
-    "Domain=grove.place", // No leading dot - modern browsers handle this correctly
-  ].join("; ");
+	// Build Set-Cookie header manually to ensure it's correct
+	// Format: name=value; Path=/; Max-Age=604800; HttpOnly; Secure; SameSite=Lax; Domain=.grove.place
+	const cookieHeader = [
+		`${TURNSTILE_COOKIE_NAME}=${cookieValue}`,
+		"Path=/",
+		"Max-Age=604800", // 7 days
+		"HttpOnly",
+		"Secure",
+		"SameSite=Lax",
+		"Domain=grove.place", // No leading dot - modern browsers handle this correctly
+	].join("; ");
 
-  return new Response(
-    JSON.stringify({
-      success: true,
-      message: "Verification successful",
-    }),
-    {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Set-Cookie": cookieHeader,
-      },
-    },
-  );
+	return new Response(
+		JSON.stringify({
+			success: true,
+			message: "Verification successful",
+		}),
+		{
+			status: 200,
+			headers: {
+				"Content-Type": "application/json",
+				"Set-Cookie": cookieHeader,
+			},
+		},
+	);
 };

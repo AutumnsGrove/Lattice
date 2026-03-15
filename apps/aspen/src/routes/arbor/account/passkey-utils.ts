@@ -6,8 +6,8 @@
  */
 
 import {
-  isPlatformAuthenticatorAvailable,
-  isWebAuthnSupported,
+	isPlatformAuthenticatorAvailable,
+	isWebAuthnSupported,
 } from "@autumnsgrove/lattice/utils/webauthn";
 
 /**
@@ -16,10 +16,10 @@ import {
  * (Touch ID, Face ID, Windows Hello) is available.
  */
 export async function checkPasskeySupport(): Promise<boolean> {
-  if (!isWebAuthnSupported()) {
-    return false;
-  }
-  return isPlatformAuthenticatorAvailable();
+	if (!isWebAuthnSupported()) {
+		return false;
+	}
+	return isPlatformAuthenticatorAvailable();
 }
 
 /**
@@ -27,46 +27,46 @@ export async function checkPasskeySupport(): Promise<boolean> {
  * Used as the default passkey name during registration.
  */
 export function getDeviceName(): string {
-  if (typeof navigator === "undefined") {
-    return "My Passkey";
-  }
+	if (typeof navigator === "undefined") {
+		return "My Passkey";
+	}
 
-  const platform = navigator.platform?.toLowerCase() || "";
-  const userAgent = navigator.userAgent?.toLowerCase() || "";
+	const platform = navigator.platform?.toLowerCase() || "";
+	const userAgent = navigator.userAgent?.toLowerCase() || "";
 
-  // macOS detection
-  if (platform.includes("mac") || userAgent.includes("macintosh")) {
-    if (userAgent.includes("iphone") || userAgent.includes("ipad")) {
-      return userAgent.includes("ipad") ? "iPad" : "iPhone";
-    }
-    return "MacBook";
-  }
+	// macOS detection
+	if (platform.includes("mac") || userAgent.includes("macintosh")) {
+		if (userAgent.includes("iphone") || userAgent.includes("ipad")) {
+			return userAgent.includes("ipad") ? "iPad" : "iPhone";
+		}
+		return "MacBook";
+	}
 
-  // Windows detection
-  if (platform.includes("win") || userAgent.includes("windows")) {
-    return "Windows PC";
-  }
+	// Windows detection
+	if (platform.includes("win") || userAgent.includes("windows")) {
+		return "Windows PC";
+	}
 
-  // Linux detection
-  if (platform.includes("linux") || userAgent.includes("linux")) {
-    if (userAgent.includes("android")) {
-      return "Android Device";
-    }
-    return "Linux Device";
-  }
+	// Linux detection
+	if (platform.includes("linux") || userAgent.includes("linux")) {
+		if (userAgent.includes("android")) {
+			return "Android Device";
+		}
+		return "Linux Device";
+	}
 
-  // iOS detection (in case platform doesn't match)
-  if (userAgent.includes("iphone")) {
-    return "iPhone";
-  }
-  if (userAgent.includes("ipad")) {
-    return "iPad";
-  }
+	// iOS detection (in case platform doesn't match)
+	if (userAgent.includes("iphone")) {
+		return "iPhone";
+	}
+	if (userAgent.includes("ipad")) {
+		return "iPad";
+	}
 
-  // Android detection
-  if (userAgent.includes("android")) {
-    return "Android Device";
-  }
+	// Android detection
+	if (userAgent.includes("android")) {
+		return "Android Device";
+	}
 
-  return "My Passkey";
+	return "My Passkey";
 }

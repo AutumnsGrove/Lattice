@@ -1,5 +1,5 @@
 <script>
-	import { page } from '$app/state';
+	import { page } from "$app/state";
 </script>
 
 <svelte:head>
@@ -8,7 +8,7 @@
 
 <div class="error-page">
 	<h1>{page.status}</h1>
-	<p class="message">{page.error?.message || 'Page not found'}</p>
+	<p class="message">{page.error?.message || "Page not found"}</p>
 	<p class="description">The page you're looking for doesn't exist or has been moved.</p>
 	{#if page.error?.code}
 		<p class="error-code">{page.error.code}</p>
@@ -61,7 +61,9 @@
 		text-decoration: none;
 		border-radius: 20px;
 		font-weight: 600;
-		transition: background 0.2s, transform 0.2s;
+		transition:
+			background 0.2s,
+			transform 0.2s;
 	}
 	:global(.dark) .home-link {
 		background: var(--accent-success);

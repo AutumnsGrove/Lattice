@@ -351,8 +351,8 @@
 				</a>
 			</div>
 			<p class="text-sm text-foreground-muted mb-4">
-				<GroveTerm interactive term="curios">Curios</GroveTerm> are special page types that add dynamic functionality
-				to your site.
+				<GroveTerm interactive term="curios">Curios</GroveTerm> are special page types that add dynamic
+				functionality to your site.
 			</p>
 			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
 				{#each data.curios as curio (curio.slug)}

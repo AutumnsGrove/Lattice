@@ -62,9 +62,7 @@
 <div class="max-w-screen-xl">
 	<!-- Example Site Notice -->
 	{#if data.isExampleSite}
-		<div
-			class="mb-6 p-4 bg-warning-bg border border-warning rounded-lg"
-		>
+		<div class="mb-6 p-4 bg-warning-bg border border-warning rounded-lg">
 			<p class="m-0 text-warning text-sm">
 				<strong><Sparkles class="w-4 h-4 inline-block" /> Welcome to the Example Site!</strong> This <GroveTerm
 					term="arbor"
@@ -79,9 +77,13 @@
 		class="flex justify-between items-start mb-8 max-md:flex-col max-md:items-stretch max-md:gap-4"
 	>
 		<div>
-			<h1 class="m-0 mb-1 text-3xl text-foreground"><GroveTerm interactive term="garden">Garden</GroveTerm></h1>
+			<h1 class="m-0 mb-1 text-3xl text-foreground">
+				<GroveTerm interactive term="garden">Garden</GroveTerm>
+			</h1>
 			{#if !groveModeStore.current}
-				<p class="text-sm text-foreground-subtle italic mt-1 mb-0">(<GroveTerm term="your-garden" displayOverride="grove" icon />)</p>
+				<p class="text-sm text-foreground-subtle italic mt-1 mb-0">
+					(<GroveTerm term="your-garden" displayOverride="grove" icon />)
+				</p>
 			{/if}
 			<p class="m-0 text-foreground-muted">
 				{data.posts.length}
@@ -219,14 +221,15 @@
 	<GlassCard variant="muted">
 		<h3>How the <GroveTerm interactive term="your-garden">Garden</GroveTerm> Works</h3>
 		<p>
-			Create and edit <GroveTerm interactive term="blooms">blooms</GroveTerm> directly in the built-in markdown editor.
-			<GroveTerm interactive term="blooms">Blooms</GroveTerm> are saved to the database and available immediately.
+			Create and edit <GroveTerm interactive term="blooms">blooms</GroveTerm> directly in the built-in
+			markdown editor.
+			<GroveTerm interactive term="blooms">Blooms</GroveTerm> are saved to the database and available
+			immediately.
 		</p>
 		<ul>
 			<li>
-				Use <strong>+ New <GroveTerm interactive term="blooms">Bloom</GroveTerm></strong> to create a new <GroveTerm
-					term="blooms">bloom</GroveTerm
-				> with the markdown editor
+				Use <strong>+ New <GroveTerm interactive term="blooms">Bloom</GroveTerm></strong> to create
+				a new <GroveTerm term="blooms">bloom</GroveTerm> with the markdown editor
 			</li>
 			<li>
 				Use <strong>Edit</strong> links to modify existing <GroveTerm interactive term="blooms"

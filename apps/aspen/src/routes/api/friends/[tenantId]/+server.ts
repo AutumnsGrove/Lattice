@@ -7,8 +7,8 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, throwGroveError, logGroveError } from "@autumnsgrove/lattice/errors";
-import { getUserHomeGrove } from "@autumnsgrove/lattice/server/services/users.js";
-import { removeFriend } from "@autumnsgrove/lattice/server/services/friends.js";
+import { getUserHomeGrove } from "@autumnsgrove/lattice/server/services/users";
+import { removeFriend } from "@autumnsgrove/lattice/server/services/friends";
 
 export const DELETE: RequestHandler = async ({ params, platform, locals }) => {
 	const db = platform?.env?.DB;

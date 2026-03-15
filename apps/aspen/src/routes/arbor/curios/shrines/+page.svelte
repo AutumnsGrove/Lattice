@@ -6,7 +6,11 @@
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 	import { Heart, Plus, Trash2, Eye, EyeOff, Pencil, X, RotateCcw, Save } from "@lucide/svelte";
 	import ShrineCanvas from "@autumnsgrove/lattice/curios/shrines/ShrineCanvas.svelte";
-	import type { ShrineContentItem, ShrineSize, FrameStyle } from "@autumnsgrove/lattice/curios/shrines";
+	import type {
+		ShrineContentItem,
+		ShrineSize,
+		FrameStyle,
+	} from "@autumnsgrove/lattice/curios/shrines";
 
 	let { data, form } = $props();
 

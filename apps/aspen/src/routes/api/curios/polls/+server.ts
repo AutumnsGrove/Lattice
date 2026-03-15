@@ -162,7 +162,8 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			if (!text) return null;
 			const option: PollOption = { id: generateOptionId(), text };
 			if (typeof raw?.emoji === "string" && raw.emoji.trim()) option.emoji = raw.emoji.trim();
-			if (typeof raw?.color === "string" && /^#[0-9a-fA-F]{3,8}$/.test(raw.color)) option.color = raw.color;
+			if (typeof raw?.color === "string" && /^#[0-9a-fA-F]{3,8}$/.test(raw.color))
+				option.color = raw.color;
 			return option;
 		})
 		.filter((opt): opt is PollOption => opt !== null)

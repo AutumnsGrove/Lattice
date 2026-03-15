@@ -55,8 +55,7 @@ export const GET: RequestHandler = async ({ params, platform, locals }) => {
 		{ panels },
 		{
 			headers: {
-				"Cache-Control":
-					"public, max-age=120, stale-while-revalidate=300",
+				"Cache-Control": "public, max-age=120, stale-while-revalidate=300",
 			},
 		},
 	);

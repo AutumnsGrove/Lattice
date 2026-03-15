@@ -1,6 +1,6 @@
 import { redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import type { ChatConversationWithMeta } from "@autumnsgrove/lattice/server/services/chat.types.js";
+import type { ChatConversationWithMeta } from "@autumnsgrove/lattice/server/services/chat.types";
 import { ARBOR_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 
 export const load: PageServerLoad = async ({ locals, url, fetch, parent }) => {

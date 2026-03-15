@@ -9,56 +9,51 @@ import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
  *
  * Body: { sessionId?: string } - Optional session ID for deduplication
  */
-export const POST: RequestHandler = async ({
-  params,
-  request,
-  platform,
-  locals,
-}) => {
-  if (!platform?.env?.POST_META) {
-    throwGroveError(500, API_ERRORS.DURABLE_OBJECTS_NOT_CONFIGURED, "API");
-  }
+export const POST: RequestHandler = async ({ params, request, platform, locals }) => {
+	if (!platform?.env?.POST_META) {
+		throwGroveError(500, API_ERRORS.DURABLE_OBJECTS_NOT_CONFIGURED, "API");
+	}
 
-  if (!locals.tenantId) {
-    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
-  }
+	if (!locals.tenantId) {
+		throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
+	}
 
-  const { slug } = params;
-  if (!slug) {
-    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
-  }
+	const { slug } = params;
+	if (!slug) {
+		throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
+	}
 
-  try {
-    const data = (await request.json()) as { sessionId?: string };
+	try {
+		const data = (await request.json()) as { sessionId?: string };
 
-    const postMeta = platform.env.POST_META;
-    const doId = postMeta.idFromName(`post:${locals.tenantId}:${slug}`);
-    const stub = postMeta.get(doId);
+		const postMeta = platform.env.POST_META;
+		const doId = postMeta.idFromName(`post:${locals.tenantId}:${slug}`);
+		const stub = postMeta.get(doId);
 
-    // Initialize DO if needed
-    await stub.fetch("https://post.internal/meta/init", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tenantId: locals.tenantId, slug }),
-    });
+		// Initialize DO if needed
+		await stub.fetch("https://post.internal/meta/init", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ tenantId: locals.tenantId, slug }),
+		});
 
-    // Record view
-    const response = await stub.fetch("https://post.internal/view", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sessionId: data.sessionId }),
-    });
+		// Record view
+		const response = await stub.fetch("https://post.internal/view", {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ sessionId: data.sessionId }),
+		});
 
-    if (!response.ok) {
-      throw error(response.status, await response.text());
-    }
+		if (!response.ok) {
+			throw error(response.status, await response.text());
+		}
 
-    const result = await response.json();
-    return json(result);
-  } catch (err) {
-    if ((err as { status?: number }).status) throw err;
-    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
-  }
+		const result = await response.json();
+		return json(result);
+	} catch (err) {
+		if ((err as { status?: number }).status) throw err;
+		throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
+	}
 };
 
 /**
@@ -67,43 +62,43 @@ export const POST: RequestHandler = async ({
  * Public endpoint - anyone can see view counts.
  */
 export const GET: RequestHandler = async ({ params, platform, locals }) => {
-  if (!platform?.env?.POST_META) {
-    throwGroveError(500, API_ERRORS.DURABLE_OBJECTS_NOT_CONFIGURED, "API");
-  }
+	if (!platform?.env?.POST_META) {
+		throwGroveError(500, API_ERRORS.DURABLE_OBJECTS_NOT_CONFIGURED, "API");
+	}
 
-  if (!locals.tenantId) {
-    throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
-  }
+	if (!locals.tenantId) {
+		throwGroveError(400, API_ERRORS.TENANT_CONTEXT_REQUIRED, "API");
+	}
 
-  const { slug } = params;
-  if (!slug) {
-    throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
-  }
+	const { slug } = params;
+	if (!slug) {
+		throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API");
+	}
 
-  try {
-    const postMeta = platform.env.POST_META;
-    const doId = postMeta.idFromName(`post:${locals.tenantId}:${slug}`);
-    const stub = postMeta.get(doId);
+	try {
+		const postMeta = platform.env.POST_META;
+		const doId = postMeta.idFromName(`post:${locals.tenantId}:${slug}`);
+		const stub = postMeta.get(doId);
 
-    // Get meta (includes view count)
-    const response = await stub.fetch("https://post.internal/meta");
+		// Get meta (includes view count)
+		const response = await stub.fetch("https://post.internal/meta");
 
-    if (response.status === 404) {
-      // Post meta not initialized yet - return 0 views
-      return json({ viewCount: 0, isPopular: false });
-    }
+		if (response.status === 404) {
+			// Post meta not initialized yet - return 0 views
+			return json({ viewCount: 0, isPopular: false });
+		}
 
-    if (!response.ok) {
-      throw error(response.status, await response.text());
-    }
+		if (!response.ok) {
+			throw error(response.status, await response.text());
+		}
 
-    const meta = (await response.json()) as {
-      viewCount: number;
-      isPopular: boolean;
-    };
-    return json({ viewCount: meta.viewCount, isPopular: meta.isPopular });
-  } catch (err) {
-    if ((err as { status?: number }).status) throw err;
-    throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
-  }
+		const meta = (await response.json()) as {
+			viewCount: number;
+			isPopular: boolean;
+		};
+		return json({ viewCount: meta.viewCount, isPopular: meta.isPopular });
+	} catch (err) {
+		if ((err as { status?: number }).status) throw err;
+		throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
+	}
 };

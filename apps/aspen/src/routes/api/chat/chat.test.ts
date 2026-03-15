@@ -29,19 +29,19 @@ import { GET as getUnread } from "./unread/+server";
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
 
-vi.mock("@autumnsgrove/lattice/server/services/users.js", () => ({
+vi.mock("@autumnsgrove/lattice/server/services/users", () => ({
 	getUserHomeGrove: vi.fn(),
 }));
 
-vi.mock("@autumnsgrove/lattice/threshold/factory.js", () => ({
+vi.mock("@autumnsgrove/lattice/threshold/factory", () => ({
 	createThreshold: vi.fn(() => null),
 }));
 
-vi.mock("@autumnsgrove/lattice/threshold/adapters/sveltekit.js", () => ({
+vi.mock("@autumnsgrove/lattice/threshold/adapters/sveltekit", () => ({
 	thresholdCheck: vi.fn(),
 }));
 
-vi.mock("@autumnsgrove/lattice/server/services/chat.js", () => ({
+vi.mock("@autumnsgrove/lattice/server/services/chat", () => ({
 	listConversations: vi.fn(),
 	getOrCreateConversation: vi.fn(),
 	getMessages: vi.fn(),
@@ -52,7 +52,7 @@ vi.mock("@autumnsgrove/lattice/server/services/chat.js", () => ({
 	isParticipant: vi.fn(),
 }));
 
-vi.mock("@autumnsgrove/lattice/server/services/friends.js", async (importOriginal) => {
+vi.mock("@autumnsgrove/lattice/server/services/friends", async (importOriginal) => {
 	const original = (await importOriginal()) as Record<string, unknown>;
 	return { ...original, areMutualFriends: vi.fn() };
 });
@@ -63,7 +63,7 @@ vi.mock("@autumnsgrove/lattice/loom/sveltekit", () => ({
 	})),
 }));
 
-import { getUserHomeGrove } from "@autumnsgrove/lattice/server/services/users.js";
+import { getUserHomeGrove } from "@autumnsgrove/lattice/server/services/users";
 import {
 	listConversations,
 	getOrCreateConversation,
@@ -73,8 +73,8 @@ import {
 	getTotalUnreadCount,
 	retractMessage,
 	isParticipant,
-} from "@autumnsgrove/lattice/server/services/chat.js";
-import { areMutualFriends } from "@autumnsgrove/lattice/server/services/friends.js";
+} from "@autumnsgrove/lattice/server/services/chat";
+import { areMutualFriends } from "@autumnsgrove/lattice/server/services/friends";
 
 // ── Shared fixtures ──────────────────────────────────────────────────────────
 

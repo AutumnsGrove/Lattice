@@ -2,7 +2,7 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import Spinner from "@autumnsgrove/lattice/ui/components/ui/Spinner.svelte";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
-		import BetaBadge from "@autumnsgrove/lattice/ui/components/ui/BetaBadge.svelte";
+	import BetaBadge from "@autumnsgrove/lattice/ui/components/ui/BetaBadge.svelte";
 	import BetaWelcomeDialog from "@autumnsgrove/lattice/ui/components/ui/BetaWelcomeDialog.svelte";
 	import { groveModeStore } from "@autumnsgrove/lattice/ui/stores";
 	import Badge from "@autumnsgrove/lattice/ui/components/ui/Badge.svelte";
@@ -91,7 +91,9 @@
 <div class="max-w-screen-xl">
 	<header class="mb-8">
 		<div class="flex items-center gap-3 mb-2">
-			<h1 class="m-0 text-3xl text-foreground"><GroveTerm interactive term="arbor">Dashboard</GroveTerm></h1>
+			<h1 class="m-0 text-3xl text-foreground">
+				<GroveTerm interactive term="arbor">Dashboard</GroveTerm>
+			</h1>
 			<a
 				href="https://grove.place/knowledge/help/wanderers-and-pathfinders"
 				target="_blank"
@@ -117,7 +119,9 @@
 			{/if}
 		</div>
 		{#if !groveModeStore.current}
-			<p class="text-sm text-foreground-subtle italic mt-1 mb-0">(<GroveTerm term="arbor" displayOverride="grove" icon />)</p>
+			<p class="text-sm text-foreground-subtle italic mt-1 mb-0">
+				(<GroveTerm term="arbor" displayOverride="grove" icon />)
+			</p>
 		{/if}
 		<p class="m-0 text-foreground-muted text-lg">Welcome back, {userName}.</p>
 	</header>

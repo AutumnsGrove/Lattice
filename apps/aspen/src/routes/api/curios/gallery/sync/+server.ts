@@ -7,7 +7,11 @@
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { parseImageFilename, isSupportedImage, generateGalleryId } from "@autumnsgrove/lattice/curios/gallery";
+import {
+	parseImageFilename,
+	isSupportedImage,
+	generateGalleryId,
+} from "@autumnsgrove/lattice/curios/gallery";
 import { API_ERRORS, throwGroveError, logGroveError } from "@autumnsgrove/lattice/errors";
 
 interface ConfigRow {

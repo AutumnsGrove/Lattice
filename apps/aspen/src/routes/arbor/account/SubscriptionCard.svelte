@@ -13,13 +13,7 @@
 		onResume: () => void;
 	}
 
-	let {
-		billing,
-		billingError,
-		tierConfig,
-		onCancel,
-		onResume,
-	}: Props = $props();
+	let { billing, billingError, tierConfig, onCancel, onResume }: Props = $props();
 
 	// Computed status flags
 	const isActive = $derived(billing?.status === "active");
@@ -112,20 +106,12 @@
 
 		<div class="plan-actions" role="group" aria-label="Subscription actions">
 			{#if isCancelled}
-				<Button
-					variant="primary"
-					onclick={onResume}
-					aria-label="Resume subscription"
-				>
+				<Button variant="primary" onclick={onResume} aria-label="Resume subscription">
 					<RefreshCw class="btn-icon" aria-hidden="true" />
 					Resume Membership
 				</Button>
 			{:else}
-				<Button
-					variant="danger"
-					onclick={onCancel}
-					aria-label="Cancel subscription"
-				>
+				<Button variant="danger" onclick={onCancel} aria-label="Cancel subscription">
 					<X class="btn-icon" aria-hidden="true" />
 					Cancel Membership
 				</Button>

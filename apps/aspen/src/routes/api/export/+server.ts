@@ -1,9 +1,12 @@
 import { error, json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session.js";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory.js";
-import { thresholdCheckWithResult, thresholdHeaders } from "@autumnsgrove/lattice/threshold/adapters/sveltekit.js";
-import { getEndpointLimitByKey } from "@autumnsgrove/lattice/threshold/config.js";
+import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
+import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
+import {
+	thresholdCheckWithResult,
+	thresholdHeaders,
+} from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
+import { getEndpointLimitByKey } from "@autumnsgrove/lattice/threshold/config";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 
 /**

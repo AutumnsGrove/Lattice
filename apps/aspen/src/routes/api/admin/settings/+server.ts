@@ -1,7 +1,7 @@
 import { json, error } from "@sveltejs/kit";
-import { sanitizeObject } from "@autumnsgrove/lattice/utils/validation.js";
+import { sanitizeObject } from "@autumnsgrove/lattice/utils/validation";
 import type { RequestHandler } from "./$types";
-import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session.js";
+import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
 import { validFontIds } from "@autumnsgrove/lattice/ui/tokens/fonts";
 import { ALL_SEASONS } from "@autumnsgrove/lattice/ui/types/season";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
@@ -130,7 +130,8 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 					throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
 				}
 				// Import from centralized config to ensure consistency
-				const { CANOPY_CATEGORIES } = await import("@autumnsgrove/lattice/config/canopy-categories.js");
+				const { CANOPY_CATEGORIES } =
+					await import("@autumnsgrove/lattice/config/canopy-categories");
 				const allValid = parsed.every(
 					(cat) =>
 						typeof cat === "string" &&

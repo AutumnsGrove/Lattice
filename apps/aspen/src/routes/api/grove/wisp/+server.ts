@@ -15,13 +15,17 @@ import {
 	COST_CAP,
 	PROMPT_MODES,
 	getMaxTokens,
-} from "@autumnsgrove/lattice/config/wisp.js";
-import { secureUserContent, stripMarkdown, smartTruncate } from "@autumnsgrove/lattice/server/inference-client.js";
-import { createLumenClient } from "@autumnsgrove/lattice/lumen/index.js";
-import { calculateReadability } from "@autumnsgrove/lattice/utils/readability.js";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory.js";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit.js";
-import { checkFeatureAccess } from "@autumnsgrove/lattice/server/billing.js";
+} from "@autumnsgrove/lattice/config/wisp";
+import {
+	secureUserContent,
+	stripMarkdown,
+	smartTruncate,
+} from "@autumnsgrove/lattice/server/inference-client";
+import { createLumenClient } from "@autumnsgrove/lattice/lumen";
+import { calculateReadability } from "@autumnsgrove/lattice/utils/readability";
+import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
+import { checkFeatureAccess } from "@autumnsgrove/lattice/server/billing";
 
 export const prerender = false;
 
@@ -383,7 +387,7 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 // Analysis Functions (Lumen-powered)
 // ============================================================================
 
-import type { LumenClient } from "@autumnsgrove/lattice/lumen/index.js";
+import type { LumenClient } from "@autumnsgrove/lattice/lumen";
 
 /**
  * Analyze text for grammar and spelling issues via Lumen generation task

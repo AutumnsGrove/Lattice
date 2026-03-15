@@ -9,17 +9,22 @@
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { API_ERRORS, buildErrorJson, logGroveError, throwGroveError } from "@autumnsgrove/lattice/errors";
-import { isRedirect, isHttpError } from "@autumnsgrove/lattice/server/utils/type-guards.js";
-import { getUserHomeGrove } from "@autumnsgrove/lattice/server/services/users.js";
-import { createThreshold } from "@autumnsgrove/lattice/threshold/factory.js";
-import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit.js";
+import {
+	API_ERRORS,
+	buildErrorJson,
+	logGroveError,
+	throwGroveError,
+} from "@autumnsgrove/lattice/errors";
+import { isRedirect, isHttpError } from "@autumnsgrove/lattice/server/utils/type-guards";
+import { getUserHomeGrove } from "@autumnsgrove/lattice/server/services/users";
+import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
+import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
 import {
 	isAllowedImageType,
 	ALLOWED_TYPES_DISPLAY,
 	validateFileSignature,
 	type AllowedImageType,
-} from "@autumnsgrove/lattice/utils/upload-validation.js";
+} from "@autumnsgrove/lattice/utils/upload-validation";
 
 /** Maximum file size for chat images (5MB — smaller than blog uploads). */
 const MAX_CHAT_IMAGE_SIZE = 5 * 1024 * 1024;

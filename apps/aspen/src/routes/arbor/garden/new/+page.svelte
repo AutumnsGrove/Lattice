@@ -255,7 +255,9 @@
 			<h1>New <GroveTerm term="blooms">Bloom</GroveTerm></h1>
 			<Waystone slug="using-curios-in-content" label="Curio directives" size="sm" />
 			{#if !groveModeStore.current}
-				<p class="text-sm text-foreground-subtle italic mt-1 mb-0">(<GroveTerm term="blooms" displayOverride="grove" icon />)</p>
+				<p class="text-sm text-foreground-subtle italic mt-1 mb-0">
+					(<GroveTerm term="blooms" displayOverride="grove" icon />)
+				</p>
 			{/if}
 		</div>
 		<div class="header-actions">

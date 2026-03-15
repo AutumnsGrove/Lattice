@@ -12,7 +12,7 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, buildErrorJson, logGroveError } from "@autumnsgrove/lattice/errors";
-import { validateUsernameAvailability } from "@autumnsgrove/lattice/server/services/username.js";
+import { validateUsernameAvailability } from "@autumnsgrove/lattice/server/services/username";
 
 export const GET: RequestHandler = async ({ url, platform, locals }) => {
 	// Auth required
@@ -31,11 +31,7 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
 	}
 
 	try {
-		const result = await validateUsernameAvailability(
-			db,
-			username,
-			locals.tenantId,
-		);
+		const result = await validateUsernameAvailability(db, username, locals.tenantId);
 
 		return json(result, {
 			headers: { "Cache-Control": "private, no-cache" },
@@ -45,9 +41,6 @@ export const GET: RequestHandler = async ({ url, platform, locals }) => {
 			path: "/api/username/check",
 			cause: error,
 		});
-		return json(
-			{ available: false, error: "Unable to check availability" },
-			{ status: 500 },
-		);
+		return json({ available: false, error: "Unable to check availability" }, { status: 500 });
 	}
 };

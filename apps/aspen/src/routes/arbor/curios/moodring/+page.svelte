@@ -4,7 +4,11 @@
 	import GlassButton from "@autumnsgrove/lattice/ui/components/ui/GlassButton.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 	import { Circle, Save, Plus } from "@lucide/svelte";
-	import { lightenHex, darkenHex, DISPLAY_STYLE_OPTIONS } from "@autumnsgrove/lattice/curios/moodring";
+	import {
+		lightenHex,
+		darkenHex,
+		DISPLAY_STYLE_OPTIONS,
+	} from "@autumnsgrove/lattice/curios/moodring";
 	import type { MoodDisplayStyle } from "@autumnsgrove/lattice/curios/moodring";
 
 	let { data, form } = $props();

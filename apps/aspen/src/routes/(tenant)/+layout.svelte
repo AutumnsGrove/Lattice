@@ -9,7 +9,7 @@
 	let { children, data } = $props();
 
 	// Access tenant info from context (set in hooks.server.ts)
-	const tenant = $derived(data.context?.type === 'tenant' ? data.context.tenant : null);
+	const tenant = $derived(data.context?.type === "tenant" ? data.context.tenant : null);
 </script>
 
 <!--

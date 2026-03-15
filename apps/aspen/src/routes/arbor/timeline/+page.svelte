@@ -22,11 +22,15 @@
 	<header class="mb-8">
 		<div class="flex items-center gap-3 mb-2">
 			<Calendar class="w-8 h-8 text-accent-muted" />
-			<h1 class="m-0 text-3xl text-foreground"><GroveTerm interactive term="trails">Trail</GroveTerm></h1>
+			<h1 class="m-0 text-3xl text-foreground">
+				<GroveTerm interactive term="trails">Trail</GroveTerm>
+			</h1>
 			<Waystone slug="what-are-trails" label="Learn about Trails" />
 		</div>
 		{#if !groveModeStore.current}
-			<p class="text-sm text-foreground-subtle italic mt-1 mb-0">(<GroveTerm term="trails" displayOverride="grove" icon />)</p>
+			<p class="text-sm text-foreground-subtle italic mt-1 mb-0">
+				(<GroveTerm term="trails" displayOverride="grove" icon />)
+			</p>
 		{/if}
 		<p class="m-0 text-foreground-muted text-lg italic">The path becomes clear by walking it.</p>
 	</header>
@@ -39,9 +43,11 @@
 			</div>
 			<h2 class="text-2xl font-serif text-foreground mb-3">Coming in First Buds (Early Spring)</h2>
 			<p class="text-foreground-muted max-w-2xl mx-auto">
-				<GroveTerm interactive term="trails">Trails</GroveTerm> is <GroveTerm interactive term="grove">Grove's</GroveTerm> personal
-				roadmap system for building in public. Create and share project timelines with waypoints, phases,
-				and beautiful nature-themed presentations.
+				<GroveTerm interactive term="trails">Trails</GroveTerm> is <GroveTerm
+					interactive
+					term="grove">Grove's</GroveTerm
+				> personal roadmap system for building in public. Create and share project timelines with waypoints,
+				phases, and beautiful nature-themed presentations.
 			</p>
 		</div>
 	</GlassCard>

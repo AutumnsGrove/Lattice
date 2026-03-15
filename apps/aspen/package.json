@@ -34,9 +34,12 @@
 		"wrangler": "^4.64.0"
 	},
 	"dependencies": {
+		"@11ty/gray-matter": "^2.0.1",
 		"@autumnsgrove/foliage": "workspace:*",
 		"@autumnsgrove/infra": "workspace:*",
 		"@autumnsgrove/lattice": "workspace:*",
-		"@autumnsgrove/prism": "workspace:*"
+		"@autumnsgrove/prism": "workspace:*",
+		"@lucide/svelte": "^0.577.0",
+		"zod": "^4.3.6"
 	}
 }

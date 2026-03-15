@@ -1,12 +1,12 @@
 import type { LayoutServerLoad } from "./$types";
 import type { AppContext } from "../app.d.ts";
 import { building } from "$app/environment";
-import { getNavPageLimit } from "@autumnsgrove/lattice/server/tier-features.js";
-import { canUploadImages } from "@autumnsgrove/lattice/server/upload-gate.js";
-import { emailsMatch } from "@autumnsgrove/lattice/utils/user.js";
-import { isFeatureEnabled, isInGreenhouse } from "@autumnsgrove/lattice/feature-flags/index.js";
-import { getUserHomeGrove } from "@autumnsgrove/lattice/server/services/users.js";
-import type { HomeGrove } from "@autumnsgrove/lattice/server/services/users.js";
+import { getNavPageLimit } from "@autumnsgrove/lattice/server/tier-features";
+import { canUploadImages } from "@autumnsgrove/lattice/server/upload-gate";
+import { emailsMatch } from "@autumnsgrove/lattice/utils/user";
+import { isFeatureEnabled, isInGreenhouse } from "@autumnsgrove/lattice/feature-flags";
+import { getUserHomeGrove } from "@autumnsgrove/lattice/server/services/users";
+import type { HomeGrove } from "@autumnsgrove/lattice/server/services/users";
 import { resolveSeasonPreference } from "@autumnsgrove/lattice/ui/season-meta";
 
 interface SiteSettings {
