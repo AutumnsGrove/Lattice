@@ -23,15 +23,15 @@
 			crossorigin
 		/>
 
-		<!-- Favicons (served from CDN — Aspen has no local static dir) -->
-		<link rel="icon" type="image/svg+xml" href="https://cdn.grove.place/assets/favicon.svg" />
-		<link rel="icon" type="image/png" sizes="32x32" href="https://cdn.grove.place/assets/favicon-32x32.png" />
+		<!-- Favicons -->
+		<link rel="icon" type="image/svg+xml" href="%sveltekit.assets%/favicon.svg" />
+		<link rel="icon" type="image/png" sizes="32x32" href="%sveltekit.assets%/favicon-32x32.png" />
 
 		<!-- Apple Touch Icon (iOS home screen, iMessage previews) -->
-		<link rel="apple-touch-icon" sizes="180x180" href="https://cdn.grove.place/assets/apple-touch-icon.png" />
+		<link rel="apple-touch-icon" sizes="180x180" href="%sveltekit.assets%/apple-touch-icon.png" />
 
 		<!-- Safari Pinned Tab -->
-		<link rel="mask-icon" href="https://cdn.grove.place/assets/safari-pinned-tab.svg" color="#16a34a" />
+		<link rel="mask-icon" href="%sveltekit.assets%/safari-pinned-tab.svg" color="#16a34a" />
 
 		<!-- PWA Manifest (dynamic route — serves season-aware icons per tenant preference) -->
 		<link rel="manifest" href="/site.webmanifest" />
