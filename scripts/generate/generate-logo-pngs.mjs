@@ -1013,8 +1013,9 @@ async function generateGlassEmailSignatureDividers(treeHeight = 256) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Copy non-generated static files (SVGs, robots.txt) from engine to Aspen.
+ * Copy non-generated static files (SVGs) from engine to Aspen.
  * Engine's static dir is the source of truth for these hand-crafted assets.
+ * Note: robots.txt is NOT copied — it's a per-app policy file, not a generated asset.
  */
 async function copyStaticAssets() {
 	console.log("📋 Copying static assets from engine to Aspen...\n");
@@ -1023,7 +1024,7 @@ async function copyStaticAssets() {
 	const aspenStaticDir = join(ROOT_DIR, "apps/aspen/static");
 	await mkdir(aspenStaticDir, { recursive: true });
 
-	const filesToCopy = ["favicon.svg", "safari-pinned-tab.svg", "robots.txt"];
+	const filesToCopy = ["favicon.svg", "safari-pinned-tab.svg"];
 
 	for (const file of filesToCopy) {
 		await copyFile(join(engineStaticDir, file), join(aspenStaticDir, file));
