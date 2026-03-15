@@ -1,13 +1,12 @@
 /**
  * Grove Router Worker
  *
- * Proxies wildcard subdomain requests (*.grove.place) to the lattice Pages project.
- * This is needed because Cloudflare Pages doesn't support wildcard custom domains.
+ * Proxies wildcard subdomain requests (*.grove.place) to the Aspen Worker.
  *
  * The Worker:
  * 1. Catches all *.grove.place requests
  * 2. Excludes subdomains that have their own Pages/Workers
- * 3. Proxies to grove-lattice.pages.dev with X-Forwarded-Host header
+ * 3. Proxies to grove-aspen via service binding with X-Forwarded-Host header
  */
 
 export interface Env {
@@ -21,6 +20,7 @@ export interface Env {
 	OG?: Fetcher;
 	WARDEN?: Fetcher;
 	BILLING?: Fetcher;
+	ASPEN?: Fetcher;
 }
 
 /**
@@ -257,9 +257,15 @@ export default {
 		}
 
 		// Resolve route target to hostname and optional Service Binding
-		const target = typeof routeTarget === "object" ? routeTarget : null;
+		// Default fallback: grove-aspen Worker (tenant experience)
+		const DEFAULT_TARGET: RouteTarget = {
+			origin: "grove-aspen.m7jv4v7npb.workers.dev",
+			binding: "ASPEN",
+		};
+		const target =
+			typeof routeTarget === "object" ? routeTarget : !routeTarget ? DEFAULT_TARGET : null;
 		const targetHostname =
-			(typeof routeTarget === "string" ? routeTarget : target?.origin) || "grove-lattice.pages.dev";
+			(typeof routeTarget === "string" ? routeTarget : target?.origin) || DEFAULT_TARGET.origin;
 
 		// Check if a Service Binding is available for this target
 		const fetcher = target?.binding ? (env[target.binding] as Fetcher | undefined) : undefined;
