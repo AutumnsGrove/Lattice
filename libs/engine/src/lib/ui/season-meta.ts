@@ -12,6 +12,13 @@ import type { Season } from "$lib/ui/types/season";
 import { ALL_SEASONS } from "$lib/ui/types/season";
 
 // ─────────────────────────────────────────────────────────────────────────────
+// CDN
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** CDN base URL for favicon/icon assets */
+export const FAVICON_CDN_BASE = "https://cdn.grove.place/assets";
+
+// ─────────────────────────────────────────────────────────────────────────────
 // THEME COLORS
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -37,15 +44,15 @@ interface SeasonFavicons {
 	themeColor: string;
 }
 
-/** Get favicon file paths for a given season */
+/** Get favicon file paths for a given season (served from CDN) */
 export function getSeasonFavicons(season: Season): SeasonFavicons {
 	const suffix = season === "summer" ? "" : `-${season}`;
 	return {
-		svg: `/favicon${suffix}.svg`,
-		png32: `/favicon-32x32${suffix}.png`,
-		appleTouch: `/apple-touch-icon${suffix}.png`,
-		icon192: `/icon-192${suffix}.png`,
-		icon512: `/icon-512${suffix}.png`,
+		svg: `${FAVICON_CDN_BASE}/favicon${suffix}.svg`,
+		png32: `${FAVICON_CDN_BASE}/favicon-32x32${suffix}.png`,
+		appleTouch: `${FAVICON_CDN_BASE}/apple-touch-icon${suffix}.png`,
+		icon192: `${FAVICON_CDN_BASE}/icon-192${suffix}.png`,
+		icon512: `${FAVICON_CDN_BASE}/icon-512${suffix}.png`,
 		themeColor: SEASON_THEME_COLORS[season],
 	};
 }
