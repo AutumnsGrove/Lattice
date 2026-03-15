@@ -6,7 +6,7 @@
 	 * Uses the Timeline component from the curios library.
 	 */
 
-	import { Calendar } from "@lucide/svelte";
+	import { metricIcons } from "@autumnsgrove/prism/icons";
 	import { Timeline } from "@autumnsgrove/lattice/curios/timeline";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 
@@ -68,7 +68,7 @@
 
 <div class="timeline-page">
 	<header class="timeline-header">
-		<h1><Calendar size={28} /> Development Timeline</h1>
+		<h1><metricIcons.calendar size={28} /> Development Timeline</h1>
 		<p>
 			{#if data.config.ownerName}
 				Daily summaries of {data.config.ownerName}'s coding adventures, powered by AI

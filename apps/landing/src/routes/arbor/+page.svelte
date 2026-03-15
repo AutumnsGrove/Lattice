@@ -2,28 +2,27 @@
 	import type { PageData } from './$types';
 	import { getUserDisplayName } from '@autumnsgrove/lattice/utils';
 	import { GlassCard, GroveTerm } from '@autumnsgrove/lattice/ui';
-	import {
-		MessageCircle,
-		AtSign,
-		Upload,
-		MessageSquare,
-		Sprout,
-		Home,
-		Gift,
-		Activity,
-		Users,
-		Gamepad2,
-		Github,
-		Cloud,
-		Bot,
-		BarChart3,
-		CreditCard,
-		CircleDot,
-		ExternalLink,
-		Trees,
-		Kanban,
-		Eye
-	} from '@lucide/svelte';
+	import { featureIcons, actionIcons, natureIcons, navIcons, blazeIcons, metricIcons, authIcons, toolIcons, stateIcons, phaseIcons, chromeIcons } from '@autumnsgrove/prism/icons';
+	const MessageCircle = featureIcons.messageCircle;
+	const AtSign = authIcons.atSign;
+	const Upload = actionIcons.upload;
+	const MessageSquare = featureIcons.messageSquare;
+	const Sprout = natureIcons.sprout;
+	const Home = navIcons.home;
+	const Gift = blazeIcons.gift;
+	const Activity = metricIcons.activity;
+	const Users = authIcons.users;
+	const Gamepad2 = toolIcons.graftsCultivars;
+	const Github = chromeIcons.github;
+	const Cloud = featureIcons.cloud;
+	const Bot = toolIcons.shade; // shade uses Bot in manifest
+	const BarChart3 = metricIcons.barChart;
+	const CreditCard = metricIcons.creditCard;
+	const CircleDot = stateIcons.circle;
+	const ExternalLink = navIcons.external;
+	const Trees = natureIcons.trees;
+	const Kanban = featureIcons.layoutList;
+	const Eye = stateIcons.eye;
 	import { WAYFINDER_LINKS } from '@autumnsgrove/lattice/config';
 
 	let { data }: { data: PageData } = $props();

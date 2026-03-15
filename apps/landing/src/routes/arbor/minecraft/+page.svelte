@@ -3,24 +3,23 @@
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { GlassCard } from '@autumnsgrove/lattice/ui';
-	import {
-		Play,
-		Square,
-		RefreshCw,
-		Terminal,
-		UserPlus,
-		UserMinus,
-		Clock,
-		Globe,
-		HardDrive,
-		Users,
-		Wifi,
-		WifiOff,
-		AlertCircle,
-		Loader2,
-		Package,
-		Map
-	} from '@lucide/svelte';
+	import { actionIcons, featureIcons, authIcons, metricIcons, navIcons, stateIcons } from '@autumnsgrove/prism/icons';
+	const Play = actionIcons.play;
+	const Square = featureIcons.square;
+	const RefreshCw = actionIcons.refresh;
+	const Terminal = featureIcons.terminal;
+	const UserPlus = authIcons.userPlus;
+	const UserMinus = authIcons.userMinus;
+	const Clock = metricIcons.clock;
+	const Globe = navIcons.globe;
+	const HardDrive = featureIcons.hardDrive;
+	const Users = authIcons.users;
+	const Wifi = featureIcons.wifi;
+	const WifiOff = featureIcons.wifiOff;
+	const AlertCircle = stateIcons.alertCircle;
+	const Loader2 = stateIcons.loader;
+	const Package = featureIcons.package;
+	const Map = navIcons.map;
 	import ModpackManager from './ModpackManager.svelte';
 	import WorldManager from './WorldManager.svelte';
 

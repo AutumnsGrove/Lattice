@@ -8,13 +8,7 @@
 	import { cn } from '@autumnsgrove/lattice/ui/utils';
 	import type { ComponentStatus } from '$lib/types/status';
 	import { getStatusLabel } from '$lib/types/status';
-	import {
-		CheckCircle,
-		AlertTriangle,
-		AlertCircle,
-		XCircle,
-		Wrench
-	} from '@lucide/svelte';
+	import { stateIcons, chromeIcons } from '@autumnsgrove/prism/icons';
 
 	interface Props {
 		name: string;
@@ -28,31 +22,31 @@
 	// Status-specific styling
 	const statusConfig = {
 		operational: {
-			icon: CheckCircle,
+			icon: stateIcons.checkCircle,
 			color: 'text-success',
 			bg: 'bg-success-bg',
 			border: 'border-success'
 		},
 		degraded: {
-			icon: AlertTriangle,
+			icon: stateIcons.warning,
 			color: 'text-warning',
 			bg: 'bg-warning-bg',
 			border: 'border-warning'
 		},
 		partial_outage: {
-			icon: AlertCircle,
+			icon: stateIcons.alertCircle,
 			color: 'text-warning',
 			bg: 'bg-warning-bg',
 			border: 'border-warning'
 		},
 		major_outage: {
-			icon: XCircle,
+			icon: stateIcons.xCircle,
 			color: 'text-error',
 			bg: 'bg-error-bg',
 			border: 'border-error'
 		},
 		maintenance: {
-			icon: Wrench,
+			icon: chromeIcons.toolbox,
 			color: 'text-info',
 			bg: 'bg-info-bg',
 			border: 'border-info'

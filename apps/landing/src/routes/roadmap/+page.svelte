@@ -7,7 +7,7 @@
 	import RoadmapFeatureItem from "$lib/components/RoadmapFeatureItem.svelte";
 
 	// Icon registry (only phase/state icons needed directly in template)
-	import { stateIcons, navIcons, phaseIcons } from "$lib/utils/icons";
+	import { stateIcons, navIcons, phaseIcons, natureIcons, featureIcons } from "@autumnsgrove/prism/icons";
 
 	// Roadmap data & styling
 	import {
@@ -26,15 +26,15 @@
 	let { data } = $props();
 
 	// Local aliases from centralized registry for cleaner template usage
-	const MapPin = navIcons.roadmap;
+	const MapPin = navIcons.mapPin;
 	const Check = stateIcons.check;
-	const CheckCircle = stateIcons.checkcircle;
-	const Tag = stateIcons.tag;
+	const CheckCircle = stateIcons.checkCircle;
+	const Tag = featureIcons.tag;
 	const Sun = phaseIcons.sun;
 	const Gem = phaseIcons.gem;
 	const MoonIcon = phaseIcons.moon;
 	const Star = phaseIcons.star;
-	const Sprout = phaseIcons.sprout;
+	const Sprout = natureIcons.sprout;
 
 	// Import nature assets from engine package
 	import {

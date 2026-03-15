@@ -6,20 +6,8 @@
 		EVENT_TYPE_CONFIG,
 		PULSE_EVENT_TYPES,
 	} from "./index";
-	import {
-		GitCommit,
-		GitMerge,
-		GitPullRequest,
-		CircleDot,
-		CircleCheck,
-		Tag,
-		CheckCircle,
-		XCircle,
-		Star,
-		GitFork,
-		GitBranch,
-		Trash2,
-	} from "@lucide/svelte";
+	import type { Component } from "svelte";
+	import { featureIcons, stateIcons, phaseIcons, actionIcons } from "@autumnsgrove/prism/icons";
 
 	interface Props {
 		events: PulseEvent[];
@@ -46,26 +34,26 @@
 		activeFilters = next;
 	}
 
-	// Map event types to Lucide components
-	const iconMap: Record<string, typeof GitCommit> = {
-		"git-commit": GitCommit,
-		"git-merge": GitMerge,
-		"git-pull-request": GitPullRequest,
-		"circle-dot": CircleDot,
-		"circle-check": CircleCheck,
-		tag: Tag,
-		"check-circle": CheckCircle,
-		"x-circle": XCircle,
-		star: Star,
-		"git-fork": GitFork,
-		"git-branch": GitBranch,
-		"trash-2": Trash2,
+	// Map event types to icon components
+	const iconMap: Record<string, Component> = {
+		"git-commit": featureIcons.gitCommit,
+		"git-merge": featureIcons.gitMerge,
+		"git-pull-request": featureIcons.gitPullRequest,
+		"circle-dot": stateIcons.circleDot,
+		"circle-check": stateIcons.circleCheck,
+		tag: featureIcons.tag,
+		"check-circle": stateIcons.checkCircle,
+		"x-circle": stateIcons.xCircle,
+		star: phaseIcons.star,
+		"git-fork": featureIcons.gitFork,
+		"git-branch": featureIcons.gitBranch,
+		"trash-2": actionIcons.trash,
 	};
 
 	function getIcon(eventType: string, action: string | null, data?: Record<string, unknown>) {
 		const key = getEventDisplayKey(eventType, action, data);
 		const config = EVENT_TYPE_CONFIG[key] ?? EVENT_TYPE_CONFIG[eventType];
-		return iconMap[config?.icon ?? "git-commit"] ?? GitCommit;
+		return iconMap[config?.icon ?? "git-commit"] ?? featureIcons.gitCommit;
 	}
 
 	function getColor(eventType: string, action: string | null, data?: Record<string, unknown>) {
@@ -121,7 +109,7 @@
 					class="event-icon"
 					style="color: {getColor(event.eventType, event.action, event.data)}"
 				>
-					<EventIcon size={18} />
+					<EventIcon class="w-[18px] h-[18px]" />
 				</div>
 
 				<div class="event-content">

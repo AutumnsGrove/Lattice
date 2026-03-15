@@ -1,6 +1,12 @@
 <script lang="ts">
 	import { GlassCard, GroveTerm } from '@autumnsgrove/lattice/ui';
-	import { MessageCircle, Clock, CheckCircle, Search, Filter, ArrowRight } from '@lucide/svelte';
+	import { featureIcons, metricIcons, stateIcons, navIcons, actionIcons } from '@autumnsgrove/prism/icons';
+	const MessageCircle = featureIcons.messageCircle;
+	const Clock = metricIcons.clock;
+	const CheckCircle = stateIcons.checkCircle;
+	const Search = navIcons.search;
+	const Filter = actionIcons.filter;
+	const ArrowRight = navIcons.arrowRight;
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

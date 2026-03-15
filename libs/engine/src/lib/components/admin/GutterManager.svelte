@@ -4,22 +4,7 @@
 	import Dialog from "$lib/ui/components/ui/Dialog.svelte";
 	import Select from "$lib/ui/components/ui/Select.svelte";
 	import { toast } from "$lib/ui/components/ui/toast";
-	import {
-		MessageSquare,
-		ImageIcon,
-		Images,
-		Pin,
-		Plus,
-		ChevronUp,
-		ChevronDown,
-		Pencil,
-		X,
-		Link2,
-		Loader2,
-		Check,
-		Anchor,
-		Pilcrow,
-	} from "@lucide/svelte";
+	import { featureIcons, actionIcons, navIcons, stateIcons } from "@autumnsgrove/prism/icons";
 	import { debounce } from "$lib/utils/debounce";
 
 	/**
@@ -503,7 +488,7 @@
 	<div class="vines-header">
 		<h3>Vines</h3>
 		<button class="add-btn" onclick={openAddModal}>
-			<Plus class="btn-icon" />
+			<actionIcons.plus class="btn-icon" />
 			<span>Add Item</span>
 		</button>
 	</div>
@@ -521,15 +506,15 @@
 					<div class="item-header">
 						<span class="item-type" aria-hidden="true">
 							{#if item.type === "comment"}
-								<MessageSquare class="type-icon" />
+								<featureIcons.messageSquare class="type-icon" />
 							{:else if item.type === "photo"}
-								<ImageIcon class="type-icon" />
+								<actionIcons.imageIcon class="type-icon" />
 							{:else if item.type === "gallery"}
-								<Images class="type-icon" />
+								<featureIcons.images class="type-icon" />
 							{:else if item.type === "embed"}
-								<Link2 class="type-icon" />
+								<actionIcons.link2 class="type-icon" />
 							{:else}
-								<Pin class="type-icon" />
+								<actionIcons.pin class="type-icon" />
 							{/if}
 						</span>
 						<div class="item-anchor-display">
@@ -539,11 +524,11 @@
 										>H{anchor.headingLevel}</span
 									>
 								{:else if anchor.isAnchorTag}
-									<span class="anchor-badge tag-badge" aria-hidden="true"><Anchor size={12} /></span
+									<span class="anchor-badge tag-badge" aria-hidden="true"><actionIcons.anchor size={12} /></span
 									>
 								{:else}
 									<span class="anchor-badge para-badge" aria-hidden="true"
-										><Pilcrow size={12} /></span
+										><actionIcons.pilcrow size={12} /></span
 									>
 								{/if}
 								<span class="item-anchor-text" title={item.anchor}>{anchor.displayText}</span>
@@ -560,7 +545,7 @@
 								title="Move up"
 								aria-label="Move item up"
 							>
-								<ChevronUp class="action-icon" />
+								<navIcons.chevronUp class="action-icon" />
 							</button>
 							<button
 								class="action-btn"
@@ -569,7 +554,7 @@
 								title="Move down"
 								aria-label="Move item down"
 							>
-								<ChevronDown class="action-icon" />
+								<navIcons.chevronDown class="action-icon" />
 							</button>
 							<button
 								class="action-btn"
@@ -577,7 +562,7 @@
 								title="Edit"
 								aria-label="Edit item"
 							>
-								<Pencil class="action-icon" />
+								<actionIcons.edit class="action-icon" />
 							</button>
 							<button
 								class="action-btn delete"
@@ -585,7 +570,7 @@
 								title="Delete"
 								aria-label="Delete item"
 							>
-								<X class="action-icon" />
+								<stateIcons.x class="action-icon" />
 							</button>
 						</div>
 					</div>
@@ -653,13 +638,13 @@
 									>H{anchor.headingLevel}</span
 								>
 							{:else if anchor.isAnchorTag}
-								<span class="anchor-icon tag-icon" aria-hidden="true"><Anchor size={12} /></span>
+								<span class="anchor-icon tag-icon" aria-hidden="true"><actionIcons.anchor size={12} /></span>
 							{:else}
-								<span class="anchor-icon para-icon" aria-hidden="true"><Pilcrow size={12} /></span>
+								<span class="anchor-icon para-icon" aria-hidden="true"><actionIcons.pilcrow size={12} /></span>
 							{/if}
 							<span class="anchor-text">{anchor.displayText}</span>
 							{#if itemAnchor === anchor.raw}
-								<span class="selected-check" aria-hidden="true"><Check size={12} /></span>
+								<span class="selected-check" aria-hidden="true"><stateIcons.check class="w-3 h-3" /></span>
 							{/if}
 						</button>
 					{/each}
@@ -745,7 +730,7 @@
 								/>
 							</div>
 							<button type="button" class="remove-btn" onclick={() => removeGalleryImage(i)}
-								><X size={14} /></button
+								><stateIcons.x class="w-3.5 h-3.5" /></button
 							>
 						</div>
 					{/each}
@@ -767,7 +752,7 @@
 					/>
 					<Button variant="outline" onclick={resolveEmbedUrl} disabled={embedLoading || !embedUrl}>
 						{#if embedLoading}
-							<Loader2 class="btn-icon animate-spin" />
+							<stateIcons.loader class="btn-icon animate-spin" />
 						{:else}
 							Resolve
 						{/if}
@@ -780,7 +765,7 @@
 
 			{#if embedLoading}
 				<div class="embed-resolving">
-					<Loader2 class="type-icon animate-spin" />
+					<stateIcons.loader class="type-icon animate-spin" />
 					<span>Resolving URL...</span>
 				</div>
 			{/if}
@@ -792,7 +777,7 @@
 			{#if embedProvider}
 				<div class="embed-resolved">
 					<div class="embed-resolved-badge">
-						<Link2 class="type-icon" />
+						<actionIcons.link2 class="type-icon" />
 						<span class="embed-provider-name">{embedProvider}</span>
 						<span class="embed-resolved-label">interactive embed</span>
 					</div>
@@ -808,7 +793,7 @@
 			{:else if embedTitle && !embedLoading && embedUrl}
 				<div class="embed-resolved">
 					<div class="embed-resolved-badge preview-badge">
-						<Link2 class="type-icon" />
+						<actionIcons.link2 class="type-icon" />
 						<span class="embed-resolved-label">link preview</span>
 					</div>
 					{#if embedTitle}

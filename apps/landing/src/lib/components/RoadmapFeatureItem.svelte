@@ -7,7 +7,7 @@
 -->
 <script lang="ts">
 	import { FeatureStar, GroveTerm } from "@autumnsgrove/lattice/ui";
-	import { roadmapFeatureIcons, stateIcons, type RoadmapFeatureIconKey } from "$lib/utils/icons";
+	import { stateIcons, resolveAnyIcon } from "@autumnsgrove/prism/icons";
 	import type { Feature, PhaseStyle } from "$lib/data/roadmapData";
 
 	interface Props {
@@ -26,7 +26,7 @@
 		style.useCheckIcon
 			? stateIcons.check
 			: feature.icon
-				? (roadmapFeatureIcons[feature.icon as RoadmapFeatureIconKey] ?? stateIcons.circle)
+				? (resolveAnyIcon(feature.icon, stateIcons.circle) ?? stateIcons.circle)
 				: stateIcons.circle,
 	);
 

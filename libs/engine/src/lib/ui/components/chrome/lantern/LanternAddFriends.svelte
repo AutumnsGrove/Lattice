@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { ArrowLeft, UserPlus } from "@lucide/svelte";
+	import { navIcons, authIcons } from "@autumnsgrove/prism/icons";
 	import { lanternStore } from "$lib/ui/stores/lantern.svelte";
 	import { friendsStore } from "$lib/ui/stores/friends.svelte";
 	import { api } from "$lib/utils/api";
@@ -81,7 +81,7 @@
 			onclick={goBack}
 			aria-label="Back to main view"
 		>
-			<ArrowLeft size={18} />
+			<navIcons.arrowLeft size={18} />
 		</button>
 		<h3 class="text-[0.9375rem] font-semibold text-foreground m-0">Add Friends</h3>
 	</div>
@@ -115,7 +115,7 @@
 					onclick={() => addFriend(result.subdomain)}
 					aria-label="Add {result.name} as friend"
 				>
-					<UserPlus size={14} />
+					<authIcons.userPlus size={14} />
 					<span>Add</span>
 				</button>
 			</div>

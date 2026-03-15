@@ -7,7 +7,7 @@
 	import LanternAddFriends from "./LanternAddFriends.svelte";
 	import LanternVisitingCard from "./LanternVisitingCard.svelte";
 	import type { LanternLayoutData } from "./types";
-	import { UserPlus, Settings } from "@lucide/svelte";
+	import { authIcons, actionIcons } from "@autumnsgrove/prism/icons";
 
 	interface Props {
 		data: LanternLayoutData;
@@ -77,7 +77,7 @@
 					class="flex items-center justify-center min-w-[36px] min-h-[36px] -m-1 rounded-md text-foreground-muted transition-colors hover:text-foreground hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[-2px]"
 					aria-label="Open settings"
 				>
-					<Settings size={16} strokeWidth={2} />
+					<actionIcons.settings size={16} strokeWidth={2} />
 				</a>
 			</div>
 
@@ -161,7 +161,7 @@
 								onclick={() => lanternStore.setView("add-friends")}
 								aria-label="Add friends"
 							>
-								<UserPlus size={14} />
+								<authIcons.userPlus size={14} />
 							</button>
 						</div>
 
@@ -190,7 +190,7 @@
 					class="add-friends-cta flex items-center justify-center gap-2 py-2 px-2 rounded-lg border border-dashed border-default bg-transparent text-foreground-muted text-[0.8125rem] cursor-pointer transition-colors hover:text-accent-muted hover:border-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
 					onclick={() => lanternStore.setView("add-friends")}
 				>
-					<UserPlus size={16} />
+					<authIcons.userPlus size={16} />
 					<span>Add Friends</span>
 				</button>
 			{/if}

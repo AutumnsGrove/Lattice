@@ -14,7 +14,7 @@
 <script lang="ts">
   import type { DemoContainerProps } from './types.js';
   import type { Snippet } from 'svelte';
-  import { FlaskConical } from '@lucide/svelte';
+  import { phaseIcons } from '@autumnsgrove/prism/icons';
 
   interface Props extends DemoContainerProps {
     children: Snippet;
@@ -26,7 +26,7 @@
 <div class="demo-container" class:mock-data={mockData}>
   <header class="demo-header">
     <div class="demo-title-group">
-      <FlaskConical size={18} />
+      <phaseIcons.flaskConical class="w-[18px] h-[18px]" />
       <h4 class="demo-title">{title}</h4>
     </div>
     {#if mockData}

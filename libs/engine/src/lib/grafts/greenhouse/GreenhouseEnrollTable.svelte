@@ -19,7 +19,7 @@
 	import type { GreenhouseEnrollTableProps } from "./types.js";
 	import type { GreenhouseTenant } from "../../feature-flags/types.js";
 	import GreenhouseToggle from "./GreenhouseToggle.svelte";
-	import { Trash2, FileEdit, Sprout } from "@lucide/svelte";
+	import { natureIcons, actionIcons, featureIcons } from "@autumnsgrove/prism/icons";
 
 	let {
 		tenants,
@@ -63,7 +63,7 @@
 <div class="greenhouse-enroll-table {className}">
 	{#if tenants.length === 0}
 		<div class="empty-state">
-			<Sprout class="w-12 h-12 text-grove-400 mx-auto mb-3" />
+			<natureIcons.sprout class="w-12 h-12 text-grove-400 mx-auto mb-3" />
 			<p class="text-foreground-muted text-center">
 				No tenants enrolled in the greenhouse program yet.
 			</p>
@@ -164,7 +164,7 @@
 												class="p-2 text-foreground-faint hover:text-grove-600 dark:hover:text-grove-400 transition-colors rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-grove-500 focus-visible:ring-offset-2"
 												aria-label="Edit notes for {getDisplayName(tenant.tenantId)}"
 											>
-												<FileEdit class="w-4 h-4" />
+												<featureIcons.fileEdit class="w-4 h-4" />
 											</button>
 										{/if}
 										<button
@@ -173,7 +173,7 @@
 											class="p-2 text-foreground-faint hover:text-error dark:hover:text-error transition-colors rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2"
 											aria-label="Remove {getDisplayName(tenant.tenantId)} from greenhouse"
 										>
-											<Trash2 class="w-4 h-4" />
+											<actionIcons.trash class="w-4 h-4" />
 										</button>
 									</div>
 								</td>

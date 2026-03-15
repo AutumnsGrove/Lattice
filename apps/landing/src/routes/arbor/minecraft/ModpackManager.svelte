@@ -8,15 +8,14 @@
 
 	import { invalidateAll } from '$app/navigation';
 	import { GlassCard } from '@autumnsgrove/lattice/ui';
-	import {
-		Package,
-		Upload,
-		Trash2,
-		AlertTriangle,
-		Loader2,
-		FileBox,
-		X
-	} from '@lucide/svelte';
+	import { featureIcons, actionIcons, stateIcons } from '@autumnsgrove/prism/icons';
+	const Package = featureIcons.package;
+	const Upload = actionIcons.upload;
+	const Trash2 = actionIcons.trash;
+	const AlertTriangle = stateIcons.warning;
+	const Loader2 = stateIcons.loader;
+	const FileBox = featureIcons.fileBox;
+	const X = stateIcons.x;
 
 	interface Props {
 		serverRunning: boolean;

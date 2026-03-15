@@ -6,10 +6,14 @@
 	let { data } = $props();
 
 	// Centralized icon registry - single source of truth for all icons
-	import { featureIcons, getToolIcon } from "$lib/utils/icons";
+	import { chromeIcons, stateIcons, resolveAnyIcon } from "@autumnsgrove/prism/icons";
 
-	// Use centralized registry for social link icons
-	const Github = featureIcons.github;
+	const Github = chromeIcons.github;
+
+	// getToolIcon replacement — resolves any icon key across all groups
+	function getToolIcon(iconKey: string) {
+		return resolveAnyIcon(iconKey, stateIcons.circle);
+	}
 
 	// Import nature assets from engine package
 	import { StarCluster, Moon } from "@autumnsgrove/lattice/ui/nature";

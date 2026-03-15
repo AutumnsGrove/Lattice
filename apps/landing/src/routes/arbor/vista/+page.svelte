@@ -3,17 +3,16 @@
 	import { GlassCard, GlassButton } from "@autumnsgrove/lattice/ui";
 	import { api, formatRelativeTime as _frt } from "@autumnsgrove/lattice/utils";
 	import { invalidateAll } from "$app/navigation";
-	import {
-		CheckCircle2,
-		AlertTriangle,
-		AlertCircle,
-		Clock,
-		Wifi,
-		WifiOff,
-		Info,
-		RefreshCw,
-		Loader2,
-	} from "@lucide/svelte";
+	import { stateIcons, metricIcons, actionIcons, featureIcons } from "@autumnsgrove/prism/icons";
+	const CheckCircle2 = stateIcons.checkCircle2;
+	const AlertTriangle = stateIcons.warning;
+	const AlertCircle = stateIcons.alertCircle;
+	const Clock = metricIcons.clock;
+	const Wifi = featureIcons.wifi;
+	const WifiOff = featureIcons.wifiOff;
+	const Info = stateIcons.info;
+	const RefreshCw = actionIcons.refresh;
+	const Loader2 = stateIcons.loader;
 
 	let { data }: { data: PageData } = $props();
 

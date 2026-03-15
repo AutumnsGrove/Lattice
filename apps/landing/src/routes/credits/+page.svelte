@@ -3,7 +3,15 @@
 	import Footer from "$lib/components/Footer.svelte";
 	import { GroveTerm } from "@autumnsgrove/lattice/ui";
 	import SEO from "$lib/components/SEO.svelte";
-	import { Shredder, Heart, Cpu, Layers, Package, Smile, Type, Fingerprint } from "@lucide/svelte";
+	import { chromeIcons, natureIcons, featureIcons, stateIcons, actionIcons, authIcons, toolIcons } from "@autumnsgrove/prism/icons";
+	const Shredder = chromeIcons.shredder;
+	const Heart = natureIcons.heart;
+	const Cpu = toolIcons.vista; // vista → Cpu in the manifest
+	const Layers = featureIcons.layers;
+	const Package = featureIcons.package;
+	const Smile = stateIcons.smile;
+	const Type = actionIcons.type;
+	const Fingerprint = authIcons.fingerprint;
 
 	let { data } = $props();
 

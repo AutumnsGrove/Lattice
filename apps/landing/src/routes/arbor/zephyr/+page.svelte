@@ -2,7 +2,13 @@
 	import type { PageData, ActionData } from './$types';
 	import { enhance } from '$app/forms';
 	import { GlassCard } from '@autumnsgrove/lattice/ui';
-	import { Wind, Send, Check, AlertTriangle, ExternalLink, RefreshCw } from '@lucide/svelte';
+	import { natureIcons, actionIcons, stateIcons, navIcons } from '@autumnsgrove/prism/icons';
+	const Wind = natureIcons.wind;
+	const Send = actionIcons.send;
+	const Check = stateIcons.check;
+	const AlertTriangle = stateIcons.warning;
+	const ExternalLink = navIcons.external;
+	const RefreshCw = actionIcons.refresh;
 	import { ZephyrAnalytics } from '@autumnsgrove/lattice';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();

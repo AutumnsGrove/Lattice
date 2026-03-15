@@ -3,7 +3,7 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import GlassButton from "@autumnsgrove/lattice/ui/components/ui/GlassButton.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
-	import { Activity, ArrowLeft, X } from "@lucide/svelte";
+	import { metricIcons, navIcons, stateIcons } from "@autumnsgrove/prism/icons";
 	import {
 		STATUS_PRESETS,
 		isStatusExpired,
@@ -78,12 +78,12 @@
 	<header class="page-header">
 		<div class="header-top">
 			<GlassButton href="/arbor/curios" variant="ghost" class="back-link">
-				<ArrowLeft class="w-4 h-4" />
+				<navIcons.arrowLeft class="w-4 h-4" />
 				Back to Curios
 			</GlassButton>
 		</div>
 		<div class="title-row">
-			<Activity class="header-icon" />
+			<metricIcons.activity class="header-icon" />
 			<h1>Activity Status</h1>
 		</div>
 		<p class="subtitle">A whisper from the other side of the screen: you're here.</p>
@@ -124,7 +124,7 @@
 					}}
 				>
 					<GlassButton type="submit" variant="ghost" class="clear-btn">
-						<X class="w-4 h-4" />
+						<stateIcons.x class="w-4 h-4" />
 						Clear Status
 					</GlassButton>
 				</form>

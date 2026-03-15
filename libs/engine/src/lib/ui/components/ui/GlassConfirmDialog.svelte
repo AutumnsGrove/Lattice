@@ -2,7 +2,7 @@
 	import type { Snippet } from "svelte";
 	import { Dialog as DialogPrimitive } from "bits-ui";
 	import { cn } from "$lib/ui/utils";
-	import { AlertTriangle, Trash2, HelpCircle } from "@lucide/svelte";
+	import { stateIcons, actionIcons } from "@autumnsgrove/prism/icons";
 	import Button from "./Button.svelte";
 	import GlassCard from "./GlassCard.svelte";
 	import { DialogOverlay } from "$lib/ui/components/primitives/dialog";
@@ -76,17 +76,17 @@
 	// Variant-specific styling
 	const variantConfig = {
 		default: {
-			icon: HelpCircle,
+			icon: stateIcons.help,
 			iconClass: "text-accent-muted",
 			confirmVariant: "primary" as const,
 		},
 		danger: {
-			icon: Trash2,
+			icon: actionIcons.trash,
 			iconClass: "text-error",
 			confirmVariant: "danger" as const,
 		},
 		warning: {
-			icon: AlertTriangle,
+			icon: stateIcons.warning,
 			iconClass: "text-warning",
 			confirmVariant: "primary" as const,
 		},

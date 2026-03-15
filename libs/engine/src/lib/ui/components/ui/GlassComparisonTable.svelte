@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
 	import { cn } from "$lib/ui/utils";
-	import { Check, X, Minus } from "@lucide/svelte";
+	import { stateIcons, actionIcons } from "@autumnsgrove/prism/icons";
 
 	/**
 	 * GlassComparisonTable - A glassmorphism comparison table with mobile card layout
@@ -147,15 +147,15 @@
 							>
 								{#if value === true}
 									<span class="inline-flex items-center justify-center">
-										<Check class="w-5 h-5 text-grove-600 dark:text-grove-400" aria-hidden="true" />
+										<stateIcons.check class="w-5 h-5 text-grove-600 dark:text-grove-400" aria-hidden="true" />
 									</span>
 								{:else if value === false}
 									<span class="inline-flex items-center justify-center">
-										<X class="w-4 h-4 text-foreground-faint" aria-hidden="true" />
+										<stateIcons.x class="w-4 h-4 text-foreground-faint" aria-hidden="true" />
 									</span>
 								{:else if value === undefined}
 									<span class="inline-flex items-center justify-center">
-										<Minus class="w-4 h-4 text-foreground-faint" aria-hidden="true" />
+										<actionIcons.minus class="w-4 h-4 text-foreground-faint" aria-hidden="true" />
 									</span>
 								{:else}
 									<span class={cn(
@@ -217,11 +217,11 @@
 						<!-- Grove value -->
 						<div class="flex-1 flex items-center justify-center" aria-label="{highlightedCol}: {getCellLabel(groveValue)}">
 							{#if groveValue === true}
-								<Check class="w-5 h-5 text-grove-600 dark:text-grove-400" aria-hidden="true" />
+								<stateIcons.check class="w-5 h-5 text-grove-600 dark:text-grove-400" aria-hidden="true" />
 							{:else if groveValue === false}
-								<X class="w-4 h-4 text-foreground-faint" aria-hidden="true" />
+								<stateIcons.x class="w-4 h-4 text-foreground-faint" aria-hidden="true" />
 							{:else if groveValue === undefined}
-								<Minus class="w-4 h-4 text-foreground-faint" aria-hidden="true" />
+								<actionIcons.minus class="w-4 h-4 text-foreground-faint" aria-hidden="true" />
 							{:else}
 								<span class="text-sm text-foreground font-medium font-sans">{groveValue}</span>
 							{/if}
@@ -230,11 +230,11 @@
 						<!-- Competitor value -->
 						<div class="flex-1 flex items-center justify-center" aria-label="{competitor.name}: {getCellLabel(competitorValue)}">
 							{#if competitorValue === true}
-								<Check class="w-5 h-5 text-grove-600 dark:text-grove-400" aria-hidden="true" />
+								<stateIcons.check class="w-5 h-5 text-grove-600 dark:text-grove-400" aria-hidden="true" />
 							{:else if competitorValue === false}
-								<X class="w-4 h-4 text-foreground-faint" aria-hidden="true" />
+								<stateIcons.x class="w-4 h-4 text-foreground-faint" aria-hidden="true" />
 							{:else if competitorValue === undefined}
-								<Minus class="w-4 h-4 text-foreground-faint" aria-hidden="true" />
+								<actionIcons.minus class="w-4 h-4 text-foreground-faint" aria-hidden="true" />
 							{:else}
 								<span class="text-sm text-foreground-muted font-sans">{competitorValue}</span>
 							{/if}

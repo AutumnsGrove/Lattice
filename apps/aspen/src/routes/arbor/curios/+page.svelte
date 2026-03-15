@@ -6,30 +6,18 @@
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
 	import { groveModeStore } from "@autumnsgrove/lattice/ui/stores";
 	import {
-		Calendar,
-		Sparkles,
-		GitBranch,
-		Construction,
-		Image,
-		Warehouse,
-		BookOpen,
-		Hash,
-		Shield,
-		Activity,
-		Music,
-		BarChart3,
-		Globe,
-		Wand2,
-		MousePointer,
-		Circle,
-		Rss,
-		Award,
-		Volume2,
-		BookMarked,
-		Heart,
-		Sticker,
-		Upload,
-	} from "@lucide/svelte";
+		actionIcons,
+		authIcons,
+		blazeIcons,
+		chromeIcons,
+		featureIcons,
+		metricIcons,
+		navIcons,
+		natureIcons,
+		phaseIcons,
+		stateIcons,
+		toolIcons,
+	} from "@autumnsgrove/prism/icons";
 
 	// Available curios with their status
 	const curios = [
@@ -37,7 +25,7 @@
 			id: "gallery",
 			name: "Gallery",
 			description: "Beautiful image galleries with tags, collections, and lightbox viewing",
-			icon: Image,
+			icon: featureIcons.image,
 			status: "available",
 			href: "/arbor/curios/gallery",
 			features: ["Amber storage", "Tags and collections", "Lightbox viewer", "Masonry layout"],
@@ -47,7 +35,7 @@
 			name: "Guestbook",
 			description:
 				"Let visitors leave notes on your site — classic personal web warmth with moderation built in",
-			icon: BookOpen,
+			icon: featureIcons.bookOpen,
 			status: "greenhouse",
 			href: "/arbor/curios/guestbook",
 			features: ["Visitor signatures", "4 display styles", "Moderation queue", "Emoji support"],
@@ -57,7 +45,7 @@
 			name: "Hit Counter",
 			description:
 				"Nostalgic page view counter with frosted glass, brass odometer, LCD, and minimal styles",
-			icon: Hash,
+			icon: featureIcons.hash,
 			status: "greenhouse",
 			href: "/arbor/curios/hitcounter",
 			features: [
@@ -72,7 +60,7 @@
 			name: "Status Badges",
 			description:
 				"Small, expressive badges that signal the state of your site — online, away, creating, or custom",
-			icon: Shield,
+			icon: authIcons.shield,
 			status: "greenhouse",
 			href: "/arbor/curios/statusbadge",
 			features: [
@@ -86,7 +74,7 @@
 			id: "activitystatus",
 			name: "Activity Status",
 			description: "A customizable status indicator — let visitors know you're here",
-			icon: Activity,
+			icon: metricIcons.activity,
 			status: "greenhouse",
 			href: "/arbor/curios/activitystatus",
 			features: ["15 quick presets", "Custom text + emoji", "Auto-expiration", "One-line display"],
@@ -96,7 +84,7 @@
 			name: "Shelves",
 			description:
 				"Collect and display anything — books you've read, links you love, or custom collections with ratings and notes",
-			icon: BookMarked,
+			icon: actionIcons.bookMarked,
 			status: "greenhouse",
 			href: "/arbor/curios/shelves",
 			features: [
@@ -110,7 +98,7 @@
 			id: "nowplaying",
 			name: "Now Playing",
 			description: "Share what you're listening to — music fills the grove",
-			icon: Music,
+			icon: blazeIcons.music,
 			status: "greenhouse",
 			href: "/arbor/curios/nowplaying",
 			features: [
@@ -124,7 +112,7 @@
 			id: "polls",
 			name: "Polls",
 			description: "Run interactive polls on your site — quick votes, live results",
-			icon: BarChart3,
+			icon: metricIcons.barChart,
 			status: "greenhouse",
 			href: "/arbor/curios/polls",
 			features: [
@@ -138,7 +126,7 @@
 			id: "webring",
 			name: "Webring Hub",
 			description: "Join webrings and connect your site to the wider indie web",
-			icon: Globe,
+			icon: navIcons.globe,
 			status: "greenhouse",
 			href: "/arbor/curios/webring",
 			features: [
@@ -153,7 +141,7 @@
 			name: "Weird Artifacts",
 			description:
 				"Playful chaos objects — Magic 8-Ball, fortune cookies, dice rollers, and more weird fun",
-			icon: Wand2,
+			icon: chromeIcons.wand,
 			status: "greenhouse",
 			href: "/arbor/curios/artifacts",
 			features: [
@@ -167,7 +155,7 @@
 			id: "cursors",
 			name: "Custom Cursors",
 			description: "Replace the default pointer with something that matches your vibe",
-			icon: MousePointer,
+			icon: actionIcons.mousePointer,
 			status: "greenhouse",
 			href: "/arbor/curios/cursors",
 			features: [
@@ -181,7 +169,7 @@
 			id: "moodring",
 			name: "Mood Ring",
 			description: "A visual mood indicator that changes color throughout the day",
-			icon: Circle,
+			icon: stateIcons.circle,
 			status: "greenhouse",
 			href: "/arbor/curios/moodring",
 			features: [
@@ -195,7 +183,7 @@
 			id: "blogroll",
 			name: "Blogroll",
 			description: "The blogs you love, the voices you return to — curated recommendations",
-			icon: Rss,
+			icon: featureIcons.rss,
 			status: "greenhouse",
 			href: "/arbor/curios/blogroll",
 			features: ["Auto-favicons", "RSS feed tracking", "Latest post display", "Blog descriptions"],
@@ -204,7 +192,7 @@
 			id: "badges",
 			name: "Badges",
 			description: "Collectible achievements celebrating your milestones and journey",
-			icon: Award,
+			icon: phaseIcons.award,
 			status: "greenhouse",
 			href: "/arbor/curios/badges",
 			features: [
@@ -218,7 +206,7 @@
 			id: "ambient",
 			name: "Ambient Sounds",
 			description: "Optional background audio — forest rain, morning birds, or lo-fi vibes",
-			icon: Volume2,
+			icon: chromeIcons.volume,
 			status: "greenhouse",
 			href: "/arbor/curios/ambient",
 			features: [
@@ -232,7 +220,7 @@
 			id: "shrines",
 			name: "Personal Shrines",
 			description: "Sacred spaces for things you love — memories, fandoms, gratitude",
-			icon: Heart,
+			icon: natureIcons.heart,
 			status: "greenhouse",
 			href: "/arbor/curios/shrines",
 			features: [
@@ -246,7 +234,7 @@
 			id: "clipart",
 			name: "Clip Art Library",
 			description: "Decorative overlays — borders, critters, sparkles dropped onto any page",
-			icon: Sticker,
+			icon: actionIcons.sticker,
 			status: "greenhouse",
 			href: "/arbor/curios/clipart",
 			features: [
@@ -261,7 +249,7 @@
 			name: "Custom Uploads",
 			description:
 				"Upload and manage images used across your curios — auto-resized with quota tracking",
-			icon: Upload,
+			icon: actionIcons.upload,
 			status: "greenhouse",
 			href: "/arbor/curios/customuploads",
 			features: [
@@ -275,7 +263,7 @@
 			id: "timeline",
 			name: "Timeline",
 			description: "AI-powered daily summaries of your GitHub activity",
-			icon: Calendar,
+			icon: metricIcons.calendar,
 			status: "greenhouse",
 			href: "/arbor/curios/timeline",
 			features: [
@@ -289,7 +277,7 @@
 			id: "journey",
 			name: "Journey",
 			description: "Visualize your repo's growth with line-based metrics and beautiful charts",
-			icon: GitBranch,
+			icon: featureIcons.gitBranch,
 			status: "building",
 			href: "/arbor/curios/journey",
 			features: ["Version milestones", "Code composition", "Growth timeline", "AI release notes"],
@@ -298,7 +286,7 @@
 			id: "pulse",
 			name: "Pulse",
 			description: "Live development heartbeat — real-time activity from your GitHub repos",
-			icon: Activity,
+			icon: metricIcons.activity,
 			status: "building",
 			href: "/arbor/curios/pulse",
 			features: [
@@ -319,7 +307,7 @@
 	<header class="page-header">
 		<div class="header-content">
 			<div class="title-row">
-				<Sparkles class="header-icon" />
+				<phaseIcons.sparkles class="header-icon" />
 				<h1><GroveTerm interactive term="curios">Curios</GroveTerm></h1>
 				<Waystone slug="what-are-curios" label="Learn about Curios" />
 			</div>
@@ -352,17 +340,17 @@
 						<h2>{curio.name}</h2>
 						{#if curio.status === "building"}
 							<Badge variant="secondary">
-								<Construction class="badge-icon" />
+								<chromeIcons.construction class="badge-icon" />
 								Building
 							</Badge>
 						{:else if curio.status === "coming-soon"}
 							<Badge variant="secondary">
-								<Construction class="badge-icon" />
+								<chromeIcons.construction class="badge-icon" />
 								Coming Soon
 							</Badge>
 						{:else if curio.status === "greenhouse"}
 							<Badge variant="default" class="greenhouse-badge">
-								<Warehouse class="badge-icon" />
+								<toolIcons.warehouse class="badge-icon" />
 								Greenhouse
 							</Badge>
 						{:else}

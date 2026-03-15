@@ -16,21 +16,19 @@
 	import { EditorDemo, BlogCardsDemo } from '$lib/components/demos';
 	import { page } from '$app/state';
 
-	// Lucide icons
-	import {
-		Trees,
-		HandCoins,
-		Leaf,
-		Shield,
-		Users,
-		Download,
-		ArrowRight,
-		Sprout,
-		ChevronDown,
-		PenLine,
-		Image as ImageIcon,
-		ChevronRight
-	} from '@lucide/svelte';
+	import { natureIcons, authIcons, actionIcons, navIcons, metricIcons, featureIcons } from '@autumnsgrove/prism/icons';
+	const Trees = natureIcons.trees;
+	const HandCoins = metricIcons.handCoins;
+	const Leaf = natureIcons.leaf;
+	const Shield = authIcons.shield;
+	const Users = authIcons.users;
+	const Download = actionIcons.download;
+	const ArrowRight = navIcons.arrowRight;
+	const Sprout = natureIcons.sprout;
+	const ChevronDown = navIcons.chevronDown;
+	const PenLine = actionIcons.penLine;
+	const ImageIcon = featureIcons.image;
+	const ChevronRight = navIcons.chevronRight;
 
 	let { data } = $props();
 

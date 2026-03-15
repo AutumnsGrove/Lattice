@@ -3,7 +3,7 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import GlassButton from "@autumnsgrove/lattice/ui/components/ui/GlassButton.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
-	import { Award, Plus, Trash2, Star, Settings } from "@lucide/svelte";
+	import { phaseIcons, actionIcons } from "@autumnsgrove/prism/icons";
 
 	let { data, form } = $props();
 
@@ -40,7 +40,7 @@
 <div class="badges-page">
 	<header class="page-header">
 		<div class="title-row">
-			<Award class="header-icon" />
+			<phaseIcons.award class="header-icon" />
 			<h1>Badges</h1>
 		</div>
 		<p class="subtitle">
@@ -54,7 +54,7 @@
 		<div class="section-header">
 			<h2>Display Settings</h2>
 			<GlassButton variant="ghost" onclick={() => (showConfigForm = !showConfigForm)}>
-				<Settings class="btn-icon" />
+				<actionIcons.settings class="btn-icon" />
 				{showConfigForm ? "Hide" : "Customize"}
 			</GlassButton>
 		</div>
@@ -146,7 +146,7 @@
 		<h2>Earned Badges</h2>
 		{#if data.earnedBadges.length === 0}
 			<GlassCard class="empty-card">
-				<Award class="empty-icon" />
+				<phaseIcons.award class="empty-icon" />
 				<p>No badges earned yet.</p>
 				<p class="empty-hint">Badges are awarded automatically as you use your site.</p>
 			</GlassCard>
@@ -158,7 +158,7 @@
 							{#if badge.iconUrl}
 								<img src={badge.iconUrl} alt={badge.name} width="32" height="32" />
 							{:else}
-								<Award class="badge-fallback-icon" />
+								<phaseIcons.award class="badge-fallback-icon" />
 							{/if}
 						</div>
 						<div class="badge-details">
@@ -169,7 +169,7 @@
 									>{badge.rarity}</span
 								>
 								{#if badge.isShowcased}
-									<span class="showcase-tag"><Star class="showcase-icon" /> Showcased</span>
+									<span class="showcase-tag"><phaseIcons.star class="showcase-icon" /> Showcased</span>
 								{/if}
 							</div>
 						</div>
@@ -183,7 +183,7 @@
 								title={badge.isShowcased ? "Remove from showcase" : "Add to showcase"}
 								aria-label={badge.isShowcased ? "Remove from showcase" : "Add to showcase"}
 							>
-								<Star class="btn-icon" />
+								<phaseIcons.star class="btn-icon" />
 							</GlassButton>
 						</form>
 					</GlassCard>
@@ -252,7 +252,7 @@
 		<h2>Custom Badges</h2>
 		{#if !showCustomForm}
 			<GlassButton variant="accent" onclick={() => (showCustomForm = true)}>
-				<Plus class="btn-icon" />
+				<actionIcons.plus class="btn-icon" />
 				Create Custom Badge
 			</GlassButton>
 		{:else}
@@ -297,7 +297,7 @@
 					</div>
 					<div class="form-actions">
 						<GlassButton type="submit" variant="accent">
-							<Plus class="btn-icon" />
+							<actionIcons.plus class="btn-icon" />
 							Create
 						</GlassButton>
 						<GlassButton variant="ghost" onclick={() => (showCustomForm = false)}
@@ -325,7 +325,7 @@
 								title="Remove badge"
 								aria-label="Remove badge"
 							>
-								<Trash2 class="btn-icon" />
+								<actionIcons.trash class="btn-icon" />
 							</GlassButton>
 						</form>
 					</GlassCard>

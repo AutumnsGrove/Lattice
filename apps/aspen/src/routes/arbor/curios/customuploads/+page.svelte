@@ -3,7 +3,7 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import GlassButton from "@autumnsgrove/lattice/ui/components/ui/GlassButton.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
-	import { Upload, Trash2, Image } from "@lucide/svelte";
+	import { actionIcons, featureIcons } from "@autumnsgrove/prism/icons";
 
 	let { data, form } = $props();
 
@@ -23,7 +23,7 @@
 <div class="uploads-page">
 	<header class="page-header">
 		<div class="title-row">
-			<Upload class="header-icon" />
+			<actionIcons.upload class="header-icon" />
 			<h1>Custom Uploads</h1>
 		</div>
 		<p class="subtitle">
@@ -45,7 +45,7 @@
 	<section class="uploads-section">
 		{#if data.uploads.length === 0}
 			<GlassCard class="empty-card">
-				<Image class="empty-icon" />
+				<featureIcons.image class="empty-icon" />
 				<p>No uploads yet.</p>
 				<p class="empty-hint">
 					Upload images to use them across your curios. Supported: PNG, GIF, WebP, SVG.
@@ -77,7 +77,7 @@
 									title="Remove upload"
 									aria-label="Remove upload"
 								>
-									<Trash2 class="btn-icon" />
+									<actionIcons.trash class="btn-icon" />
 								</GlassButton>
 							</form>
 						</div>

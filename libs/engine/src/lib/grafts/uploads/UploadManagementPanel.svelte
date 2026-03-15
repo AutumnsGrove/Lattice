@@ -19,7 +19,7 @@
 <script>
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import Button from "$lib/ui/components/ui/Button.svelte";
-	import { Upload, Users, CheckCircle, XCircle, ShieldCheck, Search } from "@lucide/svelte";
+	import { stateIcons, navIcons, actionIcons, authIcons } from "@autumnsgrove/prism/icons";
 
 	/** @type {import('./types.js').UploadManagementPanelProps} */
 	let {
@@ -67,7 +67,7 @@
 	<div class="admin-header">
 		<div class="header-text">
 			<h2>
-				<Upload class="inline-icon" />
+				<actionIcons.upload class="inline-icon" />
 				Upload Management
 			</h2>
 			<p class="subtitle">Control which tenants can upload images</p>
@@ -78,14 +78,14 @@
 	{#if formResult?.success}
 		<GlassCard variant="frosted" class="message-card success">
 			<div class="message-content">
-				<CheckCircle class="message-icon success" />
+				<stateIcons.checkCircle class="message-icon success" />
 				<span>{formResult.message || "Action completed successfully"}</span>
 			</div>
 		</GlassCard>
 	{:else if formResult?.error}
 		<GlassCard variant="frosted" class="message-card error">
 			<div class="message-content">
-				<XCircle class="message-icon error" />
+				<stateIcons.xCircle class="message-icon error" />
 				<span>{formResult.error}</span>
 			</div>
 		</GlassCard>
@@ -96,21 +96,21 @@
 		<GlassCard variant="frosted" class="stat-card">
 			<div class="stat-value total">{totalTenants}</div>
 			<div class="stat-label">
-				<Users class="stat-icon" />
+				<authIcons.users class="stat-icon" />
 				Total Tenants
 			</div>
 		</GlassCard>
 		<GlassCard variant="frosted" class="stat-card">
 			<div class="stat-value active">{enabledCount}</div>
 			<div class="stat-label">
-				<CheckCircle class="stat-icon" />
+				<stateIcons.checkCircle class="stat-icon" />
 				Uploads Enabled
 			</div>
 		</GlassCard>
 		<GlassCard variant="frosted" class="stat-card">
 			<div class="stat-value disabled">{suspendedCount}</div>
 			<div class="stat-label">
-				<XCircle class="stat-icon" />
+				<stateIcons.xCircle class="stat-icon" />
 				Uploads Suspended
 			</div>
 		</GlassCard>
@@ -120,7 +120,7 @@
 	<GlassCard variant="frosted" class="info-card">
 		<div class="info-content">
 			<div class="info-icon-wrapper">
-				<ShieldCheck class="info-icon" />
+				<authIcons.shieldCheck class="info-icon" />
 			</div>
 			<div>
 				<h3>About Upload Suspension</h3>
@@ -135,7 +135,7 @@
 
 	<!-- Search -->
 	<div class="search-bar">
-		<Search class="search-icon" />
+		<navIcons.search class="search-icon" />
 		<input
 			type="text"
 			bind:value={searchQuery}
@@ -167,12 +167,12 @@
 							<td>
 								{#if tenant.suspended}
 									<span class="status-badge suspended">
-										<XCircle class="status-icon" />
+										<stateIcons.xCircle class="status-icon" />
 										Suspended
 									</span>
 								{:else}
 									<span class="status-badge enabled">
-										<CheckCircle class="status-icon" />
+										<stateIcons.checkCircle class="status-icon" />
 										Enabled
 									</span>
 								{/if}

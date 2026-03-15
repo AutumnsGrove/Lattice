@@ -2,7 +2,7 @@
 	import type { LayoutData } from './$types';
 	import { page } from '$app/state';
 	import { AdminHeader } from '@autumnsgrove/lattice/ui/chrome';
-	import { LayoutDashboard, Search, Clock, Settings } from '@lucide/svelte';
+	import { featureIcons, navIcons, metricIcons, actionIcons } from '@autumnsgrove/prism/icons';
 
 	let { data, children }: { data: LayoutData; children: any } = $props();
 
@@ -10,10 +10,10 @@
 	const isLoginPage = $derived(page.url.pathname === '/arbor/login');
 
 	const tabs = [
-		{ href: '/arbor', label: 'Dashboard', icon: LayoutDashboard },
-		{ href: '/arbor/searcher', label: 'Searcher', icon: Search },
-		{ href: '/arbor/history', label: 'History', icon: Clock },
-		{ href: '/arbor/config', label: 'Config', icon: Settings }
+		{ href: '/arbor', label: 'Dashboard', icon: featureIcons.layoutDashboard },
+		{ href: '/arbor/searcher', label: 'Searcher', icon: navIcons.search },
+		{ href: '/arbor/history', label: 'History', icon: metricIcons.clock },
+		{ href: '/arbor/config', label: 'Config', icon: actionIcons.settings }
 	];
 
 	async function logout() {

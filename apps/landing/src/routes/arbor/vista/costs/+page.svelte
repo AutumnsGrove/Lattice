@@ -1,7 +1,9 @@
 <script lang="ts">
 	import type { PageData } from "./$types";
 	import { GlassCard } from "@autumnsgrove/lattice/ui";
-	import { DollarSign, Clock } from "@lucide/svelte";
+	import { metricIcons } from "@autumnsgrove/prism/icons";
+	const DollarSign = metricIcons.dollarSign;
+	const Clock = metricIcons.clock;
 
 	let { data }: { data: PageData } = $props();
 

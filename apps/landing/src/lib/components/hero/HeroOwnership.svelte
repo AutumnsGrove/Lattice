@@ -7,7 +7,8 @@
 <script lang="ts">
 	import type { HeroSlideContentProps } from './hero-types';
 	import HeroSlide from './HeroSlide.svelte';
-	import { ArrowRight } from '@lucide/svelte';
+	import { navIcons } from '@autumnsgrove/prism/icons';
+	const ArrowRight = navIcons.arrowRight;
 	import {
 		TreePine,
 		Lantern

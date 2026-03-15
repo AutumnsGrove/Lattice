@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Check, X } from "@lucide/svelte";
+	import { stateIcons } from "@autumnsgrove/prism/icons";
 
 	interface ExecuteStep {
 		domain: string;
@@ -40,7 +40,7 @@
 <div class="result-card" class:partial={!allSuccess}>
 	<div class="result-header">
 		{#if allSuccess}
-			<Check size={16} class="text-success" aria-hidden="true" />
+			<stateIcons.check size={16} class="text-success" aria-hidden="true" />
 			<span>Applied {appliedCount} change{appliedCount === 1 ? "" : "s"}</span>
 		{:else}
 			<span>Applied {appliedCount} of {total} change{total === 1 ? "" : "s"}</span>
@@ -52,10 +52,10 @@
 			{#each domainResults as [label, success] (label)}
 				<span class="domain-item" class:failed={!success} role="listitem">
 					{#if success}
-						<Check size={12} aria-hidden="true" />
+						<stateIcons.check size={12} aria-hidden="true" />
 						<span class="sr-only">succeeded: </span>
 					{:else}
-						<X size={12} aria-hidden="true" />
+						<stateIcons.x size={12} aria-hidden="true" />
 						<span class="sr-only">failed: </span>
 					{/if}
 					{label}

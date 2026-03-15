@@ -64,7 +64,7 @@
 		flowers,
 	} from "@autumnsgrove/lattice/ui/components/nature/palette";
 	import { groveColors as grove, cream, bark as barkTokens, status } from "@autumnsgrove/prism";
-	import { Sparkles, Palette, Box, ChevronRight, Type } from "@lucide/svelte";
+	import { phaseIcons, featureIcons, actionIcons, navIcons } from "@autumnsgrove/prism/icons";
 
 	// Interactive state for demos
 	let showConfirmDialog = $state(false);
@@ -138,28 +138,28 @@
 			href="#glass"
 			class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/80 dark:bg-bark-800/80 backdrop-blur-sm border border-white/60 dark:border-bark-700/60 text-bark-700 dark:text-cream-200 hover:bg-white/90 dark:hover:bg-bark-700/90 transition-colors"
 		>
-			<Sparkles class="w-4 h-4 text-grove-600" />
+			<phaseIcons.sparkles class="w-4 h-4 text-grove-600" />
 			Glass Suite
 		</a>
 		<a
 			href="#components"
 			class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/80 dark:bg-bark-800/80 backdrop-blur-sm border border-white/60 dark:border-bark-700/60 text-bark-700 dark:text-cream-200 hover:bg-white/90 dark:hover:bg-bark-700/90 transition-colors"
 		>
-			<Box class="w-4 h-4 text-grove-600" />
+			<featureIcons.box class="w-4 h-4 text-grove-600" />
 			UI Components
 		</a>
 		<a
 			href="#typography"
 			class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/80 dark:bg-bark-800/80 backdrop-blur-sm border border-white/60 dark:border-bark-700/60 text-bark-700 dark:text-cream-200 hover:bg-white/90 dark:hover:bg-bark-700/90 transition-colors"
 		>
-			<Type class="w-4 h-4 text-grove-600" />
+			<actionIcons.type class="w-4 h-4 text-grove-600" />
 			Typography
 		</a>
 		<a
 			href="#palettes"
 			class="flex items-center gap-2 px-4 py-2 rounded-lg bg-white/80 dark:bg-bark-800/80 backdrop-blur-sm border border-white/60 dark:border-bark-700/60 text-bark-700 dark:text-cream-200 hover:bg-white/90 dark:hover:bg-bark-700/90 transition-colors"
 		>
-			<Palette class="w-4 h-4 text-grove-600" />
+			<featureIcons.palette class="w-4 h-4 text-grove-600" />
 			Color Palettes
 		</a>
 	</nav>
@@ -170,7 +170,7 @@
 	<section id="glass" class="mb-20 scroll-mt-20">
 		<div class="flex items-center gap-3 mb-8">
 			<div class="p-2 rounded-lg bg-white/80 dark:bg-bark-800/80 backdrop-blur-sm">
-				<Sparkles class="w-6 h-6 text-grove-600" />
+				<phaseIcons.sparkles class="w-6 h-6 text-grove-600" />
 			</div>
 			<div>
 				<h2 class="text-2xl font-bold text-bark-900 dark:text-cream-50">Glass Suite</h2>
@@ -588,7 +588,7 @@
 	<section id="components" class="mb-20 scroll-mt-20">
 		<div class="flex items-center gap-3 mb-8">
 			<div class="p-2 rounded-lg bg-white/80 dark:bg-bark-800/80 backdrop-blur-sm">
-				<Box class="w-6 h-6 text-grove-600" />
+				<featureIcons.box class="w-6 h-6 text-grove-600" />
 			</div>
 			<div>
 				<h2 class="text-2xl font-bold text-bark-900 dark:text-cream-50">UI Components</h2>
@@ -829,7 +829,7 @@
 	<section id="typography" class="mb-20 scroll-mt-20">
 		<div class="flex items-center gap-3 mb-8">
 			<div class="p-2 rounded-lg bg-white/80 dark:bg-bark-800/80 backdrop-blur-sm">
-				<Type class="w-6 h-6 text-grove-600" />
+				<actionIcons.type class="w-6 h-6 text-grove-600" />
 			</div>
 			<div>
 				<h2 class="text-2xl font-bold text-bark-900 dark:text-cream-50">Typography</h2>
@@ -1011,7 +1011,7 @@ $ npm run dev
 	<section id="palettes" class="mb-20 scroll-mt-20">
 		<div class="flex items-center gap-3 mb-8">
 			<div class="p-2 rounded-lg bg-white/80 dark:bg-bark-800/80 backdrop-blur-sm">
-				<Palette class="w-6 h-6 text-grove-600" />
+				<featureIcons.palette class="w-6 h-6 text-grove-600" />
 			</div>
 			<div>
 				<h2 class="text-2xl font-bold text-bark-900 dark:text-cream-50">Color Palettes</h2>
@@ -1186,22 +1186,22 @@ $ npm run dev
 					</h4>
 					<ul class="space-y-2 text-sm text-bark-600">
 						<li class="flex items-center gap-2">
-							<ChevronRight class="w-3 h-3 text-grove-500" /> Glass component suite (9 components)
+							<navIcons.chevronRight class="w-3 h-3 text-grove-500" /> Glass component suite (9 components)
 						</li>
 						<li class="flex items-center gap-2">
-							<ChevronRight class="w-3 h-3 text-grove-500" /> Core UI components (15+ components)
+							<navIcons.chevronRight class="w-3 h-3 text-grove-500" /> Core UI components (15+ components)
 						</li>
 						<li class="flex items-center gap-2">
-							<ChevronRight class="w-3 h-3 text-grove-500" /> Typography components (11 fonts)
+							<navIcons.chevronRight class="w-3 h-3 text-grove-500" /> Typography components (11 fonts)
 						</li>
 						<li class="flex items-center gap-2">
-							<ChevronRight class="w-3 h-3 text-grove-500" /> Nature color palettes (12 palettes)
+							<navIcons.chevronRight class="w-3 h-3 text-grove-500" /> Nature color palettes (12 palettes)
 						</li>
 						<li class="flex items-center gap-2">
-							<ChevronRight class="w-3 h-3 text-grove-500" /> Seasonal theming system
+							<navIcons.chevronRight class="w-3 h-3 text-grove-500" /> Seasonal theming system
 						</li>
 						<li class="flex items-center gap-2">
-							<ChevronRight class="w-3 h-3 text-grove-500" /> Interactive demos
+							<navIcons.chevronRight class="w-3 h-3 text-grove-500" /> Interactive demos
 						</li>
 					</ul>
 				</div>
@@ -1221,13 +1221,13 @@ $ npm run dev
 					</h4>
 					<ul class="space-y-2 text-sm text-bark-500">
 						<li class="flex items-center gap-2">
-							<ChevronRight class="w-3 h-3" /> More gallery components
+							<navIcons.chevronRight class="w-3 h-3" /> More gallery components
 						</li>
 						<li class="flex items-center gap-2">
-							<ChevronRight class="w-3 h-3" /> Animation utilities
+							<navIcons.chevronRight class="w-3 h-3" /> Animation utilities
 						</li>
 						<li class="flex items-center gap-2">
-							<ChevronRight class="w-3 h-3" /> Theme customization tools
+							<navIcons.chevronRight class="w-3 h-3" /> Theme customization tools
 						</li>
 					</ul>
 				</div>

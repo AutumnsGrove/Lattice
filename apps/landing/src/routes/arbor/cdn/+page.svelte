@@ -1,23 +1,22 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { GlassCard, GlassButton } from '@autumnsgrove/lattice/ui';
-	import {
-		Upload,
-		Image,
-		Video,
-		Music,
-		FileText,
-		Type,
-		File as FileIcon,
-		Code,
-		Copy,
-		Check,
-		Trash2,
-		ExternalLink,
-		X,
-		CheckCircle,
-		RefreshCw
-	} from '@lucide/svelte';
+	import { actionIcons, featureIcons, stateIcons, navIcons, blazeIcons } from '@autumnsgrove/prism/icons';
+	const Upload = actionIcons.upload;
+	const Image = featureIcons.image;
+	const Video = featureIcons.video;
+	const Music = blazeIcons.music;
+	const FileText = featureIcons.fileText;
+	const Type = actionIcons.type;
+	const FileIcon = featureIcons.fileText;
+	const Code = featureIcons.code;
+	const Copy = actionIcons.copy;
+	const Check = stateIcons.check;
+	const Trash2 = actionIcons.trash;
+	const ExternalLink = navIcons.external;
+	const X = stateIcons.x;
+	const CheckCircle = stateIcons.checkCircle;
+	const RefreshCw = actionIcons.refresh;
 	import type { Component } from 'svelte';
 
 	interface CdnFile {

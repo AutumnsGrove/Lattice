@@ -6,7 +6,12 @@
 	import { seasonStore } from "@autumnsgrove/lattice/ui/chrome";
 	import Footer from "$lib/components/Footer.svelte";
 	import { Logo } from "@autumnsgrove/lattice/ui/nature";
-	import { CreditCard, Wrench, User, Hand, HelpCircle } from "@lucide/svelte";
+	import { metricIcons, chromeIcons, authIcons, stateIcons, actionIcons } from "@autumnsgrove/prism/icons";
+	const CreditCard = metricIcons.creditCard;
+	const Wrench = chromeIcons.toolbox;
+	const User = authIcons.user;
+	const Hand = actionIcons.hand;
+	const HelpCircle = stateIcons.help;
 	import type { ActionData, PageData } from "./$types";
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();

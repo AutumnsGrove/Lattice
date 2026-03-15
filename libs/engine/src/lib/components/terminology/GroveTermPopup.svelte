@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Dialog as DialogPrimitive } from "bits-ui";
-	import { X, Leaf, ExternalLink } from "@lucide/svelte";
+	import { stateIcons, natureIcons, navIcons } from "@autumnsgrove/prism/icons";
 	import { cn } from "$lib/ui/utils";
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import { DialogOverlay } from "$lib/ui/components/primitives/dialog";
@@ -128,7 +128,7 @@
 						</div>
 					{:else if error}
 						<div class="flex-shrink-0 p-2.5 rounded-full bg-error-bg">
-							<Leaf class="w-5 h-5 text-error" />
+							<natureIcons.leaf class="w-5 h-5 text-error" />
 						</div>
 						<div class="flex-1 min-w-0">
 							<DialogPrimitive.Title
@@ -167,7 +167,7 @@
 						</div>
 					{:else}
 						<div class="flex-shrink-0 p-2.5 rounded-full bg-cream-100 dark:bg-bark-800">
-							<Leaf class="w-5 h-5 text-muted-foreground" />
+							<natureIcons.leaf class="w-5 h-5 text-muted-foreground" />
 						</div>
 						<div class="flex-1 min-w-0">
 							<DialogPrimitive.Title
@@ -183,7 +183,7 @@
 						class="flex-shrink-0 rounded-md p-1.5 text-muted-foreground hover:text-foreground hover:bg-cream-100 dark:hover:bg-bark-800 transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
 						aria-label="Close term popup"
 					>
-						<X class="w-5 h-5" />
+						<stateIcons.x class="w-5 h-5" />
 					</DialogPrimitive.Close>
 				</div>
 
@@ -264,7 +264,7 @@
 								rel="noopener noreferrer"
 							>
 								Visit {displayEntry?.term || "page"}
-								<ExternalLink class="w-3.5 h-3.5" aria-hidden="true" />
+								<navIcons.external class="w-3.5 h-3.5" aria-hidden="true" />
 							</a>
 						{/if}
 					</div>

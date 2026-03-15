@@ -1,7 +1,7 @@
 <script lang="ts">
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import Spinner from "@autumnsgrove/lattice/ui/components/ui/Spinner.svelte";
-	import { ArrowUpRight, ArrowDownRight } from "@lucide/svelte";
+	import { navIcons } from "@autumnsgrove/prism/icons";
 	import type { AvailableTier } from "./types";
 
 	interface Props {
@@ -52,9 +52,9 @@
 						{#if tier.isCurrent}
 							<span class="current-badge" aria-hidden="true">Current</span>
 						{:else if tier.isUpgrade}
-							<ArrowUpRight class="direction-icon upgrade" aria-hidden="true" />
+							<navIcons.arrowUpRight class="direction-icon upgrade" aria-hidden="true" />
 						{:else}
-							<ArrowDownRight class="direction-icon downgrade" aria-hidden="true" />
+							<navIcons.arrowDownRight class="direction-icon downgrade" aria-hidden="true" />
 						{/if}
 					</div>
 

@@ -2,7 +2,7 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import GlassButton from "@autumnsgrove/lattice/ui/components/ui/GlassButton.svelte";
 	import GuestbookEntryCollage from "@autumnsgrove/lattice/curios/guestbook/GuestbookEntryCollage.svelte";
-	import { Send, BookOpen, ChevronDown, Loader2, Palette } from "@lucide/svelte";
+	import { actionIcons, featureIcons, navIcons, stateIcons } from "@autumnsgrove/prism/icons";
 	import {
 		DEFAULT_COLOR_PALETTE,
 		GUESTBOOK_SIGNING_STYLES,
@@ -180,7 +180,7 @@
 
 <div class="guestbook-page guestbook-{data.config.style}">
 	<header class="guestbook-header">
-		<BookOpen class="header-icon" />
+		<featureIcons.bookOpen class="header-icon" />
 		<h1>Guestbook</h1>
 		<p class="entry-count">{data.total} {data.total === 1 ? "signature" : "signatures"}</p>
 	</header>
@@ -223,7 +223,7 @@
 							aria-haspopup="listbox"
 						>
 							{selectedEmoji || "Pick"}
-							<ChevronDown class="w-3 h-3" />
+							<navIcons.chevronDown class="w-3 h-3" />
 						</button>
 
 						{#if showEmojiPicker}
@@ -265,7 +265,7 @@
 			<!-- Personalize your entry -->
 			<details class="personalize-section" bind:open={showPersonalize}>
 				<summary class="personalize-toggle">
-					<Palette class="w-4 h-4" />
+					<featureIcons.palette class="w-4 h-4" />
 					Personalize your entry
 				</summary>
 
@@ -331,10 +331,10 @@
 					disabled={isSubmitting || !message.trim() || isOverLimit}
 				>
 					{#if isSubmitting}
-						<Loader2 class="w-4 h-4 spin" />
+						<stateIcons.loader class="w-4 h-4 spin" />
 						Signing...
 					{:else}
-						<Send class="w-4 h-4" />
+						<actionIcons.send class="w-4 h-4" />
 						Sign the Guestbook
 					{/if}
 				</GlassButton>
@@ -363,7 +363,7 @@
 		<div class="load-more">
 			<GlassButton variant="ghost" onclick={loadMore} disabled={loadingMore}>
 				{#if loadingMore}
-					<Loader2 class="w-4 h-4 spin" />
+					<stateIcons.loader class="w-4 h-4 spin" />
 					Loading...
 				{:else}
 					Load more signatures

@@ -9,7 +9,7 @@
 	import type { GroveTier } from "@autumnsgrove/lattice/ui/vineyard/types";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 	import { getCSRFToken } from "@autumnsgrove/lattice/utils/api";
-	import { Sparkles, Lock } from "@lucide/svelte";
+	import { phaseIcons, stateIcons } from "@autumnsgrove/prism/icons";
 	import ReverieHeader from "./ReverieHeader.svelte";
 	import ReverieChangeCard from "./ReverieChangeCard.svelte";
 	import ReverieResultCard from "./ReverieResultCard.svelte";
@@ -309,7 +309,7 @@
 				<div class="fallback-glow"></div>
 				<div class="fallback-content">
 					<div class="fallback-icon">
-						<Sparkles size={32} aria-hidden="true" />
+						<phaseIcons.sparkles size={32} aria-hidden="true" />
 					</div>
 					<h2 class="text-xl font-semibold text-bark-800 dark:text-white mb-2">Reverie</h2>
 					<p class="text-bark-600 dark:text-white/60 text-sm mb-1">
@@ -326,7 +326,7 @@
 							hover:from-violet-500 hover:to-violet-400
 							transition-all shadow-lg shadow-violet-500/25"
 					>
-						<Lock size={14} aria-hidden="true" />
+						<stateIcons.lock size={14} aria-hidden="true" />
 						Take Root to unlock Reverie
 					</a>
 				</div>

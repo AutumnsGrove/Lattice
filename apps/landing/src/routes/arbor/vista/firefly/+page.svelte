@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { PageData } from "./$types";
 	import { GlassCard } from "@autumnsgrove/lattice/ui";
-	import { Flame } from "@lucide/svelte";
+	import { natureIcons } from "@autumnsgrove/prism/icons";
+	const Flame = natureIcons.flame;
 
 	let { data }: { data: PageData } = $props();
 </script>

@@ -3,7 +3,7 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/state';
 	import { Header, Footer } from '@autumnsgrove/lattice/ui/chrome';
-	import { Search } from '@lucide/svelte';
+	import { navIcons } from '@autumnsgrove/prism/icons';
 
 	let { children } = $props();
 
@@ -12,7 +12,7 @@
 
 	// Forage nav items for public pages
 	const navItems = [
-		{ href: '/arbor', label: 'Admin', icon: Search }
+		{ href: '/arbor', label: 'Admin', icon: navIcons.search }
 	];
 
 	// Enable dark mode by default

@@ -7,7 +7,7 @@
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 	import { api } from "@autumnsgrove/lattice/utils";
 	import { clickOutside } from "@autumnsgrove/lattice/actions/clickOutside";
-	import { ExternalLink, Ellipsis, Trash2, ChevronRight, ArrowLeft } from "@lucide/svelte";
+	import { navIcons, actionIcons } from "@autumnsgrove/prism/icons";
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
 
 	/**
@@ -213,7 +213,7 @@
 	<header class="page-header">
 		<div class="header-content">
 			<a href="/arbor/pages" class="back-link">
-				<ArrowLeft size={14} class="inline-block" /> Back to Pages
+				<navIcons.arrowLeft size={14} class="inline-block" /> Back to Pages
 			</a>
 			<div class="title-row">
 				<h1>Edit Page</h1>
@@ -236,7 +236,7 @@
 				href={slug === "home" ? "/" : `/${slug}`}
 				title="View live page"
 			>
-				<ExternalLink size={16} />
+				<navIcons.external size={16} />
 			</Button>
 
 			<!-- More menu (contains Delete) -->
@@ -250,7 +250,7 @@
 						aria-expanded={showMoreMenu}
 						aria-haspopup="true"
 					>
-						<Ellipsis size={16} />
+						<actionIcons.ellipsis size={16} />
 					</Button>
 					{#if showMoreMenu}
 						<div
@@ -266,7 +266,7 @@
 									showDeleteDialog = true;
 								}}
 							>
-								<Trash2 size={14} />
+								<actionIcons.trash size={14} />
 								Delete Page
 							</button>
 						</div>
@@ -294,7 +294,7 @@
 		<!-- Details strip -->
 		<div class="details-strip">
 			<button class="details-toggle" onclick={toggleDetails}>
-				<ChevronRight size={16} class="details-chevron {detailsExpanded ? 'rotated' : ''}" />
+				<navIcons.chevronRight size={16} class="details-chevron {detailsExpanded ? 'rotated' : ''}" />
 				<span class="details-label">Page details</span>
 				{#if !detailsExpanded && detailsSummary}
 					<span class="details-summary">{detailsSummary}</span>

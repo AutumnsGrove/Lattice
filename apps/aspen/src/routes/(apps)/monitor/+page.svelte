@@ -12,7 +12,7 @@
 	 * Full implementation: docs/specs/vista-spec.md
 	 */
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
-	import { Activity, Bell, TrendingUp, HandCoins } from "@lucide/svelte";
+	import { metricIcons, blazeIcons } from "@autumnsgrove/prism/icons";
 </script>
 
 <svelte:head>
@@ -51,7 +51,7 @@
 		<div class="features">
 			<div class="feature">
 				<span class="feature-icon" aria-hidden="true">
-					<Activity class="w-6 h-6" />
+					<metricIcons.activity class="w-6 h-6" />
 				</span>
 				<div class="feature-text">
 					<span class="feature-title">Real-time Metrics</span>
@@ -61,7 +61,7 @@
 
 			<div class="feature">
 				<span class="feature-icon" aria-hidden="true">
-					<Bell class="w-6 h-6" />
+					<blazeIcons.bell class="w-6 h-6" />
 				</span>
 				<div class="feature-text">
 					<span class="feature-title">Smart Alerting</span>
@@ -71,7 +71,7 @@
 
 			<div class="feature">
 				<span class="feature-icon" aria-hidden="true">
-					<TrendingUp class="w-6 h-6" />
+					<metricIcons.trending class="w-6 h-6" />
 				</span>
 				<div class="feature-text">
 					<span class="feature-title">90-Day History</span>
@@ -81,7 +81,7 @@
 
 			<div class="feature">
 				<span class="feature-icon" aria-hidden="true">
-					<HandCoins class="w-6 h-6" />
+					<metricIcons.handCoins class="w-6 h-6" />
 				</span>
 				<div class="feature-text">
 					<span class="feature-title">Cost Tracking</span>

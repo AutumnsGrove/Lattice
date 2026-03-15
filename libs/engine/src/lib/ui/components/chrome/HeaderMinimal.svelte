@@ -4,7 +4,7 @@
 	 *
 	 * Clean, minimal header with Grove branding and theme toggle.
 	 */
-	import { Rss } from '@lucide/svelte';
+	import { featureIcons } from '@autumnsgrove/prism/icons';
 	import { defaultSuite, resolveIcon } from '$lib/ui/components/ui/groveicon';
 	import ThemeToggle from './ThemeToggle.svelte';
 	import { cn } from '$lib/utils/cn';
@@ -61,7 +61,7 @@
 				aria-label="RSS Feed"
 				title="Subscribe via RSS"
 			>
-				<Rss class="w-5 h-5" />
+				<featureIcons.rss class="w-5 h-5" />
 			</a>
 
 			<!-- Theme toggle -->

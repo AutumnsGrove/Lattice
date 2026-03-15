@@ -1,20 +1,7 @@
 <script lang="ts">
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
-	import {
-		Sparkles,
-		Activity,
-		Clock,
-		Coins,
-		Cpu,
-		Database,
-		Zap,
-		CheckCircle,
-		AlertTriangle,
-		Loader2,
-		TrendingUp,
-		BarChart3,
-		Layers,
-	} from "@lucide/svelte";
+	import { phaseIcons, metricIcons, featureIcons, stateIcons, toolIcons } from "@autumnsgrove/prism/icons";
+	import type { Component } from "svelte";
 
 	interface LumenTaskStat {
 		task: string;
@@ -55,15 +42,15 @@
 
 	// Task display names and icons
 	// brand-color: intentional — task type color coding
-	const taskInfo: Record<string, { name: string; icon: typeof Sparkles; color: string }> = {
-		moderation: { name: "Moderation", icon: CheckCircle, color: "text-emerald-600" },
-		generation: { name: "Generation", icon: Sparkles, color: "text-violet-600" },
-		summary: { name: "Summary", icon: Layers, color: "text-blue-600" },
-		embedding: { name: "Embedding", icon: Database, color: "text-amber-600" },
-		chat: { name: "Chat", icon: Activity, color: "text-rose-600" },
-		image: { name: "Image", icon: Zap, color: "text-pink-600" },
-		code: { name: "Code", icon: Cpu, color: "text-cyan-600" },
-		transcription: { name: "Transcription", icon: BarChart3, color: "text-indigo-600" },
+	const taskInfo: Record<string, { name: string; icon: Component; color: string }> = {
+		moderation: { name: "Moderation", icon: stateIcons.checkCircle, color: "text-emerald-600" },
+		generation: { name: "Generation", icon: phaseIcons.sparkles, color: "text-violet-600" },
+		summary: { name: "Summary", icon: featureIcons.layers, color: "text-blue-600" },
+		embedding: { name: "Embedding", icon: featureIcons.database, color: "text-amber-600" },
+		chat: { name: "Chat", icon: metricIcons.activity, color: "text-rose-600" },
+		image: { name: "Image", icon: phaseIcons.zap, color: "text-pink-600" },
+		code: { name: "Code", icon: toolIcons.vista, color: "text-cyan-600" },
+		transcription: { name: "Transcription", icon: metricIcons.barChart, color: "text-indigo-600" },
 	};
 
 	// Format currency
@@ -106,7 +93,7 @@
 		<GlassCard variant="frosted" class="p-4">
 			<div class="flex items-center gap-3">
 				<div class="p-2 rounded-lg bg-accent-subtle">
-					<Sparkles class="w-5 h-5 text-accent" />
+					<phaseIcons.sparkles class="w-5 h-5 text-accent" />
 				</div>
 				<div>
 					<p class="text-sm text-foreground-subtle">Today's Requests</p>
@@ -118,7 +105,7 @@
 		<GlassCard variant="frosted" class="p-4">
 			<div class="flex items-center gap-3">
 				<div class="p-2 rounded-lg bg-success-bg">
-					<Coins class="w-5 h-5 text-success" />
+					<metricIcons.coins class="w-5 h-5 text-success" />
 				</div>
 				<div>
 					<p class="text-sm text-foreground-subtle">Today's Cost</p>
@@ -130,7 +117,7 @@
 		<GlassCard variant="frosted" class="p-4">
 			<div class="flex items-center gap-3">
 				<div class="p-2 rounded-lg bg-info-bg">
-					<TrendingUp class="w-5 h-5 text-info" />
+					<metricIcons.trending class="w-5 h-5 text-info" />
 				</div>
 				<div>
 					<p class="text-sm text-foreground-subtle">7-Day Requests</p>
@@ -142,7 +129,7 @@
 		<GlassCard variant="frosted" class="p-4">
 			<div class="flex items-center gap-3">
 				<div class="p-2 rounded-lg bg-warning-bg">
-					<Coins class="w-5 h-5 text-warning" />
+					<metricIcons.coins class="w-5 h-5 text-warning" />
 				</div>
 				<div>
 					<p class="text-sm text-foreground-subtle">7-Day Cost</p>
@@ -159,12 +146,12 @@
 			variant="default"
 			class="p-6"
 			title="Today's Usage by Task"
-			icon={Activity}
+			icon={metricIcons.activity}
 			iconClass="text-foreground-subtle"
 		>
 			{#if today.length === 0}
 				<div class="text-center py-8 text-foreground-subtle">
-					<AlertTriangle class="w-8 h-8 mx-auto mb-2 opacity-50" />
+					<stateIcons.warning class="w-8 h-8 mx-auto mb-2 opacity-50" />
 					<p>No requests today</p>
 				</div>
 			{:else}
@@ -172,7 +159,7 @@
 					{#each today as stat (stat.task)}
 						{@const info = taskInfo[stat.task] || {
 							name: stat.task,
-							icon: Zap,
+							icon: phaseIcons.zap,
 							color: "text-foreground-muted",
 						}}
 						{@const Icon = info.icon}
@@ -197,12 +184,12 @@
 			variant="default"
 			class="p-6"
 			title="Provider Usage (7 Days)"
-			icon={Database}
+			icon={featureIcons.database}
 			iconClass="text-foreground-subtle"
 		>
 			{#if providers.length === 0}
 				<div class="text-center py-8 text-foreground-subtle">
-					<AlertTriangle class="w-8 h-8 mx-auto mb-2 opacity-50" />
+					<stateIcons.warning class="w-8 h-8 mx-auto mb-2 opacity-50" />
 					<p>No provider data</p>
 				</div>
 			{:else}
@@ -230,12 +217,12 @@
 		variant="default"
 		class="p-6"
 		title="Recent Requests"
-		icon={Clock}
+		icon={metricIcons.clock}
 		iconClass="text-foreground-subtle"
 	>
 		{#if recent.length === 0}
 			<div class="text-center py-8 text-foreground-subtle">
-				<AlertTriangle class="w-8 h-8 mx-auto mb-2 opacity-50" />
+				<stateIcons.warning class="w-8 h-8 mx-auto mb-2 opacity-50" />
 				<p>No recent requests</p>
 			</div>
 		{:else}
@@ -256,7 +243,7 @@
 						{#each recent.slice(0, 20) as request (request.id)}
 							{@const info = taskInfo[request.task] || {
 								name: request.task,
-								icon: Zap,
+								icon: phaseIcons.zap,
 								color: "text-foreground-muted",
 							}}
 							{@const Icon = info.icon}

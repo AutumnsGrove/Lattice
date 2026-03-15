@@ -5,51 +5,7 @@
  * JIT scanner sees it at build time. Never construct class names dynamically.
  */
 
-import { NotebookText, Feather } from "@lucide/svelte";
-import {
-	Bell,
-	UtensilsCrossed,
-	Heart,
-	GraduationCap,
-	Hammer,
-	Star,
-	CloudSun,
-	Megaphone,
-	HelpCircle,
-	// Expanded icon set for custom blazes
-	BookOpen,
-	Camera,
-	Coffee,
-	Compass,
-	Crown,
-	Flame,
-	Flower2,
-	Gift,
-	Globe,
-	Headphones,
-	Key,
-	Leaf,
-	Lightbulb,
-	MapPin,
-	MessageCircle,
-	Moon,
-	Music,
-	Palette,
-	PenLine,
-	Plane,
-	Rocket,
-	Sparkles,
-	Sprout,
-	Sun,
-	Tag,
-	TreeDeciduous,
-	Umbrella,
-	Zap,
-	ChefHat,
-	Laptop,
-	Briefcase,
-	Footprints,
-} from "@lucide/svelte";
+import { blazeIcons, stateIcons } from "@autumnsgrove/prism/icons";
 import type { AutoBlazeConfig, BlazeColorClasses, LucideIcon, PostType } from "./types.js";
 
 /**
@@ -59,12 +15,12 @@ import type { AutoBlazeConfig, BlazeColorClasses, LucideIcon, PostType } from ".
 export const BLAZE_CONFIG: Record<PostType, AutoBlazeConfig> = {
 	bloom: {
 		label: "Bloom",
-		icon: NotebookText,
+		icon: blazeIcons.notebookText as LucideIcon,
 		classes: "bg-grove-50 text-grove-700 dark:bg-grove-100/30 dark:text-grove-700",
 	},
 	note: {
 		label: "Note",
-		icon: Feather,
+		icon: blazeIcons.feather as LucideIcon,
 		classes: "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
 	},
 };
@@ -148,69 +104,16 @@ export const BLAZE_COLOR_HEX: Record<string, string> = {
 	lime: "#84cc16",
 };
 
-/**
- * Map of icon names to Lucide components for custom blazes.
- * Curated set of ~35 expressive icons suitable for content markers.
- */
-const LUCIDE_ICON_MAP: Record<string, LucideIcon> = {
-	// Original 8 (used by defaults)
-	Bell,
-	UtensilsCrossed,
-	Heart,
-	GraduationCap,
-	Hammer,
-	Star,
-	CloudSun,
-	Megaphone,
-	// Creative & Writing
-	BookOpen,
-	PenLine,
-	Lightbulb,
-	Sparkles,
-	Palette,
-	// Nature & Growth
-	Leaf,
-	Flower2,
-	Sprout,
-	TreeDeciduous,
-	Flame,
-	Sun,
-	Moon,
-	// Travel & Exploration
-	Compass,
-	MapPin,
-	Globe,
-	Plane,
-	Footprints,
-	// Lifestyle
-	Camera,
-	Coffee,
-	Music,
-	Headphones,
-	ChefHat,
-	Gift,
-	Umbrella,
-	// Tech & Work
-	Laptop,
-	Briefcase,
-	Rocket,
-	Zap,
-	Tag,
-	MessageCircle,
-	Crown,
-	Key,
-};
-
 /** Resolve a Lucide icon name to a component. Falls back to HelpCircle. */
 export function resolveLucideIcon(name: string): LucideIcon {
-	return LUCIDE_ICON_MAP[name] ?? HelpCircle;
+	return (blazeIcons[name] ?? stateIcons.help) as LucideIcon;
 }
 
 /** All valid color keys for validation */
 export const VALID_BLAZE_COLORS = Object.keys(BLAZE_COLORS);
 
 /** All valid icon names for validation */
-export const VALID_BLAZE_ICONS = Object.keys(LUCIDE_ICON_MAP);
+export const VALID_BLAZE_ICONS = Object.keys(blazeIcons);
 
 /**
  * Validate a hex color string (#rgb or #rrggbb).

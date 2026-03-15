@@ -21,27 +21,7 @@
 	} from "$lib/utils/upload-validation";
 	import { convertHeicToJpeg } from "$lib/utils/imageProcessor";
 	import ContentWithGutter from "$lib/components/custom/ContentWithGutter.svelte";
-	import {
-		Eye,
-		EyeOff,
-		Maximize2,
-		PenLine,
-		Columns2,
-		BookOpen,
-		Focus,
-		Minimize2,
-		Flame,
-		Mic,
-		Bold,
-		Italic,
-		Code,
-		Link,
-		Heading1,
-		Heading2,
-		Heading3,
-		Check,
-		Images,
-	} from "@lucide/svelte";
+	import { stateIcons, actionIcons, featureIcons, natureIcons, chromeIcons } from "@autumnsgrove/prism/icons";
 	import CurioAutocomplete from "./CurioAutocomplete.svelte";
 	import FiresideChat from "./FiresideChat.svelte";
 	import PhotoPicker from "./PhotoPicker.svelte";
@@ -1069,7 +1049,7 @@
 							title="Bold (⌘B)"
 							aria-label="Bold"
 						>
-							<Bold class="toolbar-icon" />
+							<actionIcons.bold class="toolbar-icon" />
 						</button>
 						<button
 							type="button"
@@ -1079,7 +1059,7 @@
 							title="Italic (⌘I)"
 							aria-label="Italic"
 						>
-							<Italic class="toolbar-icon" />
+							<actionIcons.italic class="toolbar-icon" />
 						</button>
 						<button
 							type="button"
@@ -1089,7 +1069,7 @@
 							title="Inline code"
 							aria-label="Code"
 						>
-							<Code class="toolbar-icon" />
+							<featureIcons.code class="toolbar-icon" />
 						</button>
 					</div>
 
@@ -1104,7 +1084,7 @@
 							title="Insert link"
 							aria-label="Link"
 						>
-							<Link class="toolbar-icon" />
+							<actionIcons.link class="toolbar-icon" />
 						</button>
 					</div>
 
@@ -1118,7 +1098,7 @@
 							title="Insert photo from gallery"
 							aria-label="Insert photo from gallery"
 						>
-							<Images class="toolbar-icon" />
+							<featureIcons.images class="toolbar-icon" />
 						</button>
 					</div>
 
@@ -1133,7 +1113,7 @@
 							title="Heading 1"
 							aria-label="Heading 1"
 						>
-							<Heading1 class="toolbar-icon" />
+							<actionIcons.heading1 class="toolbar-icon" />
 						</button>
 						<button
 							type="button"
@@ -1143,7 +1123,7 @@
 							title="Heading 2"
 							aria-label="Heading 2"
 						>
-							<Heading2 class="toolbar-icon" />
+							<actionIcons.heading2 class="toolbar-icon" />
 						</button>
 						<button
 							type="button"
@@ -1153,7 +1133,7 @@
 							title="Heading 3"
 							aria-label="Heading 3"
 						>
-							<Heading3 class="toolbar-icon" />
+							<actionIcons.heading3 class="toolbar-icon" />
 						</button>
 					</div>
 
@@ -1168,7 +1148,7 @@
 						title="Fireside Mode (⌘⇧F) - Start with a conversation"
 						aria-label="Enter Fireside mode for conversational writing"
 					>
-						<Flame class="toolbar-icon fireside-icon" />
+						<natureIcons.flame class="toolbar-icon fireside-icon" />
 						<span>Fireside</span>
 					</button>
 					<span class="toolbar-divider">|</span>
@@ -1206,7 +1186,7 @@
 					title="Source Mode (⌘1)"
 					aria-label="Source mode - editor only"
 				>
-					<PenLine class="toolbar-icon" />
+					<actionIcons.penLine class="toolbar-icon" />
 				</button>
 				<button
 					type="button"
@@ -1216,7 +1196,7 @@
 					title="Split Mode (⌘2)"
 					aria-label="Split mode - editor and preview"
 				>
-					<Columns2 class="toolbar-icon" />
+					<actionIcons.columns class="toolbar-icon" />
 				</button>
 				<button
 					type="button"
@@ -1226,7 +1206,7 @@
 					title="Preview Mode (⌘3)"
 					aria-label="Preview mode - preview only"
 				>
-					<BookOpen class="toolbar-icon" />
+					<featureIcons.bookOpen class="toolbar-icon" />
 				</button>
 			</div>
 
@@ -1240,7 +1220,7 @@
 					title="Full Preview with Styling"
 					aria-label="Open full preview with blog styling"
 				>
-					<Maximize2 class="toolbar-icon" />
+					<actionIcons.maximize class="toolbar-icon" />
 				</button>
 				<button
 					type="button"
@@ -1251,9 +1231,9 @@
 					aria-label={isZenMode ? "Exit zen mode" : "Enter zen mode for focused writing"}
 				>
 					{#if isZenMode}
-						<Minimize2 class="toolbar-icon" />
+						<actionIcons.minimize class="toolbar-icon" />
 					{:else}
-						<Focus class="toolbar-icon" />
+						<actionIcons.focus class="toolbar-icon" />
 					{/if}
 				</button>
 			</div>
@@ -1369,7 +1349,7 @@
 				{:else if draftKey && draftManager.saveStatus === "saved"}
 					<span class="status-divider">|</span>
 					<span class="status-draft-saved"
-						>Draft saved <Check size={12} class="inline-block" /></span
+						>Draft saved <stateIcons.check class="inline-block w-3 h-3" /></span
 					>
 				{:else if draftKey && draftManager.hasUnsavedChanges(content)}
 					<span class="status-divider">|</span>

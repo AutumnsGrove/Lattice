@@ -4,7 +4,7 @@
 	import GlassButton from "@autumnsgrove/lattice/ui/components/ui/GlassButton.svelte";
 	import GlassConfirmDialog from "@autumnsgrove/lattice/ui/components/ui/GlassConfirmDialog.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
-	import { BookMarked, Plus, Trash2, Settings, ChevronDown, ChevronUp } from "@lucide/svelte";
+	import { actionIcons, navIcons } from "@autumnsgrove/prism/icons";
 	import { api } from "@autumnsgrove/lattice/utils/api";
 
 	let { data, form } = $props();

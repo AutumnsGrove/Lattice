@@ -1,7 +1,12 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { GlassCard } from '@autumnsgrove/lattice/ui';
-	import { Search, Users, HardDrive, FileText, ChevronRight } from '@lucide/svelte';
+	import { navIcons, authIcons, featureIcons } from '@autumnsgrove/prism/icons';
+	const Search = navIcons.search;
+	const Users = authIcons.users;
+	const HardDrive = featureIcons.hardDrive;
+	const FileText = featureIcons.fileText;
+	const ChevronRight = navIcons.chevronRight;
 
 	let { data }: { data: PageData } = $props();
 

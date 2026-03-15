@@ -2,13 +2,13 @@
   import SEO from '$lib/components/SEO.svelte';
   import Header from '$lib/components/Header.svelte';
   import Footer from '$lib/components/Footer.svelte';
-  import { knowledgeCategoryIcons } from '$lib/utils/icons';
+  import { featureIcons } from '@autumnsgrove/prism/icons';
   import { kbCategoryColors } from '$lib/utils/kb-colors';
 
   let { data } = $props();
   const docs = $derived(data.designDocs);
 
-  const DesignIcon = knowledgeCategoryIcons.design;
+  const DesignIcon = featureIcons.palette;
   const colors = kbCategoryColors.design;
 </script>
 

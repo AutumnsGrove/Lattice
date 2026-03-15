@@ -4,7 +4,7 @@
 	import ThemeToggle from "$lib/ui/components/chrome/ThemeToggle.svelte";
 	import MobileMenu from "./MobileMenu.svelte";
 	import { seasonStore } from "$lib/ui/stores/season.svelte";
-	import { Menu, Search, X, PanelLeftOpen } from "@lucide/svelte";
+	import { navIcons, stateIcons, chromeIcons } from "@autumnsgrove/prism/icons";
 	import type { NavItem, MaxWidth, FooterLink, HeaderUser } from "$lib/ui/components/chrome/types";
 	import type { Season } from "$lib/ui/types/season";
 	import { isActivePath } from "$lib/ui/components/chrome/types";
@@ -160,7 +160,7 @@
 					class="p-2 -ml-2 text-foreground-subtle hover:text-foreground transition-colors rounded-lg hover:bg-surface-hover"
 					aria-label="Toggle sidebar"
 				>
-					<PanelLeftOpen class="w-5 h-5" />
+					<chromeIcons.panelLeftOpen class="w-5 h-5" />
 				</button>
 			{/if}
 			<!-- Logo icon - clickable to cycle through seasons -->
@@ -234,9 +234,9 @@
 						aria-label={searchExpanded ? "Close search" : "Open search"}
 					>
 						{#if searchExpanded}
-							<X class="w-4 h-4" />
+							<stateIcons.x class="w-4 h-4" />
 						{:else}
-							<Search class="w-4 h-4" />
+							<navIcons.search class="w-4 h-4" />
 						{/if}
 					</button>
 				</div>
@@ -258,7 +258,7 @@
 				class="p-2 -mr-2 text-foreground-subtle hover:text-foreground transition-colors rounded-lg hover:bg-surface-hover"
 				aria-label="Open menu"
 			>
-				<Menu class="w-5 h-5" />
+				<navIcons.menu class="w-5 h-5" />
 			</button>
 		</div>
 	</div>

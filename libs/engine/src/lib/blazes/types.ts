@@ -11,7 +11,7 @@ export type PostType = "bloom" | "note";
 /**
  * Lucide icon component type — matches @lucide/svelte's Svelte 5 Component export.
  */
-export type LucideIcon = typeof import("@lucide/svelte").Cherry;
+export type LucideIcon = import("svelte").Component<any>;
 
 /** Auto-blaze config for Slot 1 (derived from post_type, never stored) */
 export interface AutoBlazeConfig {

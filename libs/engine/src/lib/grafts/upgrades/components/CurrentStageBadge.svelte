@@ -6,15 +6,8 @@
 	 * Used in dashboard headers and account settings.
 	 */
 
-	import {
-		Sprout,
-		TreeDeciduous,
-		Trees,
-		Crown,
-		Footprints,
-		Settings,
-		ArrowRight,
-	} from "@lucide/svelte";
+	import { navIcons, natureIcons, actionIcons } from "@autumnsgrove/prism/icons";
+	import type { Component } from "svelte";
 	import type { CurrentStageBadgeProps } from "./types.js";
 	import type { TierKey } from "$lib/config/tiers";
 
@@ -29,12 +22,12 @@
 	}: CurrentStageBadgeProps = $props();
 
 	// Icon mapping — keyed by TierKey
-	const iconComponents: Record<TierKey, typeof Sprout> = {
-		wanderer: Footprints,
-		seedling: Sprout,
-		sapling: TreeDeciduous,
-		oak: Trees,
-		evergreen: Crown,
+	const iconComponents: Record<TierKey, Component> = {
+		wanderer: natureIcons.footprints,
+		seedling: natureIcons.sprout,
+		sapling: natureIcons.treeDeciduous,
+		oak: natureIcons.trees,
+		evergreen: natureIcons.crown,
 	};
 
 	// Stage display names
@@ -46,7 +39,7 @@
 		evergreen: "Evergreen",
 	};
 
-	let IconComponent = $derived(iconComponents[currentStage] || Sprout);
+	let IconComponent = $derived(iconComponents[currentStage] || natureIcons.sprout);
 
 	// Flourish state colors
 	const stateColors = {
@@ -115,9 +108,9 @@
 			class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent/10 text-accent hover:bg-accent/20 transition-colors text-sm font-medium"
 			onclick={() => onNurture?.()}
 		>
-			<Sprout class="w-3.5 h-3.5" />
+			<natureIcons.sprout class="w-3.5 h-3.5" />
 			Nurture
-			<ArrowRight class="w-3 h-3" />
+			<navIcons.arrowRight class="w-3 h-3" />
 		</button>
 	{/if}
 
@@ -129,7 +122,7 @@
 			onclick={() => onTend?.()}
 			aria-label="Open garden shed"
 		>
-			<Settings class="w-4 h-4 text-foreground-muted" />
+			<actionIcons.settings class="w-4 h-4 text-foreground-muted" />
 		</button>
 	{/if}
 </div>

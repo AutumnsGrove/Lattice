@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { UserPlus, UserCheck, UserMinus } from "@lucide/svelte";
+	import { authIcons } from "@autumnsgrove/prism/icons";
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
 	import { friendsStore } from "$lib/ui/stores/friends.svelte";
 	import { api } from "$lib/utils/api";
@@ -70,7 +70,7 @@
 	}
 
 	// "active" mirrors hover AND focus — keyboard users see the unfollow state too
-	let icon = $derived(isFollowing ? (active ? UserMinus : UserCheck) : UserPlus);
+	let icon = $derived(isFollowing ? (active ? authIcons.userMinus : authIcons.userCheck) : authIcons.userPlus);
 	let label = $derived(
 		loading
 			? "Loading..."

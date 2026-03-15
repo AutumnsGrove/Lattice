@@ -19,7 +19,8 @@
 	} from '@autumnsgrove/lattice/ui/nature';
 
 	// Icon for solarpunk link
-	import { SolarPanel } from '@lucide/svelte';
+	import { chromeIcons } from '@autumnsgrove/prism/icons';
+	const SolarPanel = chromeIcons.solarPanel;
 </script>
 
 <SEO

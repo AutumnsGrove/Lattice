@@ -3,7 +3,7 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import GlassButton from "@autumnsgrove/lattice/ui/components/ui/GlassButton.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
-	import { Shield, ArrowLeft, Trash2, Plus } from "@lucide/svelte";
+	import { authIcons, navIcons, actionIcons } from "@autumnsgrove/prism/icons";
 	import {
 		BADGE_DEFINITIONS,
 		BADGE_POSITION_OPTIONS,

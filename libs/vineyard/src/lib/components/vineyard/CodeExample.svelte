@@ -10,7 +10,7 @@
 <script lang="ts">
 	import type { CodeExampleProps } from "../../types/index.js";
 	import type { Snippet } from "svelte";
-	import { Copy, Check, FileCode } from "@lucide/svelte";
+	import { actionIcons, stateIcons, featureIcons } from "@autumnsgrove/prism/icons";
 
 	interface Props extends CodeExampleProps {
 		children: Snippet;
@@ -57,7 +57,7 @@
 <div class="code-example" data-language={language}>
 	<header class="code-header">
 		<div class="code-info">
-			<FileCode size={14} />
+			<featureIcons.fileCode size={14} />
 			{#if filename}
 				<span class="filename">{filename}</span>
 			{/if}
@@ -70,13 +70,13 @@
 			aria-label="Copy code"
 		>
 			{#if copied}
-				<Check size={14} />
+				<stateIcons.check size={14} />
 				<span>Copied!</span>
 			{:else if copyFailed}
-				<Copy size={14} />
+				<actionIcons.copy size={14} />
 				<span>Copy failed</span>
 			{:else}
-				<Copy size={14} />
+				<actionIcons.copy size={14} />
 				<span>Copy</span>
 			{/if}
 		</button>

@@ -22,7 +22,7 @@
 	import type { FlourishState } from "@autumnsgrove/lattice/grafts/upgrades";
 
 	// Import types and utils
-	import { KeyRound } from "@lucide/svelte";
+	import { authIcons } from "@autumnsgrove/prism/icons";
 	import type { TierKey } from "@autumnsgrove/lattice/config/tiers";
 
 	let { data } = $props();
@@ -134,7 +134,7 @@
 	<!-- Passkeys — managed on login hub (single WebAuthn origin) -->
 	<GlassCard variant="default" class="mb-6">
 		<h2 style="display: flex; align-items: center; gap: 0.5rem; margin: 0 0 1rem 0;">
-			<KeyRound
+			<authIcons.key
 				style="width: 1.25rem; height: 1.25rem; color: var(--color-primary);"
 				aria-hidden="true"
 			/>

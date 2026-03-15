@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { X } from "@lucide/svelte";
+	import { stateIcons } from "@autumnsgrove/prism/icons";
 	import type { Friend } from "$lib/types/friend";
 	import { friendsStore } from "$lib/ui/stores/friends.svelte";
 	import { api } from "$lib/utils/api";
@@ -55,7 +55,7 @@
 		aria-label="Remove {friend.name}"
 		title="Remove friend"
 	>
-		<X size={14} />
+		<stateIcons.x size={14} />
 	</button>
 </div>
 

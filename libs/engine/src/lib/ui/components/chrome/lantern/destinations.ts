@@ -6,7 +6,7 @@
  * - Services: platform tools (Email, Storage, AI Config, etc.)
  */
 
-import { BookUser, BookOpen } from "@lucide/svelte";
+import { featureIcons } from "@autumnsgrove/prism/icons";
 import { defaultSuite, resolveIcon } from "$lib/ui/components/ui/groveicon";
 import type { LanternDestination } from "./types";
 
@@ -30,7 +30,7 @@ export function getDestinations(_homeGrove: string): LanternDestination[] {
 			href: "https://grove.place/canopy",
 			label: "Dashboard",
 			groveLabel: "Canopy",
-			icon: BookUser,
+			icon: featureIcons.bookUser,
 			external: true,
 			termSlug: "canopy",
 		},
@@ -54,7 +54,7 @@ export function getDestinations(_homeGrove: string): LanternDestination[] {
 			href: "https://grove.place/knowledge",
 			label: "Help",
 			groveLabel: "Knowledge Base",
-			icon: BookOpen,
+			icon: featureIcons.bookOpen,
 			external: true,
 		},
 	];

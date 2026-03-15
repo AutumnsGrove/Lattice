@@ -17,7 +17,7 @@
 -->
 
 <script lang="ts">
-	import { Monitor } from "@lucide/svelte";
+	import { chromeIcons } from "@autumnsgrove/prism/icons";
 	import Terrarium from "@autumnsgrove/lattice/ui/components/terrarium/Terrarium.svelte";
 
 	let isMobileViewport = $state(false);
@@ -43,7 +43,7 @@
 
 {#if isMobileViewport}
 	<div class="flex flex-col items-center justify-center min-h-screen p-6 text-center">
-		<Monitor class="w-16 h-16 text-grove-400 mb-4" />
+		<chromeIcons.monitor class="w-16 h-16 text-grove-400 mb-4" />
 		<h1 class="text-2xl font-semibold text-grove-700 dark:text-grove-300 mb-2">
 			Terrarium works best on larger screens
 		</h1>

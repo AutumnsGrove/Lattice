@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { cn } from "$lib/ui/utils";
-	import { Info, AlertTriangle, Sparkles, PartyPopper, X } from "@lucide/svelte";
+	import { stateIcons, phaseIcons } from "@autumnsgrove/prism/icons";
 	import type { GroveMessage, GroveMessageType } from "./types";
 
 	interface Props {
@@ -53,32 +53,32 @@
 	const typeConfig: Record<
 		GroveMessageType,
 		{
-			icon: typeof Info;
+			icon: typeof stateIcons.info;
 			accent: string;
 			bg: string;
 			border: string;
 		}
 	> = {
 		info: {
-			icon: Info,
+			icon: stateIcons.info,
 			accent: "text-info",
 			bg: "bg-info-bg",
 			border: "border-info/40",
 		},
 		warning: {
-			icon: AlertTriangle,
+			icon: stateIcons.warning,
 			accent: "text-warning",
 			bg: "bg-warning-bg",
 			border: "border-warning/40",
 		},
 		celebration: {
-			icon: PartyPopper,
+			icon: phaseIcons.partyPopper,
 			accent: "text-success",
 			bg: "bg-success-bg",
 			border: "border-success/40",
 		},
 		update: {
-			icon: Sparkles,
+			icon: phaseIcons.sparkles,
 			accent: "text-accent",
 			bg: "bg-accent/20 dark:bg-accent/15",
 			border: "border-accent/40",
@@ -235,7 +235,7 @@
 								class="flex-shrink-0 p-1 rounded-md text-foreground-faint hover:text-foreground-muted hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
 								aria-label="Dismiss message: {message.title}"
 							>
-								<X class="w-4 h-4" />
+								<stateIcons.x class="w-4 h-4" />
 							</button>
 						{/if}
 					</div>

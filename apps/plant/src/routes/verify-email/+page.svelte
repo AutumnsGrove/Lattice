@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
-	import { Mail, Loader2, RefreshCw, Check, ArrowRight } from "@lucide/svelte";
+	import { featureIcons, stateIcons, actionIcons, navIcons } from "@autumnsgrove/prism/icons";
 	import { GlassCard } from "@autumnsgrove/lattice/ui";
 
 	let { data } = $props();
@@ -160,9 +160,9 @@
 	<div class="text-center mb-8">
 		<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
 			{#if success}
-				<Check size={32} class="text-success" />
+				<stateIcons.check size={32} class="text-success" />
 			{:else}
-				<Mail size={32} class="text-primary" />
+				<featureIcons.mail size={32} class="text-primary" />
 			{/if}
 		</div>
 		<h1 class="text-2xl md:text-3xl font-medium text-foreground mb-2">
@@ -206,7 +206,7 @@
 						/>
 						{#if isVerifying}
 							<div class="absolute right-4 top-1/2 -translate-y-1/2" aria-hidden="true">
-								<Loader2 size={24} class="animate-spin text-primary" />
+								<stateIcons.loader size={24} class="animate-spin text-primary" />
 							</div>
 						{/if}
 					</div>
@@ -233,10 +233,10 @@
 					class="btn-primary w-full"
 				>
 					{#if isVerifying}
-						<Loader2 size={18} class="animate-spin" />
+						<stateIcons.loader size={18} class="animate-spin" />
 						Verifying...
 					{:else}
-						<ArrowRight size={18} />
+						<navIcons.arrowRight size={18} />
 						Verify and Continue
 					{/if}
 				</button>
@@ -253,10 +253,10 @@
 							class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium text-primary bg-primary/10 hover:bg-primary/20 transition-colors disabled:opacity-50"
 						>
 							{#if isResending}
-								<Loader2 size={16} class="animate-spin" />
+								<stateIcons.loader size={16} class="animate-spin" />
 								Sending...
 							{:else}
-								<RefreshCw size={16} />
+								<actionIcons.refresh size={16} />
 								Resend code
 								{#if remainingResends < 3}
 									<span class="text-xs text-foreground-muted">

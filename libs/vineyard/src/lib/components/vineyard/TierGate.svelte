@@ -17,7 +17,7 @@
 <script lang="ts">
 	import type { TierGateProps, GroveTier } from "../../types/index.js";
 	import type { Snippet } from "svelte";
-	import { Lock, Sparkles } from "@lucide/svelte";
+	import { stateIcons, phaseIcons } from "@autumnsgrove/prism/icons";
 
 	interface Props extends TierGateProps {
 		children: Snippet;
@@ -61,7 +61,7 @@
 				{:else}
 					<div class="tier-gate-fallback">
 						<div class="fallback-icon">
-							<Lock size={24} />
+							<stateIcons.lock size={24} />
 						</div>
 						<h4 class="fallback-title">
 							{tierLabels[required]} Feature
@@ -70,7 +70,7 @@
 							This feature requires {tierLabels[required]} tier or higher.
 						</p>
 						<a href="/upgrade" class="upgrade-button">
-							<Sparkles size={16} />
+							<phaseIcons.sparkles size={16} />
 							Upgrade to {tierLabels[required]}
 						</a>
 					</div>

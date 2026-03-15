@@ -8,25 +8,32 @@
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 	import { api } from "@autumnsgrove/lattice/utils/api";
 	import {
-		Calendar,
-		Github,
-		Key,
-		Bot,
-		Mic2,
-		Settings2,
-		ChevronLeft,
-		Save,
-		TestTube,
-		AlertCircle,
-		CheckCircle2,
-		Eye,
-		EyeOff,
-		History,
-		Loader2,
-		Sparkles,
-		XCircle,
-		ArrowRight,
-	} from "@lucide/svelte";
+		metricIcons,
+		chromeIcons,
+		authIcons,
+		toolIcons,
+		actionIcons,
+		navIcons,
+		stateIcons,
+		phaseIcons,
+	} from "@autumnsgrove/prism/icons";
+	const Calendar = metricIcons.calendar;
+	const Github = chromeIcons.github;
+	const Key = authIcons.keyLegacy;
+	const Bot = toolIcons.shade;
+	const Mic2 = chromeIcons.mic;
+	const Settings2 = actionIcons.settings;
+	const ChevronLeft = navIcons.chevronLeft;
+	const Save = actionIcons.save;
+	const AlertCircle = stateIcons.alertCircle;
+	const CheckCircle2 = stateIcons.checkCircle2;
+	const Eye = stateIcons.eye;
+	const EyeOff = stateIcons.eyeOff;
+	const History = metricIcons.history;
+	const Loader2 = stateIcons.loader;
+	const Sparkles = phaseIcons.sparkles;
+	const XCircle = stateIcons.xCircle;
+	const ArrowRight = navIcons.arrowRight;
 
 	const { data, form }: { data: PageData; form: ActionData } = $props();
 

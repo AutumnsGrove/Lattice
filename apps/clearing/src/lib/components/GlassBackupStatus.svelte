@@ -11,7 +11,7 @@
 	 */
 	import { cn } from "@autumnsgrove/lattice/ui/utils";
 	import type { BackupStatus } from "$lib/server/backups";
-	import { Shield, CheckCircle, AlertTriangle, Calendar, HardDrive } from "@lucide/svelte";
+	import { authIcons, stateIcons, metricIcons, featureIcons } from "@autumnsgrove/prism/icons";
 
 	interface Props {
 		backupStatus: BackupStatus;
@@ -46,14 +46,14 @@
 	const statusConfig = $derived(
 		backupStatus.isHealthy
 			? {
-					icon: CheckCircle,
+					icon: stateIcons.checkCircle,
 					label: "Protected",
 					color: "text-success",
 					bgColor: "bg-success-bg",
 					borderColor: "border-success",
 				}
 			: {
-					icon: AlertTriangle,
+					icon: stateIcons.warning,
 					label: "Attention Needed",
 					color: "text-warning",
 					bgColor: "bg-warning-bg",
@@ -76,7 +76,7 @@
 	<div class="flex items-center justify-between mb-6">
 		<div class="flex items-center gap-3">
 			<div class="p-2.5 rounded-xl bg-success-bg">
-				<Shield class="w-5 h-5 text-success" aria-hidden="true" />
+				<authIcons.shield class="w-5 h-5 text-success" aria-hidden="true" />
 			</div>
 			<div>
 				<h2 id="data-protection-heading" class="text-lg font-semibold text-foreground">
@@ -148,11 +148,11 @@
 		</div>
 		<div class="flex items-center gap-4 mt-2.5 text-xs text-foreground-muted">
 			<span class="flex items-center gap-1.5">
-				<CheckCircle class="w-3.5 h-3.5 text-success" aria-hidden="true" />
+				<stateIcons.checkCircle class="w-3.5 h-3.5 text-success" aria-hidden="true" />
 				{backupStatus.reliability.perfectJobs} perfect
 			</span>
 			<span class="flex items-center gap-1.5">
-				<AlertTriangle class="w-3.5 h-3.5 text-warning" aria-hidden="true" />
+				<stateIcons.warning class="w-3.5 h-3.5 text-warning" aria-hidden="true" />
 				{backupStatus.reliability.partialJobs} partial
 			</span>
 			<span class="ml-auto text-foreground-muted/60">
@@ -171,7 +171,7 @@
 					role="listitem"
 				>
 					<div class="flex items-center gap-3">
-						<Calendar class="w-4 h-4 text-foreground-muted/60" aria-hidden="true" />
+						<metricIcons.calendar class="w-4 h-4 text-foreground-muted/60" aria-hidden="true" />
 						<span class="text-sm font-medium text-foreground min-w-[80px]">
 							{formatDate(day.date)}
 						</span>
@@ -192,7 +192,7 @@
 					<div class="flex items-center gap-4 text-sm text-foreground-muted tabular-nums">
 						<span>{day.count} files</span>
 						<span class="flex items-center gap-1.5 min-w-[70px] justify-end">
-							<HardDrive class="w-3.5 h-3.5" aria-hidden="true" />
+							<featureIcons.hardDrive class="w-3.5 h-3.5" aria-hidden="true" />
 							<span>{formatBytes(day.size)}</span>
 						</span>
 					</div>

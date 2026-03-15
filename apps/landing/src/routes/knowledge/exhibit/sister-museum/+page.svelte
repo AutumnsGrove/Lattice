@@ -5,7 +5,7 @@
 	import SEO from "$lib/components/SEO.svelte";
 	import { TableOfContents, MobileTOC } from "@autumnsgrove/lattice";
 	import { kbCategoryColors } from "$lib/utils/kb-colors";
-	import { toolIcons } from "$lib/utils/icons";
+	import { chromeIcons as toolIcons } from "@autumnsgrove/prism/icons";
 	import "$lib/styles/content.css";
 
 	let { data } = $props();

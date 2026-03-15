@@ -3,7 +3,7 @@
 	import type { HTMLAttributes } from "svelte/elements";
 	import { cn } from "$lib/ui/utils";
 	import { GossamerClouds } from "@autumnsgrove/gossamer/svelte";
-	import { Star } from "@lucide/svelte";
+	import { phaseIcons } from "@autumnsgrove/prism/icons";
 	import Waystone from "./Waystone.svelte";
 
 	/**
@@ -283,7 +283,7 @@
 			title="Featured"
 			aria-hidden="true"
 		>
-			<Star
+			<phaseIcons.star
 				class="w-3.5 h-3.5 fill-current {featuredColor ? '' : 'text-warning'}"
 				style={featuredColor ? `color: ${featuredColor}` : undefined}
 			/>

@@ -2,7 +2,7 @@
 	import type { Snippet } from "svelte";
 	import { Dialog as DialogPrimitive } from "bits-ui";
 	import { cn } from "$lib/ui/utils";
-	import { FlaskConical, MessageSquare, ExternalLink } from "@lucide/svelte";
+	import { phaseIcons, featureIcons, navIcons } from "@autumnsgrove/prism/icons";
 	import Button from "./Button.svelte";
 	import GlassCard from "./GlassCard.svelte";
 	import { DialogOverlay } from "$lib/ui/components/primitives/dialog";
@@ -130,7 +130,7 @@
 				<!-- Header with beta icon -->
 				<div class="px-6 pt-6 pb-4 flex items-start gap-4">
 					<div class="flex-shrink-0 p-3 rounded-full bg-info-bg">
-						<FlaskConical class="w-6 h-6 text-info" />
+						<phaseIcons.flaskConical class="w-6 h-6 text-info" />
 					</div>
 					<div class="flex-1 min-w-0">
 						<DialogPrimitive.Title
@@ -178,9 +178,9 @@
 							"hover:bg-info/20 transition-colors",
 						)}
 					>
-						<MessageSquare class="w-4 h-4 flex-shrink-0" />
+						<featureIcons.messageSquare class="w-4 h-4 flex-shrink-0" />
 						<span>Share feedback</span>
-						<ExternalLink class="w-3.5 h-3.5 ml-auto opacity-50" />
+						<navIcons.external class="w-3.5 h-3.5 ml-auto opacity-50" />
 					</a>
 				</div>
 

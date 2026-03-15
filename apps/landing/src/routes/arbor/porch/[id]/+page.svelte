@@ -2,16 +2,15 @@
 	import { enhance } from "$app/forms";
 	import { GlassCard, GlassChat, GroveTerm, createChatController } from "@autumnsgrove/lattice/ui";
 	import type { ChatMessageData } from "@autumnsgrove/lattice/ui";
-	import {
-		MessageCircle,
-		Clock,
-		CheckCircle,
-		ArrowLeft,
-		Send,
-		User,
-		Mail,
-		StickyNote,
-	} from "@lucide/svelte";
+	import { featureIcons, metricIcons, stateIcons, navIcons, actionIcons, authIcons } from "@autumnsgrove/prism/icons";
+	const MessageCircle = featureIcons.messageCircle;
+	const Clock = metricIcons.clock;
+	const CheckCircle = stateIcons.checkCircle;
+	const ArrowLeft = navIcons.arrowLeft;
+	const Send = actionIcons.send;
+	const User = authIcons.user;
+	const Mail = featureIcons.mail;
+	const StickyNote = featureIcons.stickyNote;
 	import { toChatMessages, PORCH_ADMIN_ROLES } from "$lib/utils/porch";
 	import type { ActionData, PageData } from "./$types";
 

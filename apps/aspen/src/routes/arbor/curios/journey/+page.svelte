@@ -1,7 +1,7 @@
 <script lang="ts">
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
-	import { ChevronLeft, Sparkles } from "@lucide/svelte";
+	import { navIcons, phaseIcons } from "@autumnsgrove/prism/icons";
 </script>
 
 <svelte:head>
@@ -11,13 +11,13 @@
 <div class="journey-coming-soon">
 	<header class="page-header">
 		<a href="/arbor/curios" class="back-link">
-			<ChevronLeft class="back-icon" />
+			<navIcons.chevronLeft class="back-icon" />
 			<span>Back to Curios</span>
 		</a>
 
 		<div class="header-content">
 			<div class="title-row">
-				<Sparkles class="header-icon" />
+				<phaseIcons.sparkles class="header-icon" />
 				<h1>Journey</h1>
 				<Waystone slug="what-is-journey" label="Learn about Journey" />
 			</div>
@@ -28,7 +28,7 @@
 	<GlassCard class="coming-soon-card">
 		<div class="coming-soon-content">
 			<div class="coming-soon-icon">
-				<Sparkles />
+				<phaseIcons.sparkles />
 			</div>
 			<h2>Coming Soon</h2>
 			<p class="coming-soon-description">

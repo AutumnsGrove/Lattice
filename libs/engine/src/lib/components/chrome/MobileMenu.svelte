@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from "$app/state";
-	import { X, ExternalLink, Search, LogIn, LogOut } from "@lucide/svelte";
+	import { stateIcons, navIcons, authIcons } from "@autumnsgrove/prism/icons";
 	import type { NavItem, FooterLink, HeaderUser } from "$lib/ui/components/chrome/types";
 	import { isActivePath, resolveDisplayName, resolveInitial } from "$lib/ui/components/chrome/types";
 	import {
@@ -180,7 +180,7 @@
 			class="p-2 -mr-2 text-foreground-subtle hover:text-foreground transition-colors rounded-lg hover:bg-surface-hover"
 			aria-label="Close menu"
 		>
-			<X class="w-5 h-5" />
+			<stateIcons.x class="w-5 h-5" />
 		</button>
 	</div>
 
@@ -219,7 +219,7 @@
 						onclick={handleClose}
 						class="flex w-full items-center gap-3 px-3 py-3 rounded-lg text-foreground hover:bg-surface-hover transition-colors"
 					>
-						<LogOut class="w-5 h-5 text-accent-muted" />
+						<authIcons.logout class="w-5 h-5 text-accent-muted" />
 						<span class="text-sm font-medium">{signOutLabel}</span>
 					</button>
 				</form>
@@ -230,7 +230,7 @@
 					onclick={handleClose}
 					class="flex items-center gap-3 px-3 py-3 rounded-lg text-foreground hover:bg-surface-hover transition-colors"
 				>
-					<LogIn class="w-5 h-5 text-accent-muted" />
+					<authIcons.login class="w-5 h-5 text-accent-muted" />
 					<span class="text-sm font-medium">{signInLabel}</span>
 				</a>
 			{/if}
@@ -254,7 +254,7 @@
 					class="p-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors"
 					aria-label="Search"
 				>
-					<Search class="w-4 h-4" />
+					<navIcons.search class="w-4 h-4" />
 				</button>
 			</div>
 		</form>
@@ -281,7 +281,7 @@
 				{/if}
 				<span class="text-sm font-medium">{labelFor(item)}</span>
 				{#if item.external}
-					<ExternalLink class="w-3 h-3 text-foreground-subtle ml-auto" />
+					<navIcons.external class="w-3 h-3 text-foreground-subtle ml-auto" />
 				{/if}
 			</a>
 		{/each}
@@ -317,7 +317,7 @@
 						{/if}
 						<span class="text-sm font-medium">{labelFor(link)}</span>
 						{#if link.external}
-							<ExternalLink class="w-3 h-3 text-foreground-subtle ml-auto" />
+							<navIcons.external class="w-3 h-3 text-foreground-subtle ml-auto" />
 						{/if}
 					</a>
 				{/each}
@@ -355,7 +355,7 @@
 						{/if}
 						<span class="text-sm font-medium">{labelFor(link)}</span>
 						{#if link.external}
-							<ExternalLink class="w-3 h-3 text-foreground-subtle ml-auto" />
+							<navIcons.external class="w-3 h-3 text-foreground-subtle ml-auto" />
 						{/if}
 					</a>
 				{/each}

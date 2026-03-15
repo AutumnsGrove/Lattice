@@ -9,25 +9,15 @@
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 	import { api, getUserDisplayName } from "@autumnsgrove/lattice/utils";
 	import {
-		FileText,
-		Image,
-		BarChart3,
-		Calendar,
-		Settings,
-		Globe,
-		BookOpen,
-		Tags,
-		Clock,
-		MapPin,
-		ArrowRight,
-		Megaphone,
-		TreeDeciduous,
-		BookUser,
-		Sprout,
-		Plus,
-		Users,
-		Amphora,
-	} from "@lucide/svelte";
+		actionIcons,
+		authIcons,
+		blazeIcons,
+		featureIcons,
+		metricIcons,
+		natureIcons,
+		navIcons,
+		toolIcons,
+	} from "@autumnsgrove/prism/icons";
 
 	/**
 	 * @typedef {Object} DashboardStats
@@ -102,7 +92,7 @@
 				title="You've planted your tree in the grove"
 				aria-label="Learn about being Rooted in Grove"
 			>
-				<TreeDeciduous class="w-3.5 h-3.5" />
+				<natureIcons.treeDeciduous class="w-3.5 h-3.5" />
 				<GroveTerm interactive term="rooted">Rooted</GroveTerm>
 			</a>
 			{#if data.inGreenhouse}
@@ -110,7 +100,7 @@
 					class="greenhouse-badge inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium"
 					title="You're in the greenhouse — early access to experimental features"
 				>
-					<Sprout class="w-3.5 h-3.5" />
+					<natureIcons.sprout class="w-3.5 h-3.5" />
 					Greenhouse
 				</span>
 			{/if}
@@ -131,7 +121,7 @@
 		<GlassCard>
 			<div class="stat-card">
 				<div class="stat-icon">
-					<FileText class="w-5 h-5" />
+					<featureIcons.fileText class="w-5 h-5" />
 				</div>
 				<div class="stat-content">
 					<span class="stat-label"><GroveTerm interactive term="bloom">Blooms</GroveTerm></span>
@@ -147,7 +137,7 @@
 		<GlassCard>
 			<div class="stat-card">
 				<div class="stat-icon">
-					<BookOpen class="w-5 h-5" />
+					<featureIcons.bookOpen class="w-5 h-5" />
 				</div>
 				<div class="stat-content">
 					<span class="stat-label">Words Written</span>
@@ -163,7 +153,7 @@
 		<GlassCard>
 			<div class="stat-card">
 				<div class="stat-icon">
-					<Tags class="w-5 h-5" />
+					<featureIcons.tags class="w-5 h-5" />
 				</div>
 				<div class="stat-content">
 					<span class="stat-label">Top Tags</span>
@@ -191,7 +181,7 @@
 		<GlassCard>
 			<div class="stat-card">
 				<div class="stat-icon">
-					<Clock class="w-5 h-5" />
+					<metricIcons.clock class="w-5 h-5" />
 				</div>
 				<div class="stat-content">
 					<span class="stat-label">Account Age</span>
@@ -210,29 +200,29 @@
 		<h2 class="m-0 mb-4 text-xl text-foreground">Quick Actions</h2>
 		<div class="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4">
 			<a href="/arbor/garden/new" class="action-card glass-action">
-				<Plus class="w-7 h-7 text-accent-muted" />
+				<actionIcons.plus class="w-7 h-7 text-accent-muted" />
 				<span class="font-medium text-center text-sm"
 					>New <GroveTerm interactive term="bloom">Bloom</GroveTerm></span
 				>
 			</a>
 			<a href="/arbor/garden" class="action-card glass-action">
-				<FileText class="w-7 h-7 text-accent-muted" />
+				<featureIcons.fileText class="w-7 h-7 text-accent-muted" />
 				<span class="font-medium text-center text-sm"
 					>Manage <GroveTerm interactive term="your-garden">Garden</GroveTerm></span
 				>
 			</a>
 			<a href="/arbor/images" class="action-card glass-action">
-				<Image class="w-7 h-7 text-accent-muted" />
+				<featureIcons.image class="w-7 h-7 text-accent-muted" />
 				<span class="font-medium text-center text-sm">Upload Images</span>
 			</a>
 			<a href="/arbor/analytics" class="action-card glass-action">
-				<BarChart3 class="w-7 h-7 text-accent-muted" />
+				<metricIcons.barChart class="w-7 h-7 text-accent-muted" />
 				<span class="font-medium text-center text-sm"
 					>View <GroveTerm interactive term="rings">Rings</GroveTerm></span
 				>
 			</a>
 			<a href="/arbor/curios" class="action-card glass-action">
-				<Amphora class="w-7 h-7 text-accent-muted" />
+				<toolIcons.amphora class="w-7 h-7 text-accent-muted" />
 				<span class="font-medium text-center text-sm"
 					><GroveTerm interactive term="curios">Curios</GroveTerm></span
 				>
@@ -244,7 +234,7 @@
 				rel="noopener noreferrer"
 				aria-label="Browse the Meadow feed (opens in new tab)"
 			>
-				<Users class="w-7 h-7 text-accent-muted" />
+				<authIcons.users class="w-7 h-7 text-accent-muted" />
 				<span class="font-medium text-center text-sm"
 					><GroveTerm interactive term="meadow">Meadow</GroveTerm></span
 				>
@@ -256,13 +246,13 @@
 				rel="noopener noreferrer"
 				aria-label="Browse the Canopy directory (opens in new tab)"
 			>
-				<BookUser class="w-7 h-7 text-accent-muted" />
+				<featureIcons.bookUser class="w-7 h-7 text-accent-muted" />
 				<span class="font-medium text-center text-sm"
 					><GroveTerm interactive term="canopy">Canopy</GroveTerm></span
 				>
 			</a>
 			<a href="/arbor/settings" class="action-card glass-action">
-				<Settings class="w-7 h-7 text-accent-muted" />
+				<actionIcons.settings class="w-7 h-7 text-accent-muted" />
 				<span class="font-medium text-center text-sm">Settings</span>
 			</a>
 			<a
@@ -272,7 +262,7 @@
 				rel="noopener noreferrer"
 				aria-label="View your live site (opens in new tab)"
 			>
-				<Globe class="w-7 h-7 text-accent-muted" />
+				<navIcons.globe class="w-7 h-7 text-accent-muted" />
 				<span class="font-medium text-center text-sm">View Site</span>
 			</a>
 		</div>
@@ -289,10 +279,10 @@
 		>
 			<div class="roadmap-header">
 				<div class="roadmap-badge">
-					<Megaphone class="w-4 h-4" />
+					<blazeIcons.megaphone class="w-4 h-4" />
 					<span>What's New in the Grove</span>
 				</div>
-				<ArrowRight
+				<navIcons.arrowRight
 					class="w-5 h-5 text-foreground-subtle group-hover:text-accent-muted transition-colors"
 				/>
 			</div>
@@ -300,7 +290,7 @@
 			<div class="roadmap-content">
 				<div class="roadmap-phase">
 					<div class="phase-indicator">
-						<MapPin class="w-4 h-4 text-accent-muted" />
+						<navIcons.mapPin class="w-4 h-4 text-accent-muted" />
 						<span class="text-xs uppercase tracking-wide text-foreground-subtle">Currently</span>
 					</div>
 					<h3 class="text-xl font-serif text-foreground">{currentPhase.title}</h3>

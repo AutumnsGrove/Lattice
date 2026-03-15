@@ -9,19 +9,26 @@
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/waystone/Waystone.svelte";
 	import { GreenhouseStatusCard, GraftControlPanel } from "@autumnsgrove/lattice/grafts/greenhouse";
 	import {
-		Smartphone,
-		Laptop,
-		Monitor,
-		Leaf,
-		Plus,
-		RotateCcw,
-		Check,
-		X,
-		Loader2,
-		AlertTriangle,
-		Clock,
-		Globe,
-	} from "@lucide/svelte";
+		chromeIcons,
+		blazeIcons,
+		natureIcons,
+		actionIcons,
+		stateIcons,
+		metricIcons,
+		navIcons,
+	} from "@autumnsgrove/prism/icons";
+	const Smartphone = chromeIcons.smartphone;
+	const Laptop = blazeIcons.laptop;
+	const Monitor = chromeIcons.monitor;
+	const Leaf = natureIcons.leaf;
+	const Plus = actionIcons.plus;
+	const RotateCcw = actionIcons.rotateCcw;
+	const Check = stateIcons.check;
+	const X = stateIcons.x;
+	const Loader2 = stateIcons.loader;
+	const AlertTriangle = stateIcons.warning;
+	const Clock = metricIcons.clock;
+	const Globe = navIcons.globe;
 	import GroveIcon from "@autumnsgrove/lattice/ui/components/ui/groveicon/GroveIcon.svelte";
 	import { DomainCheckerModal } from "@autumnsgrove/lattice/ui/components/domain";
 	import { groveModeStore } from "@autumnsgrove/lattice/ui/stores/grove-mode.svelte";

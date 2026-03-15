@@ -7,7 +7,14 @@
 <script lang="ts">
 	import { browser } from "$app/environment";
 	import MarkdownIt from "markdown-it";
-	import { Bold, Italic, Code, Link, Heading1, Heading2, Heading3 } from "@lucide/svelte";
+	import { actionIcons } from "@autumnsgrove/prism/icons";
+	const Bold = actionIcons.bold;
+	const Italic = actionIcons.italic;
+	const Code = actionIcons.code;
+	const Link = actionIcons.link;
+	const Heading1 = actionIcons.heading1;
+	const Heading2 = actionIcons.heading2;
+	const Heading3 = actionIcons.heading3;
 
 	const md = new MarkdownIt({
 		html: false,

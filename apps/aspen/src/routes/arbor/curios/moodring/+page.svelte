@@ -3,7 +3,7 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import GlassButton from "@autumnsgrove/lattice/ui/components/ui/GlassButton.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
-	import { Circle, Save, Plus } from "@lucide/svelte";
+	import { stateIcons, actionIcons } from "@autumnsgrove/prism/icons";
 	import {
 		lightenHex,
 		darkenHex,

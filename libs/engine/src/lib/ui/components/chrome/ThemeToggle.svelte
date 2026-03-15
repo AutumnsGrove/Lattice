@@ -7,7 +7,7 @@
 	 */
 
 	import { themeStore } from '$lib/ui/stores/theme.svelte';
-	import { Sun, Moon } from '@lucide/svelte';
+	import { natureIcons } from '@autumnsgrove/prism/icons';
 
 	// Derive button title from current theme
 	let title = $derived(
@@ -22,8 +22,8 @@
 	{title}
 >
 	{#if themeStore.resolvedTheme === 'dark'}
-		<Sun class="w-5 h-5" strokeWidth={2} />
+		<natureIcons.sun class="w-5 h-5" strokeWidth={2} />
 	{:else}
-		<Moon class="w-5 h-5" strokeWidth={2} />
+		<natureIcons.moon class="w-5 h-5" strokeWidth={2} />
 	{/if}
 </button>

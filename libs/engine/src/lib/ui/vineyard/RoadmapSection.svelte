@@ -11,7 +11,7 @@
 -->
 <script lang="ts">
   import type { RoadmapSectionProps } from './types.js';
-  import { Check, ArrowRight, Circle } from '@lucide/svelte';
+  import { stateIcons, navIcons } from '@autumnsgrove/prism/icons';
 
   let { built, inProgress, planned }: RoadmapSectionProps = $props();
 </script>
@@ -27,7 +27,7 @@
       <div class="roadmap-group roadmap-built">
         <div class="group-header">
           <div class="group-icon">
-            <Check size={16} />
+            <stateIcons.check class="w-4 h-4" />
           </div>
           <h4 class="group-title">Built</h4>
           <span class="group-count">{built.length}</span>
@@ -47,7 +47,7 @@
       <div class="roadmap-group roadmap-in-progress">
         <div class="group-header">
           <div class="group-icon">
-            <ArrowRight size={16} />
+            <navIcons.arrowRight class="w-4 h-4" />
           </div>
           <h4 class="group-title">In Progress</h4>
           <span class="group-count">{inProgress.length}</span>
@@ -67,7 +67,7 @@
       <div class="roadmap-group roadmap-planned">
         <div class="group-header">
           <div class="group-icon">
-            <Circle size={16} />
+            <stateIcons.circle class="w-4 h-4" />
           </div>
           <h4 class="group-title">Planned</h4>
           <span class="group-count">{planned.length}</span>

@@ -10,7 +10,10 @@
 	import Footer from "$lib/components/Footer.svelte";
 	import { MediaPlayer } from "@autumnsgrove/lattice/ui/media-player";
 	import { seasonStore } from "@autumnsgrove/lattice/ui/stores";
-	import { Trees, Sprout, MapPin } from "@lucide/svelte";
+	import { natureIcons, navIcons } from "@autumnsgrove/prism/icons";
+	const Trees = natureIcons.trees;
+	const Sprout = natureIcons.sprout;
+	const MapPin = navIcons.mapPin;
 	import GroveArchipelago from "./components/GroveArchipelago.svelte";
 
 	let { data } = $props();

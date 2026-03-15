@@ -5,7 +5,7 @@
   import { page } from '$app/state';
   import { Header, Footer, type NavItem } from '@autumnsgrove/lattice/ui/chrome';
   import { buildLoginUrl } from '@autumnsgrove/lattice/grafts/login';
-  import { Bookmark } from '@lucide/svelte';
+  import { actionIcons } from '@autumnsgrove/prism/icons';
   import { defaultSuite, resolveIcon } from '@autumnsgrove/lattice/ui';
 
   let { children, data } = $props();
@@ -21,7 +21,7 @@
   const navItems: NavItem[] = [
     { href: 'https://grove.place', label: 'Grove', icon: groveIcon, external: true },
     { href: '/feed', label: 'Feed' },
-    { href: '/bookmarks', label: 'Bookmarks', icon: Bookmark },
+    { href: '/bookmarks', label: 'Bookmarks', icon: actionIcons.bookmark },
   ];
 </script>
 

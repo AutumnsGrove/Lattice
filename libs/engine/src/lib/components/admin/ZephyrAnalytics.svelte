@@ -1,18 +1,7 @@
 <script lang="ts">
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
-	import {
-		Wind,
-		Send,
-		Check,
-		AlertTriangle,
-		Clock,
-		TrendingUp,
-		Hash,
-		AlertCircle,
-		CheckCircle2,
-		XCircle,
-		Activity,
-	} from "@lucide/svelte";
+	import { natureIcons, actionIcons, stateIcons, metricIcons, featureIcons } from "@autumnsgrove/prism/icons";
+	import type { Component } from "svelte";
 
 	interface Broadcast {
 		id: string;
@@ -39,23 +28,23 @@
 	// Status display info
 	const statusInfo: Record<
 		string,
-		{ label: string; icon: typeof Check; color: string; bgColor: string }
+		{ label: string; icon: Component; color: string; bgColor: string }
 	> = {
 		delivered: {
 			label: "Delivered",
-			icon: CheckCircle2,
+			icon: stateIcons.checkCircle2,
 			color: "text-success",
 			bgColor: "bg-success-bg",
 		},
 		partial: {
 			label: "Partial",
-			icon: AlertCircle,
+			icon: stateIcons.alertCircle,
 			color: "text-warning",
 			bgColor: "bg-warning-bg",
 		},
 		failed: {
 			label: "Failed",
-			icon: XCircle,
+			icon: stateIcons.xCircle,
 			color: "text-error",
 			bgColor: "bg-error-bg",
 		},
@@ -97,7 +86,7 @@
 			<GlassCard variant="frosted" class="p-4">
 				<div class="flex items-center gap-3">
 					<div class="p-2 rounded-lg bg-info-bg">
-						<Wind class="w-5 h-5 text-info" />
+						<natureIcons.wind class="w-5 h-5 text-info" />
 					</div>
 					<div>
 						<p class="text-sm text-foreground-subtle">7-Day Broadcasts</p>
@@ -109,7 +98,7 @@
 			{#each stats.byStatus as stat (stat.status)}
 				{@const info = statusInfo[stat.status] || {
 					label: stat.status,
-					icon: Activity,
+					icon: metricIcons.activity,
 					color: "text-foreground-muted",
 					bgColor: "bg-muted",
 				}}
@@ -135,7 +124,7 @@
 			variant="default"
 			class="p-6"
 			title="Platform Breakdown (Recent)"
-			icon={TrendingUp}
+			icon={metricIcons.trending}
 			iconClass="text-foreground-subtle"
 		>
 			<div class="flex flex-wrap gap-3">
@@ -158,12 +147,12 @@
 		variant="default"
 		class="p-6"
 		title="Recent Broadcasts"
-		icon={Clock}
+		icon={metricIcons.clock}
 		iconClass="text-foreground-subtle"
 	>
 		{#if broadcasts.length === 0}
 			<div class="text-center py-8 text-foreground-subtle">
-				<AlertTriangle class="w-8 h-8 mx-auto mb-2 opacity-50" />
+				<stateIcons.warning class="w-8 h-8 mx-auto mb-2 opacity-50" />
 				<p>No recent broadcasts</p>
 			</div>
 		{:else}
@@ -172,7 +161,7 @@
 					{@const platforms = parsePlatforms(broadcast.platforms)}
 					{@const status = statusInfo[broadcast.status] || {
 						label: broadcast.status,
-						icon: Activity,
+						icon: metricIcons.activity,
 						color: "text-foreground-muted",
 						bgColor: "bg-muted",
 					}}

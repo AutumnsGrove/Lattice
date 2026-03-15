@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Share2, Check, Link } from "@lucide/svelte";
+	import { actionIcons, stateIcons } from "@autumnsgrove/prism/icons";
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
 	import { share } from "$lib/utils/share";
 
@@ -39,7 +39,7 @@
 		// cancelled or failed: stay idle
 	}
 
-	let icon = $derived(state === "copied" ? Check : state === "shared" ? Check : Share2);
+	let icon = $derived(state === "copied" ? stateIcons.check : state === "shared" ? stateIcons.check : actionIcons.share);
 	let displayText = $derived(
 		state === "copied" ? "Copied!" : state === "shared" ? "Shared!" : "Share",
 	);

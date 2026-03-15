@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Lamp, Compass } from "@lucide/svelte";
+	import { toolIcons, navIcons } from "@autumnsgrove/prism/icons";
 	import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";
 	import { lanternStore } from "$lib/ui/stores/lantern.svelte";
 
@@ -24,9 +24,9 @@
 	aria-haspopup="dialog"
 >
 	{#if groveModeStore.current}
-		<Lamp size={22} strokeWidth={2} />
+		<toolIcons.lantern size={22} strokeWidth={2} />
 	{:else}
-		<Compass size={22} strokeWidth={2} />
+		<navIcons.compass size={22} strokeWidth={2} />
 	{/if}
 </button>
 

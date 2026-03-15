@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { cn } from "$lib/ui/utils";
 	import Icons from "../icons/Icons.svelte";
-	import { AlertCircle } from "@lucide/svelte";
+	import { stateIcons } from "@autumnsgrove/prism/icons";
 	import type { OGMetadata } from "$lib/types/og.js";
 
 	/**
@@ -304,7 +304,7 @@
 			<!-- Error state -->
 			{#if error}
 				<div class="flex items-center gap-2 text-xs text-warning">
-					<AlertCircle class="w-4 h-4" />
+					<stateIcons.alertCircle class="w-4 h-4" />
 					<span>Preview unavailable</span>
 				</div>
 			{/if}

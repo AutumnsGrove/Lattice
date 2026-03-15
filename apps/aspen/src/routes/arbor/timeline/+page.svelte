@@ -3,25 +3,13 @@
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
 	import { groveModeStore } from "@autumnsgrove/lattice/ui/stores";
-	import {
-		Calendar,
-		MapPin,
-		Target,
-		TreePine,
-		Workflow,
-		Map,
-		Sprout,
-		Check,
-		Circle,
-		CircleDot,
-		Diamond,
-	} from "@lucide/svelte";
+	import { metricIcons, navIcons, natureIcons, stateIcons, actionIcons, phaseIcons } from "@autumnsgrove/prism/icons";
 </script>
 
 <div class="max-w-4xl mx-auto">
 	<header class="mb-8">
 		<div class="flex items-center gap-3 mb-2">
-			<Calendar class="w-8 h-8 text-accent-muted" />
+			<metricIcons.calendar class="w-8 h-8 text-accent-muted" />
 			<h1 class="m-0 text-3xl text-foreground">
 				<GroveTerm interactive term="trails">Trail</GroveTerm>
 			</h1>
@@ -39,7 +27,7 @@
 	<GlassCard class="mb-8">
 		<div class="text-center py-8">
 			<div class="mb-4">
-				<Sprout class="w-16 h-16 text-accent-muted mx-auto" />
+				<natureIcons.sprout class="w-16 h-16 text-accent-muted mx-auto" />
 			</div>
 			<h2 class="text-2xl font-serif text-foreground mb-3">Coming in First Buds (Early Spring)</h2>
 			<p class="text-foreground-muted max-w-2xl mx-auto">
@@ -59,7 +47,7 @@
 			<GlassCard>
 				<div class="flex items-start gap-3">
 					<div class="p-2 bg-accent-subtle/10 rounded-lg">
-						<MapPin class="w-5 h-5 text-accent-muted" />
+						<navIcons.mapPin class="w-5 h-5 text-accent-muted" />
 					</div>
 					<div>
 						<h3 class="text-sm font-medium text-foreground mb-1">Waypoints & Phases</h3>
@@ -74,14 +62,14 @@
 			<GlassCard>
 				<div class="flex items-start gap-3">
 					<div class="p-2 bg-accent-subtle/10 rounded-lg">
-						<Target class="w-5 h-5 text-accent-muted" />
+						<actionIcons.target class="w-5 h-5 text-accent-muted" />
 					</div>
 					<div>
 						<h3 class="text-sm font-medium text-foreground mb-1">Status Tracking</h3>
 						<p class="text-xs text-foreground-muted">
-							<Circle class="w-3 h-3 inline-block" /> Planned, <CircleDot
+							<stateIcons.circle class="w-3 h-3 inline-block" /> Planned, <stateIcons.circleDot
 								class="w-3 h-3 inline-block"
-							/> In Progress, <Check class="w-3 h-3 inline-block" /> Complete, <Diamond
+							/> In Progress, <stateIcons.check class="w-3 h-3 inline-block" /> Complete, <phaseIcons.diamond
 								class="w-3 h-3 inline-block"
 							/> Deferred—clear visual indicators of where you are.
 						</p>
@@ -92,7 +80,7 @@
 			<GlassCard>
 				<div class="flex items-start gap-3">
 					<div class="p-2 bg-accent-subtle/10 rounded-lg">
-						<TreePine class="w-5 h-5 text-accent-muted" />
+						<natureIcons.treePine class="w-5 h-5 text-accent-muted" />
 					</div>
 					<div>
 						<h3 class="text-sm font-medium text-foreground mb-1">Nature Themes</h3>
@@ -107,7 +95,7 @@
 			<GlassCard>
 				<div class="flex items-start gap-3">
 					<div class="p-2 bg-accent-subtle/10 rounded-lg">
-						<Workflow class="w-5 h-5 text-accent-muted" />
+						<actionIcons.workflow class="w-5 h-5 text-accent-muted" />
 					</div>
 					<div>
 						<h3 class="text-sm font-medium text-foreground mb-1">Templates</h3>
@@ -131,20 +119,20 @@
 					<div class="flex items-center gap-2 mb-3">
 						<h3 class="text-sm font-medium text-foreground uppercase tracking-wide">Foundation</h3>
 						<span class="text-xs text-success inline-flex items-center gap-1"
-							><Check class="w-3 h-3" /> Complete</span
+							><stateIcons.check class="w-3 h-3" /> Complete</span
 						>
 					</div>
 					<div class="space-y-2 ml-4">
 						<div class="flex items-center gap-2 text-sm text-foreground-muted">
-							<Check class="w-3.5 h-3.5 text-success shrink-0" />
+							<stateIcons.check class="w-3.5 h-3.5 text-success shrink-0" />
 							<span>Set up project structure</span>
 						</div>
 						<div class="flex items-center gap-2 text-sm text-foreground-muted">
-							<Check class="w-3.5 h-3.5 text-success shrink-0" />
+							<stateIcons.check class="w-3.5 h-3.5 text-success shrink-0" />
 							<span>Configure development environment</span>
 						</div>
 						<div class="flex items-center gap-2 text-sm text-foreground-muted">
-							<Check class="w-3.5 h-3.5 text-success shrink-0" />
+							<stateIcons.check class="w-3.5 h-3.5 text-success shrink-0" />
 							<span>Write initial documentation</span>
 						</div>
 					</div>
@@ -157,20 +145,20 @@
 							Core Features
 						</h3>
 						<span class="text-xs text-accent-muted inline-flex items-center gap-1"
-							><CircleDot class="w-3 h-3" /> In Progress</span
+							><stateIcons.circleDot class="w-3 h-3" /> In Progress</span
 						>
 					</div>
 					<div class="space-y-2 ml-4">
 						<div class="flex items-center gap-2 text-sm text-foreground-muted">
-							<Check class="w-3.5 h-3.5 text-success shrink-0" />
+							<stateIcons.check class="w-3.5 h-3.5 text-success shrink-0" />
 							<span>User authentication</span>
 						</div>
 						<div class="flex items-center gap-2 text-sm text-accent-muted">
-							<CircleDot class="w-3.5 h-3.5 shrink-0" />
+							<stateIcons.circleDot class="w-3.5 h-3.5 shrink-0" />
 							<span>Dashboard implementation</span>
 						</div>
 						<div class="flex items-center gap-2 text-sm text-foreground-subtle">
-							<Circle class="w-3.5 h-3.5 shrink-0" />
+							<stateIcons.circle class="w-3.5 h-3.5 shrink-0" />
 							<span>API endpoints</span>
 						</div>
 					</div>
@@ -183,16 +171,16 @@
 							Future Dreams
 						</h3>
 						<span class="text-xs text-foreground-subtle inline-flex items-center gap-1"
-							><Circle class="w-3 h-3" /> Planned</span
+							><stateIcons.circle class="w-3 h-3" /> Planned</span
 						>
 					</div>
 					<div class="space-y-2 ml-4">
 						<div class="flex items-center gap-2 text-sm text-foreground-subtle">
-							<Circle class="w-3.5 h-3.5 shrink-0" />
+							<stateIcons.circle class="w-3.5 h-3.5 shrink-0" />
 							<span>Mobile app</span>
 						</div>
 						<div class="flex items-center gap-2 text-sm text-foreground-subtle">
-							<Circle class="w-3.5 h-3.5 shrink-0" />
+							<stateIcons.circle class="w-3.5 h-3.5 shrink-0" />
 							<span>Third-party integrations</span>
 						</div>
 					</div>
@@ -205,7 +193,7 @@
 	<GlassCard>
 		<div class="flex items-start gap-4">
 			<div class="p-3 bg-accent-subtle/10 rounded-lg shrink-0">
-				<Map class="w-8 h-8 text-accent-muted" />
+				<navIcons.map class="w-8 h-8 text-accent-muted" />
 			</div>
 			<div>
 				<h3 class="text-lg font-serif text-foreground mb-2">Build in Public. Show the Journey.</h3>

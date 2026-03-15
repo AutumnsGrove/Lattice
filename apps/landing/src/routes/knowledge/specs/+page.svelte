@@ -4,7 +4,11 @@
 	import Footer from "$lib/components/Footer.svelte";
 	import { GlassLegend } from "@autumnsgrove/lattice/ui";
 	import { CategoryNav } from "@autumnsgrove/lattice";
-	import { getToolIcon } from "$lib/utils/icons";
+	import { resolveAnyIcon, stateIcons } from "@autumnsgrove/prism/icons";
+
+	function getToolIcon(iconKey: string) {
+		return resolveAnyIcon(iconKey, stateIcons.circle);
+	}
 	import { kbCategoryColors } from "$lib/utils/kb-colors";
 	import type { SpecCategory } from "$lib/types/docs";
 

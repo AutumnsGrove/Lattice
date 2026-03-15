@@ -13,7 +13,7 @@
 
 	import type { GreenhouseStatusCardProps } from "./types.js";
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
-	import { Sprout, Sparkles } from "@lucide/svelte";
+	import { natureIcons, phaseIcons } from "@autumnsgrove/prism/icons";
 
 	let {
 		inGreenhouse,
@@ -47,9 +47,9 @@
 					: 'bg-grove-100 text-grove-600 dark:bg-grove-900/30 dark:text-grove-400'}"
 			>
 				{#if inGreenhouse}
-					<Sprout class="w-6 h-6" />
+					<natureIcons.sprout class="w-6 h-6" />
 				{:else}
-					<Sparkles class="w-6 h-6" />
+					<phaseIcons.sparkles class="w-6 h-6" />
 				{/if}
 			</div>
 

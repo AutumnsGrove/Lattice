@@ -3,37 +3,18 @@
 	 * Module-level constants for PricingTable
 	 * Defined outside component scope for better performance
 	 */
-	import {
-		Sprout,
-		TreeDeciduous,
-		Trees,
-		Crown,
-		User,
-		Footprints,
-		Check,
-		PenLine,
-		FileText,
-		HardDrive,
-		Palette,
-		Amphora,
-		Flower2,
-		MessageCircle,
-		SearchCode,
-		Mail,
-		Clock,
-		LifeBuoy,
-		CalendarDays,
-	} from "@lucide/svelte";
+	import { stateIcons, natureIcons, actionIcons, featureIcons, authIcons, metricIcons, chromeIcons, toolIcons } from "@autumnsgrove/prism/icons";
+	import type { Component } from "svelte";
 	import type { TierIcon } from "../../config/tiers.js";
 
 	// Icon components for tier headers - defined at module level for performance
-	const TIER_ICON_MAP: Record<TierIcon, typeof Sprout> = {
-		user: User,
-		footprints: Footprints,
-		sprout: Sprout,
-		"tree-deciduous": TreeDeciduous,
-		trees: Trees,
-		crown: Crown,
+	const TIER_ICON_MAP: Record<TierIcon, Component> = {
+		user: authIcons.user,
+		footprints: natureIcons.footprints,
+		sprout: natureIcons.sprout,
+		"tree-deciduous": natureIcons.treeDeciduous,
+		trees: natureIcons.trees,
+		crown: natureIcons.crown,
 	} as const;
 </script>
 
@@ -68,7 +49,7 @@
 		type: RowType;
 		label: string;
 		standardLabel?: string;
-		icon: typeof PenLine;
+		icon: Component;
 		getValue: (tier: PricingTier) => string | boolean;
 	}
 
@@ -76,51 +57,51 @@
 		{
 			type: "feature",
 			label: "Blog",
-			icon: PenLine,
+			icon: actionIcons.penLine,
 			getValue: (tier) => tier.features.blog,
 		},
 		{
 			type: "limit",
 			label: "Blog Posts",
-			icon: FileText,
+			icon: featureIcons.fileText,
 			getValue: (tier) => tier.limits.posts,
 		},
 		{
 			type: "limit",
 			label: "Storage",
-			icon: HardDrive,
+			icon: featureIcons.hardDrive,
 			getValue: (tier) => tier.limits.storage,
 		},
 		{
 			type: "limit",
 			label: "Themes",
-			icon: Palette,
+			icon: featureIcons.palette,
 			getValue: (tier) => tier.limits.themes,
 		},
 		{
 			type: "limit",
 			label: "Curios",
 			standardLabel: "Custom Pages",
-			icon: Amphora,
+			icon: toolIcons.curios,
 			getValue: (tier) => tier.limits.navPages,
 		},
 		{
 			type: "feature",
 			label: "Meadow",
 			standardLabel: "Community Feed",
-			icon: Flower2,
+			icon: natureIcons.flower2,
 			getValue: (tier) => tier.features.meadow,
 		},
 		{
 			type: "limit",
 			label: "Public Comments",
-			icon: MessageCircle,
+			icon: featureIcons.messageCircle,
 			getValue: (tier) => tier.limits.commentsPerWeek,
 		},
 		{
 			type: "custom",
 			label: "Custom Domain",
-			icon: SearchCode,
+			icon: featureIcons.searchCode,
 			getValue: (tier) => {
 				if (!tier.features.customDomain) return "—";
 				if (tier.features.byod) return "BYOD";
@@ -130,7 +111,7 @@
 		{
 			type: "custom",
 			label: "@grove.place Email",
-			icon: Mail,
+			icon: featureIcons.mail,
 			getValue: (tier) => {
 				if (tier.features.fullEmail) return "Full";
 				if (tier.features.emailForwarding) return "Forward";
@@ -141,19 +122,19 @@
 			type: "feature",
 			label: "Centennial",
 			standardLabel: "100-Year Preservation",
-			icon: Clock,
+			icon: metricIcons.clock,
 			getValue: (tier) => tier.features.centennial,
 		},
 		{
 			type: "support",
 			label: "Support",
-			icon: LifeBuoy,
+			icon: chromeIcons.lifebuoy,
 			getValue: (tier) => tier.supportLevel,
 		},
 		{
 			type: "bestfor",
 			label: "Best for",
-			icon: User,
+			icon: authIcons.user,
 			getValue: (tier) => tier.bestFor,
 		},
 	];
@@ -249,7 +230,7 @@
 									: 'text-foreground'}"
 						>
 							{#if rendered.type === "check"}
-								<Check class="w-5 h-5 mx-auto text-accent-muted" aria-hidden="true" />
+								<stateIcons.check class="w-5 h-5 mx-auto text-accent-muted" aria-hidden="true" />
 								<span class="sr-only">Included</span>
 							{:else if rendered.type === "dash"}
 								<span aria-label="Not included">—</span>
@@ -265,7 +246,7 @@
 			<tr>
 				<th scope="row" class="py-4 px-3 text-foreground-muted font-normal text-left">
 					<span class="inline-flex items-center gap-2">
-						<CalendarDays class="w-4 h-4 text-accent-subtle flex-shrink-0" aria-hidden="true" />
+						<metricIcons.calendarDays class="w-4 h-4 text-accent-subtle flex-shrink-0" aria-hidden="true" />
 						Yearly
 					</span>
 				</th>

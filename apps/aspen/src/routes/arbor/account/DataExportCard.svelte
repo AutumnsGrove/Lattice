@@ -2,7 +2,7 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import Button from "@autumnsgrove/lattice/ui/components/ui/Button.svelte";
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
-	import { Archive } from "@lucide/svelte";
+	import { featureIcons } from "@autumnsgrove/prism/icons";
 
 	interface ExportCounts {
 		posts: number;
@@ -32,12 +32,12 @@
 	</div>
 
 	<div class="zip-export-callout">
-		<Archive class="callout-icon" aria-hidden="true" />
+		<featureIcons.archive class="callout-icon" aria-hidden="true" />
 		<div class="callout-content">
 			<strong>Full Zip Export</strong>
 			<p>Download all your content as Markdown files with images — ready for any platform.</p>
 			<Button variant="secondary" href="/arbor/export" aria-label="Go to full export page">
-				<Archive class="btn-icon" aria-hidden="true" />
+				<featureIcons.archive class="btn-icon" aria-hidden="true" />
 				Go to Full Export
 			</Button>
 		</div>

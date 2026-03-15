@@ -30,7 +30,7 @@
 	import { page } from "$app/stores";
 	import { buildTracePath } from "$lib/utils/trace-path.js";
 	import { cn } from "$lib/ui/utils";
-	import { ThumbsUp, ThumbsDown, Loader2, Check } from "@lucide/svelte";
+	import { chromeIcons, stateIcons } from "@autumnsgrove/prism/icons";
 
 	interface Props {
 		/** Override auto-detected path (appended as suffix to route path) */
@@ -143,7 +143,7 @@
 	{#if hasSubmitted}
 		<!-- Success state -->
 		<div class="flex items-center gap-2 text-success animate-in fade-in duration-300">
-			<Check class={sizeClasses.icon} aria-hidden="true" />
+			<stateIcons.check class={sizeClasses.icon} aria-hidden="true" />
 			<span class={cn(sizeClasses.prompt, "font-medium")}> Thanks for your feedback! </span>
 		</div>
 	{:else}
@@ -173,9 +173,9 @@
 				aria-label="Helpful"
 			>
 				{#if isSubmitting && vote === "up"}
-					<Loader2 class={cn(sizeClasses.icon, "animate-spin")} aria-hidden="true" />
+					<stateIcons.loader class={cn(sizeClasses.icon, "animate-spin")} aria-hidden="true" />
 				{:else}
-					<ThumbsUp class={sizeClasses.icon} aria-hidden="true" />
+					<chromeIcons.thumbsUp class={sizeClasses.icon} aria-hidden="true" />
 				{/if}
 			</button>
 
@@ -198,9 +198,9 @@
 				aria-label="Not helpful"
 			>
 				{#if isSubmitting && vote === "down"}
-					<Loader2 class={cn(sizeClasses.icon, "animate-spin")} aria-hidden="true" />
+					<stateIcons.loader class={cn(sizeClasses.icon, "animate-spin")} aria-hidden="true" />
 				{:else}
-					<ThumbsDown class={sizeClasses.icon} aria-hidden="true" />
+					<chromeIcons.thumbsDown class={sizeClasses.icon} aria-hidden="true" />
 				{/if}
 			</button>
 		</div>
@@ -225,7 +225,7 @@
 						>
 							{#if isSubmitting}
 								<span class="flex items-center gap-2">
-									<Loader2 class="w-4 h-4 animate-spin" aria-hidden="true" />
+									<stateIcons.loader class="w-4 h-4 animate-spin" aria-hidden="true" />
 									Sending...
 								</span>
 							{:else}
@@ -284,7 +284,7 @@
 							>
 								{#if isSubmitting}
 									<span class="flex items-center gap-2">
-										<Loader2 class="w-4 h-4 animate-spin" aria-hidden="true" />
+										<stateIcons.loader class="w-4 h-4 animate-spin" aria-hidden="true" />
 										Sending...
 									</span>
 								{:else}

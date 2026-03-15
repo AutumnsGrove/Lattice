@@ -8,13 +8,7 @@
 	import { cn } from '@autumnsgrove/lattice/ui/utils';
 	import { formatRelativeTime } from '$lib/utils/date';
 	import type { OverallStatus } from '$lib/types/status';
-	import {
-		CheckCircle,
-		AlertTriangle,
-		AlertCircle,
-		XCircle,
-		Wrench
-	} from '@lucide/svelte';
+	import { stateIcons, chromeIcons } from '@autumnsgrove/prism/icons';
 
 	interface Props {
 		status: OverallStatus;
@@ -27,7 +21,7 @@
 	// Status configuration
 	const statusConfig = {
 		operational: {
-			icon: CheckCircle,
+			icon: stateIcons.checkCircle,
 			label: 'All Systems Operational',
 			description: 'Everything is running smoothly.',
 			bgGradient: 'from-success/20 via-success/10 to-transparent',
@@ -36,7 +30,7 @@
 			textColor: 'text-success'
 		},
 		degraded: {
-			icon: AlertTriangle,
+			icon: stateIcons.warning,
 			label: 'Degraded Performance',
 			description: 'Some services are experiencing slowdowns.',
 			bgGradient: 'from-warning/20 via-warning/10 to-transparent',
@@ -45,7 +39,7 @@
 			textColor: 'text-warning'
 		},
 		partial_outage: {
-			icon: AlertCircle,
+			icon: stateIcons.alertCircle,
 			label: 'Partial Outage',
 			description: 'Some services are currently unavailable.',
 			bgGradient: 'from-warning/20 via-warning/10 to-transparent',
@@ -54,7 +48,7 @@
 			textColor: 'text-warning'
 		},
 		major_outage: {
-			icon: XCircle,
+			icon: stateIcons.xCircle,
 			label: 'Major Outage',
 			description: 'We are experiencing significant issues.',
 			bgGradient: 'from-error/20 via-error/10 to-transparent',
@@ -63,7 +57,7 @@
 			textColor: 'text-error'
 		},
 		maintenance: {
-			icon: Wrench,
+			icon: chromeIcons.toolbox,
 			label: 'Under Maintenance',
 			description: 'Scheduled maintenance is in progress.',
 			bgGradient: 'from-info/20 via-info/10 to-transparent',

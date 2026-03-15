@@ -5,7 +5,7 @@
   import { page } from '$app/state';
   import { Header, Footer, type NavItem } from '@autumnsgrove/lattice/ui/chrome';
   import { buildLoginUrl } from '@autumnsgrove/lattice/grafts/login';
-  import { Bookmark, Rss } from '@lucide/svelte';
+  import { featureIcons, actionIcons } from '@autumnsgrove/prism/icons';
   import { defaultSuite, resolveIcon } from '@autumnsgrove/lattice/ui';
 
   let { children, data } = $props();
@@ -16,10 +16,10 @@
   const navItems: NavItem[] = $derived.by(() => {
     const items: NavItem[] = [
       { href: 'https://grove.place', label: 'Grove', icon: groveIcon, external: true },
-      { href: '/feed', label: 'Feed', icon: Rss },
+      { href: '/feed', label: 'Feed', icon: featureIcons.rss },
     ];
     if (loggedIn) {
-      items.push({ href: '/bookmarks', label: 'Bookmarks', icon: Bookmark });
+      items.push({ href: '/bookmarks', label: 'Bookmarks', icon: actionIcons.bookmark });
     }
     return items;
   });

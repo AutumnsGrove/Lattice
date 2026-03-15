@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { UserPlus } from "@lucide/svelte";
+	import { authIcons } from "@autumnsgrove/prism/icons";
 	import { friendsStore } from "$lib/ui/stores/friends.svelte";
 	import { api } from "$lib/utils/api";
 	import type { VisitingGrove } from "./types";
@@ -49,7 +49,7 @@
 		{#if adding}
 			<span class="visiting-spinner" aria-hidden="true"></span>
 		{:else}
-			<UserPlus size={14} aria-hidden="true" />
+			<authIcons.userPlus size={14} aria-hidden="true" />
 		{/if}
 		<span>Add Friend</span>
 	</button>

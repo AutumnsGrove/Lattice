@@ -9,7 +9,7 @@
 	import type { ArtifactDisplay } from "$lib/curios/artifacts";
 	import { getTypeLabel, summarizeConfig } from "$lib/curios/artifacts";
 	import ArtifactRenderer from "./ArtifactRenderer.svelte";
-	import { ChevronLeft, ChevronRight, X } from "@lucide/svelte";
+	import { navIcons, stateIcons } from "@autumnsgrove/prism/icons";
 
 	let {
 		artifacts,
@@ -136,7 +136,7 @@
 		<div class="showcase-panel">
 			<!-- Close button -->
 			<button class="close-btn" onclick={close} aria-label="Close showcase">
-				<X size={20} />
+				<stateIcons.x class="w-5 h-5" />
 			</button>
 
 			<!-- Artifact stage -->
@@ -179,13 +179,13 @@
 			{#if artifacts.length > 1}
 				<nav class="showcase-nav" aria-label="Artifact navigation">
 					<button class="nav-btn" onclick={prev} disabled={!hasPrev} aria-label="Previous artifact">
-						<ChevronLeft size={18} />
+						<navIcons.chevronLeft class="w-[18px] h-[18px]" />
 					</button>
 					<span class="nav-counter" aria-live="polite">
 						{index + 1} / {artifacts.length}
 					</span>
 					<button class="nav-btn" onclick={next} disabled={!hasNext} aria-label="Next artifact">
-						<ChevronRight size={18} />
+						<navIcons.chevronRight class="w-[18px] h-[18px]" />
 					</button>
 				</nav>
 			{/if}

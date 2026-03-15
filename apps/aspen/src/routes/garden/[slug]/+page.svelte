@@ -4,7 +4,7 @@
 	import Button from "@autumnsgrove/lattice/ui/components/ui/Button.svelte";
 	import Badge from "@autumnsgrove/lattice/ui/components/ui/Badge.svelte";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
-	import { MessageSquare, MessageSquareText } from "@lucide/svelte";
+	import { featureIcons } from "@autumnsgrove/prism/icons";
 	import { fontMap } from "@autumnsgrove/lattice/ui/tokens/fonts";
 	import { Blaze } from "@autumnsgrove/lattice/blazes/components";
 	import { resolveBlaze } from "@autumnsgrove/lattice/blazes";
@@ -179,9 +179,9 @@
 								: 'comments'} — jump to discussion"
 						>
 							{#if (data.commentTotal || 0) > 0}
-								<MessageSquareText class="comment-badge-icon has-comments" />
+								<featureIcons.messageSquareText class="comment-badge-icon has-comments" />
 							{:else}
-								<MessageSquare class="comment-badge-icon" />
+								<featureIcons.messageSquare class="comment-badge-icon" />
 							{/if}
 						</a>
 					{/if}

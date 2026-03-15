@@ -4,7 +4,12 @@
 	import { seasonStore } from '@autumnsgrove/lattice/ui/chrome';
 	import Footer from '$lib/components/Footer.svelte';
 	import { Logo } from '@autumnsgrove/lattice/ui/nature';
-	import { MessageCircle, Clock, CheckCircle, AlertCircle, ArrowRight } from '@lucide/svelte';
+	import { featureIcons, metricIcons, stateIcons, navIcons } from '@autumnsgrove/prism/icons';
+	const MessageCircle = featureIcons.messageCircle;
+	const Clock = metricIcons.clock;
+	const CheckCircle = stateIcons.checkCircle;
+	const AlertCircle = stateIcons.alertCircle;
+	const ArrowRight = navIcons.arrowRight;
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

@@ -12,7 +12,7 @@
 	 * @fires close - When user exits Fireside mode without a draft
 	 */
 
-	import { Sparkles, ArrowLeft, Check, RotateCcw, X } from "@lucide/svelte";
+	import { phaseIcons, navIcons, stateIcons, actionIcons } from "@autumnsgrove/prism/icons";
 	import GlassChat from "$lib/ui/components/ui/glasschat/GlassChat.svelte";
 	import { createAIChatController } from "$lib/ui/components/ui/glasschat/controller.svelte";
 	import type { ChatRoleMap } from "$lib/ui/components/ui/glasschat/types";
@@ -190,7 +190,7 @@
 		<div class="draft-view">
 			<header class="draft-header">
 				<button class="back-button" onclick={backToChat} type="button">
-					<ArrowLeft size={16} />
+					<navIcons.arrowLeft class="w-4 h-4" />
 					Back to chat
 				</button>
 				<h2>Your Draft</h2>
@@ -212,11 +212,11 @@
 
 			<footer class="draft-actions">
 				<button class="action-secondary" onclick={backToChat} type="button">
-					<RotateCcw size={16} />
+					<actionIcons.rotateCcw class="w-4 h-4" />
 					Keep chatting
 				</button>
 				<button class="action-primary" onclick={acceptDraft} type="button">
-					<Check size={16} />
+					<stateIcons.check class="w-4 h-4" />
 					Use this draft
 				</button>
 			</footer>
@@ -261,7 +261,7 @@
 			{#snippet inputToolbar()}
 				{#if canDraft}
 					<button class="draft-button" onclick={generateDraft} disabled={isDrafting} type="button">
-						<Sparkles size={16} />
+						<phaseIcons.sparkles class="w-4 h-4" />
 						{isDrafting ? "Drafting..." : "Ready to draft"}
 					</button>
 				{:else if chat.messages.length > 0}
@@ -269,7 +269,7 @@
 						class="draft-hint"
 						title="Share a few more thoughts and I'll be able to help shape them into a draft"
 					>
-						<Sparkles size={16} />
+						<phaseIcons.sparkles class="w-4 h-4" />
 						<span>Keep chatting - drafting unlocks after a few exchanges</span>
 					</p>
 				{/if}

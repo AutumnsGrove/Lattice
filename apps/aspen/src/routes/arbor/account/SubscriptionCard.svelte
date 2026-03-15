@@ -1,7 +1,7 @@
 <script lang="ts">
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import Button from "@autumnsgrove/lattice/ui/components/ui/Button.svelte";
-	import { AlertCircle, Check, X, Package, RefreshCw } from "@lucide/svelte";
+	import { stateIcons, actionIcons, featureIcons } from "@autumnsgrove/prism/icons";
 	import type { BillingData, TierConfig } from "./types";
 	import { formatDate, daysRemaining } from "./utils";
 
@@ -24,7 +24,7 @@
 <GlassCard variant="frosted" class="mb-6">
 	{#if billingError}
 		<div class="error-state" role="alert" aria-live="polite">
-			<AlertCircle class="error-icon" aria-hidden="true" />
+			<stateIcons.alertCircle class="error-icon" aria-hidden="true" />
 			<div>
 				<p class="error-title">Could not load billing information</p>
 				<p class="error-desc">
@@ -36,7 +36,7 @@
 		<div class="plan-header">
 			<div class="plan-info">
 				<div class="plan-badge">
-					<Package class="plan-icon" />
+					<featureIcons.package class="plan-icon" />
 					<span class="plan-name">{tierConfig?.name || "Unknown"}</span>
 				</div>
 				<p class="plan-tagline">{tierConfig?.tagline || ""}</p>
@@ -45,7 +45,7 @@
 			<div class="plan-status" role="status" aria-live="polite">
 				{#if isPastDue}
 					<span class="status-badge past-due" aria-label="Subscription status: Payment past due">
-						<AlertCircle class="status-icon" aria-hidden="true" />
+						<stateIcons.alertCircle class="status-icon" aria-hidden="true" />
 						Past Due
 					</span>
 				{:else if isCancelled}
@@ -53,12 +53,12 @@
 						class="status-badge cancelled"
 						aria-label="Subscription status: Cancelling at period end"
 					>
-						<X class="status-icon" aria-hidden="true" />
+						<stateIcons.x class="status-icon" aria-hidden="true" />
 						Cancelling
 					</span>
 				{:else if isActive}
 					<span class="status-badge active" aria-label="Subscription status: Active">
-						<Check class="status-icon" aria-hidden="true" />
+						<stateIcons.check class="status-icon" aria-hidden="true" />
 						Active
 					</span>
 				{:else}
@@ -66,7 +66,7 @@
 						class="status-badge inactive"
 						aria-label="Subscription status: {billing?.status || 'No subscription'}"
 					>
-						<AlertCircle class="status-icon" aria-hidden="true" />
+						<stateIcons.alertCircle class="status-icon" aria-hidden="true" />
 						{billing?.status || "No Subscription"}
 					</span>
 				{/if}
@@ -107,12 +107,12 @@
 		<div class="plan-actions" role="group" aria-label="Subscription actions">
 			{#if isCancelled}
 				<Button variant="primary" onclick={onResume} aria-label="Resume subscription">
-					<RefreshCw class="btn-icon" aria-hidden="true" />
+					<actionIcons.refresh class="btn-icon" aria-hidden="true" />
 					Resume Membership
 				</Button>
 			{:else}
 				<Button variant="danger" onclick={onCancel} aria-label="Cancel subscription">
-					<X class="btn-icon" aria-hidden="true" />
+					<stateIcons.x class="btn-icon" aria-hidden="true" />
 					Cancel Membership
 				</Button>
 			{/if}

@@ -6,20 +6,19 @@
 		TenantUploadSection,
 		TenantGraftSection
 	} from '@autumnsgrove/lattice/grafts/greenhouse';
-	import {
-		ArrowLeft,
-		Globe,
-		FileText,
-		BookOpen,
-		Image,
-		HardDrive,
-		Copy,
-		Check,
-		AlertTriangle,
-		ExternalLink,
-		CheckCircle,
-		XCircle
-	} from '@lucide/svelte';
+	import { navIcons, featureIcons, actionIcons, stateIcons } from '@autumnsgrove/prism/icons';
+	const ArrowLeft = navIcons.arrowLeft;
+	const Globe = navIcons.globe;
+	const FileText = featureIcons.fileText;
+	const BookOpen = featureIcons.bookOpen;
+	const Image = featureIcons.image;
+	const HardDrive = featureIcons.hardDrive;
+	const Copy = actionIcons.copy;
+	const Check = stateIcons.check;
+	const AlertTriangle = stateIcons.warning;
+	const ExternalLink = navIcons.external;
+	const CheckCircle = stateIcons.checkCircle;
+	const XCircle = stateIcons.xCircle;
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 

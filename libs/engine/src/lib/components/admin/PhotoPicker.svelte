@@ -2,7 +2,7 @@
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import { apiRequest } from "$lib/utils/api";
 	import { tick } from "svelte";
-	import { X, Check, Search, Images, Link, Plus } from "@lucide/svelte";
+	import { stateIcons, navIcons, featureIcons, actionIcons } from "@autumnsgrove/prism/icons";
 
 	/**
 	 * @typedef {Object} PickerImage
@@ -254,7 +254,7 @@
 			<!-- Header -->
 			<div class="picker-header">
 				<div class="picker-title">
-					<Images size={18} />
+					<featureIcons.images class="w-[18px] h-[18px]" />
 					<span>Insert Photo</span>
 				</div>
 				<button
@@ -263,7 +263,7 @@
 					onclick={onClose}
 					aria-label="Close photo picker"
 				>
-					<X size={18} />
+					<stateIcons.x class="w-[18px] h-[18px]" />
 				</button>
 			</div>
 
@@ -271,7 +271,7 @@
 			<div class="manual-url-section">
 				{#if showManualInput}
 					<div class="manual-url-row">
-						<Link size={14} class="manual-url-icon" />
+						<actionIcons.link class="w-3.5 h-3.5 manual-url-icon" />
 						<input
 							bind:this={manualInputRef}
 							type="url"
@@ -288,12 +288,12 @@
 							disabled={!manualUrl.trim()}
 							aria-label="Add URL to selection"
 						>
-							<Plus size={16} />
+							<actionIcons.plus class="w-4 h-4" />
 						</button>
 					</div>
 				{:else}
 					<button type="button" class="manual-url-toggle" onclick={() => (showManualInput = true)}>
-						<Link size={14} />
+						<actionIcons.link class="w-3.5 h-3.5" />
 						<span>Paste an image URL</span>
 					</button>
 				{/if}
@@ -303,7 +303,7 @@
 			{#if galleryEnabled}
 				<!-- Search -->
 				<div class="picker-search">
-					<Search size={14} class="search-icon" />
+					<navIcons.search class="w-3.5 h-3.5 search-icon" />
 					<input
 						type="text"
 						placeholder="Search your photos..."
@@ -329,7 +329,7 @@
 						</div>
 					{:else if images.length === 0}
 						<div class="picker-empty">
-							<Images size={32} class="empty-icon" />
+							<featureIcons.images class="w-8 h-8 empty-icon" />
 							<p>No photos uploaded yet</p>
 							<p class="picker-empty-hint">
 								Upload photos in the <a href="/arbor/images">image manager</a>, or paste a URL above
@@ -361,7 +361,7 @@
 									/>
 									{#if selected.has(image.url)}
 										<div class="thumb-check" aria-hidden="true">
-											<Check size={16} />
+											<stateIcons.check class="w-4 h-4" />
 										</div>
 									{/if}
 								</button>
@@ -384,7 +384,7 @@
 			{:else}
 				<!-- No gallery graft — show friendly message -->
 				<div class="picker-empty picker-no-gallery">
-					<Images size={28} class="empty-icon" />
+					<featureIcons.images class="w-7 h-7 empty-icon" />
 					<p>Paste an image URL above to insert it into your post</p>
 					<p class="picker-empty-hint">Photo library browsing is available on upgraded plans</p>
 				</div>
@@ -402,7 +402,7 @@
 								onclick={() => toggleSelect(url)}
 								aria-label="Remove {url.split('/').pop()} from selection"
 							>
-								<X size={12} />
+								<stateIcons.x class="w-3 h-3" />
 							</button>
 						</div>
 					{/each}

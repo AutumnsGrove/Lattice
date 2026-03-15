@@ -21,15 +21,7 @@
 	 */
 	import { cn } from "$lib/ui/utils";
 	import { formatRelativeTime } from "$lib/utils/date";
-	import {
-		CheckCircle,
-		AlertTriangle,
-		AlertCircle,
-		XCircle,
-		Wrench,
-		RefreshCw,
-		ExternalLink,
-	} from "@lucide/svelte";
+	import { stateIcons, actionIcons, chromeIcons, navIcons } from "@autumnsgrove/prism/icons";
 
 	type OverallStatus =
 		| "operational"
@@ -89,7 +81,7 @@
 	const statusConfig: Record<
 		OverallStatus,
 		{
-			icon: typeof CheckCircle;
+			icon: typeof stateIcons.checkCircle;
 			label: string;
 			color: string;
 			bg: string;
@@ -97,42 +89,42 @@
 		}
 	> = {
 		operational: {
-			icon: CheckCircle,
+			icon: stateIcons.checkCircle,
 			label: "All Systems Operational",
 			color: "text-success",
 			bg: "bg-success-bg",
 			border: "border-success/30",
 		},
 		degraded: {
-			icon: AlertTriangle,
+			icon: stateIcons.warning,
 			label: "Degraded Performance",
 			color: "text-warning",
 			bg: "bg-warning-bg",
 			border: "border-warning/30",
 		},
 		partial_outage: {
-			icon: AlertCircle,
+			icon: stateIcons.alertCircle,
 			label: "Partial Outage",
 			color: "text-warning",
 			bg: "bg-warning-bg",
 			border: "border-warning/30",
 		},
 		major_outage: {
-			icon: XCircle,
+			icon: stateIcons.xCircle,
 			label: "Major Outage",
 			color: "text-error",
 			bg: "bg-error-bg",
 			border: "border-error/30",
 		},
 		maintenance: {
-			icon: Wrench,
+			icon: chromeIcons.toolbox,
 			label: "Under Maintenance",
 			color: "text-info",
 			bg: "bg-info-bg",
 			border: "border-info/30",
 		},
 		unknown: {
-			icon: RefreshCw,
+			icon: actionIcons.refresh,
 			label: "Status Unknown",
 			color: "text-foreground-muted",
 			bg: "bg-foreground/10",
@@ -189,7 +181,7 @@
 		)}
 	>
 		{#if loading}
-			<RefreshCw class="w-4 h-4 text-foreground-muted animate-spin" />
+			<actionIcons.refresh class="w-4 h-4 text-foreground-muted animate-spin" />
 			<span class="text-sm text-foreground-muted">Loading...</span>
 		{:else}
 			<StatusIcon class={cn("w-4 h-4", currentConfig.color)} />
@@ -213,7 +205,7 @@
 			<div class="flex items-center justify-between">
 				<div class="flex items-center gap-2">
 					{#if loading}
-						<RefreshCw class="w-5 h-5 text-foreground-muted animate-spin" />
+						<actionIcons.refresh class="w-5 h-5 text-foreground-muted animate-spin" />
 						<span class="font-medium text-foreground-muted dark:text-foreground-subtle">
 							Checking status...
 						</span>
@@ -232,7 +224,7 @@
 					class="text-foreground-muted hover:text-foreground transition-colors"
 					title="View full status page"
 				>
-					<ExternalLink class="w-4 h-4" />
+					<navIcons.external class="w-4 h-4" />
 				</a>
 			</div>
 
@@ -300,7 +292,7 @@
 					class="hover:text-foreground transition-colors"
 					title="Refresh status"
 				>
-					<RefreshCw class={cn("w-3 h-3", loading && "animate-spin")} />
+					<actionIcons.refresh class={cn("w-3 h-3", loading && "animate-spin")} />
 				</button>
 			</div>
 		</div>

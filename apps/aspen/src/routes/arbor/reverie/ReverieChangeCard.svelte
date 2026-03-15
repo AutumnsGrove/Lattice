@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Spinner from "@autumnsgrove/lattice/ui/components/ui/Spinner.svelte";
-	import { ChevronDown, ChevronUp, Check, X } from "@lucide/svelte";
+	import { navIcons, stateIcons } from "@autumnsgrove/prism/icons";
 
 	interface ChangePreview {
 		domain: string;
@@ -71,12 +71,12 @@
 <div class="change-card" class:applied class:cancelled>
 	{#if applied && !cancelled}
 		<div class="applied-badge" role="status" aria-live="polite">
-			<Check size={12} aria-hidden="true" />
+			<stateIcons.check size={12} aria-hidden="true" />
 			Applied
 		</div>
 	{:else if cancelled}
 		<div class="cancelled-badge" role="status" aria-live="polite">
-			<X size={12} aria-hidden="true" />
+			<stateIcons.x size={12} aria-hidden="true" />
 			Cancelled
 		</div>
 	{/if}
@@ -160,7 +160,7 @@
 					aria-expanded={expanded}
 					onclick={() => (expanded = false)}
 				>
-					<ChevronUp size={14} aria-hidden="true" />
+					<navIcons.chevronUp size={14} aria-hidden="true" />
 					Collapse
 				</button>
 			{:else if !hasMore}
@@ -170,7 +170,7 @@
 					aria-expanded={expanded}
 					onclick={() => (expanded = true)}
 				>
-					<ChevronDown size={14} aria-hidden="true" />
+					<navIcons.chevronDown size={14} aria-hidden="true" />
 					Details
 				</button>
 			{/if}

@@ -1,28 +1,13 @@
 import type { NavItem, FooterLink } from "./types";
 import {
-	Scroll,
-	Telescope,
-	MapPin,
-	Tag,
-	BookOpen,
-	BookUser,
-	Home,
-	HandCoins,
-	Send,
-	Github,
-	ExternalLink,
-	Mail,
-	Hammer,
-	Grape,
-	Footprints,
-	HeartHandshake,
-	Activity,
-	TreePine,
-	Coffee,
-	Inbox,
-	Armchair,
-	Shield,
-} from "@lucide/svelte";
+	navIcons,
+	featureIcons,
+	metricIcons,
+	chromeIcons,
+	authIcons,
+	natureIcons,
+	blazeIcons,
+} from "@autumnsgrove/prism/icons";
 import BlueSky from "../icons/BlueSky.svelte";
 import { defaultSuite, resolveIcon } from "$lib/ui/components/ui/groveicon";
 
@@ -59,12 +44,12 @@ export const DIVIDER_VERTICAL = {
 
 // Default navigation items (desktop header)
 export const DEFAULT_NAV_ITEMS: NavItem[] = [
-	{ href: "/manifesto", label: "Manifesto", icon: Scroll },
-	{ href: "/vision", label: "Vision", icon: Telescope },
-	{ href: "/roadmap", label: "Roadmap", icon: MapPin },
-	{ href: "/pricing", label: "Pricing", icon: Tag },
-	{ href: "/knowledge", label: "Knowledge", icon: BookOpen },
-	{ href: "/canopy", label: "Canopy", icon: BookUser, termSlug: "canopy" },
+	{ href: "/manifesto", label: "Manifesto", icon: navIcons.scroll },
+	{ href: "/vision", label: "Vision", icon: chromeIcons.telescope },
+	{ href: "/roadmap", label: "Roadmap", icon: navIcons.mapPin },
+	{ href: "/pricing", label: "Pricing", icon: featureIcons.tag },
+	{ href: "/knowledge", label: "Knowledge", icon: featureIcons.bookOpen },
+	{ href: "/canopy", label: "Canopy", icon: featureIcons.bookUser, termSlug: "canopy" },
 	{
 		href: "https://autumn.grove.place/garden",
 		label: "Garden",
@@ -76,13 +61,13 @@ export const DEFAULT_NAV_ITEMS: NavItem[] = [
 
 // Default mobile navigation items (includes Home)
 export const DEFAULT_MOBILE_NAV_ITEMS: NavItem[] = [
-	{ href: "/", label: "Home", icon: Home },
-	{ href: "/manifesto", label: "Manifesto", icon: Scroll },
-	{ href: "/vision", label: "Vision", icon: Telescope },
-	{ href: "/roadmap", label: "Roadmap", icon: MapPin },
-	{ href: "/pricing", label: "Pricing", icon: HandCoins },
-	{ href: "/knowledge", label: "Knowledge", icon: BookOpen },
-	{ href: "/canopy", label: "Canopy", icon: BookUser, termSlug: "canopy" },
+	{ href: "/", label: "Home", icon: navIcons.home },
+	{ href: "/manifesto", label: "Manifesto", icon: navIcons.scroll },
+	{ href: "/vision", label: "Vision", icon: chromeIcons.telescope },
+	{ href: "/roadmap", label: "Roadmap", icon: navIcons.mapPin },
+	{ href: "/pricing", label: "Pricing", icon: metricIcons.handCoins },
+	{ href: "/knowledge", label: "Knowledge", icon: featureIcons.bookOpen },
+	{ href: "/canopy", label: "Canopy", icon: featureIcons.bookUser, termSlug: "canopy" },
 	{
 		href: "https://autumn.grove.place/garden",
 		label: "Garden",
@@ -100,26 +85,26 @@ export const DEFAULT_MOBILE_NAV_ITEMS: NavItem[] = [
 
 // Resources section (desktop footer, landing only)
 export const LANDING_RESOURCE_LINKS: FooterLink[] = [
-	{ href: "/workshop", label: "Workshop", icon: Hammer, termSlug: "workshop" },
-	{ href: "/vineyard", label: "Vineyard", icon: Grape, termSlug: "vineyard" },
+	{ href: "/workshop", label: "Workshop", icon: blazeIcons.hammer, termSlug: "workshop" },
+	{ href: "/vineyard", label: "Vineyard", icon: chromeIcons.grape, termSlug: "vineyard" },
 	{ href: "/forest", label: "Forest", icon: forestsIcon, termSlug: "forests" },
-	{ href: "/journey", label: "Journey", icon: Footprints },
-	{ href: "/grove", label: "Grove", icon: TreePine },
+	{ href: "/journey", label: "Journey", icon: natureIcons.footprints },
+	{ href: "/grove", label: "Grove", icon: natureIcons.treePine },
 	{
 		href: "https://status.grove.place",
 		label: "Status",
-		icon: Activity,
+		icon: metricIcons.activity,
 		external: true,
 	},
 ];
 
 // Connect section (desktop footer, landing only)
 export const LANDING_CONNECT_LINKS: FooterLink[] = [
-	{ href: "/hello", label: "Hello", icon: HeartHandshake },
-	{ href: "/feedback", label: "Feedback", icon: Inbox },
-	{ href: "/contact", label: "Contact", icon: Mail },
-	{ href: "/porch", label: "Porch", icon: Armchair, termSlug: "porch" },
-	{ href: "/contribute", label: "Contributing", icon: Coffee },
+	{ href: "/hello", label: "Hello", icon: navIcons.heartHandshake },
+	{ href: "/feedback", label: "Feedback", icon: featureIcons.inbox },
+	{ href: "/contact", label: "Contact", icon: featureIcons.mail },
+	{ href: "/porch", label: "Porch", icon: chromeIcons.armchair, termSlug: "porch" },
+	{ href: "/contribute", label: "Contributing", icon: blazeIcons.coffee },
 	{
 		href: "https://bsky.app/profile/groveplace.bsky.social",
 		label: "Bluesky",
@@ -129,7 +114,7 @@ export const LANDING_CONNECT_LINKS: FooterLink[] = [
 	{
 		href: "https://github.com/AutumnsGrove/Lattice",
 		label: "GitHub",
-		icon: Github,
+		icon: chromeIcons.github,
 		external: true,
 	},
 ];
@@ -140,26 +125,26 @@ export const LANDING_CONNECT_LINKS: FooterLink[] = [
 
 // Resources section (mobile menu, landing only)
 export const LANDING_MOBILE_RESOURCE_LINKS: FooterLink[] = [
-	{ href: "/workshop", label: "Workshop", icon: Hammer, termSlug: "workshop" },
-	{ href: "/vineyard", label: "Vineyard", icon: Grape, termSlug: "vineyard" },
+	{ href: "/workshop", label: "Workshop", icon: blazeIcons.hammer, termSlug: "workshop" },
+	{ href: "/vineyard", label: "Vineyard", icon: chromeIcons.grape, termSlug: "vineyard" },
 	{ href: "/forest", label: "Forest", icon: forestsIcon, termSlug: "forests" },
-	{ href: "/journey", label: "Journey", icon: Footprints },
-	{ href: "/grove", label: "Grove", icon: TreePine },
+	{ href: "/journey", label: "Journey", icon: natureIcons.footprints },
+	{ href: "/grove", label: "Grove", icon: natureIcons.treePine },
 	{
 		href: "https://status.grove.place",
 		label: "Status",
-		icon: Activity,
+		icon: metricIcons.activity,
 		external: true,
 	},
 ];
 
 // Connect section (mobile menu, landing only)
 export const LANDING_MOBILE_CONNECT_LINKS: FooterLink[] = [
-	{ href: "/hello", label: "Hello", icon: HeartHandshake },
-	{ href: "/feedback", label: "Feedback", icon: Inbox },
-	{ href: "/contact", label: "Contact", icon: Mail },
-	{ href: "/porch", label: "Porch", icon: Armchair, termSlug: "porch" },
-	{ href: "/contribute", label: "Contributing", icon: Coffee },
+	{ href: "/hello", label: "Hello", icon: navIcons.heartHandshake },
+	{ href: "/feedback", label: "Feedback", icon: featureIcons.inbox },
+	{ href: "/contact", label: "Contact", icon: featureIcons.mail },
+	{ href: "/porch", label: "Porch", icon: chromeIcons.armchair, termSlug: "porch" },
+	{ href: "/contribute", label: "Contributing", icon: blazeIcons.coffee },
 	{
 		href: "https://bsky.app/profile/groveplace.bsky.social",
 		label: "Bluesky",
@@ -169,7 +154,7 @@ export const LANDING_MOBILE_CONNECT_LINKS: FooterLink[] = [
 	{
 		href: "https://github.com/AutumnsGrove/Lattice",
 		label: "GitHub",
-		icon: Github,
+		icon: chromeIcons.github,
 		external: true,
 	},
 ];
@@ -183,7 +168,7 @@ export const LANDING_LEGAL_LINKS: FooterLink[] = [
 	{ href: "/knowledge/legal/privacy-policy", label: "Privacy" },
 	{ href: "/knowledge/legal/terms-of-service", label: "Terms" },
 	{ href: "/shade", label: "Shade", icon: shadeIcon, termSlug: "shade" },
-	{ href: "/security", label: "Security", icon: Shield },
+	{ href: "/security", label: "Security", icon: authIcons.shield },
 ];
 
 // =============================================================================

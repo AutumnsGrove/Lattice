@@ -1,7 +1,12 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { GlassCard } from '@autumnsgrove/lattice/ui';
-	import { Copy, Download, Check, AlertTriangle, AtSign } from '@lucide/svelte';
+	import { actionIcons, stateIcons, authIcons } from '@autumnsgrove/prism/icons';
+	const Copy = actionIcons.copy;
+	const Download = actionIcons.download;
+	const Check = stateIcons.check;
+	const AlertTriangle = stateIcons.warning;
+	const AtSign = authIcons.atSign;
 
 	interface Subscriber {
 		id: number;

@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { FileText, ArrowRight } from '@lucide/svelte';
+  import { featureIcons, navIcons } from '@autumnsgrove/prism/icons';
+  const FileText = featureIcons.fileText;
+  const ArrowRight = navIcons.arrowRight;
   import type { Doc } from '$lib/types/docs';
   import { kbCategoryColors } from '$lib/utils/kb-colors';
 

@@ -3,7 +3,7 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import GlassButton from "@autumnsgrove/lattice/ui/components/ui/GlassButton.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
-	import { MousePointer, Save } from "@lucide/svelte";
+	import { actionIcons } from "@autumnsgrove/prism/icons";
 
 	let { data, form } = $props();
 
@@ -37,7 +37,7 @@
 <div class="cursors-page">
 	<header class="page-header">
 		<div class="title-row">
-			<MousePointer class="header-icon" />
+			<actionIcons.mousePointer class="header-icon" />
 			<h1>Custom Cursors</h1>
 		</div>
 		<p class="subtitle">
@@ -116,7 +116,7 @@
 
 			<div class="form-actions">
 				<GlassButton type="submit" variant="accent">
-					<Save class="btn-icon" />
+					<actionIcons.save class="btn-icon" />
 					Save Settings
 				</GlassButton>
 			</div>

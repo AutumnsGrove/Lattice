@@ -1,7 +1,12 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { GlassNavbar } from '@autumnsgrove/lattice/ui';
-	import { Home, Sparkles, TreePine, Type, Palette } from '@lucide/svelte';
+	import { navIcons, phaseIcons, natureIcons, actionIcons, featureIcons } from '@autumnsgrove/prism/icons';
+	const Home = navIcons.home;
+	const Sparkles = phaseIcons.sparkles;
+	const TreePine = natureIcons.treePine;
+	const Type = actionIcons.type;
+	const Palette = featureIcons.palette;
 
 	interface Props {
 		children: Snippet;

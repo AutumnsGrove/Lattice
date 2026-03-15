@@ -2,16 +2,15 @@
 	import type { PageData } from './$types';
 	import { enhance } from '$app/forms';
 	import { GlassCard } from '@autumnsgrove/lattice/ui';
-	import {
-		CheckCircle2,
-		AlertTriangle,
-		AlertCircle,
-		XCircle,
-		Wrench,
-		Plus,
-		Clock,
-		ChevronRight
-	} from '@lucide/svelte';
+	import { stateIcons, chromeIcons, actionIcons, metricIcons, navIcons } from '@autumnsgrove/prism/icons';
+	const CheckCircle2 = stateIcons.checkCircle2;
+	const AlertTriangle = stateIcons.warning;
+	const AlertCircle = stateIcons.alertCircle;
+	const XCircle = stateIcons.xCircle;
+	const Wrench = chromeIcons.toolbox;
+	const Plus = actionIcons.plus;
+	const Clock = metricIcons.clock;
+	const ChevronRight = navIcons.chevronRight;
 	import type { Component } from 'svelte';
 
 	let { data }: { data: PageData } = $props();

@@ -8,17 +8,7 @@
 
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import { formatDateTime } from "$lib/utils/date";
-	import {
-		Shield,
-		ShieldAlert,
-		ShieldCheck,
-		Eye,
-		AlertTriangle,
-		CheckCircle,
-		XCircle,
-		Activity,
-		Clock,
-	} from "@lucide/svelte";
+	import { authIcons, stateIcons, metricIcons } from "@autumnsgrove/prism/icons";
 
 	interface Props {
 		thornStats: {
@@ -132,9 +122,9 @@
 	{#if reviewMessage}
 		<div class={reviewMessage.type === "success" ? "success-banner" : "error-banner"}>
 			{#if reviewMessage.type === "success"}
-				<CheckCircle class="banner-icon" />
+				<stateIcons.checkCircle class="banner-icon" />
 			{:else}
-				<AlertTriangle class="banner-icon" />
+				<stateIcons.warning class="banner-icon" />
 			{/if}
 			<span>{reviewMessage.text}</span>
 		</div>
@@ -145,7 +135,7 @@
 		<GlassCard>
 			<div class="stat-card">
 				<div class="stat-icon">
-					<Activity class="icon-sm" />
+					<metricIcons.activity class="icon-sm" />
 				</div>
 				<div class="stat-content">
 					<span class="stat-value">{thornStats.total}</span>
@@ -157,7 +147,7 @@
 		<GlassCard>
 			<div class="stat-card">
 				<div class="stat-icon stat-pass">
-					<ShieldCheck class="icon-sm" />
+					<authIcons.shieldCheck class="icon-sm" />
 				</div>
 				<div class="stat-content">
 					<span class="stat-value">{thornStats.passRate}%</span>
@@ -169,7 +159,7 @@
 		<GlassCard>
 			<div class="stat-card">
 				<div class="stat-icon stat-flag">
-					<ShieldAlert class="icon-sm" />
+					<authIcons.shieldAlert class="icon-sm" />
 				</div>
 				<div class="stat-content">
 					<span class="stat-value">{thornStats.flagged + thornStats.warned}</span>
@@ -181,7 +171,7 @@
 		<GlassCard>
 			<div class="stat-card">
 				<div class="stat-icon stat-block">
-					<XCircle class="icon-sm" />
+					<stateIcons.xCircle class="icon-sm" />
 				</div>
 				<div class="stat-content">
 					<span class="stat-value">{thornStats.blocked}</span>
@@ -196,7 +186,7 @@
 		<!-- Thorn Section -->
 		<GlassCard>
 			<div class="section-header">
-				<Shield class="section-icon" />
+				<authIcons.shield class="section-icon" />
 				<h2>Thorn &mdash; Text Moderation</h2>
 			</div>
 
@@ -230,7 +220,7 @@
 		<!-- Petal Section -->
 		<GlassCard>
 			<div class="section-header">
-				<Eye class="section-icon" />
+				<stateIcons.eye class="section-icon" />
 				<h2>Petal &mdash; Image Moderation</h2>
 			</div>
 
@@ -270,7 +260,7 @@
 	<!-- Flagged Content Review Queue -->
 	<GlassCard>
 		<div class="section-header">
-			<ShieldAlert class="section-icon" />
+			<authIcons.shieldAlert class="section-icon" />
 			<h2>Flagged Content Queue</h2>
 			{#if thornFlagged.length > 0}
 				<span class="queue-count">{thornFlagged.length} pending</span>
@@ -313,7 +303,7 @@
 									disabled={reviewingId === flag.id}
 									onclick={() => handleReview(flag.id, "cleared")}
 								>
-									<CheckCircle class="btn-icon" />
+									<stateIcons.checkCircle class="btn-icon" />
 								</button>
 								<button
 									class="btn-remove"
@@ -321,7 +311,7 @@
 									disabled={reviewingId === flag.id}
 									onclick={() => handleReview(flag.id, "removed")}
 								>
-									<XCircle class="btn-icon" />
+									<stateIcons.xCircle class="btn-icon" />
 								</button>
 							</div>
 						</span>
@@ -336,7 +326,7 @@
 	<!-- Recent Activity -->
 	<GlassCard>
 		<div class="section-header">
-			<Clock class="section-icon" />
+			<metricIcons.clock class="section-icon" />
 			<h2>Recent Activity (7d)</h2>
 		</div>
 

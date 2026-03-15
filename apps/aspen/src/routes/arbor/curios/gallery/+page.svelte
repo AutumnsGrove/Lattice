@@ -6,20 +6,7 @@
 	import Badge from "@autumnsgrove/lattice/ui/components/ui/Badge.svelte";
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
-	import {
-		Image,
-		Settings2,
-		Cloud,
-		Layout,
-		Palette,
-		ChevronLeft,
-		Save,
-		AlertCircle,
-		CheckCircle2,
-		Tags,
-		FolderOpen,
-		RefreshCw,
-	} from "@lucide/svelte";
+	import { featureIcons, navIcons, actionIcons, stateIcons } from "@autumnsgrove/prism/icons";
 
 	const { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -74,13 +61,13 @@
 <div class="gallery-config">
 	<header class="page-header">
 		<a href="/arbor/curios" class="back-link">
-			<ChevronLeft class="back-icon" />
+			<navIcons.chevronLeft class="back-icon" />
 			<span>Back to Curios</span>
 		</a>
 
 		<div class="header-content">
 			<div class="title-row">
-				<Image class="header-icon" />
+				<featureIcons.image class="header-icon" />
 				<h1>Gallery</h1>
 				<Waystone slug="what-is-gallery" label="Learn about Gallery" />
 				<Badge variant={enabled ? "default" : "secondary"}>
@@ -97,7 +84,7 @@
 	<!-- Stats -->
 	<div class="stats-row">
 		<GlassCard class="stat-card">
-			<Image class="stat-icon" />
+			<featureIcons.image class="stat-icon" />
 			<div class="stat-content">
 				<span class="stat-value">{data.stats.imageCount}</span>
 				<span class="stat-label">Images</span>
@@ -105,7 +92,7 @@
 		</GlassCard>
 
 		<GlassCard class="stat-card">
-			<Tags class="stat-icon" />
+			<featureIcons.tags class="stat-icon" />
 			<div class="stat-content">
 				<span class="stat-value">{data.stats.tagCount}</span>
 				<span class="stat-label">Tags</span>
@@ -113,7 +100,7 @@
 		</GlassCard>
 
 		<GlassCard class="stat-card">
-			<FolderOpen class="stat-icon" />
+			<featureIcons.folderOpen class="stat-icon" />
 			<div class="stat-content">
 				<span class="stat-value">{data.stats.collectionCount}</span>
 				<span class="stat-label">Collections</span>
@@ -123,14 +110,14 @@
 
 	{#if form?.error}
 		<div class="alert alert-error">
-			<AlertCircle class="alert-icon" />
+			<stateIcons.alertCircle class="alert-icon" />
 			<span>{form.error}</span>
 		</div>
 	{/if}
 
 	{#if form?.success}
 		<div class="alert alert-success">
-			<CheckCircle2 class="alert-icon" />
+			<stateIcons.checkCircle2 class="alert-icon" />
 			<span>Configuration saved successfully!</span>
 		</div>
 	{/if}
@@ -149,7 +136,7 @@
 		<!-- Enable/Disable Toggle -->
 		<GlassCard class="config-section">
 			<div class="section-header">
-				<Settings2 class="section-icon" />
+				<actionIcons.settings2 class="section-icon" />
 				<h2>General</h2>
 			</div>
 
@@ -198,13 +185,13 @@
 		<!-- Storage Configuration -->
 		<GlassCard class="config-section">
 			<div class="section-header">
-				<Cloud class="section-icon" />
+				<featureIcons.cloud class="section-icon" />
 				<h2>Storage</h2>
 			</div>
 
 			<div class="sync-section-top">
 				<a href="/arbor/curios/gallery/sync" class="sync-link">
-					<RefreshCw class="sync-icon" />
+					<actionIcons.refresh class="sync-icon" />
 					<span>Sync images from Amber</span>
 				</a>
 				<p class="field-help">
@@ -216,12 +203,12 @@
 			<!-- Advanced Storage Settings -->
 			<details class="advanced-section">
 				<summary class="advanced-toggle">
-					<AlertCircle class="warning-icon-small" />
+					<stateIcons.alertCircle class="warning-icon-small" />
 					<span>Advanced Storage Settings</span>
 				</summary>
 
 				<div class="advanced-warning">
-					<AlertCircle class="warning-icon" />
+					<stateIcons.alertCircle class="warning-icon" />
 					<div>
 						<strong>For power users only</strong>
 						<p>
@@ -276,7 +263,7 @@
 		<!-- Display Settings -->
 		<GlassCard class="config-section">
 			<div class="section-header">
-				<Layout class="section-icon" />
+				<featureIcons.layout class="section-icon" />
 				<h2>Display</h2>
 			</div>
 
@@ -333,7 +320,7 @@
 		<!-- Features -->
 		<GlassCard class="config-section">
 			<div class="section-header">
-				<Palette class="section-icon" />
+				<featureIcons.palette class="section-icon" />
 				<h2>Features</h2>
 			</div>
 
@@ -378,7 +365,7 @@
 		<!-- Custom CSS -->
 		<GlassCard class="config-section">
 			<div class="section-header">
-				<Palette class="section-icon" />
+				<featureIcons.palette class="section-icon" />
 				<h2>Custom Styles</h2>
 			</div>
 
@@ -399,7 +386,7 @@
 		<!-- Actions -->
 		<div class="form-actions">
 			<GlassButton type="submit" variant="accent" disabled={isSubmitting}>
-				<Save class="button-icon" />
+				<actionIcons.save class="button-icon" />
 				{isSubmitting ? "Saving..." : "Save Configuration"}
 			</GlassButton>
 		</div>

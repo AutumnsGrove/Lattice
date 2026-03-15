@@ -9,7 +9,7 @@
  */
 
 import type { NavItem } from "./types";
-import { Home, BookOpen, Image, Clock, User, FileText } from "@lucide/svelte";
+import { navIcons, featureIcons, metricIcons, authIcons } from "@autumnsgrove/prism/icons";
 import type { IconComponent } from "./types";
 
 /**
@@ -42,13 +42,13 @@ export interface TenantNavOptions {
  * Falls back to FileText for unknown slugs.
  */
 const PAGE_ICONS: Record<string, IconComponent> = {
-	home: Home,
-	blog: BookOpen,
-	garden: BookOpen,
-	gallery: Image,
-	timeline: Clock,
-	trail: Clock,
-	about: User,
+	home: navIcons.home,
+	blog: featureIcons.bookOpen,
+	garden: featureIcons.bookOpen,
+	gallery: featureIcons.image,
+	timeline: metricIcons.clock,
+	trail: metricIcons.clock,
+	about: authIcons.user,
 };
 
 /**
@@ -68,16 +68,16 @@ const PAGE_ICONS: Record<string, IconComponent> = {
  */
 export function buildTenantNavItems(options: TenantNavOptions): NavItem[] {
 	const items: NavItem[] = [
-		{ href: "/", label: "Home", icon: Home },
-		{ href: "/garden", label: "Garden", icon: BookOpen },
+		{ href: "/", label: "Home", icon: navIcons.home },
+		{ href: "/garden", label: "Garden", icon: featureIcons.bookOpen },
 	];
 
 	// Add optional sections based on tenant config
 	if (options.showTimeline) {
-		items.push({ href: "/timeline", label: "Timeline", icon: Clock });
+		items.push({ href: "/timeline", label: "Timeline", icon: metricIcons.clock });
 	}
 	if (options.showGallery) {
-		items.push({ href: "/gallery", label: "Gallery", icon: Image });
+		items.push({ href: "/gallery", label: "Gallery", icon: featureIcons.image });
 	}
 
 	// Add custom nav pages from database
@@ -91,7 +91,7 @@ export function buildTenantNavItems(options: TenantNavOptions): NavItem[] {
 		items.push({
 			href: `/${page.slug}`,
 			label: page.title,
-			icon: PAGE_ICONS[slug] ?? FileText,
+			icon: PAGE_ICONS[slug] ?? featureIcons.fileText,
 		});
 	}
 
@@ -100,7 +100,7 @@ export function buildTenantNavItems(options: TenantNavOptions): NavItem[] {
 		(item) => item.href === "/about" || item.label.toLowerCase() === "about",
 	);
 	if (!hasAbout) {
-		items.push({ href: "/about", label: "About", icon: User });
+		items.push({ href: "/about", label: "About", icon: authIcons.user });
 	}
 
 	return items;

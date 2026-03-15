@@ -14,7 +14,7 @@
 	 * @prop {"inline" | "modal"} variant - Layout variant
 	 */
 
-	import { Check, X, Loader2, Globe, ExternalLink } from "@lucide/svelte";
+	import { stateIcons, navIcons } from "@autumnsgrove/prism/icons";
 	import { TIERS } from "$lib/config/tiers";
 
 	/** @type {{ username: string; userTier: string; variant?: "inline" | "modal" }} */
@@ -108,7 +108,7 @@
 <div class="domain-checker" class:domain-checker--modal={variant === "modal"}>
 	<!-- Header -->
 	<div class="domain-checker__header">
-		<Globe size={20} class="domain-checker__icon" />
+		<navIcons.globe class="w-5 h-5 domain-checker__icon" />
 		<h3 class="domain-checker__title">Check Domain Availability</h3>
 	</div>
 
@@ -130,13 +130,13 @@
 		/>
 		<div class="domain-checker__status-icon">
 			{#if domainStatus === "checking"}
-				<Loader2 size={18} class="domain-checker__spinner" />
+				<stateIcons.loader class="w-[18px] h-[18px] domain-checker__spinner" />
 			{:else if domainStatus === "available"}
-				<Check size={18} class="domain-checker__check" />
+				<stateIcons.check class="w-[18px] h-[18px] domain-checker__check" />
 			{:else if domainStatus === "registered"}
-				<X size={18} class="domain-checker__x" />
+				<stateIcons.x class="w-[18px] h-[18px] domain-checker__x" />
 			{:else if domainStatus === "unknown" || domainStatus === "error"}
-				<X size={18} class="domain-checker__x" />
+				<stateIcons.x class="w-[18px] h-[18px] domain-checker__x" />
 			{/if}
 		</div>
 	</div>
@@ -151,7 +151,7 @@
 	<!-- Result messages -->
 	{#if domainStatus === "available"}
 		<div class="domain-checker__result domain-checker__result--available">
-			<Check size={16} />
+			<stateIcons.check class="w-4 h-4" />
 			<span><strong>{checkedDomain}</strong> is available!</span>
 		</div>
 
@@ -167,13 +167,13 @@
 					(${oakTier.pricing.monthlyPrice}/mo).
 				</p>
 				<a href="/arbor/account" class="domain-checker__upsell-link">
-					See plans <ExternalLink size={14} />
+					See plans <navIcons.external class="w-[14px] h-[14px]" />
 				</a>
 			</div>
 		{/if}
 	{:else if domainStatus === "registered"}
 		<div class="domain-checker__result domain-checker__result--taken">
-			<X size={16} />
+			<stateIcons.x class="w-4 h-4" />
 			<span>
 				<strong>{checkedDomain}</strong> is already registered{registrar ? ` (via ${registrar})` : ""}
 			</span>

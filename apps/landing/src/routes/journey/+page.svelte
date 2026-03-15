@@ -3,7 +3,13 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import { GroveTerm } from '@autumnsgrove/lattice/ui';
 	import SEO from '$lib/components/SEO.svelte';
-	import { Tag, Sprout, ChevronDown, Sparkles, Wrench, List } from '@lucide/svelte';
+	import { featureIcons, natureIcons, navIcons, phaseIcons, chromeIcons, actionIcons } from '@autumnsgrove/prism/icons';
+	const Tag = featureIcons.tag;
+	const Sprout = natureIcons.sprout;
+	const ChevronDown = navIcons.chevronDown;
+	const Sparkles = phaseIcons.sparkles;
+	const Wrench = chromeIcons.toolbox;
+	const List = actionIcons.list;
 	import { formatNumber, formatBytes, getGrowthIcon } from '$lib/utils/journey';
 
 	// Floating TOC state

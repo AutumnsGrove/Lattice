@@ -8,17 +8,15 @@
 
 	let { data } = $props();
 
-	// Lucide icons
-	import {
-		Sprout,
-		Shield,
-		Users,
-		Download,
-		ArrowRight,
-		Leaf,
-		Trees,
-		BookOpen
-	} from '@lucide/svelte';
+	import { natureIcons, authIcons, actionIcons, navIcons, featureIcons } from '@autumnsgrove/prism/icons';
+	const Sprout = natureIcons.sprout;
+	const Shield = authIcons.shield;
+	const Users = authIcons.users;
+	const Download = actionIcons.download;
+	const ArrowRight = navIcons.arrowRight;
+	const Leaf = natureIcons.leaf;
+	const Trees = natureIcons.trees;
+	const BookOpen = featureIcons.bookOpen;
 </script>
 
 <SEO

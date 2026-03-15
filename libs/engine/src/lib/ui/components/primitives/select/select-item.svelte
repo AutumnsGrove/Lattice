@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Check from "@lucide/svelte/icons/check";
+	import { stateIcons } from "@autumnsgrove/prism/icons";
 	import { Select as SelectPrimitive, type WithoutChild } from "bits-ui";
 	import { cn } from "$lib/utils";
 
@@ -26,7 +26,7 @@
 	{#snippet children({ selected, highlighted })}
 		<span class="absolute left-2 flex size-3.5 items-center justify-center">
 			{#if selected}
-				<Check class="size-4" />
+				<stateIcons.check class="size-4" />
 			{/if}
 		</span>
 		{#if childrenProp}

@@ -11,7 +11,7 @@
 	import { copyToClipboard } from "$lib/utils/share";
 	import type { CodeExampleProps } from "./types.js";
 	import type { Snippet } from "svelte";
-	import { Copy, Check, FileCode } from "@lucide/svelte";
+	import { actionIcons, stateIcons, featureIcons } from "@autumnsgrove/prism/icons";
 
 	interface Props extends CodeExampleProps {
 		children: Snippet;
@@ -51,7 +51,7 @@
 <div class="code-example" data-language={language}>
 	<header class="code-header">
 		<div class="code-info">
-			<FileCode size={14} />
+			<featureIcons.fileCode class="w-3.5 h-3.5" />
 			{#if filename}
 				<span class="filename">{filename}</span>
 			{/if}
@@ -59,10 +59,10 @@
 		</div>
 		<button class="copy-btn" onclick={copyCode} aria-label="Copy code">
 			{#if copied}
-				<Check size={14} />
+				<stateIcons.check class="w-3.5 h-3.5" />
 				<span>Copied!</span>
 			{:else}
-				<Copy size={14} />
+				<actionIcons.copy class="w-3.5 h-3.5" />
 				<span>Copy</span>
 			{/if}
 		</button>

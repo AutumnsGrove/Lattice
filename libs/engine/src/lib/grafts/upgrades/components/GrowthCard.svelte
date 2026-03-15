@@ -6,16 +6,8 @@
 	 * Used in garden modals and dashboard widgets.
 	 */
 
-	import {
-		Sprout,
-		TreeDeciduous,
-		Trees,
-		Crown,
-		User,
-		Footprints,
-		Check,
-		ArrowRight,
-	} from "@lucide/svelte";
+	import { stateIcons, navIcons, natureIcons, authIcons } from "@autumnsgrove/prism/icons";
+	import type { Component } from "svelte";
 	import type { GrowthCardProps } from "./types.js";
 
 	let {
@@ -35,16 +27,16 @@
 	}: GrowthCardProps = $props();
 
 	// Icon mapping
-	const iconComponents: Record<string, typeof Sprout> = {
-		user: User,
-		footprints: Footprints,
-		sprout: Sprout,
-		"tree-deciduous": TreeDeciduous,
-		trees: Trees,
-		crown: Crown,
+	const iconComponents: Record<string, Component> = {
+		user: authIcons.user,
+		footprints: natureIcons.footprints,
+		sprout: natureIcons.sprout,
+		"tree-deciduous": natureIcons.treeDeciduous,
+		trees: natureIcons.trees,
+		crown: natureIcons.crown,
 	};
 
-	let IconComponent = $derived(iconComponents[icon] || Sprout);
+	let IconComponent = $derived(iconComponents[icon] || natureIcons.sprout);
 
 	// Price display
 	let displayPrice = $derived(monthlyPrice === 0 ? "Free" : `$${monthlyPrice}`);
@@ -135,7 +127,7 @@
 		<ul class="flex-1 space-y-1.5 mb-4 text-sm">
 			{#each features.slice(0, 4) as feature}
 				<li class="flex items-center gap-1.5 text-foreground-muted">
-					<Check class="w-3.5 h-3.5 text-accent flex-shrink-0" />
+					<stateIcons.check class="w-3.5 h-3.5 text-accent flex-shrink-0" />
 					<span class="truncate">{feature}</span>
 				</li>
 			{/each}
@@ -155,11 +147,11 @@
 		onclick={() => onCultivate?.(stage)}
 	>
 		{#if isNext}
-			<Sprout class="w-4 h-4" />
+			<natureIcons.sprout class="w-4 h-4" />
 		{/if}
 		{buttonText}
 		{#if isNext && !buttonDisabled}
-			<ArrowRight class="w-3.5 h-3.5" />
+			<navIcons.arrowRight class="w-3.5 h-3.5" />
 		{/if}
 	</button>
 </div>

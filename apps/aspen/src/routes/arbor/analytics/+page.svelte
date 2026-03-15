@@ -3,23 +3,13 @@
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
 	import { groveModeStore } from "@autumnsgrove/lattice/ui/stores";
-	import {
-		BarChart3,
-		TrendingUp,
-		Heart,
-		Eye,
-		Users,
-		Calendar,
-		Sprout,
-		Leaf,
-		TreePine,
-	} from "@lucide/svelte";
+	import { metricIcons, natureIcons, stateIcons, authIcons } from "@autumnsgrove/prism/icons";
 </script>
 
 <div class="max-w-4xl mx-auto">
 	<header class="mb-8">
 		<div class="flex items-center gap-3 mb-2">
-			<BarChart3 class="w-8 h-8 text-accent-muted" />
+			<metricIcons.barChart class="w-8 h-8 text-accent-muted" />
 			<h1 class="m-0 text-3xl text-foreground">
 				<GroveTerm interactive term="rings">Rings</GroveTerm>
 			</h1>
@@ -37,7 +27,7 @@
 	<GlassCard class="mb-8">
 		<div class="text-center py-8">
 			<div class="mb-4">
-				<Sprout class="w-16 h-16 text-accent-muted mx-auto" />
+				<natureIcons.sprout class="w-16 h-16 text-accent-muted mx-auto" />
 			</div>
 			<h2 class="text-2xl font-serif text-foreground mb-3">Coming in Full Bloom (Early Summer)</h2>
 			<p class="text-foreground-muted max-w-2xl mx-auto">
@@ -56,7 +46,7 @@
 			<GlassCard>
 				<div class="flex items-start gap-3">
 					<div class="p-2 bg-accent-subtle/10 rounded-lg">
-						<Eye class="w-5 h-5 text-accent-muted" />
+						<stateIcons.eye class="w-5 h-5 text-accent-muted" />
 					</div>
 					<div>
 						<h3 class="text-sm font-medium text-foreground mb-1">24-Hour Delayed Stats</h3>
@@ -70,13 +60,13 @@
 			<GlassCard>
 				<div class="flex items-start gap-3">
 					<div class="p-2 bg-accent-subtle/10 rounded-lg">
-						<TrendingUp class="w-5 h-5 text-accent-muted" />
+						<metricIcons.trending class="w-5 h-5 text-accent-muted" />
 					</div>
 					<div>
 						<h3 class="text-sm font-medium text-foreground mb-1">Resonance Indicators</h3>
 						<p class="text-xs text-foreground-muted">
-							Positive signals like <Sprout class="inline w-3.5 h-3.5 text-accent-muted" /> Sparked Interest,
-							<Leaf class="inline w-3.5 h-3.5 text-accent-muted" /> Really Resonated, <TreePine
+							Positive signals like <natureIcons.sprout class="inline w-3.5 h-3.5 text-accent-muted" /> Sparked Interest,
+							<natureIcons.leaf class="inline w-3.5 h-3.5 text-accent-muted" /> Really Resonated, <natureIcons.treePine
 								class="inline w-3.5 h-3.5 text-accent-muted"
 							/> Community Favorite.
 						</p>
@@ -87,7 +77,7 @@
 			<GlassCard>
 				<div class="flex items-start gap-3">
 					<div class="p-2 bg-accent-subtle/10 rounded-lg">
-						<Heart class="w-5 h-5 text-accent-muted" />
+						<natureIcons.heart class="w-5 h-5 text-accent-muted" />
 					</div>
 					<div>
 						<h3 class="text-sm font-medium text-foreground mb-1">Writer Wellness</h3>
@@ -101,7 +91,7 @@
 			<GlassCard>
 				<div class="flex items-start gap-3">
 					<div class="p-2 bg-accent-subtle/10 rounded-lg">
-						<Users class="w-5 h-5 text-accent-muted" />
+						<authIcons.users class="w-5 h-5 text-accent-muted" />
 					</div>
 					<div>
 						<h3 class="text-sm font-medium text-foreground mb-1">Meaningful Metrics</h3>
@@ -118,7 +108,7 @@
 	<GlassCard>
 		<div class="flex items-start gap-4">
 			<div class="p-3 bg-accent-subtle/10 rounded-lg shrink-0">
-				<TreePine class="w-8 h-8 text-accent-muted" />
+				<natureIcons.treePine class="w-8 h-8 text-accent-muted" />
 			</div>
 			<div>
 				<h3 class="text-lg font-serif text-foreground mb-2">

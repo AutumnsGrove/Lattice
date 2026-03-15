@@ -3,7 +3,7 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import GlassButton from "@autumnsgrove/lattice/ui/components/ui/GlassButton.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
-	import { BarChart3, ArrowLeft, Plus, Trash2, Copy, Archive } from "@lucide/svelte";
+	import { metricIcons, navIcons, actionIcons, featureIcons } from "@autumnsgrove/prism/icons";
 	import {
 		POLL_TYPE_OPTIONS,
 		RESULTS_VISIBILITY_OPTIONS,

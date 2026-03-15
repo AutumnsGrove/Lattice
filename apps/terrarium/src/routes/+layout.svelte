@@ -2,7 +2,7 @@
 	import '../app.css';
 	import { Logo } from '@autumnsgrove/lattice/ui/nature';
 	import { ThemeToggle, seasonStore, themeStore } from '@autumnsgrove/lattice/ui/chrome';
-	import { ArrowLeft, FlaskConical } from '@lucide/svelte';
+	import { navIcons, phaseIcons } from '@autumnsgrove/prism/icons';
 
 	let { children } = $props();
 
@@ -25,7 +25,7 @@
 				href="https://grove.place"
 				class="flex items-center gap-1.5 text-sm text-foreground-subtle hover:text-foreground transition-colors"
 			>
-				<ArrowLeft class="w-4 h-4" />
+				<navIcons.arrowLeft class="w-4 h-4" />
 				<span class="hidden sm:inline">Back to Grove</span>
 			</a>
 
@@ -44,7 +44,7 @@
 
 		<!-- Center: Greenhouse Badge -->
 		<div class="greenhouse-badge">
-			<FlaskConical class="w-3.5 h-3.5" />
+			<phaseIcons.flaskConical class="w-3.5 h-3.5" />
 			<span>Greenhouse</span>
 		</div>
 

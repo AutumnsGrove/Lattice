@@ -8,22 +8,11 @@
 	import { cn } from '@autumnsgrove/lattice/ui/utils';
 	import { getIncidentStatusLabel } from '$lib/types/status';
 	import type { IncidentStatus } from '$lib/types/status';
-	import {
-		ArrowLeft,
-		AlertCircle,
-		AlertTriangle,
-		Wrench,
-		ShieldAlert,
-		CheckCircle,
-		Search,
-		Eye,
-		Clock,
-		Trees
-	} from '@lucide/svelte';
+	import { navIcons, stateIcons, chromeIcons, authIcons, metricIcons, natureIcons } from '@autumnsgrove/prism/icons';
 
 	// Status page navigation - just a way home
 	const navItems: NavItem[] = [
-		{ href: 'https://grove.place', label: 'Grove', icon: Trees, external: true }
+		{ href: 'https://grove.place', label: 'Grove', icon: natureIcons.trees, external: true }
 	];
 
 	let { data } = $props();
@@ -31,21 +20,21 @@
 
 	// Type icons
 	const typeIcons = {
-		outage: AlertCircle,
-		degraded: AlertTriangle,
-		maintenance: Wrench,
-		security: ShieldAlert
+		outage: stateIcons.alertCircle,
+		degraded: stateIcons.warning,
+		maintenance: chromeIcons.toolbox,
+		security: authIcons.shieldAlert
 	};
 
 	// Status icons for timeline
-	const statusIcons: Record<IncidentStatus, typeof Search> = {
-		investigating: Search,
-		identified: Eye,
-		monitoring: Clock,
-		resolved: CheckCircle
+	const statusIcons = {
+		investigating: navIcons.search,
+		identified: stateIcons.eye,
+		monitoring: metricIcons.clock,
+		resolved: stateIcons.checkCircle
 	};
 
-	const TypeIcon = $derived(typeIcons[incident.type as keyof typeof typeIcons] || AlertCircle);
+	const TypeIcon = $derived(typeIcons[incident.type as keyof typeof typeIcons] || stateIcons.alertCircle);
 
 	// Format timestamp
 	function formatTime(timestamp: string): string {
@@ -101,7 +90,7 @@
 				href="/"
 				class="inline-flex items-center gap-1.5 text-sm text-foreground-muted hover:text-foreground mb-6 transition-colors"
 			>
-				<ArrowLeft class="w-4 h-4" />
+				<navIcons.arrowLeft class="w-4 h-4" />
 				Back to Status
 			</a>
 
@@ -185,7 +174,7 @@
 				<div class="glass-card p-6">
 					<div class="space-y-6">
 						{#each incident.updates as update, i}
-							{@const UpdateIcon = statusIcons[update.status as IncidentStatus] || Clock}
+							{@const UpdateIcon = statusIcons[update.status as IncidentStatus] || metricIcons.clock}
 							<div class="flex gap-4">
 								<!-- Timeline indicator -->
 								<div class="flex flex-col items-center">

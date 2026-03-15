@@ -17,21 +17,7 @@
 -->
 
 <script lang="ts">
-  import {
-    Play,
-    Pause,
-    Grid3X3,
-    Trash2,
-    Copy,
-    Download,
-    Save,
-    ZoomIn,
-    ZoomOut,
-    FlipHorizontal,
-    FlipVertical,
-    Palette,
-    X,
-  } from "@lucide/svelte";
+  import { actionIcons, stateIcons, featureIcons, chromeIcons } from "@autumnsgrove/prism/icons";
   import { cn } from "$lib/ui/utils";
   import { CANVAS_BACKGROUNDS } from "./types";
 
@@ -235,9 +221,9 @@
         aria-label={animationsEnabled ? "Pause animations" : "Play animations"}
       >
         {#if animationsEnabled}
-          <Pause />
+          <actionIcons.pause />
         {:else}
-          <Play />
+          <actionIcons.play />
         {/if}
       </button>
 
@@ -248,7 +234,7 @@
         title={gridEnabled ? "Hide grid (G)" : "Show grid (G)"}
         aria-label={gridEnabled ? "Hide grid" : "Show grid"}
       >
-        <Grid3X3 />
+        <chromeIcons.grid />
       </button>
 
       <!-- Grid Size Dropdown -->
@@ -289,7 +275,7 @@
         title="Zoom out"
         aria-label="Zoom out"
       >
-        <ZoomOut />
+        <actionIcons.zoomOut />
       </button>
 
       <button
@@ -316,7 +302,7 @@
         title="Zoom in"
         aria-label="Zoom in"
       >
-        <ZoomIn />
+        <actionIcons.zoomIn />
       </button>
     </div>
 
@@ -336,7 +322,7 @@
           class="absolute inset-1 rounded"
           style="background: {background};"
         ></div>
-        <Palette class="relative z-10 drop-shadow-sm" />
+        <featureIcons.palette class="relative z-10 drop-shadow-sm" />
       </button>
 
       {#if showBackgroundPicker}
@@ -368,7 +354,7 @@
               title="Close"
               aria-label="Close background picker"
             >
-              <X class="w-4 h-4" />
+              <stateIcons.x class="w-4 h-4" />
             </button>
           </div>
 
@@ -440,7 +426,7 @@
         title="Flip horizontal"
         aria-label="Flip selected asset horizontally"
       >
-        <FlipHorizontal />
+        <actionIcons.flipHorizontal />
       </button>
 
       <button
@@ -450,7 +436,7 @@
         title="Flip vertical"
         aria-label="Flip selected asset vertically"
       >
-        <FlipVertical />
+        <actionIcons.flipVertical />
       </button>
     </div>
 
@@ -467,7 +453,7 @@
         title="Delete selected (⌫)"
         aria-label="Delete selected asset"
       >
-        <Trash2 />
+        <actionIcons.trash />
       </button>
 
       <!-- Duplicate -->
@@ -478,7 +464,7 @@
         title="Duplicate selected (⌘D)"
         aria-label="Duplicate selected asset"
       >
-        <Copy />
+        <actionIcons.copy />
       </button>
 
       <!-- Export PNG -->
@@ -488,7 +474,7 @@
         title="Export as PNG (⌘E)"
         aria-label="Export scene as PNG"
       >
-        <Download />
+        <actionIcons.download />
         <span>Export PNG</span>
       </button>
     </div>
@@ -510,7 +496,7 @@
       title="Save scene (⌘S)"
       aria-label="Save scene"
     >
-      <Save />
+      <actionIcons.save />
       <span>Save</span>
     </button>
   </div>

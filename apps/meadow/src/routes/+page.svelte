@@ -4,7 +4,7 @@
 	import SEO from '$lib/components/SEO.svelte';
 	import { Header, Footer, type NavItem } from '@autumnsgrove/lattice/ui/chrome';
 	import { seasonStore, groveModeStore } from '@autumnsgrove/lattice/ui/stores';
-	import { Users, Heart, Calendar, Zap, Sprout, ArrowRight } from '@lucide/svelte';
+	import { authIcons, natureIcons, metricIcons, phaseIcons, navIcons } from '@autumnsgrove/prism/icons';
 	import { defaultSuite, resolveIcon } from '@autumnsgrove/lattice/ui';
 
 	const groveIcon = resolveIcon(defaultSuite.grove.icon);
@@ -109,7 +109,7 @@
 			<!-- Opt-in -->
 			<div class="glass-grove rounded-xl p-5 border border-divider">
 				<div class="flex items-start gap-3 mb-3">
-					<Users class="w-6 h-6 text-accent-muted flex-shrink-0 mt-0.5" />
+					<authIcons.users class="w-6 h-6 text-accent-muted flex-shrink-0 mt-0.5" />
 					<h3 class="text-lg font-serif text-foreground">Blog owners opt-in</h3>
 				</div>
 				<p class="text-sm md:text-base text-foreground-muted font-sans leading-relaxed">
@@ -120,7 +120,7 @@
 			<!-- Chronological -->
 			<div class="glass-grove rounded-xl p-5 border border-divider">
 				<div class="flex items-start gap-3 mb-3">
-					<Calendar class="w-6 h-6 text-accent-muted flex-shrink-0 mt-0.5" />
+					<metricIcons.calendar class="w-6 h-6 text-accent-muted flex-shrink-0 mt-0.5" />
 					<h3 class="text-lg font-serif text-foreground">Chronological feed</h3>
 				</div>
 				<p class="text-sm md:text-base text-foreground-muted font-sans leading-relaxed">
@@ -131,7 +131,7 @@
 			<!-- Private Voting -->
 			<div class="glass-grove rounded-xl p-5 border border-divider">
 				<div class="flex items-start gap-3 mb-3">
-					<Zap class="w-6 h-6 text-accent-muted flex-shrink-0 mt-0.5" />
+					<phaseIcons.zap class="w-6 h-6 text-accent-muted flex-shrink-0 mt-0.5" />
 					<h3 class="text-lg font-serif text-foreground">Vote privately</h3>
 				</div>
 				<p class="text-sm md:text-base text-foreground-muted font-sans leading-relaxed">
@@ -142,7 +142,7 @@
 			<!-- Author Reactions -->
 			<div class="glass-grove rounded-xl p-5 border border-divider">
 				<div class="flex items-start gap-3 mb-3">
-					<Heart class="w-6 h-6 text-accent-muted flex-shrink-0 mt-0.5" />
+					<natureIcons.heart class="w-6 h-6 text-accent-muted flex-shrink-0 mt-0.5" />
 					<h3 class="text-lg font-serif text-foreground">React authentically</h3>
 				</div>
 				<p class="text-sm md:text-base text-foreground-muted font-sans leading-relaxed">
@@ -196,14 +196,14 @@
 				class="btn-primary inline-flex items-center gap-2 text-base"
 			>
 				Open the Feed
-				<ArrowRight class="w-4 h-4" />
+				<navIcons.arrowRight class="w-4 h-4" />
 			</a>
 			<a
 				href="https://plant.grove.place"
 				class="btn-secondary inline-flex items-center gap-2 text-base"
 			>
 				Plant Your Blog
-				<Sprout class="w-4 h-4" />
+				<natureIcons.sprout class="w-4 h-4" />
 			</a>
 		</div>
 	</section>

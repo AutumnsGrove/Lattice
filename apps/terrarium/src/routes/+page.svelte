@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { Terrarium } from '@autumnsgrove/lattice/ui/terrarium';
-	import { Monitor, Smartphone } from '@lucide/svelte';
+	import { chromeIcons } from '@autumnsgrove/prism/icons';
 
 	// Check viewport width on mount
 	let isMobile = $state(false);
@@ -36,11 +36,11 @@
 			<!-- Icon comparison -->
 			<div class="flex items-center justify-center gap-4">
 				<div class="p-4 rounded-2xl bg-error/10 dark:bg-error/10">
-					<Smartphone class="w-8 h-8 text-error dark:text-error" />
+					<chromeIcons.smartphone class="w-8 h-8 text-error dark:text-error" />
 				</div>
 				<div class="text-foreground-subtle text-2xl">&rarr;</div>
 				<div class="p-4 rounded-2xl bg-accent-foreground/10 dark:bg-accent-foreground/10">
-					<Monitor class="w-8 h-8 text-accent-foreground dark:text-accent-foreground" />
+					<chromeIcons.monitor class="w-8 h-8 text-accent-foreground dark:text-accent-foreground" />
 				</div>
 			</div>
 

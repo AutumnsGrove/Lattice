@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
 	import { cn } from "$lib/ui/utils";
-	import { Send } from "@lucide/svelte";
+	import { actionIcons } from "@autumnsgrove/prism/icons";
 
 	/**
 	 * ChatInput - Auto-resizing textarea with send button.
@@ -107,7 +107,7 @@
 				"disabled:opacity-50 disabled:cursor-not-allowed",
 			)}
 		>
-			<Send size={18} />
+			<actionIcons.send size={18} />
 		</button>
 	</div>
 

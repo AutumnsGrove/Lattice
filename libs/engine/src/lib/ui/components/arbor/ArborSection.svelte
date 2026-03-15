@@ -16,7 +16,7 @@
     </ArborSection>
 -->
 <script lang="ts">
-  import { ChevronLeft } from "@lucide/svelte";
+  import { navIcons } from "@autumnsgrove/prism/icons";
   import { resolveTerm } from "../../utils/grove-term-resolve";
   import type { ArborSectionProps } from "./types";
 
@@ -28,7 +28,7 @@
 <section class="arbor-section">
   {#if backHref}
     <a href={backHref} class="arbor-section-back">
-      <ChevronLeft class="arbor-section-back-icon" />
+      <navIcons.chevronLeft class="arbor-section-back-icon" />
       <span>{backLabel ?? "Back"}</span>
     </a>
   {/if}

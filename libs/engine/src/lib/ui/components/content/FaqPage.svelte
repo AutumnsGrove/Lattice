@@ -4,16 +4,7 @@
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
 	import Accordion from "$lib/ui/components/ui/Accordion.svelte";
 	import GroveTerm from "$lib/components/terminology/GroveTerm.svelte";
-	import {
-		Sprout,
-		PenLine,
-		Users,
-		ShieldCheck,
-		CreditCard,
-		LifeBuoy,
-		Mail,
-		MessageCircleQuestion,
-	} from "@lucide/svelte";
+	import { natureIcons, actionIcons, authIcons, metricIcons, chromeIcons, featureIcons } from "@autumnsgrove/prism/icons";
 
 	// --- Item definitions (titles only, content rendered via snippets) ---
 
@@ -66,7 +57,7 @@
 	<!-- Hero header -->
 	<Glass variant="tint" as="header" class="rounded-2xl p-8 md:p-12 mb-10 text-center">
 		<div class="flex items-center justify-center gap-3 mb-4">
-			<MessageCircleQuestion
+			<featureIcons.messageCircleQuestion
 				aria-hidden="true"
 				class="w-8 h-8 text-grove-600 dark:text-grove-400"
 			/>
@@ -87,7 +78,7 @@
 					<div
 						class="flex items-center justify-center w-10 h-10 rounded-lg bg-grove-100 dark:bg-grove-900/40"
 					>
-						<Sprout aria-hidden="true" class="w-5 h-5 text-grove-600 dark:text-grove-400" />
+						<natureIcons.sprout aria-hidden="true" class="w-5 h-5 text-grove-600 dark:text-grove-400" />
 					</div>
 					<div>
 						<h2 class="text-xl font-semibold text-foreground">Getting Started</h2>
@@ -149,7 +140,7 @@
 					<div
 						class="flex items-center justify-center w-10 h-10 rounded-lg bg-grove-100 dark:bg-grove-900/40"
 					>
-						<PenLine aria-hidden="true" class="w-5 h-5 text-grove-600 dark:text-grove-400" />
+						<actionIcons.penLine aria-hidden="true" class="w-5 h-5 text-grove-600 dark:text-grove-400" />
 					</div>
 					<div>
 						<h2 class="text-xl font-semibold text-foreground">
@@ -204,7 +195,7 @@
 					<div
 						class="flex items-center justify-center w-10 h-10 rounded-lg bg-grove-100 dark:bg-grove-900/40"
 					>
-						<Users aria-hidden="true" class="w-5 h-5 text-grove-600 dark:text-grove-400" />
+						<authIcons.users aria-hidden="true" class="w-5 h-5 text-grove-600 dark:text-grove-400" />
 					</div>
 					<div>
 						<h2 class="text-xl font-semibold text-foreground">Community</h2>
@@ -256,7 +247,7 @@
 					<div
 						class="flex items-center justify-center w-10 h-10 rounded-lg bg-grove-100 dark:bg-grove-900/40"
 					>
-						<ShieldCheck aria-hidden="true" class="w-5 h-5 text-grove-600 dark:text-grove-400" />
+						<authIcons.shieldCheck aria-hidden="true" class="w-5 h-5 text-grove-600 dark:text-grove-400" />
 					</div>
 					<div>
 						<h2 class="text-xl font-semibold text-foreground">Privacy & Security</h2>
@@ -299,7 +290,7 @@
 					<div
 						class="flex items-center justify-center w-10 h-10 rounded-lg bg-grove-100 dark:bg-grove-900/40"
 					>
-						<CreditCard aria-hidden="true" class="w-5 h-5 text-grove-600 dark:text-grove-400" />
+						<metricIcons.creditCard aria-hidden="true" class="w-5 h-5 text-grove-600 dark:text-grove-400" />
 					</div>
 					<div>
 						<h2 class="text-xl font-semibold text-foreground">Billing & Plans</h2>
@@ -348,7 +339,7 @@
 					<div
 						class="flex items-center justify-center w-10 h-10 rounded-lg bg-grove-100 dark:bg-grove-900/40"
 					>
-						<LifeBuoy aria-hidden="true" class="w-5 h-5 text-grove-600 dark:text-grove-400" />
+						<chromeIcons.lifebuoy aria-hidden="true" class="w-5 h-5 text-grove-600 dark:text-grove-400" />
 					</div>
 					<div>
 						<h2 class="text-xl font-semibold text-foreground">Troubleshooting</h2>
@@ -407,7 +398,7 @@
 		<div class="flex flex-wrap items-center justify-center gap-4">
 			<GlassButton variant="accent" href="https://grove.place/contact">
 				<span class="inline-flex items-center gap-2">
-					<Mail class="w-4 h-4" />
+					<featureIcons.mail class="w-4 h-4" />
 					Contact Us
 				</span>
 			</GlassButton>

@@ -1,7 +1,11 @@
 <script lang="ts">
 	import type { PageData } from "./$types";
 	import { GlassCard } from "@autumnsgrove/lattice/ui";
-	import { HardDrive, Info, CheckCircle2, AlertTriangle } from "@lucide/svelte";
+	import { featureIcons, stateIcons } from "@autumnsgrove/prism/icons";
+	const HardDrive = featureIcons.hardDrive;
+	const Info = stateIcons.info;
+	const CheckCircle2 = stateIcons.checkCircle2;
+	const AlertTriangle = stateIcons.warning;
 
 	let { data }: { data: PageData } = $props();
 

@@ -6,16 +6,15 @@
 	 */
 
 	import { GlassCard } from "@autumnsgrove/lattice/ui";
-	import {
-		Map,
-		Download,
-		RotateCcw,
-		AlertTriangle,
-		Loader2,
-		HardDrive,
-		Clock,
-		Trash2,
-	} from "@lucide/svelte";
+	import { navIcons, actionIcons, stateIcons, featureIcons, metricIcons } from "@autumnsgrove/prism/icons";
+	const Map = navIcons.map;
+	const Download = actionIcons.download;
+	const RotateCcw = actionIcons.rotateCcw;
+	const AlertTriangle = stateIcons.warning;
+	const Loader2 = stateIcons.loader;
+	const HardDrive = featureIcons.hardDrive;
+	const Clock = metricIcons.clock;
+	const Trash2 = actionIcons.trash;
 
 	interface Props {
 		serverRunning: boolean;

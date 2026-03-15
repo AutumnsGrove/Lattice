@@ -22,7 +22,7 @@
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import Button from "$lib/ui/components/ui/Button.svelte";
 	import Waystone from "$lib/ui/components/ui/Waystone.svelte";
-	import { Sprout, RotateCcw, Sparkles, FlaskConical, Leaf, CheckCircle } from "@lucide/svelte";
+	import { stateIcons, natureIcons, actionIcons, phaseIcons } from "@autumnsgrove/prism/icons";
 
 	let {
 		grafts,
@@ -48,7 +48,7 @@
 	<GlassCard variant="frosted" class="graft-panel {className}">
 		<div class="empty-state">
 			<div class="empty-icon">
-				<Sparkles class="icon" />
+				<phaseIcons.sparkles class="icon" />
 			</div>
 			<h3>No experimental features available</h3>
 			<p>Check back soon! New features are always growing in the greenhouse.</p>
@@ -60,7 +60,7 @@
 		<div class="panel-header">
 			<div class="header-content">
 				<div class="header-icon">
-					<Sprout class="icon" />
+					<natureIcons.sprout class="icon" />
 				</div>
 				<div class="header-text">
 					<h2>
@@ -76,12 +76,12 @@
 			<!-- Stats -->
 			<div class="stats">
 				<span class="stat enabled">
-					<span class="stat-icon"><Sprout size={20} /></span>
+					<span class="stat-icon"><natureIcons.sprout class="w-5 h-5" /></span>
 					<span class="stat-value">{enabledCount}</span>
 					<span class="stat-label">Enabled</span>
 				</span>
 				<span class="stat total">
-					<span class="stat-icon"><Leaf size={20} /></span>
+					<span class="stat-icon"><natureIcons.leaf class="w-5 h-5" /></span>
 					<span class="stat-value">{grafts.length}</span>
 					<span class="stat-label">Available</span>
 				</span>
@@ -93,7 +93,7 @@
 			{#if experimentalGrafts.length > 0}
 				<div class="graft-section">
 					<div class="section-header">
-						<FlaskConical class="section-icon" />
+						<phaseIcons.flaskConical class="section-icon" />
 						<span>Experimental</span>
 					</div>
 					{#each experimentalGrafts as graft (graft.id)}
@@ -105,7 +105,7 @@
 			{#if betaGrafts.length > 0}
 				<div class="graft-section">
 					<div class="section-header">
-						<Sparkles class="section-icon" />
+						<phaseIcons.sparkles class="section-icon" />
 						<span>Beta</span>
 					</div>
 					{#each betaGrafts as graft (graft.id)}

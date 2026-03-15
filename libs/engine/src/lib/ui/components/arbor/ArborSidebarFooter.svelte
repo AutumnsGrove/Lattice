@@ -6,7 +6,8 @@
   Internal component — not exported to consumers.
 -->
 <script lang="ts">
-	import { LogOut, HelpCircle, MessageCircle } from "@lucide/svelte";
+	import { authIcons, stateIcons, featureIcons } from "@autumnsgrove/prism/icons";
+	import type { Component } from "svelte";
 	import type { Snippet } from "svelte";
 	import type { ArborFooterLink } from "./types";
 
@@ -22,13 +23,13 @@
 	let { showExpanded, user, footerLinks, logoutHref, onLogout, customFooter }: Props = $props();
 
 	/** Map of known link labels to their default icons */
-	const defaultIcons: Record<string, typeof HelpCircle> = {
-		"Help Center": HelpCircle,
-		"Get Support": MessageCircle,
+	const defaultIcons: Record<string, Component> = {
+		"Help Center": stateIcons.help,
+		"Get Support": featureIcons.messageCircle,
 	};
 
 	function getIcon(link: ArborFooterLink) {
-		return link.icon || defaultIcons[link.label] || HelpCircle;
+		return link.icon || defaultIcons[link.label] || stateIcons.help;
 	}
 
 	function handleLogout(e: MouseEvent) {
@@ -69,18 +70,18 @@
 			{#if user}
 				{#if onLogout && !logoutHref}
 					<button class="arbor-logout-btn" onclick={handleLogout}>
-						<LogOut class="arbor-logout-icon" />
+						<authIcons.logout class="arbor-logout-icon" />
 						<span>Logout</span>
 					</button>
 				{:else}
 					<a href={logoutHref ?? "/auth/logout"} class="arbor-logout-btn">
-						<LogOut class="arbor-logout-icon" />
+						<authIcons.logout class="arbor-logout-icon" />
 						<span>Logout</span>
 					</a>
 				{/if}
 			{:else}
 				<a href={logoutHref ?? "/auth/login"} class="arbor-logout-btn">
-					<LogOut class="arbor-logout-icon" />
+					<authIcons.logout class="arbor-logout-icon" />
 					<span>Sign In</span>
 				</a>
 			{/if}
@@ -112,7 +113,7 @@
 						aria-label="Logout"
 						onclick={handleLogout}
 					>
-						<LogOut class="arbor-logout-icon" />
+						<authIcons.logout class="arbor-logout-icon" />
 					</button>
 				{:else}
 					<a
@@ -121,7 +122,7 @@
 						title="Logout"
 						aria-label="Logout"
 					>
-						<LogOut class="arbor-logout-icon" />
+						<authIcons.logout class="arbor-logout-icon" />
 					</a>
 				{/if}
 			{:else}
@@ -131,7 +132,7 @@
 					title="Sign In"
 					aria-label="Sign In"
 				>
-					<LogOut class="arbor-logout-icon" />
+					<authIcons.logout class="arbor-logout-icon" />
 				</a>
 			{/if}
 		{/if}

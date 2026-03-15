@@ -5,7 +5,7 @@
 	import GlassOverlay from "@autumnsgrove/lattice/ui/components/ui/GlassOverlay.svelte";
 	import Button from "@autumnsgrove/lattice/ui/components/ui/Button.svelte";
 	import { getImageTitle } from "@autumnsgrove/lattice/utils";
-	import { X, ChevronLeft, ChevronRight } from "@lucide/svelte";
+	import { stateIcons, navIcons } from "@autumnsgrove/prism/icons";
 
 	let { data } = $props();
 
@@ -219,7 +219,7 @@
 {#if lightboxOpen && data.config.enableLightbox}
 	<GlassOverlay onclick={closeLightbox} class="gallery-lightbox">
 		<GlassButton variant="ghost" onclick={closeLightbox} aria-label="Close" class="lightbox-close">
-			<X class="w-6 h-6" />
+			<stateIcons.x class="w-6 h-6" />
 		</GlassButton>
 
 		<!-- Navigation buttons -->
@@ -233,7 +233,7 @@
 				aria-label="Previous image"
 				class="lightbox-nav prev"
 			>
-				<ChevronLeft class="w-7 h-7" />
+				<navIcons.chevronLeft class="w-7 h-7" />
 			</GlassButton>
 		{/if}
 
@@ -247,7 +247,7 @@
 				aria-label="Next image"
 				class="lightbox-nav next"
 			>
-				<ChevronRight class="w-7 h-7" />
+				<navIcons.chevronRight class="w-7 h-7" />
 			</GlassButton>
 		{/if}
 

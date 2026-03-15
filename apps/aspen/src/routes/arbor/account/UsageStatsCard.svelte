@@ -1,7 +1,7 @@
 <script lang="ts">
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
-	import { AlertCircle, HardDrive, FileText, Calendar } from "@lucide/svelte";
+	import { stateIcons, featureIcons, metricIcons } from "@autumnsgrove/prism/icons";
 	import { formatStorage, formatLimit } from "@autumnsgrove/lattice/config/tiers";
 	import type { UsageData } from "./types";
 	import { USAGE_WARNING_THRESHOLD } from "./utils";
@@ -23,7 +23,7 @@
 	<GlassCard variant="default" class="mb-6">
 		<h2>Usage</h2>
 		<div class="error-state small" role="alert" aria-live="polite">
-			<AlertCircle class="error-icon" aria-hidden="true" />
+			<stateIcons.alertCircle class="error-icon" aria-hidden="true" />
 			<p class="error-desc">Unable to load usage statistics. Please try again later.</p>
 		</div>
 	</GlassCard>
@@ -32,7 +32,7 @@
 		<h2>Usage</h2>
 		<div class="usage-grid">
 			<div class="usage-item">
-				<HardDrive class="usage-icon" aria-hidden="true" />
+				<featureIcons.hardDrive class="usage-icon" aria-hidden="true" />
 				<div class="usage-info">
 					<span class="usage-label" id="storage-label">Storage</span>
 					<span class="usage-value">
@@ -59,7 +59,7 @@
 			</div>
 
 			<div class="usage-item">
-				<FileText class="usage-icon" aria-hidden="true" />
+				<featureIcons.fileText class="usage-icon" aria-hidden="true" />
 				<div class="usage-info">
 					<span class="usage-label" id="posts-label"
 						><GroveTerm term="blooms">Blooms</GroveTerm></span
@@ -88,7 +88,7 @@
 			</div>
 
 			<div class="usage-item">
-				<Calendar class="usage-icon" aria-hidden="true" />
+				<metricIcons.calendar class="usage-icon" aria-hidden="true" />
 				<div class="usage-info">
 					<span class="usage-label">Account Age</span>
 					<span class="usage-value">{usage.accountAge} days</span>

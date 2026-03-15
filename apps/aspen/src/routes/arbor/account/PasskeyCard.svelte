@@ -2,7 +2,7 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import Button from "@autumnsgrove/lattice/ui/components/ui/Button.svelte";
 	import Spinner from "@autumnsgrove/lattice/ui/components/ui/Spinner.svelte";
-	import { KeyRound, Plus, Trash2, Fingerprint, AlertCircle } from "@lucide/svelte";
+	import { authIcons, actionIcons, stateIcons } from "@autumnsgrove/prism/icons";
 	import type { Passkey } from "@autumnsgrove/lattice/heartwood";
 	import { formatDateShort } from "@autumnsgrove/lattice/utils/date";
 
@@ -50,7 +50,7 @@
 <GlassCard variant="default" class="mb-6">
 	<div class="card-header">
 		<h2>
-			<KeyRound class="header-icon" aria-hidden="true" />
+			<authIcons.key class="header-icon" aria-hidden="true" />
 			Passkeys
 			{#if passkeys.length > 0}
 				<span class="passkey-count">({passkeys.length})</span>
@@ -67,14 +67,14 @@
 	{:else if passkeyError}
 		<!-- Error State -->
 		<div class="error-state" role="alert">
-			<AlertCircle class="error-icon" aria-hidden="true" />
+			<stateIcons.alertCircle class="error-icon" aria-hidden="true" />
 			<p>Could not load passkeys. Please try refreshing the page.</p>
 		</div>
 	{:else if passkeys.length === 0}
 		<!-- Empty State -->
 		<div class="empty-state">
 			<div class="empty-icon-wrapper">
-				<Fingerprint class="empty-icon" aria-hidden="true" />
+				<authIcons.fingerprint class="empty-icon" aria-hidden="true" />
 			</div>
 			<h3>No passkeys yet</h3>
 			<p class="empty-description">
@@ -84,7 +84,7 @@
 
 			{#if supportsPasskeys}
 				<Button variant="primary" onclick={onRegister} aria-label="Add your first passkey">
-					<Plus class="btn-icon" aria-hidden="true" />
+					<actionIcons.plus class="btn-icon" aria-hidden="true" />
 					Add Your First Passkey
 				</Button>
 			{:else}
@@ -97,7 +97,7 @@
 			{#each passkeys as passkey (passkey.id)}
 				<li class="passkey-item">
 					<div class="passkey-info">
-						<Fingerprint class="passkey-icon" aria-hidden="true" />
+						<authIcons.fingerprint class="passkey-icon" aria-hidden="true" />
 						<div class="passkey-details">
 							<span class="passkey-name">{passkey.name}</span>
 							<span class="passkey-meta">
@@ -119,7 +119,7 @@
 						{#if deletingId === passkey.id}
 							<span aria-hidden="true"><Spinner size="sm" /></span>
 						{:else}
-							<Trash2 class="delete-icon" aria-hidden="true" />
+							<actionIcons.trash class="delete-icon" aria-hidden="true" />
 						{/if}
 						Remove
 					</Button>
@@ -131,7 +131,7 @@
 		{#if supportsPasskeys}
 			<div class="add-more">
 				<Button variant="secondary" onclick={onRegister} aria-label="Add another passkey">
-					<Plus class="btn-icon" aria-hidden="true" />
+					<actionIcons.plus class="btn-icon" aria-hidden="true" />
 					Add Passkey
 				</Button>
 			</div>

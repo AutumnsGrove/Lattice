@@ -2,7 +2,7 @@
 	import ThemeToggle from "$lib/ui/components/chrome/ThemeToggle.svelte";
 	import Logo from "$lib/ui/components/ui/Logo.svelte";
 	import GroveDivider from "$lib/ui/components/nature/GroveDivider.svelte";
-	import { ExternalLink, Leaf } from "@lucide/svelte";
+	import { navIcons, natureIcons } from "@autumnsgrove/prism/icons";
 	import { seasonStore } from "$lib/ui/stores/season.svelte";
 	import { groveModeStore } from "$lib/ui/stores/grove-mode.svelte";
 	import type { FooterLink, MaxWidth, Season } from "$lib/ui/components/chrome/types";
@@ -130,7 +130,7 @@
 									{/if}
 									{labelFor(link)}
 									{#if link.external}
-										<ExternalLink class="w-3 h-3" />
+										<navIcons.external class="w-3 h-3" />
 									{/if}
 								</a>
 							</li>
@@ -179,7 +179,7 @@
 						aria-pressed={groveModeStore.current}
 						title={groveModeStore.current ? "Grove Mode is on" : "Grove Mode is off"}
 					>
-						<Leaf class="w-3.5 h-3.5" />
+						<natureIcons.leaf class="w-3.5 h-3.5" />
 						<span>Grove Mode</span>
 					</button>
 

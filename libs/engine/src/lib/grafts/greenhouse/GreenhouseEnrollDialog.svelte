@@ -19,7 +19,7 @@
 	import type { GreenhouseEnrollDialogProps } from "./types.js";
 	import Dialog from "$lib/ui/components/ui/Dialog.svelte";
 	import Button from "$lib/ui/components/ui/Button.svelte";
-	import { Sprout } from "@lucide/svelte";
+	import { natureIcons } from "@autumnsgrove/prism/icons";
 
 	let {
 		open,
@@ -84,7 +84,7 @@
 	{#snippet header()}
 		<div class="dialog-header">
 			<div class="icon-wrapper">
-				<Sprout class="w-6 h-6 text-success-foreground" />
+				<natureIcons.sprout class="w-6 h-6 text-success-foreground" />
 			</div>
 			<h2 class="text-xl font-serif text-foreground">Enroll in Greenhouse</h2>
 			<p class="text-sm text-foreground-muted mt-1">

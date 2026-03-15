@@ -5,7 +5,7 @@
 	 * Minimal footer with links to main Grove site and support.
 	 */
 	import { cn } from '$lib/utils/cn';
-	import { Mail, ExternalLink } from '@lucide/svelte';
+	import { featureIcons, navIcons } from '@autumnsgrove/prism/icons';
 	import { defaultSuite, resolveIcon } from '$lib/ui/components/ui/groveicon';
 	import type { FooterLink, MaxWidth } from './types';
 
@@ -35,7 +35,7 @@
 	const DEFAULT_LINKS: FooterLink[] = [
 		{ href: 'https://grove.place', label: 'grove.place', icon: groveIcon, external: true },
 		{ href: '/feed', label: 'Subscribe via RSS' },
-		{ href: 'mailto:support@grove.place', label: 'Contact Support', icon: Mail }
+		{ href: 'mailto:support@grove.place', label: 'Contact Support', icon: featureIcons.mail }
 	];
 
 	const items = $derived(links || DEFAULT_LINKS);
@@ -65,7 +65,7 @@
 					{/if}
 					{link.label}
 					{#if link.external}
-						<ExternalLink class="w-3 h-3 opacity-50" />
+						<navIcons.external class="w-3 h-3 opacity-50" />
 					{/if}
 				</a>
 			{/each}

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
-	import { CreditCard, ExternalLink, Gift } from "@lucide/svelte";
+	import { metricIcons, navIcons, blazeIcons } from "@autumnsgrove/prism/icons";
 	import { buildPortalUrl } from "@autumnsgrove/lattice/config/billing";
 	import { page } from "$app/stores";
 	import type { BillingData } from "./types";
@@ -28,7 +28,7 @@
 		<!-- Comped account - show friendly message -->
 		<div class="comped-notice">
 			<div class="comped-icon">
-				<Gift class="gift-icon" aria-hidden="true" />
+				<blazeIcons.gift class="gift-icon" aria-hidden="true" />
 			</div>
 			<div class="comped-content">
 				<p class="comped-title">Complimentary Account</p>
@@ -38,7 +38,7 @@
 	{:else if billing?.paymentMethod}
 		<div class="payment-info">
 			<div class="card-display">
-				<CreditCard class="card-icon" aria-hidden="true" />
+				<metricIcons.creditCard class="card-icon" aria-hidden="true" />
 				<div class="card-details">
 					<span class="card-brand">{billing.paymentMethod.brand || "Card"}</span>
 					<span class="card-number">•••• {billing.paymentMethod.last4}</span>
@@ -55,7 +55,7 @@
 		<p class="payment-note">
 			<button type="button" onclick={openBillingPortal} class="portal-button">
 				Manage Payment Method
-				<ExternalLink class="external-icon" aria-hidden="true" />
+				<navIcons.external class="external-icon" aria-hidden="true" />
 			</button>
 		</p>
 	{/if}

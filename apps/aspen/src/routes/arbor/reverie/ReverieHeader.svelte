@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Sparkles } from "@lucide/svelte";
+	import { phaseIcons } from "@autumnsgrove/prism/icons";
 
 	interface Props {
 		onAtmospherePick: (keyword: string) => void;
@@ -14,7 +14,7 @@
 <header class="reverie-header">
 	<div class="header-top">
 		<div class="header-title">
-			<Sparkles size={18} class="text-violet-400" aria-hidden="true" />
+			<phaseIcons.sparkles size={18} class="text-violet-400" aria-hidden="true" />
 			<h2>Reverie</h2>
 		</div>
 	</div>

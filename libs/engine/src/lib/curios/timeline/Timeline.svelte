@@ -16,18 +16,7 @@
 
 	// Local instance with breaks: true for timeline rendering
 	const timelineMd = new MarkdownIt({ breaks: true, linkify: true });
-	import {
-		Calendar,
-		GitCommit,
-		Plus,
-		Minus,
-		FolderGit2,
-		ChevronDown,
-		ChevronUp,
-		Cloud,
-		Loader2,
-		Flame,
-	} from "@lucide/svelte";
+	import { metricIcons, actionIcons, navIcons, featureIcons, stateIcons, natureIcons } from "@autumnsgrove/prism/icons";
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import GlassButton from "$lib/ui/components/ui/GlassButton.svelte";
 	import Badge from "$lib/ui/components/ui/Badge.svelte";
@@ -250,7 +239,7 @@
 <div class="timeline-component">
 	{#if summaries.length === 0}
 		<div class="empty-state">
-			<Cloud size={48} />
+			<featureIcons.cloud class="w-12 h-12" />
 			<h2>No summaries yet</h2>
 			<p>Daily summaries will appear here once generation begins.</p>
 		</div>
@@ -289,18 +278,18 @@
 							<div class="commit-badge-wrapper">
 								{#if isRestDay}
 									<Badge class="commit-badge rest-badge">
-										<Cloud size={14} />
+										<featureIcons.cloud class="w-[14px] h-[14px]" />
 										<span>Rest Day</span>
 									</Badge>
 								{:else}
 									{#if focusStreak}
 										<Badge class="focus-badge">
-											<Flame size={14} />
+											<natureIcons.flame class="w-[14px] h-[14px]" />
 											<span>{focusStreak}</span>
 										</Badge>
 									{/if}
 									<Badge class="commit-badge">
-										<GitCommit size={14} />
+										<featureIcons.gitCommit class="w-3.5 h-3.5" />
 										<span>{summary.commit_count} commit{summary.commit_count !== 1 ? "s" : ""}</span
 										>
 									</Badge>
@@ -317,14 +306,14 @@
 
 							<div class="meta-info">
 								<span class="repos">
-									<FolderGit2 size={14} />
+									<featureIcons.folderGit2 class="w-3.5 h-3.5" />
 									{summary.repos_active?.join(", ") || "Unknown"}
 								</span>
 								{#if summary.total_additions > 0 || summary.total_deletions > 0}
 									<span class="changes">
-										<Plus size={14} class="plus-icon" />
+										<actionIcons.plus class="w-[14px] h-[14px] plus-icon" />
 										{summary.total_additions.toLocaleString()}
-										<Minus size={14} class="minus-icon" />
+										<actionIcons.minus class="w-[14px] h-[14px] minus-icon" />
 										{summary.total_deletions.toLocaleString()}
 									</span>
 								{/if}
@@ -348,10 +337,10 @@
 										class="expand-btn w-full"
 									>
 										{#if isExpanded}
-											<ChevronUp size={16} />
+											<navIcons.chevronUp class="w-4 h-4" />
 											<span>Hide Details</span>
 										{:else}
-											<ChevronDown size={16} />
+											<navIcons.chevronDown class="w-4 h-4" />
 											<span>Show Details</span>
 										{/if}
 									</GlassButton>
@@ -374,7 +363,7 @@
 					class="load-more-btn"
 				>
 					{#if loadingMore}
-						<Loader2 size={16} class="spinner" />
+						<stateIcons.loader class="w-4 h-4 spinner" />
 						<span>Loading...</span>
 					{:else}
 						<span>Load More</span>

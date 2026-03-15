@@ -131,10 +131,13 @@ export const ICON_MANIFEST: IconManifest = {
 		globe: "Globe",
 		earth: "Earth",
 		compass: "Compass",
+		map: "Map",
 		mapPin: "MapPin",
 		signpost: "Signpost",
 		route: "Route",
 		waypoints: "Waypoints",
+		scroll: "Scroll",
+		heartHandshake: "HeartHandshake",
 	},
 
 	// -----------------------------------------------------------------------
@@ -159,6 +162,8 @@ export const ICON_MANIFEST: IconManifest = {
 		smile: "Smile",
 		meh: "Meh",
 		frown: "Frown",
+		circleDot: "CircleDot",
+		circleCheck: "CircleCheck",
 	},
 
 	// -----------------------------------------------------------------------
@@ -186,6 +191,10 @@ export const ICON_MANIFEST: IconManifest = {
 		sun: "Sun",
 		moon: "Moon",
 		snowflake: "Snowflake",
+		mountain: "Mountain",
+		droplets: "Droplets",
+		landmark: "Landmark",
+		bug: "Bug",
 	},
 
 	// -----------------------------------------------------------------------
@@ -223,6 +232,8 @@ export const ICON_MANIFEST: IconManifest = {
 		bookMarked: "BookMarked",
 		filter: "Filter",
 		ellipsis: "Ellipsis",
+		ellipsisH: "MoreHorizontal",
+		sortAlt: "ArrowUpDown",
 		bold: "Bold",
 		italic: "Italic",
 		heading1: "Heading1",
@@ -230,11 +241,29 @@ export const ICON_MANIFEST: IconManifest = {
 		heading3: "Heading3",
 		list: "List",
 		link: "Link",
+		link2: "Link2",
 		type: "Type",
 		sticker: "Sticker",
 		mousePointer: "MousePointer",
 		hand: "Hand",
 		focus: "Focus",
+		play: "Play",
+		pause: "Pause",
+		zoomIn: "ZoomIn",
+		zoomOut: "ZoomOut",
+		flipHorizontal: "FlipHorizontal",
+		flipVertical: "FlipVertical",
+		maximize: "Maximize2",
+		minimize: "Minimize2",
+		columns: "Columns2",
+		pin: "Pin",
+		anchor: "Anchor",
+		pilcrow: "Pilcrow",
+		imageIcon: "ImageIcon",
+		settings2: "Settings2",
+		target: "Target",
+		workflow: "Workflow",
+		radio: "Radio",
 	},
 
 	// -----------------------------------------------------------------------
@@ -246,6 +275,9 @@ export const ICON_MANIFEST: IconManifest = {
 		mailX: "MailX",
 		mailbox: "Mailbox",
 		hardDrive: "HardDrive",
+		folder: "Folder",
+		folderOpen: "FolderOpen",
+		video: "Video",
 		palette: "Palette",
 		paintbrush: "PaintbrushVertical",
 		swatchBook: "SwatchBook",
@@ -261,6 +293,7 @@ export const ICON_MANIFEST: IconManifest = {
 		fileEdit: "FileEdit",
 		fileWarning: "FileWarning",
 		tag: "Tag",
+		tags: "Tags",
 		hash: "Hash",
 		layers: "Layers",
 		database: "Database",
@@ -298,6 +331,17 @@ export const ICON_MANIFEST: IconManifest = {
 		galleryHorizontalEnd: "GalleryHorizontalEnd",
 		chevronsLeftRightEllipsis: "ChevronsLeftRightEllipsis",
 		squaresExclude: "SquaresExclude",
+		inbox: "Inbox",
+		messageCircleQuestion: "MessageCircleQuestion",
+		gitCommit: "GitCommit",
+		gitMerge: "GitMerge",
+		gitPullRequest: "GitPullRequest",
+		gitFork: "GitFork",
+		folderGit2: "FolderGit2",
+		stickyNote: "StickyNote",
+		wifi: "Wifi",
+		wifiOff: "WifiOff",
+		square: "Square",
 	},
 
 	// -----------------------------------------------------------------------
@@ -334,6 +378,7 @@ export const ICON_MANIFEST: IconManifest = {
 	// -----------------------------------------------------------------------
 	metric: {
 		clock: "Clock",
+		history: "History",
 		calendar: "Calendar",
 		calendarDays: "CalendarDays",
 		trending: "TrendingUp",
@@ -346,6 +391,7 @@ export const ICON_MANIFEST: IconManifest = {
 		dollarSign: "DollarSign",
 		creditCard: "CreditCard",
 		handCoins: "HandCoins",
+		coins: "Coins",
 	},
 
 	// -----------------------------------------------------------------------
@@ -365,6 +411,7 @@ export const ICON_MANIFEST: IconManifest = {
 		rocket: "Rocket",
 		brain: "Brain",
 		flaskConical: "FlaskConical",
+		diamond: "Diamond",
 	},
 
 	// -----------------------------------------------------------------------
@@ -521,6 +568,7 @@ export const ICON_MANIFEST: IconManifest = {
 		shapes: "Shapes",
 		panelLeftOpen: "PanelLeftOpen",
 		sliders: "SlidersHorizontal",
+		grid: "Grid3x3",
 		monitor: "Monitor",
 		smartphone: "Smartphone",
 		blinds: "Blinds",
@@ -540,6 +588,7 @@ export const ICON_MANIFEST: IconManifest = {
 		refrigerator: "Refrigerator",
 		projector: "Projector",
 		spool: "Spool",
+		construction: "Construction",
 		binoculars: "Binoculars",
 		landPlot: "LandPlot",
 		goal: "Goal",
@@ -561,6 +610,8 @@ export const ICON_MANIFEST: IconManifest = {
 		handCoins: "HandCoins",
 		thumbsUp: "ThumbsUp",
 		thumbsDown: "ThumbsDown",
+		armchair: "Armchair",
+		shredder: "Shredder",
 	},
 };
 

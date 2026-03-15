@@ -7,18 +7,8 @@
 	import { TERRARIUM_CONFIG } from '$lib/config/terrarium';
 	import type { AssetCategory } from './types';
 	import PaletteItem from './PaletteItem.svelte';
-	import {
-		Trees,
-		Bug,
-		Leaf,
-		Mountain,
-		Landmark,
-		Cloud,
-		Droplets,
-		Snowflake,
-		ChevronDown
-	} from '@lucide/svelte';
 	import type { Component } from 'svelte';
+	import { natureIcons, featureIcons, navIcons } from '@autumnsgrove/prism/icons';
 
 	interface Props {
 		onAssetSelect: (name: string, category: AssetCategory) => void;
@@ -37,12 +27,12 @@
 	const categoriesMap: Record<AssetCategory, CategoryMeta> = {
 		trees: {
 			name: 'Trees',
-			icon: Trees,
+			icon: natureIcons.trees,
 			assets: ['GroveLogo', 'TreeAspen', 'TreeBirch', 'TreeCherry', 'TreePine']
 		},
 		creatures: {
 			name: 'Creatures',
-			icon: Bug,
+			icon: natureIcons.bug,
 			assets: [
 				'Bee',
 				'Bird',
@@ -61,12 +51,12 @@
 		},
 		botanical: {
 			name: 'Botanical',
-			icon: Leaf,
+			icon: natureIcons.leaf,
 			assets: ['Acorn', 'Berry', 'DandelionPuff', 'Leaf', 'PineCone', 'Vine']
 		},
 		ground: {
 			name: 'Ground',
-			icon: Mountain,
+			icon: natureIcons.mountain,
 			assets: [
 				'Bush',
 				'Crocus',
@@ -84,12 +74,12 @@
 		},
 		sky: {
 			name: 'Sky',
-			icon: Cloud,
+			icon: featureIcons.cloud,
 			assets: ['Cloud', 'CloudWispy', 'Moon', 'Rainbow', 'Star', 'StarCluster', 'StarShooting', 'Sun']
 		},
 		structural: {
 			name: 'Structural',
-			icon: Landmark,
+			icon: natureIcons.landmark,
 			assets: [
 				'Birdhouse',
 				'Bridge',
@@ -103,12 +93,12 @@
 		},
 		water: {
 			name: 'Water',
-			icon: Droplets,
+			icon: natureIcons.droplets,
 			assets: ['LilyPad', 'Pond', 'Reeds', 'Stream']
 		},
 		weather: {
 			name: 'Weather',
-			icon: Snowflake,
+			icon: natureIcons.snowflake,
 			assets: ['Snowflake']
 		}
 	};
@@ -185,7 +175,7 @@
 								({assets.length})
 							</span>
 						</span>
-						<ChevronDown
+						<navIcons.chevronDown
 							class="w-4 h-4 transition-transform duration-200 {expandedCategories.has(key)
 								? 'rotate-180'
 								: ''}"

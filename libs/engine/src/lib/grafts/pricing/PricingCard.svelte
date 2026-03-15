@@ -6,7 +6,7 @@
 	 * Glassmorphism styled with Grove aesthetics.
 	 */
 
-	import { Check } from "@lucide/svelte";
+	import { stateIcons } from "@autumnsgrove/prism/icons";
 	import { defaultSuite, resolveIcon } from "$lib/ui/components/ui/groveicon";
 	import type { IconComponent } from "$lib/ui/components/ui/groveicon";
 	import type { PricingCardProps } from "./types.js";
@@ -129,7 +129,7 @@
 	<ul class="flex-1 space-y-3 mb-6">
 		{#each displayFeatures as feature}
 			<li class="flex items-start gap-2 text-sm text-foreground-muted">
-				<Check class="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
+				<stateIcons.check class="w-4 h-4 text-accent mt-0.5 flex-shrink-0" />
 				<span>{feature}</span>
 			</li>
 		{/each}

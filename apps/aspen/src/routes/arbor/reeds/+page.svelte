@@ -3,7 +3,7 @@
 	import Badge from "@autumnsgrove/lattice/ui/components/ui/Badge.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
-	import { MessageSquare, Mail, Check, X, Ban, Settings, ShieldAlert, UserX } from "@lucide/svelte";
+	import { featureIcons, stateIcons, actionIcons, authIcons } from "@autumnsgrove/prism/icons";
 	import { api } from "@autumnsgrove/lattice/utils/api";
 
 	let { data } = $props();
@@ -117,7 +117,7 @@
 <div class="reeds-admin">
 	<header class="page-header">
 		<h1 class="page-title">
-			<MessageSquare class="title-icon" />
+			<featureIcons.messageSquare class="title-icon" />
 			<GroveTerm term="reeds">Comments</GroveTerm>
 		</h1>
 		<p class="page-subtitle">
@@ -233,7 +233,7 @@
 										disabled={moderating === comment.id}
 										title="Approve"
 									>
-										<Check class="mod-icon" />
+										<stateIcons.check class="mod-icon" />
 										Approve
 									</button>
 									<button
@@ -242,7 +242,7 @@
 										disabled={moderating === comment.id}
 										title="Reject"
 									>
-										<X class="mod-icon" />
+										<stateIcons.x class="mod-icon" />
 										Reject
 									</button>
 									<button
@@ -251,7 +251,7 @@
 										disabled={moderating === comment.id}
 										title="Block this user"
 									>
-										<Ban class="mod-icon" />
+										<stateIcons.ban class="mod-icon" />
 										Block
 									</button>
 								</div>
@@ -260,7 +260,7 @@
 					</div>
 				{:else}
 					<div class="empty-state">
-						<MessageSquare class="empty-icon" />
+						<featureIcons.messageSquare class="empty-icon" />
 						<p>No comments waiting for review.</p>
 					</div>
 				{/if}
@@ -278,7 +278,7 @@
 							{@const post = getPostInfo(reply.post_id)}
 							<div class="comment-card">
 								<div class="comment-meta">
-									<Mail class="reply-icon" />
+									<featureIcons.mail class="reply-icon" />
 									<span class="comment-author">{reply.author_name}</span>
 									<span class="meta-sep" aria-hidden="true"></span>
 									<time class="comment-time">{formatTimeAgo(reply.created_at)}</time>
@@ -301,7 +301,7 @@
 					</div>
 				{:else}
 					<div class="empty-state">
-						<Mail class="empty-icon" />
+						<featureIcons.mail class="empty-icon" />
 						<p>No private replies yet.</p>
 					</div>
 				{/if}
@@ -347,7 +347,7 @@
 										disabled={moderating === comment.id}
 										title="Re-approve this comment"
 									>
-										<Check class="mod-icon" />
+										<stateIcons.check class="mod-icon" />
 										Approve
 									</button>
 								</div>
@@ -356,7 +356,7 @@
 					</div>
 				{:else}
 					<div class="empty-state">
-						<ShieldAlert class="empty-icon" />
+						<authIcons.shieldAlert class="empty-icon" />
 						<p>No rejected or spam-flagged comments.</p>
 					</div>
 				{/if}
@@ -373,7 +373,7 @@
 						{#each data.blocked as blocked (blocked.blocked_user_id)}
 							<div class="comment-card" class:moderating={unblocking === blocked.blocked_user_id}>
 								<div class="comment-meta">
-									<UserX class="reply-icon" />
+									<authIcons.userX class="reply-icon" />
 									<span class="comment-author">{blocked.blocked_user_id}</span>
 									<span class="meta-sep" aria-hidden="true"></span>
 									<time class="comment-time">{formatTimeAgo(blocked.created_at)}</time>
@@ -390,7 +390,7 @@
 										disabled={unblocking === blocked.blocked_user_id}
 										title="Unblock this user"
 									>
-										<Check class="mod-icon" />
+										<stateIcons.check class="mod-icon" />
 										Unblock
 									</button>
 								</div>
@@ -399,7 +399,7 @@
 					</div>
 				{:else}
 					<div class="empty-state">
-						<Ban class="empty-icon" />
+						<stateIcons.ban class="empty-icon" />
 						<p>No blocked users.</p>
 					</div>
 				{/if}

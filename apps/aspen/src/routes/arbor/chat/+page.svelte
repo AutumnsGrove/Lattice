@@ -22,7 +22,7 @@
 	import { chatStore } from "@autumnsgrove/lattice/ui/stores/chat.svelte";
 	import { cn } from "@autumnsgrove/lattice/ui/utils";
 	import { api } from "@autumnsgrove/lattice/utils/api";
-	import { MessageCircle } from "@lucide/svelte";
+	import { featureIcons } from "@autumnsgrove/prism/icons";
 
 	let { data } = $props();
 
@@ -332,7 +332,7 @@
 
 		{#if conversations.length === 0}
 			<div class="flex flex-col items-center justify-center py-12 px-4 text-center">
-				<MessageCircle size={32} class="opacity-30 mb-3" aria-hidden="true" />
+				<featureIcons.messageCircle size={32} class="opacity-30 mb-3" aria-hidden="true" />
 				<p class="text-sm opacity-50">No conversations yet</p>
 				<p class="text-xs opacity-30 mt-1">Follow a friend to start chatting</p>
 			</div>
@@ -460,7 +460,7 @@
 			</GlassChat>
 		{:else}
 			<div class="flex flex-col items-center justify-center h-full text-center px-8">
-				<MessageCircle size={48} class="opacity-20 mb-4" aria-hidden="true" />
+				<featureIcons.messageCircle size={48} class="opacity-20 mb-4" aria-hidden="true" />
 				<h3 class="text-lg font-medium opacity-50 mb-1">No conversation selected</h3>
 				<p class="text-sm opacity-30">
 					{conversations.length > 0

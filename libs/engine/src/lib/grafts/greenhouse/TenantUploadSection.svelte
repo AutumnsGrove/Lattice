@@ -8,7 +8,7 @@
 
 	import type { TenantUploadSectionProps } from "./types.js";
 	import { GlassCard } from "../../ui/index.js";
-	import { Upload } from "@lucide/svelte";
+	import { actionIcons } from "@autumnsgrove/prism/icons";
 
 	let {
 		suspended,
@@ -20,7 +20,7 @@
 
 <GlassCard class="p-6 {className}">
 	<div class="flex items-center gap-2 mb-4">
-		<Upload class="w-5 h-5 text-foreground-muted" aria-hidden="true" />
+		<actionIcons.upload class="w-5 h-5 text-foreground-muted" aria-hidden="true" />
 		<h3 class="text-lg font-serif text-foreground">Upload Access</h3>
 	</div>
 

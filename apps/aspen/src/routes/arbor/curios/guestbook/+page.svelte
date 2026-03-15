@@ -7,20 +7,7 @@
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 	import GuestbookPreview from "@autumnsgrove/lattice/curios/guestbook/GuestbookPreview.svelte";
 	import "@autumnsgrove/lattice/styles/fonts-optional.css";
-	import {
-		BookOpen,
-		Check,
-		X,
-		Trash2,
-		Clock,
-		MessageSquare,
-		Shield,
-		ArrowLeft,
-		Palette,
-		Plus,
-		RotateCcw,
-		Eye,
-	} from "@lucide/svelte";
+	import { featureIcons, stateIcons, actionIcons, metricIcons, authIcons, navIcons } from "@autumnsgrove/prism/icons";
 	import {
 		formatRelativeTime,
 		type GuestbookStyle,
@@ -188,12 +175,12 @@
 	<header class="page-header">
 		<div class="header-top">
 			<GlassButton href="/arbor/curios" variant="ghost" class="back-link">
-				<ArrowLeft class="w-4 h-4" />
+				<navIcons.arrowLeft class="w-4 h-4" />
 				Back to Curios
 			</GlassButton>
 		</div>
 		<div class="title-row">
-			<BookOpen class="header-icon" />
+			<featureIcons.bookOpen class="header-icon" />
 			<h1>Guestbook</h1>
 		</div>
 		<p class="subtitle">Let visitors sign your guestbook. The classic personal web element.</p>
@@ -218,7 +205,7 @@
 	<!-- Live Preview -->
 	<details class="preview-section" open>
 		<summary class="preview-toggle">
-			<Eye class="w-4 h-4" />
+			<stateIcons.eye class="w-4 h-4" />
 			Live Preview
 		</summary>
 		<GlassCard class="preview-card">
@@ -361,7 +348,7 @@
 									title="Click to remove"
 								>
 									{#if colorPalette.length > 1}
-										<span class="swatch-remove"><X class="w-3 h-3" /></span>
+										<span class="swatch-remove"><stateIcons.x class="w-3 h-3" /></span>
 									{/if}
 								</button>
 							{/each}
@@ -373,12 +360,12 @@
 									aria-label="Pick a new color"
 								/>
 								<button type="button" class="add-color-btn" onclick={addColor}>
-									<Plus class="w-3.5 h-3.5" />
+									<actionIcons.plus class="w-3.5 h-3.5" />
 								</button>
 							</div>
 						</div>
 						<button type="button" class="reset-palette-btn" onclick={resetPalette}>
-							<RotateCcw class="w-3.5 h-3.5" />
+							<actionIcons.rotateCcw class="w-3.5 h-3.5" />
 							Reset to defaults
 						</button>
 					</div>
@@ -503,12 +490,12 @@
 		<GlassCard class="moderation-card">
 			{#if loadingPending}
 				<div class="loading-state">
-					<Clock class="w-5 h-5 spin" />
+					<metricIcons.clock class="w-5 h-5 spin" />
 					<span>Loading pending entries...</span>
 				</div>
 			{:else if pendingEntries.length === 0}
 				<div class="empty-state">
-					<Shield class="w-8 h-8" />
+					<authIcons.shield class="w-8 h-8" />
 					<p>No entries awaiting approval</p>
 					<span class="empty-hint"
 						>New entries will appear here when visitors sign your guestbook</span
@@ -542,7 +529,7 @@
 									onclick={() => approveEntry(entry.id)}
 									aria-label="Approve entry from {entry.name}"
 								>
-									<Check class="w-4 h-4" />
+									<stateIcons.check class="w-4 h-4" />
 									Approve
 								</button>
 								<button
@@ -550,7 +537,7 @@
 									onclick={() => deleteEntry(entry.id)}
 									aria-label="Delete entry from {entry.name}"
 								>
-									<Trash2 class="w-4 h-4" />
+									<actionIcons.trash class="w-4 h-4" />
 									Delete
 								</button>
 							</div>

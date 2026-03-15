@@ -33,7 +33,7 @@
 	import GreenhouseEnrollTable from "./GreenhouseEnrollTable.svelte";
 	import GreenhouseEnrollDialog from "./GreenhouseEnrollDialog.svelte";
 	import CultivateFlagTable from "./CultivateFlagTable.svelte";
-	import { Sprout, Plus, Users, CheckCircle, XCircle, Leaf } from "@lucide/svelte";
+	import { stateIcons, natureIcons, actionIcons, authIcons } from "@autumnsgrove/prism/icons";
 
 	/**
 	 * @typedef {import('../../feature-flags/types.js').GreenhouseTenant} GreenhouseTenant
@@ -118,7 +118,7 @@
 	<div class="admin-header">
 		<div class="header-text">
 			<h2>
-				<Sprout class="inline-icon" />
+				<natureIcons.sprout class="inline-icon" />
 				Greenhouse Admin
 			</h2>
 			<p class="subtitle">Manage early access to experimental features</p>
@@ -128,7 +128,7 @@
 			onclick={() => (showEnrollDialog = true)}
 			disabled={availableCount === 0}
 		>
-			<Plus class="btn-icon" />
+			<actionIcons.plus class="btn-icon" />
 			Enroll Tenant
 			{#if availableCount > 0}
 				<span class="available-badge">{availableCount}</span>
@@ -140,14 +140,14 @@
 	{#if formResult?.success}
 		<GlassCard variant="frosted" class="message-card success">
 			<div class="message-content">
-				<CheckCircle class="message-icon success" />
+				<stateIcons.checkCircle class="message-icon success" />
 				<span>{formResult.message || "Action completed successfully"}</span>
 			</div>
 		</GlassCard>
 	{:else if formResult?.error}
 		<GlassCard variant="frosted" class="message-card error">
 			<div class="message-content">
-				<XCircle class="message-icon error" />
+				<stateIcons.xCircle class="message-icon error" />
 				<span>{formResult.error}</span>
 			</div>
 		</GlassCard>
@@ -158,21 +158,21 @@
 		<GlassCard variant="frosted" class="stat-card">
 			<div class="stat-value total">{totalEnrolled}</div>
 			<div class="stat-label">
-				<Users class="stat-icon" />
+				<authIcons.users class="stat-icon" />
 				Total Enrolled
 			</div>
 		</GlassCard>
 		<GlassCard variant="frosted" class="stat-card">
 			<div class="stat-value active">{activeCount}</div>
 			<div class="stat-label">
-				<CheckCircle class="stat-icon" />
+				<stateIcons.checkCircle class="stat-icon" />
 				Active
 			</div>
 		</GlassCard>
 		<GlassCard variant="frosted" class="stat-card">
 			<div class="stat-value disabled">{disabledCount}</div>
 			<div class="stat-label">
-				<XCircle class="stat-icon" />
+				<stateIcons.xCircle class="stat-icon" />
 				Disabled
 			</div>
 		</GlassCard>
@@ -182,7 +182,7 @@
 	<GlassCard variant="frosted" class="info-card">
 		<div class="info-content">
 			<div class="info-icon-wrapper">
-				<Sprout class="info-icon" />
+				<natureIcons.sprout class="info-icon" />
 			</div>
 			<div>
 				<h3>About the Greenhouse Program</h3>
@@ -202,7 +202,7 @@
 	<div class="cultivate-section">
 		<div class="section-header">
 			<div class="section-title">
-				<Leaf class="section-icon" />
+				<natureIcons.leaf class="section-icon" />
 				<h3>Cultivate Mode</h3>
 			</div>
 			<p class="section-subtitle">Toggle features globally for all Groves</p>
@@ -212,7 +212,7 @@
 		<GlassCard variant="frosted" class="info-card">
 			<div class="info-content">
 				<div class="info-icon-wrapper">
-					<Sprout class="info-icon" />
+					<natureIcons.sprout class="info-icon" />
 				</div>
 				<div>
 					<h3>Quick Actions</h3>

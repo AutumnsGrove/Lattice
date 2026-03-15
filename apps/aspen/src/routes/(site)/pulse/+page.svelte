@@ -7,7 +7,7 @@
 	 * all in real time.
 	 */
 
-	import { Activity, HeartPulse, Zap } from "@lucide/svelte";
+	import { metricIcons, natureIcons, phaseIcons } from "@autumnsgrove/prism/icons";
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import GroveDivider from "@autumnsgrove/lattice/ui/components/nature/GroveDivider.svelte";
 	import { Pulse } from "@autumnsgrove/lattice/curios/pulse";
@@ -93,7 +93,7 @@
 	<GlassCard class="pulse-page-hero">
 		<div class="hero-content">
 			<div class="hero-icon-ring">
-				<HeartPulse size={32} strokeWidth={1.5} />
+				<natureIcons.heartPulse size={32} strokeWidth={1.5} />
 			</div>
 			<div class="hero-text">
 				<h1>{data.isLanding ? "Lattice Pulse" : "Development Pulse"}</h1>
@@ -106,7 +106,7 @@
 				</p>
 				{#if todaySummary}
 					<p class="hero-today">
-						<Zap size={14} />
+						<phaseIcons.zap size={14} />
 						{todaySummary}
 					</p>
 				{/if}
@@ -132,7 +132,7 @@
 
 	<!-- Footer breathing room -->
 	<div class="pulse-footer" aria-hidden="true">
-		<Activity size={16} strokeWidth={1.5} />
+		<metricIcons.activity size={16} strokeWidth={1.5} />
 		<span>Events arrive in real time via webhook</span>
 	</div>
 </div>

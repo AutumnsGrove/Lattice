@@ -10,7 +10,7 @@
 	import type { CultivateFlagTableProps } from "./types.js";
 	import CultivateFlagRow from "./CultivateFlagRow.svelte";
 	import { GlassCard } from "../../ui/index.js";
-	import { Sprout, Home } from "@lucide/svelte";
+	import { navIcons, natureIcons } from "@autumnsgrove/prism/icons";
 
 	let {
 		flags,
@@ -89,11 +89,11 @@
 		<!-- Legend -->
 		<div class="mt-4 text-xs text-foreground-subtle flex items-center gap-4">
 			<span class="flex items-center gap-1.5">
-				<Sprout class="w-3.5 h-3.5 text-success" />
+				<natureIcons.sprout class="w-3.5 h-3.5 text-success" />
 				<span>Greenhouse Only</span>
 			</span>
 			<span class="flex items-center gap-1.5">
-				<Home class="w-3.5 h-3.5 text-warning" />
+				<navIcons.home class="w-3.5 h-3.5 text-warning" />
 				<span>Global Flag</span>
 			</span>
 		</div>

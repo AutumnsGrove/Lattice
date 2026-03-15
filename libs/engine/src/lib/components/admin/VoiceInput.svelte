@@ -9,7 +9,7 @@
 	 * @fires error - When an error occurs { message: string }
 	 */
 
-	import { Mic, MicOff, Loader2 } from "@lucide/svelte";
+	import { chromeIcons, stateIcons } from "@autumnsgrove/prism/icons";
 	import {
 		createScribeRecorder,
 		type ScribeRecorder,
@@ -282,15 +282,15 @@
 		aria-pressed={isRecording}
 	>
 		{#if isTranscribing}
-			<Loader2 class="icon spinning" size={20} />
+			<stateIcons.loader class="icon spinning w-5 h-5" />
 		{:else if isRecording}
 			<div class="recording-indicator" style="--level: {audioLevel}">
-				<Mic class="icon pulse" size={20} />
+				<chromeIcons.mic class="icon pulse w-5 h-5" />
 			</div>
 		{:else if error}
-			<MicOff class="icon" size={20} />
+			<chromeIcons.micOff class="icon w-5 h-5" />
 		{:else}
-			<Mic class="icon" size={20} />
+			<chromeIcons.mic class="icon w-5 h-5" />
 		{/if}
 	</button>
 

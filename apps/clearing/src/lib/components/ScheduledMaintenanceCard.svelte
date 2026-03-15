@@ -6,7 +6,7 @@
 	 */
 	import { cn } from '@autumnsgrove/lattice/ui/utils';
 	import type { ScheduledMaintenance, StatusComponent } from '$lib/types/status';
-	import { Calendar, Clock, Wrench } from '@lucide/svelte';
+	import { metricIcons, chromeIcons } from '@autumnsgrove/prism/icons';
 
 	interface Props {
 		maintenance: ScheduledMaintenance;
@@ -62,7 +62,7 @@
 )}>
 	<div class="flex items-start gap-3">
 		<div class="p-2 rounded-lg bg-info-bg flex-shrink-0">
-			<Wrench class="w-5 h-5 text-info" aria-hidden="true" />
+			<chromeIcons.toolbox class="w-5 h-5 text-info" aria-hidden="true" />
 		</div>
 
 		<div class="flex-1 min-w-0">
@@ -85,11 +85,11 @@
 
 			<div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3 text-sm text-foreground-muted">
 				<span class="inline-flex items-center gap-1.5">
-					<Calendar class="w-4 h-4" aria-hidden="true" />
+					<metricIcons.calendar class="w-4 h-4" aria-hidden="true" />
 					{dateTime.date}
 				</span>
 				<span class="inline-flex items-center gap-1.5">
-					<Clock class="w-4 h-4" aria-hidden="true" />
+					<metricIcons.clock class="w-4 h-4" aria-hidden="true" />
 					{dateTime.time}
 				</span>
 			</div>

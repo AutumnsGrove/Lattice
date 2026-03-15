@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { cn } from "$lib/ui/utils";
-	import { FlaskConical } from "@lucide/svelte";
+	import { phaseIcons } from "@autumnsgrove/prism/icons";
 	import type { Snippet } from "svelte";
 
 	/**
@@ -63,7 +63,7 @@
 		target={href.startsWith("http") ? "_blank" : undefined}
 		rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
 	>
-		<FlaskConical class="w-3.5 h-3.5" />
+		<phaseIcons.flaskConical class="w-3.5 h-3.5" />
 		{#if children}
 			{@render children()}
 		{:else}
@@ -76,7 +76,7 @@
 		title={titleProp}
 		role="status"
 	>
-		<FlaskConical class="w-3.5 h-3.5" />
+		<phaseIcons.flaskConical class="w-3.5 h-3.5" />
 		{#if children}
 			{@render children()}
 		{:else}

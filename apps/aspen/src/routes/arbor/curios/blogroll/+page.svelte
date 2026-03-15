@@ -3,7 +3,7 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import GlassButton from "@autumnsgrove/lattice/ui/components/ui/GlassButton.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
-	import { Rss, Plus, Trash2, ExternalLink } from "@lucide/svelte";
+	import { featureIcons, actionIcons, navIcons } from "@autumnsgrove/prism/icons";
 
 	let { data, form } = $props();
 
@@ -28,7 +28,7 @@
 <div class="blogroll-page">
 	<header class="page-header">
 		<div class="title-row">
-			<Rss class="header-icon" />
+			<featureIcons.rss class="header-icon" />
 			<h1>Blogroll</h1>
 		</div>
 		<p class="subtitle">
@@ -39,7 +39,7 @@
 	<section class="add-section">
 		{#if !showAddForm}
 			<GlassButton variant="accent" onclick={() => (showAddForm = true)}>
-				<Plus class="btn-icon" />
+				<actionIcons.plus class="btn-icon" />
 				Add a Blog
 			</GlassButton>
 		{:else}
@@ -98,7 +98,7 @@
 
 					<div class="form-actions">
 						<GlassButton type="submit" variant="accent">
-							<Plus class="btn-icon" />
+							<actionIcons.plus class="btn-icon" />
 							Add Blog
 						</GlassButton>
 						<GlassButton variant="ghost" onclick={() => (showAddForm = false)}>Cancel</GlassButton>
@@ -111,7 +111,7 @@
 	<section class="blogs-section">
 		{#if data.items.length === 0}
 			<GlassCard class="empty-card">
-				<Rss class="empty-icon" />
+				<featureIcons.rss class="empty-icon" />
 				<p>Your blogroll is empty.</p>
 				<p class="empty-hint">Add the blogs you love to share them with visitors.</p>
 			</GlassCard>
@@ -128,7 +128,7 @@
 									<h3>
 										<a href={blog.url} target="_blank" rel="noopener noreferrer">
 											{blog.title}
-											<ExternalLink class="external-icon" />
+											<navIcons.external class="external-icon" />
 										</a>
 									</h3>
 									{#if blog.description}
@@ -152,7 +152,7 @@
 									title="Remove blog"
 									aria-label="Remove blog"
 								>
-									<Trash2 class="btn-icon" />
+									<actionIcons.trash class="btn-icon" />
 								</GlassButton>
 							</form>
 						</div>

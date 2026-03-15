@@ -3,7 +3,11 @@
 	import Header from "$lib/components/Header.svelte";
 	import Footer from "$lib/components/Footer.svelte";
 	import { CategoryNav } from "@autumnsgrove/lattice";
-	import { getToolIcon } from "$lib/utils/icons";
+	import { resolveAnyIcon, stateIcons } from "@autumnsgrove/prism/icons";
+
+	function getToolIcon(iconKey: string) {
+		return resolveAnyIcon(iconKey, stateIcons.circle);
+	}
 	import { kbCategoryColors } from "$lib/utils/kb-colors";
 	import type { ExhibitWing } from "$lib/types/docs";
 

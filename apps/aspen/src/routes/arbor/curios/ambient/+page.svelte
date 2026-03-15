@@ -3,7 +3,7 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import GlassButton from "@autumnsgrove/lattice/ui/components/ui/GlassButton.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
-	import { Volume2 } from "@lucide/svelte";
+	import { chromeIcons } from "@autumnsgrove/prism/icons";
 
 	let { data, form } = $props();
 
@@ -32,7 +32,7 @@
 <div class="ambient-page">
 	<header class="page-header">
 		<div class="title-row">
-			<Volume2 class="header-icon" />
+			<chromeIcons.volume class="header-icon" />
 			<h1>Ambient Sounds</h1>
 		</div>
 		<p class="subtitle">

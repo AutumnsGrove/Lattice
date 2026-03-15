@@ -3,7 +3,7 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import GlassButton from "@autumnsgrove/lattice/ui/components/ui/GlassButton.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
-	import { Globe, ArrowLeft, ArrowRight, Home, Plus, Trash2, ExternalLink } from "@lucide/svelte";
+	import { navIcons, actionIcons } from "@autumnsgrove/prism/icons";
 
 	let { data, form } = $props();
 
@@ -31,7 +31,7 @@
 <div class="webring-page">
 	<header class="page-header">
 		<div class="title-row">
-			<Globe class="header-icon" />
+			<navIcons.globe class="header-icon" />
 			<h1>Webring Hub</h1>
 		</div>
 		<p class="subtitle">
@@ -44,7 +44,7 @@
 	<section class="add-section">
 		{#if !showAddForm}
 			<GlassButton variant="accent" onclick={() => (showAddForm = true)}>
-				<Plus class="btn-icon" />
+				<actionIcons.plus class="btn-icon" />
 				Join a Webring
 			</GlassButton>
 		{:else}
@@ -132,7 +132,7 @@
 
 					<div class="form-actions">
 						<GlassButton type="submit" variant="accent">
-							<Plus class="btn-icon" />
+							<actionIcons.plus class="btn-icon" />
 							Add Ring
 						</GlassButton>
 						<GlassButton variant="ghost" onclick={() => (showAddForm = false)}>Cancel</GlassButton>
@@ -146,7 +146,7 @@
 	<section class="rings-section">
 		{#if data.webrings.length === 0}
 			<GlassCard class="empty-card">
-				<Globe class="empty-icon" />
+				<navIcons.globe class="empty-icon" />
 				<p>No webring memberships yet.</p>
 				<p class="empty-hint">Join a webring to connect your site to the indie web.</p>
 			</GlassCard>
@@ -164,7 +164,7 @@
 										rel="noopener noreferrer"
 										class="ring-link"
 									>
-										<ExternalLink class="link-icon" />
+										<navIcons.external class="link-icon" />
 										Ring Homepage
 									</a>
 								{/if}
@@ -178,7 +178,7 @@
 									title="Remove ring"
 									aria-label="Remove ring"
 								>
-									<Trash2 class="btn-icon" />
+									<actionIcons.trash class="btn-icon" />
 								</GlassButton>
 							</form>
 						</div>
@@ -196,7 +196,7 @@
 								class="nav-link prev"
 								title="Previous site"
 							>
-								<ArrowLeft class="nav-icon" />
+								<navIcons.arrowLeft class="nav-icon" />
 								Prev
 							</a>
 							{#if ring.homeUrl}
@@ -207,7 +207,7 @@
 									class="nav-link home"
 									title="Ring hub"
 								>
-									<Home class="nav-icon" />
+									<navIcons.home class="nav-icon" />
 								</a>
 							{/if}
 							<span class="ring-label">{ring.ringName}</span>
@@ -219,7 +219,7 @@
 								title="Next site"
 							>
 								Next
-								<ArrowRight class="nav-icon" />
+								<navIcons.arrowRight class="nav-icon" />
 							</a>
 						</div>
 

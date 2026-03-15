@@ -7,7 +7,7 @@
 -->
 <script lang="ts">
 	import Logo from "../ui/Logo.svelte";
-	import { ChevronLeft, X } from "@lucide/svelte";
+	import { navIcons, stateIcons } from "@autumnsgrove/prism/icons";
 	import GroveTerm from "$lib/components/terminology/GroveTerm.svelte";
 	import { sidebarStore } from "../../stores/sidebar.svelte";
 	import type { Snippet } from "svelte";
@@ -58,10 +58,10 @@
 		aria-label={sidebarStore.collapsed ? "Expand sidebar" : "Collapse sidebar"}
 		title={sidebarStore.collapsed ? "Expand sidebar" : "Collapse sidebar"}
 	>
-		<ChevronLeft class="arbor-collapse-icon{sidebarStore.collapsed ? ' rotated' : ''}" />
+		<navIcons.chevronLeft class="arbor-collapse-icon{sidebarStore.collapsed ? ' rotated' : ''}" />
 	</button>
 	<button class="arbor-close-sidebar" onclick={closeSidebar} aria-label="Close menu">
-		<X size={16} />
+		<stateIcons.x class="w-4 h-4" />
 	</button>
 </div>
 

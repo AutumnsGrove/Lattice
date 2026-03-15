@@ -2,14 +2,7 @@
 	import { ArborPanel } from "@autumnsgrove/lattice/ui/components/arbor";
 	import Toast from "@autumnsgrove/lattice/ui/components/ui/Toast.svelte";
 	import { defaultSuite, resolveIcon } from "@autumnsgrove/lattice/ui/components/ui/groveicon";
-	import {
-		LayoutDashboard,
-		FileStack,
-		Image,
-		Settings,
-		CreditCard,
-		MessageCircle,
-	} from "@lucide/svelte";
+	import { featureIcons, actionIcons, metricIcons } from "@autumnsgrove/prism/icons";
 
 	let { data, children } = $props();
 
@@ -21,10 +14,10 @@
 
 	// Build nav items from tenant grafts and data
 	let navItems = $derived([
-		{ href: "/arbor", label: "Dashboard", icon: LayoutDashboard, termSlug: "arbor" },
+		{ href: "/arbor", label: "Dashboard", icon: featureIcons.layoutDashboard, termSlug: "arbor" },
 		{ href: "/arbor/garden", label: "Garden", icon: gardenIcon, termSlug: "your-garden" },
-		{ href: "/arbor/pages", label: "Pages", icon: FileStack },
-		{ href: "/arbor/images", label: "Images", icon: Image },
+		{ href: "/arbor/pages", label: "Pages", icon: featureIcons.fileStack },
+		{ href: "/arbor/images", label: "Images", icon: featureIcons.image },
 		{
 			href: "/arbor/reeds",
 			label: "Comments",
@@ -36,7 +29,7 @@
 		{
 			href: "/arbor/chat",
 			label: "Messages",
-			icon: MessageCircle,
+			icon: featureIcons.messageCircle,
 			visible: !!data.grafts?.chirp_enabled,
 		},
 		{ href: "/arbor/curios", label: "Curios", icon: curioIcon, termSlug: "curio" },
@@ -46,8 +39,8 @@
 			icon: reverieIcon,
 			visible: !!data.grafts?.reverie_enabled,
 		},
-		{ href: "/arbor/account", label: "Account", icon: CreditCard },
-		{ href: "/arbor/settings", label: "Settings", icon: Settings },
+		{ href: "/arbor/account", label: "Account", icon: metricIcons.creditCard },
+		{ href: "/arbor/settings", label: "Settings", icon: actionIcons.settings },
 	]);
 
 	const footerLinks = [

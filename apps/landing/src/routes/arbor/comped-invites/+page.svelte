@@ -9,30 +9,29 @@
 	import { enhance } from "$app/forms";
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
-	import {
-		Gift,
-		Plus,
-		Trash2,
-		Search,
-		Filter,
-		History,
-		ChevronLeft,
-		ChevronRight,
-		AlertTriangle,
-		Check,
-		X,
-		Loader2,
-		Mail,
-		MailPlus,
-		Link2,
-		CheckCircle,
-		Clock,
-		Eye,
-		EyeOff,
-		Users,
-		ArrowUpRight,
-		Zap,
-	} from "@lucide/svelte";
+	import { blazeIcons, actionIcons, navIcons, stateIcons, featureIcons, metricIcons, authIcons, phaseIcons } from "@autumnsgrove/prism/icons";
+	const Gift = blazeIcons.gift;
+	const Plus = actionIcons.plus;
+	const Trash2 = actionIcons.trash;
+	const Search = navIcons.search;
+	const Filter = actionIcons.filter;
+	const History = metricIcons.history;
+	const ChevronLeft = navIcons.chevronLeft;
+	const ChevronRight = navIcons.chevronRight;
+	const AlertTriangle = stateIcons.warning;
+	const Check = stateIcons.check;
+	const X = stateIcons.x;
+	const Loader2 = stateIcons.loader;
+	const Mail = featureIcons.mail;
+	const MailPlus = featureIcons.mailOpen;
+	const Link2 = actionIcons.link;
+	const CheckCircle = stateIcons.checkCircle;
+	const Clock = metricIcons.clock;
+	const Eye = stateIcons.eye;
+	const EyeOff = stateIcons.eyeOff;
+	const Users = authIcons.users;
+	const ArrowUpRight = navIcons.arrowUpRight;
+	const Zap = phaseIcons.zap;
 	import { GlassCard, GroveTerm } from "@autumnsgrove/lattice/ui";
 
 	let { data, form } = $props();

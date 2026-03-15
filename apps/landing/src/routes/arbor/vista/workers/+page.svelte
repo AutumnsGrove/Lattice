@@ -2,7 +2,9 @@
 	import type { PageData } from "./$types";
 	import { GlassCard } from "@autumnsgrove/lattice/ui";
 	import { formatRelativeTime } from "@autumnsgrove/lattice/utils";
-	import { Server, Info } from "@lucide/svelte";
+	import { featureIcons, stateIcons } from "@autumnsgrove/prism/icons";
+	const Server = featureIcons.server;
+	const Info = stateIcons.info;
 
 	let { data }: { data: PageData } = $props();
 

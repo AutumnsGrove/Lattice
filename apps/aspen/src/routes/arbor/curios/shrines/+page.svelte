@@ -4,7 +4,7 @@
 	import GlassButton from "@autumnsgrove/lattice/ui/components/ui/GlassButton.svelte";
 	import Badge from "@autumnsgrove/lattice/ui/components/ui/Badge.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
-	import { Heart, Plus, Trash2, Eye, EyeOff, Pencil, X, RotateCcw, Save } from "@lucide/svelte";
+	import { natureIcons, actionIcons, stateIcons } from "@autumnsgrove/prism/icons";
 	import ShrineCanvas from "@autumnsgrove/lattice/curios/shrines/ShrineCanvas.svelte";
 	import type {
 		ShrineContentItem,

@@ -7,7 +7,7 @@
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
 	import { api } from "@autumnsgrove/lattice/utils";
 	import { groveModeStore } from "@autumnsgrove/lattice/ui/stores";
-	import { Trash2, Sparkles } from "@lucide/svelte";
+	import { actionIcons, phaseIcons } from "@autumnsgrove/prism/icons";
 	import { Blaze } from "@autumnsgrove/lattice/blazes/components";
 	import { resolveBlaze } from "@autumnsgrove/lattice/blazes";
 
@@ -64,7 +64,7 @@
 	{#if data.isExampleSite}
 		<div class="mb-6 p-4 bg-warning-bg border border-warning rounded-lg">
 			<p class="m-0 text-warning text-sm">
-				<strong><Sparkles class="w-4 h-4 inline-block" /> Welcome to the Example Site!</strong> This <GroveTerm
+				<strong><phaseIcons.sparkles class="w-4 h-4 inline-block" /> Welcome to the Example Site!</strong> This <GroveTerm
 					term="arbor"
 					standard="dashboard">admin panel</GroveTerm
 				> is publicly accessible so you can explore Grove's features. On your own site, this panel is
@@ -202,7 +202,7 @@
 								class="text-error text-sm hover:underline transition-colors inline-flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
 								aria-label="Delete {post.title}"
 							>
-								<Trash2 class="w-3.5 h-3.5" />
+								<actionIcons.trash class="w-3.5 h-3.5" />
 								<span class="max-md:hidden">Delete</span>
 							</button>
 						</td>

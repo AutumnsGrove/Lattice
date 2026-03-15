@@ -11,15 +11,7 @@
 	import { resolveTermString } from "@autumnsgrove/lattice/ui/utils/grove-term-resolve";
 	import { api } from "@autumnsgrove/lattice/utils";
 	import { clickOutside } from "@autumnsgrove/lattice/actions/clickOutside";
-	import {
-		ExternalLink,
-		Ellipsis,
-		Trash2,
-		ChevronRight,
-		ArrowLeft,
-		ArrowRight,
-		RefreshCw,
-	} from "@lucide/svelte";
+	import { navIcons, actionIcons } from "@autumnsgrove/prism/icons";
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
 	import { Blaze } from "@autumnsgrove/lattice/blazes/components";
 	import { GLOBAL_BLAZE_DEFAULTS } from "@autumnsgrove/lattice/blazes";
@@ -377,7 +369,7 @@
 	<header class="page-header">
 		<div class="header-content">
 			<a href="/arbor/garden" class="back-link"
-				><ArrowLeft size={14} class="inline-block" /> Back to <GroveTerm term="your-garden"
+				><navIcons.arrowLeft size={14} class="inline-block" /> Back to <GroveTerm term="your-garden"
 					>Garden</GroveTerm
 				></a
 			>
@@ -402,7 +394,7 @@
 			<!-- View Live (icon-only, only when published) -->
 			{#if status === "published"}
 				<Button variant="ghost" size="icon" href="/garden/{slug}" title="View live post">
-					<ExternalLink size={16} />
+					<navIcons.external size={16} />
 				</Button>
 			{/if}
 
@@ -416,7 +408,7 @@
 					aria-expanded={showMoreMenu}
 					aria-haspopup="true"
 				>
-					<Ellipsis size={16} />
+					<actionIcons.ellipsis size={16} />
 				</Button>
 				{#if showMoreMenu}
 					<div
@@ -433,7 +425,7 @@
 									showRepublishDialog = true;
 								}}
 							>
-								<RefreshCw size={14} />
+								<actionIcons.refresh size={14} />
 								Re-publish (bump in feeds)
 							</button>
 						{/if}
@@ -445,7 +437,7 @@
 								confirmDelete();
 							}}
 						>
-							<Trash2 size={14} />
+							<actionIcons.trash size={14} />
 							Delete {resolveTermString("Bloom", "Post")}
 						</button>
 					</div>
@@ -483,7 +475,7 @@
 		<!-- Add details strip -->
 		<div class="details-strip">
 			<button class="details-toggle" onclick={toggleDetails}>
-				<ChevronRight size={16} class="details-chevron {detailsExpanded ? 'rotated' : ''}" />
+				<navIcons.chevronRight size={16} class="details-chevron {detailsExpanded ? 'rotated' : ''}" />
 				<span class="details-label">Add details</span>
 				{#if !detailsExpanded && detailsSummary}
 					<span class="details-summary">{detailsSummary}</span>
@@ -531,7 +523,7 @@
 						/>
 						<span class="form-hint">
 							URL to a cover image. <a href="/arbor/images" target="_blank"
-								>Upload one first <ArrowRight size={12} class="inline-block" /></a
+								>Upload one first <navIcons.arrowRight size={12} class="inline-block" /></a
 							>
 						</span>
 						{#if featuredImage}

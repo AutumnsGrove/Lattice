@@ -4,16 +4,7 @@
 	import Spinner from "@autumnsgrove/lattice/ui/components/ui/Spinner.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 	import { api } from "@autumnsgrove/lattice/utils";
-	import {
-		Download,
-		Mail,
-		Package,
-		Clock,
-		AlertTriangle,
-		CheckCircle,
-		Archive,
-		XCircle,
-	} from "@lucide/svelte";
+	import { actionIcons, featureIcons, metricIcons, stateIcons } from "@autumnsgrove/prism/icons";
 
 	let { data } = $props();
 
@@ -225,7 +216,7 @@
 
 <div class="export-page">
 	<header class="page-header">
-		<h1><Archive class="header-icon" aria-hidden="true" /> Your Data, Your Way Out</h1>
+		<h1><featureIcons.archive class="header-icon" aria-hidden="true" /> Your Data, Your Way Out</h1>
 		<p class="page-description">
 			You own your content. Download everything — posts, pages, and images — as a tidy zip file with
 			standard Markdown files you can take anywhere. Data portability means you're never locked in.
@@ -268,7 +259,7 @@
 						bind:group={deliveryMethod}
 						disabled={!!hasActiveExport}
 					/>
-					<Mail class="delivery-icon" aria-hidden="true" />
+					<featureIcons.mail class="delivery-icon" aria-hidden="true" />
 					<div class="delivery-info">
 						<span class="delivery-name">Email me a link</span>
 						<span class="delivery-desc">We'll email you when it's ready</span>
@@ -283,7 +274,7 @@
 						bind:group={deliveryMethod}
 						disabled={!!hasActiveExport}
 					/>
-					<Download class="delivery-icon" aria-hidden="true" />
+					<actionIcons.download class="delivery-icon" aria-hidden="true" />
 					<div class="delivery-info">
 						<span class="delivery-name">Download in browser</span>
 						<span class="delivery-desc">Wait here and download when done</span>
@@ -294,7 +285,7 @@
 
 		<!-- Size Estimate -->
 		<p class="size-estimate">
-			<Package class="estimate-icon" aria-hidden="true" />
+			<featureIcons.package class="estimate-icon" aria-hidden="true" />
 			Estimated export: {data.counts.posts} posts, {data.counts.pages} pages{#if includeImages}, {data
 					.counts.media} images{/if}
 			(~{formatBytes(estimatedSize())})
@@ -312,7 +303,7 @@
 			{:else if hasActiveExport}
 				Export in progress...
 			{:else}
-				<Download class="btn-icon" aria-hidden="true" />
+				<actionIcons.download class="btn-icon" aria-hidden="true" />
 				Start Export
 			{/if}
 		</Button>
@@ -353,7 +344,7 @@
 					<Spinner size="sm" />
 					Cancelling...
 				{:else}
-					<XCircle class="btn-icon" aria-hidden="true" />
+					<stateIcons.xCircle class="btn-icon" aria-hidden="true" />
 					Cancel Export
 				{/if}
 			</Button>
@@ -366,7 +357,7 @@
 			variant="default"
 			class="mb-6"
 			title="Export Ready!"
-			icon={CheckCircle}
+			icon={stateIcons.checkCircle}
 			iconClass="text-primary"
 		>
 			<p class="section-desc">Your export is bundled and ready to download.</p>
@@ -376,7 +367,7 @@
 					window.location.href = `/api/export/${activeExportId}/download`;
 				}}
 			>
-				<Download class="btn-icon" aria-hidden="true" />
+				<actionIcons.download class="btn-icon" aria-hidden="true" />
 				Download Zip
 			</Button>
 		</GlassCard>
@@ -386,7 +377,7 @@
 	{#if activeExportId && activeStatus === "failed"}
 		<GlassCard variant="default" class="mb-6">
 			<div class="error-banner" role="alert">
-				<AlertTriangle class="error-icon" aria-hidden="true" />
+				<stateIcons.warning class="error-icon" aria-hidden="true" />
 				<div>
 					<strong>Export failed</strong>
 					<p>
@@ -400,7 +391,7 @@
 
 	<!-- Section 3: Past Exports -->
 	{#if data.pastExports.length > 0}
-		<GlassCard variant="default" title="Past Exports" icon={Clock} iconClass="text-primary">
+		<GlassCard variant="default" title="Past Exports" icon={metricIcons.clock} iconClass="text-primary">
 			<div class="exports-list">
 				{#each data.pastExports as exp (exp.id)}
 					<div class="export-row">
@@ -428,14 +419,14 @@
 										window.location.href = `/api/export/${exp.id}/download`;
 									}}
 								>
-									<Download class="btn-icon-sm" aria-hidden="true" />
+									<actionIcons.download class="btn-icon-sm" aria-hidden="true" />
 									Download
 								</Button>
 							{:else if exp.status === "expired"}
 								<span class="expired-label">Expired</span>
 							{:else if exp.status === "failed"}
 								<span class="failed-label">
-									<XCircle class="failed-icon" aria-hidden="true" />
+									<stateIcons.xCircle class="failed-icon" aria-hidden="true" />
 									Failed
 								</span>
 							{/if}

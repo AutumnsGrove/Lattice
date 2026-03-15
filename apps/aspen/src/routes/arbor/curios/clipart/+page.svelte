@@ -3,7 +3,7 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import GlassButton from "@autumnsgrove/lattice/ui/components/ui/GlassButton.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
-	import { Sticker, Plus, Trash2 } from "@lucide/svelte";
+	import { actionIcons } from "@autumnsgrove/prism/icons";
 
 	let { data, form } = $props();
 
@@ -39,7 +39,7 @@
 <div class="clipart-page">
 	<header class="page-header">
 		<div class="title-row">
-			<Sticker class="header-icon" />
+			<actionIcons.sticker class="header-icon" />
 			<h1>Clip Art Library</h1>
 		</div>
 		<p class="subtitle">
@@ -50,7 +50,7 @@
 	<section class="add-section">
 		{#if !showAddForm}
 			<GlassButton variant="accent" onclick={() => (showAddForm = true)}>
-				<Plus class="btn-icon" />
+				<actionIcons.plus class="btn-icon" />
 				Place Clip Art
 			</GlassButton>
 		{:else}
@@ -147,7 +147,7 @@
 					</div>
 					<div class="form-actions">
 						<GlassButton type="submit" variant="accent">
-							<Plus class="btn-icon" />
+							<actionIcons.plus class="btn-icon" />
 							Place
 						</GlassButton>
 						<GlassButton variant="ghost" onclick={() => (showAddForm = false)}>Cancel</GlassButton>
@@ -160,7 +160,7 @@
 	<section class="placements-section">
 		{#if data.placements.length === 0}
 			<GlassCard class="empty-card">
-				<Sticker class="empty-icon" />
+				<actionIcons.sticker class="empty-icon" />
 				<p>No clip art placed yet.</p>
 				<p class="empty-hint">Add decorative elements to make your pages come alive.</p>
 			</GlassCard>
@@ -186,7 +186,7 @@
 									title="Remove"
 									aria-label="Remove clip art"
 								>
-									<Trash2 class="btn-icon" />
+									<actionIcons.trash class="btn-icon" />
 								</GlassButton>
 							</form>
 						</div>

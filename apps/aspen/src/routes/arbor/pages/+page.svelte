@@ -6,57 +6,40 @@
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
 	import {
-		Plus,
-		AlertCircle,
-		Sparkles,
-		Trash2,
-		Calendar,
-		Image,
-		Map,
-		Activity,
-		BookOpen,
-		Hash,
-		Music,
-		BarChart3,
-		Circle,
-		Award,
-		Rss,
-		Globe,
-		TreePine,
-		Radio,
-		Shield,
-		Bookmark,
-		Package,
-		Star,
-		MousePointer,
-		Wind,
-		ArrowRight,
-	} from "@lucide/svelte";
+		actionIcons,
+		authIcons,
+		blazeIcons,
+		featureIcons,
+		metricIcons,
+		natureIcons,
+		navIcons,
+		phaseIcons,
+		stateIcons,
+	} from "@autumnsgrove/prism/icons";
 	import { api } from "@autumnsgrove/lattice/utils";
 
 	// Map curio slugs to icons
-	/** @type {Record<string, typeof Calendar>} */
 	const curioIcons = {
-		timeline: Calendar,
-		gallery: Image,
-		journey: Map,
-		pulse: Activity,
-		guestbook: BookOpen,
-		ambient: Wind,
-		hitcounter: Hash,
-		nowplaying: Music,
-		polls: BarChart3,
-		moodring: Circle,
-		badges: Award,
-		blogroll: Rss,
-		webring: Globe,
-		linkgarden: TreePine,
-		activitystatus: Radio,
-		statusbadge: Shield,
-		bookmarkshelf: Bookmark,
-		artifacts: Package,
-		shrines: Star,
-		cursors: MousePointer,
+		timeline: metricIcons.calendar,
+		gallery: featureIcons.image,
+		journey: navIcons.map,
+		pulse: metricIcons.activity,
+		guestbook: featureIcons.bookOpen,
+		ambient: natureIcons.wind,
+		hitcounter: featureIcons.hash,
+		nowplaying: blazeIcons.music,
+		polls: metricIcons.barChart,
+		moodring: stateIcons.circle,
+		badges: phaseIcons.award,
+		blogroll: featureIcons.rss,
+		webring: navIcons.globe,
+		linkgarden: natureIcons.treePine,
+		activitystatus: actionIcons.radio,
+		statusbadge: authIcons.shield,
+		bookmarkshelf: actionIcons.bookmark,
+		artifacts: featureIcons.package,
+		shrines: phaseIcons.star,
+		cursors: actionIcons.mousePointer,
 	};
 
 	let { data } = $props();
@@ -182,7 +165,7 @@
 			</p>
 		</div>
 		<a href="/arbor/pages/create" class="btn-primary inline-flex items-center gap-2">
-			<Plus class="w-5 h-5" />
+			<actionIcons.plus class="w-5 h-5" />
 			<span>Create Page</span>
 		</a>
 	</header>
@@ -191,7 +174,7 @@
 		<div
 			class="flex items-center gap-2 p-3 mb-6 rounded-lg bg-warning-bg border border-warning text-warning"
 		>
-			<AlertCircle class="w-4 h-4 flex-shrink-0" />
+			<stateIcons.alertCircle class="w-4 h-4 flex-shrink-0" />
 			<span class="text-sm">Couldn't load your pages. Try refreshing the page.</span>
 		</div>
 	{/if}
@@ -200,7 +183,7 @@
 		<div
 			class="flex items-center gap-2 p-3 mb-6 rounded-lg bg-surface-subtle border border-border text-foreground-muted"
 		>
-			<AlertCircle class="w-4 h-4 flex-shrink-0" />
+			<stateIcons.alertCircle class="w-4 h-4 flex-shrink-0" />
 			<span class="text-sm"
 				>Custom navigation pages are available starting with <GroveTerm interactive term="sapling"
 					>Sapling</GroveTerm
@@ -212,7 +195,7 @@
 		<div
 			class="flex items-center gap-2 p-3 mb-6 rounded-lg bg-warning-bg border border-warning text-warning"
 		>
-			<AlertCircle class="w-4 h-4 flex-shrink-0" />
+			<stateIcons.alertCircle class="w-4 h-4 flex-shrink-0" />
 			<span class="text-sm"
 				>Navigation page limit reached ({navLimit}).
 				<a href="/arbor/billing" class="underline hover:no-underline">Upgrade your plan</a> for more.</span
@@ -315,7 +298,7 @@
 									class="text-error text-sm hover:underline transition-colors inline-flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:no-underline"
 									aria-label="Delete {page.title}"
 								>
-									<Trash2 class="w-3.5 h-3.5" />
+									<actionIcons.trash class="w-3.5 h-3.5" />
 									<span class="max-md:hidden">Delete</span>
 								</button>
 							{/if}
@@ -337,7 +320,7 @@
 		<GlassCard variant="default" class="mb-8">
 			<div class="flex items-center justify-between mb-4">
 				<div class="flex items-center gap-2">
-					<Sparkles class="w-5 h-5 text-grove-600 dark:text-grove-400" />
+					<phaseIcons.sparkles class="w-5 h-5 text-grove-600 dark:text-grove-400" />
 					<h2 class="m-0 text-lg font-semibold text-foreground">
 						Active <GroveTerm interactive term="curios">Curios</GroveTerm>
 					</h2>
@@ -347,7 +330,7 @@
 					class="inline-flex items-center gap-1 text-sm text-grove-600 dark:text-grove-400 no-underline hover:underline transition-colors"
 				>
 					Manage all
-					<ArrowRight class="w-4 h-4" />
+					<navIcons.arrowRight class="w-4 h-4" />
 				</a>
 			</div>
 			<p class="text-sm text-foreground-muted mb-4">
@@ -356,7 +339,7 @@
 			</p>
 			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
 				{#each data.curios as curio (curio.slug)}
-					{@const CurioIcon = curioIcons[curio.slug] || Sparkles}
+					{@const CurioIcon = curioIcons[curio.slug] || phaseIcons.sparkles}
 					<a
 						href={curio.configUrl}
 						class="flex items-center gap-3 p-3 rounded-lg border transition-all {curio.enabled

@@ -2,11 +2,11 @@
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import { GroveTerm } from '@autumnsgrove/lattice/ui';
-	import { toolIcons, stateIcons } from '$lib/utils/icons';
+	import { chromeIcons, stateIcons } from '@autumnsgrove/prism/icons';
 
 	let { data } = $props();
 
-	const ShadeIcon = toolIcons.blinds;
+	const ShadeIcon = chromeIcons.blinds;
 	const BlockIcon = stateIcons.x;
 	const AllowIcon = stateIcons.check;
 </script>

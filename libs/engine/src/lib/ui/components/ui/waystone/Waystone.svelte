@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { HelpCircle } from '@lucide/svelte';
+	import { stateIcons } from '@autumnsgrove/prism/icons';
 	import { cn } from '$lib/ui/utils';
 	import WaystonePopup from './WaystonePopup.svelte';
 	import type { WaystoneExcerpt, WaystoneManifest } from './types';
@@ -184,7 +184,7 @@
 	onfocus={handleFocus}
 >
 	<span class="sr-only">Help: {label}</span>
-	<HelpCircle class="waystone-icon" />
+	<stateIcons.help class="waystone-icon" />
 </a>
 
 <!-- Popup overlay -->

@@ -7,7 +7,13 @@
 	import Footer from "$lib/components/Footer.svelte";
 	import SEO from "$lib/components/SEO.svelte";
 	import { Logo } from "@autumnsgrove/lattice/ui/nature";
-	import { Shield, Mail, AlertTriangle, Clock, Lock, ChevronDown } from "@lucide/svelte";
+	import { authIcons, featureIcons, stateIcons, metricIcons, navIcons } from "@autumnsgrove/prism/icons";
+	const Shield = authIcons.shield;
+	const Mail = featureIcons.mail;
+	const AlertTriangle = stateIcons.warning;
+	const Clock = metricIcons.clock;
+	const Lock = authIcons.lock;
+	const ChevronDown = navIcons.chevronDown;
 	import type { ActionData, PageData } from "./$types";
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();

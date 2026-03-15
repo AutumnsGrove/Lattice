@@ -4,7 +4,7 @@
 	import type { GroveTermEntry, GroveTermManifest, GroveTermCategory } from './types';
 	import type { Snippet } from 'svelte';
 	import { groveModeStore } from '$lib/ui/stores';
-	import { Leaf } from '@lucide/svelte';
+	import { natureIcons } from '@autumnsgrove/prism/icons';
 
 	// Import manifest internally so consumers don't need to
 	import defaultManifestData from '$lib/data/grove-term-manifest.json';
@@ -190,7 +190,7 @@
 		{:else}
 			{displayText}
 		{/if}
-		{#if icon}<Leaf class="grove-term-icon" aria-hidden="true" />{/if}
+		{#if icon}<natureIcons.leaf class="grove-term-icon" aria-hidden="true" />{/if}
 	</span>
 
 	<GroveTermPopup
@@ -204,7 +204,7 @@
 	/>
 {:else}
 	<!-- Non-interactive mode: plain text swap, zero chrome -->
-	{#if showAsGrove}{#if children}{@render children()}{:else}{displayText}{/if}{:else}{displayText}{/if}{#if icon}<Leaf class="grove-term-icon" aria-hidden="true" />{/if}
+	{#if showAsGrove}{#if children}{@render children()}{:else}{displayText}{/if}{:else}{displayText}{/if}{#if icon}<natureIcons.leaf class="grove-term-icon" aria-hidden="true" />{/if}
 {/if}
 
 <style>

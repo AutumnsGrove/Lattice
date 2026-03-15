@@ -3,18 +3,17 @@
 	import { enhance } from '$app/forms';
 	import { GlassCard, GroveMessages } from '@autumnsgrove/lattice/ui';
 	import type { GroveMessage, GroveMessageChannel } from '@autumnsgrove/lattice/ui';
-	import {
-		Plus,
-		Pencil,
-		Trash2,
-		Eye,
-		EyeOff,
-		Pin,
-		Info,
-		AlertTriangle,
-		Sparkles,
-		PartyPopper
-	} from '@lucide/svelte';
+	import { actionIcons, stateIcons, phaseIcons, featureIcons } from '@autumnsgrove/prism/icons';
+	const Plus = actionIcons.plus;
+	const Pencil = actionIcons.edit;
+	const Trash2 = actionIcons.trash;
+	const Eye = stateIcons.eye;
+	const EyeOff = stateIcons.eyeOff;
+	const Pin = featureIcons.tag; // no Pin in prism — use tag as closest
+	const Info = stateIcons.info;
+	const AlertTriangle = stateIcons.warning;
+	const Sparkles = phaseIcons.sparkles;
+	const PartyPopper = phaseIcons.partyPopper;
 
 	interface DbMessage {
 		id: string;

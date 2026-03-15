@@ -4,7 +4,7 @@
   import Header from '$lib/components/Header.svelte';
   import Footer from '$lib/components/Footer.svelte';
   import { GroveTerm } from '@autumnsgrove/lattice/ui';
-  import { toolIcons, knowledgeCategoryIcons } from '$lib/utils/icons';
+  import { toolIcons, natureIcons, featureIcons, navIcons } from '@autumnsgrove/prism/icons';
   import { kbCategoryColors } from '$lib/utils/kb-colors';
 
   let { data } = $props();
@@ -17,9 +17,9 @@
   const designDocs = $derived(data.designDocs);
   const exhibitDocs = $derived(data.exhibitDocs);
 
-  const PhilosophyIcon = knowledgeCategoryIcons.philosophy;
-  const DesignIcon = knowledgeCategoryIcons.design;
-  const ExhibitIcon = knowledgeCategoryIcons.exhibit;
+  const PhilosophyIcon = natureIcons.trees;
+  const DesignIcon = featureIcons.palette;
+  const ExhibitIcon = navIcons.signpost;
 
   // Seasonal color references for cleaner templates
   const colors = {

@@ -3,7 +3,13 @@
 	import Footer from "$lib/components/Footer.svelte";
 
 	// Lucide Icons
-	import { Sparkles, TreePine as TreeIcon, Palette, Type, Eye, ChevronDown } from "@lucide/svelte";
+	import { phaseIcons, natureIcons, featureIcons, actionIcons, stateIcons, navIcons } from "@autumnsgrove/prism/icons";
+	const Sparkles = phaseIcons.sparkles;
+	const TreeIcon = natureIcons.treePine;
+	const Palette = featureIcons.palette;
+	const Type = actionIcons.type;
+	const Eye = stateIcons.eye;
+	const ChevronDown = navIcons.chevronDown;
 
 	// Import Glass components
 	import {

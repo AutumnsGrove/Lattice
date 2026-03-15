@@ -13,16 +13,7 @@
 		StatusComponent,
 	} from "$lib/types/status";
 	import { getIncidentStatusLabel } from "$lib/types/status";
-	import {
-		AlertCircle,
-		AlertTriangle,
-		Wrench,
-		ShieldAlert,
-		CheckCircle,
-		Search,
-		Eye,
-		Clock,
-	} from "@lucide/svelte";
+	import { stateIcons, chromeIcons, authIcons, navIcons, metricIcons } from "@autumnsgrove/prism/icons";
 
 	interface Props {
 		title: string;
@@ -55,18 +46,18 @@
 
 	// Type icons
 	const typeIcons = {
-		outage: AlertCircle,
-		degraded: AlertTriangle,
-		maintenance: Wrench,
-		security: ShieldAlert,
+		outage: stateIcons.alertCircle,
+		degraded: stateIcons.warning,
+		maintenance: chromeIcons.toolbox,
+		security: authIcons.shieldAlert,
 	};
 
 	// Status icons for timeline
 	const statusIcons = {
-		investigating: Search,
-		identified: Eye,
-		monitoring: Clock,
-		resolved: CheckCircle,
+		investigating: navIcons.search,
+		identified: stateIcons.eye,
+		monitoring: metricIcons.clock,
+		resolved: stateIcons.checkCircle,
 	};
 
 	const TypeIcon = $derived(typeIcons[type]);
@@ -152,7 +143,7 @@
 
 			<div class="space-y-4">
 				{#each updates as update}
-					{@const UpdateIcon = statusIcons[update.status as IncidentStatus] || Clock}
+					{@const UpdateIcon = statusIcons[update.status as IncidentStatus] || metricIcons.clock}
 					<div class="flex gap-3">
 						<div class="flex flex-col items-center">
 							<div

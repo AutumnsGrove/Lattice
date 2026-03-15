@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Select as SelectPrimitive, type WithoutChild } from "bits-ui";
-	import ChevronDown from "@lucide/svelte/icons/chevron-down";
+	import { navIcons } from "@autumnsgrove/prism/icons";
 	import { cn } from "$lib/utils";
 
 	// svelte-ignore custom_element_props_identifier
@@ -21,5 +21,5 @@
 	{...restProps}
 >
 	{@render children?.()}
-	<ChevronDown class="size-4 opacity-50" />
+	<navIcons.chevronDown class="size-4 opacity-50" />
 </SelectPrimitive.Trigger>

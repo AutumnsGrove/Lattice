@@ -9,7 +9,7 @@
 	import type { TenantGreenhouseSectionProps } from "./types.js";
 	import { GlassCard } from "../../ui/index.js";
 	import GreenhouseToggle from "./GreenhouseToggle.svelte";
-	import { Sprout, Trash2 } from "@lucide/svelte";
+	import { natureIcons, actionIcons } from "@autumnsgrove/prism/icons";
 
 	let {
 		greenhouse,
@@ -63,7 +63,7 @@
 
 <GlassCard class="p-6 {className}">
 	<div class="flex items-center gap-2 mb-4">
-		<Sprout class="w-5 h-5 text-success" aria-hidden="true" />
+		<natureIcons.sprout class="w-5 h-5 text-success" aria-hidden="true" />
 		<h3 class="text-lg font-serif text-foreground">Greenhouse Program</h3>
 	</div>
 
@@ -186,7 +186,7 @@
 						? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
 						: 'text-error hover:bg-error-bg'} disabled:opacity-50 transition-colors"
 				>
-					<Trash2 class="w-3.5 h-3.5" aria-hidden="true" />
+					<actionIcons.trash class="w-3.5 h-3.5" aria-hidden="true" />
 					{#if confirmRemove}
 						Confirm Remove
 					{:else}

@@ -17,7 +17,7 @@
 -->
 
 <script lang="ts">
-	import { X, Loader2, Download } from '@lucide/svelte';
+	import { stateIcons, actionIcons } from '@autumnsgrove/prism/icons';
 	import { cn } from '$lib/ui/utils';
 	import GlassCard from '$lib/ui/components/ui/GlassCard.svelte';
 	import GlassButton from '$lib/ui/components/ui/GlassButton.svelte';
@@ -174,7 +174,7 @@
 							)}
 							aria-label="Close dialog"
 						>
-							<X />
+							<stateIcons.x />
 						</button>
 					</div>
 				{/snippet}
@@ -269,7 +269,7 @@
 								'border border-accent/30 dark:border-accent/20'
 							)}
 						>
-							<Loader2 class="w-5 h-5 text-accent animate-spin" />
+							<stateIcons.loader class="w-5 h-5 text-accent animate-spin" />
 							<div>
 								<p class="text-sm font-medium text-foreground">Exporting...</p>
 								<p class="text-xs text-muted-foreground mt-0.5">
@@ -292,10 +292,10 @@
 							class="min-w-[120px]"
 						>
 							{#if isExporting}
-								<Loader2 class="w-4 h-4 animate-spin" />
+								<stateIcons.loader class="w-4 h-4 animate-spin" />
 								<span>Exporting...</span>
 							{:else}
-								<Download />
+								<actionIcons.download />
 								<span>Export</span>
 							{/if}
 						</GlassButton>

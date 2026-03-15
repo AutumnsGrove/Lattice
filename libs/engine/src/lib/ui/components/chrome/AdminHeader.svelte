@@ -22,7 +22,7 @@
 	import { page } from "$app/state";
 	import ThemeToggle from "./ThemeToggle.svelte";
 	import Logo from "../ui/Logo.svelte";
-	import { LogOut } from "@lucide/svelte";
+	import { authIcons } from "@autumnsgrove/prism/icons";
 	import type { AdminTab, MaxWidth } from "./types";
 	import type { Snippet } from "svelte";
 
@@ -118,7 +118,7 @@
 							title="Logout"
 							aria-label="Logout"
 						>
-							<LogOut class="w-5 h-5" />
+							<authIcons.logout class="w-5 h-5" />
 						</button>
 					</form>
 				{:else if onLogout}
@@ -128,7 +128,7 @@
 						title="Logout"
 						aria-label="Logout"
 					>
-						<LogOut class="w-5 h-5" />
+						<authIcons.logout class="w-5 h-5" />
 					</button>
 				{/if}
 			</div>

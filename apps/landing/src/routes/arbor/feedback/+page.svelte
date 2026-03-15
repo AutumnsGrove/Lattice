@@ -2,7 +2,13 @@
 	import type { PageData } from "./$types";
 	import { enhance } from "$app/forms";
 	import { GlassCard, GroveTerm } from "@autumnsgrove/lattice/ui";
-	import { Smile, Frown, Meh, Mail, Globe, MessageCircle } from "@lucide/svelte";
+	import { stateIcons, featureIcons, navIcons } from "@autumnsgrove/prism/icons";
+	const Smile = stateIcons.smile;
+	const Frown = stateIcons.frown;
+	const Meh = stateIcons.meh;
+	const Mail = featureIcons.mail;
+	const Globe = navIcons.globe;
+	const MessageCircle = featureIcons.messageCircle;
 	import type { Component } from "svelte";
 
 	interface Feedback {

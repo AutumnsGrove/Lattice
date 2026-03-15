@@ -3,7 +3,8 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import { GlassComparisonTable } from '@autumnsgrove/lattice/ui';
 	import SEO from '$lib/components/SEO.svelte';
-	import { ArrowLeft } from '@lucide/svelte';
+	import { navIcons } from '@autumnsgrove/prism/icons';
+	const ArrowLeft = navIcons.arrowLeft;
 
 	let { data } = $props();
 

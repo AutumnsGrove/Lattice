@@ -8,27 +8,26 @@
 
 	let { data } = $props();
 
-	// Centralized icon registry
-	import { navIcons, contentIcons, actionIcons, toolIcons } from "$lib/utils/icons";
+	import { navIcons, natureIcons, actionIcons, stateIcons, metricIcons, featureIcons, chromeIcons } from "@autumnsgrove/prism/icons";
 
 	// Destructured icons for Svelte 5 direct component rendering
-	const VisionIcon = navIcons.vision;
-	const TreesIcon = contentIcons.trees;
-	const SolarpunkIcon = toolIcons.solarpanel;
+	const VisionIcon = navIcons.compass;
+	const TreesIcon = natureIcons.trees;
+	const SolarpunkIcon = chromeIcons.solarPanel;
 
 	// Core Values icons
-	const AccessibilityIcon = toolIcons.helpcircle;
+	const AccessibilityIcon = stateIcons.help;
 	const OwnershipIcon = actionIcons.download;
-	const SimplicityIcon = contentIcons.leaf;
-	const CommunityIcon = contentIcons.heart;
-	const AiSanctuaryIcon = toolIcons.brickwallshield;
+	const SimplicityIcon = natureIcons.leaf;
+	const CommunityIcon = natureIcons.heart;
+	const AiSanctuaryIcon = chromeIcons.brickWallFire;
 
 	// "What Makes This Different" icons
-	const NoMetricsIcon = actionIcons.trenddown;
-	const NoAlgorithmIcon = contentIcons.clock;
-	const PrivateEncouragementIcon = toolIcons.messagessquare;
+	const NoMetricsIcon = metricIcons.trendDown;
+	const NoAlgorithmIcon = metricIcons.clock;
+	const PrivateEncouragementIcon = featureIcons.messagesSquare;
 	const FullControlIcon = actionIcons.settings;
-	const OpenStandardsIcon = toolIcons.signpost;
+	const OpenStandardsIcon = navIcons.signpost;
 
 	// TOC headers with icons (using engine TOC format)
 	const tocHeaders = [
@@ -39,7 +38,7 @@
 			id: "where-this-comes-from",
 			text: "Where This Comes From",
 			level: 2,
-			icon: contentIcons.heart,
+			icon: natureIcons.heart,
 		},
 	];
 </script>

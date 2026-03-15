@@ -6,7 +6,8 @@
 	 * Supports parallax depth effect on hover (respects prefers-reduced-motion).
 	 */
 
-	import { Heart, Star, Flame, Sparkles, Trophy, Flower2, type Icon } from "@lucide/svelte";
+	import type { Component } from "svelte";
+	import { natureIcons, phaseIcons } from "@autumnsgrove/prism/icons";
 	import type { ShrineContentItem, ShrineSize, FrameStyle } from "./index";
 	import { SIZE_DIMENSIONS } from "./index";
 
@@ -58,13 +59,13 @@
 	}
 
 	/** Maps icon name strings to Lucide components */
-	const ICON_MAP: Record<string, typeof Icon> = {
-		Heart,
-		Star,
-		Flame,
-		Sparkles,
-		Trophy,
-		Flower2,
+	const ICON_MAP: Record<string, Component> = {
+		Heart: natureIcons.heart,
+		Star: phaseIcons.star,
+		Flame: natureIcons.flame,
+		Sparkles: phaseIcons.sparkles,
+		Trophy: phaseIcons.trophy,
+		Flower2: natureIcons.flower2,
 	};
 
 	function getParallaxOffset(depth: number): string {
@@ -107,12 +108,12 @@
 				{@const iconLabel = (item.data.label as string) ?? "icon"}
 				{#if IconComponent}
 					<IconComponent
-						size={size === "small" ? 18 : size === "medium" ? 24 : 32}
+						class={size === "small" ? "w-[18px] h-[18px]" : size === "medium" ? "w-6 h-6" : "w-8 h-8"}
 						aria-hidden="true"
 					/>
 					<span class="sr-only">{iconLabel}</span>
 				{:else}
-					<Heart size={size === "small" ? 18 : size === "medium" ? 24 : 32} aria-hidden="true" />
+					<natureIcons.heart class={size === "small" ? "w-[18px] h-[18px]" : size === "medium" ? "w-6 h-6" : "w-8 h-8"} aria-hidden="true" />
 					<span class="sr-only">Heart</span>
 				{/if}
 			{:else if item.type === "date"}
@@ -139,7 +140,7 @@
 
 	{#if items.length === 0}
 		<div class="empty-shrine" aria-hidden="true">
-			<Heart size={24} />
+			<natureIcons.heart class="w-6 h-6" />
 		</div>
 	{/if}
 </div>

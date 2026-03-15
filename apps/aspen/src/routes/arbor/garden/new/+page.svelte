@@ -10,7 +10,7 @@
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 	import { resolveTermString } from "@autumnsgrove/lattice/ui/utils/grove-term-resolve";
 	import { api } from "@autumnsgrove/lattice/utils";
-	import { ArrowLeft, ArrowRight, ChevronRight, X, AlertCircle } from "@lucide/svelte";
+	import { navIcons, stateIcons } from "@autumnsgrove/prism/icons";
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
 	import { Blaze } from "@autumnsgrove/lattice/blazes/components";
 	import { GLOBAL_BLAZE_DEFAULTS } from "@autumnsgrove/lattice/blazes";
@@ -248,7 +248,7 @@
 	<header class="page-header">
 		<div class="header-content">
 			<a href="/arbor/garden" class="back-link"
-				><ArrowLeft size={14} class="inline-block" /> Back to <GroveTerm term="your-garden"
+				><navIcons.arrowLeft size={14} class="inline-block" /> Back to <GroveTerm term="your-garden"
 					>Garden</GroveTerm
 				></a
 			>
@@ -275,12 +275,12 @@
 			variant="accent"
 			class="bg-destructive/10 border-destructive/30 p-4 rounded-lg mb-4 flex items-center gap-3"
 		>
-			<AlertCircle class="w-5 h-5 text-error shrink-0" />
+			<stateIcons.alertCircle class="w-5 h-5 text-error shrink-0" />
 			<span class="flex-1 text-error">{error}</span>
 			<button
 				class="text-error hover:text-destructive leading-none"
 				onclick={() => (error = null)}
-				aria-label="Dismiss error"><X size={16} /></button
+				aria-label="Dismiss error"><stateIcons.x size={16} /></button
 			>
 		</Glass>
 	{/if}
@@ -298,7 +298,7 @@
 		<!-- Add details strip -->
 		<div class="details-strip">
 			<button class="details-toggle" onclick={toggleDetails}>
-				<ChevronRight size={16} class="details-chevron {detailsExpanded ? 'rotated' : ''}" />
+				<navIcons.chevronRight size={16} class="details-chevron {detailsExpanded ? 'rotated' : ''}" />
 				<span class="details-label">Add details</span>
 				{#if !detailsExpanded && detailsSummary}
 					<span class="details-summary">{detailsSummary}</span>
@@ -346,7 +346,7 @@
 						/>
 						<span class="form-hint">
 							URL to a cover image. <a href="/arbor/images" target="_blank"
-								>Upload one first <ArrowRight size={12} class="inline-block" /></a
+								>Upload one first <navIcons.arrowRight size={12} class="inline-block" /></a
 							>
 						</span>
 						{#if featuredImage}

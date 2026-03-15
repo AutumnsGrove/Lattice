@@ -3,15 +3,14 @@
 	import { GlassCard } from "@autumnsgrove/lattice/ui";
 	import { enhance } from "$app/forms";
 	import { invalidateAll } from "$app/navigation";
-	import {
-		Sprout,
-		Users,
-		CheckCircle,
-		XCircle,
-		Leaf,
-		ArrowRight,
-		AlertTriangle,
-	} from "@lucide/svelte";
+	import { natureIcons, authIcons, stateIcons, navIcons } from "@autumnsgrove/prism/icons";
+	const Sprout = natureIcons.sprout;
+	const Users = authIcons.users;
+	const CheckCircle = stateIcons.checkCircle;
+	const XCircle = stateIcons.xCircle;
+	const Leaf = natureIcons.leaf;
+	const ArrowRight = navIcons.arrowRight;
+	const AlertTriangle = stateIcons.warning;
 	import type { FlagMaturity } from "@autumnsgrove/lattice/feature-flags";
 	import type { PageData, ActionData } from "./$types";
 

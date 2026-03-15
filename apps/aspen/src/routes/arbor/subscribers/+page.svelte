@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { copyToClipboard } from "@autumnsgrove/lattice/utils/share";
-	import { Mail, AlertTriangle, Check, Copy, Download, MailOpen } from "@lucide/svelte";
+	import { featureIcons, stateIcons, actionIcons } from "@autumnsgrove/prism/icons";
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import Glass from "@autumnsgrove/lattice/ui/components/ui/Glass.svelte";
 
@@ -81,7 +81,7 @@
 
 <div class="page-header">
 	<div>
-		<h1 class="flex items-center gap-3"><Mail class="w-7 h-7" /> Email Subscribers</h1>
+		<h1 class="flex items-center gap-3"><featureIcons.mail class="w-7 h-7" /> Email Subscribers</h1>
 		<p class="subtitle">
 			{data.totalActive} active subscriber{data.totalActive === 1 ? "" : "s"}
 			{#if data.totalUnsubscribed > 0}
@@ -95,7 +95,7 @@
 <Glass variant="accent" class="error-bg border-error/30 p-6 rounded-lg mb-8">
 	<div class="danger-header">
 		<div>
-			<h2 class="flex items-center gap-2"><AlertTriangle class="w-5 h-5" /> Mass Email Zone</h2>
+			<h2 class="flex items-center gap-2"><stateIcons.warning class="w-5 h-5" /> Mass Email Zone</h2>
 			<p>
 				Use with extreme care. This copies all {data.totalActive} subscriber email{data.totalActive ===
 				1
@@ -107,16 +107,16 @@
 	<div class="danger-actions">
 		<button class="btn-danger inline-flex items-center gap-2" onclick={copyAllEmails}>
 			{#if copiedAll}
-				<Check class="w-4 h-4" /> Copied!
+				<stateIcons.check class="w-4 h-4" /> Copied!
 			{:else}
-				<Copy class="w-4 h-4" /> Copy All Emails (comma-separated)
+				<actionIcons.copy class="w-4 h-4" /> Copy All Emails (comma-separated)
 			{/if}
 		</button>
 		<button class="btn-secondary inline-flex items-center gap-2" onclick={exportAsList}
-			><Download class="w-4 h-4" /> Export as List (.txt)</button
+			><actionIcons.download class="w-4 h-4" /> Export as List (.txt)</button
 		>
 		<button class="btn-secondary inline-flex items-center gap-2" onclick={exportAsCSV}
-			><Download class="w-4 h-4" /> Export as CSV</button
+			><actionIcons.download class="w-4 h-4" /> Export as CSV</button
 		>
 	</div>
 </Glass>
@@ -127,7 +127,7 @@
 
 	{#if subscribers.length === 0}
 		<div class="empty-state">
-			<div class="empty-icon"><MailOpen class="w-12 h-12 text-foreground-muted" /></div>
+			<div class="empty-icon"><featureIcons.mailOpen class="w-12 h-12 text-foreground-muted" /></div>
 			<p>No subscribers yet</p>
 		</div>
 	{:else}
@@ -161,7 +161,7 @@
 									{#if copiedEmail === subscriber.email}
 										<Check class="w-4 h-4" /> Copied
 									{:else}
-										<Copy class="w-4 h-4" /> Copy
+										<actionIcons.copy class="w-4 h-4" /> Copy
 									{/if}
 								</button>
 							</td>

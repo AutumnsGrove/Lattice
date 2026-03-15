@@ -5,7 +5,12 @@
 	import { GroveTerm } from "@autumnsgrove/lattice/ui";
 	import SEO from "$lib/components/SEO.svelte";
 	import { Logo } from "@autumnsgrove/lattice/ui/nature";
-	import { Mail, ExternalLink, Heart, Compass, Shield } from "@lucide/svelte";
+	import { featureIcons, navIcons, natureIcons, authIcons } from "@autumnsgrove/prism/icons";
+	const Mail = featureIcons.mail;
+	const ExternalLink = navIcons.external;
+	const Heart = natureIcons.heart;
+	const Compass = navIcons.compass;
+	const Shield = authIcons.shield;
 
 	let { data } = $props();
 </script>

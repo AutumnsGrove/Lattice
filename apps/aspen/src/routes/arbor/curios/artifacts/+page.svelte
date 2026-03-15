@@ -5,7 +5,7 @@
 	import GlassButton from "@autumnsgrove/lattice/ui/components/ui/GlassButton.svelte";
 	import GlassConfirmDialog from "@autumnsgrove/lattice/ui/components/ui/GlassConfirmDialog.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
-	import { Wand2, Plus, Trash2, Eye, Sparkles, Box, Pencil } from "@lucide/svelte";
+	import { chromeIcons, actionIcons, stateIcons, phaseIcons, featureIcons } from "@autumnsgrove/prism/icons";
 	import { api } from "@autumnsgrove/lattice/utils/api";
 	import ArtifactConfigForm from "@autumnsgrove/lattice/curios/components/artifacts/ArtifactConfigForm.svelte";
 	import ArtifactShowcase from "@autumnsgrove/lattice/curios/components/artifacts/ArtifactShowcase.svelte";
@@ -171,7 +171,7 @@
 <div class="artifacts-page">
 	<header class="page-header">
 		<div class="title-row">
-			<Wand2 class="header-icon" />
+			<chromeIcons.wand class="header-icon" />
 			<h1>Artifacts</h1>
 		</div>
 		<p class="subtitle">
@@ -184,12 +184,12 @@
 		{#if !showAddForm}
 			<div class="action-buttons">
 				<GlassButton variant="accent" onclick={() => (showAddForm = true)}>
-					<Plus class="btn-icon" />
+					<actionIcons.plus class="btn-icon" />
 					Add Artifact
 				</GlassButton>
 				{#if data.artifacts.length > 0}
 					<GlassButton variant="ghost" onclick={() => openPreview(0)}>
-						<Eye class="btn-icon" />
+						<stateIcons.eye class="btn-icon" />
 						Preview Gallery
 					</GlassButton>
 				{/if}
@@ -259,7 +259,7 @@
 
 						<div class="form-field">
 							<label for="visibility">
-								<Eye class="field-icon" />
+								<stateIcons.eye class="field-icon" />
 								Visibility
 							</label>
 							<select id="visibility" name="visibility" class="glass-input">
@@ -271,7 +271,7 @@
 
 						<div class="form-field">
 							<label for="revealAnimation">
-								<Sparkles class="field-icon" />
+								<phaseIcons.sparkles class="field-icon" />
 								Reveal
 							</label>
 							<select id="revealAnimation" name="revealAnimation" class="glass-input">
@@ -283,7 +283,7 @@
 
 						<div class="form-field">
 							<label for="container">
-								<Box class="field-icon" />
+								<featureIcons.box class="field-icon" />
 								Container
 							</label>
 							<select id="container" name="container" class="glass-input">
@@ -296,7 +296,7 @@
 
 					<div class="form-actions">
 						<GlassButton type="submit" variant="accent" disabled={!selectedType}>
-							<Plus class="btn-icon" />
+							<actionIcons.plus class="btn-icon" />
 							Add
 						</GlassButton>
 						<GlassButton
@@ -318,7 +318,7 @@
 	<section class="artifacts-list">
 		{#if data.artifacts.length === 0}
 			<GlassCard class="empty-card">
-				<Wand2 class="empty-icon" />
+				<chromeIcons.wand class="empty-icon" />
 				<p>No artifacts yet.</p>
 				<p class="empty-hint">Add some interactive objects to bring your site to life.</p>
 			</GlassCard>
@@ -443,7 +443,7 @@
 										title="Preview artifact"
 										onclick={() => openPreview(artIdx)}
 									>
-										<Eye class="btn-icon-solo" />
+										<stateIcons.eye class="btn-icon-solo" />
 									</GlassButton>
 									<GlassButton
 										variant="ghost"
@@ -451,7 +451,7 @@
 										title="Edit artifact"
 										onclick={() => startEdit(artifact)}
 									>
-										<Pencil class="btn-icon-solo" />
+										<actionIcons.edit class="btn-icon-solo" />
 									</GlassButton>
 									<GlassButton
 										variant="ghost"
@@ -459,7 +459,7 @@
 										title="Remove artifact"
 										onclick={() => requestDelete(artifact)}
 									>
-										<Trash2 class="btn-icon-solo" />
+										<actionIcons.trash class="btn-icon-solo" />
 									</GlassButton>
 								</div>
 							</div>

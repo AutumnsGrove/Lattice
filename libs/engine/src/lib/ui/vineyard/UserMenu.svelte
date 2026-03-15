@@ -10,7 +10,7 @@
 	import type { UserMenuProps } from "./types.js";
 	import type { BetterAuthUser } from "./types.js";
 	import { getSession, signOut } from "./auth.js";
-	import { User, LogOut, ChevronDown } from "@lucide/svelte";
+	import { authIcons, navIcons } from "@autumnsgrove/prism/icons";
 
 	type Props = UserMenuProps;
 
@@ -75,7 +75,7 @@
 					{#if user.image}
 						<img src={user.image} alt={user.name} />
 					{:else}
-						<User size={20} />
+						<authIcons.user class="w-5 h-5" />
 					{/if}
 				</div>
 			{/if}
@@ -86,7 +86,7 @@
 				{/if}
 			</div>
 			<div class="chevron" class:rotated={isMenuOpen}>
-				<ChevronDown size={16} />
+				<navIcons.chevronDown class="w-4 h-4" />
 			</div>
 		</button>
 
@@ -100,7 +100,7 @@
 				</div>
 				<div class="menu-divider"></div>
 				<button class="menu-item menu-item-danger" onclick={handleSignOut}>
-					<LogOut size={16} />
+					<authIcons.logout class="w-4 h-4" />
 					<span>Sign out</span>
 				</button>
 			</div>

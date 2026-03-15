@@ -9,7 +9,7 @@
 <script lang="ts">
 	import type { AuthButtonProps } from "../../types/index.js";
 	import { signIn, signOut, getSession } from "../../auth/index.js";
-	import { LogIn, LogOut } from "@lucide/svelte";
+	import { authIcons } from "@autumnsgrove/prism/icons";
 
 	type Props = AuthButtonProps;
 
@@ -55,10 +55,10 @@
 		<span class="loading-spinner"></span>
 		<span>Loading...</span>
 	{:else if isAuthenticated}
-		<LogOut size={16} />
+		<authIcons.logout size={16} />
 		<span>{signOutText}</span>
 	{:else}
-		<LogIn size={16} />
+		<authIcons.login size={16} />
 		<span>{signInText}</span>
 	{/if}
 </button>

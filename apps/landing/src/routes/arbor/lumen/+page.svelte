@@ -1,7 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { GlassCard } from '@autumnsgrove/lattice/ui';
-	import { Sparkles, Shield, Loader2, AlertTriangle, RefreshCw } from '@lucide/svelte';
+	import { phaseIcons, authIcons, stateIcons, actionIcons } from '@autumnsgrove/prism/icons';
+	const Sparkles = phaseIcons.sparkles;
+	const Shield = authIcons.shield;
+	const Loader2 = stateIcons.loader;
+	const AlertTriangle = stateIcons.warning;
+	const RefreshCw = actionIcons.refresh;
 	import { LumenAnalytics, SafetyMonitoring } from '@autumnsgrove/lattice';
 
 	interface LumenData {

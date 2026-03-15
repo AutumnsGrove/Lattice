@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Check, Circle, X, Compass } from '@lucide/svelte';
+	import { stateIcons, navIcons } from '@autumnsgrove/prism/icons';
 
 	interface ChecklistItem {
 		id: string;
@@ -25,7 +25,7 @@
 	<!-- Header -->
 	<div class="flex items-center justify-between mb-4">
 		<div class="flex items-center gap-2">
-			<Compass size={18} class="text-primary" />
+			<navIcons.compass class="w-[18px] h-[18px] text-primary" />
 			<h3 class="font-medium text-foreground text-sm">Getting Started</h3>
 		</div>
 		{#if onDismiss}
@@ -35,7 +35,7 @@
 				aria-label="Dismiss getting started checklist"
 				title="Dismiss checklist"
 			>
-				<X size={16} />
+				<stateIcons.x class="w-4 h-4" />
 			</button>
 		{/if}
 	</div>
@@ -70,7 +70,7 @@
 							class:group-hover:border-primary={!item.completed}
 						>
 							{#if item.completed}
-								<Check size={12} class="text-white" />
+								<stateIcons.check class="w-3 h-3 text-white" />
 							{/if}
 						</div>
 						<span
@@ -91,7 +91,7 @@
 							class:border-default={!item.completed}
 						>
 							{#if item.completed}
-								<Check size={12} class="text-white" />
+								<stateIcons.check class="w-3 h-3 text-white" />
 							{/if}
 						</div>
 						<span

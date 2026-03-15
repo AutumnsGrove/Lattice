@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Star } from "@lucide/svelte";
+	import { phaseIcons } from "@autumnsgrove/prism/icons";
 
 	/**
 	 * FeatureStar - Inline star indicator for key/featured items
@@ -30,4 +30,4 @@
 	);
 </script>
 
-<Star class="w-4 h-4 {colorClass}" aria-hidden="true" />
+<phaseIcons.star class="w-4 h-4 {colorClass}" aria-hidden="true" />

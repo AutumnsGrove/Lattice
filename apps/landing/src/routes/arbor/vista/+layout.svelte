@@ -12,21 +12,20 @@
 	import { GlassConfirmDialog } from "@autumnsgrove/lattice/ui";
 	import Header from "$lib/components/Header.svelte";
 	import Footer from "$lib/components/Footer.svelte";
-	import {
-		LayoutDashboard,
-		Server,
-		Database,
-		HardDrive,
-		Box,
-		DollarSign,
-		Brain,
-		Shield,
-		Lock,
-		Flower2,
-		Flame,
-		Bell,
-		ArrowLeft,
-	} from "@lucide/svelte";
+	import { featureIcons, metricIcons, phaseIcons, authIcons, natureIcons, blazeIcons, navIcons } from "@autumnsgrove/prism/icons";
+	const LayoutDashboard = featureIcons.layoutDashboard;
+	const Server = featureIcons.server;
+	const Database = featureIcons.database;
+	const HardDrive = featureIcons.hardDrive;
+	const Box = featureIcons.box;
+	const DollarSign = metricIcons.dollarSign;
+	const Brain = phaseIcons.brain;
+	const Shield = authIcons.shield;
+	const Lock = authIcons.lock;
+	const Flower2 = natureIcons.flower2;
+	const Flame = natureIcons.flame;
+	const Bell = blazeIcons.bell;
+	const ArrowLeft = navIcons.arrowLeft;
 	import type { ArborNavEntry } from "@autumnsgrove/lattice/ui/arbor";
 	import type { LayoutData } from "./$types";
 	import type { Snippet } from "svelte";

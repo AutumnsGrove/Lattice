@@ -10,22 +10,7 @@
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
 	import { formatRelativeTime, formatDateTime } from "@autumnsgrove/lattice/utils/date";
-	import {
-		MessageSquare,
-		ThumbsUp,
-		ThumbsDown,
-		Filter,
-		Eye,
-		EyeOff,
-		Archive,
-		ChevronLeft,
-		ChevronRight,
-		Check,
-		AlertTriangle,
-		Loader2,
-		X,
-		MapPin,
-	} from "@lucide/svelte";
+	import { featureIcons, chromeIcons, actionIcons, navIcons, stateIcons } from "@autumnsgrove/prism/icons";
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 
 	let { data, form } = $props();
@@ -85,7 +70,7 @@
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 		<div>
 			<h1 class="text-2xl font-medium text-foreground flex items-center gap-2">
-				<MessageSquare class="w-6 h-6 text-grove-600 dark:text-grove-400" />
+				<featureIcons.messageSquare class="w-6 h-6 text-grove-600 dark:text-grove-400" />
 				Traces
 			</h1>
 			<p class="text-foreground-muted mt-1">Feedback from across Grove</p>
@@ -110,9 +95,9 @@
 					class="px-4 py-2 rounded-lg bg-grove-600 hover:bg-primary/90 text-white transition-colors flex items-center gap-2"
 				>
 					{#if markingAllRead}
-						<Loader2 class="w-4 h-4 animate-spin" />
+						<stateIcons.loader class="w-4 h-4 animate-spin" />
 					{:else}
-						<Check class="w-4 h-4" />
+						<stateIcons.check class="w-4 h-4" />
 					{/if}
 					Mark all read
 				</button>
@@ -125,14 +110,14 @@
 		<div
 			class="p-4 rounded-lg success-bg border border-success/30 text-success flex items-center gap-2"
 		>
-			<Check size={18} />
+			<stateIcons.check size={18} />
 			{form.message}
 		</div>
 	{/if}
 
 	{#if form?.error}
 		<div class="p-4 rounded-lg error-bg border border-error/30 text-error flex items-center gap-2">
-			<AlertTriangle size={18} />
+			<stateIcons.warning size={18} />
 			{form.error}
 		</div>
 	{/if}
@@ -146,7 +131,7 @@
 
 		<GlassCard variant="muted" class="p-4 text-center">
 			<div class="text-3xl font-bold text-success flex items-center justify-center gap-1">
-				<ThumbsUp class="w-6 h-6" />
+				<chromeIcons.thumbsUp class="w-6 h-6" />
 				{data.stats.upvotes}
 			</div>
 			<div class="text-sm text-foreground-muted">Helpful</div>
@@ -154,7 +139,7 @@
 
 		<GlassCard variant="muted" class="p-4 text-center">
 			<div class="text-3xl font-bold text-error flex items-center justify-center gap-1">
-				<ThumbsDown class="w-6 h-6" />
+				<chromeIcons.thumbsDown class="w-6 h-6" />
 				{data.stats.downvotes}
 			</div>
 			<div class="text-sm text-foreground-muted">Not Helpful</div>
@@ -206,9 +191,9 @@
 							: 'bg-surface-subtle dark:bg-surface-subtle text-foreground-muted hover:text-foreground'}"
 					>
 						{#if unreadOnly}
-							<EyeOff class="w-4 h-4" />
+							<stateIcons.eyeOff class="w-4 h-4" />
 						{:else}
-							<Eye class="w-4 h-4" />
+							<stateIcons.eye class="w-4 h-4" />
 						{/if}
 						Unread ({data.stats.unread})
 					</button>
@@ -218,7 +203,7 @@
 						onclick={applyFilters}
 						class="px-4 py-2 rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors"
 					>
-						<Filter class="w-4 h-4" />
+						<actionIcons.filter class="w-4 h-4" />
 					</button>
 
 					{#if voteFilter || unreadOnly || sourceFilter}
@@ -227,7 +212,7 @@
 							onclick={clearFilters}
 							class="px-4 py-2 rounded-lg bg-surface-subtle dark:bg-surface-subtle text-foreground-muted hover:text-foreground transition-colors"
 						>
-							<X class="w-4 h-4" />
+							<stateIcons.x class="w-4 h-4" />
 						</button>
 					{/if}
 				</div>
@@ -304,9 +289,9 @@
 												title="Mark as read"
 											>
 												{#if markingRead === trace.id}
-													<Loader2 class="w-4 h-4 animate-spin" />
+													<stateIcons.loader class="w-4 h-4 animate-spin" />
 												{:else}
-													<Eye class="w-4 h-4" />
+													<stateIcons.eye class="w-4 h-4" />
 												{/if}
 											</button>
 										</form>
@@ -331,9 +316,9 @@
 											title="Archive"
 										>
 											{#if archiving === trace.id}
-												<Loader2 class="w-4 h-4 animate-spin" />
+												<stateIcons.loader class="w-4 h-4 animate-spin" />
 											{:else}
-												<Archive class="w-4 h-4" />
+												<featureIcons.archive class="w-4 h-4" />
 											{/if}
 										</button>
 									</form>
@@ -369,7 +354,7 @@
 								disabled={data.pagination.page === 1}
 								class="p-2 rounded hover:bg-surface-hover disabled:opacity-50 disabled:cursor-not-allowed"
 							>
-								<ChevronLeft class="w-4 h-4" />
+								<navIcons.chevronLeft class="w-4 h-4" />
 							</button>
 
 							<span class="px-3 text-sm">
@@ -382,7 +367,7 @@
 								disabled={data.pagination.page === data.pagination.totalPages}
 								class="p-2 rounded hover:bg-surface-hover disabled:opacity-50 disabled:cursor-not-allowed"
 							>
-								<ChevronRight class="w-4 h-4" />
+								<navIcons.chevronRight class="w-4 h-4" />
 							</button>
 						</div>
 					</div>
@@ -394,7 +379,7 @@
 		<div class="space-y-4">
 			<GlassCard variant="frosted">
 				<h2 class="text-lg font-medium text-foreground mb-4 flex items-center gap-2 px-4 pt-4">
-					<MapPin class="w-5 h-5 text-grove-600 dark:text-grove-400" />
+					<navIcons.mapPin class="w-5 h-5 text-grove-600 dark:text-grove-400" />
 					By Location
 				</h2>
 

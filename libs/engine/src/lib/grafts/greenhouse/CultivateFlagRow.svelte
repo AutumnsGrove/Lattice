@@ -9,7 +9,7 @@
 	import type { CultivateFlagRowProps } from "./types.js";
 	import type { FlagMaturity } from "../../feature-flags/types.js";
 	import GreenhouseToggle from "./GreenhouseToggle.svelte";
-	import { Sprout, Home } from "@lucide/svelte";
+	import { navIcons, natureIcons } from "@autumnsgrove/prism/icons";
 
 	let {
 		flag,
@@ -80,9 +80,9 @@
 	<td class="py-3 px-4">
 		<div class="flex items-center gap-2">
 			{#if flag.greenhouseOnly}
-				<Sprout class="w-4 h-4 text-success" aria-label="Greenhouse Only" />
+				<natureIcons.sprout class="w-4 h-4 text-success" aria-label="Greenhouse Only" />
 			{:else}
-				<Home class="w-4 h-4 text-warning" aria-label="Global Flag" />
+				<navIcons.home class="w-4 h-4 text-warning" aria-label="Global Flag" />
 			{/if}
 			<span class="font-medium text-foreground">{displayName}</span>
 		</div>

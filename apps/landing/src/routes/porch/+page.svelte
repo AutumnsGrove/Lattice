@@ -4,7 +4,10 @@
 	import { seasonStore, groveModeStore } from '@autumnsgrove/lattice/ui/stores';
 	import Footer from '$lib/components/Footer.svelte';
 	import { Logo } from '@autumnsgrove/lattice/ui/nature';
-	import { MessageCircle, Clock, ArrowRight } from '@lucide/svelte';
+	import { featureIcons, metricIcons, navIcons } from '@autumnsgrove/prism/icons';
+	const MessageCircle = featureIcons.messageCircle;
+	const Clock = metricIcons.clock;
+	const ArrowRight = navIcons.arrowRight;
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();

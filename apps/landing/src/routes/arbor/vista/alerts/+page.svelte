@@ -2,7 +2,11 @@
 	import type { PageData } from "./$types";
 	import { GlassCard } from "@autumnsgrove/lattice/ui";
 	import { formatRelativeTime } from "@autumnsgrove/lattice/utils";
-	import { Bell, AlertCircle, CheckCircle2, Info } from "@lucide/svelte";
+	import { blazeIcons, stateIcons } from "@autumnsgrove/prism/icons";
+	const Bell = blazeIcons.bell;
+	const AlertCircle = stateIcons.alertCircle;
+	const CheckCircle2 = stateIcons.checkCircle2;
+	const Info = stateIcons.info;
 	let { data }: { data: PageData } = $props();
 
 	// Threshold form state

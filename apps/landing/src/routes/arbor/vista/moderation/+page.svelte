@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { PageData } from "./$types";
 	import { GlassCard } from "@autumnsgrove/lattice/ui";
-	import { Shield } from "@lucide/svelte";
+	import { authIcons } from "@autumnsgrove/prism/icons";
+	const Shield = authIcons.shield;
 
 	let { data }: { data: PageData } = $props();
 </script>

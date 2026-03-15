@@ -8,7 +8,7 @@
 
 	import type { ShrineDisplay } from "./index";
 	import ShrineCanvas from "./ShrineCanvas.svelte";
-	import { Heart } from "@lucide/svelte";
+	import { natureIcons } from "@autumnsgrove/prism/icons";
 
 	interface Props {
 		shrines: ShrineDisplay[];
@@ -19,7 +19,7 @@
 
 {#if shrines.length === 0}
 	<section class="shrines-empty" aria-label="No shrines available">
-		<Heart size={32} aria-hidden="true" />
+		<natureIcons.heart class="w-8 h-8" aria-hidden="true" />
 		<p>No shrines to display yet.</p>
 	</section>
 {:else}

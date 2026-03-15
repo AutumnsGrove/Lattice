@@ -6,14 +6,17 @@
 
 	let { data } = $props();
 
-	// Centralized icon registry - single source of truth for all icons
-	import { featureIcons, contentIcons, actionIcons, getToolIcon } from "$lib/utils/icons";
+	import { featureIcons, phaseIcons, chromeIcons, stateIcons, resolveAnyIcon } from "@autumnsgrove/prism/icons";
 
-	// Use centralized registry for spec/github link icons
-	const FileText = contentIcons.filetext;
-	const BookOpen = contentIcons.bookopen;
-	const Github = featureIcons.github;
-	const Lightbulb = actionIcons.lightbulb;
+	const FileText = featureIcons.fileText;
+	const BookOpen = featureIcons.bookOpen;
+	const Github = chromeIcons.github;
+	const Lightbulb = phaseIcons.lightbulb;
+
+	// getToolIcon replacement — resolves any icon key across all groups
+	function getToolIcon(iconKey: string) {
+		return resolveAnyIcon(iconKey, stateIcons.circle);
+	}
 
 	// Import nature assets from engine package
 	import { Logo, Lantern } from "@autumnsgrove/lattice/ui/nature";

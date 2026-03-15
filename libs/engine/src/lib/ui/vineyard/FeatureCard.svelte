@@ -16,35 +16,22 @@
   import type { FeatureCardProps } from './types.js';
   import type { Snippet } from 'svelte';
   import StatusBadge from './StatusBadge.svelte';
-  // Explicit icon map to avoid bundling all 1000+ lucide icons (~300KB savings)
-  import {
-    HardDrive,
-    Layout,
-    CreditCard,
-    Sparkles,
-    Code,
-    Lock,
-    Map,
-    FolderOpen,
-    Download,
-    Palette,
-    Search,
-    type Icon,
-  } from '@lucide/svelte';
+  import { featureIcons, metricIcons, phaseIcons, stateIcons, navIcons, actionIcons } from '@autumnsgrove/prism/icons';
+  import type { Component } from 'svelte';
 
-  // Use lucide's Icon type for proper typing
-  const iconMap: Record<string, typeof Icon> = {
-    HardDrive,
-    Layout,
-    CreditCard,
-    Sparkles,
-    Code,
-    Lock,
-    Map,
-    FolderOpen,
-    Download,
-    Palette,
-    Search,
+  // Icon map keyed by string prop value — all migrated to prism groups
+  const iconMap: Record<string, Component> = {
+    HardDrive: featureIcons.hardDrive,
+    Layout: featureIcons.layout,
+    CreditCard: metricIcons.creditCard,
+    Sparkles: phaseIcons.sparkles,
+    Code: featureIcons.code,
+    Lock: stateIcons.lock,
+    Map: navIcons.map,
+    FolderOpen: featureIcons.folderOpen,
+    Download: actionIcons.download,
+    Palette: featureIcons.palette,
+    Search: navIcons.search,
   };
 
   interface Props extends FeatureCardProps {
@@ -53,7 +40,7 @@
 
   let { title, description, status, icon, demo }: Props = $props();
 
-  const IconComponent = $derived(icon && icon in iconMap ? iconMap[icon] : null);
+  const IconComponent = $derived<Component | null>(icon && icon in iconMap ? iconMap[icon] : null);
 </script>
 
 <article class="feature-card" data-status={status}>

@@ -5,7 +5,7 @@
 	 * Modal dialog for comparing growth stages and initiating cultivation.
 	 */
 
-	import { X, Sprout, RefreshCw, Settings } from "@lucide/svelte";
+	import { stateIcons, natureIcons, actionIcons } from "@autumnsgrove/prism/icons";
 	import type { GardenModalProps } from "./types.js";
 	import type { TierKey } from "$lib/config/tiers";
 	import { transformAllTiers, type PricingTier, type BillingPeriod } from "$lib/grafts/pricing";
@@ -85,14 +85,14 @@
 				onclick={() => onClose?.()}
 				aria-label="Close garden modal"
 			>
-				<X class="w-5 h-5 text-foreground-muted" />
+				<stateIcons.x class="w-5 h-5 text-foreground-muted" />
 			</button>
 
 			<!-- Header -->
 			<div class="p-6 border-b border-border">
 				<div class="flex items-center gap-3 mb-2">
 					<div class="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
-						<Sprout class="w-5 h-5 text-accent" />
+						<natureIcons.sprout class="w-5 h-5 text-accent" />
 					</div>
 					<div>
 						<h2 id="garden-modal-title" class="text-xl font-serif text-foreground">
@@ -162,7 +162,7 @@
 					class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground-muted hover:text-foreground transition-colors"
 					onclick={() => onTend?.()}
 				>
-					<Settings class="w-4 h-4" />
+					<actionIcons.settings class="w-4 h-4" />
 					Tend Garden
 				</button>
 

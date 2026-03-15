@@ -10,7 +10,7 @@
 	import type { TenantGraftSectionProps } from "./types.js";
 	import { GlassCard } from "../../ui/index.js";
 	import GraftToggleRow from "./GraftToggleRow.svelte";
-	import { Settings, RotateCcw } from "@lucide/svelte";
+	import { actionIcons } from "@autumnsgrove/prism/icons";
 
 	let {
 		grafts,
@@ -38,7 +38,7 @@
 <GlassCard class="p-6 {className}">
 	<div class="flex items-center justify-between mb-4">
 		<div class="flex items-center gap-2">
-			<Settings class="w-5 h-5 text-foreground-muted" aria-hidden="true" />
+			<actionIcons.settings class="w-5 h-5 text-foreground-muted" aria-hidden="true" />
 			<h3 class="text-lg font-serif text-foreground">Graft Overrides</h3>
 		</div>
 
@@ -55,7 +55,7 @@
 						? 'bg-warning text-white hover:bg-warning/90'
 						: 'text-foreground-muted hover:bg-surface-subtle'}"
 				>
-					<RotateCcw class="w-3.5 h-3.5" aria-hidden="true" />
+					<actionIcons.rotateCcw class="w-3.5 h-3.5" aria-hidden="true" />
 					{#if confirmReset}
 						Confirm Reset
 					{:else}

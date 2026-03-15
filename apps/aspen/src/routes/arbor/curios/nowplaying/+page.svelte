@@ -3,7 +3,7 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import GlassButton from "@autumnsgrove/lattice/ui/components/ui/GlassButton.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
-	import { Music, ArrowLeft, Trash2 } from "@lucide/svelte";
+	import { blazeIcons, navIcons, actionIcons } from "@autumnsgrove/prism/icons";
 	import {
 		DISPLAY_STYLE_OPTIONS,
 		PROVIDER_OPTIONS,

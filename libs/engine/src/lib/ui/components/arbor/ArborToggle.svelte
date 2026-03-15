@@ -13,7 +13,7 @@
     </header>
 -->
 <script lang="ts">
-  import { Menu } from "@lucide/svelte";
+  import { navIcons } from "@autumnsgrove/prism/icons";
   import { sidebarStore } from "../../stores/sidebar.svelte";
 
   interface Props {
@@ -40,7 +40,7 @@
   aria-label="Toggle sidebar"
   title="Toggle sidebar"
 >
-  <Menu class="arbor-toggle-icon" />
+  <navIcons.menu class="arbor-toggle-icon" />
 </button>
 
 <style>

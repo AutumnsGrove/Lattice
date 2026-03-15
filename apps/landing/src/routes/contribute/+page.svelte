@@ -8,21 +8,22 @@
 
 	let { data } = $props();
 
-	// Icon imports
-	import { featureIcons, contentIcons, actionIcons, stateIcons, toolIcons } from "$lib/utils/icons";
-	import { Coffee, Heart, TreePine, Sparkles } from "@lucide/svelte";
+	import { natureIcons, featureIcons, chromeIcons, phaseIcons, stateIcons, authIcons, navIcons, metricIcons } from "@autumnsgrove/prism/icons";
 
 	// Page icons
-	const HeartIcon = contentIcons.heart;
-	const GithubIcon = featureIcons.github;
-	const BugIcon = toolIcons.bug;
-	const LightbulbIcon = actionIcons.lightbulb;
-	const EyeIcon = toolIcons.eye;
-	const SproutIcon = contentIcons.sprout;
-	const UsersIcon = contentIcons.users;
-	const ArrowIcon = actionIcons.arrow;
+	const HeartIcon = natureIcons.heart;
+	const GithubIcon = chromeIcons.github;
+	const BugIcon = stateIcons.warning;
+	const LightbulbIcon = phaseIcons.lightbulb;
+	const EyeIcon = stateIcons.eye;
+	const SproutIcon = natureIcons.sprout;
+	const UsersIcon = authIcons.users;
+	const ArrowIcon = navIcons.arrowRight;
 	const CheckIcon = stateIcons.check;
-	const FileTextIcon = contentIcons.filetext;
+	const FileTextIcon = featureIcons.fileText;
+	const Coffee = metricIcons.handCoins; // no coffee in prism — hand coins for financial support
+	const TreePine = natureIcons.treePine;
+	const Sparkles = phaseIcons.sparkles;
 
 	// TOC headers
 	const tocHeaders = [

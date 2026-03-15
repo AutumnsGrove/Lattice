@@ -7,22 +7,7 @@
 	import Badge from "@autumnsgrove/lattice/ui/components/ui/Badge.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 	import { api } from "@autumnsgrove/lattice/utils/api";
-	import {
-		Activity,
-		Settings2,
-		ChevronLeft,
-		Save,
-		AlertCircle,
-		CheckCircle2,
-		Copy,
-		RefreshCw,
-		Eye,
-		EyeOff,
-		Loader2,
-		Globe,
-		Filter,
-		BarChart3,
-	} from "@lucide/svelte";
+	import { metricIcons, navIcons, actionIcons, stateIcons, featureIcons } from "@autumnsgrove/prism/icons";
 
 	const { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -208,7 +193,7 @@
 		<!-- Enable/Disable -->
 		<GlassCard class="config-section">
 			<div class="section-header">
-				<Settings2 class="section-icon" />
+				<actionIcons.settings2 class="section-icon" />
 				<h2>General</h2>
 			</div>
 
