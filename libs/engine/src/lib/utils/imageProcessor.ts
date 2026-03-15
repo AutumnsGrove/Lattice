@@ -21,7 +21,11 @@ let jxlModule: typeof import("@jsquash/jxl") | null = null;
  */
 async function getJxlEncoder(): Promise<typeof import("@jsquash/jxl")> {
 	if (!jxlModule) {
-		jxlModule = await import("@jsquash/jxl");
+		// Dynamic import with .catch() so bundlers (esbuild/Rollup) don't fail
+		// when @jsquash/jxl isn't installed. JXL is disabled in production
+		// until Firefox adds support.
+		jxlModule = await import("@jsquash/jxl").catch(() => null);
+		if (!jxlModule) throw new Error("JXL encoder not available");
 	}
 	return jxlModule;
 }

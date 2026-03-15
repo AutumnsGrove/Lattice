@@ -6,7 +6,7 @@
  */
 
 import type { ConversationPreview } from "$lib/ui/chat/types";
-import type { ChatConversationWithMeta } from "$lib/server/services/chat.types.js";
+import type { ChatConversationWithMeta } from "$lib/types/chat";
 import { api } from "$lib/utils/api";
 
 let conversations = $state<ConversationPreview[]>([]);

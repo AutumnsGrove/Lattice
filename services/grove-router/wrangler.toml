@@ -1,8 +1,8 @@
 # Grove Router Worker
-# Proxies wildcard subdomain requests to lattice Pages
+# Proxies wildcard subdomain requests to grove-aspen Worker
 #
 # This worker catches all *.grove.place requests and forwards them
-# to grove-lattice.pages.dev with the original host in X-Forwarded-Host.
+# to grove-aspen with the original host in X-Forwarded-Host.
 
 name = "grove-router"
 main = "src/index.ts"
@@ -59,6 +59,10 @@ service = "grove-warden"
 [[services]]
 binding = "BILLING"
 service = "grove-billing"
+
+[[services]]
+binding = "ASPEN"
+service = "grove-aspen"
 
 # Cron triggers
 # - Every minute: keepalive to prevent cold starts (~10s delay on first request)

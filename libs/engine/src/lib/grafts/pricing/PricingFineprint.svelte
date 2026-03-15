@@ -7,7 +7,7 @@
 	 */
 
 	import type { PricingFineprintProps, FineprintSection } from "./types.js";
-	import { GroveText } from "../../ui/components/ui";
+	import GroveText from "$lib/components/terminology/GroveText.svelte";
 
 	let {
 		sections,

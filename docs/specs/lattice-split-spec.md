@@ -1,13 +1,13 @@
 ---
-title: "The Lattice Split — Lattice and Aspen"
-description: "Architectural specification for separating the reusable Lattice framework from the Aspen live deployment domain code."
+title: "The Lattice Split — Engine Cleanup and Aspen Deployment"
+description: "Clean up cross-layer tangles inside libs/engine, fix barrel imports, and extract the tenant-facing app into apps/aspen/ as a Cloudflare Worker."
 category: specs
 specCategory: core-infrastructure
 icon: scissors
-lastUpdated: "2026-03-10"
+lastUpdated: "2026-03-14"
 aliases: []
 date created: Sunday, March 1st 2026
-date modified: Tuesday, March 10th 2026
+date modified: Friday, March 14th 2026
 tags:
   - core
   - architecture
@@ -38,30 +38,31 @@ type: tech-spec
             Time to let the aspen grow.
 ```
 
-> _The lattice stays still. The aspen reaches for the light._
+> *The lattice stays still. The aspen reaches for the light.*
 
 # The Lattice Split
 
-Right now, `libs/engine` is one package that does two things. It's the framework (Lattice, the structure, the support system) and it's also the living deployment (what tenants interact with daily). When something breaks in production, you're debugging inside the framework package, scrolling past rate limiters and Durable Object coordinators to find the curio that's misbehaving. When you want to understand what the engine *is*, you're staring at 140+ exports mixing UI primitives with Stripe billing hooks.
+Right now, `libs/engine` does two things at once. It's a library (UI primitives, error framework, rate limiting, Durable Object coordination) and it's also a deployed app (tenant routes, admin panel, API endpoints, auth hooks). A library shouldn't have `src/routes/`. A deployed app shouldn't be inside `libs/`.
 
-This spec separates them. The framework stays as **Lattice**. The live deployment becomes **Aspen**.
+This spec fixes that. The library stays clean. The app moves out.
 
 **Type:** Architectural refactor
-**Scope:** `libs/engine/`, new `libs/aspen/`, new `apps/aspen/`
-**Breaking:** Yes. All import paths for domain modules change.
-**Last Updated:** March 2026
+**Scope:** `libs/engine/` (internal cleanup) + new `apps/aspen/` (Cloudflare Worker)
+**Breaking:** No. All `@autumnsgrove/lattice` import paths stay the same.
+**Last Updated:** March 14, 2026
 
 ### Naming
 
-| Name | What it is | Package | Location |
-|------|-----------|---------|----------|
-| **Lattice** | The framework. UI, utilities, error system, feature flags, rate limiting, DO coordination. The structure things grow on. | `@autumnsgrove/lattice` (npm published) | `libs/engine/` |
-| **Aspen** | The grove itself. Domain logic, database, auth, payments, curios, moderation. The living tree that tenants tend. | `@autumnsgrove/aspen` (workspace lib) | `libs/aspen/` |
-| **Aspen App** | The SvelteKit app that serves the live tenant experience. Pages, admin panels, daily interaction. | N/A (app, not a lib) | `apps/aspen/` |
+| Name | What it is | Location |
+|------|-----------|----------|
+| **Lattice** | The library. Everything in `libs/engine/src/lib/`. UI, curios, heartwood, server, all of it. Published as `@autumnsgrove/lattice`. | `libs/engine/` |
+| **Aspen** | The deployment. A Cloudflare Worker running SvelteKit that serves the tenant experience. Routes, hooks, app shell. | `apps/aspen/` |
+
+No `libs/aspen/`. No `@autumnsgrove/aspen`. Two things, not three.
 
 ### Prior Art: Prism
 
-This split follows the pattern established by **Prism** (`libs/prism/`, `@autumnsgrove/prism`), which was recently extracted from the engine as a standalone design token package. Prism proved that extraction works: isolate the concern, create the package, update imports. The Lattice/Aspen split is the same idea, just larger.
+Prism (`libs/prism/`, `@autumnsgrove/prism`) proved that extraction from the engine works. But Prism was a clean leaf module (design tokens, zero deps). The lesson that applies here is simpler: the engine can lose code and keep working.
 
 ---
 
@@ -69,451 +70,293 @@ This split follows the pattern established by **Prism** (`libs/prism/`, `@autumn
 
 ### What This Is
 
-A plan to split `libs/engine` (published as `@autumnsgrove/lattice`) into two clear layers: the reusable framework (Lattice) and the Grove-specific domain code (Aspen). Plus a new `apps/aspen/` that serves as the tenant-facing live deployment.
+Two changes:
+
+1. **Internal cleanup.** Fix cross-layer tangles where framework modules (`ui/`, `config/`, `utils/`) import from domain modules (`blazes/`, `curios/`, `server/`). Fix the 65 barrel cascade imports that bloat bundles. The engine's external API doesn't change. Everything stays in `@autumnsgrove/lattice`.
+
+2. **Route extraction.** Move 291 route files, `hooks.server.ts`, and all app-level files from `libs/engine/` to a new `apps/aspen/` Cloudflare Worker. The engine becomes a pure library.
 
 ### Goals
 
-- **Clarity.** When debugging, you know immediately whether you're in framework code or domain code. The import path tells you.
-- **Clean boundaries.** Lattice has zero knowledge of Grove's business logic. Aspen depends on Lattice, never the reverse.
-- **Debuggability.** Stack traces tell you where you are. `@autumnsgrove/lattice/ui` is framework. `@autumnsgrove/aspen/curios/timeline` is domain. No ambiguity.
+- `libs/engine/` has no `src/routes/`. It's a library package, period.
+- Framework modules don't reach into domain modules. Internal boundaries are clean.
+- No barrel cascade imports pulling 100+ modules when you only need one component.
+- The tenant app deploys as a Cloudflare Worker, giving direct control over routing and bindings.
 
-### Non-Goals (Out of Scope)
+### Non-Goals
 
-- Making the engine reusable for non-Grove projects. This is about clarity within Grove.
-- Publishing `libs/aspen` to npm. It stays as a workspace-only lib.
-- Consolidating existing apps (landing, plant, meadow, etc.) into `apps/aspen/`.
-- Changing any runtime behavior. This is a structural refactor only.
+- Splitting the engine into multiple packages. Lattice stays one package.
+- Changing any `@autumnsgrove/lattice/*` import paths. External consumers see nothing.
+- Consolidating other apps (landing, plant, meadow) into Aspen.
+- Rewriting any business logic. Same code, better home.
 
 ---
 
 ## Architecture
 
-### Before: One Package, Two Concerns
+### Before: Library + App Tangled Together
 
 ```
 libs/engine/  →  @autumnsgrove/lattice
-├── ui/              ← framework
-├── utils/           ← framework
-├── errors/          ← framework
-├── config/          ← framework
-├── feature-flags/   ← framework
-├── threshold/       ← framework
-├── loom/            ← framework
-├── server/          ← DOMAIN (56 files of business logic)
-├── db/              ← DOMAIN (Drizzle schema, Grove tables)
-├── curios/          ← DOMAIN (timeline, guestbook, polls...)
-├── heartwood/       ← DOMAIN (Grove's auth client)
-├── payments/        ← DOMAIN (Stripe, billing tiers)
-├── thorn/           ← DOMAIN (content moderation)
-├── lumen/           ← DOMAIN (AI gateway)
-├── warden/          ← DOMAIN (API gateway)
-├── email/           ← DOMAIN (templates, delivery)
-├── components/      ← DOMAIN (WispPanel, MarkdownEditor)
-├── blazes/          ← DOMAIN (content marking)
-├── reverie/         ← DOMAIN (schema registry)
-├── sentinel/        ← DOMAIN (stress testing)
-├── durable-objects/ ← DOMAIN (TenantDO, PostMetaDO)
-└── ...more domain modules
-```
-
-Everything imports from `@autumnsgrove/lattice/*`. You can't tell from an import whether you're pulling in a UI primitive or a Stripe webhook handler.
-
-### After: Two Packages, Clear Layers
-
-```
-libs/
-├── engine/          →  @autumnsgrove/lattice     (the framework)
-│   └── src/lib/
-│       ├── actions/         Svelte actions
-│       ├── auth/            Session verification helpers
-│       ├── config/          Configuration presets
-│       ├── errors/          Signpost error catalog
-│       ├── feature-flags/   Feature management framework
-│       ├── loom/            Durable Objects framework
-│       ├── styles/          CSS design tokens
-│       ├── threshold/       Rate limiting framework
-│       ├── types/           Shared type definitions (OG, Turnstile)
-│       ├── ui/              Glass design system
-│       └── utils/           Markdown, sanitization, image
+├── src/lib/
+│   ├── ui/              ← framework (but imports from blazes, curios, data, server)
+│   ├── config/          ← framework (but imports from server/petal)
+│   ├── utils/           ← framework (but imports from data)
+│   ├── errors/          ← framework (test imports from heartwood)
+│   ├── curios/          ← domain
+│   ├── heartwood/       ← domain
+│   ├── server/          ← domain
+│   └── ...21 more modules
 │
-├── aspen/         →  @autumnsgrove/aspen     (the live deployment)
-│   └── src/lib/
-│       ├── amber/           Storage SDK
-│       ├── blazes/          Content marking
-│       ├── components/      WispPanel, MarkdownEditor, etc.
-│       ├── curios/          Timeline, guestbook, polls, etc.
-│       ├── data/            Grove terminology manifest
-│       ├── db/              Drizzle schema + clients
-│       ├── durable-objects/ TenantDO, PostMetaDO, PostContentDO
-│       ├── email/           Email templates
-│       ├── firefly/         Server provisioning
-│       ├── git/             GitHub integration
-│       ├── grafts/          Feature flag UI components
-│       ├── heartwood/       Auth client
-│       ├── lumen/           AI gateway
-│       ├── payments/        Stripe integration
-│       ├── reverie/         Domain schema registry
-│       ├── scribe/          Activity recording
-│       ├── sentinel/        Infrastructure stress testing
-│       ├── server/          Business logic, DB queries
-│       ├── thorn/           Content moderation
-│       ├── warden/          API gateway
-│       └── zephyr/          Email gateway
+├── src/routes/          ← 291 route files (why is this in a library?)
+├── src/hooks.server.ts  ← 837 lines of auth/routing (why is this in a library?)
+├── src/app.html         ← HTML shell (why is this in a library?)
+└── wrangler.toml        ← Cloudflare deployment config (why is this in a library?)
+```
+
+### After: Clean Library + Separate Worker
+
+```
+libs/engine/  →  @autumnsgrove/lattice  (pure library, no routes)
+├── src/lib/
+│   ├── ui/              framework (clean, no domain imports)
+│   ├── config/          framework (clean)
+│   ├── utils/           framework (clean)
+│   ├── errors/          framework (clean)
+│   ├── curios/          domain (with its own Svelte components now)
+│   ├── heartwood/       domain
+│   ├── server/          domain
+│   ├── blazes/          domain (with Blaze.svelte moved here)
+│   ├── components/      domain chrome (Header, Footer, GroveTerm)
+│   └── ...all other modules unchanged
 │
-├── prism/           →  @autumnsgrove/prism       (already extracted)
-├── foliage/         →  @autumnsgrove/foliage     (already separate)
-└── gossamer/        →  @autumnsgrove/gossamer    (already separate)
-
-apps/
-├── aspen/         →  The live deployment (tenant-facing SvelteKit app)
-├── landing/         →  grove.place marketing
-├── plant/           →  Onboarding
-├── meadow/          →  Community feed
-└── ...              →  Other existing apps unchanged
+│   NO src/routes/. NO hooks. NO app.html. Pure library.
+│
+apps/aspen/  →  grove-aspen  (Cloudflare Worker)
+├── src/
+│   ├── routes/          291 route files (moved from engine)
+│   ├── hooks.server.ts  auth, routing, CSRF, rate limiting
+│   ├── app.html         Grove Entrance overlay, theme detection
+│   ├── app.d.ts         type definitions
+│   └── app.css          global styles
+├── wrangler.toml        Worker bindings (D1, R2, KV, DOs, services)
+└── svelte.config.js     adapter-cloudflare (Worker mode)
 ```
-
-### Dependency Direction
-
-```
-                    ┌───────────────────────────┐
-                    │      apps/aspen/         │
-                    │    apps/plant/  etc.        │
-                    └─────┬──────────┬───────────┘
-                          │          │
-              imports     │          │     imports
-                          ▼          ▼
-         ┌────────────────────┐  ┌────────────────────┐
-         │  @autumnsgrove/    │  │  @autumnsgrove/    │
-         │     aspen        │  │     lattice        │
-         │   (domain lib)     │  │   (framework)      │
-         └────────┬───────────┘  └────────────────────┘
-                  │                        ▲
-                  │       depends on       │
-                  └────────────────────────┘
-
-         aspen depends on lattice.
-         lattice knows nothing about aspen.
-         apps import from both.
-```
-
-The arrow only goes one direction. Lattice never imports from Aspen. Aspen builds on Lattice. Apps consume both.
 
 ---
 
-## The Split Line
+## Phase 0: Internal Cleanup
 
-### What Stays in Lattice (`@autumnsgrove/lattice`)
+Fix the tangles inside the engine. Nothing moves out of the package. The engine's external API doesn't change. All work happens inside `libs/engine/src/lib/`.
 
-Framework code. Things that have no opinion about what Grove *is*.
+### Surgery Points
 
-| Module | Purpose | Why it's framework |
-|--------|---------|-------------------|
-| `actions/` | Svelte actions (click-outside) | Generic browser behavior |
-| `auth/` | Session verification helpers | Generic auth primitives |
-| `config/` | Configuration presets, tiers | Structural definitions |
-| `errors/` | Signpost error catalog | Generic error framework |
-| `feature-flags/` | Boolean flags, percentage rollouts | Generic feature management |
-| `loom/` | Durable Objects framework | Generic DO coordination |
-| `styles/` | CSS design tokens, fonts, patterns | Generic design tokens |
-| `threshold/` | Rate limiting with storage adapters | Generic rate limiting |
-| `types/` | OG image types, Turnstile defs | Shared type infrastructure |
-| `ui/` | Glass design system, all primitives | Generic UI components |
-| `utils/` | Markdown, sanitization, image processing | Generic utilities |
+10 places where framework modules import from domain modules. Each one is a dependency going the wrong direction.
 
-Note: `foliage/` no longer exists in the engine (the theme bridge was removed). The `@autumnsgrove/foliage` package already lives separately in `libs/foliage/`.
-
-### What Moves to Aspen (`@autumnsgrove/aspen`)
-
-Grove's soul. The things that make it *this* platform.
-
-| Module | Files | Purpose | Key deps on Lattice |
-|--------|-------|---------|---------------------|
-| `amber/` | 9 | Storage SDK, quotas, exports | `db/` (domain-to-domain) |
-| `blazes/` | 3 | Content marking, custom tags | None (leaf module) |
-| `components/` | ~15 | WispPanel, MarkdownEditor, GutterManager | `ui/`, `config/` |
-| `curios/` | ~23 dirs | Timeline, guestbook, polls, gallery... | `utils/` |
-| `data/` | 1 | Grove terminology manifest (JSON) | None (leaf module) |
-| `db/` | ~10 | Drizzle schema, database clients | `errors/` |
-| `durable-objects/` | 4 | TenantDO, PostMetaDO, PostContentDO | `loom/` |
-| `email/` | ~8 | Email templates, rendering | `config/` |
-| `firefly/` | 20 | Server provisioning (Hetzner, Fly) | `loom/`, `errors/` |
-| `git/` | 2 | GitHub integration, contribution stats | None (leaf module) |
-| `grafts/` | ~8 | Feature flag UI components | `config/`, `feature-flags/` |
-| `heartwood/` | 8 | GroveAuth client, quotas, limits | `config/`, `errors/` |
-| `lumen/` | 20 | AI gateway, multi-provider routing | `config/`, `errors/` |
-| `payments/` | ~5 | Stripe integration, billing | None (leaf module) |
-| `reverie/` | ~30 | Domain schema registry, atmosphere | None (leaf module) |
-| `scribe/` | 1 | Activity recording | None (leaf module) |
-| `sentinel/` | 7 | Infrastructure stress testing | `loom/` |
-| `server/` | 56 | Business logic, DB queries, observability | `config/`, `feature-flags/`, `threshold/`, `errors/` |
-| `thorn/` | 12 | Content moderation | `lumen/`, `threshold/` |
-| `warden/` | 12 | API gateway SDK | None (leaf module) |
-| `zephyr/` | ~5 | Email + social broadcasting | None (leaf module) |
-
-### What the New App Is (`apps/aspen/`)
-
-The live deployment. The thing tenants interact with every day. Their pages, their admin panels, their posts and curios. It's a SvelteKit app on Cloudflare Pages that imports from both `@autumnsgrove/lattice` (framework) and `@autumnsgrove/aspen` (domain).
-
-This is distinct from:
-- `apps/landing/` (marketing at grove.place)
-- `apps/plant/` (onboarding at plant.grove.place)
-- `apps/meadow/` (community feed at meadow.grove.place)
-
-`apps/aspen/` is the *grove itself*. The tenant subdomain. The daily experience.
-
----
-
-## Surgery Points
-
-The split is mostly clean cuts. Dependencies flow downward, no circular imports exist. But several places in the framework currently reach into domain code. These need resolving **before** any modules move.
-
-### 1. `ui/` imports from `blazes/`
+#### S1. `ui/` imports from `blazes/`
 
 **File:** `ui/components/indicators/Blaze.svelte`
 **Imports:** `BLAZE_CONFIG`, `BLAZE_COLORS`, `resolveLucideIcon`, `isValidBlazeHexColor`
 
-**Fix:** Move `Blaze.svelte` to Aspen. It's a domain component wearing a framework disguise. The UI layer should have a generic `Badge` or `Indicator` primitive. `Blaze.svelte` wraps that with Grove-specific config.
+**Fix:** Move `Blaze.svelte` to `blazes/components/Blaze.svelte`. It's a domain component. The remaining indicators (StatusBadge, ScoreBar, CreditBalance) stay in `ui/`. Update barrel in `ui/components/indicators/index.ts`. Add new barrel at `blazes/components/index.ts`. Add `./blazes/components` to engine's package.json exports.
 
-### 2. `ui/` imports from `data/` (Grove terminology)
+**Scope:** 9 consumers (6 engine routes, 3 meadow components), 2 barrel files, 1 package.json entry. ~13 files total.
 
-**Files:**
+#### S2. `ui/` imports from `data/` (Grove terminology)
+
+**Files (groveterm/, 6 files):**
+- `ui/components/ui/groveterm/GroveTerm.svelte`
+- `ui/components/ui/groveterm/GroveTermPopup.svelte`
+- `ui/components/ui/groveterm/GroveText.svelte`
+- `ui/components/ui/groveterm/types.ts`
+- `ui/components/ui/groveterm/index.ts`
+- `ui/components/ui/groveterm/groveterm.test.ts`
+
+**Files (chrome/, 3 files):**
 - `ui/components/chrome/Header.svelte`
 - `ui/components/chrome/Footer.svelte`
 - `ui/components/chrome/MobileMenu.svelte`
-- `ui/components/ui/groveterm/GroveIntro.svelte`
-- `ui/components/ui/groveterm/GroveSwap.svelte`
-- `ui/components/ui/groveterm/GroveTerm.svelte`
 
-**Imports:** `grove-term-manifest.json`
+All import `grove-term-manifest.json` from `$lib/data/`. None are exported to external packages.
 
-**Fix:** The `groveterm/` components are entirely Grove-specific. Move them to Aspen. For `Header.svelte`, `Footer.svelte`, and `MobileMenu.svelte`, move them to Aspen too. A generic engine wouldn't have a branded Header. Lattice can keep a `BaseHeader` slot component if needed. Aspen wraps it.
+**Fix:** Move groveterm to `components/terminology/`. Move chrome to `components/chrome/`. Both follow the existing `components/` pattern (alongside `components/admin/`, `components/editor/`, `components/reeds/`).
 
-### 3. `ui/` imports from `curios/` (expanded since v1 of this spec)
+**Scope:** 26 internal groveterm consumers + 3 chrome consumers. ~35 files total.
 
-**Files:**
-- `ui/components/content/curios/CurioMoodring.svelte` (moodring color functions)
-- `ui/components/content/curios/CurioPoll.svelte` (polls types)
-- `ui/components/content/curios/CurioGuestbook.svelte` (guestbook types)
-- Multiple artifact renderers in `ui/` (Hourglass, TerrariumGlobe, RainbowDivider, etc.) importing from `curios/artifacts`
+#### S3. `ui/` imports from `curios/`
 
-**Fix:** Move the entire `ui/components/content/curios/` subtree to Aspen. All curio display components are domain components.
+**39 files** in `ui/components/content/curios/`:
+- 13 main curio components (CurioHitcounter, CurioPoll, CurioMoodring, CurioBadges, etc.)
+- 24 artifact components in `artifacts/` (20 individual artifacts + renderers + config form + test)
+- 1 barrel `index.ts`
 
-### 4. `ui/` imports `Friend` type from `server/`
+All import types and utilities from `$lib/curios/*`. The `curios/` domain directory already contains Svelte components in `pulse/`, `shrines/`, `guestbook/`, and `timeline/`.
 
-**Files:**
-- `ui/stores/friends.svelte.ts`
-- `ui/components/chrome/FriendsLoader.svelte`
-- `ui/components/chrome/lantern/LanternFriendCard.svelte`
-- `ui/components/chrome/lantern/LanternAddFriends.svelte`
+**Fix:** Move the entire `ui/components/content/curios/` subtree into the `curios/` domain module. Update `ContentWithGutter.svelte`'s dynamic import path.
 
-**Imports:** `type Friend` from `$lib/server/services/friends`
+**Scope:** 3 consumers. ~44 files total.
 
-**Fix:** Two options:
-- (a) Extract the `Friend` type into a shared types location in the engine (`types/` or `config/`)
-- (b) Move the friends-related UI components to Aspen
+#### S4. `ui/` imports `Friend` type from `server/`
 
-Option (a) if `Friend` is a simple type. Option (b) if the components are tightly coupled to Grove's friend system.
+**Files:** `ui/stores/friends.svelte.ts`, `ui/components/chrome/FriendsLoader.svelte`, `ui/components/chrome/lantern/LanternFriendCard.svelte`, `ui/components/chrome/lantern/LanternAddFriends.svelte`
 
-### 5. `utils/rehype-groveterm` imports from `data/`
+The `Friend` interface is 4 string properties (`tenantId`, `name`, `subdomain`, `source`). No dependencies on other server types.
 
-**File:** `utils/rehype-groveterm.ts`
-**Imports:** `grove-term-manifest.json`
+**Fix:** Extract `Friend` to `types/friend.ts`. Update 4 consumers. ~5 files.
 
-**Fix:** Make the rehype plugin accept a terminology manifest as a parameter instead of hardcoding the import. Lattice provides the generic `rehypeTermReplace(manifest)` function. Aspen calls it with Grove's manifest.
+#### S5. `utils/rehype-groveterm` imports from `data/`
 
-### 6. `lumen/` imports from `server/` (encryption)
+**File:** `utils/rehype-groveterm.ts` (line 27)
 
-**File:** `lumen/client.ts`
-**Imports:** `safeDecryptToken`, `isEncryptedToken` from `$lib/server/encryption.js`
+The plugin API already accepts an optional `manifest` parameter. Tests pass custom manifests. The module-level `import manifestData from "$lib/data/grove-term-manifest.json"` is the only problem.
 
-**Fix:** Both `lumen/` and `server/` are moving to Aspen, so this is a domain-to-domain import. No surgery needed. This was a false alarm for the split, it resolves naturally.
+**Fix:** Remove the hardcoded import. Make `manifest` required, or move the default into the caller. ~2 files.
 
-### 7. `errors/` test imports from `heartwood/`
+#### S6. `lumen/` imports from `server/` (encryption)
 
-**File:** `errors/integrity.test.ts`
+Both `lumen/` and `server/` are domain modules in the same package. Domain-to-domain. No surgery needed.
+
+#### S7. `errors/` test imports from `heartwood/`
+
+**File:** `errors/integrity.test.ts` (line 17)
 **Imports:** `AUTH_ERRORS` from `../heartwood/errors`
 
-**Fix:** Test-only import. Either move the test to Aspen alongside heartwood, or inline the error code constants in the test file.
+Test-only import. The test validates the real auth error catalog, which is valuable. Inlining constants would decouple the test from reality.
 
-### 8. Root `index.ts` re-exports `heartwood/`
+**Fix:** Leave as-is. Both modules stay in the same package. This is an internal cross-reference, not a layer violation worth breaking. ~0 files.
+
+#### S8. Root `index.ts` re-exports `heartwood/`
 
 **File:** `libs/engine/src/lib/index.ts` (lines 75-119)
-**Exports:** `GroveAuthClient`, `createGroveAuthClient`, `TIER_POST_LIMITS`, `TIER_NAMES`, quota utilities
+**Exports:** 23 items (GroveAuthClient, quota utils, rate limiting, types)
 
-**Fix:** Remove these re-exports. After the split, apps import heartwood from `@autumnsgrove/aspen/heartwood` instead.
+Zero external consumers. Every app imports heartwood through `@autumnsgrove/lattice/heartwood`, not the root barrel.
 
----
+**Fix:** Remove 45 lines of dead re-exports. ~1 file.
 
-## Import Migration
+#### S9. `config/` imports from `server/` (Petal types)
 
-### The Clean Break
+**File:** `config/petal.ts` (lines 10-13)
+**Imports:** `PetalCategory`, `PetalProviderConfig` from `$lib/server/petal/types.js`
 
-Every import from a moved module changes package name. The subpath stays the same.
+Type-only. No runtime coupling.
 
-```typescript
-// BEFORE (everything from lattice)
-import { GlassCard }         from "@autumnsgrove/lattice/ui";
-import { createDb }          from "@autumnsgrove/lattice/db";
-import { GroveAuthClient }   from "@autumnsgrove/lattice/heartwood";
-import { TimelineCurio }     from "@autumnsgrove/lattice/curios/timeline";
-import { buildErrorJson }    from "@autumnsgrove/lattice/errors";
-import { getSchema }         from "@autumnsgrove/lattice/reverie";
+**Fix:** Extract types to `types/petal.ts`. Update `config/petal.ts`. ~2 files.
 
-// AFTER (framework from lattice, domain from aspen)
-import { GlassCard }         from "@autumnsgrove/lattice/ui";            // unchanged
-import { createDb }          from "@autumnsgrove/aspen/db";            // moved
-import { GroveAuthClient }   from "@autumnsgrove/aspen/heartwood";     // moved
-import { TimelineCurio }     from "@autumnsgrove/aspen/curios/timeline"; // moved
-import { buildErrorJson }    from "@autumnsgrove/lattice/errors";        // unchanged
-import { getSchema }         from "@autumnsgrove/aspen/reverie";       // moved
-```
+#### S10. `ui/` imports from `server/` (Chat WebSocket types)
 
-### Scope of Changes
+**Files:** `ui/chat/types.ts`, `ui/chat/connection.svelte.ts`, `ui/stores/chat.svelte.ts`
+**Imports:** 14 chat protocol types from `$lib/server/services/chat.types.js`
 
-Every file that imports a domain module from `@autumnsgrove/lattice` needs updating. This affects:
+All type-only. Protocol definitions (message shapes, content types).
 
-- All `apps/*` (9 apps)
-- All `services/*` (10 services)
-- All `workers/*` (7 workers)
-- `libs/gossamer/`, `libs/foliage/`, `libs/vineyard/`
+**Fix:** Extract chat protocol types to `types/chat.ts`. Update 3 consumers. ~4 files.
 
-The change is mechanical. `@autumnsgrove/lattice/<domain-module>` becomes `@autumnsgrove/aspen/<domain-module>`. The subpath is identical.
+### Barrel Cascade Cleanup
 
-### Tailwind Content Paths
+65 files import through mega-barrels like `$lib/ui` or `$lib/ui/components/ui`, pulling CSS side effects that Vite can't tree-shake. This bloats route bundles and can break hydration.
 
-Every app's `tailwind.config.js` currently scans `libs/engine/` for classes. After the split, they scan both:
+**Rule:** Svelte files use direct imports, not barrel imports. `import X from "$lib/ui/components/ui/X.svelte"`, not `import { X } from "$lib/ui"`.
 
-```javascript
-// BEFORE
-content: [
-  "./src/**/*.{html,js,svelte,ts}",
-  "../../libs/engine/src/lib/**/*.{html,js,svelte,ts}",
-],
+**Fix:** Update all 65 files to use direct imports. Suppress intentional barrel usage with `// barrel-ok`. The pre-commit hook (added March 2026) already checks for new violations.
 
-// AFTER
-content: [
-  "./src/**/*.{html,js,svelte,ts}",
-  "../../libs/engine/src/lib/**/*.{html,js,svelte,ts}",
-  "../../libs/aspen/src/lib/**/*.{html,js,svelte,ts}",   // added
-],
-```
+**Scope:** ~65 files.
+
+### Phase 0 PR Strategy
+
+**PR 1: "Extract cross-layer types to framework boundary"** (~14 files, low risk)
+Surgeries S4, S5, S8, S9, S10. Type extractions and dead re-export removal. No component moves. Validates the approach.
+
+**PR 2: "Move domain components out of ui/"** (~97 files, medium risk)
+Surgeries S1, S2, S3. The big component move. Blaze, groveterm, chrome, and all curio display components relocate to their domain directories.
+
+**PR 3: "Fix barrel cascade imports"** (~65 files, low risk per file)
+All 65 barrel imports updated to direct imports. Mechanical change. Each file is independent.
+
+**PR 4: "Verify clean internal boundaries"** (trivial)
+Grep for remaining framework-to-domain imports. Full engine build + test suite.
 
 ---
 
-## Execution Plan
+## Phase 1: Create `apps/aspen/` Worker
 
-### Phase 0: Untangle Cross-Layer Dependencies
+Set up the Cloudflare Worker that will serve the tenant experience.
 
-Resolve the surgery points listed above while everything still lives in one package. This is the hardest phase. Nothing moves yet. When it's done, every framework module has zero imports from any domain module.
-
-**Requirements:**
-
-| ID | Pattern | Requirement | Priority |
-|----|---------|-------------|----------|
-| REQ-001 | Ubiquitous | After Phase 0, no file in `actions/`, `auth/`, `config/`, `errors/`, `feature-flags/`, `loom/`, `styles/`, `threshold/`, `types/`, `ui/`, or `utils/` shall import from any domain module. | Must Have |
-| REQ-002 | Event-Driven | When a surgery point is resolved, the engine shall build and pass all existing tests without changes to any app code. | Must Have |
+**Why a Worker, not Pages:** The engine currently deploys as a Cloudflare Pages project (`grove-lattice`). Workers give better control over routing, native Durable Object bindings without the Pages Functions abstraction, `wrangler dev` with full binding simulation, and cleaner deployment via `wrangler deploy`. For an app with 7 DOs, 2 D1 databases, 3 R2 buckets, and 3 service bindings, Workers is the right choice.
 
 **Checklist:**
 
-- [ ] Move `Blaze.svelte` from `ui/indicators/` to a domain-appropriate location
-- [ ] Move `groveterm/` components out of `ui/`
-- [ ] Move all curio display components out of `ui/components/content/curios/`
-- [ ] Move or parameterize Header/Footer/MobileMenu (terminology deps)
-- [ ] Resolve `Friend` type dependency (ui/ → server/)
-- [ ] Make `rehype-groveterm` accept manifest as parameter
-- [ ] Move or inline `errors/integrity.test.ts` heartwood import
-- [ ] Remove heartwood re-exports from root `index.ts`
-- [ ] Verify: `grep` for any remaining cross-layer imports
-- [ ] Verify: engine builds cleanly
+- [ ] Create `apps/aspen/` directory
+- [ ] `package.json` with deps on `@autumnsgrove/lattice`, `@autumnsgrove/prism`, `@autumnsgrove/foliage`
+- [ ] `svelte.config.js` with `@sveltejs/adapter-cloudflare` (Worker mode)
+- [ ] `tsconfig.json` extending monorepo base
+- [ ] `vite.config.ts`
+- [ ] `wrangler.toml` with all bindings (see Aspen spec for full list):
+  - D1: `DB` (grove-engine-db), `CURIO_DB` (grove-curios-db)
+  - R2: `IMAGES` (grove-media), `EXPORTS_BUCKET` (grove-exports), `IMAGES_SOURCE`
+  - KV: `CACHE_KV`, `FLAGS_KV`
+  - DOs: `TENANTS`, `POST_META`, `POST_CONTENT`, `SENTINEL`, `EXPORTS`, `THRESHOLD`, `CHAT`
+  - Services: `AUTH` (groveauth), `ZEPHYR` (grove-zephyr), `REVERIE` (grove-reverie)
+  - AI: `AI` (Petal image moderation)
+  - 30+ env vars and secrets
+- [ ] `tailwind.config.js` scanning `libs/engine/src/lib/`
+- [ ] Verify: `pnpm install` resolves, `wrangler dev` starts
 
-### Phase 1: Create `libs/aspen/`
+---
 
-Set up the new workspace library.
+## Phase 2: Move Routes and App Files
+
+One big PR. All 291 route files, hooks, and app-level files move from `libs/engine/src/` to `apps/aspen/src/`.
+
+**App-level files:**
+- `hooks.server.ts` (837 lines: subdomain routing, auth, CSRF, rate limiting, CSP, security headers)
+- `app.html` (249 lines: Grove Entrance overlay, theme detection, PWA manifest)
+- `app.d.ts` (197 lines: App.Locals, App.Platform, tenant types, env bindings)
+- `app.css` (global styles)
+
+**Route groups (291 files):**
+- `arbor/` (admin panel, 99 files)
+- `api/` (144 files across 31 endpoint groups)
+- `garden/` (blog content)
+- `auth/` (login, callback, logout, magic link)
+- `(tenant)/`, `(site)/`, `(apps)/` (layout groups)
+- Root routes (`+layout.svelte`, `+page.svelte`, etc.)
+
+**For each route file:**
+1. Move the file
+2. Update `$lib/` imports to `@autumnsgrove/lattice/` imports
+3. No subpath changes needed (the modules haven't moved, just the routes)
 
 **Checklist:**
 
-- [ ] Create `libs/aspen/` directory structure
-- [ ] Create `package.json` with name `@autumnsgrove/aspen`, `workspace:*` dep on `@autumnsgrove/lattice`
-- [ ] Create `svelte.config.js` (SvelteKit library package format)
-- [ ] Create `tsconfig.json` extending the monorepo base
-- [ ] Create `vite.config.js` with svelte-package build
-- [ ] Add to `pnpm-workspace.yaml` (already covered by `libs/*` glob)
-- [ ] Define export map in `package.json` mirroring domain module paths
-- [ ] Verify: `pnpm install` resolves the new package
+- [ ] Move all app-level files to `apps/aspen/src/`
+- [ ] Move all route files to `apps/aspen/src/routes/`
+- [ ] Update `$lib/` imports in routes to `@autumnsgrove/lattice/` package imports
+- [ ] Remove `src/routes/`, `src/hooks.server.ts`, `src/app.html`, `src/app.d.ts`, `src/app.css` from `libs/engine/`
+- [ ] Remove `wrangler.toml` deployment config from `libs/engine/`
+- [ ] Update `libs/engine/svelte.config.js` (no more adapter, no more prerendering)
+- [ ] Update `services/grove-router/` to point default fallback to `grove-aspen` Worker
+- [ ] Deploy secrets via `gw secret apply --worker grove-aspen`
+- [ ] Verify: `wrangler dev` runs locally with all bindings
+- [ ] Verify: `wrangler deploy` succeeds
+- [ ] Verify: tenant subdomain routing works via X-Forwarded-Host
+- [ ] Verify: auth flow (SessionDO + Heartwood OAuth + JWT fallback)
+- [ ] Verify: CSRF, rate limiting, CSP headers all function
+- [ ] Verify: engine still builds as a library (`pnpm --filter @autumnsgrove/lattice run build:package`)
 
-### Phase 2: Move Domain Modules
+---
 
-Move modules from `libs/engine/src/lib/` to `libs/aspen/src/lib/` in dependency order.
-
-**Wave 1 — Leaf modules (no cross-deps):**
-- [ ] `data/`
-- [ ] `blazes/`
-- [ ] `scribe/`
-- [ ] `payments/`
-- [ ] `warden/`
-- [ ] `zephyr/`
-- [ ] `git/`
-- [ ] `reverie/`
-
-**Wave 2 — Modules depending only on Lattice:**
-- [ ] `db/` (depends on `errors/`)
-- [ ] `heartwood/` (depends on `config/`, `errors/`)
-- [ ] `lumen/` (depends on `config/`, `errors/`)
-- [ ] `email/` (depends on `config/`)
-- [ ] `grafts/` (depends on `config/`, `feature-flags/`)
-- [ ] `durable-objects/` (depends on `loom/`)
-- [ ] `sentinel/` (depends on `loom/`)
-
-**Wave 3 — Modules with domain cross-deps:**
-- [ ] `server/` (depends on `config/`, `feature-flags/`, `threshold/`, `errors/`)
-- [ ] `amber/` (depends on `db/`)
-- [ ] `thorn/` (depends on `lumen/`, `threshold/`)
-- [ ] `firefly/` (depends on `loom/`, `errors/`)
-- [ ] `components/` (depends on `ui/`, `config/`)
-- [ ] `curios/` (depends on `utils/`)
-
-**For each module:**
-1. Move the directory
-2. Update internal imports: `$lib/X` stays as `$lib/X` for domain-to-domain refs
-3. Update imports from engine modules: `$lib/X` becomes `@autumnsgrove/lattice/X`
-4. Verify: the module's TypeScript compiles
-
-### Phase 3: Update Engine Exports
-
-- [ ] Remove all moved module paths from `libs/engine/package.json` exports
-- [ ] Clean up root `index.ts` (remove domain re-exports)
-- [ ] Verify: engine builds with `pnpm --filter @autumnsgrove/lattice run build:package`
-- [ ] Verify: `libs/aspen` builds with its new export map
-
-### Phase 4: Update All Consumer Imports (Clean Break)
-
-For every file in `apps/`, `services/`, `workers/`, and other `libs/`:
-
-- [ ] Find-and-replace `@autumnsgrove/lattice/<domain-module>` to `@autumnsgrove/aspen/<domain-module>` for all moved modules
-- [ ] Add `@autumnsgrove/aspen` as `workspace:*` dependency to every consuming `package.json`
-- [ ] Update every `tailwind.config.js` to include `libs/aspen/` content path
-- [ ] Update any `tsconfig.json` path aliases if applicable
-- [ ] Run `pnpm install` to wire workspace dependencies
-- [ ] Verify: every app/service/worker builds
-
-### Phase 5: Create `apps/aspen/`
-
-- [ ] Create SvelteKit app skeleton
-- [ ] Set up `wrangler.toml` with all Cloudflare bindings (DB, CURIO_DB, OBS_DB, KV, R2, service bindings)
-- [ ] Set up `hooks.server.ts` with auth, session handling
-- [ ] Move or create tenant-facing routes (the pages and admin panels tenants use daily)
-- [ ] Import from both `@autumnsgrove/lattice` and `@autumnsgrove/aspen`
-- [ ] Set up `tailwind.config.js` scanning both libs
-- [ ] Verify: app builds and deploys to Cloudflare Pages
-
-### Phase 6: Verify Everything
+## Phase 3: Verify Everything
 
 - [ ] `pnpm install` from root succeeds
-- [ ] Every package in the workspace builds: `pnpm -r run build`
-- [ ] CI passes: `gw dev ci --affected --fail-fast --diagnose`
-- [ ] No remaining imports of `@autumnsgrove/aspen/<domain-module>` referencing old `@autumnsgrove/lattice` path
-- [ ] No remaining imports of domain modules from any engine file
-- [ ] Staging deploy of at least one app succeeds
+- [ ] Every package builds: `pnpm -r run build`
+- [ ] CI passes: `gw ci`
+- [ ] `libs/engine/` has no `src/routes/` directory
+- [ ] No framework module imports from domain modules (grep check)
+- [ ] No barrel cascade imports remain (pre-commit hook passes)
+- [ ] Staging deploy of `grove-aspen` Worker succeeds
+- [ ] Blue-green traffic shift from `grove-lattice` Pages to `grove-aspen` Worker
+- [ ] Monitor error rates, DO performance, auth success rates
 
 ---
 
@@ -521,49 +364,50 @@ For every file in `apps/`, `services/`, `workers/`, and other `libs/`:
 
 | Risk | Severity | Mitigation |
 |------|----------|------------|
-| Volume of import changes (140+ paths across 26+ packages) | Medium | Mechanical find-and-replace. Script it. Subpaths don't change, only package name. |
-| Surgery points in `ui/` require real refactoring (more than originally estimated) | High | Do Phase 0 first, in isolation. Everything still builds as one package during surgery. No consumer changes needed. |
-| Build ordering in pnpm workspace | Low | `libs/engine` must build before `libs/aspen`. pnpm workspace protocol handles this via dependency graph. Verify with `pnpm -r run build`. |
-| Tailwind class purging | Medium | If any app forgets to add `libs/aspen/` to its content paths, classes from domain components get purged silently. Add a CI check. |
-| TypeScript path resolution | Low | `$lib/` alias in `libs/aspen` resolves to `libs/aspen/src/lib/` automatically via SvelteKit conventions. Cross-package imports use full package names. |
-| `apps/aspen/` route ownership | Medium | Clarify which routes move to `apps/aspen/` vs stay in existing apps. Tenant-facing routes are the scope. Marketing stays in landing. Onboarding stays in plant. |
-| `lumen/` depends on `server/encryption` | Low | Both move to Aspen. This is a domain-to-domain dep that resolves naturally. No action needed. |
-| `ui/` → `server/` Friend type imports (new) | Medium | Either extract the `Friend` type to a shared location in Lattice, or move the friends UI to Aspen. Decide during Phase 0. |
+| Phase 0 surgery volume (~116 files across 10 points) | Medium | Group into 4 PRs by risk profile. Type extractions first. |
+| `ContentWithGutter.svelte` dynamic imports | Medium | Uses `` import(`$lib/ui/components/content/curios/Curio${name}.svelte`) `` which breaks after S3. Update dynamic import path. |
+| `hooks.server.ts` complexity (837 lines) | High | Copy to `apps/aspen/`, don't rewrite. Diff-based review. Test auth, CSRF, rate limiting, CSP independently. |
+| Worker vs Pages migration | Medium | SvelteKit's `adapter-cloudflare` supports Workers. Bindings are the same, just configured in `wrangler.toml` instead of Pages Functions. |
+| Router cutover | Medium | Blue-green deployment. Run both `grove-lattice` (Pages) and `grove-aspen` (Worker). Gradual traffic shift via router config. Rollback is one line change. |
+| Binding mismatch | Medium | If `wrangler.toml` bindings don't match what `hooks.server.ts` expects, the app fails. Copy bindings exactly from engine's wrangler.toml. Test each binding class. |
+| Barrel cleanup scope (65 files) | Low | Each file is independent. Mechanical find-replace. Pre-commit hook validates. |
+| Route import updates | Medium | 291 files need `$lib/` changed to `@autumnsgrove/lattice/`. Scriptable, but needs verification. TypeScript compiler catches misses. |
 
 ---
 
 ## Security Considerations
 
-- No auth logic changes. Heartwood moves packages but its behavior is identical.
-- No database changes. Schema stays the same, just lives in a different directory.
-- No API changes. Endpoints work the same, they just import from `@autumnsgrove/aspen` instead of `@autumnsgrove/lattice`.
-- Multi-tenant isolation remains unchanged. `WHERE tenant_id = ?` patterns are structural, not affected by which package they live in.
+- No auth logic changes. `hooks.server.ts` moves to `apps/aspen/` with identical behavior.
+- No database changes. Same schema, same queries.
+- No API changes. Same endpoints, same handlers. They import from `@autumnsgrove/lattice` instead of `$lib`.
+- Multi-tenant isolation unchanged. `WHERE tenant_id = ?` patterns are structural.
+- Worker deployment inherits the same Cloudflare security model (DDoS protection, TLS, WAF).
 
 ---
 
-## Changes Since v1 (March 1st)
+## Spec History
 
-This spec was originally written March 1st with the domain lib named `@autumnsgrove/grove` and the app as `apps/grove/`. Key updates:
+### v1 (March 1st, 2026)
 
-- **Renamed:** Domain lib from `grove` → `trellis` → `aspen` (`@autumnsgrove/aspen`). Lattice is the framework, Aspen is the living grove.
-- **New modules classified:** `reverie/` (domain, schema registry), `sentinel/` (domain, stress testing), `durable-objects/` (domain, Grove-specific DOs), `git/` (domain, GitHub integration), `types/` (framework, shared type defs).
-- **foliage/ bridge removed:** No longer exists in the engine. Already separate as `libs/foliage/`.
-- **Prism extraction noted** as prior art for the same pattern.
-- **New surgery points discovered:** `ui/` → `curios/` expanded (artifact renderers, CurioPoll). `ui/` → `server/` (Friend type in 4 files). `errors/` → `heartwood/` (test file). `lumen/` → `server/` (encryption, resolves naturally).
-- **Module count:** 21 domain modules to move (was 17).
+Original spec proposed a three-way split: `@autumnsgrove/lattice` (framework lib), `@autumnsgrove/grove` (domain lib), and `apps/grove/` (app). Domain lib was later renamed from `grove` to `trellis` to `aspen`. Identified 8 surgery points and 17 domain modules.
+
+### v2 (March 10th, 2026)
+
+Module count updated to 21. Surgery points expanded. Prism extraction noted as prior art. GroveTerm files updated after PR #1470 consolidation.
+
+### v3 (March 14th, 2026)
+
+Full codebase audit. Scope changed from three-way to two-way split. No `libs/aspen/` package. All modules stay in Lattice. `apps/aspen/` deploys as a Cloudflare Worker (not Pages). Two new surgery points found (S9: config/petal types, S10: ui/chat types). Barrel cascade cleanup (65 files) added to scope. Surgery counts verified with exact file numbers. Phase 0 PR strategy defined. Total scope: ~180 files changed across 4 phases.
 
 ---
 
 ## Implementation Checklist (Summary)
 
-- [ ] **Phase 0:** Resolve 8 surgery points (cross-layer deps)
-- [ ] **Phase 1:** Create `libs/aspen/` package
-- [ ] **Phase 2:** Move 21 domain modules in 3 waves
-- [ ] **Phase 3:** Clean up engine exports
-- [ ] **Phase 4:** Update all consumer imports (clean break)
-- [ ] **Phase 5:** Create `apps/aspen/` deployment
-- [ ] **Phase 6:** Full verification pass
+- [ ] **Phase 0:** Internal cleanup (10 surgeries + 65 barrel fixes, 4 PRs)
+- [ ] **Phase 1:** Create `apps/aspen/` Worker scaffold
+- [ ] **Phase 2:** Move 291 routes + app files (1 PR)
+- [ ] **Phase 3:** Verify everything, blue-green cutover
 
 ---
 
-*The lattice and the aspen, finally, each knowing where they end and the other begins.*
+*The lattice stays whole. The aspen finds its own light.*

@@ -1,0 +1,247 @@
+import type { PageServerLoad, Actions } from "./$types";
+import { fail } from "@sveltejs/kit";
+import { z } from "zod";
+import { ARBOR_ERRORS, logGroveError } from "@autumnsgrove/lattice/errors";
+import { parseFormData } from "@autumnsgrove/lattice/server/utils/form-data";
+import {
+	isValidMode,
+	isValidDisplayStyle,
+	isValidColorScheme,
+	isValidHexColor,
+	sanitizeMoodText,
+	sanitizeNote,
+	generateMoodLogId,
+	MODE_OPTIONS,
+	DISPLAY_STYLE_OPTIONS,
+	COLOR_SCHEME_OPTIONS,
+	MAX_LOG_ENTRIES,
+} from "@autumnsgrove/lattice/curios/moodring";
+
+interface MoodRingRow {
+	tenant_id: string;
+	mode: string;
+	manual_mood: string | null;
+	manual_color: string | null;
+	color_scheme: string;
+	display_style: string;
+	show_mood_log: number;
+	updated_at: string;
+}
+
+interface MoodLogRow {
+	id: string;
+	mood: string;
+	color: string;
+	note: string | null;
+	logged_at: string;
+}
+
+export const load: PageServerLoad = async ({ platform, locals }) => {
+	const db = platform?.env?.CURIO_DB;
+	const tenantId = locals.tenantId;
+
+	if (!db || !tenantId) {
+		return {
+			config: null,
+			logEntries: [],
+			modeOptions: MODE_OPTIONS,
+			displayStyleOptions: DISPLAY_STYLE_OPTIONS,
+			colorSchemeOptions: COLOR_SCHEME_OPTIONS,
+			error: "Database not available",
+		};
+	}
+
+	const [configResult, logResult] = await Promise.all([
+		db
+			.prepare(`SELECT * FROM mood_ring_config WHERE tenant_id = ?`)
+			.bind(tenantId)
+			.first<MoodRingRow>()
+			.catch(() => null),
+		db
+			.prepare(
+				`SELECT id, mood, color, note, logged_at FROM mood_ring_log
+         WHERE tenant_id = ? ORDER BY logged_at DESC LIMIT 30`,
+			)
+			.bind(tenantId)
+			.all<MoodLogRow>()
+			.catch(() => ({ results: [] as MoodLogRow[] })),
+	]);
+
+	const config = configResult
+		? {
+				mode: configResult.mode,
+				manualMood: configResult.manual_mood,
+				manualColor: configResult.manual_color,
+				colorScheme: configResult.color_scheme,
+				displayStyle: configResult.display_style,
+				showMoodLog: !!configResult.show_mood_log,
+			}
+		: null;
+
+	return {
+		config,
+		logEntries: logResult.results,
+		modeOptions: MODE_OPTIONS,
+		displayStyleOptions: DISPLAY_STYLE_OPTIONS,
+		colorSchemeOptions: COLOR_SCHEME_OPTIONS,
+	};
+};
+
+const SaveMoodConfigSchema = z.object({
+	mode: z.string().optional().default("time"),
+	displayStyle: z.string().optional().default("ring"),
+	colorScheme: z.string().optional().default("default"),
+	manualMood: z.string().optional().default(""),
+	manualColor: z.string().optional().default(""),
+	showMoodLog: z.string().optional(),
+});
+
+const LogMoodSchema = z.object({
+	mood: z.string().optional().default(""),
+	color: z.string().optional().default(""),
+	note: z.string().optional().default(""),
+});
+
+export const actions: Actions = {
+	saveConfig: async ({ request, platform, locals }) => {
+		const db = platform?.env?.CURIO_DB;
+		const tenantId = locals.tenantId;
+
+		if (!db || !tenantId) {
+			return fail(500, {
+				error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+				error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+			});
+		}
+
+		const formData = await request.formData();
+		const parsed = parseFormData(formData, SaveMoodConfigSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const d = parsed.data;
+
+		const mode = isValidMode(d.mode) ? d.mode : "time";
+		const displayStyle = isValidDisplayStyle(d.displayStyle) ? d.displayStyle : "ring";
+		const colorScheme = isValidColorScheme(d.colorScheme) ? d.colorScheme : "default";
+		const manualMood = sanitizeMoodText(d.manualMood);
+		const manualColorRaw = d.manualColor?.trim();
+		const manualColor = manualColorRaw && isValidHexColor(manualColorRaw) ? manualColorRaw : null;
+		const showMoodLog = d.showMoodLog ? 1 : 0;
+
+		try {
+			// Try with show_mood_log column (requires migration 084)
+			await db
+				.prepare(
+					`INSERT INTO mood_ring_config (tenant_id, mode, manual_mood, manual_color, color_scheme, display_style, show_mood_log, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+           ON CONFLICT(tenant_id) DO UPDATE SET
+             mode = excluded.mode,
+             manual_mood = excluded.manual_mood,
+             manual_color = excluded.manual_color,
+             color_scheme = excluded.color_scheme,
+             display_style = excluded.display_style,
+             show_mood_log = excluded.show_mood_log,
+             updated_at = datetime('now')`,
+				)
+				.bind(tenantId, mode, manualMood, manualColor, colorScheme, displayStyle, showMoodLog)
+				.run();
+
+			return { success: true, configSaved: true };
+		} catch (error) {
+			// Fallback: save without show_mood_log if column doesn't exist yet
+			const errMsg = error instanceof Error ? error.message : String(error);
+			if (errMsg.includes("show_mood_log")) {
+				try {
+					await db
+						.prepare(
+							`INSERT INTO mood_ring_config (tenant_id, mode, manual_mood, manual_color, color_scheme, display_style, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+               ON CONFLICT(tenant_id) DO UPDATE SET
+                 mode = excluded.mode,
+                 manual_mood = excluded.manual_mood,
+                 manual_color = excluded.manual_color,
+                 color_scheme = excluded.color_scheme,
+                 display_style = excluded.display_style,
+                 updated_at = datetime('now')`,
+						)
+						.bind(tenantId, mode, manualMood, manualColor, colorScheme, displayStyle)
+						.run();
+
+					return { success: true, configSaved: true };
+				} catch (fallbackError) {
+					logGroveError("Arbor", ARBOR_ERRORS.SAVE_FAILED, { cause: fallbackError });
+					return fail(500, {
+						error: ARBOR_ERRORS.SAVE_FAILED.userMessage,
+						error_code: ARBOR_ERRORS.SAVE_FAILED.code,
+					});
+				}
+			}
+
+			logGroveError("Arbor", ARBOR_ERRORS.SAVE_FAILED, { cause: error });
+			return fail(500, {
+				error: ARBOR_ERRORS.SAVE_FAILED.userMessage,
+				error_code: ARBOR_ERRORS.SAVE_FAILED.code,
+			});
+		}
+	},
+
+	logMood: async ({ request, platform, locals }) => {
+		const db = platform?.env?.CURIO_DB;
+		const tenantId = locals.tenantId;
+
+		if (!db || !tenantId) {
+			return fail(500, {
+				error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+				error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+			});
+		}
+
+		const formData = await request.formData();
+		const parsed = parseFormData(formData, LogMoodSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const d = parsed.data;
+
+		const mood = sanitizeMoodText(d.mood);
+		if (!mood) {
+			return fail(400, {
+				error: "Mood text is required",
+				error_code: "MISSING_MOOD",
+			});
+		}
+
+		const colorRaw = d.color?.trim();
+		const color = colorRaw && isValidHexColor(colorRaw) ? colorRaw : "#7cb85c";
+		const note = sanitizeNote(d.note);
+		const id = generateMoodLogId();
+
+		try {
+			await db
+				.prepare(
+					`INSERT INTO mood_ring_log (id, tenant_id, mood, color, note) VALUES (?, ?, ?, ?, ?)`,
+				)
+				.bind(id, tenantId, mood, color, note)
+				.run();
+
+			// Prune
+			await db
+				.prepare(
+					`DELETE FROM mood_ring_log WHERE tenant_id = ? AND id NOT IN (
+             SELECT id FROM mood_ring_log WHERE tenant_id = ? ORDER BY logged_at DESC LIMIT ?
+           )`,
+				)
+				.bind(tenantId, tenantId, MAX_LOG_ENTRIES)
+				.run();
+
+			return { success: true, moodLogged: true };
+		} catch (error) {
+			logGroveError("Arbor", ARBOR_ERRORS.SAVE_FAILED, { cause: error });
+			return fail(500, {
+				error: ARBOR_ERRORS.SAVE_FAILED.userMessage,
+				error_code: ARBOR_ERRORS.SAVE_FAILED.code,
+			});
+		}
+	},
+};

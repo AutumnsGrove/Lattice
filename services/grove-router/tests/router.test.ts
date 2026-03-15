@@ -466,24 +466,24 @@ describe("Grove Router", () => {
 	// ==========================================================================
 
 	describe("Unknown subdomain fallback", () => {
-		it("routes unknown subdomain to grove-lattice (main engine)", async () => {
+		it("routes unknown subdomain to grove-aspen (tenant Worker)", async () => {
 			const request = createRequest("autumn", "/blog/hello");
 			await router.fetch(request, env);
 
 			expect(mockFetch).toHaveBeenCalledWith(
 				expect.objectContaining({
-					url: expect.stringContaining("grove-lattice.pages.dev/blog/hello"),
+					url: expect.stringContaining("grove-aspen.m7jv4v7npb.workers.dev/blog/hello"),
 				}),
 			);
 		});
 
-		it("routes arbitrary tenant subdomain to grove-lattice", async () => {
+		it("routes arbitrary tenant subdomain to grove-aspen", async () => {
 			const request = createRequest("my-cool-blog", "/posts/first");
 			await router.fetch(request, env);
 
 			expect(mockFetch).toHaveBeenCalledWith(
 				expect.objectContaining({
-					url: expect.stringContaining("grove-lattice.pages.dev/posts/first"),
+					url: expect.stringContaining("grove-aspen.m7jv4v7npb.workers.dev/posts/first"),
 				}),
 			);
 		});

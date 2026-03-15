@@ -9,7 +9,7 @@
  * exported as a plain object with getters and methods.
  */
 
-import type { Friend } from "$lib/server/services/friends";
+import type { Friend } from "$lib/types/friend";
 
 let friends = $state<Friend[]>([]);
 let loaded = $state(false);

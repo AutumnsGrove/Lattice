@@ -14,7 +14,7 @@
     </ArborPanel>
 -->
 <script lang="ts">
-	import { GroveMessages } from "../ui";
+	import GroveMessages from "../ui/grove-messages/GroveMessages.svelte";
 	import { sidebarStore } from "../../stores/sidebar.svelte";
 	import ArborNav from "./ArborNav.svelte";
 	import ArborSidebarHeader from "./ArborSidebarHeader.svelte";

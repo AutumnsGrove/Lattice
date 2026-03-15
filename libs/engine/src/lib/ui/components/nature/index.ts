@@ -18,7 +18,7 @@
  */
 
 // Logo - Re-export from ui module (new tree design)
-export { Logo } from "../ui";
+export { default as Logo } from "../ui/Logo.svelte";
 
 // LogoArchive - Original asterisk logo with nature animations (deprecated)
 export { default as LogoArchive } from "./LogoArchive.svelte";

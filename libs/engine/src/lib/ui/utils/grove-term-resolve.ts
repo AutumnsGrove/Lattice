@@ -16,7 +16,7 @@
 
 import { groveModeStore } from "../stores/grove-mode.svelte.js";
 import manifestData from "../../data/grove-term-manifest.json";
-import type { GroveTermManifest } from "../components/ui/groveterm/types.js";
+import type { GroveTermManifest } from "$lib/components/terminology/types.js";
 
 const manifest = manifestData as GroveTermManifest;
 
@@ -24,12 +24,11 @@ const manifest = manifestData as GroveTermManifest;
  * Try common slug variations (matches GroveSwap logic).
  */
 function findInManifest(slug: string) {
-  if (slug in manifest) return manifest[slug];
-  if (`your-${slug}` in manifest) return manifest[`your-${slug}`];
-  if (`${slug}s` in manifest) return manifest[`${slug}s`];
-  if (slug.endsWith("s") && slug.slice(0, -1) in manifest)
-    return manifest[slug.slice(0, -1)];
-  return null;
+	if (slug in manifest) return manifest[slug];
+	if (`your-${slug}` in manifest) return manifest[`your-${slug}`];
+	if (`${slug}s` in manifest) return manifest[`${slug}s`];
+	if (slug.endsWith("s") && slug.slice(0, -1) in manifest) return manifest[slug.slice(0, -1)];
+	return null;
 }
 
 /**
@@ -40,16 +39,16 @@ function findInManifest(slug: string) {
  * @returns The resolved display string
  */
 export function resolveTerm(slug: string): string {
-  const normalized = slug
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-  const entry = findInManifest(normalized);
-  if (!entry) return slug;
-  // Brand terms (alwaysGrove) always show the Grove name regardless of mode —
-  // this runs after the null check so unknown slugs fall through safely above.
-  if (entry.alwaysGrove) return entry.term;
-  return groveModeStore.current ? entry.term : entry.standardTerm || entry.term;
+	const normalized = slug
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/^-|-$/g, "");
+	const entry = findInManifest(normalized);
+	if (!entry) return slug;
+	// Brand terms (alwaysGrove) always show the Grove name regardless of mode —
+	// this runs after the null check so unknown slugs fall through safely above.
+	if (entry.alwaysGrove) return entry.term;
+	return groveModeStore.current ? entry.term : entry.standardTerm || entry.term;
 }
 
 /**
@@ -60,9 +59,6 @@ export function resolveTerm(slug: string): string {
  * @param standardTerm - Text to show when Grove Mode is OFF
  * @returns The appropriate string for the current mode
  */
-export function resolveTermString(
-  groveTerm: string,
-  standardTerm: string,
-): string {
-  return groveModeStore.current ? groveTerm : standardTerm;
+export function resolveTermString(groveTerm: string, standardTerm: string): string {
+	return groveModeStore.current ? groveTerm : standardTerm;
 }

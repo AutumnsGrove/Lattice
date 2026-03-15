@@ -1,0 +1,391 @@
+import {
+	getPostBySlug,
+	processAnchorTags,
+	extractHeaders,
+	renderMarkdown,
+	type GutterItem,
+} from "@autumnsgrove/lattice/utils/markdown";
+import { SITE_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
+import { getTenantDb } from "@autumnsgrove/lattice/server/services/database";
+import * as cache from "@autumnsgrove/lattice/server/services/cache";
+import { emailsMatch } from "@autumnsgrove/lattice/utils/user";
+import {
+	getApprovedComments,
+	getCommentCount,
+	getCommentSettings,
+	buildCommentTree,
+} from "@autumnsgrove/lattice/server/services/reeds";
+import { isInGreenhouse, isFeatureEnabled } from "@autumnsgrove/lattice/feature-flags";
+import type { PageServerLoad } from "./$types.js";
+
+// Disable prerendering - D1 posts are fetched dynamically at runtime
+export const prerender = false;
+
+interface Header {
+	level: number;
+	id: string;
+	text: string;
+}
+
+interface PostRecord {
+	slug: string;
+	title: string;
+	description?: string;
+	markdown_content?: string;
+	html_content?: string;
+	gutter_content?: string;
+	tags?: string;
+	status?: string;
+	published_at?: number;
+	created_at?: number;
+	updated_at?: number;
+	font?: string;
+	featured_image?: string;
+	storage_location?: string;
+	r2_key?: string;
+	blaze?: string;
+}
+
+/** Resolved blaze definition (label, icon, color) */
+interface BlazeDefinition {
+	label: string;
+	icon: string;
+	color: string;
+}
+
+/** Cached post data - the fully processed result */
+interface CachedPost {
+	slug: string;
+	title: string;
+	date: string;
+	tags: string[];
+	description: string;
+	content: string;
+	headers: Header[];
+	gutterContent: GutterItem[];
+	font: string;
+	author: string;
+	featured_image?: string;
+	created_at?: string;
+	updated_at?: string;
+	blaze?: string | null;
+	blazeDefinition?: BlazeDefinition | null;
+}
+
+/** Cache configuration */
+const CACHE_TTL_SECONDS = 300; // 5 minutes for KV cache
+
+export const load: PageServerLoad = async ({ params, locals, platform, setHeaders }) => {
+	const { slug } = params;
+	const tenantId = locals?.tenantId;
+
+	// Get author name from context (needed for cache key and response)
+	const context = locals.context;
+	const authorName = context?.type === "tenant" ? context.tenant.name : "Grove Author";
+
+	// Determine if logged-in user is the tenant owner (can edit this post)
+	const isOwner =
+		locals.user &&
+		context?.type === "tenant" &&
+		emailsMatch(context.tenant.ownerId, locals.user.email);
+
+	// Cache key includes tenant for multi-tenant isolation
+	const cacheKey = tenantId ? `garden:${tenantId}:${slug}` : `garden:_:${slug}`;
+
+	try {
+		// Try to get from KV cache first, or compute from D1/filesystem
+		const kv = platform?.env?.CACHE_KV;
+		const db = platform?.env?.DB;
+
+		// If we have KV, use getOrSet pattern for caching
+		if (kv && db && tenantId) {
+			const cachedPost = await cache.getOrSet<CachedPost | null>(kv, cacheKey, {
+				ttl: CACHE_TTL_SECONDS,
+				compute: async () => {
+					return await fetchAndProcessPost(slug, tenantId, db, authorName);
+				},
+			});
+
+			if (cachedPost) {
+				// Set Cache-Control headers for edge caching (published posts only)
+				setHeaders({
+					"Cache-Control": "public, max-age=300, s-maxage=300",
+					"CDN-Cache-Control": "max-age=3600, stale-while-revalidate=86400",
+					Vary: "Cookie",
+				});
+
+				// Load comments (not cached — always fresh from D1)
+				const { comments, commentTotal, commentSettings } = await loadComments(
+					db,
+					tenantId,
+					slug,
+					kv,
+				);
+				return {
+					post: cachedPost,
+					isOwner: isOwner || false,
+					comments,
+					commentTotal,
+					commentSettings,
+				};
+			}
+		} else if (db && tenantId) {
+			// No KV available, fall back to direct D1 (no caching)
+			const post = await fetchAndProcessPost(slug, tenantId, db, authorName);
+			if (post) {
+				const { comments, commentTotal, commentSettings } = await loadComments(db, tenantId, slug);
+				return {
+					post,
+					isOwner: isOwner || false,
+					comments,
+					commentTotal,
+					commentSettings,
+				};
+			}
+		}
+
+		// Fall back to filesystem (UserContent) for local dev
+		if (typeof globalThis.Buffer !== "undefined") {
+			const post = getPostBySlug(slug);
+
+			if (post) {
+				return {
+					post: {
+						...post,
+						font: "default",
+						author: authorName,
+						created_at: undefined,
+						updated_at: undefined,
+						blaze: null as string | null,
+						blazeDefinition: null as BlazeDefinition | null,
+					},
+					isOwner: isOwner || false,
+					comments: [],
+					commentTotal: 0,
+					commentSettings: null,
+				};
+			}
+		}
+
+		// Post not found
+		if (!db) {
+			console.error("DB binding not available - check Cloudflare Pages D1 bindings");
+		}
+		throwGroveError(404, SITE_ERRORS.POST_NOT_FOUND, "Site");
+	} catch (err) {
+		// If it's already a SvelteKit error, rethrow it
+		if ((err as { status?: number })?.status) {
+			throw err;
+		}
+		// Diagnostic logging — deep-extracts cause chain (CacheError wraps the real error)
+		const errName = err instanceof Error ? err.constructor.name : typeof err;
+		const errMessage = err instanceof Error ? err.message : String(err);
+		// CacheError stores cause as a property; Error objects serialize to {} so extract manually
+		const rawCause =
+			err instanceof Error && "cause" in err
+				? (err as Error & { cause?: unknown }).cause
+				: undefined;
+		const causeInfo =
+			rawCause instanceof Error
+				? { name: rawCause.constructor.name, message: rawCause.message, stack: rawCause.stack }
+				: rawCause;
+		// Go one deeper — if the cause itself has a cause (e.g., CacheError → Error → root)
+		const deepCause =
+			rawCause instanceof Error && "cause" in rawCause
+				? (rawCause as Error & { cause?: unknown }).cause
+				: undefined;
+		const deepCauseInfo =
+			deepCause instanceof Error
+				? { name: deepCause.constructor.name, message: deepCause.message, stack: deepCause.stack }
+				: deepCause;
+		console.error(`[garden/${slug}] POST_LOAD_FAILED — ${errName}: ${errMessage}`, {
+			tenantId,
+			hasKV: !!platform?.env?.CACHE_KV,
+			hasDB: !!platform?.env?.DB,
+			cause: causeInfo,
+			deepCause: deepCauseInfo,
+			stack: err instanceof Error ? err.stack : undefined,
+		});
+		throwGroveError(500, SITE_ERRORS.POST_LOAD_FAILED, "Site");
+	}
+};
+
+/**
+ * Load Reeds comments for a blog post.
+ * Fails gracefully — comments are non-critical for page rendering.
+ * Returns empty data when the reeds_comments graft is disabled.
+ */
+async function loadComments(db: D1Database, tenantId: string, slug: string, kv?: KVNamespace) {
+	try {
+		// Gate: reeds_comments graft — skip loading if feature is off
+		// When KV is unavailable, default to disabled (can't verify graft)
+		if (!kv) {
+			return { comments: [], commentTotal: 0, commentSettings: null };
+		}
+		const flagsEnv = { DB: db, FLAGS_KV: kv };
+		const inGreenhouse = await isInGreenhouse(tenantId, flagsEnv).catch(() => false);
+		if (!inGreenhouse) {
+			return { comments: [], commentTotal: 0, commentSettings: null };
+		}
+		const reedsEnabled = await isFeatureEnabled(
+			"reeds_comments",
+			{ tenantId, inGreenhouse: true },
+			flagsEnv,
+		).catch(() => false);
+		if (!reedsEnabled) {
+			return { comments: [], commentTotal: 0, commentSettings: null };
+		}
+
+		const tenantDb = getTenantDb(db, { tenantId });
+
+		// Get the post ID from slug
+		const post = await tenantDb.queryOne<{ id: string }>("posts", "slug = ?", [slug]);
+
+		if (!post) {
+			return { comments: [], commentTotal: 0, commentSettings: null };
+		}
+
+		const [rawComments, commentTotal, commentSettings] = await Promise.all([
+			getApprovedComments(tenantDb, post.id).catch(() => []),
+			getCommentCount(tenantDb, post.id).catch(() => 0),
+			getCommentSettings(tenantDb).catch(() => null),
+		]);
+
+		const comments = buildCommentTree(rawComments);
+
+		return { comments, commentTotal, commentSettings };
+	} catch (err) {
+		console.error("[Reeds] Failed to load comments:", err);
+		return { comments: [], commentTotal: 0, commentSettings: null };
+	}
+}
+
+/**
+ * Fetch post from D1 and process it (markdown, headers, gutter content)
+ * This is the "compute" function for cache.getOrSet()
+ */
+async function fetchAndProcessPost(
+	slug: string,
+	tenantId: string,
+	db: D1Database,
+	authorName: string,
+): Promise<CachedPost | null> {
+	const tenantDb = getTenantDb(db, { tenantId });
+
+	const post = await tenantDb.queryOne<PostRecord>("posts", "slug = ? AND status = ?", [
+		slug,
+		"published",
+	]);
+
+	if (!post) {
+		return null;
+	}
+
+	// Detect posts whose content was migrated to cold storage (R2).
+	// The storage tier migration system has been disabled, but posts that were
+	// already migrated will have empty content in D1. Log a clear warning so
+	// this is diagnosable, and show a fallback message instead of a blank page.
+	if (
+		post.storage_location &&
+		post.storage_location !== "hot" &&
+		!post.markdown_content &&
+		!post.html_content
+	) {
+		console.error(
+			`[garden] Post "${post.slug}" has storage_location="${post.storage_location}" ` +
+				`with empty content in D1. Content may be in R2 at key: ${post.r2_key || "unknown"}. ` +
+				`Run the recovery migration to restore content from R2 back to D1.`,
+		);
+	}
+
+	// Extract headers from markdown for TOC (this generates IDs)
+	const headers = post.markdown_content ? extractHeaders(post.markdown_content) : [];
+
+	// Generate HTML from markdown if not stored
+	let htmlContent = post.html_content;
+	if (!htmlContent && post.markdown_content) {
+		// renderMarkdown handles heading IDs and sanitization
+		htmlContent = renderMarkdown(post.markdown_content);
+	}
+
+	// Process anchor tags
+	const processedHtml = processAnchorTags(htmlContent || "");
+
+	// Parse tags
+	let tags: string[] = [];
+	if (post.tags) {
+		try {
+			tags = JSON.parse(post.tags as string);
+		} catch {
+			tags = [];
+		}
+	}
+
+	// Parse and process gutter content
+	let gutterContent: GutterItem[] = [];
+	if (post.gutter_content) {
+		try {
+			gutterContent = JSON.parse(post.gutter_content as string);
+			gutterContent = gutterContent.map((item: GutterItem) => {
+				if ((item.type === "comment" || item.type === "markdown") && item.content) {
+					return {
+						...item,
+						content: renderMarkdown(item.content),
+					};
+				}
+				return item;
+			});
+		} catch {
+			gutterContent = [];
+		}
+	}
+
+	// Safe date conversion — D1 timestamps may be stored as strings or non-numeric values.
+	// new Date(NaN).toISOString() throws RangeError: Invalid time value, so guard each conversion.
+	const safeDate = (value: unknown): string | undefined => {
+		if (value == null) return undefined;
+		const num = Number(value);
+		if (!Number.isFinite(num)) return undefined;
+		const d = new Date(num * 1000);
+		return Number.isNaN(d.getTime()) ? undefined : d.toISOString();
+	};
+
+	// Resolve blaze definition if post has a custom blaze
+	let blazeDefinition: BlazeDefinition | null = null;
+	if (post.blaze) {
+		try {
+			const bdRow = await db
+				.prepare(
+					`SELECT label, icon, color FROM blaze_definitions
+					 WHERE slug = ? AND (tenant_id = ? OR tenant_id IS NULL)
+					 ORDER BY tenant_id IS NOT NULL DESC
+					 LIMIT 1`,
+				)
+				.bind(post.blaze, tenantId)
+				.first<{ label: string; icon: string; color: string }>();
+			if (bdRow) {
+				blazeDefinition = { label: bdRow.label, icon: bdRow.icon, color: bdRow.color };
+			}
+		} catch {
+			// Non-critical — blaze will use client-side fallback
+		}
+	}
+
+	return {
+		slug: post.slug as string,
+		title: post.title as string,
+		date: safeDate(post.published_at) ?? new Date().toISOString(),
+		tags,
+		description: (post.description as string) || "",
+		content: processedHtml,
+		headers,
+		gutterContent,
+		font: (post.font as string) || "default",
+		author: authorName,
+		featured_image: (post.featured_image as string) || undefined,
+		created_at: safeDate(post.created_at),
+		updated_at: safeDate(post.updated_at),
+		blaze: (post.blaze as string) || null,
+		blazeDefinition,
+	};
+}

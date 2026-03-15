@@ -8,7 +8,7 @@
 <script lang="ts">
 	import type { MeadowPost } from "$lib/types/post";
 	import { NoteEditor } from "@autumnsgrove/lattice/ui/editor";
-	import { Blaze } from "@autumnsgrove/lattice/ui/indicators";
+	import { Blaze } from "@autumnsgrove/lattice/blazes/components";
 	import { GLOBAL_BLAZE_DEFAULTS } from "@autumnsgrove/lattice/blazes";
 	import { uploadNoteImage } from "$lib/utils/note-upload";
 
@@ -50,7 +50,7 @@
 		if (blazesFetched) return;
 		blazesFetched = true;
 		try {
-			const res = await fetch("/api/blazes");
+			const res = await fetch("/api/blazes"); // csrf-ok
 			if (res.ok) {
 				const { blazes } = (await res.json()) as { blazes: Array<{ slug: string; label: string; icon: string; color: string }> };
 				if (Array.isArray(blazes) && blazes.length > 0) {

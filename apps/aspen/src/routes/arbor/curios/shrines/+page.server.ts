@@ -1,0 +1,409 @@
+import type { PageServerLoad, Actions } from "./$types";
+import { fail } from "@sveltejs/kit";
+import { z } from "zod";
+import { ARBOR_ERRORS, logGroveError } from "@autumnsgrove/lattice/errors";
+import { parseFormData } from "@autumnsgrove/lattice/server/utils/form-data";
+import {
+	generateShrineId,
+	isValidShrineId,
+	isValidShrineType,
+	isValidSize,
+	isValidFrameStyle,
+	sanitizeTitle,
+	sanitizeDescription,
+	parseContents,
+	SHRINE_TYPE_OPTIONS,
+	SIZE_OPTIONS,
+	FRAME_STYLE_OPTIONS,
+	CONTENT_TYPE_OPTIONS,
+	SHRINE_TEMPLATES,
+	MAX_CONTENTS_SIZE,
+	MAX_SHRINES_PER_TENANT,
+	type ShrineType,
+} from "@autumnsgrove/lattice/curios/shrines";
+
+interface ShrineRow {
+	id: string;
+	title: string;
+	shrine_type: string;
+	description: string | null;
+	size: string;
+	frame_style: string;
+	contents: string;
+	is_published: number;
+	sort_order: number;
+}
+
+const AddShrineSchema = z.object({
+	title: z.string().optional().default(""),
+	shrineType: z.string().min(1),
+	size: z.string().min(1),
+	frameStyle: z.string().min(1),
+	description: z.string().optional().default(""),
+});
+
+const ShrineIdSchema = z.object({
+	shrineId: z.string().min(1),
+});
+
+const UpdateContentsSchema = z.object({
+	shrineId: z.string().min(1),
+	contents: z.string().min(1),
+});
+
+const LoadTemplateSchema = z.object({
+	shrineId: z.string().min(1),
+	shrineType: z.string().min(1),
+});
+
+export const load: PageServerLoad = async ({ platform, locals }) => {
+	const db = platform?.env?.CURIO_DB;
+	const tenantId = locals.tenantId;
+
+	if (!db || !tenantId) {
+		logGroveError("Arbor", ARBOR_ERRORS.DB_NOT_AVAILABLE, {
+			detail: "Shrines load: missing db or tenantId",
+		});
+		return {
+			shrines: [],
+			shrineTypeOptions: SHRINE_TYPE_OPTIONS,
+			sizeOptions: SIZE_OPTIONS,
+			frameStyleOptions: FRAME_STYLE_OPTIONS,
+			contentTypeOptions: CONTENT_TYPE_OPTIONS,
+			shrineTemplates: SHRINE_TEMPLATES,
+			error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+			error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+		};
+	}
+
+	const result = await db
+		.prepare(
+			`SELECT id, title, shrine_type, description, size, frame_style, contents, is_published, sort_order
+       FROM shrines WHERE tenant_id = ?
+       ORDER BY sort_order ASC, created_at ASC`,
+		)
+		.bind(tenantId)
+		.all<ShrineRow>()
+		.catch((error) => {
+			logGroveError("Arbor", ARBOR_ERRORS.LOAD_FAILED, { cause: error });
+			return { results: [] as ShrineRow[] };
+		});
+
+	const shrines = (result.results ?? []).map((row) => ({
+		id: row.id,
+		title: row.title,
+		shrineType: row.shrine_type,
+		description: row.description,
+		size: row.size,
+		frameStyle: row.frame_style,
+		contents: parseContents(row.contents),
+		isPublished: row.is_published === 1,
+	}));
+
+	return {
+		shrines,
+		shrineTypeOptions: SHRINE_TYPE_OPTIONS,
+		sizeOptions: SIZE_OPTIONS,
+		frameStyleOptions: FRAME_STYLE_OPTIONS,
+		contentTypeOptions: CONTENT_TYPE_OPTIONS,
+		shrineTemplates: SHRINE_TEMPLATES,
+	};
+};
+
+export const actions: Actions = {
+	add: async ({ request, platform, locals }) => {
+		const db = platform?.env?.CURIO_DB;
+		const tenantId = locals.tenantId;
+
+		if (!db || !tenantId) {
+			return fail(500, {
+				error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+				error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+			});
+		}
+
+		const countResult = await db
+			.prepare("SELECT COUNT(*) as count FROM shrines WHERE tenant_id = ?")
+			.bind(tenantId)
+			.first<{ count: number }>();
+
+		if (countResult && countResult.count >= MAX_SHRINES_PER_TENANT) {
+			return fail(400, {
+				error: `You can have at most ${MAX_SHRINES_PER_TENANT} shrines.`,
+				error_code: ARBOR_ERRORS.INVALID_INPUT.code,
+			});
+		}
+
+		const formData = await request.formData();
+		const parsed = parseFormData(formData, AddShrineSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const d = parsed.data;
+
+		const title = sanitizeTitle(d.title);
+		if (!title) {
+			return fail(400, {
+				error: ARBOR_ERRORS.FIELD_REQUIRED.userMessage,
+				error_code: ARBOR_ERRORS.FIELD_REQUIRED.code,
+			});
+		}
+
+		const shrineType = d.shrineType;
+		if (!isValidShrineType(shrineType)) {
+			return fail(400, {
+				error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
+				error_code: ARBOR_ERRORS.INVALID_INPUT.code,
+			});
+		}
+
+		const size = d.size;
+		if (!isValidSize(size)) {
+			return fail(400, {
+				error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
+				error_code: ARBOR_ERRORS.INVALID_INPUT.code,
+			});
+		}
+
+		const frameStyle = d.frameStyle;
+		if (!isValidFrameStyle(frameStyle)) {
+			return fail(400, {
+				error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
+				error_code: ARBOR_ERRORS.INVALID_INPUT.code,
+			});
+		}
+
+		const description = sanitizeDescription(d.description);
+		const id = generateShrineId();
+
+		// Auto-populate with template contents based on shrine type
+		const templateContents = SHRINE_TEMPLATES[shrineType as ShrineType] ?? [];
+		const contentsJson = JSON.stringify(templateContents);
+
+		try {
+			const maxSort = await db
+				.prepare(
+					`SELECT COALESCE(MAX(sort_order), -1) as max_sort FROM shrines WHERE tenant_id = ?`,
+				)
+				.bind(tenantId)
+				.first<{ max_sort: number }>();
+
+			const sortOrder = (maxSort?.max_sort ?? -1) + 1;
+
+			await db
+				.prepare(
+					`INSERT INTO shrines (id, tenant_id, title, shrine_type, description, size, frame_style, contents, is_published, sort_order)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?)`,
+				)
+				.bind(
+					id,
+					tenantId,
+					title,
+					shrineType,
+					description,
+					size,
+					frameStyle,
+					contentsJson,
+					sortOrder,
+				)
+				.run();
+
+			return { success: true, shrineAdded: true };
+		} catch (error) {
+			logGroveError("Arbor", ARBOR_ERRORS.SAVE_FAILED, { cause: error });
+			return fail(500, {
+				error: ARBOR_ERRORS.SAVE_FAILED.userMessage,
+				error_code: ARBOR_ERRORS.SAVE_FAILED.code,
+			});
+		}
+	},
+
+	togglePublish: async ({ request, platform, locals }) => {
+		const db = platform?.env?.CURIO_DB;
+		const tenantId = locals.tenantId;
+
+		if (!db || !tenantId) {
+			return fail(500, {
+				error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+				error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+			});
+		}
+
+		const formData = await request.formData();
+		const parsed = parseFormData(formData, ShrineIdSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const { shrineId } = parsed.data;
+
+		if (!isValidShrineId(shrineId)) {
+			return fail(400, {
+				error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
+				error_code: ARBOR_ERRORS.INVALID_INPUT.code,
+			});
+		}
+
+		const isPublished = formData.get("isPublished") === "true" ? 0 : 1;
+
+		try {
+			await db
+				.prepare(
+					`UPDATE shrines SET is_published = ?, updated_at = datetime('now')
+           WHERE id = ? AND tenant_id = ?`,
+				)
+				.bind(isPublished, shrineId, tenantId)
+				.run();
+
+			return { success: true, publishToggled: true };
+		} catch (error) {
+			logGroveError("Arbor", ARBOR_ERRORS.SAVE_FAILED, { cause: error });
+			return fail(500, {
+				error: ARBOR_ERRORS.SAVE_FAILED.userMessage,
+				error_code: ARBOR_ERRORS.SAVE_FAILED.code,
+			});
+		}
+	},
+
+	remove: async ({ request, platform, locals }) => {
+		const db = platform?.env?.CURIO_DB;
+		const tenantId = locals.tenantId;
+
+		if (!db || !tenantId) {
+			return fail(500, {
+				error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+				error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+			});
+		}
+
+		const formData = await request.formData();
+		const parsed = parseFormData(formData, ShrineIdSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const { shrineId } = parsed.data;
+
+		if (!isValidShrineId(shrineId)) {
+			return fail(400, {
+				error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
+				error_code: ARBOR_ERRORS.INVALID_INPUT.code,
+			});
+		}
+
+		try {
+			await db
+				.prepare(`DELETE FROM shrines WHERE id = ? AND tenant_id = ?`)
+				.bind(shrineId, tenantId)
+				.run();
+
+			return { success: true, shrineRemoved: true };
+		} catch (error) {
+			logGroveError("Arbor", ARBOR_ERRORS.OPERATION_FAILED, { cause: error });
+			return fail(500, {
+				error: ARBOR_ERRORS.OPERATION_FAILED.userMessage,
+				error_code: ARBOR_ERRORS.OPERATION_FAILED.code,
+			});
+		}
+	},
+
+	updateContents: async ({ request, platform, locals }) => {
+		const db = platform?.env?.CURIO_DB;
+		const tenantId = locals.tenantId;
+
+		if (!db || !tenantId) {
+			return fail(500, {
+				error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+				error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+			});
+		}
+
+		const formData = await request.formData();
+		const parsed = parseFormData(formData, UpdateContentsSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const { shrineId, contents: contentsRaw } = parsed.data;
+
+		if (!isValidShrineId(shrineId)) {
+			return fail(400, {
+				error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
+				error_code: ARBOR_ERRORS.INVALID_INPUT.code,
+			});
+		}
+
+		if (contentsRaw.length > MAX_CONTENTS_SIZE) {
+			return fail(400, {
+				error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
+				error_code: ARBOR_ERRORS.INVALID_INPUT.code,
+			});
+		}
+
+		// Validate JSON structure
+		const contents = parseContents(contentsRaw);
+		const validatedJson = JSON.stringify(contents);
+
+		try {
+			await db
+				.prepare(
+					`UPDATE shrines SET contents = ?, updated_at = datetime('now')
+           WHERE id = ? AND tenant_id = ?`,
+				)
+				.bind(validatedJson, shrineId, tenantId)
+				.run();
+
+			return { success: true, contentsUpdated: true };
+		} catch (error) {
+			logGroveError("Arbor", ARBOR_ERRORS.SAVE_FAILED, { cause: error });
+			return fail(500, {
+				error: ARBOR_ERRORS.SAVE_FAILED.userMessage,
+				error_code: ARBOR_ERRORS.SAVE_FAILED.code,
+			});
+		}
+	},
+
+	loadTemplate: async ({ request, platform, locals }) => {
+		const db = platform?.env?.CURIO_DB;
+		const tenantId = locals.tenantId;
+
+		if (!db || !tenantId) {
+			return fail(500, {
+				error: ARBOR_ERRORS.DB_NOT_AVAILABLE.userMessage,
+				error_code: ARBOR_ERRORS.DB_NOT_AVAILABLE.code,
+			});
+		}
+
+		const formData = await request.formData();
+		const parsed = parseFormData(formData, LoadTemplateSchema);
+		if (!parsed.success) {
+			return fail(400, { error: "Invalid form data", error_code: "INVALID_INPUT" });
+		}
+		const { shrineId, shrineType } = parsed.data;
+
+		if (!isValidShrineId(shrineId) || !isValidShrineType(shrineType)) {
+			return fail(400, {
+				error: ARBOR_ERRORS.INVALID_INPUT.userMessage,
+				error_code: ARBOR_ERRORS.INVALID_INPUT.code,
+			});
+		}
+
+		const templateContents = SHRINE_TEMPLATES[shrineType as ShrineType] ?? [];
+		const contentsJson = JSON.stringify(templateContents);
+
+		try {
+			await db
+				.prepare(
+					`UPDATE shrines SET contents = ?, updated_at = datetime('now')
+           WHERE id = ? AND tenant_id = ?`,
+				)
+				.bind(contentsJson, shrineId, tenantId)
+				.run();
+
+			return { success: true, templateLoaded: true };
+		} catch (error) {
+			logGroveError("Arbor", ARBOR_ERRORS.SAVE_FAILED, { cause: error });
+			return fail(500, {
+				error: ARBOR_ERRORS.SAVE_FAILED.userMessage,
+				error_code: ARBOR_ERRORS.SAVE_FAILED.code,
+			});
+		}
+	},
+};

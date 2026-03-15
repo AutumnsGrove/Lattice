@@ -16,7 +16,7 @@
  * ```
  */
 
-import type { ChatWSClientMessage, ChatWSServerMessage } from "$lib/server/services/chat.types.js";
+import type { ChatWSClientMessage, ChatWSServerMessage } from "$lib/types/chat";
 
 export interface ChatConnectionOptions {
 	conversationId: string;

@@ -79,12 +79,6 @@ export { default as GroveMessages } from "./grove-messages/GroveMessages.svelte"
 export * from "./grove-messages/types";
 export type { GroveMessageChannel } from "./grove-messages/types";
 
-// GroveTerm - unified terminology (non-interactive by default, add `interactive` for popup)
-export { default as GroveTerm } from "./groveterm/GroveTerm.svelte";
-export { default as GroveText } from "./groveterm/GroveText.svelte";
-export { default as GroveTermPopup } from "./groveterm/GroveTermPopup.svelte";
-export * from "./groveterm/types";
-
 // GroveIcon - manifest-driven service icon swap
 export { default as GroveIcon } from "./groveicon/GroveIcon.svelte";
 export { defaultSuite, groveIconManifest, getSuite } from "./groveicon/manifest";
