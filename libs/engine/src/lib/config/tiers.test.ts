@@ -289,8 +289,8 @@ describe("Tier Configuration", () => {
 
 	describe("Format Functions", () => {
 		describe("formatStorage", () => {
-			it("formats zero as dash", () => {
-				expect(formatStorage(0)).toBe("—");
+			it("formats zero as 0 MB", () => {
+				expect(formatStorage(0)).toBe("0 MB");
 			});
 
 			it("formats infinity as Unlimited", () => {
@@ -303,7 +303,7 @@ describe("Tier Configuration", () => {
 			});
 
 			it("formats MB for small values", () => {
-				expect(formatStorage(512 * 1024 * 1024)).toBe("512 MB");
+				expect(formatStorage(512 * 1024 * 1024)).toBe("512.0 MB");
 			});
 		});
 

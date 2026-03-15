@@ -116,20 +116,36 @@ export const load: PageServerLoad = async ({ locals, platform, parent, cookies }
 		] = await Promise.all([
 			platform.env.DB.prepare("SELECT COUNT(*) as count FROM posts WHERE tenant_id = ?")
 				.bind(locals.tenantId)
-				.first<{ count: number }>(),
+				.first<{ count: number }>()
+				.catch((e) => {
+					console.error("[Account] Failed to load post count:", e);
+					return null;
+				}),
 			platform.env.DB.prepare("SELECT COUNT(*) as count FROM pages WHERE tenant_id = ?")
 				.bind(locals.tenantId)
-				.first<{ count: number }>(),
+				.first<{ count: number }>()
+				.catch((e) => {
+					console.error("[Account] Failed to load page count:", e);
+					return null;
+				}),
 			// gallery_images is the primary image store (media table is legacy/empty)
 			platform.env.DB.prepare("SELECT COUNT(*) as count FROM gallery_images WHERE tenant_id = ?")
 				.bind(locals.tenantId)
-				.first<{ count: number }>(),
+				.first<{ count: number }>()
+				.catch((e) => {
+					console.error("[Account] Failed to load media count:", e);
+					return null;
+				}),
 			// Calculate actual storage from gallery_images.file_size (not stale tenants.storage_used or incomplete image_hashes)
 			platform.env.DB.prepare(
 				"SELECT COALESCE(SUM(COALESCE(file_size, 0)), 0) as total_bytes FROM gallery_images WHERE tenant_id = ?",
 			)
 				.bind(locals.tenantId)
-				.first<{ total_bytes: number }>(),
+				.first<{ total_bytes: number }>()
+				.catch((e) => {
+					console.error("[Account] Failed to load storage size:", e);
+					return null;
+				}),
 			// Curio config queries
 			platform.env.DB.prepare("SELECT enabled FROM timeline_curio_config WHERE tenant_id = ?")
 				.bind(locals.tenantId)

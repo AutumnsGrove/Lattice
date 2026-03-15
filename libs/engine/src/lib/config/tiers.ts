@@ -561,10 +561,10 @@ export function getTierRateLimits(tier: TierKey): TierRateLimits {
  * Format storage size for display.
  */
 export function formatStorage(bytes: number): string {
-	if (bytes === 0) return "—";
+	if (bytes === 0) return "0 MB";
 	if (bytes === Infinity) return "Unlimited";
 	const gb = bytes / (1024 * 1024 * 1024);
-	return gb >= 1 ? `${gb} GB` : `${bytes / (1024 * 1024)} MB`;
+	return gb >= 1 ? `${gb} GB` : `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 /**

@@ -193,8 +193,8 @@ describe("getTierRateLimits", () => {
 });
 
 describe("formatStorage", () => {
-	it("should format 0 as dash", () => {
-		expect(formatStorage(0)).toBe("—");
+	it("should format 0 as 0 MB", () => {
+		expect(formatStorage(0)).toBe("0 MB");
 	});
 
 	it("should format Infinity as Unlimited", () => {
@@ -207,7 +207,7 @@ describe("formatStorage", () => {
 	});
 
 	it("should format MB values", () => {
-		expect(formatStorage(100 * 1024 * 1024)).toBe("100 MB");
+		expect(formatStorage(100 * 1024 * 1024)).toBe("100.0 MB");
 	});
 });
 
