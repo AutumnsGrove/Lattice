@@ -11,7 +11,7 @@
  */
 
 import sharp from "sharp";
-import { mkdir, writeFile } from "fs/promises";
+import { copyFile, mkdir, writeFile } from "fs/promises";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 
@@ -37,8 +37,8 @@ const OUTPUT_DIRS = {
 
 // All packages that need favicon assets
 const PACKAGES = [
+	"apps/aspen",
 	"apps/landing",
-	"libs/engine",
 	"apps/clearing",
 	"apps/plant",
 	"apps/domains",
@@ -277,11 +277,12 @@ function generateFaviconSvg(season) {
 </svg>`;
 }
 
-async function generateSeasonalFavicons() {
-	console.log("🌿 Generating seasonal favicon variants for engine (#1304)...\n");
+// Packages that need seasonal favicon variants (PWA personalization #1304)
+// Aspen is the tenant deployment — it serves personalized seasonal favicons.
+const SEASONAL_PACKAGES = ["apps/aspen"];
 
-	const engineStaticDir = join(ROOT_DIR, "libs/engine/static");
-	await mkdir(engineStaticDir, { recursive: true });
+async function generateSeasonalFavicons() {
+	console.log("🌿 Generating seasonal favicon variants (#1304)...\n");
 
 	// Generate seasonal variants for non-summer seasons
 	// Summer files already exist as the defaults (favicon.svg, icon-192.png, etc.)
@@ -292,10 +293,9 @@ async function generateSeasonalFavicons() {
 
 		// Generate SVG favicon variant
 		const svgContent = generateFaviconSvg(season);
-		await writeFile(join(engineStaticDir, `favicon-${season}.svg`), svgContent);
-		console.log(`    ✓ favicon-${season}.svg`);
 
 		// Generate PNG favicon variants at all sizes
+		const pngBuffers = {};
 		for (const [filename, size] of Object.entries(FAVICON_SIZES)) {
 			const logoSvg = generateSvg(season);
 			const logoSvgBuffer = Buffer.from(logoSvg);
@@ -324,8 +324,20 @@ async function generateSeasonalFavicons() {
 
 			// Insert season before extension: "icon-192.png" → "icon-192-autumn.png"
 			const seasonalFilename = filename.replace(/\.png$/, `-${season}.png`);
-			await writeFile(join(engineStaticDir, seasonalFilename), finalBuffer);
-			console.log(`    ✓ ${seasonalFilename} (${size}x${size})`);
+			pngBuffers[seasonalFilename] = { buffer: finalBuffer, size };
+		}
+
+		// Write to all seasonal packages
+		for (const pkg of SEASONAL_PACKAGES) {
+			const staticDir = join(ROOT_DIR, pkg, "static");
+			await mkdir(staticDir, { recursive: true });
+
+			await writeFile(join(staticDir, `favicon-${season}.svg`), svgContent);
+
+			for (const [seasonalFilename, { buffer, size }] of Object.entries(pngBuffers)) {
+				await writeFile(join(staticDir, seasonalFilename), buffer);
+			}
+			console.log(`    ✓ ${pkg}/static/ (svg + ${Object.keys(pngBuffers).length} pngs)`);
 		}
 		console.log("");
 	}
@@ -1000,13 +1012,37 @@ async function generateGlassEmailSignatureDividers(treeHeight = 256) {
 // MAIN
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Copy non-generated static files (SVGs) from engine to Aspen.
+ * Engine's static dir is the source of truth for these hand-crafted assets.
+ * Note: robots.txt is NOT copied — it's a per-app policy file, not a generated asset.
+ */
+async function copyStaticAssets() {
+	console.log("📋 Copying static assets from engine to Aspen...\n");
+
+	const engineStaticDir = join(ROOT_DIR, "libs/engine/static");
+	const aspenStaticDir = join(ROOT_DIR, "apps/aspen/static");
+	await mkdir(aspenStaticDir, { recursive: true });
+
+	const filesToCopy = ["favicon.svg", "safari-pinned-tab.svg"];
+
+	for (const file of filesToCopy) {
+		await copyFile(join(engineStaticDir, file), join(aspenStaticDir, file));
+		console.log(`  ✓ ${file}`);
+	}
+	console.log("");
+}
+
 async function main() {
 	console.log("🌲 Generating Grove tree logo PNGs...\n");
+
+	// Copy hand-crafted static files from engine to Aspen
+	await copyStaticAssets();
 
 	// Generate favicon PNGs for all packages
 	await generatePackageFavicons();
 
-	// Generate seasonal favicon variants for engine (PWA personalization #1304)
+	// Generate seasonal favicon variants for Aspen (PWA personalization #1304)
 	await generateSeasonalFavicons();
 
 	// Generate seasonal email assets

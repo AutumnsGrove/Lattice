@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="32" height="32">
+  <defs>
+    <radialGradient id="circleGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#122a1a" />
+      <stop offset="70%" stop-color="#0f2015" />
+      <stop offset="100%" stop-color="#0d1a12" />
+    </radialGradient>
+    <radialGradient id="glassHighlight" cx="35%" cy="30%" r="50%">
+      <stop offset="0%" stop-color="white" stop-opacity="0.06" />
+      <stop offset="100%" stop-color="white" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <!-- Circular background -->
+  <circle cx="50" cy="50" r="48" fill="url(#circleGradient)" />
+  <circle cx="50" cy="50" r="48" fill="url(#glassHighlight)" />
+  <circle cx="50" cy="50" r="48" fill="none" stroke="#22c55e" stroke-opacity="0.12" stroke-width="1" />
+  <!-- Tree logo (scaled to fit within circle with padding) -->
+  <g transform="translate(15, 15) scale(0.7)">
+    <g transform="rotate(-12 50 50)">
+      <path fill="#15803d" d="M50 5 L18 32 L50 18 Z" />
+      <path fill="#86efac" d="M50 5 L50 18 L82 32 Z" />
+      <path fill="#166534" d="M50 20 L12 50 L50 35 Z" />
+      <path fill="#4ade80" d="M50 20 L50 35 L88 50 Z" />
+      <path fill="#14532d" d="M50 38 L18 68 L50 54 Z" />
+      <path fill="#22c55e" d="M50 38 L50 54 L82 68 Z" />
+      <path fill="#3d2914" d="M50 54 L42 58 L46 100 L50 100 Z" />
+      <path fill="#5a3f30" d="M50 54 L58 58 L54 100 L50 100 Z" />
+    </g>
+  </g>
+</svg>
