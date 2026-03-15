@@ -1,16 +1,17 @@
 /**
  * Shared Lucide icon registry for Grove Platform.
- * Single source of truth for commonly used icons across all Grove apps.
  *
- * DO: Import icons from '@autumnsgrove/lattice/ui/icons'
- * DON'T: Import directly from '@lucide/svelte' in app components
+ * BRIDGE FILE — Prism is now the SSOT for icon identity.
+ * This file re-exports Prism's maps alongside engine-specific aliases
+ * for backward compatibility. New code should import from Prism directly:
  *
- * @example
- * ```svelte
- * import { stateIcons, navIcons } from '@autumnsgrove/lattice/ui/icons';
+ *   import { navIcons, resolveIcon } from '@autumnsgrove/prism/icons/lucide';
  *
- * <svelte:component this={stateIcons.check} class="w-5 h-5" />
- * ```
+ * Legacy imports still work:
+ *
+ *   import { stateIcons, Check } from '@autumnsgrove/lattice/ui/icons';
+ *
+ * @see libs/prism/src/lib/icons/ — the SSOT
  */
 
 import {
@@ -451,3 +452,37 @@ export {
 	Plane,
 	Briefcase,
 };
+
+// ============================================================================
+// PRISM ICON GATEWAY (new SSOT — use these in new code)
+// ============================================================================
+// Re-export Prism adapter maps and utilities for consumers that want to
+// migrate incrementally. These use Prism's canonical key names (camelCase)
+// with forgiving Proxy-based lookups.
+//
+// Prefer importing directly from '@autumnsgrove/prism/icons/lucide' when
+// possible. These re-exports exist for engine consumers that can't add
+// a direct Prism dependency.
+
+export {
+	// Semantic icon maps (Proxy-wrapped, case/delimiter insensitive)
+	navIcons as prismNavIcons,
+	stateIcons as prismStateIcons,
+	natureIcons as prismNatureIcons,
+	seasonIcons as prismSeasonIcons,
+	actionIcons as prismActionIcons,
+	featureIcons as prismFeatureIcons,
+	authIcons as prismAuthIcons,
+	metricIcons as prismMetricIcons,
+	phaseIcons as prismPhaseIcons,
+	toolIcons as prismToolIcons,
+	blazeIcons as prismBlazeIcons,
+	chromeIcons as prismChromeIcons,
+	allIcons as prismAllIcons,
+	// Safe resolver — validates + normalizes + resolves (never throws)
+	resolveIcon,
+	resolveAnyIcon,
+	// Manifest utilities
+	isIconKey,
+	isGroupKey,
+} from "@autumnsgrove/prism/icons/lucide";

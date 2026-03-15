@@ -18,7 +18,15 @@
 			"default": "./src/index.ts"
 		},
 		"./css": "./src/lib/css/grove-tokens.css",
-		"./tailwind": "./src/lib/tailwind/preset.js"
+		"./tailwind": "./src/lib/tailwind/preset.js",
+		"./icons": {
+			"types": "./src/lib/icons/index.ts",
+			"default": "./src/lib/icons/index.ts"
+		},
+		"./icons/lucide": {
+			"types": "./src/lib/icons/adapters/lucide.ts",
+			"default": "./src/lib/icons/adapters/lucide.ts"
+		}
 	},
 	"files": [
 		"src"
@@ -28,7 +36,11 @@
 		"test": "vitest",
 		"test:run": "vitest run"
 	},
+	"dependencies": {
+		"@lucide/svelte": "^0.577.0"
+	},
 	"devDependencies": {
+		"svelte": "^5.0.0",
 		"typescript": "^5.0.0",
 		"vitest": "^2.0.0"
 	},
