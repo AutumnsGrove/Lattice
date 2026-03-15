@@ -218,10 +218,10 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 		session: {
 			...cfConfig.session,
 			modelName: "ba_session", // Map to our ba_session table
-			// 7 days session expiry
-			expiresIn: 7 * 24 * 60 * 60,
-			// Refresh session if within 7 days of expiry
-			updateAge: 7 * 24 * 60 * 60,
+			// 30 days session expiry
+			expiresIn: 30 * 24 * 60 * 60,
+			// Refresh session if within 1 day of expiry
+			updateAge: 24 * 60 * 60,
 			// Disable "fresh session" check for passkey registration.
 			// BA's freshSessionMiddleware rejects sessions where updatedAt is older
 			// than freshAge. With updateAge=7d, updatedAt is never refreshed, so the

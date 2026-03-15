@@ -183,15 +183,15 @@ describe("Session Cookie Header", () => {
       expect(header).toContain("Max-Age=");
     });
 
-    it("should use default 7-day expiry", async () => {
+    it("should use default 30-day expiry", async () => {
       const header = await createSessionCookieHeader(
         "sess_123",
         "user_456",
         TEST_SECRET,
       );
 
-      // 7 days = 604800 seconds
-      expect(header).toContain("Max-Age=604800");
+      // 30 days = 2592000 seconds
+      expect(header).toContain("Max-Age=2592000");
     });
 
     it("should respect custom max age", async () => {
