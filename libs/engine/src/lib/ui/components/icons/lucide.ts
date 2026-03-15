@@ -485,4 +485,4 @@ export {
 	// Manifest utilities
 	isIconKey,
 	isGroupKey,
-} from "@autumnsgrove/prism/icons/lucide";
+} from "@autumnsgrove/prism/icons";

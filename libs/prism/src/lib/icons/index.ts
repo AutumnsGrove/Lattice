@@ -1,11 +1,37 @@
 // @autumnsgrove/prism/icons
 //
-// The icon vocabulary — zero dependencies. Defines semantic groups, aliases,
-// type guards, and normalizer. No icon components here — those live in adapters.
+// THE consumer-facing entry point for all icons in Grove.
+// Import from here — never from @lucide/svelte or adapters directly.
 //
-// import { isIconKey, isGroupKey, normalize, ICON_MANIFEST } from '@autumnsgrove/prism/icons'
+// import { stateIcons, navIcons, resolveIcon } from '@autumnsgrove/prism/icons'
+//
+// To swap icon packs: change which adapter this file wires to.
+// Consumers never change.
 
-// Manifest — the vocabulary
+// Resolved semantic icon maps (from the active adapter)
+export {
+	navIcons,
+	stateIcons,
+	natureIcons,
+	seasonIcons,
+	actionIcons,
+	featureIcons,
+	authIcons,
+	metricIcons,
+	phaseIcons,
+	toolIcons,
+	blazeIcons,
+	chromeIcons,
+	allIcons,
+	// Lookup utilities
+	getIcon,
+	getIconFromAll,
+	// Safe resolver — the icon trust boundary
+	resolveIcon,
+	resolveAnyIcon,
+} from "./adapters/lucide.js";
+
+// Manifest — the vocabulary (pure data, zero-dep)
 export {
 	ICON_MANIFEST,
 	normalize,
