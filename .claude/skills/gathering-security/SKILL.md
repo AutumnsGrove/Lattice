@@ -5,7 +5,7 @@ description: The drum sounds. Spider, Raccoon, and Turtle gather for complete se
 
 # Gathering Security 🌲🕷️🦝🐢
 
-The drum echoes in the shadows. The Spider weaves intricate webs of authentication, each strand placed with precision. The Raccoon rummages through every corner, finding what doesn't belong, cleaning what could harm. The Turtle moves with ancient patience, layering defense upon defense, testing every plate of the shell. Together they secure the forest — doors locked tight, secrets safe, paths protected, and the ground itself hardened against anything that comes.
+The drum echoes in the shadows. But this time, the conductor stands at the clearing's edge — not doing the work, but orchestrating it. Each animal arrives with fresh eyes, reads its own instructions, and works with full adversarial attention. The Spider weaves auth with precision. The Raccoon rummages with suspicion. The Turtle hardens with patience. Three isolated minds, zero shared sympathy, one fortress built right.
 
 ## When to Summon
 
@@ -18,37 +18,28 @@ The drum echoes in the shadows. The Spider weaves intricate webs of authenticati
 - Building a new feature that handles sensitive data
 - Hardening existing code for defense in depth
 
----
-
-## Grove Tools for This Gathering
-
-Use `gw` and `gf` throughout. Quick reference for security work:
-
-```bash
-# Find security-relevant code patterns
-gf --agent search "sanitize|escape|validate"  # Security patterns
-gf --agent auth                     # Find auth code and middleware
-
-# Verify security changes don't break anything
-gw ci --affected --diagnose         # Run CI on affected packages
-```
+**IMPORTANT:** This gathering is a **conductor**. It never writes code or fixes vulnerabilities directly. It dispatches subagents — one per animal — each with isolated context and an intentional model. The conductor only manages handoffs and gate checks.
 
 ---
 
 ## The Gathering
 
 ```
-SUMMON --> ORGANIZE --> EXECUTE --> VALIDATE --> COMPLETE
-   |          |           |           |            |
-Receive   Dispatch     Animals     Verify      Security
-Request   Animals      Work        Check       Hardened
+SUMMON → DISPATCH → GATE → DISPATCH → GATE → DISPATCH → GATE → FORTIFY
+  ↓         ↓        ↓        ↓        ↓        ↓        ↓        ↓
+Spec     Spider    Check   Raccoon   Check    Turtle   Check   Final
+(self)   (opus)     ✓     (sonnet)    ✓      (opus)    ✓     Verify
 ```
 
-### Animals Mobilized
+### Animals Dispatched
 
-1. **🕷️ Spider** — Weave authentication webs with patient precision
-2. **🦝 Raccoon** — Rummage for security risks and cleanup
-3. **🐢 Turtle** — Harden with layered, defense-in-depth protection
+| Order | Animal     | Model  | Role                            | Fresh Eyes?                                       |
+| ----- | ---------- | ------ | ------------------------------- | ------------------------------------------------- |
+| 1     | 🕷️ Spider  | opus   | Weave authentication            | Yes — sees only the security spec                 |
+| 2     | 🦝 Raccoon | sonnet | Audit secrets, vulns, dead code | Yes — sees only file list from Spider             |
+| 3     | 🐢 Turtle  | opus   | Adversarial hardening           | Yes — sees file list only, not Spider's reasoning |
+
+**Reference:** Load `references/conductor-dispatch.md` for exact subagent prompts and handoff formats
 
 ---
 
@@ -56,7 +47,7 @@ Request   Animals      Work        Check       Hardened
 
 _The drum sounds. The shadows shift..._
 
-Receive and parse the request:
+The conductor receives the security request and prepares the dispatch plan:
 
 **Clarify the Security Work:**
 
@@ -67,41 +58,8 @@ Receive and parse the request:
 - Post-incident cleanup?
 - Pre-production hardening?
 
-**Error Codes as Security Posture:**
-All errors MUST use Signpost codes — this is a security requirement, not just a convention:
-
-- All server errors use codes from the appropriate catalog (`API_ERRORS`, `AUTH_ERRORS`, etc.)
-- `userMessage` is always generic and warm — no technical details leak to clients
-- `adminMessage` is detailed — stays in server logs only
-- Auth errors NEVER reveal user existence ("Invalid credentials" — not "user not found")
-- `logGroveError()` for all server errors — never `console.error` alone
-
-**Scope Check:**
-
-> "I'll mobilize a security gathering for: **[security work]**
->
-> This will involve:
->
-> - 🕷️ Spider weaving authentication
->   - OAuth/PKCE flow
->   - Session management
->   - Route protection
->   - Token handling
-> - 🦝 Raccoon auditing security
->   - Secret scanning
->   - Vulnerability check
->   - Dependency audit
->   - Dead code removal
-> - 🐢 Turtle hardening defenses
->   - Input/output validation
->   - Security headers & CSP
->   - Defense-in-depth enforcement
->   - Exotic attack vector testing
->   - Hardening report
->
-> Proceed with the gathering?"
-
 **Selective Mobilization:**
+
 Not every gathering needs all three animals:
 
 | Situation                            | Animals Needed                                    |
@@ -112,282 +70,269 @@ Not every gathering needs all three animals:
 | Secrets leak / incident response     | Raccoon → Spider (rotate creds) → Turtle (verify) |
 | Pre-production deploy                | Raccoon → Turtle                                  |
 
+**Error Codes as Security Posture:**
+
+All errors MUST use Signpost codes — this is a security requirement, not just a convention:
+
+- All server errors use codes from the appropriate catalog (`API_ERRORS`, `AUTH_ERRORS`, etc.)
+- `userMessage` is always generic and warm — no technical details leak to clients
+- `adminMessage` is detailed — stays in server logs only
+- Auth errors NEVER reveal user existence ("Invalid credentials" — not "user not found")
+- `logGroveError()` for all server errors — never `console.error` alone
+
+**Confirm with the human, then proceed.**
+
+**Output:** Security specification, animal roster, dispatch plan confirmed.
+
 ---
 
-### Phase 2: ORGANIZE
+### Phase 2: WEAVE (Spider)
 
-_The animals take their positions in the shadows..._
-
-Dispatch in sequence:
-
-**Full Dispatch Order:**
+_The conductor signals. The Spider descends from the canopy..._
 
 ```
-Spider ──→ Raccoon ──→ Turtle
-   │          │            │
-   │          │            │
-Weave      Audit       Harden
-Auth       Secrets     Defenses
+Agent(spider, model: opus)
+  Input:  security specification only
+  Reads:  spider-weave/SKILL.md + references (MANDATORY)
+  Output: auth implementation + file list
 ```
 
-**Dependencies:**
+Dispatch an **opus subagent** to implement authentication. The Spider receives ONLY the security specification — no pre-analysis, no opinions. It reads its own skill file and executes its full workflow.
 
-- Spider must complete before Raccoon (needs auth to audit)
-- Raccoon should complete before Turtle (clean first, then harden)
-- May iterate: Turtle findings → Spider/Raccoon fixes → Turtle re-verify
+**What the Spider builds:**
 
-**Iteration Cycle (When Vulnerabilities Found):**
+- OAuth/PKCE flow implementation
+- Session management
+- Route protection middleware
+- CSRF protection
+- Token handling
+
+**Handoff to conductor:** Auth file list (every file created/modified), auth summary (what was implemented, key decisions), integration points.
+
+**Gate check:** Run `gw dev ci --affected --fail-fast` — must compile. If build fails, resume the Spider agent with error output.
+
+---
+
+### Phase 3: AUDIT (Raccoon)
+
+_The Raccoon emerges from the undergrowth, nose twitching..._
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                   SECURITY ITERATION                              │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│  🕷️ Spider ──► 🦝 Raccoon ──► 🐢 Turtle                       │
-│  weaves auth    audits          hardens & tests                   │
-│       ▲                              │                            │
-│       │                              ▼                            │
-│       │                     Deep vulnerabilities?                 │
-│       │                        /          \                       │
-│       │                     Yes            No                     │
-│       │                      │              │                     │
-│       │         ┌────────────┘              ▼                     │
-│       │         ▼                     ✅ Hardened                 │
-│       │    Auth issue?                                            │
-│       │    /         \                                            │
-│       │  Yes          No                                          │
-│       │   │           │                                           │
-│       └───┘    Raccoon/Turtle                                   │
-│                fixes directly                                     │
-└──────────────────────────────────────────────────────────────────┘
+Agent(raccoon, model: sonnet)
+  Input:  file list from Spider + security scope summary
+  Reads:  raccoon-audit/SKILL.md (MANDATORY)
+  Output: audit report + applied fixes
+```
+
+Dispatch a **sonnet subagent** to audit the codebase. The Raccoon receives the file list and a brief scope summary — NOT the Spider's reasoning or implementation details. Fresh eyes for the audit.
+
+**What the Raccoon audits:**
+
+- Secrets in code (hardcoded keys, tokens)
+- Dependency vulnerabilities
+- Dead code and unused imports
+- Unsafe patterns (eval, innerHTML, string SQL)
+- Sensitive data in logs
+
+**Handoff to conductor:** Audit report (findings, fixes applied, remaining concerns), updated file list.
+
+**Gate check:** Run `gw dev ci --affected --fail-fast` — must still compile after audit fixes. If broken, resume Raccoon agent.
+
+---
+
+### Phase 4: HARDEN (Turtle)
+
+_The Turtle approaches. It sees only what was built — not why..._
+
+```
+Agent(turtle, model: opus)
+  Input:  combined file list ONLY (not Spider's or Raccoon's reasoning)
+  Reads:  turtle-harden/SKILL.md + references (MANDATORY)
+  Output: hardening report + applied fixes
+```
+
+Dispatch an **opus subagent** for adversarial security hardening. The Turtle receives ONLY the file list — NOT the Spider's auth decisions or Raccoon's audit reasoning. This is intentional: the Turtle should examine the code with adversarial fresh eyes, not sympathize with prior animals' reasoning.
+
+**What the Turtle hardens:**
+
+- Input validation (Zod schemas on all entry points)
+- Output encoding (context-aware, DOMPurify for rich text)
+- Parameterized queries (no string concatenation in SQL)
+- Security headers (CSP with nonces, HSTS, X-Frame)
+- Signpost error codes (verify Spider used them correctly)
+- Rootwork boundary safety (verify no `as` casts at trust boundaries)
+- Rate limiting on sensitive endpoints
+- CSRF, CORS, session security
+- Exotic attack vectors (prototype pollution, timing attacks, SSRF, race conditions)
+
+**Handoff to conductor:** Hardening report (vulnerabilities found, fixes applied, defense layers, remaining risks), updated file list.
+
+**Gate check:** Run `gw dev ci --affected --fail-fast` — must still compile after hardening.
+
+---
+
+### Phase 5: ITERATION (When Turtle Finds Deep Issues)
+
+_The cycle turns. Some vulnerabilities run deeper than one animal can fix..._
+
+```
+┌──────────────────────────────────────────────────┐
+│              SECURITY ITERATION                   │
+├──────────────────────────────────────────────────┤
+│                                                   │
+│  Turtle hardening report                          │
+│       │                                           │
+│       ▼                                           │
+│  Auth vulnerability found?                        │
+│     /          \                                  │
+│   Yes           No                                │
+│    │             │                                │
+│    ▼             ▼                                │
+│  RESUME Spider  Raccoon/Turtle                    │
+│  (same agent)   fixes directly                    │
+│    │                                              │
+│    ▼                                              │
+│  Gate check                                       │
+│    │                                              │
+│    ▼                                              │
+│  RESUME Turtle                                    │
+│  (re-verify only changed files)                   │
+│    │                                              │
+│    ▼                                              │
+│  Clean? ──→ ✅ Proceed to FORTIFY                │
+│    │                                              │
+│    No ──→ Max 3 iterations, then escalate         │
+└──────────────────────────────────────────────────┘
 ```
 
 **Iteration Rules:**
 
-- Turtle finds auth vulnerability → Spider patches → Turtle re-verifies
-- Turtle finds non-auth vulnerability → Fix directly → Turtle re-verifies
-- Raccoon finds secrets → Raccoon cleans → Turtle verifies no residual exposure
-- Maximum 3 iterations per issue (if more needed, architectural review required)
+- Turtle finds auth vulnerability → **resume** Spider agent with specific finding → Spider patches → **resume** Turtle to re-verify
+- Turtle finds non-auth vulnerability → Turtle fixes directly or conductor applies fix
+- Raccoon finds secrets → Raccoon cleans → **resume** Turtle to verify no residual exposure
+- Maximum 3 iterations per issue (if more needed, escalate to human)
 - Each iteration focuses only on newly found/fixed items
-- Document all iterations in final report
+- Always **resume** agents (preserves context), don't spawn new ones
 
 ---
 
-### Phase 3: EXECUTE
-
-_The web is woven. The audit begins. The shell hardens..._
-
-Execute each animal's phase by loading and running their dedicated skill:
-
----
-
-**🕷️ SPIDER — WEAVE**
-
-Load skill: `spider-weave`
-
-Execute the full Spider workflow for [the auth system being implemented].
-Handoff: working authentication system (OAuth flow, session management, protected routes, CSRF protection) → Raccoon for audit
-
----
-
-**🦝 RACCOON — AUDIT**
-
-Load skill: `raccoon-audit`
-
-Execute the full Raccoon workflow on the entire codebase, with particular attention to the Spider's auth implementation.
-If secrets found or auth issues discovered → Spider patches → Raccoon re-verifies.
-Handoff: clean audit report (no secrets, vulnerabilities patched, dead code removed, pre-commit hooks installed) → Turtle for hardening
-
----
-
-**🐢 TURTLE — HARDEN**
-
-Load skill: `turtle-harden`
-
-Execute the full Turtle workflow on the codebase, including auth routes, API endpoints, and data flows.
-If deep vulnerabilities found in auth → Spider patches → Turtle re-verifies. Maximum 3 iterations per issue.
-Handoff: hardening report (defense-in-depth verified, exotic vectors tested, all layers applied) → VALIDATE phase
-
----
-
-### Phase 4: VALIDATE
+### Phase 6: FORTIFY
 
 _The web holds. The audit confirms. The shell endures..._
 
+The conductor runs final verification:
+
+```bash
+pnpm install
+gw dev ci --affected --fail-fast --diagnose
+```
+
 **Validation Checklist:**
-
-- [ ] Spider: Auth flow works end-to-end
-- [ ] Spider: Routes properly protected
-- [ ] Spider: Sessions expire correctly
-- [ ] Spider: CSRF protection active
-- [ ] Raccoon: No secrets in codebase
-- [ ] Raccoon: Dependencies up to date
-- [ ] Raccoon: No sensitive data in logs
-- [ ] Raccoon: Pre-commit hooks installed
-- [ ] Turtle: Input validation on all entry points
-- [ ] Turtle: Output encoding on all exit points
-- [ ] Turtle: Security headers complete
-- [ ] Turtle: CSP enforced (nonce-based)
-- [ ] Turtle: CORS restricted to exact origins
-- [ ] Turtle: Defense-in-depth verified (2+ layers per critical function)
-- [ ] Turtle: Exotic attack vectors tested and clear
-- [ ] Turtle: Multi-tenant isolation verified (if applicable)
-
-**Rootwork Boundary Validation:**
-
-- [ ] Form data parsed with `parseFormData()`, not raw `formData.get()`
-- [ ] JSON reads validated with `safeJsonParse()`, not unsafe `as` casts
-- [ ] Caught exceptions use `isRedirect()`/`isHttpError()` type guards
-- [ ] No `as any` or `as SomeType` casts at trust boundaries
-- [ ] Schemas defined at module scope, not inside handlers
-
-**Security Test Cases:**
 
 ```
 Authentication:
-[ ] Login redirects to provider
-[ ] Callback exchanges code for tokens
-[ ] Sessions created correctly
-[ ] Logout clears sessions server-side
-[ ] Expired tokens rejected
-[ ] Session fixation prevented
+  [ ] Login redirects to provider
+  [ ] Callback exchanges code for tokens
+  [ ] Sessions created correctly
+  [ ] Logout clears sessions server-side
+  [ ] Expired tokens rejected
 
 Authorization:
-[ ] Protected routes require auth
-[ ] Admin routes check roles
-[ ] API endpoints verify tokens
-[ ] Users can't access others' data (IDOR tested)
-[ ] Horizontal escalation prevented
-[ ] Vertical escalation prevented
+  [ ] Protected routes require auth
+  [ ] API endpoints verify tokens
+  [ ] Users can't access others' data (IDOR)
 
 Hardening:
-[ ] SQL injection prevented (parameterized queries)
-[ ] XSS prevented (output encoding + CSP)
-[ ] CSRF prevented (tokens + SameSite cookies)
-[ ] File uploads sanitized (type + size + rename)
-[ ] Rate limiting active on all sensitive endpoints
-[ ] Prototype pollution vectors blocked
-[ ] Timing attacks mitigated (constant-time comparison)
-[ ] Race conditions prevented (atomic operations)
-[ ] SSRF prevented (URL allowlist, no redirect following)
+  [ ] SQL injection prevented (parameterized queries)
+  [ ] XSS prevented (output encoding + CSP)
+  [ ] CSRF prevented (tokens + SameSite cookies)
+  [ ] Rate limiting active on sensitive endpoints
+  [ ] Signpost error codes on every error path
+  [ ] Rootwork boundary safety at all trust boundaries
 ```
-
----
-
-### Phase 5: COMPLETE
-
-_The gathering ends. The forest is fortified..._
 
 **Completion Report:**
 
-```markdown
-## GATHERING SECURITY COMPLETE
+```
+🌲 GATHERING SECURITY COMPLETE
 
-### Security Work: [Description]
+Security Work: [Description]
 
-### Animals Mobilized
+DISPATCH LOG
+  🕷️ Spider (opus)    — [auth implemented, X files created/modified]
+  🦝 Raccoon (sonnet)  — [audit complete, Y findings fixed]
+  🐢 Turtle (opus)     — [Z hardening fixes, N defense layers applied]
 
-🕷️ Spider → 🦝 Raccoon → 🐢 Turtle
+GATE LOG
+  After Spider:   ✅ compiles clean, auth functional
+  After Raccoon:  ✅ compiles clean, audit findings resolved
+  After Turtle:   ✅ compiles clean, hardening applied
+  Iterations:     [N iterations, all resolved / none needed]
+  Final CI:       ✅ gw dev ci --affected passes
 
-### Authentication Implemented
+HARDENING SUMMARY
+  | Defense Layer    | Status | Details                    |
+  | Input Validation | ✅     | Zod schemas on all entry   |
+  | Output Encoding  | ✅     | Context-aware + DOMPurify  |
+  | SQL Injection    | ✅     | All queries parameterized  |
+  | Security Headers | ✅     | CSP, HSTS, X-Frame         |
+  | CORS             | ✅     | Exact origin allowlist     |
+  | Session Security | ✅     | HttpOnly, Secure, SameSite |
+  | Rate Limiting    | ✅     | Per-endpoint limits        |
 
-- **Provider:** [OAuth 2.0 / GitHub / Google / etc.]
-- **Flow:** [PKCE / Authorization Code]
-- **Session Type:** [Token / Session Cookie]
-- **Routes Protected:** [count]
-
-### Security Audit Results
-
-- Secrets found: [count] (all rotated/removed)
-- Dependencies patched: [count]
-- Dead code removed: [lines]
-- Pre-commit hooks: Installed
-
-### Hardening Applied
-
-| Defense Layer    | Status          | Details                                |
-| ---------------- | --------------- | -------------------------------------- |
-| Input Validation | [PASS/FAIL]     | Zod schemas on all endpoints           |
-| Output Encoding  | [PASS/FAIL]     | Context-aware, DOMPurify for rich text |
-| SQL Injection    | [PASS/FAIL]     | All queries parameterized              |
-| Security Headers | [PASS/FAIL]     | CSP, HSTS, X-Frame, etc.               |
-| CORS             | [PASS/FAIL]     | Exact origin allowlist                 |
-| Session Security | [PASS/FAIL]     | HttpOnly, Secure, SameSite             |
-| CSRF Protection  | [PASS/FAIL]     | Tokens + SameSite                      |
-| Rate Limiting    | [PASS/FAIL]     | Per-endpoint limits configured         |
-| Multi-Tenant     | [PASS/FAIL/N/A] | Tenant scoping verified                |
-| File Uploads     | [PASS/FAIL/N/A] | Type/size/rename enforced              |
-
-### Exotic Attack Vectors Tested
-
-| Vector              | Status        |
-| ------------------- | ------------- |
-| Prototype Pollution | [CLEAR/FOUND] |
-| Timing Attacks      | [CLEAR/FOUND] |
-| Race Conditions     | [CLEAR/FOUND] |
-| ReDoS               | [CLEAR/FOUND] |
-| SSRF                | [CLEAR/FOUND] |
-| Unicode Attacks     | [CLEAR/FOUND] |
-| Cache Poisoning     | [CLEAR/FOUND] |
-| SVG XSS             | [CLEAR/FOUND] |
-
-### Defense-in-Depth Compliance
-
-- **Layers verified:** [X/5] (Network, Application, Data, Infrastructure, Process)
-- **Critical functions with 2+ layers:** [X/Y]
-
-### Vulnerabilities Found & Fixed
-
-| Severity | Count | Status           |
-| -------- | ----- | ---------------- |
-| CRITICAL | [n]   | All fixed        |
-| HIGH     | [n]   | All fixed        |
-| MEDIUM   | [n]   | [fixed/accepted] |
-| LOW      | [n]   | [fixed/deferred] |
-
-### Files Created/Modified
-
-- Auth routes: [files]
-- Middleware: [files]
-- Configuration: [files]
-- Security tests: [files]
-
-_Woven tight, audited clean, hardened deep — the forest endures._ 🌲
+Woven tight, audited clean, hardened deep — the forest endures.
 ```
 
 ---
 
-## Example Gathering
+## Conductor Rules
 
-**User:** "/gathering-security Add GitHub OAuth, audit everything, and harden for production"
+### Never Do Animal Work
 
-**Gathering execution:**
+The conductor dispatches. It does not implement auth, audit secrets, or harden code. If you catch yourself writing security code, stop — dispatch a subagent.
 
-1. 🌲 **SUMMON** — "Mobilizing full security gathering: GitHub OAuth + audit + hardening. All three animals needed."
+### Fresh Eyes Are a Feature
 
-2. 🌲 **ORGANIZE** — "Spider implements auth → Raccoon audits for secrets/vulns → Turtle hardens everything"
+Turtle intentionally receives LESS context than the full history. It doesn't see Spider's reasoning or Raccoon's audit logic. Adversarial fresh eyes produce better security review.
 
-3. 🌲 **EXECUTE** —
-   - 🕷️ Spider: "OAuth client registered, PKCE flow implemented, sessions working, routes protected"
-   - 🦝 Raccoon: "No secrets found, 2 dependency vulns patched, dead debug endpoint removed"
-   - 🐢 Turtle: "CSP configured with nonces, CORS locked to exact origins, all inputs validated with Zod, constant-time token comparison added, prototype pollution vector in config merge fixed, defense-in-depth verified at 3 layers per critical function"
+### Gate Every Transition
 
-4. 🌲 **VALIDATE** — "Auth works, audit clean, hardening verified, all exotic vectors tested clear"
+Run CI between every animal. Don't let bad state cascade.
 
-5. 🌲 **COMPLETE** — "GitHub OAuth live, secrets clean, shell hardened. The forest endures."
+### Resume, Don't Restart
+
+If a gate check fails or iteration is needed, **resume** the failing agent with the error context. Don't spawn a new one — the resumed agent has its prior work in context.
+
+### Selective Mobilization
+
+Not every security gathering needs all three animals. Auth-only work skips Turtle. Hardening-only work skips Spider. The conductor decides based on the request.
+
+---
+
+## Anti-Patterns
+
+**The conductor does NOT:**
+
+- Write security code itself (dispatch subagents)
+- Pass full conversation history to every agent (structured handoffs only)
+- Skip gate checks between animals
+- Let agents skip reading their skill file (MANDATORY in every prompt)
+- Let Turtle see Spider's reasoning (adversarial isolation is the point)
+- Continue after a gate failure without fixing it
+- Iterate more than 3 times without escalating to human
 
 ---
 
 ## Quick Decision Guide
 
-| Situation                        | Animals to Mobilize                 |
-| -------------------------------- | ----------------------------------- |
-| New auth + full security         | Spider → Raccoon → Turtle           |
-| Auth exists, need deep hardening | Raccoon → Turtle                    |
-| New feature, secure by design    | Turtle (optionally + Raccoon)       |
-| Incident response                | Raccoon → Spider → Turtle           |
-| Pre-production deploy            | Raccoon → Turtle                    |
-| Auth-only work                   | Spider → Raccoon (no Turtle needed) |
+| Situation                        | Animals to Dispatch           | Models             |
+| -------------------------------- | ----------------------------- | ------------------ |
+| New auth + full security         | Spider → Raccoon → Turtle     | opus, sonnet, opus |
+| Auth exists, need deep hardening | Raccoon → Turtle              | sonnet, opus       |
+| New feature, secure by design    | Turtle (optionally + Raccoon) | opus (+ sonnet)    |
+| Incident response                | Raccoon → Spider → Turtle     | sonnet, opus, opus |
+| Pre-production deploy            | Raccoon → Turtle              | sonnet, opus       |
+| Auth-only work                   | Spider → Raccoon              | opus, sonnet       |
 
 ---
 

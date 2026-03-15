@@ -5,7 +5,7 @@ description: The drum sounds. Chameleon and Deer gather for complete UI work. Us
 
 # Gathering UI 🌲🦎🦌
 
-The drum echoes through the glade. The Chameleon shifts its colors, painting the forest with glass and light. The Deer senses what others cannot see, ensuring every path is clear. Together they create spaces that welcome all wanderers—beautiful to behold, accessible to all.
+The drum echoes through the glade. The conductor stands at the clearing's center, orchestrating two very different kinds of attention. The Chameleon arrives with fresh eyes — no preconceptions about what the page should look like, just the spec and the forest's palette. The Deer arrives later, also with fresh eyes — it hasn't watched the CSS being written, so it tests accessibility without unconscious trust. Beautiful and accessible, built by isolated minds.
 
 ## When to Summon
 
@@ -15,38 +15,27 @@ The drum echoes through the glade. The Chameleon shifts its colors, painting the
 - Creating Grove-themed experiences
 - When beauty and inclusion must coexist
 
----
-
-## Grove Tools for This Gathering
-
-Use `gw` and `gf` throughout. Quick reference for UI work:
-
-```bash
-# Find existing UI patterns and components
-gf --agent search "GlassCard|GlassButton"  # Find glass component usage
-gf --agent glass                    # Find glassmorphism patterns
-gf --agent store                    # Find store usage (season, theme)
-gf --agent routes                   # Understand route structure
-
-# Test UI changes
-gw ci --affected                    # Run CI on affected packages
-```
+**IMPORTANT:** This gathering is a **conductor**. It never writes components or audits accessibility directly. It dispatches subagents — one per animal — each with isolated context and an intentional model. The conductor only manages handoffs and gate checks.
 
 ---
 
 ## The Gathering
 
 ```
-SUMMON → ORGANIZE → EXECUTE → VALIDATE → COMPLETE
-   ↓         ↲          ↲          ↲          ↓
-Receive  Dispatch   Animals    Verify   UI
-Request  Animals    Work       Design   Complete
+SUMMON → DISPATCH → GATE → DISPATCH → GATE → VERIFY
+  ↓         ↓        ↓        ↓        ↓        ↓
+Spec    Chameleon  Check     Deer    Check    Visual
+(self)  (sonnet)    ✓      (sonnet)   ✓     Proof
 ```
 
-### Animals Mobilized
+### Animals Dispatched
 
-1. **🦎 Chameleon** — Design the UI with glassmorphism and seasonal themes
-2. **🦌 Deer** — Audit accessibility and ensure inclusive design
+| Order | Animal       | Model  | Role                              | Fresh Eyes?                                     |
+| ----- | ------------ | ------ | --------------------------------- | ----------------------------------------------- |
+| 1     | 🦎 Chameleon | sonnet | Design UI with Grove aesthetics   | Yes — sees only the UI spec                     |
+| 2     | 🦌 Deer      | sonnet | Audit accessibility independently | Yes — sees file list only, not design reasoning |
+
+**Reference:** Load `references/conductor-dispatch.md` for exact subagent prompts and handoff formats
 
 ---
 
@@ -54,7 +43,7 @@ Request  Animals    Work       Design   Complete
 
 _The drum sounds. The glade awaits..._
 
-Receive and parse the request:
+The conductor receives the UI request and prepares the dispatch plan:
 
 **Clarify the UI Work:**
 
@@ -63,103 +52,103 @@ Receive and parse the request:
 - Which season should it reflect?
 - What's the content structure?
 
-**Scope Check:**
+**Confirm with the human, then proceed.**
 
-> "I'll mobilize a UI gathering for: **[UI description]**
->
-> This will involve:
->
-> - 🦎 Chameleon designing with Grove aesthetics
->   - Glassmorphism containers
->   - Seasonal colors and themes
->   - Randomized forests if appropriate
->   - Lucide icons (no emojis)
-> - 🦌 Deer auditing for accessibility
->   - Keyboard navigation
->   - Screen reader compatibility
->   - Color contrast
->   - Reduced motion support
->
-> Proceed with the gathering?"
+**Output:** UI specification, dispatch plan confirmed.
 
 ---
 
-### Phase 2: ORGANIZE
+### Phase 2: ADAPT (Chameleon)
 
-_The animals take their positions..._
-
-Dispatch in sequence:
-
-**Dispatch Order:**
+_The conductor signals. The Chameleon shifts its colors..._
 
 ```
-Chameleon ──→ Deer
-     │            │
-     │            │
-Design         Audit
-UI             Accessibility
+Agent(chameleon, model: sonnet)
+  Input:  UI specification only
+  Reads:  chameleon-adapt/SKILL.md + references (MANDATORY)
+  Output: built components + file list
 ```
 
-**Dependencies:**
+Dispatch a **sonnet subagent** to design and build the UI. The Chameleon receives ONLY the UI specification. It reads its own skill file and executes its full workflow.
 
-- Chameleon must complete before Deer (needs UI to audit)
-- May iterate: Deer findings → Chameleon fixes → Deer re-audit
+**What the Chameleon builds:**
 
----
+- Svelte components with glassmorphism
+- Seasonal color palette integration
+- Nature decorations (trees, creatures, weather)
+- Mobile-responsive layouts
+- Reduced motion support
+- GroveTerm components for user-facing terminology
 
-### Phase 3: EXECUTE
+**Handoff to conductor:** File list (every file created/modified), component summary (what was built, glass variants used, seasonal elements).
 
-_The glade transforms..._
-
-Execute each phase by loading and running each animal's dedicated skill:
-
----
-
-**🦎 CHAMELEON — ADAPT**
-
-Load skill: `chameleon-adapt`
-
-Execute the full Chameleon workflow for [the page/component being designed], applying Grove's glassmorphism, seasonal palette, and nature decorations.
-Handoff: complete Svelte components (glass variants, seasonal decorations, GroveTerm usage, mobile-responsive, reduced motion support) → Deer for accessibility audit
+**Gate check:** Run `gw dev ci --affected --fail-fast` — must compile. If build fails, resume Chameleon.
 
 ---
 
-**🦌 DEER — SENSE**
+### Phase 3: SENSE (Deer)
 
-Load skill: `deer-sense`
+_The Deer steps into the glade. It hasn't watched the colors change..._
 
-Execute the full Deer workflow on everything the Chameleon produced.
-If issues are found: return to Chameleon for fixes, then Deer re-audits. Repeat until clean.
-Handoff: accessibility-verified components → VALIDATE phase
+```
+Agent(deer, model: sonnet)
+  Input:  UI file list ONLY (not Chameleon's design reasoning)
+  Reads:  deer-sense/SKILL.md + references (MANDATORY)
+  Output: accessibility report + applied fixes
+```
+
+Dispatch a **sonnet subagent** to audit accessibility. The Deer receives ONLY the file list — NOT the Chameleon's design decisions or reasoning. This isolation is intentional: the Deer should test what's rendered, not trust what was intended.
+
+**What the Deer audits:**
+
+- Keyboard navigation (tab order, focus management, escape handling)
+- Screen reader compatibility (ARIA labels, semantic HTML, live regions)
+- Color contrast (4.5:1 minimum, WCAG AA)
+- Touch targets (44px minimum)
+- Reduced motion (prefers-reduced-motion respected)
+- Focus indicators visible
+
+**Handoff to conductor:** Accessibility report (violations found, fixes applied, WCAG level achieved), updated file list.
+
+**Gate check:** Run `gw dev ci --affected --fail-fast` — must still compile after a11y fixes.
 
 ---
 
-### Phase 4: VALIDATE
+### Phase 4: ITERATION (When Deer Finds Issues)
 
-_The design stands. Both animals verify — with their own eyes..._
+If the Deer's report includes issues it couldn't fix directly (e.g., structural changes needed for keyboard navigation, color scheme changes for contrast):
 
-**Visual Verification (mandatory):**
+1. **Resume Chameleon** with Deer's specific findings
+2. Chameleon applies fixes
+3. Gate check: CI passes
+4. **Resume Deer** to re-verify only the changed files
+5. Max 2 iterations — then escalate to human
 
-Before checking boxes, actually _look_ at what was built. Use Glimpse to capture and review the rendered result:
+---
+
+### Phase 5: VERIFY
+
+_The glade is complete. But the conductor looks with its own eyes..._
+
+**Visual Verification (MANDATORY for UI gatherings):**
 
 ```bash
-# Prerequisite: seed the database if not already done
+# Seed database if not already done
 uv run --project tools/glimpse glimpse seed --yes
 
-# Capture the page across all seasons and themes
-# Local routing uses ?subdomain= for tenant isolation; --auto starts the dev server
+# Capture across all seasons and themes
 uv run --project tools/glimpse glimpse matrix \
   "http://localhost:5173/[page]?subdomain=midnight-bloom" \
   --seasons spring,summer,autumn,winter --themes light,dark --logs --auto
 
-# Browse interactively — verify flows, click targets, scrolling
+# Interactive verification — click around, verify flows
 uv run --project tools/glimpse glimpse browse \
   "http://localhost:5173/[page]?subdomain=midnight-bloom" \
-  --do "click navigation, scroll to content, click interactive elements" \
+  --do "click navigation, scroll content, interact with elements" \
   --screenshot-each --logs --auto
 ```
 
-Review every screenshot. If something looks wrong — fix it and capture again. The gathering does not declare UI complete without visual proof.
+Review every screenshot. If something looks wrong — fix it and capture again.
 
 **Validation Checklist (after visual verification):**
 
@@ -167,7 +156,6 @@ Review every screenshot. If something looks wrong — fix it and capture again. 
 - [ ] Glimpse: Light and dark mode both visually verified
 - [ ] Glimpse: No console errors in `--logs` output
 - [ ] Chameleon: UI matches Grove aesthetic (verified by screenshot)
-- [ ] Chameleon: Seasonal theme appropriate (verified by matrix)
 - [ ] Chameleon: Glassmorphism readable (verified by screenshot)
 - [ ] Chameleon: Mobile responsive
 - [ ] Deer: Keyboard navigation works
@@ -175,103 +163,73 @@ Review every screenshot. If something looks wrong — fix it and capture again. 
 - [ ] Deer: Color contrast passes (4.5:1)
 - [ ] Deer: Reduced motion respected
 - [ ] Deer: Touch targets adequate (44px)
-- [ ] Both: Grove terminology uses GroveTerm components (not hardcoded)
-- [ ] Both: `[[term]]` syntax used in data-driven content strings
-
-**Quality Gates:**
-
-```
-Chameleon completes → Glimpse capture → Review screenshots
-                                              ↓
-                                    Looks correct?
-                                       /        \
-                                    No            Yes
-                                     |             |
-                              Chameleon fixes      ↓
-                                     |          Deer audits
-                              Glimpse re-capture    ↓
-                                     |         Issues found?
-                                  Repeat        /        \
-                                             Yes          No
-                                              |            |
-                                       Chameleon fixes     ↓
-                                              |         Proceed
-                                       Deer re-audit
-                                              |
-                                          Complete
-```
-
----
-
-### Phase 5: COMPLETE
-
-_The gathering ends. A welcoming space awaits..._
+- [ ] Both: Grove terminology uses GroveTerm components
 
 **Completion Report:**
 
-```markdown
-## 🌲 GATHERING UI COMPLETE
+```
+🌲 GATHERING UI COMPLETE
 
-### UI: [Name]
+UI: [Name]
 
-### Animals Mobilized
+DISPATCH LOG
+  🦎 Chameleon (sonnet) — [X components built, Y files created/modified]
+  🦌 Deer (sonnet)       — [Z a11y issues found, W fixed]
 
-🦎 Chameleon → 🦌 Deer
+GATE LOG
+  After Chameleon: ✅ compiles clean
+  After Deer:      ✅ compiles clean, a11y verified
+  Iterations:      [N iterations / none needed]
+  Visual:          ✅ Glimpse matrix captured and reviewed
+  Final CI:        ✅ gw dev ci --affected passes
 
-### Design Decisions
+ACCESSIBILITY
+  Keyboard nav: ✅
+  Screen reader: ✅
+  Contrast: ✅ [ratios]
+  Touch targets: ✅ 44px+
+  Reduced motion: ✅
+  WCAG level: [AA/AAA]
 
-- **Season:** [spring/summer/autumn/winter/midnight]
-- **Decoration Level:** [minimal/moderate/full]
-- **Glass Variants Used:** [surface/tint/card/accent]
-
-### Visual Elements
-
-- Randomized forests: [count] trees
-- Weather effects: [snow/petals/leaves/none]
-- Seasonal birds: [species]
-- Icons: Lucide ([list])
-
-### Accessibility Features
-
-- Keyboard navigation: ✅
-- Screen reader tested: [VoiceOver/NVDA]
-- Color contrast: ✅ [ratios]
-- Reduced motion: ✅
-- Touch targets: ✅ [44px minimum]
-
-### Files Created
-
-- [Component files]
-- [Style files]
-- [Accessibility documentation]
-
-### Time Elapsed
-
-[Duration]
-
-_The glade welcomes all wanderers._ 🌲
+The glade welcomes all wanderers.
 ```
 
 ---
 
-## Example Gathering
+## Conductor Rules
 
-**User:** "/gathering-ui Create the user profile page"
+### Never Do Animal Work
 
-**Gathering execution:**
+The conductor dispatches. It does not write CSS, build components, or audit accessibility.
 
-1. 🌲 **SUMMON** — "Mobilizing for: User profile page. Personal settings, avatar, bio. Emotional: reflection."
+### Fresh Eyes Are a Feature
 
-2. 🌲 **ORGANIZE** — "Chameleon designs → Deer audits"
+The Deer hasn't watched the Chameleon work. It sees only the rendered result, not the design intent. This isolation catches contrast issues, missing labels, and navigation gaps that a sympathetic observer would miss.
 
-3. 🌲 **EXECUTE** —
-   - 🦎 Chameleon: "Autumn theme, glass cards for settings, randomized birch trees, cardinals perched, Lucide icons"
-   - 🦌 Deer: "Tab order logical, form labels associated, contrast passes, screen reader announces changes"
+### Gate Every Transition
 
-4. 🌲 **VALIDATE** — "Visual design matches Grove, all accessibility checks pass"
+CI between Chameleon and Deer. CI after Deer's fixes. Glimpse after everything.
 
-5. 🌲 **COMPLETE** — "Profile page complete, beautiful and accessible"
+### Visual Proof Required
+
+The conductor MUST capture and review Glimpse screenshots before declaring complete. CI passing is not the same as looking correct.
+
+### Resume, Don't Restart
+
+If iteration is needed, resume existing agents. They have context from their prior work.
 
 ---
 
-_Beautiful and accessible—the forest welcomes all._ 🌲
+## Anti-Patterns
+
+**The conductor does NOT:**
+
+- Write components itself
+- Let Deer see Chameleon's design reasoning (isolation is the point)
+- Skip Glimpse verification ("CI passed so it looks fine")
+- Skip the Deer phase ("it's just a small component")
+- Declare complete without visual proof
+
+---
+
+_Beautiful and accessible — the forest welcomes all._ 🌲

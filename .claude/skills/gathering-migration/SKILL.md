@@ -5,7 +5,7 @@ description: The drum sounds. Bear and Bloodhound gather for safe migration. Use
 
 # Gathering Migration 🌲🐻🐕
 
-The drum echoes through the valleys. The Bloodhound sniffs the terrain first, understanding every path, connection, and dependency. Then the Bear wakes from long slumber, gathering strength for the journey ahead. Together they move mountains safely — nothing lost, nothing broken, everything finding its new home. Whether it's database tables, component APIs, icon libraries, or document formats, no single animal can both map the territory AND carry the load.
+The drum echoes through the valleys. The conductor stands at the pass, orchestrating two very different strengths. The Bloodhound arrives first with fresh eyes — no assumptions about what's connected, just a nose for dependencies. Then the Bear wakes, receiving a map it didn't draw — no shortcuts, no "I already know where things are." Together they move mountains safely, each with isolated context, each trusting only what it verified itself.
 
 ## When to Summon
 
@@ -15,58 +15,36 @@ The drum echoes through the valleys. The Bloodhound sniffs the terrain first, un
 - Component or API migrations spanning many files
 - Icon, asset, or content migrations with downstream dependencies
 - Any migration where you need to understand the territory before moving
-- User says "migrate" and the scope touches multiple files or systems
-- User calls `/gathering-migration`
 
----
-
-## Grove Tools for This Gathering
-
-Use `gw` and `gf` throughout. Quick reference:
-
-```bash
-# Find references, dependencies, and affected code
-gf --agent search "pattern"       # Find references to affected items
-gf grep "import.*OldThing"        # Track imports and usage
-
-# Commit completed migrations
-gw git ship --write -a -m "feat: migrate description"
-```
+**IMPORTANT:** This gathering is a **conductor**. It never scouts or migrates directly. It dispatches subagents — one per animal — each with isolated context and an intentional model. The conductor only manages handoffs and gate checks.
 
 ---
 
 ## The Gathering
 
 ```
-SUMMON → ORGANIZE → EXECUTE → VALIDATE → COMPLETE
-   ↓         ↲          ↲          ↲          ↓
-Receive  Dispatch   Animals    Verify   Migration
-Request  Animals    Work       Results  Complete
+SUMMON → DISPATCH → GATE → DISPATCH → GATE → VERIFY
+  ↓         ↓        ↓        ↓        ↓        ↓
+Spec    Bloodhound  Check    Bear    Check    Final
+(self)   (haiku)     ✓     (opus)    ✓     Verify
 ```
 
-### Animals Mobilized
+### Animals Dispatched
 
-1. **🐕 Bloodhound** (`bloodhound-scout`) — Scout the codebase, map dependencies and relationships
-2. **🐻 Bear** (`bear-migrate`) — Migrate with patient strength using the appropriate domain guide
+| Order | Animal        | Model | Role                              | Fresh Eyes?                                         |
+| ----- | ------------- | ----- | --------------------------------- | --------------------------------------------------- |
+| 1     | 🐕 Bloodhound | haiku | Scout dependencies, map territory | Yes — sees only the migration spec                  |
+| 2     | 🐻 Bear       | opus  | Execute migration safely          | Yes — sees only territory map, not scouting process |
 
-### Dependencies
-
-```
-Bloodhound ──→ Bear
-     │            │
-Scout          Migrate
-Territory      Safely
-```
-
-Bloodhound must complete before Bear. The territory map becomes the Bear's migration plan.
+**Reference:** Load `references/conductor-dispatch.md` for exact subagent prompts and handoff formats
 
 ---
 
 ### Phase 1: SUMMON
 
-*The drum sounds. The animals gather at the clearing...*
+_The drum sounds. The valley listens..._
 
-Receive and parse the request:
+The conductor receives the migration request and prepares the dispatch plan:
 
 **Clarify the Migration:**
 
@@ -75,80 +53,85 @@ Receive and parse the request:
 - What downstream dependencies exist?
 - What does "undo" look like if something goes wrong?
 
-**Scope Check:**
+**Determine the Bear's domain guide:**
 
-> "I'll mobilize a migration gathering for: **[migration description]**
->
-> This will involve:
->
-> - 🐕 Bloodhound scouting the codebase
->   - Map dependencies and relationships
->   - Find all references to affected items
->   - Identify integration points and edge cases
->   - Document current patterns
-> - 🐻 Bear migrating with the appropriate domain guide
->   - Preserve original state before touching anything
->   - Transform in manageable chunks
->   - Validate after each phase
->   - Verify complete migration
->
-> Proceed with the gathering?"
+| Migration Type                         | Domain Guide           |
+| -------------------------------------- | ---------------------- |
+| Database schema, tables, D1/SQLite     | `domain-database.md`   |
+| Component props, API upgrades, imports | `domain-components.md` |
+| Icons, assets, documents, file formats | `domain-content.md`    |
+| Config, conventions, dependencies      | `domain-general.md`    |
+
+**Confirm with the human, then proceed.**
+
+**Output:** Migration specification, domain guide identified, dispatch plan confirmed.
 
 ---
 
-### Phase 2: ORGANIZE
+### Phase 2: SCOUT (Bloodhound)
 
-*The animals prepare for the journey...*
+_The conductor signals. The Bloodhound puts its nose to the ground..._
 
-Dispatch in sequence:
+```
+Agent(bloodhound, model: haiku)
+  Input:  migration specification only
+  Reads:  bloodhound-scout/SKILL.md (MANDATORY)
+  Output: territory map
+```
 
-- Bloodhound begins scouting: find every reference, dependency, and edge case
-- Bear waits for the territory map before waking
-- Determine which Bear domain guide applies (database, components, content, or general)
+Dispatch a **haiku subagent** to scout the codebase. The Bloodhound receives ONLY the migration specification — no pre-analysis, no assumptions. It reads its own skill file and executes its full SCENT → TRACK → HUNT → REPORT → RETURN workflow.
 
-**Handoff protocol:** Bloodhound produces a territory map → Bear uses it as its WAKE/GATHER foundation
+**What the Bloodhound maps:**
 
-**Output:** Scout dispatched, domain guide identified
+- Every reference to the items being migrated
+- Dependency relationships (what depends on what)
+- Downstream consumers
+- Edge cases and unusual usage patterns
+- Current state counts (how many items, how many references)
 
----
+**Handoff to conductor:** Territory map (affected files, dependency graph, edge cases, current state counts, risk assessment).
 
-### Phase 3: EXECUTE
-
-*The paths are known. The migration begins...*
-
-Execute each animal's full workflow by loading their dedicated skill:
-
----
-
-**🐕 BLOODHOUND — SCOUT**
-
-Load skill: `bloodhound-scout`
-
-Execute the full Bloodhound SCENT → TRACK → HUNT → REPORT → RETURN workflow focused on the migration target: find every reference, map relationships, identify edge cases, and document the current state.
-
-Handoff: complete territory map (dependency map, affected files, edge cases, risk assessment) → Bear
+**Gate check:** Territory map has: file lists, dependency relationships, item counts, edge cases identified. If incomplete, resume Bloodhound with specific questions.
 
 ---
 
-**🐻 BEAR — MIGRATE**
+### Phase 3: MIGRATE (Bear)
 
-Load skill: `bear-migrate`
+_The Bear wakes. It receives a map it didn't draw..._
 
-Execute the full Bear WAKE → GATHER → MOVE → HIBERNATE → VERIFY workflow, using:
-- The Bloodhound's territory map as the migration plan foundation
-- The appropriate domain guide from `bear-migrate/references/`:
-  - `domain-database.md` — for schema changes, table migrations, D1/SQLite
-  - `domain-components.md` — for prop changes, API upgrades, import rewrites
-  - `domain-content.md` — for icons, assets, documents, file formats
-  - `domain-general.md` — for config, conventions, dependencies, anything else
+```
+Agent(bear, model: opus)
+  Input:  migration spec + territory map (from Bloodhound)
+  Reads:  bear-migrate/SKILL.md + references/{domain-guide} (MANDATORY)
+  Output: migration results + file list
+```
 
-Handoff: migration complete (transformed items, validation reports, updated codebase) → VALIDATE phase
+Dispatch an **opus subagent** to execute the migration. The Bear receives the spec and the Bloodhound's territory map — NOT the Bloodhound's scouting process, just its structured output.
+
+**What the Bear does:**
+
+- Preserve original state (branch, backup, or snapshot)
+- Execute migration in manageable chunks
+- Validate after each chunk
+- Verify item counts match (source vs destination)
+- Run integrity checks (references resolve, imports work, no orphans)
+
+**Handoff to conductor:** Migration results (items migrated, items skipped, validation reports), file list.
+
+**Gate check:**
+
+```bash
+pnpm install
+gw dev ci --affected --fail-fast --diagnose
+```
+
+Must compile and pass. If it fails, resume Bear with the error.
 
 ---
 
-### Phase 4: VALIDATE
+### Phase 4: VERIFY
 
-*The journey ends. Both animals confirm safe arrival...*
+_The journey ends. The conductor confirms safe arrival..._
 
 **Validation Checklist:**
 
@@ -158,118 +141,78 @@ Handoff: migration complete (transformed items, validation reports, updated code
 - [ ] Bear: Original state preserved (branch, backup, or snapshot)
 - [ ] Bear: Item counts match (source vs destination)
 - [ ] Bear: Integrity checks pass (references resolve, imports work, no orphans)
-- [ ] Bear: Spot check confirms transformation correctness
-- [ ] Bear: Tests pass (`gw ci --affected` or relevant suite)
-- [ ] Bear: Rollback verified or documented
-
-**Domain-Specific Checks:**
-
-The Bear's domain guide (loaded in EXECUTE) defines the specific verification patterns — SQL queries for databases, `svelte-check` for components, visual inspection for icons, etc. Defer to the domain guide rather than hardcoding checks here.
-
----
-
-### Phase 5: COMPLETE
-
-*The gathering disperses. Everything found its new home...*
+- [ ] Bear: Tests pass (`gw dev ci --affected`)
+- [ ] Bear: Rollback path documented
 
 **Completion Report:**
 
-```markdown
-## 🌲 GATHERING MIGRATION COMPLETE
+```
+🌲 GATHERING MIGRATION COMPLETE
 
-### Migration: [Description]
+Migration: [Description]
 
-### Animals Mobilized
+DISPATCH LOG
+  🐕 Bloodhound (haiku) — [territory mapped, X files identified, Y dependencies found]
+  🐻 Bear (opus)         — [Z items migrated, domain guide: {guide}]
 
-🐕 Bloodhound → 🐻 Bear
+GATE LOG
+  After Bloodhound: ✅ territory map complete
+  After Bear:       ✅ compiles clean, migration verified
+  Final CI:         ✅ gw dev ci --affected passes
 
-### Territory Mapped (Bloodhound)
+MIGRATION RESULTS
+  Items migrated: [count]
+  Items skipped: [count, reason]
+  Item count match: ✅ [source] = [dest]
+  Integrity checks: ✅
+  Rollback: [branch/backup location]
 
-- Items affected: [count] [type]
-- Dependencies found: [count]
-- Files referencing migrated items: [count]
-- Edge cases identified: [list]
-
-### Migration Executed (Bear)
-
-- Domain guide used: [database / components / content / general]
-- Items migrated: [count]
-- Items skipped (intentional): [count] — [reason]
-- Duration: [time]
-- Errors: [count]
-
-### Validation Results
-
-- Item count match: ✅ [source] = [dest]
-- Integrity checks: ✅
-- Tests passing: ✅ [suite]
-- Spot check: ✅ [N samples verified]
-
-### Rollback Status
-
-- Original preserved at: [branch / backup / snapshot]
-- Rollback path: [how to undo]
-
-### Files Updated
-
-- [list of changed files or summary]
-
-_Everything found its new home._ 🌲
+Everything found its new home.
 ```
 
 ---
 
-## Examples
+## Conductor Rules
 
-### Example 1: Database Migration
+### Never Do Animal Work
 
-**User:** "/gathering-migration Move user preferences from users table to separate table"
+The conductor dispatches. It does not scout dependencies or execute migrations.
 
-**Gathering flow:**
+### Fresh Eyes Are a Feature
 
-1. 🌲 **SUMMON** — "Mobilizing for: Split user preferences. Move theme, notifications from users table to user_preferences table."
+The Bear receives the territory map, not the Bloodhound's scouting process. It trusts the map but verifies what it finds during migration.
 
-2. 🌲 **ORGANIZE** — "Bloodhound scouts → Bear migrates with `domain-database.md`"
+### Gate Every Transition
 
-3. 🌲 **EXECUTE** —
-   - 🐕 Bloodhound: "Found 15,423 users. 234 have theme set. 12 have notifications disabled. Referenced in dashboard, settings, 3 API routes."
-   - 🐻 Bear: "Backup created. Migrated in 16 batches. All rows accounted for. FK constraints maintained."
+Territory map must be complete before Bear starts. CI must pass after Bear finishes.
 
-4. 🌲 **VALIDATE** — "15,423 source = 15,423 dest. No orphans. All tests pass."
+### Resume, Don't Restart
 
-5. 🌲 **COMPLETE** — "Preferences migrated. Code updated. Backup retained."
-
-### Example 2: Icon System Migration
-
-**User:** "/gathering-migration Migrate all inline Lucide icon imports to use the icon registry pattern"
-
-**Gathering flow:**
-
-1. 🌲 **SUMMON** — "Mobilizing for: Icon import migration. Replace per-file Lucide imports with centralized icon registry lookups."
-
-2. 🌲 **ORGANIZE** — "Bloodhound scouts icon usage → Bear migrates with `domain-content.md`"
-
-3. 🌲 **EXECUTE** —
-   - 🐕 Bloodhound: "Found 47 files importing from @lucide/svelte. 31 unique icons used. 3 files use dynamic icon selection. 2 barrel re-exports in ui/index.ts."
-   - 🐻 Bear: "Feature branch created. Migrated 44 files to registry pattern. 3 dynamic-icon files handled manually. All svelte-check passes."
-
-4. 🌲 **VALIDATE** — "47 source files, 44 migrated + 3 manual = 47 accounted. Zero remaining @lucide/svelte imports. Visual spot check on 5 pages — all icons render."
-
-5. 🌲 **COMPLETE** — "Icon registry migration complete. Bundle size reduced. Branch ready for review."
+If a gate check fails, resume the failing agent. The Bear especially benefits from resumption — it has the migration context and can fix issues faster than starting fresh.
 
 ---
 
-## Integration with Other Gatherings
+## Anti-Patterns
 
-**Precedes:** `gathering-feature` — Migrations often unblock new features built on the new pattern
+**The conductor does NOT:**
 
-**Follows:** `gathering-architecture` — Architecture decisions often require migrations to implement
-
-**Animals available for extension:**
-- `beaver-build` — Add regression tests after migration
-- `fox-optimize` — Profile performance if migration touches hot paths
-- `deer-sense` — Audit accessibility if migrating UI components
+- Scout the codebase itself
+- Execute migration steps directly
+- Let Bear start without a complete territory map
+- Skip count validation (source must equal destination)
+- Skip rollback documentation
 
 ---
 
-*When no single animal suffices, the gathering answers.* 🌲🐾
+## Quick Decision Guide
+
+| Migration Scope                      | Strategy                                 |
+| ------------------------------------ | ---------------------------------------- |
+| Simple rename (< 5 files)            | Bear only (no Bloodhound needed)         |
+| Cross-cutting migration (5-50 files) | Standard: Bloodhound → Bear              |
+| Large migration (50+ files)          | Bloodhound → Bear with chunked execution |
+| Unknown scope ("migrate X")          | Always start with Bloodhound             |
+
+---
+
+_When no single animal suffices, the gathering answers._ 🌲🐾
