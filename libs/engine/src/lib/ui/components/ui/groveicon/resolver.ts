@@ -5,7 +5,6 @@
  * Delegates to Prism's icon gateway — the SSOT for all icon identity.
  */
 
-import type { Component } from "svelte";
 import { resolveAnyIcon, stateIcons } from "@autumnsgrove/prism/icons";
 import type { IconComponent } from "./types";
 

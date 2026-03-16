@@ -14,6 +14,7 @@
 	},
 	"type": "module",
 	"scripts": {
+		"prepare": "git config core.hooksPath .githooks",
 		"cairn": "bun run tools/cairn/server.ts",
 		"census": "bun run tools/census/server.ts",
 		"test": "pnpm -r run test:run",

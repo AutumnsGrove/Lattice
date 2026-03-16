@@ -5,7 +5,7 @@
 //
 // This file is the SSOT. When a new icon is needed, add it here first.
 
-import type { IconGroupManifest, IconGroupName, IconManifest } from "./types.js";
+import type { IconGroupName, IconManifest } from "./types.js";
 
 // ---------------------------------------------------------------------------
 // Normalizer — case & delimiter insensitive lookups

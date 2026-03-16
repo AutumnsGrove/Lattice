@@ -1,0 +1,179 @@
+#!/bin/bash
+# Pre-push hook - Quick validation before push
+# Full test suite runs in GitHub Actions CI - this just catches obvious issues fast
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+GRAY='\033[0;90m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
+DIM='\033[2m'
+
+echo -e "${BLUE}⚡ Quick pre-push checks...${NC}"
+echo -e "${GRAY}   (Full test suite runs in CI)${NC}"
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+
+failed=0
+
+# ============================================================================
+# LOCKFILE SYNC CHECK (catches pnpm-lock.yaml out of sync with package.json)
+# This is a common cause of CI failures that's easy to miss locally
+# ============================================================================
+if [ -f "pnpm-lock.yaml" ]; then
+    echo -e "${YELLOW}🔒 Checking lockfile sync...${NC}"
+
+    # Run pnpm install with frozen-lockfile to check sync (suppressed output)
+    if ! pnpm install --frozen-lockfile > /dev/null 2>&1; then
+        echo -e "   ${RED}✗ pnpm-lock.yaml is out of sync!${NC}"
+        echo ""
+        echo -e "${YELLOW}To fix:${NC}"
+        echo -e "${GRAY}  1. Run: pnpm install${NC}"
+        echo -e "${GRAY}  2. Commit the updated pnpm-lock.yaml${NC}"
+        echo -e "${GRAY}  3. Push again${NC}"
+        echo ""
+        failed=1
+    else
+        echo -e "   ${GREEN}✓ Lockfile in sync${NC}"
+    fi
+    echo ""
+fi
+
+# Helper function to format and display type errors
+# Usage: show_errors "package_name" "output_file"
+show_errors() {
+    local name="$1"
+    local output_file="$2"
+
+    echo -e "${DIM}────────────────────────────────────────${NC}"
+    echo -e "${CYAN}   ${name} type errors:${NC}"
+    echo -e "${DIM}────────────────────────────────────────${NC}"
+
+    # Filter and format output to show just the important parts
+    while IFS= read -r line; do
+        # Skip empty lines and command output noise
+        if [[ -z "$line" ]] || [[ "$line" =~ ^">" ]] || [[ "$line" =~ ^"Loading" ]]; then
+            continue
+        fi
+
+        # Highlight error lines (contain "Error:" or file paths with line numbers)
+        if [[ "$line" =~ Error:|error:|TS[0-9]+: ]]; then
+            echo -e "   ${RED}${line}${NC}"
+        elif [[ "$line" =~ \.svelte:[0-9]+:|\.ts:[0-9]+:|\.js:[0-9]+: ]]; then
+            echo -e "   ${YELLOW}${line}${NC}"
+        elif [[ "$line" =~ "errors found" ]] || [[ "$line" =~ "warnings found" ]]; then
+            echo -e "   ${RED}${line}${NC}"
+        else
+            echo -e "   ${GRAY}${line}${NC}"
+        fi
+    done < "$output_file"
+
+    echo -e "${DIM}────────────────────────────────────────${NC}"
+    echo ""
+}
+
+# ============================================================================
+# TYPE CHECKING (catches most issues, much faster than tests)
+# Runs ALL packages with a 'check' script in parallel for fast feedback
+# ============================================================================
+if [ -f "package.json" ]; then
+    # Detect package manager
+    if [ -f "pnpm-lock.yaml" ] || [ -f "pnpm-workspace.yaml" ]; then
+        PKG_MANAGER="pnpm"
+    elif [ -f "yarn.lock" ]; then
+        PKG_MANAGER="yarn"
+    elif [ -f "bun.lockb" ]; then
+        PKG_MANAGER="bun"
+    else
+        PKG_MANAGER="npm"
+    fi
+
+    # Core packages to type check (most critical, frequently changed)
+    # Other packages (domains, vineyard, og-worker, durable-objects, post-migrator)
+    # are checked in CI — they're more stable and rarely break in isolation
+    PACKAGES=(
+        "engine"          # Core library - everything depends on this
+        "landing"         # Public site - frequently updated
+        "meadow"          # User app - active development
+        "plant"           # Blog rendering
+        "clearing"        # Admin dashboard
+        "terrarium"       # Tenant management
+    )
+
+    # Create temp directory for output files
+    TMPDIR="${TMPDIR:-/tmp}"
+    PREPUSH_TMP=$(mktemp -d "${TMPDIR}/prepush.XXXXXX")
+
+    # Cleanup on exit
+    trap "rm -rf '$PREPUSH_TMP'" EXIT
+
+    echo -e "${YELLOW}🔍 Type checking ${#PACKAGES[@]} packages (sequential)...${NC}"
+
+    # Run type checks sequentially
+    for pkg in "${PACKAGES[@]}"; do
+        if [ -d "packages/$pkg" ] && [ -f "packages/$pkg/package.json" ]; then
+            # Check if package has a 'check' script
+            if grep -q '"check"' "packages/$pkg/package.json" 2>/dev/null; then
+                (
+                    cd "packages/$pkg"
+                    $PKG_MANAGER check > "$PREPUSH_TMP/${pkg}.out" 2>&1
+                    echo $? > "$PREPUSH_TMP/${pkg}.exit"
+                )
+            fi
+        fi
+    done
+
+    # Collect results and report status
+    declare -a failed_packages
+    for pkg in "${PACKAGES[@]}"; do
+        if [ -f "$PREPUSH_TMP/${pkg}.exit" ]; then
+            result=$(cat "$PREPUSH_TMP/${pkg}.exit")
+            printf "   → %-15s " "$pkg:"
+            if [ "$result" -eq 0 ]; then
+                echo -e "${GREEN}✓${NC}"
+            else
+                echo -e "${RED}✗${NC}"
+                failed_packages+=("$pkg")
+                failed=1
+            fi
+        fi
+    done
+
+    # Show detailed errors for failed packages
+    if [ ${#failed_packages[@]} -gt 0 ]; then
+        echo ""
+        for pkg in "${failed_packages[@]}"; do
+            show_errors "$pkg" "$PREPUSH_TMP/${pkg}.out"
+        done
+    fi
+fi
+
+# ============================================================================
+# OPTIONAL: Run critical tests only (uncomment if you want some local testing)
+# ============================================================================
+# echo -e "${YELLOW}🧪 Running critical tests...${NC}"
+# if ! pnpm test:engine --reporter=dot 2>&1 | tail -3; then
+#     failed=1
+# fi
+
+# ============================================================================
+# FINAL RESULTS
+# ============================================================================
+echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+
+if [ $failed -eq 1 ]; then
+    echo -e "${RED}✗ Pre-push checks failed!${NC}"
+    echo ""
+    echo -e "${YELLOW}To bypass (use sparingly):${NC}"
+    echo -e "${GRAY}  git push --no-verify${NC}"
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    exit 1
+else
+    echo -e "${GREEN}✅ Quick checks passed!${NC}"
+    echo -e "${GRAY}   Full test suite will run in CI${NC}"
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    exit 0
+fi
