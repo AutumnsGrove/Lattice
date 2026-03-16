@@ -43,6 +43,7 @@
 	},
 	"dependencies": {
 		"@autumnsgrove/lattice": "workspace:*",
+		"@autumnsgrove/prism": "workspace:*",
 		"@cloudflare/workers-types": "^4.0.0",
 		"@lucide/svelte": "^0.562.0",
 		"bits-ui": "^2.14.4"

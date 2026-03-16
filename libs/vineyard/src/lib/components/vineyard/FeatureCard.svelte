@@ -16,7 +16,14 @@
 	import type { FeatureCardProps } from "../../types/index.js";
 	import type { Snippet } from "svelte";
 	import StatusBadge from "./StatusBadge.svelte";
-	import { featureIcons, metricIcons, phaseIcons, stateIcons, actionIcons, navIcons } from "@autumnsgrove/prism/icons";
+	import {
+		featureIcons,
+		metricIcons,
+		phaseIcons,
+		stateIcons,
+		actionIcons,
+		navIcons,
+	} from "@autumnsgrove/prism/icons";
 	import type { Component } from "svelte";
 
 	const iconMap: Record<string, Component> = {

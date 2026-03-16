@@ -1,8 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
 	import { cn } from "$lib/ui/utils";
-	// Use centralized icon registry instead of direct lucide-svelte imports
-	import { MapPin, ArrowRight } from "$lib/ui/components/icons";
+	import { navIcons } from "@autumnsgrove/prism/icons";
 
 	/**
 	 * RoadmapPreview - A glass card showing current development phase
@@ -67,13 +66,13 @@
 	<div class="flex items-start justify-between mb-4">
 		<div>
 			<div class="flex items-center gap-2 mb-1">
-				<MapPin class="w-4 h-4 text-primary" />
+				<navIcons.mapPin class="w-4 h-4 text-primary" />
 				<span class="text-xs text-foreground-subtle uppercase tracking-wide">Currently</span>
 			</div>
 			<h3 class="text-xl font-serif text-foreground">{phase}</h3>
 			<p class="text-sm text-foreground-muted italic">{subtitle}</p>
 		</div>
-		<ArrowRight class="w-5 h-5 text-foreground-subtle group-hover:text-primary group-hover:translate-x-1 transition-all" />
+		<navIcons.arrowRight class="w-5 h-5 text-foreground-subtle group-hover:text-primary group-hover:translate-x-1 transition-all" />
 	</div>
 
 	<!-- Progress bar -->

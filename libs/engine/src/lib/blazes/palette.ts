@@ -5,7 +5,7 @@
  * JIT scanner sees it at build time. Never construct class names dynamically.
  */
 
-import { blazeIcons, stateIcons } from "@autumnsgrove/prism/icons";
+import { blazeIcons, stateIcons, ICON_MANIFEST } from "@autumnsgrove/prism/icons";
 import type { AutoBlazeConfig, BlazeColorClasses, LucideIcon, PostType } from "./types.js";
 
 /**
@@ -112,8 +112,9 @@ export function resolveLucideIcon(name: string): LucideIcon {
 /** All valid color keys for validation */
 export const VALID_BLAZE_COLORS = Object.keys(BLAZE_COLORS);
 
-/** All valid icon names for validation */
-export const VALID_BLAZE_ICONS = Object.keys(blazeIcons);
+/** All valid icon names for validation (aliases + PascalCase Lucide names) */
+const blazeManifest = ICON_MANIFEST.blaze;
+export const VALID_BLAZE_ICONS = [...Object.keys(blazeManifest), ...Object.values(blazeManifest)];
 
 /**
  * Validate a hex color string (#rgb or #rrggbb).

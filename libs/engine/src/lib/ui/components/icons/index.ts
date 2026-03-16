@@ -1,142 +1,46 @@
 // GroveUI - Icon Components
 //
-// This module exports SVG icon components and Lucide icon registries
-// used across the Grove platform.
+// Custom SVG components + Prism icon gateway re-exports.
 //
 // Usage:
 //   import { Icons, IconLegend } from '@autumnsgrove/lattice/ui/icons';
-//   import { stateIcons, pricingIcons, Check } from '@autumnsgrove/lattice/ui/icons';
+//   import { stateIcons, navIcons } from '@autumnsgrove/lattice/ui/icons';
 
 // Custom SVG components
 export { default as Icons } from "./Icons.svelte";
 export { default as IconLegend } from "./IconLegend.svelte";
 export { default as BlueSky } from "./BlueSky.svelte";
 
-// Lucide icon registries and utilities
+// Prism icon gateway — the SSOT for all icon identity
 export {
-	// Icon maps (semantic groupings)
+	// Semantic icon maps
 	navIcons,
 	stateIcons,
-	pricingIcons,
-	featureIcons,
-	growthIcons,
-	phaseIcons,
+	natureIcons,
 	seasonIcons,
 	actionIcons,
-	metricsIcons,
+	featureIcons,
+	authIcons,
+	metricIcons,
+	phaseIcons,
+	toolIcons,
+	blazeIcons,
+	chromeIcons,
 	allIcons,
-	// Types
-	type IconKey,
-	// Utilities
+	// Lookup utilities
 	getIcon,
 	getIconFromAll,
-	// Direct icon exports (commonly used)
-	Check,
-	CheckCircle,
-	X,
-	ArrowRight,
-	ArrowLeft,
-	MapPin,
-	Sprout,
-	Footprints,
-	Trees,
-	TreeDeciduous,
-	Crown,
-	Flower2,
-	Leaf,
-	Heart,
-	Home,
-	Menu,
-	Search,
-	Settings,
-	ExternalLink,
-	ChevronDown,
-	ChevronLeft,
-	ChevronRight,
-	LogIn,
-	LogOut,
-	Github,
-	HandCoins,
-	FileText,
-	TreePine,
-	Mail,
-	HardDrive,
-	Palette,
-	Shield,
-	ShieldCheck,
-	ShieldAlert,
-	UserX,
-	Download,
-	Rss,
-	Eye,
-	MessageCircle,
-	Layers,
-	Lightbulb,
-	BookOpen,
-	Loader2,
-	AlertTriangle,
-	HelpCircle,
-	Lock,
-	Ban,
-	MessageSquare,
-	MessageSquareText,
-	Sparkles,
-	Star,
-	Moon,
-	Sun,
-	Snowflake,
-	Clock,
-	TrendingUp,
-	Users,
-	Activity,
-	BarChart3,
-	Calendar,
-	// Actions
-	Megaphone,
-	Plus,
-	Copy,
-	Trash2,
-	RefreshCw,
-	Hash,
-	RotateCcw,
-	// Authentication
-	Fingerprint,
-	Key,
-	Link2,
-	// Profile & Onboarding
-	User,
-	CreditCard,
-	Gift,
-	PartyPopper,
-	PenTool,
-	Camera,
-	ChefHat,
-	Laptop,
-	Plane,
-	Briefcase,
-	// Also export the authIcons map
-	authIcons,
-} from "./lucide";
-
-// Prism icon gateway (new SSOT — prefer these in new code)
-export {
-	prismNavIcons,
-	prismStateIcons,
-	prismNatureIcons,
-	prismSeasonIcons,
-	prismActionIcons,
-	prismFeatureIcons,
-	prismAuthIcons,
-	prismMetricIcons,
-	prismPhaseIcons,
-	prismToolIcons,
-	prismBlazeIcons,
-	prismChromeIcons,
-	prismAllIcons,
-	resolveIcon,
+	// Safe resolver (resolveIcon omitted — re-exported from groveicon/resolver)
 	resolveAnyIcon,
+	// Manifest utilities
 	isIconKey,
 	isGroupKey,
-} from "./lucide";
+	normalize,
+	ICON_MANIFEST,
+	getGroupKeys,
+	getGroupNames,
+	findKeyGroups,
+} from "@autumnsgrove/prism/icons";
 
-export const ICONS_VERSION = "0.3.0";
+// Re-export types
+export type { IconGroupName, IconGroupManifest } from "@autumnsgrove/prism/icons";

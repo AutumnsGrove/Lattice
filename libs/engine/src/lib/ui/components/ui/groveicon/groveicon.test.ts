@@ -43,7 +43,12 @@ describe("hasIcon", () => {
 	it("should return false for unregistered icon names", () => {
 		expect(hasIcon("FakeIcon")).toBe(false);
 		expect(hasIcon("")).toBe(false);
-		expect(hasIcon("trees")).toBe(false); // case-sensitive
+	});
+
+	it("should resolve case-insensitively via Prism normalizer", () => {
+		expect(hasIcon("trees")).toBe(true);
+		expect(hasIcon("Trees")).toBe(true);
+		expect(hasIcon("TREES")).toBe(true);
 	});
 });
 

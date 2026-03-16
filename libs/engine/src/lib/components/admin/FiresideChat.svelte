@@ -253,7 +253,7 @@
 						type="button"
 						aria-label="Exit Fireside"
 					>
-						<X size={16} />
+						<stateIcons.x class="w-4 h-4" />
 					</button>
 				</header>
 			{/snippet}

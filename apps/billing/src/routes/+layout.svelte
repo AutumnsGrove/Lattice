@@ -117,7 +117,7 @@
 		aria-modal="true"
 		aria-labelledby="greenhouse-notice-title"
 	>
-		<div class="absolute inset-0 bg-bark-950/30 backdrop-blur-sm" onclick={dismissNotice}></div>
+		<button type="button" class="absolute inset-0 bg-bark-950/30 backdrop-blur-sm appearance-none border-none cursor-default" aria-label="Dismiss notice" onclick={dismissNotice}></button>
 		<div class="relative glass-grove rounded-xl border border-default shadow-lg max-w-sm w-full p-5 animate-fade-in">
 			<div class="flex items-start gap-3">
 				<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-foreground-muted flex-shrink-0 mt-0.5">

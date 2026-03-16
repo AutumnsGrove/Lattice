@@ -69,6 +69,9 @@ importers:
       '@autumnsgrove/lattice':
         specifier: workspace:*
         version: link:../../libs/engine
+      '@autumnsgrove/prism':
+        specifier: workspace:*
+        version: link:../../libs/prism
       '@cloudflare/workers-types':
         specifier: ^4.0.0
         version: 4.20260210.0
@@ -1123,6 +1126,9 @@ importers:
 
   libs/vineyard:
     dependencies:
+      '@autumnsgrove/prism':
+        specifier: workspace:*
+        version: link:../prism
       '@lucide/svelte':
         specifier: ^0.577.0
         version: 0.577.0(svelte@5.50.1)

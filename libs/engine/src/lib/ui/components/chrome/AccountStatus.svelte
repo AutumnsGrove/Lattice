@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { LogIn, LogOut, User, ChevronDown } from "../icons/lucide";
+	import { authIcons, navIcons } from "@autumnsgrove/prism/icons";
 	import type { AccountStatusProps, HeaderUser } from "./types";
 	import { resolveDisplayName, resolveInitial } from "./types";
 
@@ -65,7 +65,7 @@
 		href={signInHref}
 		class="flex items-center gap-1.5 text-sm text-foreground-subtle hover:text-accent-muted transition-colors"
 	>
-		<LogIn class="w-4 h-4" />
+		<authIcons.login class="w-4 h-4" />
 		<span>{signInLabel}</span>
 	</a>
 
@@ -98,7 +98,7 @@
 						>{resolveDisplayName(user)}</span
 					>
 				{/if}
-				<ChevronDown class="w-3.5 h-3.5 transition-transform {dropdownOpen ? 'rotate-180' : ''}" />
+				<navIcons.chevronDown class="w-3.5 h-3.5 transition-transform {dropdownOpen ? 'rotate-180' : ''}" />
 			</button>
 
 			<!-- Dropdown menu -->
@@ -144,7 +144,7 @@
 						role="menuitem"
 						onclick={closeDropdown}
 					>
-						<User class="w-4 h-4" />
+						<authIcons.user class="w-4 h-4" />
 						<span>Your Grove</span>
 					</a>
 
@@ -162,7 +162,7 @@
 								role="menuitem"
 								onclick={closeDropdown}
 							>
-								<LogOut class="w-4 h-4" />
+								<authIcons.logout class="w-4 h-4" />
 								<span>{signOutLabel}</span>
 							</button>
 						</form>

@@ -53,6 +53,7 @@
 		"vitest": "^2.1.9"
 	},
 	"dependencies": {
+		"@autumnsgrove/prism": "workspace:*",
 		"@lucide/svelte": "^0.577.0"
 	},
 	"svelte": "./dist/index.js",

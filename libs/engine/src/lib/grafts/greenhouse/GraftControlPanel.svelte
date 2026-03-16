@@ -117,7 +117,7 @@
 			{#if stableGrafts.length > 0}
 				<div class="graft-section">
 					<div class="section-header">
-						<Sprout class="section-icon" />
+						<natureIcons.sprout class="section-icon" />
 						<span>Stable</span>
 					</div>
 					{#each stableGrafts as graft (graft.id)}
@@ -135,7 +135,7 @@
 					You have custom preferences. Reset to use default settings.
 				</p>
 				<Button variant="secondary" size="sm" onclick={onReset} disabled={resetting}>
-					<RotateCcw class="btn-icon" />
+					<actionIcons.rotateCcw class="btn-icon" />
 					{resetting ? "Resetting..." : "Reset to Defaults"}
 				</Button>
 			</div>
