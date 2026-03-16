@@ -37,6 +37,12 @@ function buildNormalizedMap(group: IconGroupManifest): Map<string, Component> {
 		const component = _lucideMap.get(lucideName);
 		if (component) {
 			map.set(normalize(alias), component);
+			// Reverse lookup: also index by normalized Lucide name
+			// so toolIcons.store resolves even when alias is "pantry"
+			const normalizedLucide = normalize(lucideName);
+			if (!map.has(normalizedLucide)) {
+				map.set(normalizedLucide, component);
+			}
 		}
 	}
 	return map;
