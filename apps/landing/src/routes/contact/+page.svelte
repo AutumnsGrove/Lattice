@@ -8,7 +8,7 @@
 	import { featureIcons, navIcons, natureIcons, authIcons } from "@autumnsgrove/prism/icons";
 	const Mail = featureIcons.mail;
 	const ExternalLink = navIcons.external;
-	const Heart = natureIcons.heart;
+
 	const Compass = navIcons.compass;
 	const Shield = authIcons.shield;
 
@@ -118,7 +118,7 @@
 				class="flex items-center gap-4 p-4 rounded-xl border border-default bg-surface hover:bg-surface-hover transition-colors group"
 			>
 				<div class="p-3 rounded-lg bg-accent-subtle/20">
-					<Heart class="w-5 h-5 text-accent-muted" />
+					<natureIcons.heart class="w-5 h-5 text-accent-muted" />
 				</div>
 				<div class="flex-1">
 					<p
@@ -152,7 +152,7 @@
 		<!-- Closing note -->
 		<div class="text-center">
 			<p class="text-sm text-foreground-subtle font-sans flex items-center justify-center gap-2">
-				Built with <Heart class="w-4 h-4 text-accent-muted" /> and a lot of tea
+				Built with <natureIcons.heart class="w-4 h-4 text-accent-muted" /> and a lot of tea
 			</p>
 		</div>
 	</div>

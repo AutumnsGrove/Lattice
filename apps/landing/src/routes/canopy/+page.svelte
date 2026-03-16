@@ -3,7 +3,7 @@
   import Footer from '$lib/components/Footer.svelte';
   import SEO from '$lib/components/SEO.svelte';
   import { Glass, GlassCard, Button, Input, GroveTerm } from '@autumnsgrove/lattice/ui';
-  import { Search, Users, Leaf } from '@autumnsgrove/lattice/ui/icons';
+  import { navIcons, authIcons, natureIcons } from '@autumnsgrove/prism/icons';
   import {
     CANOPY_CATEGORY_LABELS,
     type CanopyCategory,
@@ -104,7 +104,7 @@
       <GlassCard variant="frosted">
         <div class="flex flex-wrap gap-3 items-center mb-4">
           <div class="search-input-wrapper relative flex-1 min-w-[250px]">
-            <Search size={20} class="search-icon absolute left-3 top-1/2 -translate-y-1/2 text-foreground-subtle pointer-events-none" />
+            <navIcons.search size={20} class="search-icon absolute left-3 top-1/2 -translate-y-1/2 text-foreground-subtle pointer-events-none" />
             <Input
               type="text"
               placeholder="Search by name or banner..."
@@ -144,7 +144,7 @@
         {/if}
 
         <div class="flex items-center gap-2 text-sm text-foreground-muted">
-          <Users size={16} />
+          <authIcons.users size={16} />
           <span>{filteredWanderers.length} wanderer{filteredWanderers.length !== 1 ? 's' : ''}</span>
           {#if data.canopy.total !== filteredWanderers.length}
             <span class="opacity-70">(of {data.canopy.total})</span>
@@ -168,7 +168,7 @@
                   {#if wanderer.avatar_url}
                     <img src={wanderer.avatar_url} alt="" class="w-full h-full object-cover" />
                   {:else}
-                    <Leaf size={20} />
+                    <natureIcons.leaf size={20} />
                   {/if}
                 </div>
                 <div class="min-w-0">
@@ -204,7 +204,7 @@
       <GlassCard variant="frosted">
         <div class="text-center py-12">
           <div class="text-accent-muted opacity-50 mb-4">
-            <Leaf size={48} />
+            <natureIcons.leaf size={48} />
           </div>
           {#if data.canopy.total === 0}
             <h2 class="text-xl font-serif text-foreground mb-2">The canopy is growing</h2>

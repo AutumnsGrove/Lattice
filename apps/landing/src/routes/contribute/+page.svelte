@@ -395,7 +395,7 @@
 
 							<div class="flex items-start gap-4 p-4 rounded-xl border border-default bg-surface">
 								<div class="p-2 rounded-lg bg-accent-subtle/20 shrink-0">
-									<Heart class="w-4 h-4 text-accent-muted" />
+									<HeartIcon class="w-4 h-4 text-accent-muted" />
 								</div>
 								<div>
 									<p class="font-sans font-medium text-foreground">Sustaining the dream</p>
