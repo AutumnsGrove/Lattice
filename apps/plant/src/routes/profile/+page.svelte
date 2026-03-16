@@ -1,18 +1,11 @@
 <script lang="ts">
 	import {
-		Check,
-		X,
-		Loader2,
-		PenTool,
-		Camera,
-		Palette,
-		ChefHat,
-		Laptop,
-		Plane,
-		BookOpen,
-		Briefcase,
-		Star,
-	} from "@autumnsgrove/lattice/ui/icons";
+		stateIcons,
+		actionIcons,
+		featureIcons,
+		phaseIcons,
+		blazeIcons,
+	} from "@autumnsgrove/prism/icons";
 	import { GlassCard } from "@autumnsgrove/lattice/ui";
 	import { COLOR_PRESETS } from "@autumnsgrove/lattice";
 	import { submitFormAndGo } from "$lib/submit-form";
@@ -38,15 +31,15 @@
 
 	// Available interests
 	const interests = [
-		{ id: "writing", label: "Writing / Blogging", icon: PenTool },
-		{ id: "photography", label: "Photography", icon: Camera },
-		{ id: "art", label: "Art / Design", icon: Palette },
-		{ id: "cooking", label: "Cooking / Food", icon: ChefHat },
-		{ id: "tech", label: "Technology", icon: Laptop },
-		{ id: "travel", label: "Travel", icon: Plane },
-		{ id: "personal", label: "Personal / Journal", icon: BookOpen },
-		{ id: "business", label: "Business / Professional", icon: Briefcase },
-		{ id: "other", label: "Other", icon: Star },
+		{ id: "writing", label: "Writing / Blogging", icon: actionIcons.penTool },
+		{ id: "photography", label: "Photography", icon: blazeIcons.camera },
+		{ id: "art", label: "Art / Design", icon: featureIcons.palette },
+		{ id: "cooking", label: "Cooking / Food", icon: blazeIcons.chefHat },
+		{ id: "tech", label: "Technology", icon: blazeIcons.laptop },
+		{ id: "travel", label: "Travel", icon: blazeIcons.plane },
+		{ id: "personal", label: "Personal / Journal", icon: featureIcons.bookOpen },
+		{ id: "business", label: "Business / Professional", icon: blazeIcons.briefcase },
+		{ id: "other", label: "Other", icon: phaseIcons.star },
 	];
 
 	// Color presets imported from shared config (ensures consistency with Arbor settings)
@@ -135,7 +128,7 @@
 			href="/auth/logout"
 			class="inline-flex items-center gap-1.5 text-sm text-foreground-muted hover:text-foreground transition-colors"
 		>
-			<X size={16} />
+			<stateIcons.x class="w-4 h-4" />
 			Start over with different account
 		</a>
 	</div>
@@ -194,11 +187,11 @@
 					<div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
 						<span class="text-sm text-foreground-subtle">.grove.place</span>
 						{#if usernameStatus === "checking"}
-							<Loader2 size={16} class="animate-spin text-foreground-subtle" />
+							<stateIcons.loader class="w-4 h-4 animate-spin text-foreground-subtle" />
 						{:else if usernameStatus === "available"}
-							<Check size={16} class="text-success" />
+							<stateIcons.check class="w-4 h-4 text-success" />
 						{:else if usernameStatus === "taken" || usernameStatus === "error"}
-							<X size={16} class="text-error" />
+							<stateIcons.x class="w-4 h-4 text-error" />
 						{/if}
 					</div>
 				</div>
@@ -259,7 +252,7 @@
 						>
 							{#if favoriteColor === color.hex}
 								<div class="absolute inset-0 flex items-center justify-center">
-									<Check size={24} class="text-white drop-shadow-lg" />
+									<stateIcons.check class="w-6 h-6 text-white drop-shadow-lg" />
 								</div>
 							{/if}
 						</button>
@@ -296,7 +289,7 @@
 							/>
 							<span class="text-foreground font-medium">{interest.label}</span>
 							{#if selectedInterests.includes(interest.id)}
-								<Check size={16} class="text-primary ml-auto" />
+								<stateIcons.check class="w-4 h-4 text-primary ml-auto" />
 							{/if}
 						</button>
 					{/each}
@@ -321,7 +314,7 @@
 				class="btn-primary w-full"
 			>
 				{#if isSubmitting}
-					<Loader2 size={18} class="animate-spin" />
+					<stateIcons.loader class="w-[18px] h-[18px] animate-spin" />
 					Saving...
 				{:else}
 					Continue to Plans

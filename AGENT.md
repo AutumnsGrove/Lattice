@@ -126,7 +126,7 @@ Apps auto-deploy via GitHub Actions on push to main. Resource IDs are hardcoded 
 
 **DO NOT use** standard Tailwind colors (`gray-*`, `slate-*`, `zinc-*`, `neutral-*`, `stone-*`, `red-*`, `blue-*`, `green-*`, `amber-*`, `purple-*`, `pink-*`, `emerald-*`, `indigo-*`, `teal-*`). These are not in the Grove palette and will render as transparent/invisible.
 
-**When unsure**, check the preset: `libs/engine/src/lib/ui/tailwind.preset.js`
+**When unsure**, check the preset: `libs/prism/src/lib/tailwind/preset.js`
 
 ### Dual Token System (CSS Custom Properties)
 
@@ -139,28 +139,28 @@ The engine has **two parallel CSS variable systems** loaded in order by `+layout
 
 **When using CSS variables in scoped `<style>` blocks**, always verify the variable exists in one of these two files. Invented variable names fail silently (render as transparent).
 
-### CRITICAL: Tailwind Preset Required
+### CRITICAL: Prism is the Design SSOT
 
-**All consumer apps MUST use the engine's Tailwind preset.**
+**`@autumnsgrove/prism`** is the single source of truth for ALL design tokens and icons:
 
-The engine provides a shared Tailwind preset (`libs/engine/src/lib/ui/tailwind.preset.js`) that defines custom z-index scale, Grove color palette, typography, animations, and shared design tokens.
+- **Colors/tokens:** `@autumnsgrove/prism` (TS tokens), `@autumnsgrove/prism/css` (CSS custom properties), `@autumnsgrove/prism/tailwind` (Tailwind preset)
+- **Icons:** `@autumnsgrove/prism/icons` (408 icons across 12 semantic groups)
 
-**Every app's `tailwind.config.js` must include:**
+**All 8 apps + engine import the Tailwind preset from `@autumnsgrove/prism/tailwind`:**
 
 ```javascript
-import grovePreset from "../../libs/engine/src/lib/ui/tailwind.preset.js";
+import grovePreset from "@autumnsgrove/prism/tailwind";
 
 export default {
 	presets: [grovePreset],
 	content: [
 		"./src/**/*.{html,js,svelte,ts}",
-		// REQUIRED: Scan engine components for Tailwind classes
 		"../../libs/engine/src/lib/**/*.{html,js,svelte,ts}",
 	],
 };
 ```
 
-**Why this matters:** Engine components use custom Tailwind utilities like `z-grove-mobile-menu`. Without the preset, Tailwind won't generate CSS for them—causing invisible styling bugs.
+> **Note:** Engine has a deprecated re-export stub at `src/lib/ui/tailwind.preset.js` for backward compat. New code should import from Prism directly.
 
 ## Architecture Notes
 
@@ -448,7 +448,7 @@ Use conventional commits format for PR titles. Write a brief description of what
 | **Forms**             | `@autumnsgrove/lattice/ui/forms`      | Form components              |
 | **Gallery**           | `@autumnsgrove/lattice/ui/gallery`    | Image galleries              |
 | **Charts**            | `@autumnsgrove/lattice/ui/charts`     | Data visualization           |
-| **Icons**             | `@autumnsgrove/lattice/ui/icons`      | Icon components              |
+| **Icons**             | `@autumnsgrove/prism/icons`           | Icon gateway (ALL icons)     |
 | **Typography**        | `@autumnsgrove/lattice/ui/typography` | Text components              |
 | **Auth**              | `@autumnsgrove/lattice/auth`          | Authentication utilities     |
 | **Errors**            | `@autumnsgrove/lattice/errors`        | Signpost error codes         |
@@ -466,6 +466,36 @@ export function cn(...classes) {
 // ✅ GOOD - Import from engine
 import { cn } from "@autumnsgrove/lattice/ui/utils";
 ```
+
+### Icons — Prism Gateway (CRITICAL)
+
+**ALL icons go through `@autumnsgrove/prism/icons`.** This is enforced by pre-commit hook.
+
+```svelte
+<!-- ✅ CORRECT — Prism dotted access -->
+<script>
+  import { stateIcons, navIcons, natureIcons } from '@autumnsgrove/prism/icons';
+</script>
+<stateIcons.check class="w-5 h-5" />
+<navIcons.arrowRight class="w-4 h-4" />
+
+<!-- ❌ WRONG — bare Lucide import (blocked by pre-commit) -->
+import { Check } from '@lucide/svelte';
+
+<!-- ❌ WRONG — individual named imports from engine barrel -->
+import { Check, ArrowRight } from '@autumnsgrove/lattice/ui/icons';
+
+<!-- ❌ WRONG — svelte:component (Svelte 4 pattern) -->
+<svelte:component this={stateIcons.check} />
+```
+
+**12 semantic groups:** `navIcons`, `stateIcons`, `natureIcons`, `seasonIcons`, `actionIcons`, `featureIcons`, `authIcons`, `metricIcons`, `phaseIcons`, `toolIcons`, `blazeIcons`, `chromeIcons`
+
+**Lookup utilities:** `resolveAnyIcon(name, fallback)` — resolves by alias OR Lucide name (case-insensitive)
+
+**Manifest:** `libs/prism/src/lib/icons/manifest.ts` — the SSOT for all icon identity. To add an icon: one line here.
+
+**Adapter:** `libs/prism/src/lib/icons/adapters/lucide.ts` — the ONE file importing from `@lucide/svelte`. Swapping icon packs = changing this file.
 
 ### Quick Engine Export Check
 

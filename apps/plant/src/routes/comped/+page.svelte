@@ -6,8 +6,8 @@
 	 * Shows them their special status and creates their tenant directly.
 	 */
 
-	import { Gift, Check, Loader2, Sparkles, ArrowRight, Heart } from '@autumnsgrove/lattice/ui/icons';
 	import { GlassCard, GroveTerm } from '@autumnsgrove/lattice/ui';
+	import { stateIcons, navIcons, phaseIcons, natureIcons } from '@autumnsgrove/prism/icons';
 	import { TIERS } from '@autumnsgrove/lattice/config';
 	import { submitForm } from '$lib/submit-form';
 
@@ -52,7 +52,7 @@
 			<GlassCard variant="default" class="max-w-md mx-auto mb-8">
 				<div class="flex flex-col items-center">
 					<div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-success-bg mb-6">
-						<Check size={40} class="text-success" />
+						<stateIcons.check size={40} class="text-success" />
 					</div>
 
 					<h1 class="text-2xl md:text-3xl font-medium text-foreground mb-3">
@@ -81,7 +81,7 @@
 		<!-- Welcome state -->
 		<div class="text-center mb-8">
 			<div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-warning-bg/20 mb-6 animate-pulse-slow">
-				<Gift size={40} class="text-warning" />
+				<phaseIcons.gift size={40} class="text-warning" />
 			</div>
 
 			{#if data.compedInvite?.inviteType === 'beta'}
@@ -107,7 +107,7 @@
 		<GlassCard variant="frosted" class="max-w-md mx-auto mb-8">
 			<div class="text-center mb-6">
 				<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-warning-bg/10 border border-warning/20 mb-4">
-					<Sparkles size={16} class="text-warning" />
+					<phaseIcons.sparkles size={16} class="text-warning" />
 					<span class="text-sm font-medium text-warning">
 						{#if data.compedInvite?.inviteType === 'beta'}
 							Beta Tester Access
@@ -137,21 +137,21 @@
 					<h3 class="text-sm font-medium text-foreground mb-3">What's included:</h3>
 					<ul class="space-y-2 text-sm text-foreground-muted">
 						<li class="flex items-center gap-2">
-							<Check size={16} class="text-success flex-shrink-0" />
+							<stateIcons.check size={16} class="text-success flex-shrink-0" />
 							<span>Your own blog at <strong>{data.user?.username}.grove.place</strong></span>
 						</li>
 						<li class="flex items-center gap-2">
-							<Check size={16} class="text-success flex-shrink-0" />
+							<stateIcons.check size={16} class="text-success flex-shrink-0" />
 							<span>{tierInfo.limits.storageDisplay} storage</span>
 						</li>
 						{#if tierInfo.limits.aiWordsPerMonth > 0}
 							<li class="flex items-center gap-2">
-								<Check size={16} class="text-success flex-shrink-0" />
+								<stateIcons.check size={16} class="text-success flex-shrink-0" />
 								<span>{tierInfo.limits.aiWordsPerMonth.toLocaleString()} AI words/month</span>
 							</li>
 						{/if}
 						<li class="flex items-center gap-2">
-							<Check size={16} class="text-success flex-shrink-0" />
+							<stateIcons.check size={16} class="text-success flex-shrink-0" />
 							<span>All {tierInfo.display.name} features</span>
 						</li>
 					</ul>
@@ -171,12 +171,12 @@
 				class="btn-primary w-full justify-center text-lg py-3"
 			>
 				{#if isClaiming}
-					<Loader2 size={20} class="animate-spin" />
+					<stateIcons.loader size={20} class="animate-spin" />
 					Creating your blog...
 				{:else}
-					<Gift size={20} />
+					<phaseIcons.gift size={20} />
 					Claim Your Blog
-					<ArrowRight size={20} />
+					<navIcons.arrowRight size={20} />
 				{/if}
 			</button>
 		</GlassCard>
@@ -184,7 +184,7 @@
 		<!-- Thank you note -->
 		<div class="text-center">
 			<p class="text-sm text-foreground-subtle flex items-center justify-center gap-1">
-				<Heart size={14} class="text-accent" />
+				<natureIcons.heart size={14} class="text-accent" />
 				{#if data.compedInvite?.inviteType === 'beta'}
 					Thank you for helping us grow
 				{:else}

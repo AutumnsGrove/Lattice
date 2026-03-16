@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { ArrowRight, X, ChevronLeft, ChevronRight, MapPin, Sprout, PartyPopper } from '@autumnsgrove/lattice/ui/icons';
 	import { GlassCard } from '@autumnsgrove/lattice/ui';
+	import { stateIcons, navIcons, natureIcons, phaseIcons } from '@autumnsgrove/prism/icons';
 
 	let { data } = $props();
 
@@ -213,7 +213,7 @@
 		<!-- Header -->
 		<div class="flex items-start justify-between mb-4">
 			<div class="flex items-center gap-2">
-				<MapPin size={20} class="text-primary" />
+				<navIcons.mapPin size={20} class="text-primary" />
 				<span class="text-sm text-foreground-muted">{currentTourStop.location}</span>
 			</div>
 		</div>
@@ -242,7 +242,7 @@
 			<!-- Welcome illustration -->
 			<div class="aspect-video bg-white/40 dark:bg-bark-800/20 backdrop-blur-sm rounded-lg mb-6 flex items-center justify-center border border-white/20 dark:border-bark-700/20">
 				<div class="text-center">
-					<Sprout class="w-16 h-16 mx-auto mb-4 text-primary" />
+					<natureIcons.sprout class="w-16 h-16 mx-auto mb-4 text-primary" />
 					<p class="text-foreground-muted">Let's explore Grove together</p>
 				</div>
 			</div>
@@ -250,7 +250,7 @@
 			<!-- Completion illustration -->
 			<div class="aspect-video bg-white/40 dark:bg-bark-800/20 backdrop-blur-sm rounded-lg mb-6 flex items-center justify-center border border-white/20 dark:border-bark-700/20">
 				<div class="text-center">
-					<PartyPopper class="w-16 h-16 mx-auto mb-4 text-primary" />
+					<phaseIcons.partyPopper class="w-16 h-16 mx-auto mb-4 text-primary" />
 					<p class="text-lg font-medium text-foreground mb-2">
 						{data.user?.username || 'your-blog'}.grove.place
 					</p>
@@ -268,7 +268,7 @@
 				class:opacity-50={isFirstStep}
 				class:cursor-not-allowed={isFirstStep}
 			>
-				<ChevronLeft size={18} />
+				<navIcons.chevronLeft size={18} />
 				Back
 			</button>
 
@@ -290,12 +290,12 @@
 			{#if isLastStep}
 				<button onclick={completeTour} class="btn-primary">
 					Go to My Blog
-					<ArrowRight size={18} />
+					<navIcons.arrowRight size={18} />
 				</button>
 			{:else}
 				<button onclick={nextStep} class="btn-primary">
 					Next
-					<ChevronRight size={18} />
+					<navIcons.chevronRight size={18} />
 				</button>
 			{/if}
 		</div>
@@ -319,7 +319,7 @@
 				<div class="flex justify-between items-start mb-4">
 					<h2 class="text-lg font-medium text-foreground">Skip the tour?</h2>
 					<button onclick={() => (showSkipConfirm = false)} class="text-foreground-subtle hover:text-foreground">
-						<X size={20} />
+						<stateIcons.x size={20} />
 					</button>
 				</div>
 				<p class="text-foreground-muted mb-6">

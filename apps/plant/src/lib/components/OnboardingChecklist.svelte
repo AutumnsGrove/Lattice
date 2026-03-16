@@ -6,16 +6,16 @@
 	 * in their journey to taking root in the Grove.
 	 */
 
-	import { Check, User, Mail, CreditCard, Sparkles } from '@autumnsgrove/lattice/ui/icons';
 	import { GlassCard, GroveTerm } from '@autumnsgrove/lattice/ui';
+	import { stateIcons, authIcons, featureIcons, phaseIcons } from '@autumnsgrove/prism/icons';
 	import { page } from '$app/state';
 
 	// Define onboarding steps with Grove-friendly language
 	const steps = [
-		{ id: 'profile', label: 'Tell us about yourself', icon: User, path: '/profile' },
-		{ id: 'verify-email', label: 'Verify your email', icon: Mail, path: '/verify-email' },
-		{ id: 'plans', label: 'Choose your path', icon: CreditCard, path: '/plans' },
-		{ id: 'success', label: 'Welcome home', icon: Sparkles, path: '/success' }
+		{ id: 'profile', label: 'Tell us about yourself', icon: authIcons.user, path: '/profile' },
+		{ id: 'verify-email', label: 'Verify your email', icon: featureIcons.mail, path: '/verify-email' },
+		{ id: 'plans', label: 'Choose your path', icon: featureIcons.creditCard, path: '/plans' },
+		{ id: 'success', label: 'Welcome home', icon: phaseIcons.sparkles, path: '/success' }
 	];
 
 	interface Props {
@@ -80,7 +80,7 @@
 								: 'bg-white/70 dark:bg-bark-700/50 text-foreground-muted backdrop-blur-sm border border-white/40 dark:border-bark-600/40'}"
 	>
 						{#if status === 'completed'}
-							<Check size={16} strokeWidth={2.5} />
+							<stateIcons.check size={16} strokeWidth={2.5} />
 						{:else}
 							<Icon size={16} />
 						{/if}
@@ -126,7 +126,7 @@
 									: 'bg-white/80 dark:bg-bark-700/60 text-foreground-muted backdrop-blur-sm border border-white/50 dark:border-bark-600/40'}"
 						>
 							{#if status === 'completed'}
-								<Check size={18} strokeWidth={2.5} />
+								<stateIcons.check size={18} strokeWidth={2.5} />
 							{:else}
 								<Icon size={18} />
 							{/if}

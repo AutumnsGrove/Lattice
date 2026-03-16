@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Loader2, CreditCard, ShieldCheck, ArrowLeft } from '@autumnsgrove/lattice/ui/icons';
 	import { GlassCard } from '@autumnsgrove/lattice/ui';
+	import { stateIcons, navIcons, featureIcons, authIcons } from '@autumnsgrove/prism/icons';
 	import { TIERS, PAID_TIERS, type PaidTierKey } from '@autumnsgrove/lattice/config';
 
 	let { data } = $props();
@@ -96,7 +96,7 @@
 				href="/plans"
 				class="inline-flex items-center gap-1.5 text-sm text-foreground-muted hover:text-foreground transition-colors"
 			>
-				<ArrowLeft size={16} />
+				<navIcons.arrowLeft size={16} />
 				Change plan
 			</a>
 		</div>
@@ -141,7 +141,7 @@
 	{#if isLoading}
 		<div class="text-center">
 			<GlassCard variant="default" class="inline-flex items-center gap-3">
-				<Loader2 size={24} class="animate-spin text-primary" />
+				<stateIcons.loader size={24} class="animate-spin text-primary" />
 				<span class="text-foreground">Taking you to secure checkout...</span>
 			</GlassCard>
 		</div>
@@ -159,11 +159,11 @@
 	<!-- Security badges -->
 	<div class="flex items-center justify-center gap-6 mt-8">
 		<div class="flex items-center gap-2 text-sm px-4 py-2 rounded-lg bg-white/50 dark:bg-bark-800/30 backdrop-blur-sm border border-white/20 dark:border-bark-700/20 text-foreground-subtle">
-			<ShieldCheck size={18} />
+			<authIcons.shieldCheck size={18} />
 			<span>Secure checkout</span>
 		</div>
 		<div class="flex items-center gap-2 text-sm px-4 py-2 rounded-lg bg-white/50 dark:bg-bark-800/30 backdrop-blur-sm border border-white/20 dark:border-bark-700/20 text-foreground-subtle">
-			<CreditCard size={18} />
+			<featureIcons.creditCard size={18} />
 			<span>Powered by Stripe</span>
 		</div>
 	</div>

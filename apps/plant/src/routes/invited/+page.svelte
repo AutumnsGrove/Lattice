@@ -8,7 +8,7 @@
 	 */
 
 	import { GlassCard } from "@autumnsgrove/lattice/ui";
-	import { Sparkles, Mail, Check, Loader2, Heart, Leaf } from "@autumnsgrove/lattice/ui/icons";
+	import { stateIcons, featureIcons, phaseIcons, natureIcons } from "@autumnsgrove/prism/icons";
 
 	let { data } = $props();
 
@@ -62,7 +62,7 @@
 		<div
 			class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-warning-bg/20 mb-2"
 		>
-			<Sparkles size={40} class="text-warning" aria-hidden="true" />
+			<phaseIcons.sparkles size={40} class="text-warning" aria-hidden="true" />
 		</div>
 
 		{#if data.inviteType === "beta"}
@@ -104,7 +104,7 @@
 			<div
 				class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-warning-bg/10 border border-warning/20 mb-4"
 			>
-				<Leaf size={16} class="text-warning" aria-hidden="true" />
+				<natureIcons.leaf size={16} class="text-warning" aria-hidden="true" />
 				<span class="text-sm font-medium text-warning">
 					{#if data.inviteType === "beta"}
 						Beta Tester — {displayTier(data.inviteTier)} Plan
@@ -139,7 +139,7 @@
 						<div
 							class="flex items-center gap-2 px-4 py-3 rounded-xl bg-white/60 dark:bg-bark-800/40 border border-border/50 dark:border-bark-700/40"
 						>
-							<Mail size={16} class="text-foreground-subtle flex-shrink-0" aria-hidden="true" />
+							<featureIcons.mail size={16} class="text-foreground-subtle flex-shrink-0" aria-hidden="true" />
 							<span class="text-foreground">{data.inviteEmail}</span>
 						</div>
 					</div>
@@ -156,7 +156,7 @@
 						class="btn-primary w-full justify-center text-base py-3 min-h-[44px]"
 						aria-label="Send a sign-in link to {data.inviteEmail}"
 					>
-						<Mail size={18} aria-hidden="true" />
+						<featureIcons.mail size={18} aria-hidden="true" />
 						Send me a sign-in link
 					</button>
 
@@ -166,7 +166,7 @@
 				</div>
 			{:else if mode === "sending"}
 				<div class="text-center py-4 space-y-3" role="status" aria-live="polite">
-					<Loader2 size={24} class="animate-spin mx-auto text-primary" aria-hidden="true" />
+					<stateIcons.loader size={24} class="animate-spin mx-auto text-primary" aria-hidden="true" />
 					<p class="text-foreground-muted">Sending your sign-in link...</p>
 				</div>
 			{:else if mode === "sent"}
@@ -174,7 +174,7 @@
 					<div
 						class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-success-bg/50 dark:bg-success-bg/30"
 					>
-						<Check size={28} class="text-success" aria-hidden="true" />
+						<stateIcons.check size={28} class="text-success" aria-hidden="true" />
 					</div>
 
 					<div>
@@ -209,7 +209,7 @@
 	<!-- What's next -->
 	<section class="text-center">
 		<p class="text-sm text-foreground-subtle flex items-center justify-center gap-1.5">
-			<Heart size={14} class="text-accent" aria-hidden="true" />
+			<natureIcons.heart size={14} class="text-accent" aria-hidden="true" />
 			{#if data.inviteType === "beta"}
 				Thank you for helping us grow
 			{:else}

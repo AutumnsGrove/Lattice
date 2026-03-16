@@ -1,13 +1,5 @@
 <script lang="ts">
-	import {
-		Check,
-		Clock,
-		Lock,
-		ArrowRight,
-		ArrowLeft,
-		Loader2,
-		Sprout,
-	} from "@autumnsgrove/lattice/ui/icons";
+	import { stateIcons, navIcons, metricIcons } from "@autumnsgrove/prism/icons";
 	import { GlassCard, GroveTerm } from "@autumnsgrove/lattice/ui";
 	import { groveModeStore } from "@autumnsgrove/lattice/ui/stores";
 
@@ -160,7 +152,7 @@
 			href="/profile"
 			class="inline-flex items-center gap-1.5 text-sm text-foreground-muted hover:text-foreground transition-colors"
 		>
-			<ArrowLeft class="w-4 h-4" />
+			<navIcons.arrowLeft class="w-4 h-4" />
 			Back to profile
 		</a>
 	</div>
@@ -206,7 +198,7 @@
 							class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium
 								bg-warning text-white shadow-lg shadow-warning/25"
 						>
-							<Clock class="w-3 h-3" />
+							<metricIcons.clock class="w-3 h-3" />
 							Coming Soon
 						</span>
 					</div>
@@ -216,7 +208,7 @@
 							class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium
 								bg-foreground-subtle dark:bg-foreground-subtle text-white shadow-lg"
 						>
-							<Lock class="w-3 h-3" />
+							<stateIcons.lock class="w-3 h-3" />
 							Future
 						</span>
 					</div>
@@ -284,9 +276,9 @@
 						{/if}
 					</div>
 					{#if isSubmitting}
-						<Loader2 class="w-5 h-5 animate-spin text-foreground-muted" />
+						<stateIcons.loader class="w-5 h-5 animate-spin text-foreground-muted" />
 					{:else}
-						<Check class="w-5 h-5 text-success" />
+						<stateIcons.check class="w-5 h-5 text-success" />
 					{/if}
 				</div>
 			</div>
@@ -299,7 +291,7 @@
 			class="btn-primary w-full py-3 text-base disabled:opacity-50 disabled:cursor-not-allowed"
 		>
 			{#if isSubmitting}
-				<Loader2 class="w-5 h-5 animate-spin" />
+				<stateIcons.loader class="w-5 h-5 animate-spin" />
 				Processing...
 			{:else if selectedPlan}
 				{@const selectedTier = plans.find((p) => p.key === selectedPlan)}
@@ -335,7 +327,7 @@
 		>
 			View full plan comparison
 			<span class="sr-only">(opens in new tab)</span>
-			<ArrowRight class="w-4 h-4" aria-hidden="true" />
+			<navIcons.arrowRight class="w-4 h-4" aria-hidden="true" />
 		</a>
 	</div>
 </div>

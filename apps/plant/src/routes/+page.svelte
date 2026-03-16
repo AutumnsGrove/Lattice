@@ -11,25 +11,14 @@
 	} from "@autumnsgrove/lattice/ui/nature";
 	import { seasonStore } from "@autumnsgrove/lattice/ui/chrome";
 	import {
-		// Feature icons
-		Leaf,
-		Shield,
-		Palette,
-		Download,
-		Rss,
-		HardDrive,
-		// Community icons
-		Users,
-		Heart,
-		Eye,
-		MessageCircle,
-		// Journey
-		ArrowRight,
-		Clock,
-		Lock,
-		// Notice icon
-		AlertTriangle,
-	} from "@autumnsgrove/lattice/ui/icons";
+		natureIcons,
+		authIcons,
+		stateIcons,
+		featureIcons,
+		actionIcons,
+		navIcons,
+		metricIcons,
+	} from "@autumnsgrove/prism/icons";
 
 	// Use graft config for tier data
 	import { transformAllTiers, type PricingTier } from "@autumnsgrove/lattice/grafts/pricing";
@@ -107,32 +96,32 @@
 	// Feature list for "What you'll get" section
 	const features = [
 		{
-			icon: Leaf,
+			icon: natureIcons.leaf,
 			title: "Your own subdomain",
 			description: "yourname.grove.place — a corner of the web that's truly yours.",
 		},
 		{
-			icon: Shield,
+			icon: authIcons.shield,
 			title: "Shade protection",
 			description: "Your words are not training data. AI crawlers blocked at the gate.",
 		},
 		{
-			icon: Palette,
+			icon: featureIcons.palette,
 			title: "Beautiful themes",
 			description: "Start beautiful by default. Customize when you're ready.",
 		},
 		{
-			icon: Rss,
+			icon: featureIcons.rss,
 			title: "RSS built in",
 			description: "The open web, the way it should be. Readers can follow you anywhere.",
 		},
 		{
-			icon: HardDrive,
+			icon: featureIcons.hardDrive,
 			title: "Image hosting",
 			description: "Upload your images. We'll optimize them for you.",
 		},
 		{
-			icon: Download,
+			icon: actionIcons.download,
 			title: "Data export",
 			description: "Your words are yours. Export everything, anytime.",
 		},
@@ -185,7 +174,7 @@
 			class="text-center border-error/50 dark:border-error/30 bg-error-bg/60 dark:bg-error-bg/20"
 		>
 			<div class="flex items-center justify-center gap-2 mb-2">
-				<AlertTriangle class="w-5 h-5 text-error" />
+				<stateIcons.warning class="w-5 h-5 text-error" />
 				<span class="font-medium text-foreground">Sign-in trouble</span>
 			</div>
 			<p class="text-foreground-muted text-sm">
@@ -214,7 +203,7 @@
 			class="text-center border-warning/50 dark:border-warning/30 bg-warning-bg/60 dark:bg-warning-bg/20"
 		>
 			<div class="flex items-center justify-center gap-2 mb-2">
-				<AlertTriangle class="w-5 h-5 text-warning" />
+				<stateIcons.warning class="w-5 h-5 text-warning" />
 				<span class="font-medium text-foreground">Invite link expired</span>
 			</div>
 			<p class="text-foreground-muted text-sm">
@@ -258,18 +247,18 @@
 
 		<div class="flex flex-wrap items-center justify-center gap-4 text-foreground-subtle text-sm">
 			<span class="flex items-center gap-1.5">
-				<Leaf class="w-4 h-4 {accentText}" />
+				<natureIcons.leaf class="w-4 h-4 {accentText}" />
 				yourname.grove.place
 			</span>
 			<span class="text-foreground-faint hidden sm:inline">|</span>
 			<span class="flex items-center gap-1.5">
-				<Shield class="w-4 h-4 {accentText}" />
+				<authIcons.shield class="w-4 h-4 {accentText}" />
 				AI-free zone
 			</span>
 		</div>
 
 		<p class="text-sm text-foreground-subtle flex items-center justify-center gap-1.5 flex-wrap">
-			<Users class="w-4 h-4 flex-shrink-0" />
+			<authIcons.users class="w-4 h-4 flex-shrink-0" />
 			<span
 				>Join <GroveTerm interactive term="wanderer">wanderers</GroveTerm> building their corner of the web</span
 			>
@@ -310,7 +299,7 @@
 					<div
 						class="inline-flex items-center justify-center w-10 h-10 rounded-full {accentIconBg}"
 					>
-						<Users class="w-5 h-5 {accentIconText}" />
+						<authIcons.users class="w-5 h-5 {accentIconText}" />
 					</div>
 					<p class="text-sm text-foreground-muted">Queer-friendly</p>
 				</div>
@@ -318,7 +307,7 @@
 					<div
 						class="inline-flex items-center justify-center w-10 h-10 rounded-full {accentIconBg}"
 					>
-						<Eye class="w-5 h-5 {accentIconText}" />
+						<stateIcons.eye class="w-5 h-5 {accentIconText}" />
 					</div>
 					<p class="text-sm text-foreground-muted">No public metrics</p>
 				</div>
@@ -326,7 +315,7 @@
 					<div
 						class="inline-flex items-center justify-center w-10 h-10 rounded-full {accentIconBg}"
 					>
-						<Heart class="w-5 h-5 {accentIconText}" />
+						<natureIcons.heart class="w-5 h-5 {accentIconText}" />
 					</div>
 					<p class="text-sm text-foreground-muted">Built with care</p>
 				</div>
@@ -334,7 +323,7 @@
 					<div
 						class="inline-flex items-center justify-center w-10 h-10 rounded-full {accentIconBg}"
 					>
-						<MessageCircle class="w-5 h-5 {accentIconText}" />
+						<featureIcons.messageCircle class="w-5 h-5 {accentIconText}" />
 					</div>
 					<p class="text-sm text-foreground-muted">Private reactions</p>
 				</div>
@@ -364,7 +353,7 @@
 							<span
 								class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-warning text-white shadow-lg shadow-warning/25"
 							>
-								<Clock class="w-2.5 h-2.5" />
+								<metricIcons.clock class="w-2.5 h-2.5" />
 								Soon
 							</span>
 						</div>
@@ -373,7 +362,7 @@
 							<span
 								class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-bark-400 dark:bg-bark-600 text-white shadow-lg"
 							>
-								<Lock class="w-2.5 h-2.5" />
+								<stateIcons.lock class="w-2.5 h-2.5" />
 								Future
 							</span>
 						</div>
@@ -449,7 +438,7 @@
 									<span
 										class="mt-3 text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1"
 									>
-										Get started <ArrowRight class="w-3 h-3" />
+										Get started <navIcons.arrowRight class="w-3 h-3" />
 									</span>
 								{/if}
 							</div>
@@ -465,7 +454,7 @@
 				class="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
 			>
 				See future plans
-				<ArrowRight class="w-4 h-4" />
+				<navIcons.arrowRight class="w-4 h-4" />
 			</a>
 		</div>
 	</section>

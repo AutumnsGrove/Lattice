@@ -3,15 +3,7 @@
 	import { browser } from "$app/environment";
 	import { invalidateAll } from "$app/navigation";
 	import { GlassCard } from "@autumnsgrove/lattice/ui";
-	import {
-		Fingerprint,
-		Shield,
-		Link2,
-		Trash2,
-		Copy,
-		Check,
-		RefreshCw,
-	} from "@autumnsgrove/lattice/ui/icons";
+	import { stateIcons, actionIcons, authIcons } from "@autumnsgrove/prism/icons";
 
 	// Type definitions
 	interface TwoFactorStatus {
@@ -111,7 +103,7 @@
 		<GlassCard variant="frosted">
 			<div class="flex items-center gap-3 mb-4">
 				<div class="p-2 rounded-lg bg-success-bg/50 dark:bg-success-bg/30">
-					<Fingerprint class="w-5 h-5 text-success" />
+					<authIcons.fingerprint class="w-5 h-5 text-success" />
 				</div>
 				<div>
 					<h2 class="font-medium text-foreground">Passkeys</h2>
@@ -130,7 +122,7 @@
 				)}"
 				class="btn-primary inline-flex items-center gap-2 text-sm"
 			>
-				<Fingerprint class="w-4 h-4" />
+				<authIcons.fingerprint class="w-4 h-4" />
 				Manage Passkeys
 			</a>
 		</GlassCard>
@@ -139,7 +131,7 @@
 		<GlassCard variant="frosted">
 			<div class="flex items-center gap-3 mb-4">
 				<div class="p-2 rounded-lg bg-success-bg/50 dark:bg-success-bg/30">
-					<Shield class="w-5 h-5 text-success" />
+					<authIcons.shield class="w-5 h-5 text-success" />
 				</div>
 				<div>
 					<h2 class="font-medium text-foreground">Two-Factor Authentication</h2>
@@ -155,7 +147,7 @@
 					class="p-3 rounded-lg bg-success-bg/50 dark:bg-success-bg/30 border border-success/50 dark:border-success/30 mb-4"
 				>
 					<div class="flex items-center gap-2 mb-1">
-						<Check class="w-4 h-4 text-success" />
+						<stateIcons.check class="w-4 h-4 text-success" />
 						<span class="text-sm font-medium text-success"
 							>Two-factor authentication is enabled</span
 						>
@@ -175,7 +167,7 @@
 				<div class="flex gap-2">
 					<form method="POST" action="?/generateBackupCodes" use:enhance class="contents">
 						<button type="submit" class="btn-secondary flex items-center gap-2 text-sm">
-							<RefreshCw class="w-4 h-4" />
+							<actionIcons.refresh class="w-4 h-4" />
 							New Backup Codes
 						</button>
 					</form>
@@ -229,7 +221,7 @@
 				</p>
 				<form method="POST" action="?/enableTwoFactor" use:enhance>
 					<button type="submit" class="btn-primary flex items-center gap-2">
-						<Shield class="w-4 h-4" />
+						<authIcons.shield class="w-4 h-4" />
 						Enable Two-Factor Auth
 					</button>
 				</form>
@@ -300,7 +292,7 @@
 						class="p-3 rounded-lg bg-success-bg/50 dark:bg-success-bg/30 border border-success/50 dark:border-success/30"
 					>
 						<div class="flex items-center gap-2 mb-1">
-							<Check class="w-4 h-4 text-success" />
+							<stateIcons.check class="w-4 h-4 text-success" />
 							<span class="text-sm font-medium text-success"
 								>Two-factor authentication is now enabled!</span
 							>
@@ -330,10 +322,10 @@
 								: "Copy backup codes to clipboard"}
 						>
 							{#if copiedBackupCodes}
-								<Check class="w-4 h-4" aria-hidden="true" />
+								<stateIcons.check class="w-4 h-4" aria-hidden="true" />
 								Copied!
 							{:else}
-								<Copy class="w-4 h-4" aria-hidden="true" />
+								<actionIcons.copy class="w-4 h-4" aria-hidden="true" />
 								Copy Codes
 							{/if}
 						</button>
@@ -357,7 +349,7 @@
 		<GlassCard variant="frosted">
 			<div class="flex items-center gap-3 mb-4">
 				<div class="p-2 rounded-lg bg-success-bg/50 dark:bg-success-bg/30">
-					<Link2 class="w-5 h-5 text-success" />
+					<actionIcons.link2 class="w-5 h-5 text-success" />
 				</div>
 				<div>
 					<h2 class="font-medium text-foreground">Linked Accounts</h2>

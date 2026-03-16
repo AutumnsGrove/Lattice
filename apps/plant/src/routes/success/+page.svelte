@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Check, Loader2, Lightbulb, ArrowRight, X } from "@autumnsgrove/lattice/ui/icons";
 	import { GlassCard, GroveTerm } from "@autumnsgrove/lattice/ui";
+	import { stateIcons, navIcons, phaseIcons } from "@autumnsgrove/prism/icons";
 
 	let { data } = $props();
 
@@ -81,7 +81,7 @@
 		<!-- Loading state -->
 		<div class="text-center">
 			<div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-accent mb-6">
-				<Loader2 size={40} class="animate-spin text-primary" />
+				<stateIcons.loader size={40} class="animate-spin text-primary" />
 			</div>
 
 			<h1 class="text-2xl md:text-3xl font-medium text-foreground mb-3">
@@ -113,7 +113,7 @@
 		<!-- Error state -->
 		<div class="text-center">
 			<div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-error-bg mb-6">
-				<X size={40} class="text-error" />
+				<stateIcons.x size={40} class="text-error" />
 			</div>
 
 			<h1 class="text-2xl md:text-3xl font-medium text-foreground mb-3">Something went wrong</h1>
@@ -135,7 +135,7 @@
 					<div
 						class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-success-bg mb-6"
 					>
-						<Check size={40} class="text-success" />
+						<stateIcons.check size={40} class="text-success" />
 					</div>
 
 					<h1 class="text-2xl md:text-3xl font-medium text-foreground mb-3">Your blog is ready!</h1>
@@ -154,7 +154,7 @@
 				variant="frosted"
 				class="max-w-md mx-auto mb-8 text-left"
 				title="What's next?"
-				icon={Lightbulb}
+				icon={phaseIcons.lightbulb}
 				iconClass="text-primary"
 			>
 				<ul class="space-y-3">
@@ -203,7 +203,7 @@
 				<div class="flex flex-col sm:flex-row gap-3">
 					<a href="/tour" class="btn-primary flex-1 justify-center">
 						Take the Tour
-						<ArrowRight size={18} />
+						<navIcons.arrowRight size={18} />
 					</a>
 					<a
 						href="https://{tenant.subdomain}.grove.place"
@@ -212,7 +212,7 @@
 						rel="noopener noreferrer"
 					>
 						Visit My Blog
-						<ArrowRight size={18} />
+						<navIcons.arrowRight size={18} />
 					</a>
 				</div>
 				<a

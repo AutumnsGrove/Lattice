@@ -115,6 +115,40 @@ Some code legitimately uses raw bindings:
 
 ---
 
+## Category 1b: Icon Gateway Compliance
+
+All icons MUST route through `@autumnsgrove/prism/icons`. The pre-commit hook enforces this, but the crane should also verify in PR diffs.
+
+### Bare Lucide Imports
+
+| Pattern | Status | Remediation |
+|---------|--------|-------------|
+| `from '@lucide/svelte'` | FAIL | Use `from '@autumnsgrove/prism/icons'` with semantic groups |
+| `from '@autumnsgrove/lattice/ui/icons'` with named icons (e.g., `{ Check, ArrowRight }`) | FAIL | Use Prism groups: `{ stateIcons, navIcons }` |
+| `from '@autumnsgrove/prism/icons'` with group imports | PASS | Correct |
+| `from '@lucide/svelte'` with `// prism-ok` comment | PASS | Intentional exception (BeeIcon only) |
+
+### Template Patterns
+
+| Pattern | Status | Remediation |
+|---------|--------|-------------|
+| `<Check class="..." />` (bare Lucide component) | FAIL | Use `<stateIcons.check class="..." />` |
+| `<svelte:component this={stateIcons.check} />` | WARN | Svelte 5 supports dotted access directly — use `<stateIcons.check />` |
+| `<stateIcons.check class="w-5 h-5" />` | PASS | Correct dotted access |
+
+### Dynamic/JS Usage
+
+| Pattern | Status | Remediation |
+|---------|--------|-------------|
+| `icon: Check` (Lucide component reference) | FAIL | Use `icon: stateIcons.check` |
+| `const icon = resolveAnyIcon(name, stateIcons.help)` | PASS | Correct dynamic resolution |
+
+### Allowed Exception
+
+`libs/prism/src/lib/icons/adapters/lucide.ts` — the ONE adapter file. `apps/landing/src/lib/components/icons/BeeIcon.svelte` — needs `Icon` base component from Lucide for lab icons.
+
+---
+
 ## Category 2: Fetch Safety & CSRF
 
 ### Bare Fetch Calls

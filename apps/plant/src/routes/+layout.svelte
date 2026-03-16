@@ -4,7 +4,7 @@
 	import { Logo } from '@autumnsgrove/lattice/ui/nature';
 	import { Footer, ThemeToggle, MobileMenu, seasonStore, themeStore } from '@autumnsgrove/lattice/ui/chrome';
 	import { GroveMessages } from '@autumnsgrove/lattice/ui';
-	import { Menu, ArrowLeft, HandCoins, Home, Trees, FileText } from '@autumnsgrove/lattice/ui/icons';
+	import { navIcons, metricIcons, natureIcons, featureIcons } from '@autumnsgrove/prism/icons';
 	import type { NavItem, FooterLink } from '@autumnsgrove/lattice/ui/chrome';
 
 	// Centralized external links to prevent drift
@@ -48,17 +48,17 @@
 
 	// Plant-specific navigation (minimal for onboarding focus)
 	const navItems: NavItem[] = [
-		{ href: GROVE_LINKS.HOME, label: 'Back to Grove', icon: ArrowLeft, external: true },
-		{ href: GROVE_LINKS.PRICING, label: 'Pricing', icon: HandCoins, external: true }
+		{ href: GROVE_LINKS.HOME, label: 'Back to Grove', icon: navIcons.arrowLeft, external: true },
+		{ href: GROVE_LINKS.PRICING, label: 'Pricing', icon: metricIcons.handCoins, external: true }
 	];
 
 	// Mobile menu items (more comprehensive)
 	const mobileNavItems: NavItem[] = [
-		{ href: '/', label: 'Start', icon: Home },
-		{ href: GROVE_LINKS.HOME, label: 'Back to Grove', icon: Trees, external: true },
-		{ href: GROVE_LINKS.PRICING, label: 'Pricing', icon: HandCoins, external: true },
-		{ href: GROVE_LINKS.TERMS, label: 'Terms', icon: FileText, external: true },
-		{ href: GROVE_LINKS.PRIVACY, label: 'Privacy', icon: FileText, external: true }
+		{ href: '/', label: 'Start', icon: navIcons.home },
+		{ href: GROVE_LINKS.HOME, label: 'Back to Grove', icon: natureIcons.trees, external: true },
+		{ href: GROVE_LINKS.PRICING, label: 'Pricing', icon: metricIcons.handCoins, external: true },
+		{ href: GROVE_LINKS.TERMS, label: 'Terms', icon: featureIcons.fileText, external: true },
+		{ href: GROVE_LINKS.PRIVACY, label: 'Privacy', icon: featureIcons.fileText, external: true }
 	];
 
 	// Plant onboarding doesn't need additional menu sections — empty arrays
@@ -158,7 +158,7 @@
 					class="p-2 -mr-2 text-foreground-subtle hover:text-foreground transition-colors rounded-lg hover:bg-surface-hover"
 					aria-label="Open menu"
 				>
-					<Menu class="w-5 h-5" />
+					<navIcons.menu class="w-5 h-5" />
 				</button>
 			</div>
 		</div>

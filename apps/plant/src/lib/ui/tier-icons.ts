@@ -5,23 +5,18 @@
  * Used by both the home page plan previews and the plans selection page.
  */
 
-import {
-  Footprints,
-  Sprout,
-  TreeDeciduous,
-  Trees,
-  Crown,
-} from "@autumnsgrove/lattice/ui/icons";
+import { natureIcons } from "@autumnsgrove/prism/icons";
+import type { Component } from "svelte";
 import type { TierIcon } from "@autumnsgrove/lattice/config";
 
 /**
- * Map tier icon identifiers to Lucide icon components.
+ * Map tier icon identifiers to icon components.
  */
-export const tierIcons: Record<TierIcon, typeof Sprout> = {
-  user: Sprout, // fallback for legacy free tier
-  footprints: Footprints, // Wanderer (free tier)
-  sprout: Sprout,
-  "tree-deciduous": TreeDeciduous,
-  trees: Trees,
-  crown: Crown,
+export const tierIcons: Record<TierIcon, Component> = {
+	user: natureIcons.sprout, // fallback for legacy free tier
+	footprints: natureIcons.footprints, // Wanderer (free tier)
+	sprout: natureIcons.sprout,
+	"tree-deciduous": natureIcons.treeDeciduous,
+	trees: natureIcons.trees,
+	crown: natureIcons.crown,
 };
