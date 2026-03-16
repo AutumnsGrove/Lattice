@@ -339,7 +339,7 @@ export async function createSessionCookieHeader(
   sessionId: string,
   userId: string,
   secret: string,
-  maxAgeSeconds: number = 7 * 24 * 60 * 60, // 7 days
+  maxAgeSeconds: number = 30 * 24 * 60 * 60, // 30 days
 ): Promise<string> {
   const value = await createSessionCookie(sessionId, userId, secret);
   // SameSite=Lax required for OAuth redirects (Google → our callback → device page)

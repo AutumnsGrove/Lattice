@@ -370,7 +370,7 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
       httpOnly: true,
       secure: isProduction,
       sameSite: "lax" as const,
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: 60 * 60 * 24 * 30, // 30 days
     };
 
     cookies.set("onboarding_id", onboardingId, cookieOptions);

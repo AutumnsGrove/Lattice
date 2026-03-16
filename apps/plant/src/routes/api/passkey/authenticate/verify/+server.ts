@@ -249,7 +249,7 @@ export const POST: RequestHandler = async ({
       httpOnly: true,
       secure: isProduction,
       sameSite: "lax" as const,
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: 60 * 60 * 24 * 30, // 30 days
     };
 
     // Store onboarding ID

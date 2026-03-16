@@ -99,9 +99,9 @@ export async function verifyTurnstileToken(
 export const TURNSTILE_COOKIE_NAME = "grove_verified";
 
 /**
- * Cookie max age (7 days in seconds)
+ * Cookie max age (30 days in seconds)
  */
-export const TURNSTILE_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
+export const TURNSTILE_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
 
 /**
  * Create the verification cookie value (signed timestamp)
