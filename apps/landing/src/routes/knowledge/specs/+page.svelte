@@ -6,8 +6,8 @@
 	import { CategoryNav } from "@autumnsgrove/lattice";
 	import { resolveAnyIcon, stateIcons } from "@autumnsgrove/prism/icons";
 
-	function getToolIcon(iconKey: string) {
-		return resolveAnyIcon(iconKey, stateIcons.circle);
+	function getToolIcon(iconKey: string | undefined) {
+		return resolveAnyIcon(iconKey ?? "", stateIcons.circle);
 	}
 	import { kbCategoryColors } from "$lib/utils/kb-colors";
 	import type { SpecCategory } from "$lib/types/docs";
