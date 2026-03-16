@@ -28,6 +28,9 @@ export * from "./components/charts/index.js";
 // Typography (font wrapper components)
 export * from "./components/typography/index.js";
 
+// Terminology (GroveTerm, GroveText)
+export * from "../components/terminology/index.js";
+
 // Export design tokens
 export * from "./tokens/index.js";
 
