@@ -4,7 +4,7 @@
  * POST /api/verify/turnstile
  *
  * Validates a Turnstile token and sets a verification cookie.
- * Cookie lasts 7 days, shared across all *.grove.place subdomains.
+ * Cookie lasts 30 days, shared across all *.grove.place subdomains.
  */
 
 import { error } from "@sveltejs/kit";
@@ -13,6 +13,7 @@ import {
 	verifyTurnstileToken,
 	createVerificationCookie,
 	TURNSTILE_COOKIE_NAME,
+	TURNSTILE_COOKIE_MAX_AGE,
 } from "@autumnsgrove/lattice/server/services/turnstile";
 import { createThreshold } from "@autumnsgrove/lattice/threshold/factory";
 import { thresholdCheck } from "@autumnsgrove/lattice/threshold/adapters/sveltekit";
@@ -76,11 +77,11 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	const cookieValue = await createVerificationCookie(secretKey);
 
 	// Build Set-Cookie header manually to ensure it's correct
-	// Format: name=value; Path=/; Max-Age=604800; HttpOnly; Secure; SameSite=Lax; Domain=.grove.place
+	// Format: name=value; Path=/; Max-Age=<30 days>; HttpOnly; Secure; SameSite=Lax; Domain=.grove.place
 	const cookieHeader = [
 		`${TURNSTILE_COOKIE_NAME}=${cookieValue}`,
 		"Path=/",
-		"Max-Age=604800", // 7 days
+		`Max-Age=${TURNSTILE_COOKIE_MAX_AGE}`, // 30 days
 		"HttpOnly",
 		"Secure",
 		"SameSite=Lax",

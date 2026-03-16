@@ -175,7 +175,7 @@ Shade implements defense in depth through nine complementary layers:
 │              LAYER 7: TURNSTILE HUMAN VERIFICATION              │
 │  • Cloudflare Turnstile widget (managed mode)                   │
 │  • Server-side token validation                                 │
-│  • Cookie-based verification (7-day expiry)                     │
+│  • Cookie-based verification (30-day expiry)                    │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
@@ -381,7 +381,7 @@ Turnstile is Cloudflare's human verification system that doesn't require solving
 2. **Redirect:** hooks.server.ts redirects to `/verify?return=<original_url>`
 3. **Challenge:** Turnstile widget runs (invisible for most users)
 4. **Verification:** Token sent to `/api/verify/turnstile`, validated with Cloudflare
-5. **Cookie Set:** `grove_verified` cookie set with HMAC signature (7-day expiry)
+5. **Cookie Set:** `grove_verified` cookie set with HMAC signature (30-day expiry)
 6. **Redirect Back:** User returned to their original destination
 7. **Subsequent Visits:** Cookie validated server-side, no challenge needed
 
@@ -389,7 +389,7 @@ Turnstile is Cloudflare's human verification system that doesn't require solving
 ```
 Cookie: grove_verified=<timestamp>.<hmac_signature>
 Domain: .grove.place (shared across subdomains)
-Max-Age: 604800 (7 days)
+Max-Age: 2592000 (30 days)
 SameSite: Lax
 Secure: true (production only)
 HttpOnly: false (read by client for UX)
@@ -1045,7 +1045,7 @@ Key metrics to track in Dashboard → Security → Events:
 - [x] Create /api/verify/turnstile endpoint
 - [x] Update CSP to allow challenges.cloudflare.com
 - [x] Add verification page (/verify) for first-time visitors
-- [x] Set grove_verified cookie (7-day expiry)
+- [x] Set grove_verified cookie (30-day expiry)
 - [x] Write help center article (how-grove-protects-your-content.md)
 - [x] Integrate with hooks.server.ts for site-wide verification
 
