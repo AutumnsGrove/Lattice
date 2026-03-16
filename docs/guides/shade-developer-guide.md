@@ -51,7 +51,7 @@ This is the layer developers interact with most. Every first-time visitor to a p
 4. On success, the widget returns a token. The page POSTs it to `/api/verify/turnstile`.
 5. The endpoint validates the token with Cloudflare's `siteverify` API, creates an HMAC-signed cookie, and returns it via `Set-Cookie`.
 6. The verify page does a hard redirect (`window.location.href`) back to the original URL. A hard redirect is required because SvelteKit's client-side navigation won't pick up the new cookie.
-7. On the next request, the hook finds a valid cookie and lets the request through. The cookie lasts 7 days.
+7. On the next request, the hook finds a valid cookie and lets the request through. The cookie lasts 30 days.
 
 ### Key files
 
@@ -103,14 +103,14 @@ The timestamp is `Date.now()` at creation time. The signature is an HMAC-SHA256 
 |-----------|-------|-----|
 | Domain | `grove.place` | Shared across all tenant subdomains |
 | Path | `/` | Applies everywhere |
-| Max-Age | `604800` (7 days) | Balance between UX and security |
+| Max-Age | `2592000` (30 days) | Balance between UX and security |
 | HttpOnly | `true` | Not accessible to client-side JS |
 | Secure | `true` | HTTPS only |
 | SameSite | `Lax` | Sent on top-level navigations, not cross-origin requests |
 
 ### Validation
 
-`validateVerificationCookie()` in `turnstile.ts` checks two things: that the HMAC signature matches (proving the cookie wasn't forged) and that the timestamp hasn't expired (proving it's still within the 7-day window). Both checks must pass.
+`validateVerificationCookie()` in `turnstile.ts` checks two things: that the HMAC signature matches (proving the cookie wasn't forged) and that the timestamp hasn't expired (proving it's still within the 30-day window). Both checks must pass.
 
 ```typescript
 import {
