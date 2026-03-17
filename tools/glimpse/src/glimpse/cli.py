@@ -99,11 +99,11 @@ def main(
     Capture screenshots of Grove sites with theme control,
     element targeting, console log capture, and agent-friendly output modes.
 
-    Use --app to target different Grove apps:
+    Use --app to target different Grove apps (default: aspen):
 
         glimpse --app plant capture http://localhost:5173/ --auto
 
-    Available apps: engine, amber, billing, clearing, domains, ivy,
+    Available apps: amber, aspen, billing, clearing, domains, ivy,
     landing, login, meadow, plant, terrarium
     """
     # Determine output mode

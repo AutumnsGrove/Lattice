@@ -9,13 +9,9 @@ from pathlib import Path
 
 # App configurations: name -> (start_cwd relative to grove root, port)
 # Port 5173 is the vite default; apps that override it are listed explicitly.
+DEFAULT_APP = "aspen"
+
 APP_REGISTRY: dict[str, dict] = {
-    "engine": {
-        "cwd": "apps/aspen",
-        "port": 5173,
-        "start_command": "pnpm dev",
-        "description": "Core engine via Aspen (tenant sites with subdomain routing)",
-    },
     "amber": {
         "cwd": "apps/amber",
         "port": 5173,
@@ -26,7 +22,7 @@ APP_REGISTRY: dict[str, dict] = {
         "cwd": "apps/aspen",
         "port": 5173,
         "start_command": "pnpm dev",
-        "description": "Aspen app",
+        "description": "Aspen — tenant sites with subdomain routing (default)",
     },
     "billing": {
         "cwd": "apps/billing",
