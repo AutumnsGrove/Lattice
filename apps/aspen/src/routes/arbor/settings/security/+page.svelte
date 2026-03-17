@@ -62,7 +62,7 @@
 	async function revokeSession(sessionId: string) {
 		revokingSessionId = sessionId;
 		try {
-			await api.delete(`/api/auth/sessions/${sessionId}`);
+			await api.delete(`/api/auth/sessions/${encodeURIComponent(sessionId)}`);
 			toast.success("Session revoked");
 			sessions = sessions.filter((s) => s.id !== sessionId);
 		} catch (error) {

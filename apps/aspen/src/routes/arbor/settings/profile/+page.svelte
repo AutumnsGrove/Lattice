@@ -400,12 +400,14 @@
 					showUsernameConfirmDialog = false;
 					return async ({ result, update }) => {
 						changingUsername = false;
-						if (result.type === "success") {
-							const newSub = String(result.data?.newSubdomain || newUsername.toLowerCase().trim());
+						if (result.type === "success" && result.data?.newSubdomain) {
+							const newSub = String(result.data.newSubdomain);
 							toast.success(`Username changed to ${newSub}. Redirecting...`);
 							setTimeout(() => {
 								window.location.href = `https://${newSub}.grove.place/arbor/settings/profile`;
 							}, 1500);
+						} else if (result.type === "success") {
+							toast.success("Username changed. Please refresh to continue.");
 						} else if (result.type === "failure") {
 							toast.error(String(result.data?.error || "Couldn't change username"));
 						}

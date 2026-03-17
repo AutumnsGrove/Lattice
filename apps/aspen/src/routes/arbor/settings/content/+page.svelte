@@ -106,7 +106,7 @@
 		if (!pendingDeleteBlazeSlug) return;
 		deletingBlazeSlug = pendingDeleteBlazeSlug;
 		try {
-			await api.delete(`/api/blazes/${pendingDeleteBlazeSlug}`);
+			await api.delete(`/api/blazes/${encodeURIComponent(pendingDeleteBlazeSlug)}`);
 			toast.success(`Blaze "${pendingDeleteBlazeLabel}" deleted`);
 			await fetchBlazes();
 		} catch (error) {
