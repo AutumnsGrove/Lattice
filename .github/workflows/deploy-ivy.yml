@@ -14,10 +14,10 @@ permissions:
 
 jobs:
   deploy:
-    uses: ./.github/workflows/_deploy-pages.yml
+    uses: ./.github/workflows/_deploy-worker.yml
     with:
-      app-dir: apps/ivy
-      project-name: ivy
+      worker-dir: apps/ivy
       needs-engine: true
       needs-foliage: true
+      run-build: true
     secrets: inherit
