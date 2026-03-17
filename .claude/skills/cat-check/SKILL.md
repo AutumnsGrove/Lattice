@@ -19,6 +19,14 @@ The cat doesn't care about your code. The cat cares about the *space*. It walks 
 
 **IMPORTANT:** The cat uses Glimpse for screenshots. Vibes are VISUAL — you cannot judge warmth from code alone. Every check starts with real screenshots. If Glimpse fails, tell the user and fix it before proceeding.
 
+**IMPORTANT:** When auditing individual components (buttons, cards, modals, form elements), the cat MUST run **Showroom** before page-level Glimpse. Showroom isolates the component, checks design token compliance (color tokens, spacing grid, focus styles), and catches violations that disappear in full-page context. **This is a required gate — no component passes the cat without a Showroom audit.**
+
+```bash
+# Component-level audit (run BEFORE page-level Glimpse)
+uv run --project tools/glimpse glimpse showroom \
+  libs/engine/src/lib/ui/components/primitives/button/button.svelte
+```
+
 **IMPORTANT:** The cat defaults to **NEEDS WORK**. "Fine" is not Grove. The bar is warmth, not correctness.
 
 **Pair with:** `elephant-build` and `chameleon-adapt` (run cat AFTER they build), `rabbit-inspect` (rabbit checks comprehension, cat checks warmth), `crane-audit` (crane checks compliance, cat checks vibes), `deer-sense` (deer checks accessibility, cat checks comfort)

@@ -160,6 +160,22 @@ gw ci --affected --fail-fast --diagnose
 
 If CI fails: read diagnostics, fix, re-run. The chameleon does not leave broken code behind its color shift.
 
+**Component Audit Gate (mandatory when building/modifying components):**
+
+Before page-level verification, the chameleon audits every component it built or modified in isolation using Showroom. This catches design token violations, off-grid spacing, missing focus styles, and hardcoded colors that full-page captures miss.
+
+```bash
+# For each component built or modified, run a Showroom audit
+uv run --project tools/glimpse glimpse showroom \
+  libs/engine/src/lib/ui/components/[path-to-component].svelte
+
+# Scaffold a fixture for new components (generates .showroom.ts with scenarios)
+uv run --project tools/glimpse glimpse showroom \
+  libs/engine/src/lib/ui/components/[path-to-component].svelte --scaffold
+```
+
+**This is a required gate.** Every component the chameleon touches must pass Showroom before moving to page-level Glimpse. Fix all compliance violations before proceeding.
+
 **Visual Verification (mandatory for UI work):**
 
 The chameleon doesn't just build — it _looks_ at what it built. Use Glimpse to capture the result and iterate until the design matches the vision:

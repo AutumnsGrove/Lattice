@@ -241,6 +241,22 @@ pnpm install
 gw ci --affected --fail-fast --diagnose
 ```
 
+**Component Audit Gate (for features with UI components):**
+
+Before page-level verification, audit every UI component built or modified by the Elephant in isolation using Showroom:
+
+```bash
+# For each component built or modified:
+uv run --project tools/glimpse glimpse showroom \
+  libs/engine/src/lib/ui/components/[path-to-component].svelte
+
+# For new components, scaffold fixtures first:
+uv run --project tools/glimpse glimpse showroom \
+  libs/engine/src/lib/ui/components/[path-to-component].svelte --scaffold
+```
+
+All Showroom compliance violations must be resolved before proceeding. If violations are found, resume the Elephant with specific findings.
+
 **Visual Verification (for features with UI):**
 
 ```bash
@@ -273,6 +289,7 @@ GATE LOG
   After Test:     ✅ all tests pass
   After Audit:    ✅ findings resolved
   After Document: ✅ docs written (not stubs)
+  Showroom:       ✅ all components pass compliance audit
   Final CI:       ✅ gw ci --affected passes
 
 The forest grows. The feature lives.

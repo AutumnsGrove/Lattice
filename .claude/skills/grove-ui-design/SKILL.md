@@ -1072,6 +1072,33 @@ When writing text for Grove UI (tooltips, buttons, onboarding, error messages), 
 
 ---
 
+## Component Auditing with Showroom
+
+**Before verifying full pages, audit individual components.** Showroom renders a single `.svelte` component in isolation, runs design compliance checks (color tokens, spacing grid, typography, focus styles, heading hierarchy), and diffs against visual baselines. It catches issues that full-page Glimpse captures miss.
+
+```bash
+# Audit a component in isolation
+uv run --project tools/glimpse glimpse showroom \
+  libs/engine/src/lib/ui/components/primitives/button/button.svelte
+
+# Scaffold a fixture for a new component (generates .showroom.ts with scenarios)
+uv run --project tools/glimpse glimpse showroom \
+  libs/engine/src/lib/ui/components/ui/MyComponent.svelte --scaffold
+
+# Audit with specific scenario and theme
+uv run --project tools/glimpse glimpse showroom \
+  libs/engine/src/lib/ui/components/ui/MyComponent.svelte \
+  --scenario error --theme dark
+
+# Update visual baselines after intentional design changes
+uv run --project tools/glimpse glimpse showroom \
+  libs/engine/src/lib/ui/components/ui/MyComponent.svelte --update-baselines
+```
+
+**The component gate:** Every component you build or modify must pass `glimpse showroom` before you move to page-level Glimpse verification. Fix all compliance violations first.
+
+---
+
 ## Visual Verification with Glimpse
 
 **Before shipping any Grove page, look at it.** CI passing is not the same as looking correct. Use Glimpse to capture the rendered page and review it yourself:
@@ -1097,6 +1124,7 @@ uv run --project tools/glimpse glimpse browse http://localhost:5173/[page] \
 
 Before shipping a Grove page:
 
+- [ ] Showroom: Every built/modified component passes `glimpse showroom` with no compliance violations
 - [ ] Glimpse: Page captured and visually reviewed
 - [ ] Glimpse: All target seasons render correctly (use `matrix`)
 - [ ] Glimpse: No console errors in `--logs` output

@@ -57,6 +57,21 @@ Run automated scanning to surface mechanical violations quickly. Automated tools
 - Check the common issues checklist: images, forms, navigation, color contrast, page structure, language attribute
 - Note violations and group by severity: blockers (missing labels, keyboard traps) vs. warnings (suboptimal alt text)
 
+**Component isolation audit with Showroom:**
+
+Before scanning full pages, audit individual components in isolation using Showroom. Showroom checks focus styles, heading hierarchy, and interactive element compliance at the component level — catching a11y issues that get masked by page context.
+
+```bash
+# Audit each component the deer is reviewing
+uv run --project tools/glimpse glimpse showroom \
+  libs/engine/src/lib/ui/components/[path-to-component].svelte
+
+# The audit checks: focus styles on interactive elements, heading hierarchy,
+# image alt text, color contrast via computed styles, spacing grid compliance
+```
+
+**This is a required gate for component-level a11y work.** A component that lacks focus indicators or has broken heading hierarchy must be caught here, not deferred to page-level scanning.
+
 **Visual scan with Glimpse:**
 
 Capture the page to see what the rendered result actually looks like. Console logs often reveal hidden a11y issues:

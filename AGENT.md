@@ -355,12 +355,13 @@ uv run --project tools/glimpse glimpse stop
 
 Default port is 5173. The server runs via wrangler for local D1/KV/R2 bindings.
 
-#### When to use Glimpse
+#### When to use Glimpse vs Showroom
 
-- After building or modifying any UI component, page, or layout
-- During design skill workflows (chameleon-adapt, gathering-ui, grove-ui-design)
-- When verifying accessibility (deer-sense) — capture at different viewports
-- Before declaring UI work complete — capture → review → iterate
+- **Showroom first** — After building or modifying any individual UI component, run `glimpse showroom` to audit it in isolation (design tokens, spacing, focus styles, visual baselines)
+- **Glimpse second** — After components pass Showroom, capture full pages with `glimpse capture`/`glimpse matrix` to verify integration
+- During design skill workflows (chameleon-adapt, gathering-ui, grove-ui-design) — both gates are required
+- When verifying accessibility (deer-sense) — Showroom for component a11y, Glimpse for page-level a11y
+- Before declaring UI work complete — Showroom → Glimpse → review → iterate
 - When reviewing someone else's UI changes
 
 **The iterate loop:** Capture → look at screenshot → fix issues → capture again. Don't ship UI you haven't seen.
@@ -368,6 +369,52 @@ Default port is 5173. The server runs via wrangler for local D1/KV/R2 bindings.
 **Output modes:** `--agent` for CI-style output, `--json` for structured data, default for rich terminal display. Use `--logs` to surface console errors alongside screenshots.
 
 **Full spec:** `docs/specs/glimpse-spec.md`
+
+#### Showroom — Component-Level Visual Auditing
+
+**When you build, modify, or review individual UI components, you MUST audit them in isolation.** Glimpse captures full pages; Showroom isolates single `.svelte` components, renders them with controlled props and scenarios, runs design compliance checks (color tokens, spacing grid, typography, focus styles), and diffs against visual baselines.
+
+**This is a required gate for component work.** You cannot declare a component "done" without a passing Showroom audit. Page-level Glimpse captures are not a substitute — they don't catch component-level issues like missing focus rings, off-grid spacing, or hardcoded colors hidden behind page context.
+
+```bash
+# Audit a component (auto-starts the Showroom server)
+uv run --project tools/glimpse glimpse showroom \
+  libs/engine/src/lib/ui/components/primitives/button/button.svelte
+
+# Scaffold a fixture file for a new component (generates .showroom.ts)
+uv run --project tools/glimpse glimpse showroom \
+  libs/engine/src/lib/ui/components/ui/MyNewComponent.svelte --scaffold
+
+# Audit with specific scenario/theme
+uv run --project tools/glimpse glimpse showroom \
+  libs/engine/src/lib/ui/components/primitives/button/button.svelte \
+  --scenario destructive --theme dark
+
+# Update visual baselines after intentional design changes
+uv run --project tools/glimpse glimpse showroom \
+  libs/engine/src/lib/ui/components/primitives/button/button.svelte \
+  --update-baselines
+```
+
+**What the audit checks:**
+- **Color tokens** — Flags hardcoded hex/rgb values not using CSS custom properties
+- **Spacing grid** — Verifies all spacing aligns to 4px increments
+- **Typography scale** — Ensures font sizes follow the design scale
+- **Focus styles** — Checks interactive elements have visible focus indicators
+- **Heading hierarchy** — Validates heading levels don't skip
+- **Image alt text** — Ensures images have alt attributes
+- **Visual diff** — Compares screenshots against baselines to catch regressions
+
+**Output:** An audit bundle in `.glimpse/showroom/` containing screenshots (light + dark), compliance results, and visual diffs.
+
+**When to use Showroom vs Glimpse:**
+
+| Tool | Scope | Use When |
+|------|-------|----------|
+| **Showroom** | Single component in isolation | Building/modifying a component, reviewing component PRs, verifying design token compliance |
+| **Glimpse** | Full page with real data | Verifying page layouts, user flows, seasonal themes, integration testing |
+
+**The component gate:** After building or modifying any UI component → `glimpse showroom <component>` → review audit → fix violations → re-audit → THEN use Glimpse for full-page verification. Both gates must pass before shipping.
 
 ### Naming Conventions
 
