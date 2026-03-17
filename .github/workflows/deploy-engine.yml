@@ -1,4 +1,4 @@
-name: Deploy Engine
+name: Build & Migrate Engine
 
 on:
   push:
@@ -13,17 +13,17 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  build-and-migrate:
     runs-on: ubuntu-latest
-    name: Deploy to Cloudflare Pages
+    name: Build, test & run migrations
     permissions:
       contents: read
       deployments: write
 
     steps:
-      # Engine has unique build order: foliage → engine package → tests →
-      # vineyard → type check → full build → deploy. Too custom for reusable
-      # workflow, but still uses the shared composite setup action.
+      # Engine is a library — it no longer deploys a frontend.
+      # Aspen (apps/aspen) handles the tenant app deploy via deploy-aspen.yml.
+      # This workflow builds, tests, type-checks, and runs D1 migrations.
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -46,10 +46,6 @@ jobs:
         run: pnpm check
         working-directory: libs/engine
 
-      - name: Build engine for deployment
-        run: pnpm run build
-        working-directory: libs/engine
-
       - name: Run database migrations
         uses: cloudflare/wrangler-action@v3
         with:
@@ -57,12 +53,4 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: d1 migrations apply grove-engine-db --remote
           workingDirectory: libs/engine
-          packageManager: pnpm
-
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy libs/engine/.svelte-kit/cloudflare --project-name=grove-lattice
           packageManager: pnpm
