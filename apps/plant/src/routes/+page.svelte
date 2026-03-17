@@ -93,12 +93,12 @@
 	const authErrorCode = $derived(page.url.searchParams.get("error_code"));
 	const showAuthError = $derived(!!authError);
 
-	// Feature list for "What you'll get" section
+	// Feature list for "A space that's yours" section
 	const features = [
 		{
 			icon: natureIcons.leaf,
 			title: "Your own subdomain",
-			description: "yourname.grove.place — a corner of the web that's truly yours.",
+			description: "yourname.grove.place \u2014 a corner of the web that's truly yours.",
 		},
 		{
 			icon: authIcons.shield,
@@ -174,7 +174,7 @@
 			class="text-center border-error/50 dark:border-error/30 bg-error-bg/60 dark:bg-error-bg/20"
 		>
 			<div class="flex items-center justify-center gap-2 mb-2">
-				<stateIcons.warning class="w-5 h-5 text-error" />
+				<stateIcons.warning class="w-4 h-4 text-error" />
 				<span class="font-medium text-foreground">Sign-in trouble</span>
 			</div>
 			<p class="text-foreground-muted text-sm">
@@ -203,7 +203,7 @@
 			class="text-center border-warning/50 dark:border-warning/30 bg-warning-bg/60 dark:bg-warning-bg/20"
 		>
 			<div class="flex items-center justify-center gap-2 mb-2">
-				<stateIcons.warning class="w-5 h-5 text-warning" />
+				<stateIcons.warning class="w-4 h-4 text-warning" />
 				<span class="font-medium text-foreground">Invite link expired</span>
 			</div>
 			<p class="text-foreground-muted text-sm">
@@ -213,80 +213,74 @@
 		</GlassCard>
 	{/if}
 
-	<!-- Section 1: Welcome — with nature flanking the logo -->
-	<section class="text-center space-y-6 relative z-10">
+	<!-- ═══════════════════════════════════════════════════════════════
+	     Section 1: The Threshold — Welcome home
+	     ═══════════════════════════════════════════════════════════════ -->
+	<section class="relative z-10">
 		<!-- Nature decoration: trees flanking the hero -->
-		<div class="relative inline-block">
-			<!-- Left tree -->
-			<div class="absolute -left-16 bottom-0 opacity-40 hidden sm:block" aria-hidden="true">
-				<TreePine class="w-10 h-14" {season} />
-			</div>
+		<div class="text-center mb-6">
+			<div class="relative inline-block">
+				<!-- Left tree -->
+				<div class="absolute -left-16 bottom-0 opacity-40 hidden sm:block" aria-hidden="true">
+					<TreePine class="w-10 h-14" {season} />
+				</div>
 
-			<!-- Logo circle with seasonal accent -->
-			<div
-				class="inline-flex items-center justify-center w-20 h-20 rounded-full {accentBg} backdrop-blur-md border border-surface-elevated/40 dark:border-surface-elevated/30 mb-2"
-			>
-				<Logo class="w-12 h-12" {season} />
-			</div>
+				<!-- Logo circle with seasonal accent -->
+				<div
+					class="inline-flex items-center justify-center w-20 h-20 rounded-full {accentBg} backdrop-blur-md border border-surface-elevated/40 dark:border-surface-elevated/30"
+				>
+					<Logo class="w-12 h-12" {season} />
+				</div>
 
-			<!-- Right tree -->
-			<div class="absolute -right-16 bottom-0 opacity-40 hidden sm:block" aria-hidden="true">
-				<TreeCherry class="w-10 h-14" {season} />
+				<!-- Right tree -->
+				<div class="absolute -right-16 bottom-0 opacity-40 hidden sm:block" aria-hidden="true">
+					<TreeCherry class="w-10 h-14" {season} />
+				</div>
 			</div>
 		</div>
 
-		<div>
-			<h1 class="text-3xl md:text-4xl font-medium text-foreground mb-3">
-				Plant your <GroveTerm interactive term="your-garden">blog</GroveTerm>
-			</h1>
-			<p class="text-lg text-foreground-muted max-w-lg mx-auto leading-relaxed">
-				A warm corner of the internet for your words to grow. No algorithms, no ads, no tracking.
-				Just a quiet space that's truly yours.
-			</p>
-		</div>
+		<!-- Gossamer hero — ambient clouds behind the welcome text -->
+		<GlassCard
+			variant="muted"
+			hoverable={false}
+			gossamer="ambient-clouds"
+			gossamerOpacity={0.15}
+			class="text-center"
+		>
+			<div class="space-y-4 py-4">
+				<h1 class="text-3xl md:text-4xl font-medium text-foreground">
+					Welcome home, <GroveTerm interactive term="wanderer">Wanderer</GroveTerm>.
+				</h1>
 
-		<div class="flex flex-wrap items-center justify-center gap-4 text-foreground-subtle text-sm">
-			<span class="flex items-center gap-1.5">
-				<natureIcons.leaf class="w-4 h-4 {accentText}" />
-				yourname.grove.place
-			</span>
-			<span class="text-foreground-faint hidden sm:inline">|</span>
-			<span class="flex items-center gap-1.5">
-				<authIcons.shield class="w-4 h-4 {accentText}" />
-				AI-free zone
-			</span>
-		</div>
+				<p class="text-lg {accentText} font-medium italic max-w-md mx-auto">
+					A forest of voices. A place to be.
+				</p>
 
-		<p class="text-sm text-foreground-subtle flex items-center justify-center gap-1.5 flex-wrap">
-			<authIcons.users class="w-4 h-4 flex-shrink-0" />
-			<span
-				>Join <GroveTerm interactive term="wanderer">wanderers</GroveTerm> building their corner of the web</span
-			>
-		</p>
+				<p class="text-lg text-foreground-muted max-w-lg mx-auto leading-relaxed">
+					A warm corner of the internet for your words to grow. No algorithms, no ads, no tracking.
+					Just a quiet space that's truly yours.
+				</p>
+
+				<div class="flex flex-wrap items-center justify-center gap-4 text-foreground-subtle text-sm pt-2">
+					<span class="flex items-center gap-2">
+						<natureIcons.leaf class="w-4 h-4 {accentText}" />
+						yourname.grove.place
+					</span>
+					<span class="text-foreground-faint hidden sm:inline">·</span>
+					<span class="flex items-center gap-2">
+						<authIcons.shield class="w-4 h-4 {accentText}" />
+						AI-free zone
+					</span>
+				</div>
+			</div>
+		</GlassCard>
 	</section>
 
-	<!-- Section 2: What You Get -->
+	<!-- ═══════════════════════════════════════════════════════════════
+	     Section 2: The Hearth — What this place is
+	     ═══════════════════════════════════════════════════════════════ -->
 	<section class="relative z-10">
-		<h2 class="text-lg font-medium text-center text-foreground-muted mb-6">What you'll get</h2>
-
-		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 stagger-children">
-			{#each features as feature}
-				<Glass variant="tint" class="rounded-xl p-5 hover-lift">
-					<div class="flex items-center gap-3 mb-2">
-						<div class="p-2 rounded-lg {accentIconBg}">
-							<feature.icon class="w-5 h-5 {accentIconText}" />
-						</div>
-						<h3 class="font-medium text-foreground">{feature.title}</h3>
-					</div>
-					<p class="text-sm text-foreground-muted">{feature.description}</p>
-				</Glass>
-			{/each}
-		</div>
-	</section>
-
-	<!-- Section 3: What You're Joining -->
-	<section class="relative z-10">
-		<h2 class="text-lg font-medium text-center text-foreground-muted mb-6">What you're joining</h2>
+		<h2 class="text-lg font-medium text-center text-foreground-muted mb-6">What this place is</h2>
 
 		<GlassCard variant="muted" class="text-center space-y-6">
 			<p class="text-foreground leading-relaxed max-w-md mx-auto">
@@ -299,7 +293,7 @@
 					<div
 						class="inline-flex items-center justify-center w-10 h-10 rounded-full {accentIconBg}"
 					>
-						<authIcons.users class="w-5 h-5 {accentIconText}" />
+						<authIcons.users class="w-4 h-4 {accentIconText}" />
 					</div>
 					<p class="text-sm text-foreground-muted">Queer-friendly</p>
 				</div>
@@ -307,7 +301,7 @@
 					<div
 						class="inline-flex items-center justify-center w-10 h-10 rounded-full {accentIconBg}"
 					>
-						<stateIcons.eye class="w-5 h-5 {accentIconText}" />
+						<stateIcons.eye class="w-4 h-4 {accentIconText}" />
 					</div>
 					<p class="text-sm text-foreground-muted">No public metrics</p>
 				</div>
@@ -315,7 +309,7 @@
 					<div
 						class="inline-flex items-center justify-center w-10 h-10 rounded-full {accentIconBg}"
 					>
-						<natureIcons.heart class="w-5 h-5 {accentIconText}" />
+						<natureIcons.heart class="w-4 h-4 {accentIconText}" />
 					</div>
 					<p class="text-sm text-foreground-muted">Built with care</p>
 				</div>
@@ -323,20 +317,84 @@
 					<div
 						class="inline-flex items-center justify-center w-10 h-10 rounded-full {accentIconBg}"
 					>
-						<featureIcons.messageCircle class="w-5 h-5 {accentIconText}" />
+						<featureIcons.messageCircle class="w-4 h-4 {accentIconText}" />
 					</div>
 					<p class="text-sm text-foreground-muted">Private reactions</p>
 				</div>
 			</div>
 
-			<p class="text-sm text-foreground-subtle italic">"A forest of voices. A place to be."</p>
+			<p class="text-sm text-foreground-subtle flex items-center justify-center gap-2">
+				<authIcons.users class="w-4 h-4 flex-shrink-0" />
+				<span
+					>Join <GroveTerm interactive term="wanderer">wanderers</GroveTerm> building their corner of the web</span
+				>
+			</p>
 		</GlassCard>
 	</section>
 
-	<!-- Section 4: Plans Preview -->
+	<!-- ═══════════════════════════════════════════════════════════════
+	     Section 3: Your Space — A space that's yours
+	     ═══════════════════════════════════════════════════════════════ -->
+	<section class="relative z-10">
+		<h2 class="text-lg font-medium text-center text-foreground-muted mb-6">A space that's yours</h2>
+
+		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 stagger-children">
+			{#each features as feature}
+				<Glass variant="tint" class="rounded-xl p-4 md:p-6 hover-lift">
+					<div class="flex items-center gap-3 mb-2">
+						<div class="p-2 rounded-lg {accentIconBg}">
+							<feature.icon class="w-4 h-4 {accentIconText}" />
+						</div>
+						<h3 class="font-medium text-foreground">{feature.title}</h3>
+					</div>
+					<p class="text-sm text-foreground-muted">{feature.description}</p>
+				</Glass>
+			{/each}
+		</div>
+	</section>
+
+	<!-- ═══════════════════════════════════════════════════════════════
+	     Section 4: The Door — Come inside
+	     ═══════════════════════════════════════════════════════════════ -->
+	<section id="auth-section" class="relative z-10">
+		<h2 class="text-lg font-medium text-center text-foreground-muted mb-6">Come inside</h2>
+
+		<GlassCard variant="frosted" class="max-w-lg mx-auto">
+			<div class="text-center space-y-6 py-2">
+				<p class="text-foreground leading-relaxed">
+					It's free to begin. No credit card, no catch. Just a quiet place to write.
+				</p>
+
+				<LoginRedirectButton
+					returnTo="/profile"
+					label="Step inside"
+					variant="accent"
+					size="lg"
+					class="w-full"
+				/>
+
+				<p class="text-xs text-foreground-subtle">
+					By continuing, you agree to our
+					<a
+						href="https://grove.place/knowledge/legal/terms-of-service"
+						class="text-primary hover:underline">Terms of Service</a
+					>
+					and
+					<a
+						href="https://grove.place/knowledge/legal/privacy-policy"
+						class="text-primary hover:underline">Privacy Policy</a
+					>.
+				</p>
+			</div>
+		</GlassCard>
+	</section>
+
+	<!-- ═══════════════════════════════════════════════════════════════
+	     Section 5: When You're Ready — Pricing on your terms
+	     ═══════════════════════════════════════════════════════════════ -->
 	<section class="relative z-10">
 		<h2 class="text-lg font-medium text-center text-foreground-muted mb-6">
-			Simple, honest pricing
+			When you're ready to grow
 		</h2>
 
 		<div class="flex justify-center gap-6 stagger-children">
@@ -351,18 +409,18 @@
 					{#if isComingSoon}
 						<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-10">
 							<span
-								class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-warning text-white shadow-lg shadow-warning/25"
+								class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-warning text-warning-foreground shadow-lg shadow-warning/25"
 							>
-								<metricIcons.clock class="w-2.5 h-2.5" />
+								<metricIcons.clock class="w-3 h-3" />
 								Soon
 							</span>
 						</div>
 					{:else if isFuturePlan}
 						<div class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-10">
 							<span
-								class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-bark-400 dark:bg-bark-600 text-white shadow-lg"
+								class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-bark-400 dark:bg-bark-600 text-bark-50 dark:text-bark-200 shadow-lg"
 							>
-								<stateIcons.lock class="w-2.5 h-2.5" />
+								<stateIcons.lock class="w-3 h-3" />
 								Future
 							</span>
 						</div>
@@ -403,7 +461,7 @@
 											: 'bg-surface-subtle/60 dark:bg-surface-subtle/40'}"
 								>
 									<PlanIcon
-										class="w-5 h-5 {isAvailable
+										class="w-4 h-4 {isAvailable
 											? accentIconText
 											: isComingSoon
 												? 'text-warning'
@@ -438,7 +496,7 @@
 									<span
 										class="mt-3 text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1"
 									>
-										Get started <navIcons.arrowRight class="w-3 h-3" />
+										Learn more <navIcons.arrowRight class="w-3 h-3" />
 									</span>
 								{/if}
 							</div>
@@ -451,50 +509,17 @@
 		<div class="text-center mt-6">
 			<a
 				href="https://grove.place/pricing"
-				class="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+				class="inline-flex items-center gap-2 text-sm text-primary hover:underline"
 			>
-				See future plans
+				See all plans
 				<navIcons.arrowRight class="w-4 h-4" />
 			</a>
 		</div>
 	</section>
 
-	<!-- Section 5: Auth (Begin your journey) -->
-	<section id="auth-section" class="relative z-10">
-		<h2 class="text-lg font-medium text-center text-foreground-muted mb-6">Begin your journey</h2>
-
-		<GlassCard variant="frosted" class="max-w-lg mx-auto">
-			<div class="text-center space-y-5 py-2">
-				<p class="text-foreground-muted">
-					Ready to plant your <GroveTerm interactive term="your-garden">blog</GroveTerm>? We'll walk you through
-					the rest.
-				</p>
-
-				<LoginRedirectButton
-					returnTo="/profile"
-					label="Get Started"
-					variant="accent"
-					size="lg"
-					class="w-full"
-				/>
-
-				<p class="text-xs text-foreground-subtle">
-					By continuing, you agree to our
-					<a
-						href="https://grove.place/knowledge/legal/terms-of-service"
-						class="text-primary hover:underline">Terms of Service</a
-					>
-					and
-					<a
-						href="https://grove.place/knowledge/legal/privacy-policy"
-						class="text-primary hover:underline">Privacy Policy</a
-					>.
-				</p>
-			</div>
-		</GlassCard>
-	</section>
-
-	<!-- Section 6: The Journey Ahead -->
+	<!-- ═══════════════════════════════════════════════════════════════
+	     Section 6: The Path — The journey ahead
+	     ═══════════════════════════════════════════════════════════════ -->
 	<section class="relative z-10">
 		<h2 class="text-lg font-medium text-center text-foreground-muted mb-6">The journey ahead</h2>
 
