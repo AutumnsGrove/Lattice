@@ -265,14 +265,20 @@
 	.card-link {
 		text-decoration: none;
 		color: inherit;
-		display: flex;
+		display: block;
+		height: 100%;
+	}
+
+	/* GlassCard needs full height to fill the grid cell */
+	.card-link > :global(:first-child) {
+		height: 100%;
 	}
 
 	.card-body {
-		flex: 1;
 		display: flex;
 		flex-direction: column;
 		padding: 1rem 1.5rem;
+		height: 100%;
 	}
 
 	/* ── Card header ──────────────────────────────────────────────────────── */
