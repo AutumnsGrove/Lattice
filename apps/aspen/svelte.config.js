@@ -20,7 +20,7 @@ const config = {
 			platformProxy: {
 				configPath: "../../libs/engine/wrangler.toml",
 				persist: {
-					path: "../../.wrangler/state/v3",
+					path: "../../libs/engine/.wrangler/state/v3",
 				},
 				remoteBindings: false,
 			},

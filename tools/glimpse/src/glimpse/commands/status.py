@@ -70,7 +70,24 @@ def status(ctx: click.Context) -> None:
     else:
         checks["database"] = {"ok": False, "detail": "GROVE_ROOT not found"}
 
-    # 4. Config check
+    # 4. Library build check
+    if grove_root:
+        libs_ok = True
+        missing_libs = []
+        for lib_dir in ["libs/gossamer", "libs/engine"]:
+            dist_path = grove_root / lib_dir / "dist"
+            if (grove_root / lib_dir).exists() and not dist_path.exists():
+                libs_ok = False
+                missing_libs.append(lib_dir)
+        if libs_ok:
+            checks["libraries"] = {"ok": True, "detail": "Library packages built"}
+        else:
+            checks["libraries"] = {
+                "ok": False,
+                "detail": f"Unbuilt libraries: {', '.join(missing_libs)} (--auto will build them)",
+            }
+
+    # 5. Config check
     config_path = config._find_config()
     if config_path:
         checks["config"] = {"ok": True, "detail": f".glimpse.toml found ({config_path})"}

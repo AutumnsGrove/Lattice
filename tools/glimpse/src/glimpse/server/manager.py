@@ -103,6 +103,42 @@ class ServerManager:
         except (OSError, ValueError):
             return {"managed": True, "running": False, "pid": None}
 
+    def _build_library_deps(self) -> None:
+        """Build workspace library packages if their dist/ is missing.
+
+        Apps like aspen import from @autumnsgrove/lattice and @autumnsgrove/gossamer
+        which need svelte-package to produce dist/. Without this, vite dev
+        fails with 'Cannot find module' errors.
+        """
+        if not self._grove_root:
+            return
+
+        # Libraries that need building (order matters: gossamer before engine)
+        lib_builds = [
+            ("libs/gossamer", "dist", "pnpm run build"),
+            ("libs/engine", "dist", "pnpm run build:package"),
+        ]
+
+        for lib_dir, dist_name, build_cmd in lib_builds:
+            lib_path = self._grove_root / lib_dir
+            dist_path = lib_path / dist_name
+            if lib_path.exists() and not dist_path.exists():
+                print(f"Building {lib_dir} (dist/ missing)...", file=sys.stderr)
+                try:
+                    result = subprocess.run(
+                        shlex.split(build_cmd),
+                        cwd=str(lib_path),
+                        capture_output=True,
+                        text=True,
+                        timeout=120,
+                    )
+                    if result.returncode == 0:
+                        print(f"  Built {lib_dir} successfully", file=sys.stderr)
+                    else:
+                        print(f"  Warning: {lib_dir} build failed: {result.stderr[:200]}", file=sys.stderr)
+                except Exception as e:
+                    print(f"  Warning: {lib_dir} build error: {e}", file=sys.stderr)
+
     def _start_server(self) -> tuple[bool, str]:
         """Start the dev server as a background process.
 
@@ -117,6 +153,9 @@ class ServerManager:
         start_cwd = self._grove_root / self._config.server_start_cwd
         if not start_cwd.exists():
             return False, f"Cannot auto-start: directory not found: {start_cwd}"
+
+        # Build library dependencies if needed (gossamer, engine/lattice)
+        self._build_library_deps()
 
         # Try the configured command, with fallback
         commands_to_try = [self._config.server_start_command]
