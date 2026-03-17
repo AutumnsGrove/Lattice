@@ -48,69 +48,6 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 
 	const userIsWayfinder = isWayfinder(locals.user?.email);
 
-	if (env?.DB && env?.CACHE_KV && locals.tenantId) {
-		try {
-			const tenant = await getGreenhouseTenant(locals.tenantId, {
-				DB: env.DB,
-				FLAGS_KV: env.CACHE_KV,
-			});
-
-			if (tenant && tenant.enabled) {
-				greenhouseStatus = {
-					inGreenhouse: true,
-					enrolledAt: tenant.enrolledAt,
-					notes: tenant.notes,
-				};
-
-				// Load grafts this tenant can control
-				tenantGrafts = await getTenantControllableGrafts(locals.tenantId, {
-					DB: env.DB,
-					FLAGS_KV: env.CACHE_KV,
-				});
-			}
-
-			// Load Wayfinder-only data for greenhouse admin panel
-			if (userIsWayfinder) {
-				const flagsEnv = { DB: env.DB, FLAGS_KV: env.CACHE_KV };
-
-				const [ghTenants, flags] = await Promise.all([
-					getGreenhouseTenants(flagsEnv),
-					getFeatureFlags(flagsEnv),
-				]);
-
-				greenhouseTenants = ghTenants;
-				featureFlags = flags;
-
-				const enrolledIds = new Set(ghTenants.map((t) => t.tenantId));
-
-				interface TenantRow {
-					id: string;
-					username: string;
-					display_name: string | null;
-				}
-
-				try {
-					const result = await env.DB.prepare(
-						"SELECT id, username, display_name FROM tenants ORDER BY username",
-					).all<TenantRow>();
-
-					for (const t of result.results ?? []) {
-						const displayName = t.display_name || t.username || t.id;
-						tenantNames[t.id] = displayName;
-
-						if (!enrolledIds.has(t.id)) {
-							availableTenants[t.id] = displayName;
-						}
-					}
-				} catch (error) {
-					console.error("Failed to load tenants for Wayfinder:", error);
-				}
-			}
-		} catch (error) {
-			console.error("Failed to check greenhouse status:", error);
-		}
-	}
-
 	// Username change data
 	let currentSubdomain = "";
 	let tenantPlan = "seedling";
@@ -119,29 +56,97 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 	let usernameChangeReason: string | undefined;
 	let usernameHistory: UsernameChangeHistoryEntry[] = [];
 
+	// Load greenhouse and username data in parallel (independent blocks)
 	if (env?.DB && locals.tenantId) {
-		try {
-			const tenantRow = await env.DB.prepare("SELECT subdomain, plan FROM tenants WHERE id = ?")
-				.bind(locals.tenantId)
-				.first<{ subdomain: string; plan: string | null }>();
+		const loadGreenhouse = async () => {
+			if (!env.CACHE_KV) return;
+			try {
+				const tenant = await getGreenhouseTenant(locals.tenantId!, {
+					DB: env.DB!,
+					FLAGS_KV: env.CACHE_KV,
+				});
 
-			if (tenantRow) {
-				currentSubdomain = tenantRow.subdomain;
-				tenantPlan = tenantRow.plan || "seedling";
+				if (tenant && tenant.enabled) {
+					greenhouseStatus = {
+						inGreenhouse: true,
+						enrolledAt: tenant.enrolledAt,
+						notes: tenant.notes,
+					};
+
+					tenantGrafts = await getTenantControllableGrafts(locals.tenantId!, {
+						DB: env.DB!,
+						FLAGS_KV: env.CACHE_KV,
+					});
+				}
+
+				if (userIsWayfinder) {
+					const flagsEnv = { DB: env.DB!, FLAGS_KV: env.CACHE_KV };
+
+					const [ghTenants, flags] = await Promise.all([
+						getGreenhouseTenants(flagsEnv),
+						getFeatureFlags(flagsEnv),
+					]);
+
+					greenhouseTenants = ghTenants;
+					featureFlags = flags;
+
+					const enrolledIds = new Set(ghTenants.map((t) => t.tenantId));
+
+					interface TenantRow {
+						id: string;
+						username: string;
+						display_name: string | null;
+					}
+
+					try {
+						const result = await env
+							.DB!.prepare("SELECT id, username, display_name FROM tenants ORDER BY username")
+							.all<TenantRow>();
+
+						for (const t of result.results ?? []) {
+							const displayName = t.display_name || t.username || t.id;
+							tenantNames[t.id] = displayName;
+
+							if (!enrolledIds.has(t.id)) {
+								availableTenants[t.id] = displayName;
+							}
+						}
+					} catch (error) {
+						console.error("Failed to load tenants for Wayfinder:", error);
+					}
+				}
+			} catch (error) {
+				console.error("Failed to check greenhouse status:", error);
 			}
+		};
 
-			const tier: TierKey = isValidTier(tenantPlan) ? (tenantPlan as TierKey) : "seedling";
-			const [rateResult, history] = await Promise.all([
-				canChangeUsername(env.DB, locals.tenantId, tier),
-				getUsernameHistory(env.DB, locals.tenantId),
-			]);
-			usernameChangeAllowed = rateResult.allowed;
-			usernameChangeNextAllowedAt = rateResult.nextAllowedAt;
-			usernameChangeReason = rateResult.reason;
-			usernameHistory = history;
-		} catch (error) {
-			console.error("Failed to load username change data:", error);
-		}
+		const loadUsername = async () => {
+			try {
+				const tenantRow = await env
+					.DB!.prepare("SELECT subdomain, plan FROM tenants WHERE id = ?")
+					.bind(locals.tenantId!)
+					.first<{ subdomain: string; plan: string | null }>();
+
+				if (tenantRow) {
+					currentSubdomain = tenantRow.subdomain;
+					tenantPlan = tenantRow.plan || "seedling";
+				}
+
+				const tier: TierKey = isValidTier(tenantPlan) ? (tenantPlan as TierKey) : "seedling";
+				const [rateResult, history] = await Promise.all([
+					canChangeUsername(env.DB!, locals.tenantId!, tier),
+					getUsernameHistory(env.DB!, locals.tenantId!),
+				]);
+				usernameChangeAllowed = rateResult.allowed;
+				usernameChangeNextAllowedAt = rateResult.nextAllowedAt;
+				usernameChangeReason = rateResult.reason;
+				usernameHistory = history;
+			} catch (error) {
+				console.error("Failed to load username change data:", error);
+			}
+		};
+
+		await Promise.all([loadGreenhouse(), loadUsername()]);
 	}
 
 	return {

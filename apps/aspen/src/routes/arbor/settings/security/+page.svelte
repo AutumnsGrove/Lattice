@@ -87,11 +87,13 @@
 	}
 
 	// Build passkey URL with redirect back to this page
-	const passkeyUrl = $derived(
-		`${authPath("/passkey")}?redirect=${encodeURIComponent(typeof window !== "undefined" ? window.location.href : "/arbor/settings/security")}`,
+	let passkeyUrl = $state(
+		`${authPath("/passkey")}?redirect=${encodeURIComponent("/arbor/settings/security")}`,
 	);
 
 	onMount(() => {
+		// Resolve actual URL now that window is available
+		passkeyUrl = `${authPath("/passkey")}?redirect=${encodeURIComponent(window.location.href)}`;
 		fetchSessions();
 	});
 </script>

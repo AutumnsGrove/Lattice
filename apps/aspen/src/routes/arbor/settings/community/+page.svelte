@@ -79,12 +79,14 @@
 	async function saveCanopySettings() {
 		savingCanopy = true;
 		try {
-			await api.put("/api/admin/settings/canopy_visible", { value: canopyVisible });
-			await api.put("/api/admin/settings/canopy_banner", { value: canopyBanner });
-			await api.put("/api/admin/settings/canopy_categories", {
-				value: JSON.stringify(canopyCategories),
-			});
-			await api.put("/api/admin/settings/canopy_show_forests", { value: canopyShowForests });
+			await Promise.all([
+				api.put("/api/admin/settings/canopy_visible", { value: canopyVisible }),
+				api.put("/api/admin/settings/canopy_banner", { value: canopyBanner }),
+				api.put("/api/admin/settings/canopy_categories", {
+					value: JSON.stringify(canopyCategories),
+				}),
+				api.put("/api/admin/settings/canopy_show_forests", { value: canopyShowForests }),
+			]);
 			toast.success("Canopy settings saved");
 		} catch (error) {
 			toast.error("Couldn't save Canopy settings");

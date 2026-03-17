@@ -23,17 +23,15 @@ interface MockStatement {
 
 function createMockDB(
 	options: {
-		tenantRow?: { subdomain: string; plan: string | null } | null;
+		tenantRow?: { subdomain: string; plan: string | null; meadow_opt_in: number | null } | null;
 		settingsRows?: { setting_key: string; setting_value: string }[];
 		blazeCount?: number;
-		meadowRow?: { meadow_opt_in: number | null } | null;
 	} = {},
 ) {
 	const {
-		tenantRow = { subdomain: "testuser", plan: "seedling" },
+		tenantRow = { subdomain: "testuser", plan: "seedling", meadow_opt_in: 0 },
 		settingsRows = [],
 		blazeCount = 0,
-		meadowRow = { meadow_opt_in: 0 },
 	} = options;
 
 	const mockStatement: MockStatement = {
@@ -47,9 +45,6 @@ function createMockDB(
 			// Route by SQL content
 			if (this._sql.includes("COUNT(*)")) {
 				return { count: blazeCount } as T;
-			}
-			if (this._sql.includes("meadow_opt_in")) {
-				return meadowRow as T;
 			}
 			if (this._sql.includes("subdomain, plan")) {
 				return tenantRow as T;
@@ -184,7 +179,9 @@ describe("Settings Hub — load()", () => {
 	it("should return meadow opt-in status", async () => {
 		const { load } = await import("./+page.server.js");
 		const event = createLoadEvent({
-			db: createMockDB({ meadowRow: { meadow_opt_in: 1 } }),
+			db: createMockDB({
+				tenantRow: { subdomain: "testuser", plan: "seedling", meadow_opt_in: 1 },
+			}),
 		});
 
 		const result = await load(event as any);
@@ -195,7 +192,9 @@ describe("Settings Hub — load()", () => {
 	it("should return false for meadow when not opted in", async () => {
 		const { load } = await import("./+page.server.js");
 		const event = createLoadEvent({
-			db: createMockDB({ meadowRow: { meadow_opt_in: 0 } }),
+			db: createMockDB({
+				tenantRow: { subdomain: "testuser", plan: "seedling", meadow_opt_in: 0 },
+			}),
 		});
 
 		const result = await load(event as any);

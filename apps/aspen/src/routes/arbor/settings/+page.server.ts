@@ -17,11 +17,11 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 
 	if (env?.DB && locals.tenantId) {
 		try {
-			// Fetch tenant info + settings in parallel
-			const [tenantRow, settingsRows, blazeCount, meadowRow] = await Promise.all([
-				env.DB.prepare("SELECT subdomain, plan FROM tenants WHERE id = ?")
+			// Fetch tenant info + settings + blaze count in parallel (3 queries, 1 round-trip)
+			const [tenantRow, settingsRows, blazeCount] = await Promise.all([
+				env.DB.prepare("SELECT subdomain, plan, meadow_opt_in FROM tenants WHERE id = ?")
 					.bind(locals.tenantId)
-					.first<{ subdomain: string; plan: string | null }>(),
+					.first<{ subdomain: string; plan: string | null; meadow_opt_in: number | null }>(),
 				env.DB.prepare(
 					"SELECT setting_key, setting_value FROM tenant_settings WHERE tenant_id = ? AND setting_key IN (?, ?, ?, ?, ?, ?, ?)",
 				)
@@ -41,13 +41,11 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 				)
 					.bind(locals.tenantId)
 					.first<{ count: number }>(),
-				env.DB.prepare("SELECT meadow_opt_in FROM tenants WHERE id = ?")
-					.bind(locals.tenantId)
-					.first<{ meadow_opt_in: number | null }>(),
 			]);
 
 			if (tenantRow) {
 				currentSubdomain = tenantRow.subdomain;
+				meadowOptIn = tenantRow.meadow_opt_in === 1;
 			}
 
 			// Parse settings into a map
@@ -64,7 +62,6 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 			canopyVisible = settings.canopy_visible === "true";
 			humanJsonEnabled = settings.human_json_enabled === "true";
 			customBlazeCount = blazeCount?.count ?? 0;
-			meadowOptIn = meadowRow?.meadow_opt_in === 1;
 		} catch (error) {
 			console.error("Failed to load settings hub data:", error);
 		}
