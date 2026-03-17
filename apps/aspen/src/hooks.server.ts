@@ -586,10 +586,13 @@ export const handle: Handle = async ({ event, resolve }) => {
 	// DEV-ONLY: Simulated auth for Glimpse visual testing
 	// =========================================================================
 	// Allows Glimpse to test authenticated pages without Heartwood running.
-	// Only works on localhost — the x-grove-dev-auth header carries a JSON
-	// user object that populates event.locals.user directly.
-	// Same trust model as x-subdomain header (localhost-only dev convenience).
-	if (!event.locals.user) {
+	// Only works when ALL THREE conditions are met:
+	//   1. DEV_AUTH_ENABLED env var is truthy (never set in production wrangler.toml)
+	//   2. Host header is localhost/127.0.0.1 (defense-in-depth)
+	//   3. x-grove-dev-auth header carries a valid JSON user object
+	// The env var gate makes this dead code in production regardless of
+	// header spoofing — if DEV_AUTH_ENABLED doesn't exist, nothing happens.
+	if (!event.locals.user && event.platform?.env?.DEV_AUTH_ENABLED) {
 		const rawHost = event.request.headers.get("host") || "";
 		if (rawHost.includes("localhost") || rawHost.includes("127.0.0.1")) {
 			const devAuth = event.request.headers.get("x-grove-dev-auth");
