@@ -236,6 +236,17 @@ gw gh issue create --write \
 ### Glimpse Is Mandatory
 NEVER skip screenshots. The whole point of the rabbit is seeing what users see. Run `glimpse matrix` or `glimpse capture` before doing ANYTHING else. If Glimpse isn't installed or fails, tell the user and help fix it before proceeding.
 
+### Showroom for Component Clarity
+When the rabbit encounters a component that's confusing in context (a button that doesn't look clickable, a card that blends into the background, a form element with unclear state), audit it in isolation with Showroom. This lets the rabbit see the component stripped of page context — does it stand on its own?
+
+```bash
+# Inspect a confusing component in isolation
+uv run --project tools/glimpse glimpse showroom \
+  libs/engine/src/lib/ui/components/[path-to-component].svelte
+```
+
+The rabbit doesn't need to run Showroom on every component — only when something looks off and needs closer inspection.
+
 ### Fresh Eyes Are The Point
 The rabbit has NEVER seen this site before. It doesn't know what "Heartwood" means. It doesn't know the design system. It doesn't know that "Wanderer" is a lovely term for visitors. Approach every element as if encountering it for the first time.
 

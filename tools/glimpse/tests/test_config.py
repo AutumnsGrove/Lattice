@@ -184,8 +184,8 @@ class TestGlimpseConfigServerDefaults:
     def test_server_defaults(self):
         config = GlimpseConfig()
         assert config.server_port == 5173
-        assert config.server_start_command == "pnpm dev:wrangler"
-        assert config.server_start_cwd == "libs/engine"
+        assert config.server_start_command == "pnpm dev"
+        assert config.server_start_cwd == "apps/aspen"
         assert config.server_health_timeout == 30000
         assert config.server_pid_file == ".glimpse/server.pid"
 

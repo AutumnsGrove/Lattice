@@ -1,18 +1,21 @@
 """glimpse browse — interactive page verification with natural language."""
 
 import asyncio
+import mimetypes
 from pathlib import Path
 
 import click
-from playwright.async_api import async_playwright
+from playwright.async_api import async_playwright, Route
 
 from glimpse.browse.executor import BrowseExecutor, BrowseStepResult
 from glimpse.browse.interpreter import ActionStep, parse_instructions
 from glimpse.browse.resolver import TargetResolver
+from glimpse.capture.auth import build_auth_header
 from glimpse.capture.console import ConsoleCollector
 from glimpse.capture.injector import build_init_script
 from glimpse.capture.screenshot import CaptureResult
 from glimpse.config import GlimpseConfig
+from glimpse.seed.discovery import find_grove_root
 from glimpse.utils.browser import find_chromium_executable
 from glimpse.utils.validation import validate_url
 
@@ -27,6 +30,14 @@ from glimpse.utils.validation import validate_url
 @click.option("--theme", "-t", type=str, default=None, help="Theme: light, dark, system")
 @click.option("--output", "-o", type=str, default=None, help="Output directory for screenshots")
 @click.option("--timeout", type=int, default=5000, help="Per-action timeout in ms")
+@click.option(
+    "--login",
+    type=str,
+    default=None,
+    is_flag=False,
+    flag_value="owner",
+    help="Simulate auth session (owner, admin, wanderer). Default: owner",
+)
 @click.pass_context
 def browse(
     ctx: click.Context,
@@ -39,6 +50,7 @@ def browse(
     theme: str | None,
     output: str | None,
     timeout: int,
+    login: str | None,
 ) -> None:
     """Browse a page interactively with natural language instructions.
 
@@ -93,6 +105,7 @@ def browse(
             screenshot_each=screenshot_each,
             output_dir=output_dir,
             timeout_ms=timeout,
+            login=login,
         )
     )
 
@@ -115,6 +128,7 @@ async def _run_browse(
     screenshot_each: bool,
     output_dir: Path,
     timeout_ms: int,
+    login: str | None = None,
 ) -> tuple[list[BrowseStepResult], CaptureResult]:
     """Async browse execution."""
     async with async_playwright() as p:
@@ -123,10 +137,17 @@ async def _run_browse(
         if executable:
             launch_opts["executable_path"] = executable
         browser = await p.chromium.launch(**launch_opts)
-        context = await browser.new_context(
-            viewport={"width": config.viewport_width, "height": config.viewport_height},
-            device_scale_factor=config.scale,
-        )
+
+        context_opts: dict = {
+            "viewport": {"width": config.viewport_width, "height": config.viewport_height},
+            "device_scale_factor": config.scale,
+        }
+
+        # Mock auth: inject x-grove-dev-auth header for authenticated pages
+        if login:
+            context_opts["extra_http_headers"] = build_auth_header(login)
+
+        context = await browser.new_context(**context_opts)
 
         try:
             # Theme injection
@@ -141,6 +162,27 @@ async def _run_browse(
                 await context.add_init_script(init_js)
 
             page = await context.new_page()
+
+            # Intercept CDN font requests → serve from local static/fonts/
+            grove_root = find_grove_root()
+            if grove_root:
+                fonts_dir = grove_root / "libs" / "engine" / "static" / "fonts"
+                if fonts_dir.exists():
+                    async def _handle_font_route(route: Route) -> None:
+                        url_str = route.request.url
+                        filename = url_str.rsplit("/", 1)[-1]
+                        local_path = fonts_dir / filename
+                        if local_path.exists():
+                            content_type = mimetypes.guess_type(filename)[0] or "font/ttf"
+                            await route.fulfill(
+                                status=200,
+                                content_type=content_type,
+                                body=local_path.read_bytes(),
+                            )
+                        else:
+                            await route.abort("blockedbyclient")
+
+                    await page.route("**/cdn.grove.place/fonts/**", _handle_font_route)
 
             # Console collector
             collector = None
@@ -167,7 +209,7 @@ async def _run_browse(
             # Take final screenshot
             output_dir.mkdir(parents=True, exist_ok=True)
             final_path = output_dir / "browse-final.png"
-            screenshot_bytes = await page.screenshot(type="png")
+            screenshot_bytes = await page.screenshot(type="png", timeout=config.timeout_ms)
             final_path.write_bytes(screenshot_bytes)
 
             final_result = CaptureResult(

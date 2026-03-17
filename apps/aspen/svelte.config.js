@@ -17,6 +17,13 @@ const config = {
 				include: ["/*"],
 				exclude: ["<all>"],
 			},
+			platformProxy: {
+				configPath: "../../libs/engine/wrangler.toml",
+				persist: {
+					path: "../../libs/engine/.wrangler/state/v3",
+				},
+				remoteBindings: false,
+			},
 		}),
 
 		// Disable SvelteKit's built-in CSRF origin check for two reasons:

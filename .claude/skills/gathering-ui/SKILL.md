@@ -130,6 +130,22 @@ If the Deer's report includes issues it couldn't fix directly (e.g., structural 
 
 _The glade is complete. But the conductor looks with its own eyes..._
 
+**Component Audit Gate (MANDATORY before page-level verification):**
+
+Before capturing full pages, the conductor audits every component the Chameleon built or modified in isolation using Showroom. This gate catches design token violations, off-grid spacing, missing focus styles, and hardcoded colors that page-level captures miss.
+
+```bash
+# For each component built or modified by the Chameleon:
+uv run --project tools/glimpse glimpse showroom \
+  libs/engine/src/lib/ui/components/[path-to-component].svelte
+
+# For new components, scaffold fixtures first:
+uv run --project tools/glimpse glimpse showroom \
+  libs/engine/src/lib/ui/components/[path-to-component].svelte --scaffold
+```
+
+**All Showroom compliance violations must be resolved before proceeding to page-level Glimpse.** If violations are found, resume the Chameleon with the specific findings.
+
 **Visual Verification (MANDATORY for UI gatherings):**
 
 ```bash
@@ -152,6 +168,7 @@ Review every screenshot. If something looks wrong — fix it and capture again.
 
 **Validation Checklist (after visual verification):**
 
+- [ ] Showroom: Every built/modified component passes `glimpse showroom` with no compliance violations
 - [ ] Glimpse: Page captured across all target seasons — looks correct
 - [ ] Glimpse: Light and dark mode both visually verified
 - [ ] Glimpse: No console errors in `--logs` output
@@ -208,7 +225,7 @@ The Deer hasn't watched the Chameleon work. It sees only the rendered result, no
 
 ### Gate Every Transition
 
-CI between Chameleon and Deer. CI after Deer's fixes. Glimpse after everything.
+CI between Chameleon and Deer. Showroom audit on every component after Chameleon. CI after Deer's fixes. Glimpse after everything.
 
 ### Visual Proof Required
 

@@ -163,6 +163,12 @@ class GlimpseOutput:
 
         lines = []
 
+        # HTTP status + page title
+        if result.http_status:
+            status_color = "green" if result.http_status < 400 else "red"
+            title_text = f" \u2014 {result.page_title}" if result.page_title else ""
+            lines.append(f"  Status:  [{status_color}]{result.http_status}[/{status_color}]{title_text}")
+
         # Season + theme line
         if result.season:
             emoji = SEASON_EMOJI.get(result.season, "")
@@ -174,6 +180,19 @@ class GlimpseOutput:
         # Viewport
         w, h = result.viewport
         lines.append(f"  Size:    {w}\u00d7{h} @{result.scale}x")
+
+        # A11y summary
+        if result.a11y and (result.a11y.heading_count or result.a11y.landmark_count):
+            a11y_parts = []
+            if result.a11y.heading_count:
+                a11y_parts.append(f"{result.a11y.heading_count} headings")
+            if result.a11y.landmark_count:
+                a11y_parts.append(f"{result.a11y.landmark_count} landmarks")
+            if result.a11y.link_count:
+                a11y_parts.append(f"{result.a11y.link_count} links")
+            if result.a11y.images_missing_alt:
+                a11y_parts.append(f"[red]{result.a11y.images_missing_alt} imgs missing alt[/red]")
+            lines.append(f"  A11y:    {', '.join(a11y_parts)}")
 
         # File info
         size_str = _format_bytes(result.size_bytes)
@@ -230,6 +249,23 @@ class GlimpseOutput:
         """Bare path on stdout for agent consumption. [FAIL] on failure."""
         if result.success:
             print(str(result.output_path), file=sys.stdout)
+            # HTTP status + title (always useful for agent decision-making)
+            if result.http_status:
+                title_part = f" {result.page_title}" if result.page_title else ""
+                print(f"[HTTP] {result.http_status}{title_part}", file=sys.stdout)
+            # A11y summary
+            if result.a11y:
+                parts = []
+                if result.a11y.heading_count:
+                    parts.append(f"{result.a11y.heading_count}h")
+                if result.a11y.landmark_count:
+                    parts.append(f"{result.a11y.landmark_count}lm")
+                if result.a11y.link_count:
+                    parts.append(f"{result.a11y.link_count}a")
+                if result.a11y.images_missing_alt:
+                    parts.append(f"{result.a11y.images_missing_alt}!alt")
+                if parts:
+                    print(f"[A11Y] {' '.join(parts)}", file=sys.stdout)
             self._print_agent_console(result)
         else:
             print(f"[FAIL] {result.error}", file=sys.stdout)

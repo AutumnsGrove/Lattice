@@ -1,0 +1,30 @@
+{
+  "name": "grove-showroom",
+  "version": "0.1.0",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "author": "AutumnsGrove",
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev --port 5188",
+    "build": "vite build",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
+  },
+  "devDependencies": {
+    "@autumnsgrove/prism": "workspace:*",
+    "@sveltejs/adapter-static": "^3.0.10",
+    "@sveltejs/kit": "^2.50.2",
+    "@sveltejs/vite-plugin-svelte": "^4.0.4",
+    "autoprefixer": "^10.4.24",
+    "postcss": "^8.5.6",
+    "svelte": "^5.50.1",
+    "svelte-check": "^4.3.6",
+    "tailwindcss": "^3.4.19",
+    "typescript": "^5.9.3",
+    "vite": "^5.4.21"
+  },
+  "dependencies": {
+    "@autumnsgrove/lattice": "workspace:*",
+    "@lucide/svelte": "^0.577.0"
+  }
+}

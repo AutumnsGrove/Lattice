@@ -108,6 +108,25 @@ Once CI passes, verify manually:
 - Mobile layout correct
 - Keyboard navigation and accessibility pass
 
+**Component audit gate (for UI features):**
+
+If the elephant built or modified UI components, it audits each one in isolation using Showroom BEFORE page-level Glimpse. Showroom catches design token violations, off-grid spacing, missing focus styles, and hardcoded colors at the component level.
+
+```bash
+# For each component built or modified:
+uv run --project tools/glimpse glimpse showroom \
+  libs/engine/src/lib/ui/components/[path-to-component].svelte
+
+# For brand new components, scaffold a fixture first:
+uv run --project tools/glimpse glimpse showroom \
+  libs/engine/src/lib/ui/components/[path-to-component].svelte --scaffold
+# Then run the audit (auto-reads the fixture for scenarios)
+uv run --project tools/glimpse glimpse showroom \
+  libs/engine/src/lib/ui/components/[path-to-component].svelte
+```
+
+**This is a required gate.** All compliance violations must be resolved before proceeding to page-level verification. The elephant does not ship components it hasn't audited.
+
 **Visual verification (for UI features):**
 
 If the elephant built UI, it looks at the result before declaring the structure sound:

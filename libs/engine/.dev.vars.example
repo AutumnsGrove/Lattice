@@ -12,3 +12,7 @@ ANTHROPIC_API_KEY=sk-ant-your_anthropic_key_here
 # Generate with: openssl rand -hex 32
 # This is a 256-bit key (64 hex characters)
 TOKEN_ENCRYPTION_KEY=your_64_character_hex_key_here
+
+# Enable Glimpse dev auth (simulated login via x-grove-dev-auth header)
+# Only works on localhost. Never set this in production.
+DEV_AUTH_ENABLED=true

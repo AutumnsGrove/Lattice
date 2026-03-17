@@ -16,9 +16,10 @@ from pathlib import Path
 
 from playwright.async_api import async_playwright, Browser, BrowserContext, Route
 
+from glimpse.capture.auth import build_auth_header
 from glimpse.capture.console import ConsoleCollector
 from glimpse.capture.injector import build_init_script
-from glimpse.capture.screenshot import CaptureRequest, CaptureResult, ConsoleMessage
+from glimpse.capture.screenshot import A11ySummary, CaptureRequest, CaptureResult, ConsoleMessage
 from glimpse.utils.browser import find_chromium_executable
 from glimpse.seed.discovery import find_grove_root
 
@@ -98,10 +99,16 @@ class CaptureEngine:
 
         try:
             # 1. Create browser context with viewport settings
-            context = await self._browser.new_context(
-                viewport={"width": request.width, "height": request.height},
-                device_scale_factor=request.scale,
-            )
+            context_opts: dict = {
+                "viewport": {"width": request.width, "height": request.height},
+                "device_scale_factor": request.scale,
+            }
+
+            # Mock auth: inject x-grove-dev-auth header for authenticated pages
+            if request.login:
+                context_opts["extra_http_headers"] = build_auth_header(request.login)
+
+            context = await self._browser.new_context(**context_opts)
 
             # 2. Pre-seed localStorage for theme injection (before navigation)
             if not request.no_inject:
@@ -143,13 +150,16 @@ class CaptureEngine:
                 collector = ConsoleCollector()
                 collector.attach(page)
 
-            # 4. Navigate to URL
+            # 4. Navigate to URL and capture HTTP status
+            http_status = 0
             try:
-                await page.goto(
+                response = await page.goto(
                     request.url,
                     wait_until="domcontentloaded",
                     timeout=request.timeout_ms,
                 )
+                if response:
+                    http_status = response.status
             except Exception as e:
                 return CaptureResult(
                     url=request.url,
@@ -185,6 +195,10 @@ class CaptureEngine:
                     pass  # Best-effort; proceed with capture
             elif request.wait_ms > 0:
                 await page.wait_for_timeout(request.wait_ms)
+
+            # 5b. Collect page metadata (title + a11y snapshot)
+            page_title = await page.title() or ""
+            a11y = await self._collect_a11y(page)
 
             # 6. Capture screenshot
             screenshot_opts: dict = {
@@ -239,6 +253,9 @@ class CaptureEngine:
                 scale=request.scale,
                 size_bytes=len(screenshot_bytes),
                 duration_ms=duration_ms,
+                http_status=http_status,
+                page_title=page_title,
+                a11y=a11y,
                 console_messages=collector.messages if collector else [],
             )
 
@@ -255,6 +272,68 @@ class CaptureEngine:
         finally:
             if context:
                 await context.close()
+
+    async def _collect_a11y(self, page) -> A11ySummary:
+        """Collect a brief accessibility snapshot from the page.
+
+        Uses JavaScript evaluation rather than Playwright's a11y tree API
+        for speed — we only need counts and heading text, not the full tree.
+        """
+        try:
+            data = await page.evaluate("""() => {
+                const headings = [];
+                document.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(h => {
+                    const text = h.textContent?.trim().substring(0, 80) || '';
+                    if (text) headings.push(h.tagName.toLowerCase() + ': ' + text);
+                });
+                const landmarks = [];
+                const roles = ['banner', 'navigation', 'main', 'complementary',
+                               'contentinfo', 'search', 'form', 'region'];
+                roles.forEach(role => {
+                    if (document.querySelector(`[role="${role}"]`))
+                        landmarks.push(role);
+                });
+                // Also check semantic HTML elements
+                if (!landmarks.includes('banner') && document.querySelector('header'))
+                    landmarks.push('banner');
+                if (!landmarks.includes('navigation') && document.querySelector('nav'))
+                    landmarks.push('navigation');
+                if (!landmarks.includes('main') && document.querySelector('main'))
+                    landmarks.push('main');
+                if (!landmarks.includes('contentinfo') && document.querySelector('footer'))
+                    landmarks.push('contentinfo');
+
+                const images = document.querySelectorAll('img');
+                let missingAlt = 0;
+                images.forEach(img => {
+                    if (!img.alt && !img.getAttribute('aria-label')
+                        && !img.getAttribute('aria-labelledby')
+                        && img.getAttribute('role') !== 'presentation') {
+                        missingAlt++;
+                    }
+                });
+
+                return {
+                    title: document.title || '',
+                    headings: headings.slice(0, 20),
+                    landmarks: [...new Set(landmarks)],
+                    linkCount: document.querySelectorAll('a[href]').length,
+                    imageCount: images.length,
+                    imagesMissingAlt: missingAlt,
+                };
+            }""")
+            return A11ySummary(
+                page_title=data.get("title", ""),
+                heading_count=len(data.get("headings", [])),
+                headings=data.get("headings", []),
+                landmark_count=len(data.get("landmarks", [])),
+                landmarks=data.get("landmarks", []),
+                link_count=data.get("linkCount", 0),
+                image_count=data.get("imageCount", 0),
+                images_missing_alt=data.get("imagesMissingAlt", 0),
+            )
+        except Exception:
+            return A11ySummary()
 
     async def capture_many(
         self,

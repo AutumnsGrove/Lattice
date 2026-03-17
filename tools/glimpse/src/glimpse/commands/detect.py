@@ -1,11 +1,13 @@
 """glimpse detect — AI-powered element detection via Lumen Gateway."""
 
 import asyncio
+import mimetypes
 
 import click
-from playwright.async_api import async_playwright
+from playwright.async_api import async_playwright, Route
 
 from glimpse.capture.injector import build_init_script
+from glimpse.seed.discovery import find_grove_root
 from glimpse.utils.browser import find_chromium_executable
 from glimpse.detection.a11y import find_in_a11y_tree
 from glimpse.detection.heuristics import find_by_heuristic
@@ -116,11 +118,33 @@ async def _run_detect(url, description, config, lumen, season, theme, overlay, c
                 await context.add_init_script(init_js)
 
             page = await context.new_page()
+
+            # Intercept CDN font requests → serve from local static/fonts/
+            grove_root = find_grove_root()
+            if grove_root:
+                fonts_dir = grove_root / "libs" / "engine" / "static" / "fonts"
+                if fonts_dir.exists():
+                    async def _handle_font_route(route: Route) -> None:
+                        url_str = route.request.url
+                        filename = url_str.rsplit("/", 1)[-1]
+                        local_path = fonts_dir / filename
+                        if local_path.exists():
+                            content_type = mimetypes.guess_type(filename)[0] or "font/ttf"
+                            await route.fulfill(
+                                status=200,
+                                content_type=content_type,
+                                body=local_path.read_bytes(),
+                            )
+                        else:
+                            await route.abort("blockedbyclient")
+
+                    await page.route("**/cdn.grove.place/fonts/**", _handle_font_route)
+
             await page.goto(url, wait_until="domcontentloaded", timeout=config.timeout_ms)
             await page.wait_for_timeout(config.wait_ms)
 
             # Take screenshot for detection
-            screenshot_bytes = await page.screenshot(type="png")
+            screenshot_bytes = await page.screenshot(type="png", timeout=config.timeout_ms)
 
             # Try a11y tree first
             a11y_result = await find_in_a11y_tree(page, description)
