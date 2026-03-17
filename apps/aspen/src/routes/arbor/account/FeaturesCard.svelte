@@ -2,12 +2,7 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
-	import {
-		BarChart3,
-		Calendar,
-		Sparkles,
-		MessageSquare,
-	} from "@autumnsgrove/lattice/ui/components/icons";
+	import { metricIcons, featureIcons, phaseIcons } from "@autumnsgrove/prism/icons";
 
 	interface Props {
 		curiosCount?: number;
@@ -29,7 +24,7 @@
 		<!-- Rings (Analytics) -->
 		<a href="/arbor/analytics" class="feature-item">
 			<div class="feature-icon">
-				<BarChart3 class="icon" />
+				<metricIcons.barChart class="icon" />
 			</div>
 			<div class="feature-content">
 				<div class="feature-title">
@@ -47,7 +42,7 @@
 		<!-- Trail -->
 		<a href="/arbor/timeline" class="feature-item">
 			<div class="feature-icon">
-				<Calendar class="icon" />
+				<metricIcons.calendar class="icon" />
 			</div>
 			<div class="feature-content">
 				<div class="feature-title">
@@ -63,7 +58,7 @@
 		<!-- Reeds (Comments) -->
 		<a href="/arbor/reeds" class="feature-item">
 			<div class="feature-icon">
-				<MessageSquare class="icon" />
+				<featureIcons.messageSquare class="icon" />
 			</div>
 			<div class="feature-content">
 				<div class="feature-title">
@@ -80,7 +75,7 @@
 		<!-- Curios -->
 		<a href="/arbor/curios" class="feature-item">
 			<div class="feature-icon curios">
-				<Sparkles class="icon" />
+				<phaseIcons.sparkles class="icon" />
 			</div>
 			<div class="feature-content">
 				<div class="feature-title">
@@ -100,7 +95,7 @@
 		<!-- Reverie (AI Configuration) -->
 		<a href="/arbor/reverie" class="feature-item">
 			<div class="feature-icon">
-				<Sparkles class="icon" />
+				<phaseIcons.sparkles class="icon" />
 			</div>
 			<div class="feature-content">
 				<div class="feature-title">
