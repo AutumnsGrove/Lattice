@@ -166,7 +166,7 @@
 					toast.error("Upload completed but no photo URL was returned");
 				}
 			} catch (error) {
-				toast.error(error instanceof Error ? error.message : "Failed to upload photo");
+				toast.error(error instanceof Error ? error.message : "Couldn't upload photo");
 			}
 			uploadingAvatar = false;
 		};
@@ -181,7 +181,7 @@
 			toast.success("Profile photo removed");
 			invalidateAll();
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : "Failed to remove photo");
+			toast.error(error instanceof Error ? error.message : "Couldn't remove photo");
 		}
 		clearingAvatar = false;
 	}
@@ -199,7 +199,7 @@
 					: "Title cleared — your default name will show instead.",
 			);
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : "Failed to save title");
+			toast.error(error instanceof Error ? error.message : "Couldn't save title");
 		}
 		savingTitle = false;
 	}
@@ -217,7 +217,7 @@
 					: "Grove logo hidden from header.",
 			);
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : "Failed to save logo setting");
+			toast.error(error instanceof Error ? error.message : "Couldn't save logo setting");
 		}
 		savingLogo = false;
 	}
@@ -230,7 +230,7 @@
 <ArborSection
 	title="Profile"
 	icon={chromeIcons.sliders}
-	description="Your identity, address, and grove configuration."
+	description="The face your grove shows the world."
 	backHref="/arbor/settings"
 	backLabel="Settings"
 >
@@ -407,7 +407,7 @@
 								window.location.href = `https://${newSub}.grove.place/arbor/settings/profile`;
 							}, 1500);
 						} else if (result.type === "failure") {
-							toast.error(String(result.data?.error || "Failed to change username"));
+							toast.error(String(result.data?.error || "Couldn't change username"));
 						}
 						await update();
 					};
@@ -540,7 +540,7 @@
 						toast.success(String(result.data?.message || "Feature updated"));
 						await invalidateAll();
 					} else if (result.type === "failure") {
-						toast.error(String(result.data?.error || "Failed to toggle feature"));
+						toast.error(String(result.data?.error || "Couldn't toggle feature"));
 					}
 					loadingGraftId = undefined;
 					await update({ reset: false });
@@ -562,7 +562,7 @@
 						toast.success(String(result.data?.message || "Preferences reset"));
 						await invalidateAll();
 					} else if (result.type === "failure") {
-						toast.error(String(result.data?.error || "Failed to reset preferences"));
+						toast.error(String(result.data?.error || "Couldn't reset preferences"));
 					}
 					resettingGrafts = false;
 					await update({ reset: false });

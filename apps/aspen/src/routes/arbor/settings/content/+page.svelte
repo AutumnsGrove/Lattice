@@ -89,7 +89,7 @@
 			newBlazeColor = "sky";
 			await fetchBlazes();
 		} catch (error) {
-			toast.error("Failed to create blaze");
+			toast.error("Couldn't create blaze");
 			console.error("Create blaze error:", error);
 		}
 		savingBlaze = false;
@@ -110,7 +110,7 @@
 			toast.success(`Blaze "${pendingDeleteBlazeLabel}" deleted`);
 			await fetchBlazes();
 		} catch (error) {
-			toast.error("Failed to delete blaze");
+			toast.error("Couldn't delete blaze");
 			console.error("Delete blaze error:", error);
 		}
 		deletingBlazeSlug = null;
@@ -127,7 +127,7 @@
 <ArborSection
 	title="Content"
 	icon={natureIcons.flame}
-	description="Manage your content markers and custom blazes."
+	description="The markers that tell readers what your posts are about."
 	backHref="/arbor/settings"
 	backLabel="Settings"
 >

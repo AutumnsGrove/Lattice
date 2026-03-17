@@ -87,7 +87,7 @@
 			await api.put("/api/admin/settings/canopy_show_forests", { value: canopyShowForests });
 			toast.success("Canopy settings saved");
 		} catch (error) {
-			toast.error("Failed to save Canopy settings");
+			toast.error("Couldn't save Canopy settings");
 			console.error("Save Canopy settings error:", error);
 		}
 		savingCanopy = false;
@@ -99,7 +99,7 @@
 			await api.put("/api/admin/meadow", { meadow_opt_in: meadowOptIn });
 			toast.success("Meadow settings saved");
 		} catch (error) {
-			toast.error("Failed to save Meadow settings");
+			toast.error("Couldn't save Meadow settings");
 			console.error("Save Meadow settings error:", error);
 		}
 		savingMeadow = false;
@@ -123,7 +123,7 @@
 			await api.put("/api/admin/human-json", { enabled: humanJsonEnabled });
 			toast.success("human.json settings saved");
 		} catch (error) {
-			toast.error("Failed to save human.json settings");
+			toast.error("Couldn't save human.json settings");
 			console.error("Save human.json error:", error);
 		}
 		savingHumanJson = false;
@@ -139,7 +139,7 @@
 			newVouchUrl = "";
 			toast.success("Vouch added");
 		} catch (error) {
-			toast.error("Failed to add vouch");
+			toast.error("Couldn't add vouch");
 			console.error("Add vouch error:", error);
 		}
 		addingVouch = false;
@@ -155,7 +155,7 @@
 			humanJsonVouches = humanJsonVouches.filter((v) => v.id !== id);
 			toast.success("Vouch removed");
 		} catch (error) {
-			toast.error("Failed to remove vouch");
+			toast.error("Couldn't remove vouch");
 			console.error("Remove vouch error:", error);
 		}
 		removingVouchId = null;

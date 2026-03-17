@@ -66,7 +66,7 @@
 			toast.success("Session revoked");
 			sessions = sessions.filter((s) => s.id !== sessionId);
 		} catch (error) {
-			toast.error("Failed to revoke session");
+			toast.error("Couldn't revoke session");
 			console.error("Revoke session error:", error);
 		}
 		revokingSessionId = null;
@@ -79,7 +79,7 @@
 			toast.success(`Signed out of ${result.revokedCount || "all other"} devices`);
 			await fetchSessions();
 		} catch (error) {
-			toast.error("Failed to revoke sessions");
+			toast.error("Couldn't revoke sessions");
 			console.error("Revoke all sessions error:", error);
 		}
 		revokingAllSessions = false;

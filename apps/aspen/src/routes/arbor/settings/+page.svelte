@@ -54,7 +54,7 @@
 						Title: {data.groveTitle ? `"${data.groveTitle}"` : "default"}
 					</span>
 				</div>
-				<span class="card-action">Manage &rarr;</span>
+				<span class="card-action">Edit profile &rarr;</span>
 			</GlassCard>
 		</a>
 
@@ -78,7 +78,7 @@
 					</span>
 					<span class="status-line">Season: {seasonLabel}</span>
 				</div>
-				<span class="card-action">Manage &rarr;</span>
+				<span class="card-action">Customize &rarr;</span>
 			</GlassCard>
 		</a>
 
@@ -100,7 +100,7 @@
 						human.json: {data.humanJsonEnabled ? "on" : "off"}
 					</span>
 				</div>
-				<span class="card-action">Manage &rarr;</span>
+				<span class="card-action">Connect &rarr;</span>
 			</GlassCard>
 		</a>
 
@@ -116,8 +116,9 @@
 						{data.customBlazeCount} custom blaze{data.customBlazeCount === 1 ? "" : "s"}
 					</span>
 					<span class="status-line">8 defaults</span>
+					<span class="status-line">Up to 20 per grove</span>
 				</div>
-				<span class="card-action">Manage &rarr;</span>
+				<span class="card-action">Create &rarr;</span>
 			</GlassCard>
 		</a>
 
@@ -140,7 +141,7 @@
 					{/if}
 					<span class="status-line">Passkey: manage on login hub</span>
 				</div>
-				<span class="card-action">Manage &rarr;</span>
+				<span class="card-action">Review &rarr;</span>
 			</GlassCard>
 		</a>
 	</div>

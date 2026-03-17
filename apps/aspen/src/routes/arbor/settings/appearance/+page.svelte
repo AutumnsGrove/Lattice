@@ -121,7 +121,9 @@
 		<div class="section-header">
 			<h2>Typography</h2>
 		</div>
-		<p class="section-description">Choose the font family used across your site.</p>
+		<p class="section-description">
+			Every grove has its own voice. Pick the typeface that speaks yours.
+		</p>
 
 		{#if loadingFont}
 			<div class="space-y-3">
@@ -170,7 +172,7 @@
 			<h2>Accent Color</h2>
 		</div>
 		<p class="section-description">
-			Customize the accent color used for tags and interactive elements.
+			The color that ties your grove together. Tags, links, and interactive moments all follow this.
 		</p>
 
 		<div class="color-picker-section">
@@ -224,7 +226,7 @@
 			<h2>Preferred Season</h2>
 		</div>
 		<p class="section-description">
-			Choose a season for your PWA home screen icon and browser theme color.
+			Pin your grove to a season. Your home screen icon and browser chrome will follow.
 		</p>
 
 		<div class="season-picker" role="radiogroup" aria-label="Preferred season">
