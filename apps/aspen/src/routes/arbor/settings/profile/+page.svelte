@@ -247,7 +247,7 @@
 		<div class="avatar-section">
 			<div class="avatar-preview">
 				{#if displayAvatar}
-					<img src={displayAvatar} alt="Your profile photo" class="avatar-image" />
+					<img src={displayAvatar} alt="Your profile avatar" class="avatar-image" />
 				{:else}
 					<span class="avatar-placeholder">
 						{data.user?.name?.[0] || data.user?.email?.[0] || "?"}
