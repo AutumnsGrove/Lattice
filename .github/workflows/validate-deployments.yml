@@ -17,12 +17,13 @@ on:
       - "services/email-render/**"
       - "services/og-worker/**"
       - "workers/**"
-      # Pages
-      - "libs/engine/**"
       - "apps/landing/**"
       - "apps/clearing/**"
-      - "apps/domains/**"
       - "apps/plant/**"
+      - "apps/ivy/**"
+      # Pages
+      - "libs/engine/**"
+      - "apps/domains/**"
       - "apps/terrarium/**"
       - "apps/meadow/**"
       # Root config changes affect all
@@ -83,6 +84,20 @@ jobs:
             needs-engine: true
             build-first: true
             typecheck-command: pnpm check
+          - name: clearing
+            path: apps/clearing
+            needs-engine: true
+            build-first: true
+          - name: plant
+            path: apps/plant
+            needs-engine: true
+            build-first: true
+            typecheck-command: pnpm check
+          - name: ivy
+            path: apps/ivy
+            needs-engine: true
+            needs-foliage: true
+            build-first: true
 
     steps:
       - name: Checkout
@@ -100,6 +115,11 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
+
+      - name: Build foliage
+        if: matrix.needs-foliage
+        run: pnpm run build
+        working-directory: libs/foliage
 
       - name: Build gossamer
         if: matrix.needs-engine
@@ -146,17 +166,9 @@ jobs:
             path: libs/engine
             project: grove-lattice
             needs-engine: true
-          - name: clearing
-            path: apps/clearing
-            project: grove-clearing
-            needs-engine: true
           - name: domains
             path: apps/domains
             project: forage
-            needs-engine: true
-          - name: plant
-            path: apps/plant
-            project: grove-plant
             needs-engine: true
           - name: terrarium
             path: apps/terrarium

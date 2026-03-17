@@ -1,6 +1,6 @@
 # Reusable workflow for deploying Cloudflare Pages apps.
 #
-# Each Pages app (landing, plant, amber, etc.) calls this with its own
+# Each Pages app (amber, domains, meadow, terrarium, etc.) calls this with its own
 # parameters. The calling workflow still appears as its own entry in the
 # Actions tab with full step-level logs — zero observability loss.
 #

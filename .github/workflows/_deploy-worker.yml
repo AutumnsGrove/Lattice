@@ -30,6 +30,11 @@ on:
         required: false
         type: boolean
         default: false
+      needs-foliage:
+        description: "Build libs/foliage before engine"
+        required: false
+        type: boolean
+        default: false
       run-typecheck:
         description: "Run type checking"
         required: false
@@ -107,6 +112,11 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
+
+      - name: Build foliage
+        if: inputs.needs-foliage
+        run: pnpm run build
+        working-directory: libs/foliage
 
       - name: Build gossamer
         if: inputs.needs-engine
