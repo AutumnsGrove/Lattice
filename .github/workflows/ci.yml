@@ -143,6 +143,9 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -151,7 +154,62 @@ jobs:
         uses: ./.github/actions/grove-setup
 
       - name: Run linters
-        run: pnpm lint
+        id: lint
+        run: |
+          pnpm lint 2>&1 | tee /tmp/lint-output.txt
+        continue-on-error: true
+
+      - name: Comment on PR with lint errors
+        if: steps.lint.outcome == 'failure' && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const raw = fs.readFileSync('/tmp/lint-output.txt', 'utf8');
+
+            // Extract only the error/warning lines (skip the oxlint noise)
+            const lines = raw.split('\n');
+            const errorLines = lines.filter(l =>
+              /\d+:\d+\s+(error|warning)/.test(l) || /^\s+✖/.test(l) || /^\/home/.test(l) || /Found \d+ warnings/.test(l)
+            );
+
+            // Build a focused summary
+            let body = '## 🔴 Lint Failed\n\n';
+            body += 'The lint check found errors that must be fixed before merging.\n\n';
+            body += '```\n' + errorLines.join('\n') + '\n```\n\n';
+            body += '**Full output** is in the [Lint job logs]';
+            body += `(${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}).\n`;
+
+            // Find and update existing comment, or create new one
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('Lint Failed')
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+      - name: Fail if lint errored
+        if: steps.lint.outcome == 'failure'
+        run: exit 1
 
       # TODO: Enable after running `pnpm format` across the full codebase
       # - name: Check formatting
@@ -163,23 +221,85 @@ jobs:
     if: always()
     needs: [detect, test, typecheck, barrel-exports, lint]
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
       - name: Check all jobs
+        id: check
         run: |
-          echo "detect: ${{ needs.detect.result }}"
-          echo "test: ${{ needs.test.result }}"
-          echo "typecheck: ${{ needs.typecheck.result }}"
-          echo "barrel-exports: ${{ needs.barrel-exports.result }}"
-          echo "lint: ${{ needs.lint.result }}"
+          FAILED=""
+          for job in detect test typecheck barrel-exports lint; do
+            case "$job" in
+              detect)        RESULT="${{ needs.detect.result }}" ;;
+              test)          RESULT="${{ needs.test.result }}" ;;
+              typecheck)     RESULT="${{ needs.typecheck.result }}" ;;
+              barrel-exports) RESULT="${{ needs.barrel-exports.result }}" ;;
+              lint)          RESULT="${{ needs.lint.result }}" ;;
+            esac
+            echo "$job: $RESULT"
+            if [ "$RESULT" = "failure" ]; then
+              FAILED="$FAILED $job"
+            fi
+          done
 
-          # Fail if any required job failed
-          if [[ "${{ needs.detect.result }}" == "failure" ]] || \
-             [[ "${{ needs.test.result }}" == "failure" ]] || \
-             [[ "${{ needs.typecheck.result }}" == "failure" ]] || \
-             [[ "${{ needs.barrel-exports.result }}" == "failure" ]] || \
-             [[ "${{ needs.lint.result }}" == "failure" ]]; then
-            echo "::error::One or more CI jobs failed"
+          if [ -n "$FAILED" ]; then
+            echo "failed_jobs=$FAILED" >> $GITHUB_OUTPUT
+            echo "::error::Failed jobs:$FAILED"
             exit 1
           fi
 
           echo "All CI checks passed"
+
+      - name: Comment on PR with failure summary
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const failed = '${{ steps.check.outputs.failed_jobs }}'.trim().split(/\s+/);
+            const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+
+            let body = '## 🔴 CI Failed\n\n';
+            body += '| Job | Status |\n|-----|--------|\n';
+
+            const jobs = ['detect', 'test', 'typecheck', 'barrel-exports', 'lint'];
+            const results = {
+              detect: '${{ needs.detect.result }}',
+              test: '${{ needs.test.result }}',
+              typecheck: '${{ needs.typecheck.result }}',
+              'barrel-exports': '${{ needs.barrel-exports.result }}',
+              lint: '${{ needs.lint.result }}',
+            };
+
+            for (const job of jobs) {
+              const r = results[job];
+              const icon = r === 'success' ? '✅' : r === 'failure' ? '❌' : r === 'skipped' ? '⏭️' : '⚪';
+              body += `| ${job} | ${icon} ${r} |\n`;
+            }
+
+            body += `\n[View full run](${runUrl})\n`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('CI Failed')
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
