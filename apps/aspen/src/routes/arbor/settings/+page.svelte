@@ -64,161 +64,175 @@
 	<div class="settings-grid">
 		<!-- Profile Card -->
 		<a href="/arbor/settings/profile" class="card-link">
-			<GlassCard variant="frosted" hoverable>
-				<div class="card-header">
-					<chromeIcons.sliders class="card-icon" />
-					<h2 class="card-title">Profile</h2>
-				</div>
-				<div class="profile-preview">
-					<div class="avatar-thumb">
-						{#if displayAvatar}
-							<img src={displayAvatar} alt="" class="avatar-img" />
-						{:else}
-							<span class="avatar-initial">
-								{subdomain?.[0]?.toUpperCase() || "?"}
-							</span>
-						{/if}
+			<GlassCard variant="frosted" hoverable flush class="h-full flex flex-col">
+				<div class="card-body">
+					<div class="card-header">
+						<chromeIcons.sliders class="card-icon" />
+						<h2 class="card-title">Profile</h2>
 					</div>
-					<div class="profile-info">
-						<span class="profile-address">{subdomain}.grove.place</span>
-						{#if groveTitle}
-							<span class="profile-title">&ldquo;{groveTitle}&rdquo;</span>
-						{:else}
-							<span class="profile-title muted">no title yet</span>
-						{/if}
+					<div class="profile-preview">
+						<div class="avatar-thumb">
+							{#if displayAvatar}
+								<img src={displayAvatar} alt="" class="avatar-img" />
+							{:else}
+								<span class="avatar-initial">
+									{subdomain?.[0]?.toUpperCase() || "?"}
+								</span>
+							{/if}
+						</div>
+						<div class="profile-info">
+							<span class="profile-address">{subdomain}.grove.place</span>
+							{#if groveTitle}
+								<span class="profile-title">&ldquo;{groveTitle}&rdquo;</span>
+							{:else}
+								<span class="profile-title muted">no title yet</span>
+							{/if}
+						</div>
 					</div>
+					<span class="card-action">Edit profile &rarr;</span>
 				</div>
-				<span class="card-action">Edit profile &rarr;</span>
 			</GlassCard>
 		</a>
 
 		<!-- Appearance Card -->
 		<a href="/arbor/settings/appearance" class="card-link">
-			<GlassCard variant="frosted" hoverable>
-				<div class="card-header">
-					<featureIcons.palette class="card-icon" />
-					<h2 class="card-title">Appearance</h2>
-				</div>
-				<div class="appearance-preview">
-					<div class="appearance-row">
-						<span class="appear-label">Font</span>
-						<span class="font-preview" style:font-family={fontCssFamily}>{fontName}</span>
+			<GlassCard variant="frosted" hoverable flush class="h-full flex flex-col">
+				<div class="card-body">
+					<div class="card-header">
+						<featureIcons.palette class="card-icon" />
+						<h2 class="card-title">Appearance</h2>
 					</div>
-					<div class="appearance-row">
-						<span class="appear-label">Accent</span>
-						{#if accentColor}
-							<span class="accent-swatch">
-								<span class="accent-dot" style:background={accentColor} aria-hidden="true"></span>
-								<span class="accent-hex">{accentColor}</span>
-							</span>
-						{:else}
-							<span class="appear-value muted">Grove green</span>
-						{/if}
-					</div>
-					<div class="appearance-row">
-						<span class="appear-label">Season</span>
-						<span class="season-preview">
-							{#if seasonFavicon}
-								<img
-									src={seasonFavicon}
-									alt=""
-									aria-hidden="true"
-									class="season-icon-sm"
-									width="18"
-									height="18"
-								/>
+					<div class="appearance-preview">
+						<div class="appearance-row">
+							<span class="appear-label">Font</span>
+							<span class="font-preview" style:font-family={fontCssFamily}>{fontName}</span>
+						</div>
+						<div class="appearance-row">
+							<span class="appear-label">Accent</span>
+							{#if accentColor}
+								<span class="accent-swatch">
+									<span class="accent-dot" style:background={accentColor} aria-hidden="true"></span>
+									<span class="accent-hex">{accentColor}</span>
+								</span>
+							{:else}
+								<span class="appear-value muted">Grove green</span>
 							{/if}
-							<span class="appear-value" style:color={seasonColor || "inherit"}>
-								{seasonLabel}
+						</div>
+						<div class="appearance-row">
+							<span class="appear-label">Season</span>
+							<span class="season-preview">
+								{#if seasonFavicon}
+									<img
+										src={seasonFavicon}
+										alt=""
+										aria-hidden="true"
+										class="season-icon-sm"
+										width="18"
+										height="18"
+									/>
+								{/if}
+								<span class="appear-value" style:color={seasonColor || "inherit"}>
+									{seasonLabel}
+								</span>
 							</span>
-						</span>
+						</div>
 					</div>
+					<span class="card-action">Customize &rarr;</span>
 				</div>
-				<span class="card-action">Customize &rarr;</span>
 			</GlassCard>
 		</a>
 
 		<!-- Community Card -->
 		<a href="/arbor/settings/community" class="card-link">
-			<GlassCard variant="frosted" hoverable>
-				<div class="card-header">
-					<natureIcons.trees class="card-icon" />
-					<h2 class="card-title">Community</h2>
+			<GlassCard variant="frosted" hoverable flush class="h-full flex flex-col">
+				<div class="card-body">
+					<div class="card-header">
+						<natureIcons.trees class="card-icon" />
+						<h2 class="card-title">Community</h2>
+					</div>
+					<div class="community-preview">
+						<div class="community-row">
+							<GroveIcon
+								service="grove"
+								size={16}
+								color="var(--user-accent, var(--color-primary))"
+							/>
+							<span class="community-label">Canopy</span>
+							<span class="status-dot" class:active={canopyVisible}></span>
+							<span class="community-state">
+								{canopyVisible ? "visible" : "hidden"}
+							</span>
+						</div>
+						<div class="community-row">
+							<GroveIcon
+								service="meadow"
+								size={16}
+								color="var(--user-accent, var(--color-primary))"
+							/>
+							<span class="community-label">Meadow</span>
+							<span class="status-dot" class:active={data.meadowOptIn ?? false}></span>
+							<span class="community-state">
+								{(data.meadowOptIn ?? false) ? "sharing" : "quiet"}
+							</span>
+						</div>
+						<div class="community-row">
+							<span class="community-label" style:margin-left="20px">human.json</span>
+							<span class="status-dot" class:active={humanJsonEnabled}></span>
+							<span class="community-state">
+								{humanJsonEnabled ? "published" : "off"}
+							</span>
+						</div>
+					</div>
+					<span class="card-action">Connect &rarr;</span>
 				</div>
-				<div class="community-preview">
-					<div class="community-row">
-						<GroveIcon service="grove" size={16} color="var(--user-accent, var(--color-primary))" />
-						<span class="community-label">Canopy</span>
-						<span class="status-dot" class:active={canopyVisible}></span>
-						<span class="community-state">
-							{canopyVisible ? "visible" : "hidden"}
-						</span>
-					</div>
-					<div class="community-row">
-						<GroveIcon
-							service="meadow"
-							size={16}
-							color="var(--user-accent, var(--color-primary))"
-						/>
-						<span class="community-label">Meadow</span>
-						<span class="status-dot" class:active={data.meadowOptIn ?? false}></span>
-						<span class="community-state">
-							{(data.meadowOptIn ?? false) ? "sharing" : "quiet"}
-						</span>
-					</div>
-					<div class="community-row">
-						<span class="community-label" style:margin-left="20px">human.json</span>
-						<span class="status-dot" class:active={humanJsonEnabled}></span>
-						<span class="community-state">
-							{humanJsonEnabled ? "published" : "off"}
-						</span>
-					</div>
-				</div>
-				<span class="card-action">Connect &rarr;</span>
 			</GlassCard>
 		</a>
 
 		<!-- Content Card -->
 		<a href="/arbor/settings/content" class="card-link">
-			<GlassCard variant="frosted" hoverable>
-				<div class="card-header">
-					<natureIcons.flame class="card-icon" />
-					<h2 class="card-title">Content</h2>
-				</div>
-				<div class="card-status">
-					<span class="status-line">
-						<span class="count-highlight">
-							{data.customBlazeCount}
+			<GlassCard variant="frosted" hoverable flush class="h-full flex flex-col">
+				<div class="card-body">
+					<div class="card-header">
+						<natureIcons.flame class="card-icon" />
+						<h2 class="card-title">Content</h2>
+					</div>
+					<div class="card-status">
+						<span class="status-line">
+							<span class="count-highlight">
+								{data.customBlazeCount}
+							</span>
+							custom blaze{data.customBlazeCount === 1 ? "" : "s"}
 						</span>
-						custom blaze{data.customBlazeCount === 1 ? "" : "s"}
-					</span>
-					<span class="status-line subtle">8 defaults included</span>
-					<span class="status-line subtle">Up to 20 per grove</span>
+						<span class="status-line subtle">8 defaults included</span>
+						<span class="status-line subtle">Up to 20 per grove</span>
+					</div>
+					<span class="card-action">Create &rarr;</span>
 				</div>
-				<span class="card-action">Create &rarr;</span>
 			</GlassCard>
 		</a>
 
 		<!-- Security Card -->
 		<a href="/arbor/settings/security" class="card-link">
-			<GlassCard variant="frosted" hoverable>
-				<div class="card-header">
-					<authIcons.shieldCheck class="card-icon" />
-					<h2 class="card-title">Security</h2>
+			<GlassCard variant="frosted" hoverable flush class="h-full flex flex-col">
+				<div class="card-body">
+					<div class="card-header">
+						<authIcons.shieldCheck class="card-icon" />
+						<h2 class="card-title">Security</h2>
+					</div>
+					<div class="card-status">
+						{#if loadingSessions}
+							<Skeleton class="h-4 w-32" />
+						{:else}
+							<span class="status-line">
+								{sessionCount !== null
+									? `${sessionCount} active session${sessionCount === 1 ? "" : "s"}`
+									: "Sessions unavailable"}
+							</span>
+						{/if}
+						<span class="status-line subtle">Passkeys managed on login hub</span>
+					</div>
+					<span class="card-action">Review &rarr;</span>
 				</div>
-				<div class="card-status">
-					{#if loadingSessions}
-						<Skeleton class="h-4 w-32" />
-					{:else}
-						<span class="status-line">
-							{sessionCount !== null
-								? `${sessionCount} active session${sessionCount === 1 ? "" : "s"}`
-								: "Sessions unavailable"}
-						</span>
-					{/if}
-					<span class="status-line subtle">Passkeys managed on login hub</span>
-				</div>
-				<span class="card-action">Review &rarr;</span>
 			</GlassCard>
 		</a>
 	</div>
@@ -251,7 +265,14 @@
 	.card-link {
 		text-decoration: none;
 		color: inherit;
-		display: block;
+		display: flex;
+	}
+
+	.card-body {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		padding: 1rem 1.5rem;
 	}
 
 	/* ── Card header ──────────────────────────────────────────────────────── */
@@ -279,7 +300,8 @@
 	/* ── Card action link ─────────────────────────────────────────────────── */
 	.card-action {
 		display: inline-block;
-		margin-top: 1rem;
+		margin-top: auto;
+		padding-top: 1rem;
 		font-size: 0.85rem;
 		font-weight: 500;
 		color: var(--user-accent, var(--color-primary));
