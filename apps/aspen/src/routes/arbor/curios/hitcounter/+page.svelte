@@ -3,7 +3,7 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import GlassButton from "@autumnsgrove/lattice/ui/components/ui/GlassButton.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
-	import { Hash, ArrowLeft, RotateCcw } from "@autumnsgrove/lattice/ui/components/icons";
+	import { navIcons, featureIcons, actionIcons } from "@autumnsgrove/prism/icons";
 	import {
 		formatCount,
 		toDigits,
@@ -82,12 +82,12 @@
 	<header class="page-header">
 		<div class="header-top">
 			<GlassButton href="/arbor/curios" variant="ghost" class="back-link">
-				<ArrowLeft class="w-4 h-4" />
+				<navIcons.arrowLeft class="w-4 h-4" />
 				Back to Curios
 			</GlassButton>
 		</div>
 		<div class="title-row">
-			<Hash class="header-icon" />
+			<featureIcons.hash class="header-icon" />
 			<h1>Hit Counter</h1>
 		</div>
 		<p class="subtitle">The nostalgic page view counter. No tracking, just a number.</p>
@@ -301,7 +301,7 @@
 			}}
 		>
 			<GlassButton type="submit" variant="ghost" class="reset-btn">
-				<RotateCcw class="w-4 h-4" />
+				<actionIcons.rotateCcw class="w-4 h-4" />
 				Reset to Zero
 			</GlassButton>
 		</form>

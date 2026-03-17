@@ -181,7 +181,7 @@ export const load: PageServerLoad = async ({ platform, locals, setHeaders }) => 
 				tenantName: context.tenant.name,
 				tenantSubdomain: context.tenant.subdomain,
 				title: "Welcome",
-				description: "Set up your new blog",
+				description: "A new grove, ready to grow",
 			};
 		}
 		throwGroveError(404, SITE_ERRORS.HOME_PAGE_NOT_FOUND, "Site");

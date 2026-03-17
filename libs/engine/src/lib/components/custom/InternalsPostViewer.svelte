@@ -1,19 +1,25 @@
 <script>
+	import GlassCard from "../../ui/components/ui/GlassCard.svelte";
+
 	/**
-	 * Simple component to display a featured garden post
+	 * Featured garden post card with Glass treatment.
 	 * @prop {{ title: string; description?: string; slug: string; date?: string }} post - Post data
 	 * @prop {string} [caption] - Optional caption text
 	 */
 	let { post, caption = "" } = $props();
 
-	const formattedDate = $derived(post.date ? new Date(post.date).toLocaleDateString('en-US', {
-		year: 'numeric',
-		month: 'long',
-		day: 'numeric'
-	}) : null);
+	const formattedDate = $derived(
+		post.date
+			? new Date(post.date).toLocaleDateString("en-US", {
+					year: "numeric",
+					month: "long",
+					day: "numeric",
+				})
+			: null,
+	);
 </script>
 
-<article class="post-viewer">
+<GlassCard variant="default" as="article" hoverable class="post-viewer">
 	{#if caption}
 		<span class="caption">{caption}</span>
 	{/if}
@@ -26,17 +32,9 @@
 			<time class="date">{formattedDate}</time>
 		{/if}
 	</a>
-</article>
+</GlassCard>
 
 <style>
-	.post-viewer {
-		background: var(--color-bg-secondary);
-		border: 1px solid var(--color-border);
-		border-radius: var(--border-radius-standard);
-		padding: 1.5rem;
-		transition: all 0.3s ease;
-	}
-
 	.caption {
 		display: block;
 		font-size: 0.75rem;
@@ -74,22 +72,5 @@
 		display: block;
 		font-size: 0.875rem;
 		color: var(--color-text-subtle);
-	}
-
-	:global(.dark) .post-viewer {
-		background: var(--color-bg-tertiary-dark);
-		border-color: var(--color-border-dark);
-	}
-
-	:global(.dark) .title {
-		color: var(--color-text-dark);
-	}
-
-	:global(.dark) .description {
-		color: var(--color-text-subtle-dark);
-	}
-
-	:global(.dark) .date {
-		color: var(--color-text-subtle-dark);
 	}
 </style>

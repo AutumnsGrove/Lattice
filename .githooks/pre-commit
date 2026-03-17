@@ -4,6 +4,12 @@
 
 set -e
 
+# Ensure /dev/fd exists — required for bash process substitution (< <(...)).
+# Some container environments (Docker, CI runners) omit this symlink.
+if [ ! -e /dev/fd ]; then
+    ln -sf /proc/self/fd /dev/fd 2>/dev/null || true
+fi
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'

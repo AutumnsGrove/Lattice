@@ -333,18 +333,15 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: #fafafa;
+		background: hsl(var(--background));
 		padding: 2rem;
-	}
-	:global(.dark) .not-found-layout {
-		background: var(--light-bg-primary);
 	}
 	.not-found-content {
 		text-align: center;
 		max-width: 500px;
 	}
 	.not-found-content h1 {
-		color: var(--color-primary, #2c5f2d);
+		color: var(--color-primary);
 		margin-bottom: 1rem;
 	}
 	.not-found-content p {
@@ -352,17 +349,8 @@
 		margin-bottom: 0.5rem;
 	}
 	.not-found-content a {
-		color: var(--color-primary, #2c5f2d);
+		color: var(--color-primary);
 		text-decoration: underline;
-	}
-	:global(.dark) .not-found-content h1 {
-		color: var(--accent-success);
-	}
-	:global(.dark) .not-found-content p {
-		color: var(--color-text-muted-dark);
-	}
-	:global(.dark) .not-found-content a {
-		color: var(--accent-success);
 	}
 	/* Critical font: Lexend (default across all Grove sites)
 	   Other fonts are lazy-loaded via fonts-optional.css when tenant selects them.
@@ -521,12 +509,12 @@
 	}
 	.nav-loading-bar-fill {
 		height: 100%;
-		background: var(--user-accent, var(--color-primary, #2c5f2d));
+		background: var(--user-accent, var(--color-primary));
 		animation: nav-loading 1.5s ease-in-out infinite;
 		transform-origin: left;
 	}
 	:global(.dark) .nav-loading-bar-fill {
-		background: var(--grove-300, #86efac);
+		background: var(--grove-300);
 	}
 	@keyframes nav-loading {
 		0% {
