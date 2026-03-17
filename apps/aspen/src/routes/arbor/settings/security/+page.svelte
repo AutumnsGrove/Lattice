@@ -209,24 +209,6 @@
 />
 
 <style>
-	.section-header {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		margin-bottom: 1rem;
-	}
-	.section-header h2 {
-		margin: 0;
-		font-size: 1.25rem;
-		color: var(--color-text);
-	}
-	.section-description {
-		margin: 0 0 1rem 0;
-		color: var(--color-text-muted);
-		font-size: 0.9rem;
-		line-height: 1.5;
-	}
-
 	/* Passkey styles */
 	:global(.passkey-manage-link) {
 		display: inline-flex;

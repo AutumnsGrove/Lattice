@@ -274,23 +274,6 @@
 
 <style>
 	/* ── Section structure ────────────────────────────────────────────────────── */
-	.section-header {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		margin-bottom: 1rem;
-	}
-	.section-header h2 {
-		margin: 0;
-		font-size: 1.25rem;
-		color: var(--color-text);
-	}
-	.section-description {
-		margin: 0 0 1.25rem 0;
-		color: var(--color-text-muted);
-		font-size: 0.9rem;
-		line-height: 1.5;
-	}
 	.section-hint {
 		margin: 0.75rem 0 1.25rem 0;
 		font-size: 0.8rem;
@@ -311,9 +294,6 @@
 		opacity: 0.8;
 	}
 	.button-row {
-		display: flex;
-		gap: 0.75rem;
-		align-items: center;
 		margin-top: 1.25rem;
 	}
 	.space-y-3 {

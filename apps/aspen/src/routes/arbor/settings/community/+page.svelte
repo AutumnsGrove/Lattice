@@ -412,25 +412,6 @@
 </ArborSection>
 
 <style>
-	/* ---- Section layout ---- */
-	.section-header {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		margin-bottom: 1rem;
-	}
-	.section-header h2 {
-		margin: 0;
-		font-size: 1.25rem;
-		color: var(--color-text);
-	}
-	.section-description {
-		margin: 0 0 1rem 0;
-		color: var(--color-text-muted);
-		font-size: 0.9rem;
-		line-height: 1.5;
-	}
-
 	/* ---- Links ---- */
 	.canopy-link {
 		display: inline;
@@ -456,92 +437,8 @@
 	}
 
 	/* ---- Toggle rows ---- */
-	.logo-toggle {
-		display: flex;
-		align-items: flex-start;
-		gap: 0.75rem;
-		cursor: pointer;
-		padding: 0.75rem;
-		border-radius: var(--border-radius-standard, 0.5rem);
-		border: 1px solid var(--color-border);
-		background: var(--color-surface, transparent);
-		transition:
-			background 0.15s ease,
-			border-color 0.15s ease;
-	}
-	.logo-toggle:hover {
-		background: var(--color-surface-elevated, var(--color-surface));
-		border-color: var(--user-accent, var(--color-primary));
-	}
-	.logo-toggle input[type="checkbox"] {
-		margin-top: 0.2rem;
-		flex-shrink: 0;
-		accent-color: var(--user-accent, var(--color-primary));
-		width: 1rem;
-		height: 1rem;
-	}
-	.toggle-label {
-		display: flex;
-		flex-direction: column;
-		gap: 0.2rem;
-	}
-	.toggle-title {
-		font-weight: 600;
-		font-size: 0.95rem;
-		color: var(--color-text);
-	}
-	.toggle-description {
-		font-size: 0.85rem;
-		color: var(--color-text-muted);
-		line-height: 1.4;
-	}
 	.canopy-toggle {
 		margin-bottom: 1.5rem;
-	}
-
-	/* ---- Text fields ---- */
-	.canopy-field {
-		margin-bottom: 1.25rem;
-	}
-	.field-label {
-		display: block;
-		font-size: 0.875rem;
-		font-weight: 600;
-		color: var(--color-text);
-		margin-bottom: 0.4rem;
-	}
-	.canopy-input {
-		width: 100%;
-		padding: 0.5rem 0.75rem;
-		background: var(--color-surface, transparent);
-		border: 1px solid var(--color-border);
-		border-radius: var(--border-radius-small, 0.375rem);
-		color: var(--color-text);
-		font-size: 0.9rem;
-		line-height: 1.5;
-		transition:
-			border-color 0.15s ease,
-			box-shadow 0.15s ease;
-		box-sizing: border-box;
-	}
-	.canopy-input:focus {
-		outline: none;
-		border-color: var(--user-accent, var(--color-primary));
-		box-shadow: 0 0 0 2px hsl(var(--primary-color, 145 63% 42%) / 0.15);
-	}
-	.canopy-input::placeholder {
-		color: var(--color-text-subtle, var(--color-text-muted));
-	}
-	.field-help {
-		display: flex;
-		justify-content: space-between;
-		margin-top: 0.35rem;
-		font-size: 0.8rem;
-		color: var(--color-text-muted);
-	}
-	.char-count {
-		font-variant-numeric: tabular-nums;
-		flex-shrink: 0;
 	}
 
 	/* ---- Category checkboxes ---- */
@@ -578,9 +475,6 @@
 
 	/* ---- Save button row ---- */
 	.button-row {
-		display: flex;
-		gap: 0.75rem;
-		align-items: center;
 		padding-top: 0.5rem;
 	}
 

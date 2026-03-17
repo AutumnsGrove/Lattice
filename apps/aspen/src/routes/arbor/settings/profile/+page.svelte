@@ -620,29 +620,6 @@
 		display: none;
 	}
 
-	.section-header {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		margin-bottom: 1rem;
-	}
-	.section-header h2 {
-		margin: 0;
-		font-size: 1.25rem;
-		color: var(--color-text);
-	}
-	.section-description {
-		margin: 0 0 1rem 0;
-		color: var(--color-text-muted);
-		font-size: 0.9rem;
-		line-height: 1.5;
-	}
-	.button-row {
-		display: flex;
-		gap: 0.75rem;
-		margin-bottom: 1rem;
-	}
-
 	/* Profile photo */
 	.avatar-section {
 		display: flex;
@@ -804,91 +781,6 @@
 	.history-date {
 		margin-left: 0.5rem;
 		opacity: 0.4;
-	}
-
-	/* Header branding */
-	.canopy-field {
-		margin-bottom: 1.5rem;
-	}
-	.field-label {
-		display: block;
-		font-size: 0.9rem;
-		font-weight: 600;
-		color: var(--color-text);
-		margin-bottom: 0.5rem;
-	}
-	.canopy-input {
-		width: 100%;
-		padding: 0.75rem 1rem;
-		border: 2px solid var(--color-border);
-		border-radius: var(--border-radius-standard);
-		background: var(--color-surface);
-		color: var(--color-text);
-		font-size: 0.95rem;
-		transition: border-color 0.2s;
-	}
-	.canopy-input:focus {
-		outline: none;
-		border-color: var(--color-primary);
-	}
-	.field-help {
-		font-size: 0.85rem;
-		color: var(--color-text-muted);
-		margin: 0.5rem 0 0 0;
-	}
-	.char-count {
-		float: right;
-		opacity: 0.7;
-	}
-
-	/* Toggle styles */
-	.logo-toggle {
-		display: flex;
-		align-items: flex-start;
-		gap: 1rem;
-		padding: 1rem;
-		border: 2px solid var(--color-border);
-		border-radius: var(--border-radius-standard);
-		cursor: pointer;
-		transition:
-			border-color 0.2s,
-			background-color 0.2s;
-		margin-bottom: 1rem;
-	}
-	.logo-toggle:hover {
-		border-color: var(--color-primary);
-	}
-	.logo-toggle:has(input:checked) {
-		border-color: var(--color-primary);
-		background: hsl(var(--primary-color) / 0.05);
-	}
-	:global(.dark) .logo-toggle:has(input:checked) {
-		border-color: var(--color-primary-light);
-		background: hsl(var(--primary-color) / 0.1);
-	}
-	.logo-toggle input[type="checkbox"] {
-		width: 20px;
-		height: 20px;
-		accent-color: var(--color-primary);
-		margin-top: 2px;
-		flex-shrink: 0;
-	}
-	.toggle-label {
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-	}
-	.toggle-title {
-		display: flex;
-		align-items: center;
-		gap: 0.375rem;
-		font-size: 1rem;
-		font-weight: 600;
-		color: var(--color-text);
-	}
-	.toggle-description {
-		font-size: 0.85rem;
-		color: var(--color-text-muted);
 	}
 
 	/* Domain CTA */

@@ -369,13 +369,6 @@
 />
 
 <style>
-	.section-description {
-		margin: 0 0 1.25rem 0;
-		color: var(--color-text-muted);
-		font-size: 0.9rem;
-		line-height: 1.6;
-	}
-
 	/* Global defaults */
 	.blaze-subsection-title {
 		font-size: 0.9rem;
@@ -658,14 +651,6 @@
 		font-size: 0.8rem;
 		font-weight: 600;
 		color: var(--color-text-muted);
-	}
-
-	/* Button row */
-	.button-row {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		flex-wrap: wrap;
 	}
 
 	@media (prefers-reduced-motion: reduce) {
