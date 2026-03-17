@@ -216,53 +216,64 @@
 	<!-- ═══════════════════════════════════════════════════════════════
 	     Section 1: The Threshold — Welcome home
 	     ═══════════════════════════════════════════════════════════════ -->
-	<section class="text-center space-y-6 relative z-10">
+	<section class="relative z-10">
 		<!-- Nature decoration: trees flanking the hero -->
-		<div class="relative inline-block">
-			<!-- Left tree -->
-			<div class="absolute -left-16 bottom-0 opacity-40 hidden sm:block" aria-hidden="true">
-				<TreePine class="w-10 h-14" {season} />
-			</div>
+		<div class="text-center mb-6">
+			<div class="relative inline-block">
+				<!-- Left tree -->
+				<div class="absolute -left-16 bottom-0 opacity-40 hidden sm:block" aria-hidden="true">
+					<TreePine class="w-10 h-14" {season} />
+				</div>
 
-			<!-- Logo circle with seasonal accent -->
-			<div
-				class="inline-flex items-center justify-center w-20 h-20 rounded-full {accentBg} backdrop-blur-md border border-surface-elevated/40 dark:border-surface-elevated/30 mb-2"
-			>
-				<Logo class="w-12 h-12" {season} />
-			</div>
+				<!-- Logo circle with seasonal accent -->
+				<div
+					class="inline-flex items-center justify-center w-20 h-20 rounded-full {accentBg} backdrop-blur-md border border-surface-elevated/40 dark:border-surface-elevated/30"
+				>
+					<Logo class="w-12 h-12" {season} />
+				</div>
 
-			<!-- Right tree -->
-			<div class="absolute -right-16 bottom-0 opacity-40 hidden sm:block" aria-hidden="true">
-				<TreeCherry class="w-10 h-14" {season} />
+				<!-- Right tree -->
+				<div class="absolute -right-16 bottom-0 opacity-40 hidden sm:block" aria-hidden="true">
+					<TreeCherry class="w-10 h-14" {season} />
+				</div>
 			</div>
 		</div>
 
-		<div class="space-y-4">
-			<h1 class="text-3xl md:text-4xl font-medium text-foreground">
-				Welcome home, <GroveTerm interactive term="wanderer">Wanderer</GroveTerm>.
-			</h1>
+		<!-- Gossamer hero — ambient clouds behind the welcome text -->
+		<GlassCard
+			variant="muted"
+			hoverable={false}
+			gossamer="ambient-clouds"
+			gossamerOpacity={0.15}
+			class="text-center"
+		>
+			<div class="space-y-4 py-4">
+				<h1 class="text-3xl md:text-4xl font-medium text-foreground">
+					Welcome home, <GroveTerm interactive term="wanderer">Wanderer</GroveTerm>.
+				</h1>
 
-			<p class="text-lg {accentText} font-medium italic max-w-md mx-auto">
-				A forest of voices. A place to be.
-			</p>
+				<p class="text-lg {accentText} font-medium italic max-w-md mx-auto">
+					A forest of voices. A place to be.
+				</p>
 
-			<p class="text-lg text-foreground-muted max-w-lg mx-auto leading-relaxed">
-				A warm corner of the internet for your words to grow. No algorithms, no ads, no tracking.
-				Just a quiet space that's truly yours.
-			</p>
-		</div>
+				<p class="text-lg text-foreground-muted max-w-lg mx-auto leading-relaxed">
+					A warm corner of the internet for your words to grow. No algorithms, no ads, no tracking.
+					Just a quiet space that's truly yours.
+				</p>
 
-		<div class="flex flex-wrap items-center justify-center gap-4 text-foreground-subtle text-sm">
-			<span class="flex items-center gap-2">
-				<natureIcons.leaf class="w-4 h-4 {accentText}" />
-				yourname.grove.place
-			</span>
-			<span class="text-foreground-faint hidden sm:inline">·</span>
-			<span class="flex items-center gap-2">
-				<authIcons.shield class="w-4 h-4 {accentText}" />
-				AI-free zone
-			</span>
-		</div>
+				<div class="flex flex-wrap items-center justify-center gap-4 text-foreground-subtle text-sm pt-2">
+					<span class="flex items-center gap-2">
+						<natureIcons.leaf class="w-4 h-4 {accentText}" />
+						yourname.grove.place
+					</span>
+					<span class="text-foreground-faint hidden sm:inline">·</span>
+					<span class="flex items-center gap-2">
+						<authIcons.shield class="w-4 h-4 {accentText}" />
+						AI-free zone
+					</span>
+				</div>
+			</div>
+		</GlassCard>
 	</section>
 
 	<!-- ═══════════════════════════════════════════════════════════════
