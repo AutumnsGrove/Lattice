@@ -70,7 +70,7 @@
 					<span class="status-line">
 						Accent:
 						{#if data.accentColor}
-							<span class="color-dot" style:background={data.accentColor}></span>
+							<span class="color-dot" style:background={data.accentColor} aria-hidden="true"></span>
 							{data.accentColor}
 						{:else}
 							default

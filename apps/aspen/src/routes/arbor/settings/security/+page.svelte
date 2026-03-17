@@ -150,7 +150,7 @@
 						class:current={session.isCurrent}
 						class:revoking={revokingSessionId === session.id}
 					>
-						<div class="session-icon">
+						<div class="session-icon" aria-hidden="true">
 							<DeviceIcon size={24} />
 						</div>
 						<div class="session-info">

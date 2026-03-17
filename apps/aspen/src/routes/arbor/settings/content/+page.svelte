@@ -225,7 +225,7 @@
 				<!-- Icon picker -->
 				<div class="form-group">
 					<span class="form-label">Icon</span>
-					<div class="blaze-icon-grid">
+					<div class="blaze-icon-grid" role="radiogroup" aria-label="Choose a blaze icon">
 						{#each VALID_BLAZE_ICONS.slice(0, 32) as iconName}
 							{@const IconComp = resolveLucideIcon(iconName)}
 							<button
@@ -235,6 +235,8 @@
 								onclick={() => (newBlazeIcon = iconName)}
 								aria-label={iconName}
 								title={iconName}
+								role="radio"
+								aria-checked={newBlazeIcon === iconName}
 							>
 								<IconComp size={18} aria-hidden="true" />
 							</button>
@@ -246,7 +248,7 @@
 				<div class="form-group">
 					<span class="form-label">Color</span>
 					<div class="blaze-color-picker">
-						<div class="blaze-color-swatches">
+						<div class="blaze-color-swatches" role="radiogroup" aria-label="Choose a blaze color">
 							{#each VALID_BLAZE_COLORS as colorKey}
 								<button
 									type="button"
@@ -256,6 +258,8 @@
 									onclick={() => (newBlazeColor = colorKey)}
 									aria-label={colorKey}
 									title={colorKey}
+									role="radio"
+									aria-checked={newBlazeColor === colorKey}
 								></button>
 							{/each}
 						</div>
@@ -283,10 +287,13 @@
 									placeholder="#8b5e3c"
 									bind:value={newCustomHexColor}
 									maxlength={7}
+									aria-label="Pick a custom color"
 								/>
 								<button
 									type="button"
 									class="blaze-color-add-btn"
+									title="Use this custom color"
+									aria-label="Apply custom hex color"
 									onclick={() => {
 										if (isValidBlazeHexColor(newCustomHexColor)) {
 											newBlazeColor = newCustomHexColor;

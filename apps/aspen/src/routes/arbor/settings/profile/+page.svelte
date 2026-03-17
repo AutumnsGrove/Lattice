@@ -247,7 +247,7 @@
 		<div class="avatar-section">
 			<div class="avatar-preview">
 				{#if displayAvatar}
-					<img src={displayAvatar} alt="" class="avatar-image" />
+					<img src={displayAvatar} alt="Your profile photo" class="avatar-image" />
 				{:else}
 					<span class="avatar-placeholder">
 						{data.user?.name?.[0] || data.user?.email?.[0] || "?"}
@@ -310,6 +310,7 @@
 							type="text"
 							class="glass-input"
 							placeholder="new-username"
+							aria-label="New username"
 							bind:value={newUsername}
 							oninput={(e) => checkUsernameAvailability((e.target as HTMLInputElement).value)}
 							disabled={changingUsername}
@@ -317,19 +318,24 @@
 						<span class="username-suffix">.grove.place</span>
 					</div>
 
-					<div class="username-status">
+					<div class="username-status" role="status" aria-live="polite">
 						{#if checkingUsername}
-							<Loader2 size={18} class="animate-spin" style="color: var(--color-text-muted);" />
+							<Loader2
+								size={18}
+								class="animate-spin"
+								style="color: var(--color-text-muted);"
+								aria-label="Checking availability"
+							/>
 						{:else if usernameAvailable === true}
-							<Check size={18} style="color: var(--color-success);" />
+							<Check size={18} style="color: var(--color-success);" aria-label="Available" />
 						{:else if usernameAvailable === false}
-							<X size={18} style="color: var(--color-error);" />
+							<X size={18} style="color: var(--color-error);" aria-label="Not available" />
 						{/if}
 					</div>
 				</div>
 
 				{#if usernameError}
-					<p class="username-error">{usernameError}</p>
+					<p class="username-error" role="alert">{usernameError}</p>
 				{/if}
 
 				<p class="username-hint">

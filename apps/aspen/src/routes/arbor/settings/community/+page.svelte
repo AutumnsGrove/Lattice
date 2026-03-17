@@ -395,6 +395,7 @@
 							class="vouch-input"
 							type="url"
 							placeholder="https://example.com"
+							aria-label="URL to vouch for"
 							bind:value={newVouchUrl}
 							onkeydown={(e) => e.key === "Enter" && addVouch()}
 						/>

@@ -130,7 +130,7 @@
 				<Skeleton class="h-16 w-full rounded-lg" />
 			</div>
 		{:else}
-			<div class="font-selector">
+			<div class="font-selector" role="radiogroup" aria-label="Font family">
 				{#each FONT_PRESETS as font (font.id)}
 					<label class="font-option" class:selected={currentFont === font.id}>
 						<input type="radio" name="font" value={font.id} bind:group={currentFont} />
@@ -186,7 +186,7 @@
 				</div>
 			</div>
 
-			<div class="color-presets">
+			<div class="color-presets" role="radiogroup" aria-label="Color presets">
 				<span class="presets-label">Presets</span>
 				<div class="preset-swatches">
 					{#each COLOR_PRESETS as color (color.hex)}
@@ -197,6 +197,8 @@
 							style="background: {color.hex};"
 							title={color.name}
 							aria-label={color.name}
+							role="radio"
+							aria-checked={currentAccentColor === color.hex}
 							onclick={() => (currentAccentColor = color.hex)}
 						></button>
 					{/each}
@@ -225,7 +227,7 @@
 			Choose a season for your PWA home screen icon and browser theme color.
 		</p>
 
-		<div class="season-picker">
+		<div class="season-picker" role="radiogroup" aria-label="Preferred season">
 			{#each ALL_SEASONS as season (season)}
 				{@const favicons = getSeasonFavicons(season)}
 				<button
@@ -234,7 +236,8 @@
 					class:selected={preferredSeason === season}
 					style="--season-color: {SEASON_THEME_COLORS[season]};"
 					onclick={() => (preferredSeason = season)}
-					aria-pressed={preferredSeason === season}
+					role="radio"
+					aria-checked={preferredSeason === season}
 					aria-label={SEASON_LABELS[season]}
 				>
 					<img
@@ -427,8 +430,8 @@
 		gap: 0.5rem;
 	}
 	.preset-btn {
-		width: 2rem;
-		height: 2rem;
+		width: 44px;
+		height: 44px;
 		border-radius: 50%;
 		border: 2px solid transparent;
 		cursor: pointer;
