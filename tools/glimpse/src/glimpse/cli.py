@@ -32,6 +32,7 @@ class LazyGroup(click.Group):
         "install": "glimpse.commands.install:install",
         "matrix": "glimpse.commands.matrix:matrix",
         "seed": "glimpse.commands.seed:seed",
+        "showroom": "glimpse.commands.showroom:showroom",
         "status": "glimpse.commands.status:status",
         "stop": "glimpse.commands.stop:stop",
         "watch": "glimpse.commands.watch:watch",
@@ -104,7 +105,7 @@ def main(
         glimpse --app plant capture http://localhost:5173/ --auto
 
     Available apps: amber, aspen, billing, clearing, domains, ivy,
-    landing, login, meadow, plant, terrarium
+    landing, login, meadow, plant, showroom, terrarium
     """
     # Determine output mode
     if output_json:

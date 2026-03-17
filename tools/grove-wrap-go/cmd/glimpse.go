@@ -57,7 +57,7 @@ Examples:
 		// (only if there are subcommand args to inspect)
 		if len(args) > 0 {
 			subcmd := args[0]
-			if subcmd == "capture" || subcmd == "watch" || subcmd == "browse" || subcmd == "matrix" {
+			if subcmd == "capture" || subcmd == "watch" || subcmd == "browse" || subcmd == "matrix" || subcmd == "showroom" {
 				uvArgs = append(uvArgs, "--auto", "--logs")
 			}
 		}
@@ -97,6 +97,7 @@ var glimpseHelpCategories = []ui.HelpCategory{
 		Commands: []ui.HelpCommand{
 			{Name: "diff", Desc: "Visual regression between two screenshots"},
 			{Name: "detect", Desc: "AI-powered element detection"},
+			{Name: "showroom", Desc: "Component isolation + audit bundle"},
 			{Name: "status", Desc: "Check readiness (browser, server, DB)"},
 		},
 	},

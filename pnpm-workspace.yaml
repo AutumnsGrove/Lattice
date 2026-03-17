@@ -4,3 +4,4 @@ packages:
   - "workers/*"
   - "libs/*"
   - "libs/shutter/cloudflare"
+  - "tools/showroom"

@@ -72,6 +72,12 @@ APP_REGISTRY: dict[str, dict] = {
         "start_command": "pnpm dev",
         "description": "Plant dashboard (admin)",
     },
+    "showroom": {
+        "cwd": "tools/showroom",
+        "port": 5188,
+        "start_command": "pnpm dev",
+        "description": "Component showroom for visual audits",
+    },
     "terrarium": {
         "cwd": "apps/terrarium",
         "port": 5173,
