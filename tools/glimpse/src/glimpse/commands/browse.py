@@ -10,6 +10,7 @@ from playwright.async_api import async_playwright, Route
 from glimpse.browse.executor import BrowseExecutor, BrowseStepResult
 from glimpse.browse.interpreter import ActionStep, parse_instructions
 from glimpse.browse.resolver import TargetResolver
+from glimpse.capture.auth import build_auth_header
 from glimpse.capture.console import ConsoleCollector
 from glimpse.capture.injector import build_init_script
 from glimpse.capture.screenshot import CaptureResult
@@ -29,6 +30,14 @@ from glimpse.utils.validation import validate_url
 @click.option("--theme", "-t", type=str, default=None, help="Theme: light, dark, system")
 @click.option("--output", "-o", type=str, default=None, help="Output directory for screenshots")
 @click.option("--timeout", type=int, default=5000, help="Per-action timeout in ms")
+@click.option(
+    "--login",
+    type=str,
+    default=None,
+    is_flag=False,
+    flag_value="owner",
+    help="Simulate auth session (owner, admin, wanderer). Default: owner",
+)
 @click.pass_context
 def browse(
     ctx: click.Context,
@@ -41,6 +50,7 @@ def browse(
     theme: str | None,
     output: str | None,
     timeout: int,
+    login: str | None,
 ) -> None:
     """Browse a page interactively with natural language instructions.
 
@@ -95,6 +105,7 @@ def browse(
             screenshot_each=screenshot_each,
             output_dir=output_dir,
             timeout_ms=timeout,
+            login=login,
         )
     )
 
@@ -117,6 +128,7 @@ async def _run_browse(
     screenshot_each: bool,
     output_dir: Path,
     timeout_ms: int,
+    login: str | None = None,
 ) -> tuple[list[BrowseStepResult], CaptureResult]:
     """Async browse execution."""
     async with async_playwright() as p:
@@ -125,10 +137,17 @@ async def _run_browse(
         if executable:
             launch_opts["executable_path"] = executable
         browser = await p.chromium.launch(**launch_opts)
-        context = await browser.new_context(
-            viewport={"width": config.viewport_width, "height": config.viewport_height},
-            device_scale_factor=config.scale,
-        )
+
+        context_opts: dict = {
+            "viewport": {"width": config.viewport_width, "height": config.viewport_height},
+            "device_scale_factor": config.scale,
+        }
+
+        # Mock auth: inject x-grove-dev-auth header for authenticated pages
+        if login:
+            context_opts["extra_http_headers"] = build_auth_header(login)
+
+        context = await browser.new_context(**context_opts)
 
         try:
             # Theme injection

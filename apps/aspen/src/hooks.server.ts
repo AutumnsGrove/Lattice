@@ -583,6 +583,41 @@ export const handle: Handle = async ({ event, resolve }) => {
 	}
 
 	// =========================================================================
+	// DEV-ONLY: Simulated auth for Glimpse visual testing
+	// =========================================================================
+	// Allows Glimpse to test authenticated pages without Heartwood running.
+	// Only works on localhost — the x-grove-dev-auth header carries a JSON
+	// user object that populates event.locals.user directly.
+	// Same trust model as x-subdomain header (localhost-only dev convenience).
+	if (!event.locals.user) {
+		const rawHost = event.request.headers.get("host") || "";
+		if (rawHost.includes("localhost") || rawHost.includes("127.0.0.1")) {
+			const devAuth = event.request.headers.get("x-grove-dev-auth");
+			if (devAuth) {
+				try {
+					const mockUser = JSON.parse(devAuth);
+					if (
+						typeof mockUser === "object" &&
+						typeof mockUser.id === "string" &&
+						typeof mockUser.email === "string" &&
+						typeof mockUser.name === "string"
+					) {
+						event.locals.user = {
+							id: mockUser.id,
+							email: mockUser.email,
+							name: mockUser.name,
+							picture: mockUser.picture || "",
+							isAdmin: mockUser.isAdmin === true,
+						};
+					}
+				} catch {
+					// Invalid JSON — ignore silently
+				}
+			}
+		}
+	}
+
+	// =========================================================================
 	// INTERNAL SERVICE AUTH (worker-to-worker)
 	// =========================================================================
 	// Allows trusted internal services (e.g., reverie-exec) to call API

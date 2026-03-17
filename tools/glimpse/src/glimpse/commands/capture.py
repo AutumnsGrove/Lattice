@@ -128,6 +128,14 @@ from glimpse.utils.validation import (
     default=False,
     help="Auto-start dev server if target URL is unreachable",
 )
+@click.option(
+    "--login",
+    type=str,
+    default=None,
+    is_flag=False,
+    flag_value="owner",
+    help="Simulate auth session (owner, admin, wanderer). Default: owner",
+)
 @click.pass_context
 def capture(
     ctx: click.Context,
@@ -149,6 +157,7 @@ def capture(
     wait_for: str | None,
     logs: bool,
     auto: bool,
+    login: str | None,
 ) -> None:
     """Capture a screenshot of a URL.
 
@@ -269,6 +278,7 @@ def capture(
         no_inject=no_inject,
         timeout_ms=config.timeout_ms,
         logs=effective_logs,
+        login=login,
     )
 
     # Execute capture

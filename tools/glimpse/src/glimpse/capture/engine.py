@@ -16,6 +16,7 @@ from pathlib import Path
 
 from playwright.async_api import async_playwright, Browser, BrowserContext, Route
 
+from glimpse.capture.auth import build_auth_header
 from glimpse.capture.console import ConsoleCollector
 from glimpse.capture.injector import build_init_script
 from glimpse.capture.screenshot import A11ySummary, CaptureRequest, CaptureResult, ConsoleMessage
@@ -98,10 +99,16 @@ class CaptureEngine:
 
         try:
             # 1. Create browser context with viewport settings
-            context = await self._browser.new_context(
-                viewport={"width": request.width, "height": request.height},
-                device_scale_factor=request.scale,
-            )
+            context_opts: dict = {
+                "viewport": {"width": request.width, "height": request.height},
+                "device_scale_factor": request.scale,
+            }
+
+            # Mock auth: inject x-grove-dev-auth header for authenticated pages
+            if request.login:
+                context_opts["extra_http_headers"] = build_auth_header(request.login)
+
+            context = await self._browser.new_context(**context_opts)
 
             # 2. Pre-seed localStorage for theme injection (before navigation)
             if not request.no_inject:

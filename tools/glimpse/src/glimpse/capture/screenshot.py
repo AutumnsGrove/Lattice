@@ -59,6 +59,7 @@ class CaptureRequest:
     no_inject: bool = False
     timeout_ms: int = 30000
     logs: bool = False
+    login: str | None = None  # Mock auth persona: "owner", "admin", "wanderer"
 
 
 @dataclass
