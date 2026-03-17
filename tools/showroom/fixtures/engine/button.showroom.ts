@@ -4,8 +4,13 @@ export default {
 	scenarios: {
 		default: {
 			props: {
-				size: {}, // SpinnerSize (optional)
-				class: "example", // string (optional)
+				variant: {}, // unknown (optional)
+				size: {}, // unknown (optional)
+				ref: {}, // unknown (optional)
+				href: {}, // unknown (optional)
+				type: {}, // unknown (optional)
+				disabled: {}, // unknown
+				children: {}, // unknown
 			},
 			description: "Default state",
 		},

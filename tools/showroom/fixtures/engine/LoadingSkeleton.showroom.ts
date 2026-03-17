@@ -4,7 +4,8 @@ export default {
 	scenarios: {
 		default: {
 			props: {
-				size: {}, // SpinnerSize (optional)
+				variant: "text", // 'text' | 'heading' | 'card' | 'product' | 'avatar' | 'button' (optional)
+				lines: 0, // number (optional)
 				class: "example", // string (optional)
 			},
 			description: "Default state",

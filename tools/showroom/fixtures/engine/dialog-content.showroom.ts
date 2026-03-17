@@ -4,8 +4,9 @@ export default {
 	scenarios: {
 		default: {
 			props: {
-				size: {}, // SpinnerSize (optional)
-				class: "example", // string (optional)
+				ref: {}, // unknown (optional)
+				portalProps: {}, // unknown
+				children: {}, // unknown
 			},
 			description: "Default state",
 		},

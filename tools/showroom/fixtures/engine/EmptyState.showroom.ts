@@ -4,8 +4,10 @@ export default {
 	scenarios: {
 		default: {
 			props: {
-				size: {}, // SpinnerSize (optional)
-				class: "example", // string (optional)
+				icon: "search", // 'search' | 'shopping-bag' | 'star' | 'heart' | 'sparkles' (optional)
+				title: "example", // string
+				description: "example", // string (optional)
+				action: undefined, // Snippet (optional)
 			},
 			description: "Default state",
 		},

@@ -4,8 +4,10 @@ export default {
 	scenarios: {
 		default: {
 			props: {
-				size: {}, // SpinnerSize (optional)
-				class: "example", // string (optional)
+				credits: 0, // number
+				showIcon: false, // boolean (optional)
+				size: "sm", // 'sm' | 'md' | 'lg' (optional)
+				variant: "default", // 'default' | 'compact' | 'card' (optional)
 			},
 			description: "Default state",
 		},

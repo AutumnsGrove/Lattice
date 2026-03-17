@@ -4,8 +4,8 @@ export default {
 	scenarios: {
 		default: {
 			props: {
-				size: {}, // SpinnerSize (optional)
-				class: "example", // string (optional)
+				status: "pending", // 'pending' | 'running' | 'completed' | 'failed' | 'needs_confirmation'
+				size: "sm", // 'sm' | 'md' (optional)
 			},
 			description: "Default state",
 		},

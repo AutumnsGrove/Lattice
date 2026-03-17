@@ -3,10 +3,7 @@ import type { ShowroomFixture } from "../types";
 export default {
 	scenarios: {
 		default: {
-			props: {
-				size: {}, // SpinnerSize (optional)
-				class: "example", // string (optional)
-			},
+			props: {},
 			description: "Default state",
 		},
 		empty: {
