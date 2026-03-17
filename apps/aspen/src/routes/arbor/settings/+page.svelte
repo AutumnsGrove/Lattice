@@ -11,6 +11,20 @@
 
 	let { data } = $props();
 
+	// ── Parent layout data ──────────────────────────────────────────────────
+	// Root layout provides: data.siteSettings, data.context, data.user
+	// Arbor layout provides: data.tenant (id, subdomain, displayName)
+	// Page server load provides: data.meadowOptIn, data.customBlazeCount
+	const settings = $derived(data.siteSettings || {});
+	const subdomain = $derived(data.tenant?.subdomain || "");
+	const groveTitle = $derived(settings.grove_title || "");
+	const avatarUrl = $derived(settings.avatar_url || null);
+	const fontFamily = $derived(settings.font_family || "");
+	const accentColor = $derived(settings.accent_color || "");
+	const preferredSeason = $derived(settings.preferred_season || "");
+	const canopyVisible = $derived(settings.canopy_visible === "true");
+	const humanJsonEnabled = $derived(settings.human_json_enabled === "true");
+
 	// Session count loaded client-side (real-time from SessionDO)
 	let sessionCount = $state<number | null>(null);
 	let loadingSessions = $state(true);
@@ -26,20 +40,18 @@
 	});
 
 	// Derive display values
-	const displayAvatar = $derived(data.avatarUrl || data.oauthAvatarUrl);
-	const fontDef = $derived(FONT_PRESETS.find((f) => f.id === data.fontFamily));
+	const displayAvatar = $derived(avatarUrl || data.user?.picture || null);
+	const fontDef = $derived(FONT_PRESETS.find((f) => f.id === fontFamily));
 	const fontName = $derived(fontDef?.name || "Lexend");
 	const fontCssFamily = $derived(fontDef?.family || "");
 	const seasonLabel = $derived(
-		data.preferredSeason
-			? SEASON_LABELS[data.preferredSeason as Season] || ""
-			: "follows the season",
+		preferredSeason ? SEASON_LABELS[preferredSeason as Season] || "" : "follows the season",
 	);
 	const seasonFavicon = $derived(
-		data.preferredSeason ? getSeasonFavicons(data.preferredSeason as Season).png32 : null,
+		preferredSeason ? getSeasonFavicons(preferredSeason as Season).png32 : null,
 	);
 	const seasonColor = $derived(
-		data.preferredSeason ? SEASON_THEME_COLORS[data.preferredSeason as Season] : null,
+		preferredSeason ? SEASON_THEME_COLORS[preferredSeason as Season] : null,
 	);
 </script>
 
@@ -63,14 +75,14 @@
 							<img src={displayAvatar} alt="" class="avatar-img" />
 						{:else}
 							<span class="avatar-initial">
-								{data.currentSubdomain?.[0]?.toUpperCase() || "?"}
+								{subdomain?.[0]?.toUpperCase() || "?"}
 							</span>
 						{/if}
 					</div>
 					<div class="profile-info">
-						<span class="profile-address">{data.currentSubdomain}.grove.place</span>
-						{#if data.groveTitle}
-							<span class="profile-title">&ldquo;{data.groveTitle}&rdquo;</span>
+						<span class="profile-address">{subdomain}.grove.place</span>
+						{#if groveTitle}
+							<span class="profile-title">&ldquo;{groveTitle}&rdquo;</span>
 						{:else}
 							<span class="profile-title muted">no title yet</span>
 						{/if}
@@ -94,11 +106,10 @@
 					</div>
 					<div class="appearance-row">
 						<span class="appear-label">Accent</span>
-						{#if data.accentColor}
+						{#if accentColor}
 							<span class="accent-swatch">
-								<span class="accent-dot" style:background={data.accentColor} aria-hidden="true"
-								></span>
-								<span class="accent-hex">{data.accentColor}</span>
+								<span class="accent-dot" style:background={accentColor} aria-hidden="true"></span>
+								<span class="accent-hex">{accentColor}</span>
 							</span>
 						{:else}
 							<span class="appear-value muted">Grove green</span>
@@ -138,9 +149,9 @@
 					<div class="community-row">
 						<GroveIcon service="grove" size={16} color="var(--user-accent, var(--color-primary))" />
 						<span class="community-label">Canopy</span>
-						<span class="status-dot" class:active={data.canopyVisible}></span>
+						<span class="status-dot" class:active={canopyVisible}></span>
 						<span class="community-state">
-							{data.canopyVisible ? "visible" : "hidden"}
+							{canopyVisible ? "visible" : "hidden"}
 						</span>
 					</div>
 					<div class="community-row">
@@ -150,16 +161,16 @@
 							color="var(--user-accent, var(--color-primary))"
 						/>
 						<span class="community-label">Meadow</span>
-						<span class="status-dot" class:active={data.meadowOptIn}></span>
+						<span class="status-dot" class:active={data.meadowOptIn ?? false}></span>
 						<span class="community-state">
-							{data.meadowOptIn ? "sharing" : "quiet"}
+							{(data.meadowOptIn ?? false) ? "sharing" : "quiet"}
 						</span>
 					</div>
 					<div class="community-row">
 						<span class="community-label" style:margin-left="20px">human.json</span>
-						<span class="status-dot" class:active={data.humanJsonEnabled}></span>
+						<span class="status-dot" class:active={humanJsonEnabled}></span>
 						<span class="community-state">
-							{data.humanJsonEnabled ? "published" : "off"}
+							{humanJsonEnabled ? "published" : "off"}
 						</span>
 					</div>
 				</div>
