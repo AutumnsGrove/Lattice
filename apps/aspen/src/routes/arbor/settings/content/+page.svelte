@@ -522,8 +522,8 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 2rem;
-		height: 2rem;
+		width: 44px;
+		height: 44px;
 		border: 1px solid var(--color-border);
 		border-radius: var(--border-radius-small, 0.375rem);
 		background: var(--color-surface);
@@ -560,8 +560,8 @@
 	}
 
 	.blaze-color-swatch {
-		width: 1.75rem;
-		height: 1.75rem;
+		width: 44px;
+		height: 44px;
 		border-radius: 50%;
 		border: 2px solid transparent;
 		cursor: pointer;
