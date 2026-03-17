@@ -11,10 +11,10 @@ from pathlib import Path
 # Port 5173 is the vite default; apps that override it are listed explicitly.
 APP_REGISTRY: dict[str, dict] = {
     "engine": {
-        "cwd": "libs/engine",
+        "cwd": "apps/aspen",
         "port": 5173,
         "start_command": "pnpm dev",
-        "description": "Core engine (tenant sites)",
+        "description": "Core engine via Aspen (tenant sites with subdomain routing)",
     },
     "amber": {
         "cwd": "apps/amber",

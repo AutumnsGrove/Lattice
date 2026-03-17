@@ -34,6 +34,7 @@ class LazyGroup(click.Group):
         "seed": "glimpse.commands.seed:seed",
         "status": "glimpse.commands.status:status",
         "stop": "glimpse.commands.stop:stop",
+        "watch": "glimpse.commands.watch:watch",
     }
 
     def list_commands(self, ctx: click.Context) -> list[str]:

@@ -62,6 +62,38 @@ class CaptureRequest:
 
 
 @dataclass
+class A11ySummary:
+    """Brief accessibility snapshot from the page's a11y tree.
+
+    Gives agents a quick sense of page structure and common issues
+    without needing a separate accessibility audit tool.
+    """
+
+    page_title: str = ""
+    heading_count: int = 0
+    headings: list[str] = field(default_factory=list)  # e.g. ["h1: Welcome", "h2: Posts"]
+    landmark_count: int = 0
+    landmarks: list[str] = field(default_factory=list)  # e.g. ["navigation", "main", "banner"]
+    link_count: int = 0
+    image_count: int = 0
+    images_missing_alt: int = 0
+
+    def to_dict(self) -> dict:
+        d: dict = {"page_title": self.page_title}
+        if self.headings:
+            d["headings"] = self.headings
+            d["heading_count"] = self.heading_count
+        if self.landmarks:
+            d["landmarks"] = self.landmarks
+            d["landmark_count"] = self.landmark_count
+        d["link_count"] = self.link_count
+        if self.image_count:
+            d["image_count"] = self.image_count
+            d["images_missing_alt"] = self.images_missing_alt
+        return d
+
+
+@dataclass
 class CaptureResult:
     """The outcome of a screenshot capture.
 
@@ -78,6 +110,9 @@ class CaptureResult:
     scale: int = 2
     size_bytes: int = 0
     duration_ms: int = 0
+    http_status: int = 0
+    page_title: str = ""
+    a11y: A11ySummary | None = None
     error: str | None = None
     console_messages: list[ConsoleMessage] = field(default_factory=list)
 
@@ -116,6 +151,12 @@ class CaptureResult:
             "size_bytes": self.size_bytes,
             "duration_ms": self.duration_ms,
         }
+        if self.http_status:
+            d["http_status"] = self.http_status
+        if self.page_title:
+            d["page_title"] = self.page_title
+        if self.a11y:
+            d["a11y"] = self.a11y.to_dict()
         if self.error:
             d["error"] = self.error
         if self.console_messages:

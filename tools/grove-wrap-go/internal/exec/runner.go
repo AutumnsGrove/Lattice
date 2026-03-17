@@ -35,6 +35,7 @@ var allowedBinaries = map[string]bool{
 	"npm":      true,
 	"claude":   true,
 	"bash":     true,
+	"uv":       true,
 }
 
 // Result holds the output of a completed command.
