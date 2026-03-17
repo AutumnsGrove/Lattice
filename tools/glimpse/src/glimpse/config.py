@@ -32,7 +32,7 @@ class GlimpseConfig:
 
     # [server]
     server_port: int = 5173
-    server_start_command: str = "pnpm dev:wrangler"
+    server_start_command: str = "pnpm dev"
     server_start_cwd: str = "libs/engine"
     server_health_url: str = "http://localhost:5173"
     server_health_timeout: int = 30000

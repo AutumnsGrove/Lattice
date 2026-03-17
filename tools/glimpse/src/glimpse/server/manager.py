@@ -104,7 +104,13 @@ class ServerManager:
             return {"managed": True, "running": False, "pid": None}
 
     def _start_server(self) -> tuple[bool, str]:
-        """Start the dev server as a background process."""
+        """Start the dev server as a background process.
+
+        Tries the configured command first (e.g. pnpm dev:wrangler).
+        If it exits immediately (common with wrangler version mismatches),
+        falls back to plain 'pnpm dev' which works for UI verification
+        even without D1/KV/R2 bindings.
+        """
         if not self._grove_root:
             return False, "Cannot auto-start: GROVE_ROOT not found"
 
@@ -112,11 +118,30 @@ class ServerManager:
         if not start_cwd.exists():
             return False, f"Cannot auto-start: directory not found: {start_cwd}"
 
-        # Split command into args
-        cmd_parts = shlex.split(self._config.server_start_command)
+        # Try the configured command, with fallback
+        commands_to_try = [self._config.server_start_command]
+        # If the configured command involves wrangler, add a plain vite fallback
+        if "wrangler" in self._config.server_start_command:
+            commands_to_try.append("pnpm dev")
+
+        last_error = ""
+        for cmd in commands_to_try:
+            ok, err = self._try_start_command(cmd, start_cwd)
+            if ok:
+                return True, ""
+            last_error = err
+
+        return False, last_error
+
+    def _try_start_command(self, cmd: str, cwd: Path) -> tuple[bool, str]:
+        """Attempt to start a dev server with the given command.
+
+        Returns (True, "") if the process is still running after a brief
+        settle period, or (False, error) if it exited immediately.
+        """
+        cmd_parts = shlex.split(cmd)
 
         try:
-            # Start as background process, redirect output to log file
             log_dir = self._grove_root / ".glimpse"
             log_dir.mkdir(parents=True, exist_ok=True)
             log_file = log_dir / "server.log"
@@ -124,11 +149,19 @@ class ServerManager:
             with open(log_file, "w") as log:
                 proc = subprocess.Popen(
                     cmd_parts,
-                    cwd=str(start_cwd),
+                    cwd=str(cwd),
                     stdout=log,
                     stderr=subprocess.STDOUT,
                     start_new_session=True,  # Detach from parent
                 )
+
+            # Wait briefly to detect immediate failures (e.g. wrangler
+            # version mismatch exits with code 2 in <1s)
+            time.sleep(1.5)
+            exit_code = proc.poll()
+            if exit_code is not None:
+                # Process already exited — command failed
+                return False, f"Command '{cmd}' exited immediately (code {exit_code})"
 
             # Write PID file
             pid_path = self._pid_file_path()

@@ -15,7 +15,10 @@ async def poll_until_ready(
     timeout_ms: int = 30000,
     interval_ms: int = 500,
 ) -> tuple[bool, str]:
-    """Poll a URL until it responds with a 2xx status or timeout.
+    """Poll a URL until the server responds (any HTTP status) or timeout.
+
+    Any HTTP response means the server is alive — even 404/500 pages are
+    fully rendered by SvelteKit and useful for screenshot verification.
 
     Returns (True, "") on success or (False, error_message) on failure.
     """
@@ -26,9 +29,10 @@ async def poll_until_ready(
         while time.monotonic() < deadline:
             try:
                 resp = await client.get(url)
-                if 200 <= resp.status_code < 400:
-                    return True, ""
-                last_error = f"HTTP {resp.status_code}"
+                # Any HTTP response means the server is alive and serving.
+                # SvelteKit renders error pages (404, 500) as full HTML —
+                # these are valid capture targets for visual verification.
+                return True, ""
             except httpx.ConnectError:
                 last_error = "connection refused"
             except httpx.TimeoutException:
@@ -42,10 +46,15 @@ async def poll_until_ready(
 
 
 def check_server_reachable(url: str, timeout_s: float = 3.0) -> bool:
-    """Synchronous check if a URL is reachable. Returns True/False."""
+    """Synchronous check if a URL is reachable. Returns True/False.
+
+    Any HTTP response counts as reachable — the server is up even if it
+    returns 404 or 500. Only connection failures mean "not reachable."
+    """
     try:
         with httpx.Client(timeout=timeout_s) as client:
             resp = client.get(url)
-            return 200 <= resp.status_code < 400
+            # Any response = server is alive
+            return True
     except Exception:
         return False

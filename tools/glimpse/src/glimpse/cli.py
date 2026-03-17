@@ -76,6 +76,12 @@ class LazyGroup(click.Group):
     default=False,
     help="Auto-start dev server if target URL is unreachable",
 )
+@click.option(
+    "--app",
+    type=str,
+    default=None,
+    help="Target a specific Grove app (e.g. --app plant, --app landing)",
+)
 @click.version_option(version=__version__, prog_name="glimpse")
 @click.pass_context
 def main(
@@ -85,11 +91,19 @@ def main(
     verbose: bool,
     logs: bool,
     auto: bool,
+    app: str | None,
 ) -> None:
     """Glimpse — A quick peek through the trees.
 
     Capture screenshots of Grove sites with theme control,
     element targeting, console log capture, and agent-friendly output modes.
+
+    Use --app to target different Grove apps:
+
+        glimpse --app plant capture http://localhost:5173/ --auto
+
+    Available apps: engine, amber, billing, clearing, domains, ivy,
+    landing, login, meadow, plant, terrarium
     """
     # Determine output mode
     if output_json:
@@ -105,6 +119,20 @@ def main(
     config.json_mode = output_json
     config.verbose = verbose
 
+    # Apply --app override to config
+    if app:
+        from glimpse.utils.apps import get_app, APP_NAMES
+
+        app_info = get_app(app)
+        if not app_info:
+            click.echo(f"Unknown app '{app}'. Available: {', '.join(APP_NAMES)}", err=True)
+            ctx.exit(1)
+            return
+        config.server_start_cwd = app_info["cwd"]
+        config.server_start_command = app_info["start_command"]
+        config.server_port = app_info["port"]
+        config.server_health_url = f"http://localhost:{app_info['port']}"
+
     # Build context object for child commands
     ctx.ensure_object(dict)
     ctx.obj["config"] = config
@@ -112,6 +140,7 @@ def main(
     ctx.obj["verbose"] = verbose
     ctx.obj["global_logs"] = logs
     ctx.obj["global_auto"] = auto
+    ctx.obj["app"] = app
 
     # No subcommand → show help
     if ctx.invoked_subcommand is None:
