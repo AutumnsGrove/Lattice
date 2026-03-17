@@ -96,6 +96,7 @@ jobs:
           - name: ivy
             path: apps/ivy
             needs-engine: true
+            needs-foliage: true
             build-first: true
 
     steps:
@@ -114,6 +115,11 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
+
+      - name: Build foliage
+        if: matrix.needs-foliage
+        run: pnpm run build
+        working-directory: libs/foliage
 
       - name: Build gossamer
         if: matrix.needs-engine
