@@ -63,6 +63,11 @@ vi.mock("@autumnsgrove/lattice/loom/sveltekit", () => ({
 	})),
 }));
 
+vi.mock("@autumnsgrove/lattice/feature-flags", () => ({
+	isInGreenhouse: vi.fn().mockResolvedValue(true),
+	isFeatureEnabled: vi.fn().mockResolvedValue(true),
+}));
+
 import { getUserHomeGrove } from "@autumnsgrove/lattice/server/services/users";
 import {
 	listConversations,
@@ -132,7 +137,7 @@ function makeGETEvent(
 		url.searchParams.set(k, v);
 	}
 	return {
-		platform: { env: { DB: db }, context: { waitUntil: vi.fn() } },
+		platform: { env: { DB: db, CACHE_KV: {} }, context: { waitUntil: vi.fn() } },
 		locals: { user: opts.user !== undefined ? opts.user : TEST_USER },
 		url,
 		params: opts.params ?? {},
@@ -150,7 +155,7 @@ function makePOSTEvent(
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(body),
 		}),
-		platform: { env: { DB: db, CHAT: {} }, context: { waitUntil: vi.fn() } },
+		platform: { env: { DB: db, CHAT: {}, CACHE_KV: {} }, context: { waitUntil: vi.fn() } },
 		locals: { user: opts.user !== undefined ? opts.user : TEST_USER },
 		params: opts.params ?? {},
 	};
