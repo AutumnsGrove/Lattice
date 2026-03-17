@@ -68,7 +68,7 @@
 </script>
 
 <svelte:head>
-	<title>Plant Your Blog - Grove</title>
+	<title>Welcome to Grove</title>
 </svelte:head>
 
 <div class="min-h-screen bg-page leaf-pattern flex flex-col">
