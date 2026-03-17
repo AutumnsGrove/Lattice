@@ -4,11 +4,11 @@ export default {
 	scenarios: {
 		default: {
 			props: {
-				variant: {}, // unknown (optional)
-				size: {}, // unknown (optional)
-				ref: {}, // unknown (optional)
+				class: "example", // string (optional)
+				variant: "default", // "default" (optional)
+				size: "default", // "default" (optional)
 				href: {}, // unknown (optional)
-				type: {}, // unknown (optional)
+				type: "button", // "button" (optional)
 				disabled: {}, // unknown
 				children: {}, // unknown
 			},

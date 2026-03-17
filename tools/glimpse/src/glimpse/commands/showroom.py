@@ -12,6 +12,8 @@ import asyncio
 import json
 import os
 import re
+import shutil
+import subprocess
 import sys
 import time
 from dataclasses import dataclass, field
@@ -180,84 +182,105 @@ HARDCODED_COLOR_PATTERN = re.compile(
 )
 
 
-async def _extract_computed_styles(page) -> dict:
-    """Extract computed styles from the rendered component for compliance checking."""
-    try:
-        return await page.evaluate("""() => {
-            const component = document.getElementById('showroom-component');
-            if (!component) return { error: 'No component mounted' };
+EXTRACT_STYLES_JS = """() => {
+    const component = document.getElementById('showroom-component');
+    if (!component) return { error: 'No component mounted' };
 
-            const elements = component.querySelectorAll('*');
-            const colors = new Set();
-            const fontSizes = new Set();
-            const spacings = new Set();
-            const focusStyles = [];
-            let hasGlass = false;
+    const elements = component.querySelectorAll('*');
+    const colors = new Set();
+    const fontSizes = new Set();
+    const spacings = new Set();
+    const focusStyles = [];
+    const rawInlineColors = [];
+    let hasGlass = false;
 
-            for (const el of elements) {
-                const style = window.getComputedStyle(el);
+    // Regex to detect hardcoded hex/rgb in inline styles
+    const hexPattern = /#[0-9a-fA-F]{3,8}\\b/g;
+    const rgbPattern = /rgb\\(\\s*\\d+\\s*,\\s*\\d+\\s*,\\s*\\d+\\s*\\)/g;
 
-                // Collect colors
-                colors.add(style.color);
-                colors.add(style.backgroundColor);
-                if (style.borderColor !== 'rgba(0, 0, 0, 0)') {
-                    colors.add(style.borderColor);
-                }
+    for (const el of elements) {
+        const style = window.getComputedStyle(el);
 
-                // Collect font sizes
-                fontSizes.add(style.fontSize);
+        // Collect computed colors
+        colors.add(style.color);
+        colors.add(style.backgroundColor);
+        if (style.borderColor !== 'rgba(0, 0, 0, 0)') {
+            colors.add(style.borderColor);
+        }
 
-                // Collect spacings (padding + margin)
-                for (const prop of ['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
-                                     'marginTop', 'marginRight', 'marginBottom', 'marginLeft']) {
-                    const val = parseFloat(style[prop]);
-                    if (val > 0) spacings.add(val);
-                }
+        // Collect font sizes
+        fontSizes.add(style.fontSize);
 
-                // Check for glassmorphism
-                if (style.backdropFilter && style.backdropFilter !== 'none') {
-                    hasGlass = true;
-                }
-            }
+        // Collect spacings (padding + margin)
+        for (const prop of ['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
+                             'marginTop', 'marginRight', 'marginBottom', 'marginLeft']) {
+            const val = parseFloat(style[prop]);
+            if (val > 0) spacings.add(val);
+        }
 
-            // Check focus styles on interactive elements
-            const interactives = component.querySelectorAll('button, a, input, select, textarea, [tabindex]');
-            for (const el of interactives) {
-                focusStyles.push({
-                    tag: el.tagName.toLowerCase(),
-                    type: el.type || null,
-                    hasFocusClass: el.className?.includes?.('focus') || false,
+        // Check for glassmorphism
+        if (style.backdropFilter && style.backdropFilter !== 'none') {
+            hasGlass = true;
+        }
+
+        // Check inline style attribute for hardcoded colors
+        const inlineStyle = el.getAttribute('style') || '';
+        if (inlineStyle) {
+            const hexMatches = inlineStyle.match(hexPattern) || [];
+            const rgbMatches = inlineStyle.match(rgbPattern) || [];
+            for (const m of [...hexMatches, ...rgbMatches]) {
+                rawInlineColors.push({
+                    element: el.tagName.toLowerCase() + (el.className ? '.' + el.className.split(' ')[0] : ''),
+                    value: m,
                 });
             }
+        }
+    }
 
-            return {
-                colors: [...colors].filter(c => c && c !== 'rgba(0, 0, 0, 0)'),
-                fontSizes: [...fontSizes],
-                spacings: [...spacings].sort((a, b) => a - b),
-                hasGlass,
-                interactiveCount: interactives.length,
-                focusStyles,
-                elementCount: elements.length,
-            };
-        }""")
-    except Exception:
-        return {}
+    // Check focus styles on interactive elements
+    const interactives = component.querySelectorAll('button, a, input, select, textarea, [tabindex]');
+    for (const el of interactives) {
+        focusStyles.push({
+            tag: el.tagName.toLowerCase(),
+            type: el.type || null,
+            hasFocusClass: el.className?.includes?.('focus') || false,
+        });
+    }
+
+    return {
+        colors: [...colors].filter(c => c && c !== 'rgba(0, 0, 0, 0)'),
+        fontSizes: [...fontSizes],
+        spacings: [...spacings].sort((a, b) => a - b),
+        rawInlineColors,
+        hasGlass,
+        interactiveCount: interactives.length,
+        focusStyles,
+        elementCount: elements.length,
+    };
+}"""
 
 
 def _check_color_tokens(styles: dict) -> ComplianceCheck:
-    """Check that colors use tokens, not hardcoded hex/rgb values."""
-    violations = []
-    colors = styles.get("colors", [])
+    """Check that colors use CSS custom properties (tokens), not hardcoded values.
 
-    for color in colors:
-        # rgba/transparent/inherit are fine — they're computed values
-        if not color or color.startswith("rgba") or color == "transparent":
-            continue
-        # rgb(r, g, b) from computed styles is expected — but we flag if
-        # the source used hardcoded hex. We can't fully check this from
-        # computed styles alone, so we do a lighter check.
-        # Flag only if using unexpected color values (not in grove palette range)
-        pass
+    We can't perfectly distinguish token-derived vs hardcoded from computed
+    styles alone (computed values are always resolved to rgb()). Instead,
+    we check for inline styles with hardcoded hex/rgb that bypass the
+    token system — the `rawInlineColors` field from the JS extractor.
+    """
+    violations = []
+    raw_inline = styles.get("rawInlineColors", [])
+
+    for entry in raw_inline:
+        violations.append(
+            ComplianceViolation(
+                element=entry.get("element", "unknown"),
+                expected="CSS custom property (design token)",
+                actual=entry.get("value", "hardcoded color"),
+                rule="color-tokens",
+                severity="warning",
+            )
+        )
 
     return ComplianceCheck(
         name="color-tokens",
@@ -418,13 +441,18 @@ def run_compliance_checks(styles: dict, a11y=None) -> ComplianceResult:
 # ---------------------------------------------------------------------------
 
 
-def scaffold_fixture(component_path: str, grove_root: Path) -> str | None:
+def scaffold_fixture(
+    component_path: str,
+    grove_root: Path,
+    force: bool = False,
+) -> str | None:
     """Generate a .showroom.ts fixture template from a component's props.
 
     Does lightweight regex parsing of the Props interface — not full TypeScript
     resolution. Generates a starting template that developers/agents fill in.
 
     Returns the generated fixture path, or None on failure.
+    Returns "exists:<path>" if the fixture already exists and force=False.
     """
     comp_path = Path(component_path)
     if not comp_path.is_absolute():
@@ -445,17 +473,24 @@ def scaffold_fixture(component_path: str, grove_root: Path) -> str | None:
     elif parts[0] == "apps" and len(parts) > 1:
         library = parts[1]
 
-    # Parse Props interface
-    props = _parse_props_interface(source)
+    # Check if fixture already exists (guard against overwriting hand-crafted fixtures)
+    fixture_dir = grove_root / "tools" / "showroom" / "fixtures" / library
+    fixture_path = fixture_dir / f"{component_name}.showroom.ts"
+    if fixture_path.exists() and not force:
+        return f"exists:{fixture_path}"
 
-    # Generate fixture content
+    # Parse Props interface (also checks companion *-variants.ts files)
+    props = _parse_props_interface(source, comp_path)
+
+    # Generate fixture content (use spaces for Prettier compliance)
+    I = "  "  # noqa: E741 — indent unit
     lines = [
         'import type { ShowroomFixture } from "../types";',
         "",
         "export default {",
-        "\tscenarios: {",
-        "\t\tdefault: {",
-        "\t\t\tprops: {",
+        f"{I}scenarios: {{",
+        f"{I}{I}default: {{",
+        f"{I}{I}{I}props: {{",
     ]
 
     for prop_name, prop_info in props.items():
@@ -464,18 +499,18 @@ def scaffold_fixture(component_path: str, grove_root: Path) -> str | None:
         comment = f"  // {prop_info['type']}"
         if optional:
             comment += " (optional)"
-        lines.append(f"\t\t\t\t{prop_name}: {default_val},{comment}")
+        lines.append(f"{I}{I}{I}{I}{prop_name}: {default_val},{comment}")
 
     lines.extend(
         [
-            "\t\t\t},",
-            '\t\t\tdescription: "Default state",',
-            "\t\t},",
-            "\t\tempty: {",
-            "\t\t\tprops: {},",
-            '\t\t\tdescription: "Empty/zero-props state",',
-            "\t\t},",
-            "\t},",
+            f"{I}{I}{I}}},",
+            f'{I}{I}{I}description: "Default state",',
+            f"{I}{I}}},",
+            f"{I}{I}empty: {{",
+            f"{I}{I}{I}props: {{}},",
+            f'{I}{I}{I}description: "Empty/zero-props state",',
+            f"{I}{I}}},",
+            f"{I}}},",
             "} satisfies ShowroomFixture;",
             "",
         ]
@@ -484,20 +519,22 @@ def scaffold_fixture(component_path: str, grove_root: Path) -> str | None:
     fixture_content = "\n".join(lines)
 
     # Write fixture file
-    fixture_dir = grove_root / "tools" / "showroom" / "fixtures" / library
     fixture_dir.mkdir(parents=True, exist_ok=True)
-    fixture_path = fixture_dir / f"{component_name}.showroom.ts"
     fixture_path.write_text(fixture_content)
+
+    # Run Prettier on the generated file for consistent formatting
+    _run_prettier(fixture_path)
 
     return str(fixture_path)
 
 
-def _parse_props_interface(source: str) -> dict:
+def _parse_props_interface(source: str, comp_path: Path | None = None) -> dict:
     """Extract props from a Svelte 5 component source.
 
-    Handles two patterns:
+    Handles three patterns:
     1. interface Props { name: type; ... }
-    2. let { name = default, ... }: Props = $props();
+    2. let { name = default, ... }: Type = $props();  (shadcn style)
+    3. Companion *-variants.ts with exported type (shadcn/tv pattern)
     """
     props: dict = {}
 
@@ -509,10 +546,8 @@ def _parse_props_interface(source: str) -> dict:
         body = interface_match.group(1)
         for line in body.strip().split("\n"):
             line = line.strip()
-            # Skip comments
             if line.startswith("//") or line.startswith("/*") or line.startswith("*"):
                 continue
-            # Parse: name?: Type;
             prop_match = re.match(
                 r"[\"']?(\w+)[\"']?\s*(\?)?\s*:\s*(.+?)\s*;?\s*$", line
             )
@@ -522,23 +557,207 @@ def _parse_props_interface(source: str) -> dict:
                 type_str = prop_match.group(3).strip().rstrip(";")
                 props[name] = {"type": type_str, "optional": optional}
 
-    # Pattern 2: let { a, b = default }: Type = $props()
+    # Pattern 2: let { a = default, b, ...rest }: Type = $props()
     destructure_match = re.search(
         r"let\s*\{([^}]+)\}.*\$props\(\)", source, re.DOTALL
     )
     if destructure_match and not props:
         body = destructure_match.group(1)
+
+        # Try to load type info from companion variants file
+        companion_types = _load_companion_types(comp_path) if comp_path else {}
+
         for part in body.split(","):
             part = part.strip()
+            if not part:
+                continue
+
+            # Skip rest props (...restProps)
+            if part.startswith("..."):
+                continue
+
+            # Handle: class: className = "default"
+            if ":" in part and not part.startswith("{"):
+                actual_name = part.split(":")[0].strip()
+                remainder = part.split(":", 1)[1].strip()
+                if "=" in remainder:
+                    default_val = remainder.split("=", 1)[1].strip()
+                    prop_type = _infer_type_from_default(default_val)
+                    props[actual_name] = {"type": prop_type, "optional": True}
+                else:
+                    props[actual_name] = {"type": "string", "optional": True}
+                continue
+
             if "=" in part:
                 name = part.split("=")[0].strip()
-                props[name] = {"type": "unknown", "optional": True}
-            elif part:
+                default_val = part.split("=", 1)[1].strip()
+
+                # Skip $bindable() props
+                if "$bindable" in default_val:
+                    continue
+
+                prop_type = _infer_type_from_default(default_val)
+
+                # Check companion types for better info
+                if name in companion_types:
+                    prop_type = companion_types[name]
+
+                props[name] = {"type": prop_type, "optional": True}
+            else:
                 name = part.strip()
                 if name and name.isidentifier():
-                    props[name] = {"type": "unknown", "optional": False}
+                    prop_type = companion_types.get(name, "unknown")
+                    props[name] = {"type": prop_type, "optional": False}
 
     return props
+
+
+def _load_companion_types(comp_path: Path) -> dict:
+    """Try to load type information from a companion *-variants.ts file.
+
+    Shadcn components often have button-variants.ts, badge-variants.ts, etc.
+    that export type aliases like ButtonVariant, ButtonSize.
+    """
+    types: dict = {}
+    if not comp_path:
+        return types
+
+    # Look for *-variants.ts in the same directory
+    parent = comp_path.parent
+    stem = comp_path.stem  # e.g. "button"
+    variants_path = parent / f"{stem}-variants.ts"
+    if not variants_path.exists():
+        # Try index.ts
+        variants_path = parent / "index.ts"
+
+    if not variants_path.exists():
+        return types
+
+    try:
+        source = variants_path.read_text()
+
+        # Parse tv({ variants: { name: { key: "css...", ... } } }) to extract variant keys.
+        # The variant map keys are the valid prop values. We use a brace-depth
+        # parser because the CSS class strings contain colons/braces.
+        tv_match = re.search(r"tv\(\{", source)
+        if tv_match:
+            variants_match = re.search(
+                r"\bvariants:\s*(\{)", source[tv_match.start():]
+            )
+            if variants_match:
+                # Position of the opening { for the variants object
+                brace_pos = tv_match.start() + variants_match.start(1)
+                variant_groups = _parse_tv_variants(source, brace_pos)
+
+                for group_name, keys in variant_groups.items():
+                    if keys:
+                        types[group_name] = " | ".join(f'"{k}"' for k in keys)
+
+    except Exception:
+        pass
+
+    return types
+
+
+def _parse_tv_variants(source: str, start: int) -> dict[str, list[str]]:
+    """Parse a tailwind-variants tv() variants block using brace-depth tracking.
+
+    Given `variants: { variant: { default: "...", destructive: "..." }, size: { ... } }`,
+    extracts { "variant": ["default", "destructive"], "size": [...] }.
+    """
+    groups: dict[str, list[str]] = {}
+    i = start
+    depth = 0
+    current_group = None
+    current_keys: list[str] = []
+
+    while i < len(source):
+        c = source[i]
+
+        if c == "{":
+            depth += 1
+            if depth == 2:
+                # Starting a variant group — look back for the group name
+                name_match = re.search(r"(\w+)\s*:\s*$", source[max(0, i - 40):i])
+                if name_match:
+                    current_group = name_match.group(1)
+                    current_keys = []
+            i += 1
+            continue
+
+        if c == "}":
+            if depth == 2 and current_group:
+                groups[current_group] = current_keys
+                current_group = None
+                current_keys = []
+            depth -= 1
+            if depth == 0:
+                break
+            i += 1
+            continue
+
+        # At depth 2, we're inside a variant group — look for keys.
+        # Keys appear at the start of lines (after whitespace) followed by colon.
+        # We must NOT match colons inside CSS class strings like "hover:bg-..."
+        if depth == 2 and current_group:
+            # Only look for keys after newline+whitespace or after opening brace
+            if source[i - 1] in "\n{," or (source[i - 1] in " \t" and i >= 2 and source[i - 2] == "\n"):
+                # Skip leading whitespace
+                j = i
+                while j < len(source) and source[j] in " \t":
+                    j += 1
+                key_match = re.match(r"""['"]?([\w-]+)['"]?\s*:\s*(?:\n|['"])""", source[j:])
+                if key_match:
+                    current_keys.append(key_match.group(1))
+                    i = j + key_match.end() - 1
+                    continue
+
+        i += 1
+
+    return groups
+
+
+def _infer_type_from_default(default_val: str) -> str:
+    """Infer a TypeScript type from a default value expression."""
+    val = default_val.strip().rstrip(",")
+
+    # Remove $bindable wrapper
+    if val.startswith("$bindable("):
+        val = val[len("$bindable("):-1].strip()
+
+    if val in ("true", "false"):
+        return "boolean"
+    if val == "undefined" or val == "null":
+        return "unknown"
+    if val.startswith('"') or val.startswith("'"):
+        # String literal — extract value for union hint
+        inner = val.strip("\"'")
+        return f'"{inner}"'
+    try:
+        float(val)
+        return "number"
+    except ValueError:
+        pass
+    if val.startswith("["):
+        return "array"
+    if val.startswith("{"):
+        return "object"
+    return "unknown"
+
+
+def _run_prettier(file_path: Path) -> None:
+    """Run Prettier on a generated file for consistent formatting.
+
+    Best-effort — silently skips if Prettier is not available.
+    """
+    try:
+        subprocess.run(
+            ["bun", "x", "prettier", "--write", str(file_path)],
+            capture_output=True,
+            timeout=10,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        pass
 
 
 def _default_value_for_type(type_str: str) -> str:
@@ -577,6 +796,9 @@ async def _run_showroom_audit(
     headless: bool,
     config,
     update_baselines: bool = False,
+    no_diff: bool = False,
+    no_audit: bool = False,
+    strict: bool = False,
 ) -> ShowroomAudit:
     """Execute the full showroom capture + audit pipeline."""
     timestamp = time.strftime("%Y-%m-%dT%H:%M:%S")
@@ -627,26 +849,23 @@ async def _run_showroom_audit(
                     logs=True,
                 )
 
-                # Capture
-                result = await engine.capture(request)
+                # Capture screenshot + extract styles in one browser session
+                result, computed_styles = await _capture_with_styles(
+                    engine, request, run_audit=not no_audit,
+                )
 
-                # Extract computed styles + run compliance (only if capture succeeded)
+                # Run compliance checks with both styles and a11y data
                 compliance = None
-                computed_styles = None
-                if result.success:
-                    # Get computed styles from the page
-                    # We need a fresh page for this since engine closes context
-                    # Instead, extract styles in a second pass
-                    pass
-
-                # Run compliance checks on a11y data
-                compliance = run_compliance_checks({}, result.a11y)
+                if not no_audit:
+                    compliance = run_compliance_checks(
+                        computed_styles or {}, result.a11y,
+                    )
 
                 # Diff against baseline
                 diff_result = None
                 baseline_path = baseline_dir / f"{filename}.png"
 
-                if result.success:
+                if result.success and not no_diff:
                     if baseline_path.exists() and not update_baselines:
                         diff_output = diffs_dir / f"{filename}_diff.png"
                         try:
@@ -655,10 +874,9 @@ async def _run_showroom_audit(
                             )
                         except Exception:
                             pass
-                    elif update_baselines or not baseline_path.exists():
-                        # Copy current capture as the new baseline
-                        import shutil
-
+                    elif update_baselines or (
+                        not baseline_path.exists() and not strict
+                    ):
                         shutil.copy2(output_path, baseline_path)
 
                 scenario_result = ScenarioResult(
@@ -672,6 +890,63 @@ async def _run_showroom_audit(
                 audit.scenarios.append(scenario_result)
 
     return audit
+
+
+async def _capture_with_styles(
+    engine: CaptureEngine,
+    request: CaptureRequest,
+    run_audit: bool = True,
+) -> tuple[CaptureResult, dict | None]:
+    """Capture a screenshot and extract computed styles in one browser session.
+
+    Injects the style-extraction script as an init script so it runs in
+    the same page context as the capture. After the screenshot is taken,
+    we evaluate the extraction script to get computed styles.
+
+    Falls back to plain capture if style extraction fails.
+    """
+    # First, do the normal capture
+    result = await engine.capture(request)
+
+    if not result.success or not run_audit:
+        return result, None
+
+    # Now open a second context just for style extraction
+    # (the capture engine closes its context after each capture)
+    styles: dict = {}
+    try:
+        if engine._browser:
+            from glimpse.capture.injector import build_init_script
+
+            ctx = await engine._browser.new_context(
+                viewport={"width": request.width, "height": request.height},
+                device_scale_factor=request.scale,
+            )
+            init_js = build_init_script(
+                season=request.season,
+                theme=request.theme,
+                grove_mode=None,
+            )
+            if init_js:
+                await ctx.add_init_script(init_js)
+
+            page = await ctx.new_page()
+            try:
+                await page.goto(request.url, wait_until="domcontentloaded", timeout=15000)
+                if request.wait_for:
+                    await page.wait_for_selector(request.wait_for, timeout=10000)
+                elif request.wait_ms > 0:
+                    await page.wait_for_timeout(request.wait_ms)
+
+                styles = await page.evaluate(EXTRACT_STYLES_JS)
+            except Exception:
+                pass
+            finally:
+                await ctx.close()
+    except Exception:
+        pass
+
+    return result, styles if styles else None
 
 
 # ---------------------------------------------------------------------------
@@ -726,6 +1001,12 @@ async def _run_showroom_audit(
     help="Generate a .showroom.ts fixture template for this component",
 )
 @click.option(
+    "--force",
+    is_flag=True,
+    default=False,
+    help="Overwrite existing fixture when using --scaffold",
+)
+@click.option(
     "--no-diff",
     is_flag=True,
     default=False,
@@ -736,6 +1017,12 @@ async def _run_showroom_audit(
     is_flag=True,
     default=False,
     help="Skip design compliance audit",
+)
+@click.option(
+    "--strict",
+    is_flag=True,
+    default=False,
+    help="Require --update-baselines for initial baseline creation",
 )
 @click.pass_context
 def showroom(
@@ -748,8 +1035,10 @@ def showroom(
     baseline_dir: str | None,
     update_baselines: bool,
     scaffold: bool,
+    force: bool,
     no_diff: bool,
     no_audit: bool,
+    strict: bool,
 ) -> None:
     """Render a component in isolation and run a full audit.
 
@@ -783,8 +1072,21 @@ def showroom(
 
     # Handle --scaffold mode
     if scaffold:
-        fixture_path = scaffold_fixture(component, grove_root)
-        if fixture_path:
+        fixture_path = scaffold_fixture(component, grove_root, force=force)
+        if fixture_path and fixture_path.startswith("exists:"):
+            existing = fixture_path[len("exists:"):]
+            if output_handler.mode == "json":
+                json.dump({"skipped": existing, "reason": "exists"}, sys.stdout)
+                sys.stdout.write("\n")
+            elif output_handler.mode == "agent":
+                print(f"[SKIP] {existing} (already exists, use --force to overwrite)", file=sys.stdout)
+            else:
+                output_handler.print_info(
+                    f"Fixture already exists: {existing}\n"
+                    f"  Use --force to overwrite."
+                )
+            return
+        elif fixture_path:
             if output_handler.mode == "json":
                 json.dump({"scaffold": fixture_path}, sys.stdout)
                 sys.stdout.write("\n")
@@ -814,12 +1116,14 @@ def showroom(
     if effective_auto:
         from glimpse.server.manager import ServerManager
 
-        # Override config for showroom app
+        # Override config for showroom app — use a longer health timeout
+        # because Vite cold starts (pnpm dev with no cache) can take 5-10s
         showroom_config = config
         showroom_config.server_start_cwd = "tools/showroom"
         showroom_config.server_start_command = "pnpm dev"
         showroom_config.server_port = showroom_port
         showroom_config.server_health_url = showroom_url
+        showroom_config.server_health_timeout = 45000  # 45s for cold starts
 
         mgr = ServerManager(showroom_config)
         ok, err = mgr.ensure_server(showroom_url)
@@ -853,13 +1157,16 @@ def showroom(
     fixture_source = None
     if fixture_path.exists():
         fixture_source = str(fixture_path)
-        # Load fixture scenarios via a simple JSON-compatible parser
-        # Since fixtures are TypeScript, we parse the props objects
-        try:
-            fixture_text = fixture_path.read_text()
-            scenarios = _parse_fixture_scenarios(fixture_text)
-        except Exception:
-            scenarios = {"default": {"props": {}}}
+        # Load fixture via the showroom server's API (uses Vite ssrLoadModule
+        # for full TypeScript support). Falls back to regex parser if server
+        # is not yet ready.
+        scenarios = _load_fixture_via_api(showroom_url, component)
+        if not scenarios:
+            try:
+                fixture_text = fixture_path.read_text()
+                scenarios = _parse_fixture_scenarios(fixture_text)
+            except Exception:
+                scenarios = {"default": {"props": {}}}
     else:
         scenarios = {"default": {"props": {}}}
 
@@ -908,6 +1215,9 @@ def showroom(
             headless=config.headless,
             config=config,
             update_baselines=update_baselines,
+            no_diff=no_diff,
+            no_audit=no_audit,
+            strict=strict,
         )
     )
     audit.fixture = fixture_source
@@ -999,6 +1309,40 @@ def showroom(
 
     if audit.successful_captures < audit.total_captures:
         ctx.exit(1)
+
+
+def _load_fixture_via_api(showroom_url: str, component_path: str) -> dict | None:
+    """Load fixture data from the showroom server's API.
+
+    The Vite plugin uses ssrLoadModule to load the .showroom.ts file
+    with full TypeScript support — handles nested objects, arrays,
+    and any valid TS expressions that the regex parser would miss.
+
+    Returns parsed scenarios dict, or None if the API is unreachable.
+    """
+    import urllib.request
+    import urllib.error
+
+    url = (
+        f"{showroom_url}/api/showroom/fixture"
+        f"?component={quote(component_path)}"
+    )
+    try:
+        with urllib.request.urlopen(url, timeout=5) as resp:
+            data = json.loads(resp.read().decode())
+            scenarios = data.get("scenarios", {})
+            if scenarios:
+                # Wrap raw scenario data into the expected format
+                result = {}
+                for name, scenario_data in scenarios.items():
+                    if isinstance(scenario_data, dict):
+                        result[name] = scenario_data
+                    else:
+                        result[name] = {"props": {}}
+                return result if result else None
+    except (urllib.error.URLError, json.JSONDecodeError, OSError):
+        pass
+    return None
 
 
 def _parse_fixture_scenarios(text: str) -> dict:
