@@ -1,0 +1,24 @@
+name: Deploy Aspen
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/aspen/**"
+      - "libs/engine/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/_deploy-worker.yml
+    with:
+      worker-dir: apps/aspen
+      needs-engine: true
+      run-typecheck: false
+      run-tests: true
+      run-build: true
+    secrets: inherit
