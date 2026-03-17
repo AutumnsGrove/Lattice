@@ -131,32 +131,19 @@
 	<!-- Payment Method -->
 	<PaymentMethodCard billing={data.billing} isComped={data.isComped} />
 
-	<!-- Passkeys — managed on login hub (single WebAuthn origin) -->
+	<!-- Passkeys — moved to Security settings -->
 	<GlassCard variant="default" class="mb-6">
-		<h2 style="display: flex; align-items: center; gap: 0.5rem; margin: 0 0 1rem 0;">
+		<h2 style="display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.75rem 0;">
 			<authIcons.key
 				style="width: 1.25rem; height: 1.25rem; color: var(--color-primary);"
 				aria-hidden="true"
 			/>
 			Passkeys
 		</h2>
-		<p style="margin: 0 0 1.5rem 0; color: var(--color-text-muted); font-size: 0.9rem;">
-			Passkeys let you sign in securely using Face ID, Touch ID, or Windows Hello — no password
-			needed. Manage your passkeys on the Grove login hub.
+		<p style="margin: 0 0 1rem 0; color: var(--color-text-muted); font-size: 0.9rem;">
+			Passkeys have moved to your security settings.
 		</p>
-		<a
-			href="https://login.grove.place/passkey?redirect={encodeURIComponent(
-				typeof window !== 'undefined' ? window.location.href : '',
-			)}"
-			class="passkey-manage-link"
-		>
-			Manage Passkeys →
-		</a>
-		<p
-			style="margin: 1rem 0 0 0; padding-top: 1rem; border-top: 1px solid var(--color-border); font-size: 0.8rem; color: var(--color-text-subtle);"
-		>
-			Passkeys are more secure than passwords and protect against phishing attacks.
-		</p>
+		<a href="/arbor/settings/security" class="passkey-manage-link"> Security Settings &rarr; </a>
 	</GlassCard>
 
 	<!-- Change Plan -->
@@ -258,7 +245,7 @@
 		gap: 0.5rem;
 		padding: 0.625rem 1.25rem;
 		background: var(--color-primary);
-		color: white;
+		color: var(--color-primary-foreground);
 		border-radius: var(--border-radius-small);
 		font-size: 0.9rem;
 		font-weight: 500;
