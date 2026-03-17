@@ -2,9 +2,11 @@
 	import { onMount } from "svelte";
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import Skeleton from "@autumnsgrove/lattice/ui/components/ui/Skeleton.svelte";
+	import GroveIcon from "@autumnsgrove/lattice/ui/components/ui/groveicon/GroveIcon.svelte";
 	import { authIcons, chromeIcons, featureIcons, natureIcons } from "@autumnsgrove/prism/icons";
 	import { FONT_PRESETS } from "@autumnsgrove/lattice/config/presets";
-	import { SEASON_LABELS } from "@autumnsgrove/lattice/ui/types/season";
+	import { SEASON_LABELS, type Season } from "@autumnsgrove/lattice/ui/types/season";
+	import { getSeasonFavicons, SEASON_THEME_COLORS } from "@autumnsgrove/lattice/ui/season-meta";
 	import { api } from "@autumnsgrove/lattice/utils";
 
 	let { data } = $props();
@@ -25,11 +27,19 @@
 
 	// Derive display values
 	const displayAvatar = $derived(data.avatarUrl || data.oauthAvatarUrl);
-	const fontName = $derived(FONT_PRESETS.find((f) => f.id === data.fontFamily)?.name || "Lexend");
+	const fontDef = $derived(FONT_PRESETS.find((f) => f.id === data.fontFamily));
+	const fontName = $derived(fontDef?.name || "Lexend");
+	const fontCssFamily = $derived(fontDef?.family || "");
 	const seasonLabel = $derived(
 		data.preferredSeason
-			? SEASON_LABELS[data.preferredSeason as keyof typeof SEASON_LABELS] || ""
-			: "Default",
+			? SEASON_LABELS[data.preferredSeason as Season] || ""
+			: "follows the season",
+	);
+	const seasonFavicon = $derived(
+		data.preferredSeason ? getSeasonFavicons(data.preferredSeason as Season).png32 : null,
+	);
+	const seasonColor = $derived(
+		data.preferredSeason ? SEASON_THEME_COLORS[data.preferredSeason as Season] : null,
 	);
 </script>
 
@@ -47,12 +57,24 @@
 					<chromeIcons.sliders class="card-icon" />
 					<h2 class="card-title">Profile</h2>
 				</div>
-				<div class="card-status">
-					<span class="status-line">{data.currentSubdomain}.grove.place</span>
-					<span class="status-line">Photo: {displayAvatar ? "set" : "not set"}</span>
-					<span class="status-line">
-						Title: {data.groveTitle ? `"${data.groveTitle}"` : "default"}
-					</span>
+				<div class="profile-preview">
+					<div class="avatar-thumb">
+						{#if displayAvatar}
+							<img src={displayAvatar} alt="" class="avatar-img" />
+						{:else}
+							<span class="avatar-initial">
+								{data.currentSubdomain?.[0]?.toUpperCase() || "?"}
+							</span>
+						{/if}
+					</div>
+					<div class="profile-info">
+						<span class="profile-address">{data.currentSubdomain}.grove.place</span>
+						{#if data.groveTitle}
+							<span class="profile-title">&ldquo;{data.groveTitle}&rdquo;</span>
+						{:else}
+							<span class="profile-title muted">no title yet</span>
+						{/if}
+					</div>
 				</div>
 				<span class="card-action">Edit profile &rarr;</span>
 			</GlassCard>
@@ -65,18 +87,41 @@
 					<featureIcons.palette class="card-icon" />
 					<h2 class="card-title">Appearance</h2>
 				</div>
-				<div class="card-status">
-					<span class="status-line">Font: {fontName}</span>
-					<span class="status-line">
-						Accent:
+				<div class="appearance-preview">
+					<div class="appearance-row">
+						<span class="appear-label">Font</span>
+						<span class="font-preview" style:font-family={fontCssFamily}>{fontName}</span>
+					</div>
+					<div class="appearance-row">
+						<span class="appear-label">Accent</span>
 						{#if data.accentColor}
-							<span class="color-dot" style:background={data.accentColor} aria-hidden="true"></span>
-							{data.accentColor}
+							<span class="accent-swatch">
+								<span class="accent-dot" style:background={data.accentColor} aria-hidden="true"
+								></span>
+								<span class="accent-hex">{data.accentColor}</span>
+							</span>
 						{:else}
-							default
+							<span class="appear-value muted">Grove green</span>
 						{/if}
-					</span>
-					<span class="status-line">Season: {seasonLabel}</span>
+					</div>
+					<div class="appearance-row">
+						<span class="appear-label">Season</span>
+						<span class="season-preview">
+							{#if seasonFavicon}
+								<img
+									src={seasonFavicon}
+									alt=""
+									aria-hidden="true"
+									class="season-icon-sm"
+									width="18"
+									height="18"
+								/>
+							{/if}
+							<span class="appear-value" style:color={seasonColor || "inherit"}>
+								{seasonLabel}
+							</span>
+						</span>
+					</div>
 				</div>
 				<span class="card-action">Customize &rarr;</span>
 			</GlassCard>
@@ -89,16 +134,34 @@
 					<natureIcons.trees class="card-icon" />
 					<h2 class="card-title">Community</h2>
 				</div>
-				<div class="card-status">
-					<span class="status-line">
-						Canopy: {data.canopyVisible ? "visible" : "hidden"}
-					</span>
-					<span class="status-line">
-						Meadow: {data.meadowOptIn ? "sharing" : "off"}
-					</span>
-					<span class="status-line">
-						human.json: {data.humanJsonEnabled ? "on" : "off"}
-					</span>
+				<div class="community-preview">
+					<div class="community-row">
+						<GroveIcon service="grove" size={16} color="var(--user-accent, var(--color-primary))" />
+						<span class="community-label">Canopy</span>
+						<span class="status-dot" class:active={data.canopyVisible}></span>
+						<span class="community-state">
+							{data.canopyVisible ? "visible" : "hidden"}
+						</span>
+					</div>
+					<div class="community-row">
+						<GroveIcon
+							service="meadow"
+							size={16}
+							color="var(--user-accent, var(--color-primary))"
+						/>
+						<span class="community-label">Meadow</span>
+						<span class="status-dot" class:active={data.meadowOptIn}></span>
+						<span class="community-state">
+							{data.meadowOptIn ? "sharing" : "quiet"}
+						</span>
+					</div>
+					<div class="community-row">
+						<span class="community-label" style:margin-left="20px">human.json</span>
+						<span class="status-dot" class:active={data.humanJsonEnabled}></span>
+						<span class="community-state">
+							{data.humanJsonEnabled ? "published" : "off"}
+						</span>
+					</div>
 				</div>
 				<span class="card-action">Connect &rarr;</span>
 			</GlassCard>
@@ -113,10 +176,13 @@
 				</div>
 				<div class="card-status">
 					<span class="status-line">
-						{data.customBlazeCount} custom blaze{data.customBlazeCount === 1 ? "" : "s"}
+						<span class="count-highlight">
+							{data.customBlazeCount}
+						</span>
+						custom blaze{data.customBlazeCount === 1 ? "" : "s"}
 					</span>
-					<span class="status-line">8 defaults</span>
-					<span class="status-line">Up to 20 per grove</span>
+					<span class="status-line subtle">8 defaults included</span>
+					<span class="status-line subtle">Up to 20 per grove</span>
 				</div>
 				<span class="card-action">Create &rarr;</span>
 			</GlassCard>
@@ -139,7 +205,7 @@
 								: "Sessions unavailable"}
 						</span>
 					{/if}
-					<span class="status-line">Passkey: manage on login hub</span>
+					<span class="status-line subtle">Passkeys managed on login hub</span>
 				</div>
 				<span class="card-action">Review &rarr;</span>
 			</GlassCard>
@@ -177,11 +243,12 @@
 		display: block;
 	}
 
+	/* ── Card header ──────────────────────────────────────────────────────── */
 	.card-header {
 		display: flex;
 		align-items: center;
 		gap: 0.625rem;
-		margin-bottom: 0.75rem;
+		margin-bottom: 1rem;
 	}
 
 	:global(.card-icon) {
@@ -198,11 +265,189 @@
 		color: var(--color-text);
 	}
 
+	/* ── Card action link ─────────────────────────────────────────────────── */
+	.card-action {
+		display: inline-block;
+		margin-top: 1rem;
+		font-size: 0.85rem;
+		font-weight: 500;
+		color: var(--user-accent, var(--color-primary));
+	}
+
+	/* ── Profile card ─────────────────────────────────────────────────────── */
+	.profile-preview {
+		display: flex;
+		align-items: center;
+		gap: 0.875rem;
+	}
+
+	.avatar-thumb {
+		width: 48px;
+		height: 48px;
+		border-radius: 50%;
+		overflow: hidden;
+		flex-shrink: 0;
+		background: var(--color-surface-elevated, var(--color-surface));
+		border: 2px solid var(--color-border);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.avatar-img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.avatar-initial {
+		font-size: 1.1rem;
+		font-weight: 600;
+		color: var(--user-accent, var(--color-primary));
+		text-transform: uppercase;
+	}
+
+	.profile-info {
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+		min-width: 0;
+	}
+
+	.profile-address {
+		font-size: 0.9rem;
+		font-weight: 500;
+		color: var(--color-text);
+	}
+
+	.profile-title {
+		font-size: 0.8rem;
+		color: var(--color-text-muted);
+		font-style: italic;
+	}
+
+	.profile-title.muted {
+		font-style: normal;
+		opacity: 0.6;
+	}
+
+	/* ── Appearance card ──────────────────────────────────────────────────── */
+	.appearance-preview {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.appearance-row {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.appear-label {
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: var(--color-text-muted);
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		width: 3.5rem;
+		flex-shrink: 0;
+	}
+
+	.appear-value {
+		font-size: 0.85rem;
+		color: var(--color-text);
+	}
+
+	.appear-value.muted {
+		color: var(--color-text-muted);
+	}
+
+	.font-preview {
+		font-size: 0.95rem;
+		color: var(--color-text);
+		line-height: 1.2;
+	}
+
+	.accent-swatch {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+	}
+
+	.accent-dot {
+		display: inline-block;
+		width: 14px;
+		height: 14px;
+		border-radius: 50%;
+		border: 1.5px solid rgba(255, 255, 255, 0.15);
+		flex-shrink: 0;
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+	}
+
+	.accent-hex {
+		font-size: 0.8rem;
+		font-family: monospace;
+		color: var(--color-text-muted);
+	}
+
+	.season-preview {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+	}
+
+	.season-icon-sm {
+		image-rendering: pixelated;
+		flex-shrink: 0;
+	}
+
+	/* ── Community card ───────────────────────────────────────────────────── */
+	.community-preview {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.community-row {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		font-size: 0.85rem;
+	}
+
+	.community-label {
+		color: var(--color-text);
+		font-weight: 500;
+		min-width: 4.5rem;
+	}
+
+	.status-dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: var(--color-text-muted);
+		opacity: 0.35;
+		flex-shrink: 0;
+		transition: all 0.15s ease;
+	}
+
+	.status-dot.active {
+		background: var(--color-success, #16a34a);
+		opacity: 1;
+		box-shadow: 0 0 6px color-mix(in srgb, var(--color-success, #16a34a) 50%, transparent);
+	}
+
+	.community-state {
+		font-size: 0.8rem;
+		color: var(--color-text-muted);
+	}
+
+	/* ── Generic status lines (Content, Security) ─────────────────────────── */
 	.card-status {
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
-		margin-bottom: 0.75rem;
 	}
 
 	.status-line {
@@ -213,24 +458,27 @@
 		gap: 0.375rem;
 	}
 
-	.color-dot {
-		display: inline-block;
-		width: 12px;
-		height: 12px;
-		border-radius: 50%;
-		border: 1px solid var(--color-border);
-		flex-shrink: 0;
+	.status-line.subtle {
+		font-size: 0.8rem;
+		opacity: 0.65;
 	}
 
-	.card-action {
-		font-size: 0.85rem;
-		font-weight: 500;
+	.count-highlight {
+		font-weight: 600;
 		color: var(--user-accent, var(--color-primary));
+		font-size: 1rem;
 	}
 
+	/* ── Responsive ───────────────────────────────────────────────────────── */
 	@media (max-width: 700px) {
 		.settings-grid {
 			grid-template-columns: 1fr;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.status-dot {
+			transition: none;
 		}
 	}
 </style>

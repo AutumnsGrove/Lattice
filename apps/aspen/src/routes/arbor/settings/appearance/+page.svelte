@@ -111,15 +111,10 @@
 	backLabel="Settings"
 >
 	<!-- ── Typography ─────────────────────────────────────────────────────────── -->
-	<GlassCard
-		variant="frosted"
-		class="mb-6"
-		title="Typography"
-		waystone="custom-fonts"
-		waystoneLabel="Learn about fonts"
-	>
+	<GlassCard variant="frosted" class="mb-6">
 		<div class="section-header">
 			<h2>Typography</h2>
+			<Waystone slug="custom-fonts" label="Learn about fonts" inline />
 		</div>
 		<p class="section-description">
 			Every grove has its own voice. Pick the typeface that speaks yours.
@@ -161,15 +156,10 @@
 	</GlassCard>
 
 	<!-- ── Accent Color ───────────────────────────────────────────────────────── -->
-	<GlassCard
-		variant="frosted"
-		class="mb-6"
-		title="Accent Color"
-		waystone="choosing-a-theme"
-		waystoneLabel="Learn about themes"
-	>
+	<GlassCard variant="frosted" class="mb-6">
 		<div class="section-header">
 			<h2>Accent Color</h2>
+			<Waystone slug="choosing-a-theme" label="Learn about themes" inline />
 		</div>
 		<p class="section-description">
 			The color that ties your grove together. Tags, links, and interactive moments all follow this.

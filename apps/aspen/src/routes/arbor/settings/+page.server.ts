@@ -23,7 +23,7 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 					.bind(locals.tenantId)
 					.first<{ subdomain: string; plan: string | null; meadow_opt_in: number | null }>(),
 				env.DB.prepare(
-					"SELECT setting_key, setting_value FROM tenant_settings WHERE tenant_id = ? AND setting_key IN (?, ?, ?, ?, ?, ?, ?)",
+					"SELECT setting_key, setting_value FROM site_settings WHERE tenant_id = ? AND setting_key IN (?, ?, ?, ?, ?, ?, ?)",
 				)
 					.bind(
 						locals.tenantId,
