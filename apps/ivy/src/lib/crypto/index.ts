@@ -13,7 +13,8 @@
  * - BIP39 24-word phrase can regenerate Email Key
  */
 
-import * as bip39 from "bip39";
+import { generateMnemonic, validateMnemonic, mnemonicToSeed } from "@scure/bip39";
+import { wordlist } from "@scure/bip39/wordlists/english";
 
 // Constants
 const AES_KEY_LENGTH = 256;
@@ -101,7 +102,7 @@ export async function generateEmailKey(): Promise<CryptoKey> {
  */
 export function generateRecoveryPhrase(): string[] {
 	// 256 bits of entropy = 24 words
-	const mnemonic = bip39.generateMnemonic(256);
+	const mnemonic = generateMnemonic(wordlist, 256);
 	return mnemonic.split(" ");
 }
 
@@ -110,7 +111,7 @@ export function generateRecoveryPhrase(): string[] {
  */
 export function validateRecoveryPhrase(phrase: string[]): boolean {
 	const mnemonic = phrase.join(" ");
-	return bip39.validateMnemonic(mnemonic);
+	return validateMnemonic(mnemonic, wordlist);
 }
 
 /**
@@ -120,12 +121,12 @@ export function validateRecoveryPhrase(phrase: string[]): boolean {
 export async function recoveryPhraseToKey(phrase: string[]): Promise<CryptoKey> {
 	const mnemonic = phrase.join(" ");
 
-	if (!bip39.validateMnemonic(mnemonic)) {
+	if (!validateMnemonic(mnemonic, wordlist)) {
 		throw new Error("Invalid recovery phrase");
 	}
 
 	// Get seed from mnemonic (no passphrase)
-	const seed = await bip39.mnemonicToSeed(mnemonic);
+	const seed = await mnemonicToSeed(mnemonic);
 
 	// Use seed as password, derive key with fixed salt
 	// The salt is fixed because recovery needs to be deterministic

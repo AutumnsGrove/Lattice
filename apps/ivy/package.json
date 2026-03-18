@@ -40,7 +40,7 @@
 	},
 	"dependencies": {
 		"@autumnsgrove/lattice": "workspace:*",
-		"bip39": "^3.1.0",
+		"@scure/bip39": "^1.5.4",
 		"dompurify": "^3.0.0",
 		"postal-mime": "^2.4.1"
 	}
