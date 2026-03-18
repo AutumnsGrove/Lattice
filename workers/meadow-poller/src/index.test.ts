@@ -220,6 +220,24 @@ describe("meadow-poller", () => {
 			expect(mockFetch).not.toHaveBeenCalled();
 		});
 
+		it("polls tenants with single-character subdomains", async () => {
+			const tenants = [{ id: "t1", subdomain: "a", display_name: "A" }];
+			const { env, mockD1 } = createTestEnv(tenants);
+
+			mockFetch.mockResolvedValueOnce(
+				new Response(VALID_RSS, {
+					status: 200,
+					headers: { "Content-Type": "application/rss+xml" },
+				}),
+			);
+
+			await worker.default.fetch(new Request("https://example.com/trigger"), env);
+
+			// Single-char subdomain must NOT be rejected by SSRF validation
+			expect(mockFetch).toHaveBeenCalledWith("https://a.grove.place/api/feed", expect.any(Object));
+			expect(mockD1.batch).toHaveBeenCalled();
+		});
+
 		it("rejects feeds exceeding size limit", async () => {
 			const tenants = [{ id: "t1", subdomain: "alice", display_name: "Alice" }];
 			const { env, kvStore } = createTestEnv(tenants);

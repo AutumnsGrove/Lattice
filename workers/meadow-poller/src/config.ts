@@ -4,45 +4,45 @@
 
 /** Cloudflare Worker environment bindings */
 export interface Env {
-  DB: D1Database;
-  POLL_STATE: KVNamespace;
+	DB: D1Database;
+	POLL_STATE: KVNamespace;
 }
 
 /** Tenant row from D1 for feed discovery */
 export interface TenantInfo {
-  id: string;
-  subdomain: string;
-  display_name: string | null;
+	id: string;
+	subdomain: string;
+	display_name: string | null;
 }
 
 /** Per-tenant poll state stored in KV */
 export interface PollState {
-  lastEtag: string | null;
-  lastPollAt: number;
-  consecutiveErrors: number;
-  lastErrorMessage: string | null;
+	lastEtag: string | null;
+	lastPollAt: number;
+	consecutiveErrors: number;
+	lastErrorMessage: string | null;
 }
 
 /** Parsed RSS feed structure */
 export interface ParsedFeed {
-  title: string;
-  link: string;
-  description: string;
-  items: ParsedFeedItem[];
+	title: string;
+	link: string;
+	description: string;
+	items: ParsedFeedItem[];
 }
 
 /** Individual parsed feed item */
 export interface ParsedFeedItem {
-  title: string;
-  link: string;
-  guid: string;
-  pubDate: string | null;
-  description: string;
-  contentEncoded: string | null;
-  categories: string[];
-  enclosureUrl: string | null;
-  /** Custom blaze slug from grove:blaze RSS extension */
-  blaze: string | null;
+	title: string;
+	link: string;
+	guid: string;
+	pubDate: string | null;
+	description: string;
+	contentEncoded: string | null;
+	categories: string[];
+	enclosureUrl: string | null;
+	/** Custom blaze slug from grove:blaze RSS extension */
+	blaze: string | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -67,5 +67,7 @@ export const ERROR_BACKOFF_THRESHOLD = 3;
 /** Backoff interval when error threshold is exceeded (1 hour in seconds) */
 export const BACKOFF_INTERVAL_S = 60 * 60;
 
-/** Subdomain validation pattern — only alphanumeric and hyphens */
-export const SUBDOMAIN_PATTERN = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/;
+/** Subdomain validation pattern — only alphanumeric and hyphens.
+ * Accepts single-char subdomains (e.g. "a") and multi-char with optional
+ * hyphens in the middle. First and last char must be alphanumeric. */
+export const SUBDOMAIN_PATTERN = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
