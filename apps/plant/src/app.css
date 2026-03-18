@@ -8,6 +8,9 @@
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
+	/* Prism surface token — HSL values used by bg-surface/N Tailwind utilities */
+	--surface: 0 0% 100%;
+
 	/* Primary: Grove Green */
 	--grove-50: 240 253 244;
 	--grove-100: 220 252 231;
@@ -66,6 +69,9 @@
    ═══════════════════════════════════════════════════════════════ */
 
 .dark {
+	/* Prism surface token — dark warm-gray for bg-surface/N utilities */
+	--surface: 214 13% 10%;
+
 	--cream: 23 26 30;
 	--bark: 245 242 234;
 

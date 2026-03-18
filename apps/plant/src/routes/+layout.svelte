@@ -90,7 +90,7 @@
 				<!-- Brand title - hidden on mobile -->
 				<a
 					href={GROVE_LINKS.HOME}
-					class="hidden sm:block text-lg font-serif text-foreground hover:text-accent-muted transition-colors"
+					class="hidden sm:block text-lg font-medium text-foreground hover:text-accent-muted transition-colors"
 				>
 					Grove
 				</a>

@@ -8,11 +8,11 @@
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
-		"preview": "wrangler pages dev .svelte-kit/cloudflare",
+		"preview": "wrangler dev",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"test": "vitest",
 		"test:run": "vitest run",
-		"deploy": "pnpm run build && wrangler pages deploy .svelte-kit/cloudflare --project-name grove-plant"
+		"deploy": "pnpm run build && wrangler deploy"
 	},
 	"devDependencies": {
 		"@autumnsgrove/prism": "workspace:*",

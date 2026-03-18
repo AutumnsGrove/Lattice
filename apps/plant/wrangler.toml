@@ -3,6 +3,11 @@
 #
 # Workers deployment with Smart Placement for lower D1 latency.
 # Handles new-wanderer signup, Turnstile verification, and OAuth flow.
+#
+# NOTE: There is a stale Pages project (grove-plant2) that still has
+# plant.grove.place as a Custom Domain. The [[routes]] below override it —
+# Worker Routes take priority over Pages Custom Domains. Once the route
+# registers on the next deploy, delete grove-plant2 from the CF dashboard.
 
 name = "grove-plant"
 compatibility_date = "2025-01-01"
@@ -15,6 +20,12 @@ main = ".svelte-kit/cloudflare/_worker.js"
 [assets]
 directory = ".svelte-kit/cloudflare"
 binding = "ASSETS"
+
+# Route — directs plant.grove.place to this Worker, overriding the stale
+# grove-plant2 Pages Custom Domain until that project is deleted.
+[[routes]]
+pattern = "plant.grove.place/*"
+zone_name = "grove.place"
 
 # Smart Placement — run closer to back-end services (D1) for lower latency
 [placement]
