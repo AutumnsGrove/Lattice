@@ -814,80 +814,103 @@ async def _run_showroom_audit(
     diffs_dir.mkdir(parents=True, exist_ok=True)
     baseline_dir.mkdir(parents=True, exist_ok=True)
 
+    # Build all capture jobs up front so they can run in parallel
+    jobs: list[dict] = []
+    for scenario_name, scenario_data in scenarios.items():
+        props = scenario_data.get("props", {})
+        scenario_viewport = scenario_data.get("viewport", {})
+        width = scenario_viewport.get("width", config.viewport_width)
+        height = scenario_viewport.get("height", config.viewport_height)
+
+        for theme in themes:
+            props_json = json.dumps(props)
+            url = (
+                f"{showroom_url}/showcase"
+                f"?component={quote(component_path)}"
+                f"&scenario={quote(scenario_name)}"
+                f"&props={quote(props_json)}"
+            )
+
+            filename = f"{Path(component_path).stem}_{scenario_name}_{theme}"
+            output_path = captures_dir / f"{filename}.png"
+
+            request = CaptureRequest(
+                url=url,
+                season=None,
+                theme=theme,
+                width=width,
+                height=height,
+                scale=config.scale,
+                wait_ms=800,  # Extra wait for component mount
+                wait_for="#showroom-component[data-ready='true']",
+                output_path=output_path,
+                format="png",
+                timeout_ms=config.timeout_ms,
+                logs=True,
+            )
+
+            jobs.append({
+                "scenario_name": scenario_name,
+                "theme": theme,
+                "request": request,
+                "filename": filename,
+                "output_path": output_path,
+            })
+
+    # Run all captures in parallel with bounded concurrency
+    concurrency = min(len(jobs), 4)
+    semaphore = asyncio.Semaphore(concurrency)
+
+    async def _process_one(engine: CaptureEngine, job: dict) -> ScenarioResult:
+        async with semaphore:
+            request = job["request"]
+            filename = job["filename"]
+            output_path = job["output_path"]
+
+            # Capture screenshot + extract styles
+            result, computed_styles = await _capture_with_styles(
+                engine, request, run_audit=not no_audit,
+            )
+
+            # Run compliance checks
+            compliance = None
+            if not no_audit:
+                compliance = run_compliance_checks(
+                    computed_styles or {}, result.a11y,
+                )
+
+            # Diff against baseline
+            diff_result = None
+            baseline_path = baseline_dir / f"{filename}.png"
+
+            if result.success and not no_diff:
+                if baseline_path.exists() and not update_baselines:
+                    diff_output = diffs_dir / f"{filename}_diff.png"
+                    try:
+                        diff_result = diff_images(
+                            baseline_path, output_path, diff_output
+                        )
+                    except Exception:
+                        pass
+                elif update_baselines or (
+                    not baseline_path.exists() and not strict
+                ):
+                    shutil.copy2(output_path, baseline_path)
+
+            return ScenarioResult(
+                scenario=job["scenario_name"],
+                theme=job["theme"],
+                capture=result,
+                compliance=compliance,
+                diff_result=diff_result,
+                computed_styles=computed_styles,
+            )
+
     async with CaptureEngine(headless=headless) as engine:
-        for scenario_name, scenario_data in scenarios.items():
-            props = scenario_data.get("props", {})
-            scenario_viewport = scenario_data.get("viewport", {})
-            width = scenario_viewport.get("width", config.viewport_width)
-            height = scenario_viewport.get("height", config.viewport_height)
-
-            for theme in themes:
-                # Build the showcase URL with query params
-                props_json = json.dumps(props)
-                url = (
-                    f"{showroom_url}/showcase"
-                    f"?component={quote(component_path)}"
-                    f"&scenario={quote(scenario_name)}"
-                    f"&props={quote(props_json)}"
-                )
-
-                filename = f"{Path(component_path).stem}_{scenario_name}_{theme}"
-                output_path = captures_dir / f"{filename}.png"
-
-                request = CaptureRequest(
-                    url=url,
-                    season=None,
-                    theme=theme,
-                    width=width,
-                    height=height,
-                    scale=config.scale,
-                    wait_ms=800,  # Extra wait for component mount
-                    wait_for="#showroom-component[data-ready='true']",
-                    output_path=output_path,
-                    format="png",
-                    timeout_ms=config.timeout_ms,
-                    logs=True,
-                )
-
-                # Capture screenshot + extract styles in one browser session
-                result, computed_styles = await _capture_with_styles(
-                    engine, request, run_audit=not no_audit,
-                )
-
-                # Run compliance checks with both styles and a11y data
-                compliance = None
-                if not no_audit:
-                    compliance = run_compliance_checks(
-                        computed_styles or {}, result.a11y,
-                    )
-
-                # Diff against baseline
-                diff_result = None
-                baseline_path = baseline_dir / f"{filename}.png"
-
-                if result.success and not no_diff:
-                    if baseline_path.exists() and not update_baselines:
-                        diff_output = diffs_dir / f"{filename}_diff.png"
-                        try:
-                            diff_result = diff_images(
-                                baseline_path, output_path, diff_output
-                            )
-                        except Exception:
-                            pass
-                    elif update_baselines or (
-                        not baseline_path.exists() and not strict
-                    ):
-                        shutil.copy2(output_path, baseline_path)
-
-                scenario_result = ScenarioResult(
-                    scenario=scenario_name,
-                    theme=theme,
-                    capture=result,
-                    compliance=compliance,
-                    diff_result=diff_result,
-                    computed_styles=computed_styles,
-                )
-                audit.scenarios.append(scenario_result)
+        results = await asyncio.gather(
+            *[_process_one(engine, job) for job in jobs]
+        )
+        audit.scenarios.extend(results)
 
     return audit
 

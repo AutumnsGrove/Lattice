@@ -3,12 +3,14 @@
 	<head>
 		<script>
 			try {
-				const stored = localStorage.getItem('grove-theme');
-				if (stored === 'dark' || !stored) {
+				// Glimpse injects via 'theme' key; fall back to 'grove-theme' for
+				// manual browser sessions. Default to light (no class = light mode).
+				const stored = localStorage.getItem('theme') || localStorage.getItem('grove-theme');
+				if (stored === 'dark') {
 					document.documentElement.classList.add('dark');
 				}
 			} catch (e) {
-				document.documentElement.classList.add('dark');
+				// Storage unavailable — leave as light (browser default)
 			}
 		</script>
 		<meta charset="utf-8" />
