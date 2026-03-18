@@ -1,8 +1,7 @@
 import type { ShowroomFixture } from "../types";
 
 export default {
-	viewport: { width: 400, height: 300 },
-
+	viewport: { width: 480, height: 320 },
 	scenarios: {
 		default: {
 			props: {
@@ -17,11 +16,17 @@ export default {
 				description: "This card responds to your presence.",
 				hoverable: true,
 			},
-			description: "Card with hover shadow effect",
+			description: "Card with hover shadow effect enabled",
 		},
-		minimal: {
+		title_only: {
+			props: {
+				title: "Just a Title",
+			},
+			description: "Card with title only, no description",
+		},
+		empty: {
 			props: {},
-			description: "Card with no props — empty state",
+			description: "Card with no props — bare shell",
 		},
 	},
 } satisfies ShowroomFixture;
