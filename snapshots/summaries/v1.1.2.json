@@ -1,0 +1,36 @@
+{
+  "version": "v1.1.2",
+  "date": "2026-03-18 08:42:30 -0400",
+  "commitHash": "dbb941e43",
+  "summary": "Version v1.1.2 includes 128 new features, 137 bug fixes, and 19 refactoring changes.\n",
+  "stats": {
+    "totalCommits": 406,
+    "features": 128,
+    "fixes": 137,
+    "refactoring": 19,
+    "docs": 45,
+    "tests": 20,
+    "performance": 2
+  },
+  "scopes": [
+  "gw",
+  "engine",
+  "ci",
+  "reverie",
+  "skills",
+  "gf",
+  "prism",
+  "billing",
+  "landing",
+  "glimpse"
+],
+  "highlights": {
+    "features": [],
+    "fixes": [],
+    "refactoring": [],
+    "docs": [],
+    "performance": [],
+    "tests": [],
+    "chores": []
+  }
+}
