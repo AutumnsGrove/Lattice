@@ -79,16 +79,8 @@
 	}
 
 	// Calculate percentages for the language bar
-	// Colors from Prism palette — each language gets a unique, visually distinct color:
-	// - TypeScript: bg-info (deep blue, hsl 217°)
-	// - Svelte: bg-warning (warm amber-orange, hsl 38°) — close to Svelte's brand vermillion
-	// - Python: bg-grove-500 (grove meadow green via CSS var)
-	// - Go: bg-info-muted (sky blue, distinct from TS deep blue)
-	// - SQL: bg-accent-muted (dark muted green, hsl 121°)
-	// - JavaScript: bg-warning-muted (muted amber, hsl 45°) — distinct from Svelte's amber
-	// - CSS: bg-success (teal, hsl 160°)
-	// - Shell: bg-foreground-muted (warm gray)
-	// - TSX: bg-error (coral red, #dc2626)
+	// Colors from Prism lang.* tokens — dedicated data viz palette, not semantic UI tokens.
+	// See libs/prism/src/lib/tailwind/preset.js for hex values and rationale.
 	const languageBreakdown = $derived(() => {
 		if (!data.latest) return [];
 		const total = data.latest.totalCodeLines;
@@ -97,55 +89,55 @@
 			{
 				name: "TypeScript",
 				lines: data.latest.tsLines,
-				color: "bg-info",
+				color: "bg-lang-typescript",
 				pct: Math.round((data.latest.tsLines / total) * 100),
 			},
 			{
 				name: "Svelte",
 				lines: data.latest.svelteLines,
-				color: "bg-warning",
+				color: "bg-lang-svelte",
 				pct: Math.round((data.latest.svelteLines / total) * 100),
 			},
 			{
 				name: "Python",
 				lines: data.latest.pyLines,
-				color: "bg-grove-500",
+				color: "bg-lang-python",
 				pct: Math.round((data.latest.pyLines / total) * 100),
 			},
 			{
 				name: "Go",
 				lines: data.latest.goLines,
-				color: "bg-info-muted",
+				color: "bg-lang-go",
 				pct: Math.round((data.latest.goLines / total) * 100),
 			},
 			{
 				name: "SQL",
 				lines: data.latest.sqlLines,
-				color: "bg-accent-muted",
+				color: "bg-lang-sql",
 				pct: Math.round((data.latest.sqlLines / total) * 100),
 			},
 			{
 				name: "JavaScript",
 				lines: data.latest.jsLines,
-				color: "bg-warning-muted",
+				color: "bg-lang-javascript",
 				pct: Math.round((data.latest.jsLines / total) * 100),
 			},
 			{
 				name: "CSS",
 				lines: data.latest.cssLines,
-				color: "bg-success",
+				color: "bg-lang-css",
 				pct: Math.round((data.latest.cssLines / total) * 100),
 			},
 			{
 				name: "Shell",
 				lines: data.latest.shLines,
-				color: "bg-foreground-muted",
+				color: "bg-lang-shell",
 				pct: Math.round((data.latest.shLines / total) * 100),
 			},
 			{
 				name: "TSX",
 				lines: data.latest.tsxLines,
-				color: "bg-error",
+				color: "bg-lang-tsx",
 				pct: Math.round((data.latest.tsxLines / total) * 100),
 			},
 		].filter((lang) => lang.lines > 0);
@@ -165,39 +157,47 @@
 		const total = snapshot.totalCodeLines;
 		if (total === 0) return [];
 		return [
-			{ name: "TypeScript", pct: Math.round((snapshot.tsLines / total) * 100), color: "bg-info" },
+			{
+				name: "TypeScript",
+				pct: Math.round((snapshot.tsLines / total) * 100),
+				color: "bg-lang-typescript",
+			},
 			{
 				name: "Svelte",
 				pct: Math.round((snapshot.svelteLines / total) * 100),
-				color: "bg-warning",
+				color: "bg-lang-svelte",
 			},
 			{
 				name: "Python",
 				pct: Math.round(((snapshot.pyLines || 0) / total) * 100),
-				color: "bg-grove-500",
+				color: "bg-lang-python",
 			},
 			{
 				name: "Go",
 				pct: Math.round(((snapshot.goLines || 0) / total) * 100),
-				color: "bg-info-muted",
+				color: "bg-lang-go",
 			},
 			{
 				name: "SQL",
 				pct: Math.round(((snapshot.sqlLines || 0) / total) * 100),
-				color: "bg-accent-muted",
+				color: "bg-lang-sql",
 			},
 			{
 				name: "JavaScript",
 				pct: Math.round((snapshot.jsLines / total) * 100),
-				color: "bg-warning-muted",
+				color: "bg-lang-javascript",
 			},
-			{ name: "CSS", pct: Math.round((snapshot.cssLines / total) * 100), color: "bg-success" },
+			{ name: "CSS", pct: Math.round((snapshot.cssLines / total) * 100), color: "bg-lang-css" },
 			{
 				name: "Shell",
 				pct: Math.round(((snapshot.shLines || 0) / total) * 100),
-				color: "bg-foreground-muted",
+				color: "bg-lang-shell",
 			},
-			{ name: "TSX", pct: Math.round(((snapshot.tsxLines || 0) / total) * 100), color: "bg-error" },
+			{
+				name: "TSX",
+				pct: Math.round(((snapshot.tsxLines || 0) / total) * 100),
+				color: "bg-lang-tsx",
+			},
 		].filter((lang) => lang.pct > 0);
 	}
 

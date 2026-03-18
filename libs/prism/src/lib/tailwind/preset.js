@@ -157,6 +157,19 @@ export default {
 				border: "rgb(var(--cream-200) / <alpha-value>)",
 				input: "rgb(var(--cream-200) / <alpha-value>)",
 				ring: "rgb(var(--grove-500) / <alpha-value>)",
+				// Language visualization colors — data viz identifiers, not semantic UI tokens.
+				// Anchored to each language's visual identity for the journey page chart.
+				lang: {
+					typescript: "#60A5FA", // blue-400     — TS brand
+					svelte: "#EF4444", // red-500      — Svelte orange-red, skewed red
+					python: "#FBBF24", // amber-400    — Python's warm logo yellow
+					go: "#22D3EE", // cyan-400     — Go brand (#00ADD8)
+					sql: "#B87333", // copper-brown — earthy, database
+					javascript: "#A3E635", // lime-400     — distinctive, unambiguous
+					css: "#A78BFA", // violet-400   — GitHub Linguist CSS color
+					shell: "#9CA3AF", // gray-400     — neutral, infrastructure
+					tsx: "#FB923C", // orange-400   — coral, distinct from Svelte red
+				},
 			},
 
 			// ─────────────────────────────────────────────────────────────
