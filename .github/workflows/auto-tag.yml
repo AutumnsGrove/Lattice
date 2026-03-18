@@ -290,82 +290,48 @@ jobs:
           # Build release body from AI-generated summary
           if [ -f "$SUMMARY_FILE" ]; then
             SUMMARY=$(jq -r '.summary' "$SUMMARY_FILE")
-            COMMITS=$(jq -r '.stats.totalCommits // "N/A"' "$SUMMARY_FILE")
+            TOTAL_COMMITS=$(jq -r '.stats.totalCommits // "N/A"' "$SUMMARY_FILE")
 
             # Extract scopes (areas of work)
             SCOPES=$(jq -r '.scopes[]? // empty' "$SUMMARY_FILE" | head -8 | sed 's/^/`/;s/$/`/' | paste -sd ', ' -)
 
-            # Build highlights sections — only include categories that have entries
-            HIGHLIGHTS=""
-
-            FEATURES=$(jq -r '.highlights.features[]? // empty' "$SUMMARY_FILE" | sed 's/^/- /')
-            if [ -n "$FEATURES" ]; then
-              HIGHLIGHTS="${HIGHLIGHTS}
-          **Features**
-          ${FEATURES}
-          "
-            fi
-
-            FIXES=$(jq -r '.highlights.fixes[]? // empty' "$SUMMARY_FILE" | sed 's/^/- /')
-            if [ -n "$FIXES" ]; then
-              HIGHLIGHTS="${HIGHLIGHTS}
-          **Fixes**
-          ${FIXES}
-          "
-            fi
-
-            REFACTORING=$(jq -r '.highlights.refactoring[]? // empty' "$SUMMARY_FILE" | sed 's/^/- /')
-            if [ -n "$REFACTORING" ]; then
-              HIGHLIGHTS="${HIGHLIGHTS}
-          **Refactoring**
-          ${REFACTORING}
-          "
-            fi
-
+            # Read each category. Architecture (significant chore: commits) goes first
+            # so structural/infra work isn't buried under features and fixes.
+            ARCH=$(jq -r '.highlights.architecture[]? // empty' "$SUMMARY_FILE" | sed 's/^/- /')
+            FEAT=$(jq -r '.highlights.features[]? // empty' "$SUMMARY_FILE" | sed 's/^/- /')
+            FIXS=$(jq -r '.highlights.fixes[]? // empty' "$SUMMARY_FILE" | sed 's/^/- /')
+            REFR=$(jq -r '.highlights.refactoring[]? // empty' "$SUMMARY_FILE" | sed 's/^/- /')
             PERF=$(jq -r '.highlights.performance[]? // empty' "$SUMMARY_FILE" | sed 's/^/- /')
-            if [ -n "$PERF" ]; then
-              HIGHLIGHTS="${HIGHLIGHTS}
-          **Performance**
-          ${PERF}
-          "
-            fi
-
             DOCS=$(jq -r '.highlights.docs[]? // empty' "$SUMMARY_FILE" | sed 's/^/- /')
-            if [ -n "$DOCS" ]; then
-              HIGHLIGHTS="${HIGHLIGHTS}
-          **Docs**
-          ${DOCS}
-          "
-            fi
+            TSTS=$(jq -r '.highlights.tests[]? // empty' "$SUMMARY_FILE" | sed 's/^/- /')
 
-            TESTS=$(jq -r '.highlights.tests[]? // empty' "$SUMMARY_FILE" | sed 's/^/- /')
-            if [ -n "$TESTS" ]; then
-              HIGHLIGHTS="${HIGHLIGHTS}
-          **Tests**
-          ${TESTS}
-          "
-            fi
+            # Build HIGHLIGHTS by appending each non-empty section.
+            # $'\n\n' is added OUTSIDE $() so bash's trailing-newline stripping
+            # doesn't eat the blank line that separates sections in GitHub markdown.
+            NL=$'\n\n'
+            HIGHLIGHTS=""
+            [ -n "$ARCH" ] && HIGHLIGHTS="${HIGHLIGHTS}$(printf '**%s**\n%s' 'Architecture & Infrastructure' "$ARCH")${NL}"
+            [ -n "$FEAT" ] && HIGHLIGHTS="${HIGHLIGHTS}$(printf '**%s**\n%s' 'Features' "$FEAT")${NL}"
+            [ -n "$FIXS" ] && HIGHLIGHTS="${HIGHLIGHTS}$(printf '**%s**\n%s' 'Fixes' "$FIXS")${NL}"
+            [ -n "$REFR" ] && HIGHLIGHTS="${HIGHLIGHTS}$(printf '**%s**\n%s' 'Refactoring' "$REFR")${NL}"
+            [ -n "$PERF" ] && HIGHLIGHTS="${HIGHLIGHTS}$(printf '**%s**\n%s' 'Performance' "$PERF")${NL}"
+            [ -n "$DOCS" ] && HIGHLIGHTS="${HIGHLIGHTS}$(printf '**%s**\n%s' 'Docs' "$DOCS")${NL}"
+            [ -n "$TSTS" ] && HIGHLIGHTS="${HIGHLIGHTS}$(printf '**%s**\n%s' 'Tests' "$TSTS")${NL}"
 
             SCOPE_LINE=""
             if [ -n "$SCOPES" ]; then
               SCOPE_LINE="Areas: ${SCOPES} | "
             fi
 
-            HIGHLIGHTS_SECTION=""
+            FOOTER="${SCOPE_LINE}*${TOTAL_COMMITS} total commits* | [npm](https://npm.pkg.github.com/package/@autumnsgrove/lattice) | [journey](https://grove.place/journey)"
+
             if [ -n "$HIGHLIGHTS" ]; then
-              HIGHLIGHTS_SECTION="
-          ### Highlights
-          ${HIGHLIGHTS}"
+              BODY=$(printf '%s\n\n### Highlights\n\n%s\n---\n%s' "$SUMMARY" "$HIGHLIGHTS" "$FOOTER")
+            else
+              BODY=$(printf '%s\n\n---\n%s' "$SUMMARY" "$FOOTER")
             fi
-
-            BODY="${SUMMARY}
-          ${HIGHLIGHTS_SECTION}
-          ---
-          ${SCOPE_LINE}*${COMMITS} total commits* | [npm](https://npm.pkg.github.com/package/@autumnsgrove/lattice) | [journey](https://grove.place/journey)"
           else
-            BODY="## @autumnsgrove/lattice v${VERSION}
-
-          See the [journey](https://grove.place/journey) for details."
+            BODY=$(printf '## @autumnsgrove/lattice v%s\n\nSee the [journey](https://grove.place/journey) for details.' "$VERSION")
           fi
 
           gh release create "$TAG" \

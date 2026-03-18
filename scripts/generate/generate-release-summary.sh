@@ -116,6 +116,16 @@ echo -e "  Docs:        ${GREEN}$DOCS_COUNT${NC}"
 echo -e "  Tests:       ${GREEN}$TEST_COUNT${NC}"
 echo -e "  Performance: ${GREEN}$PERF_COUNT${NC}"
 
+# Extract architecturally significant chore commits by scope.
+# Done here (before LLM) so ARCH_CHORES is available for the prompt.
+# These are chore: commits that represent structural, infra, or platform work —
+# the kind of change that matters to anyone following Grove's development even
+# though conventional commits labels them as routine maintenance.
+ARCH_SCOPES_PATTERN="infra|arch|engine|ci|migration|worker|loom|prism|billing|build|deploy|deps|durable|db|tooling|aspen|lattice"
+ARCH_CHORES=$(echo "$COMMITS" | grep "^chore(" | grep -E "^chore\((${ARCH_SCOPES_PATTERN})[,):]" | tac | head -10 | sed 's/^[^:]*: //' || echo "")
+ARCH_CHORE_COUNT=$(echo "$COMMITS" | grep "^chore(" | grep -E "^chore\((${ARCH_SCOPES_PATTERN})[,):]" | wc -l | tr -d ' ')
+echo -e "  Arch chores: ${GREEN}$ARCH_CHORE_COUNT${NC}"
+
 # ============================================================================
 # GENERATE SUMMARY WITH LLM
 # ============================================================================
@@ -134,6 +144,16 @@ else
     # Prepare commit list for LLM (limit to 100 most recent to avoid token limits)
     COMMIT_LIST=$(echo "$COMMITS" | head -100)
 
+    # Prepare architecturally significant chore commits for the prompt
+    ARCH_CHORE_PROMPT=""
+    if [ -n "$ARCH_CHORES" ]; then
+        ARCH_CHORE_PROMPT="
+
+The following commits are labeled chore: but represent architecturally significant work — infra migrations, platform splits, structural rewrites, dependency overhauls. Do NOT ignore these. Mention them if they explain why something works differently or better now:
+
+$ARCH_CHORES"
+    fi
+
     # Create prompt for LLM
     read -r -d '' PROMPT <<EOF || true
 You are writing a release summary for Grove — a blogging platform built by a queer indie developer for friends, writers, and people who want their own corner of the internet.
@@ -141,6 +161,7 @@ You are writing a release summary for Grove — a blogging platform built by a q
 These are the git commits for version $VERSION_TAG:
 
 $COMMIT_LIST
+$ARCH_CHORE_PROMPT
 
 Write a 2-4 sentence summary for the public roadmap page. This is the developer talking directly to the people who use Grove.
 
@@ -279,6 +300,7 @@ DOCS_JSON=$(to_json_array "$DOCS")
 PERF_JSON=$(to_json_array "$PERF")
 TESTS_JSON=$(to_json_array "$TESTS")
 CHORES_JSON=$(to_json_array "$CHORES")
+ARCH_CHORES_JSON=$(to_json_array "$ARCH_CHORES")
 SCOPES_JSON=$(to_json_array "$ALL_SCOPES")
 
 # Create JSON structure
@@ -305,7 +327,8 @@ cat > "$OUTPUT_FILE" <<EOF
     "docs": ${DOCS_JSON},
     "performance": ${PERF_JSON},
     "tests": ${TESTS_JSON},
-    "chores": ${CHORES_JSON}
+    "chores": ${CHORES_JSON},
+    "architecture": ${ARCH_CHORES_JSON}
   }
 }
 EOF
