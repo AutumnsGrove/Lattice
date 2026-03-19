@@ -101,10 +101,10 @@ export default {
 					foreground: "rgb(var(--bark-700) / <alpha-value>)",
 				},
 				accent: {
-					DEFAULT: "hsl(var(--accent, 142 76% 93%) / <alpha-value>)",
-					foreground: "hsl(var(--accent-foreground, 142 50% 22%))",
-					muted: "hsl(var(--accent-muted, 121 37% 32%))",
-					subtle: "hsl(var(--accent-subtle, 121 40% 92%))",
+					DEFAULT: "var(--grove-accent-10)",
+					foreground: "var(--grove-accent-dark)",
+					muted: "var(--grove-accent-dark)",
+					subtle: "var(--grove-accent-8)",
 				},
 				surface: {
 					DEFAULT: "hsl(var(--surface, 0 0% 100%) / <alpha-value>)",

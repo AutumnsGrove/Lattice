@@ -61,8 +61,8 @@
 
 <style>
 	.friend-card.visiting {
-		background: hsl(var(--accent) / 0.08);
-		border: 1px solid hsl(var(--accent) / 0.2);
+		background: var(--grove-accent-8);
+		border: 1px solid var(--grove-accent-20);
 		position: relative;
 	}
 
@@ -74,7 +74,7 @@
 		bottom: 25%;
 		width: 3px;
 		border-radius: 0 2px 2px 0;
-		background: hsl(var(--accent));
+		background: var(--grove-accent);
 	}
 
 	.sr-only {

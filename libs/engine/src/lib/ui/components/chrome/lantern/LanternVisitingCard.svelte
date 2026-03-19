@@ -69,8 +69,8 @@
 		gap: 0.5rem;
 		padding: 0.5rem 0.625rem;
 		border-radius: 0.5rem;
-		background: hsl(var(--accent) / 0.06);
-		border: 1px solid hsl(var(--accent) / 0.15);
+		background: var(--grove-accent-6);
+		border: 1px solid var(--grove-accent-15);
 	}
 
 	.visiting-info {
@@ -104,8 +104,8 @@
 		padding: 0.375rem 0.625rem;
 		border: none;
 		border-radius: 0.375rem;
-		background: hsl(var(--accent));
-		color: hsl(var(--accent-foreground));
+		background: var(--grove-accent);
+		color: white;
 		font-size: 0.75rem;
 		font-weight: 500;
 		cursor: pointer;
@@ -130,7 +130,7 @@
 	}
 
 	.visiting-add:focus-visible {
-		outline: 2px solid hsl(var(--accent));
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 2px;
 	}
 
