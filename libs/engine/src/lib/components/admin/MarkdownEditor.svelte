@@ -2292,7 +2292,7 @@
 	}
 	.full-preview-article .tag {
 		padding: 0.25rem 0.75rem;
-		background: var(--tag-bg, #2c5f2d);
+		background: var(--tag-bg, var(--grove-accent-dark));
 		color: white;
 		border-radius: 12px;
 		font-size: 0.8rem;

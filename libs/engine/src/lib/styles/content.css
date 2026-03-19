@@ -171,14 +171,14 @@
 
 .content-header h1 {
   font-size: 2.5rem;
-  color: #2c5f2d;
+  color: var(--grove-accent-dark);
   margin: 0;
   line-height: 1.2;
   transition: color 0.3s ease;
 }
 
 .dark .content-header h1 {
-  color: #5cb85f;
+  color: var(--grove-accent);
 }
 
 /* ==========================================================================

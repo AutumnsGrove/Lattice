@@ -286,7 +286,7 @@
 
 	/* Icon items */
 	.item-icon {
-		color: var(--color-primary, #2c5f2d);
+		color: var(--color-primary, var(--grove-accent-dark));
 	}
 	:global(.dark) .item-icon {
 		color: var(--grove-accent);

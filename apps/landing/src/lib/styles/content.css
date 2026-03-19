@@ -171,14 +171,14 @@
 
 .content-header h1 {
   font-size: 2.5rem;
-  color: #2c5f2d;
+  color: var(--grove-accent-dark);
   margin: 0;
   line-height: 1.2;
   transition: color 0.3s ease;
 }
 
 .dark .content-header h1 {
-  color: #5cb85f;
+  color: var(--grove-accent);
 }
 
 /* ==========================================================================
@@ -462,7 +462,7 @@
   text-decoration: none;
 
   /* Grove styling */
-  border-bottom: 1px dotted #2c5f2d;
+  border-bottom: 1px dotted var(--grove-accent-dark);
   cursor: help;
   font-style: normal;
   transition:
@@ -471,25 +471,25 @@
 }
 
 .dark .content-body abbr.grove-term {
-  border-bottom-color: #5cb85f;
+  border-bottom-color: var(--grove-accent);
 }
 
 .content-body abbr.grove-term:hover {
   border-bottom-style: solid;
-  color: #2c5f2d;
+  color: var(--grove-accent-dark);
 }
 
 .dark .content-body abbr.grove-term:hover {
-  color: #5cb85f;
+  color: var(--grove-accent);
 }
 
 /* Focus styles for keyboard accessibility */
 .content-body abbr.grove-term:focus {
-  outline: 2px solid #2c5f2d;
+  outline: 2px solid var(--grove-accent-dark);
   outline-offset: 2px;
   border-radius: 2px;
 }
 
 .dark .content-body abbr.grove-term:focus {
-  outline-color: #5cb85f;
+  outline-color: var(--grove-accent);
 }

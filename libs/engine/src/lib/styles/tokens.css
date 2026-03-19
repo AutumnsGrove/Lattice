@@ -198,7 +198,7 @@
 
 	/* Component-specific colors for standardized dark mode */
 	/* Blog header */
-	--blog-header-title: #2c5f2d;
+	--blog-header-title: var(--grove-accent-dark);
 	--blog-header-text: #666;
 
 	/* Admin actions */
@@ -371,11 +371,11 @@
 
 	/* Dark mode component-specific overrides */
 	/* Blog header */
-	--blog-header-title: #5cb85f;
+	--blog-header-title: var(--grove-accent);
 	--blog-header-text: var(--color-text-muted-dark);
 
 	/* Admin actions */
-	--admin-indicator: #5cb85f;
+	--admin-indicator: var(--grove-accent);
 	--admin-link-text: #a8a8a8;
 	--admin-link-hover-bg: rgba(255, 255, 255, 0.05);
 

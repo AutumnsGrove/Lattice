@@ -401,7 +401,7 @@
 	}
 	.empty-state h2 {
 		margin: 1rem 0 0.5rem;
-		color: #2c5f2d;
+		color: var(--grove-accent-dark);
 	}
 	:global(.dark) .empty-state h2 {
 		color: var(--grove-accent);
@@ -474,8 +474,8 @@
 		display: flex;
 		align-items: center;
 		gap: 0.35rem;
-		background: #e8f5e9;
-		color: #2c5f2d;
+		background: var(--grove-accent-8);
+		color: var(--grove-accent-dark);
 		padding: 0.35rem 0.65rem;
 		border-radius: 16px;
 		font-size: 0.85rem;
@@ -603,10 +603,10 @@
 		border-left: 3px solid var(--grove-accent);
 		border-radius: 0 8px 8px 0;
 		font-size: 0.8rem;
-		color: #2c5f2d;
+		color: var(--grove-accent-dark);
 		line-height: 1.4;
 		font-style: italic;
-		box-shadow: 0 1px 4px rgba(44, 95, 45, 0.08);
+		box-shadow: 0 1px 4px var(--grove-accent-8);
 		transition: background 0.15s ease;
 	}
 	.markdown-content :global(.inline-gutter-comment:hover) {
@@ -637,7 +637,7 @@
 		backdrop-filter: blur(12px);
 		-webkit-backdrop-filter: blur(12px);
 		border-radius: 12px;
-		border: 1px solid rgba(44, 95, 45, 0.08);
+		border: 1px solid var(--grove-accent-8);
 		font-size: 0.9rem;
 		color: var(--color-foreground, #333);
 		line-height: 1.65;
@@ -651,7 +651,7 @@
 	}
 	.markdown-content :global(h2) {
 		font-size: 1.1rem;
-		color: #2c5f2d;
+		color: var(--grove-accent-dark);
 		margin: 0 0 0.75rem;
 		padding-bottom: 0.5rem;
 		border-bottom: 1px solid var(--color-border, #ddd);
@@ -678,9 +678,9 @@
 		border-top-color: rgba(255, 255, 255, 0.06);
 	}
 	.markdown-content :global(h3 a) {
-		color: #2c5f2d;
+		color: var(--grove-accent-dark);
 		text-decoration: none;
-		border-bottom: 1px dashed #2c5f2d;
+		border-bottom: 1px dashed var(--grove-accent-dark);
 		transition: all 0.15s ease;
 	}
 	.markdown-content :global(h3 a:hover) {

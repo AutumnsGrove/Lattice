@@ -1222,12 +1222,12 @@
 	}
 
 	:global(.dark) .anchor-option {
-		background: rgba(16, 50, 37, 0.35);
+		background: rgba(33, 28, 23, 0.35);
 		border-color: var(--grove-accent-10);
 	}
 
 	:global(.dark) .anchor-option:hover {
-		background: rgba(16, 50, 37, 0.5);
+		background: rgba(33, 28, 23, 0.5);
 		border-color: var(--grove-accent-20);
 	}
 

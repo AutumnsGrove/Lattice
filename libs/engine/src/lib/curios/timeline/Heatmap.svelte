@@ -173,7 +173,7 @@
 	}
 	.heatmap-header h3 {
 		margin: 0;
-		color: #2c5f2d;
+		color: var(--grove-accent-dark);
 		font-size: 1rem;
 	}
 	:global(.dark) .heatmap-header h3 {

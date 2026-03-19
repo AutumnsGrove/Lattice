@@ -156,7 +156,7 @@
   .overview-header h3 {
     margin: 0;
     font-size: 0.9rem;
-    color: #2c5f2d;
+    color: var(--grove-accent-dark);
     font-weight: 600;
   }
   :global(.dark) .overview-header h3 {

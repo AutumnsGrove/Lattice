@@ -326,8 +326,8 @@
 	.domain-checker__upsell {
 		padding: 0.75rem 1rem;
 		border-radius: var(--border-radius-standard);
-		background: rgba(44, 95, 45, 0.06);
-		border: 1px solid rgba(44, 95, 45, 0.15);
+		background: var(--grove-accent-6);
+		border: 1px solid var(--grove-accent-15);
 		font-size: 0.875rem;
 		color: var(--color-text-muted);
 	}

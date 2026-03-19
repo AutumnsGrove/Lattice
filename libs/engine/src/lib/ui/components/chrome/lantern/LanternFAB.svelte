@@ -44,7 +44,7 @@
 		align-items: center;
 		justify-content: center;
 		color: white;
-		background: var(--color-primary, #2c5f2d);
+		background: var(--color-primary, var(--grove-accent-dark));
 		box-shadow:
 			0 2px 8px rgba(0, 0, 0, 0.15),
 			0 0 0 0 var(--grove-accent-40);
@@ -56,13 +56,13 @@
 	}
 
 	.lantern-fab:hover {
-		background: var(--color-primary-hover, #245024);
+		background: var(--color-primary-hover, var(--grove-accent-dark));
 		transform: scale(1.08);
 	}
 
 	.lantern-fab.open {
 		animation: none;
-		background: var(--color-primary-hover, #245024);
+		background: var(--color-primary-hover, var(--grove-accent-dark));
 	}
 
 	:global(.dark) .lantern-fab {

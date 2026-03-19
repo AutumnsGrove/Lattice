@@ -20,8 +20,8 @@
     data = /** @type {number[]} */ ([]),
     width = 120,
     height = 24,
-    strokeColor = '#5cb85f',
-    fillColor = 'rgba(92, 184, 95, 0.1)',
+    strokeColor = 'var(--grove-accent)',
+    fillColor = 'var(--grove-accent-10)',
     strokeWidth = 1.5,
     showDots = false,
     showArea = true
