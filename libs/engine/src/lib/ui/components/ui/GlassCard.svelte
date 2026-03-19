@@ -190,6 +190,7 @@
 		flush = false,
 		waystone,
 		waystoneLabel,
+		style: userStyle,
 		...restProps
 	}: Props = $props();
 
@@ -204,10 +205,8 @@
 	// --- Theme-driven glass (when `glass` prop is provided) ---
 	// `dark` variant has no ThemeGlass equivalent, falls back to Tailwind classes
 
-	/** Whether this variant can be driven by ThemeGlass */
-	const isThemeVariant = $derived(
-		glass != null && resolved !== "dark" && resolved in (glass ?? {}),
-	);
+	/** Whether this variant can be driven by ThemeGlass (all except dark) */
+	const isThemeVariant = $derived(glass != null && resolved !== "dark");
 
 	/** Compute CSS custom properties from ThemeGlass for the active variant */
 	const glassStyle = $derived.by(() => {
@@ -230,10 +229,9 @@
 		return blurValue === "none" ? undefined : `backdrop-filter:${blurValue}`;
 	});
 
-	/** Combined inline style for theme-driven glass */
+	/** Combined inline style — merges theme glass vars with any user-provided style */
 	const inlineStyle = $derived.by(() => {
-		if (!isThemeVariant) return undefined;
-		const parts = [glassStyle, glassBlurStyle].filter(Boolean);
+		const parts = [glassStyle, glassBlurStyle, userStyle].filter(Boolean);
 		return parts.length > 0 ? parts.join(";") : undefined;
 	});
 

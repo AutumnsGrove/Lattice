@@ -133,6 +133,7 @@
 		gossamerOpacity,
 		gossamerSpeed,
 		gossamerStatic = false,
+		style: userStyle,
 		...restProps
 	}: Props = $props();
 
@@ -162,10 +163,9 @@
 		return blurValue === "none" ? undefined : `backdrop-filter:${blurValue}`;
 	});
 
-	/** Combined inline style for theme-driven glass */
+	/** Combined inline style — merges theme glass vars with any user-provided style */
 	const inlineStyle = $derived.by(() => {
-		if (!glass) return undefined;
-		const parts = [glassStyle, glassBlurStyle].filter(Boolean);
+		const parts = [glassStyle, glassBlurStyle, userStyle].filter(Boolean);
 		return parts.length > 0 ? parts.join(";") : undefined;
 	});
 
@@ -183,7 +183,8 @@
 		card: "bg-white/80 dark:bg-grove-950/25",
 
 		// Frosted glass - strong blur, high opacity for prominent panels
-		frosted: "bg-white/70 dark:bg-grove-950/35 backdrop-blur-lg",
+		// Note: frosted bakes in its own blur; intensityClasses is skipped for this variant
+		frosted: "bg-white/70 dark:bg-grove-950/35",
 
 		// Accent-colored glass for highlights/callouts
 		accent: "bg-accent/25 dark:bg-accent/15",
@@ -225,14 +226,17 @@
 		muted: "",
 	};
 
+	// Frosted variant has its own blur (lg); other variants use the intensity prop
+	const hasBuiltInBlur = variant === "frosted";
+
 	const computedClass = $derived(
 		cn(
 			// Add relative positioning and overflow hidden when gossamer is enabled
 			gossamer && "relative overflow-hidden",
 			// When glass prop is provided, use theme-driven styles via CSS class
 			glass ? "glass-themed" : variantClasses[variant],
-			// Blur: when glass provided, blur is set via inline style; otherwise use intensity classes
-			!glass && intensityClasses[intensity],
+			// Blur: glass prop → inline style; frosted → built-in lg; others → intensity prop
+			!glass && (hasBuiltInBlur ? "backdrop-blur-lg" : intensityClasses[intensity]),
 			border && `border ${glass ? "glass-themed-border" : borderClasses[variant]}`,
 			shadow && shadowClasses[variant],
 			className,
