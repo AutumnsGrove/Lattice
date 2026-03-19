@@ -279,13 +279,14 @@ async function handleVibeSearch(
 	// Default to OpenRouter for ZDR compliance
 	const parseProvider = getProvider((env.DRIVER_PROVIDER as ProviderName) || "openrouter", env);
 
-	let parsedParams: {
+	type VibeParams = {
 		business_name: string;
 		domain_idea?: string;
 		vibe: string;
 		keywords?: string;
 		tld_preferences: string[];
 	};
+	let parsedParams: VibeParams | null = null;
 
 	try {
 		const parseResponse = await parseProvider.generate({
@@ -306,7 +307,7 @@ async function handleVibeSearch(
 				headers: { "Content-Type": "application/json" },
 			});
 		}
-		parsedParams = safeParseJson(jsonMatch[0], null);
+		parsedParams = safeParseJson<VibeParams | null>(jsonMatch[0], null);
 		if (!parsedParams) {
 			logForageError(FORAGE_ERRORS.PARSE_FAILED, { detail: "Failed to parse JSON response" });
 			return new Response(JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.PARSE_FAILED)), {
@@ -334,6 +335,13 @@ async function handleVibeSearch(
 	}
 
 	// Build quiz responses from parsed parameters
+	// Guard: TS can't narrow through try/catch — all error paths return above
+	if (!parsedParams) {
+		return new Response(JSON.stringify(buildForageErrorResponse(FORAGE_ERRORS.PARSE_FAILED)), {
+			status: 500,
+			headers: { "Content-Type": "application/json" },
+		});
+	}
 	const quizResponses: InitialQuizResponse = {
 		business_name: parsedParams.business_name,
 		domain_idea: parsedParams.domain_idea,

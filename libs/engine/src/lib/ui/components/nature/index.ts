@@ -26,6 +26,9 @@ export { default as LogoArchive } from "./LogoArchive.svelte";
 // GroveDivider - Decorative divider with alternating logos
 export { default as GroveDivider } from "./GroveDivider.svelte";
 
+// VineBackground - Reactive vine pattern using the user's accent color
+export { default as VineBackground } from "./VineBackground.svelte";
+
 // Palette - Seasonal color system
 export * from "./palette";
 

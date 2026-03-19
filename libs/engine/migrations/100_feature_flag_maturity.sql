@@ -1,7 +1,9 @@
 -- Add maturity lifecycle column to feature flags
 -- Replaces the convention of deriving category from flag ID prefixes
 -- Values: experimental, beta, stable, graduated
-ALTER TABLE feature_flags ADD COLUMN maturity TEXT NOT NULL DEFAULT 'experimental';
+--
+-- NOTE: ALTER TABLE removed — column already exists in production (partial apply).
+-- Fresh databases get the column from 020_feature_flags.sql's CREATE TABLE.
 
 -- Backfill existing flags based on current state
 -- greenhouse_only=0 flags that are enabled are stable

@@ -551,7 +551,8 @@
     },
     "./ui/components/nature/*.svelte": {
       "default": "./dist/ui/components/nature/*.svelte",
-      "svelte": "./dist/ui/components/nature/*.svelte"
+      "svelte": "./dist/ui/components/nature/*.svelte",
+      "types": "./dist/ui/components/nature/*.svelte.d.ts"
     },
     "./ui/components/nature/palette": {
       "default": "./dist/ui/components/nature/palette.js",

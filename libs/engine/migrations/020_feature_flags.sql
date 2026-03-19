@@ -24,7 +24,8 @@ CREATE TABLE IF NOT EXISTS feature_flags (
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
   created_by TEXT,                     -- User ID who created
-  updated_by TEXT                      -- User ID who last updated
+  updated_by TEXT,                     -- User ID who last updated
+  maturity TEXT NOT NULL DEFAULT 'experimental'  -- Lifecycle: experimental, beta, stable, graduated
 );
 
 -- Rules determine flag values based on context

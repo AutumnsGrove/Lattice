@@ -21,7 +21,7 @@ import {
 } from "../test-helpers";
 
 /** Mock ExecutionContext for c.executionCtx.waitUntil() */
-const mockExecutionCtx = { waitUntil: vi.fn(), passThroughOnException: vi.fn() };
+const mockExecutionCtx = { waitUntil: vi.fn(), passThroughOnException: vi.fn(), props: {} };
 
 // Mock dual auth to control authentication
 vi.mock("../auth/dual-auth", async (importOriginal) => {

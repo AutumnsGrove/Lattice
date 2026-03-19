@@ -453,7 +453,11 @@ export class SearchJobDO extends LoomDO<SearchJobState, Env> {
 			client_id: row.client_id,
 			status: row.status as SearchStatus,
 			batch_num: row.batch_num,
-			quiz_responses: safeJsonParse(row.quiz_responses, {}),
+			quiz_responses: safeJsonParse(row.quiz_responses, {
+				business_name: "",
+				tld_preferences: [],
+				vibe: "",
+			} satisfies InitialQuizResponse),
 			followup_responses: row.followup_responses
 				? safeJsonParse(row.followup_responses, undefined)
 				: undefined,
