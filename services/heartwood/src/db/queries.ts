@@ -246,6 +246,14 @@ export async function updateUserLogin(
 		.run();
 }
 
+export async function updateUserAvatar(
+	db: D1DatabaseOrSession,
+	id: string,
+	avatarUrl: string | null,
+): Promise<void> {
+	await db.prepare(`UPDATE users SET avatar_url = ? WHERE id = ?`).bind(avatarUrl, id).run();
+}
+
 export async function getOrCreateUser(
 	db: D1DatabaseOrSession,
 	data: {

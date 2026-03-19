@@ -506,19 +506,19 @@ export const handle: Handle = async ({ event, resolve }) => {
 				if (data.valid && data.user) {
 					const user = data.user as Record<string, unknown>;
 					// Only set user if all required fields are valid
+					// avatarUrl is optional (nullable in Heartwood DB schema)
 					if (
 						typeof user === "object" &&
 						typeof user.id === "string" &&
 						typeof user.email === "string" &&
 						typeof user.name === "string" &&
-						typeof user.avatarUrl === "string" &&
 						typeof user.isAdmin === "boolean"
 					) {
 						event.locals.user = {
 							id: user.id,
 							email: user.email,
 							name: user.name,
-							picture: user.avatarUrl,
+							picture: typeof user.avatarUrl === "string" ? user.avatarUrl : undefined,
 							isAdmin: user.isAdmin,
 						};
 					} else {
@@ -556,20 +556,20 @@ export const handle: Handle = async ({ event, resolve }) => {
 					const userInfo = (await userInfoResponse.json()) as Record<string, unknown>;
 
 					// Validate response shape and set user if valid
+					// picture is optional (nullable in Heartwood DB schema)
 					if (
 						userInfo &&
 						typeof userInfo === "object" &&
 						typeof userInfo.sub === "string" &&
 						typeof userInfo.email === "string" &&
 						typeof userInfo.name === "string" &&
-						typeof userInfo.picture === "string" &&
 						typeof userInfo.provider === "string"
 					) {
 						event.locals.user = {
 							id: userInfo.sub,
 							email: userInfo.email,
 							name: userInfo.name,
-							picture: userInfo.picture,
+							picture: typeof userInfo.picture === "string" ? userInfo.picture : undefined,
 							provider: userInfo.provider,
 						};
 					} else {

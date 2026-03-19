@@ -205,6 +205,24 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 			.bind(tenantId, avatarUrl)
 			.run();
 
+		// Sync avatar to Heartwood user record so it follows the user cross-domain
+		const authBinding = platform?.env?.AUTH;
+		if (authBinding) {
+			try {
+				await authBinding.fetch("https://login.grove.place/user/avatar", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						Cookie: request.headers.get("Cookie") || "",
+					},
+					body: JSON.stringify({ avatarUrl }),
+				});
+			} catch (err) {
+				// Non-critical: site_settings is the primary store, Heartwood is for cross-domain
+				console.warn("[Avatar] Failed to sync avatar to Heartwood:", err);
+			}
+		}
+
 		return json({ success: true, url: avatarUrl });
 	} catch (err) {
 		if ((err as { status?: number }).status) throw err;
@@ -263,6 +281,19 @@ export const DELETE: RequestHandler = async ({ request, platform, locals }) => {
 			.prepare("DELETE FROM site_settings WHERE tenant_id = ? AND setting_key = 'avatar_url'")
 			.bind(tenantId)
 			.run();
+
+		// Clear avatar in Heartwood user record
+		const authBinding = platform?.env?.AUTH;
+		if (authBinding) {
+			try {
+				await authBinding.fetch("https://login.grove.place/user/avatar", {
+					method: "DELETE",
+					headers: { Cookie: request.headers.get("Cookie") || "" },
+				});
+			} catch (err) {
+				console.warn("[Avatar] Failed to clear avatar in Heartwood:", err);
+			}
+		}
 
 		return json({ success: true });
 	} catch (err) {
