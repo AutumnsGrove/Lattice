@@ -66,16 +66,17 @@ CREATE TABLE tenants_new (
 );
 
 -- Copy all data from existing table
+-- NOTE: Columns from migrations 053 (last_activity_at, reclamation_status) and
+-- 076 (meadow_opt_in) may not exist in production despite being tracked as applied.
+-- Use defaults for those columns — the new table definition provides them.
 INSERT INTO tenants_new (
   id, subdomain, display_name, email, plan, storage_used, post_count,
   custom_domain, theme, accent_color, active, encrypted_dek,
-  last_activity_at, reclamation_status, meadow_opt_in,
   created_at, updated_at
 )
 SELECT
   id, subdomain, display_name, email, plan, storage_used, post_count,
   custom_domain, theme, accent_color, active, encrypted_dek,
-  last_activity_at, reclamation_status, meadow_opt_in,
   created_at, updated_at
 FROM tenants;
 
