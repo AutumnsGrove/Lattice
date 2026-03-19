@@ -79,6 +79,9 @@ export interface User {
 	is_admin: number; // 0 or 1
 	created_at: string;
 	last_login: string | null;
+	theme: string | null;
+	grove_mode: number | null; // 0 or 1 (SQLite boolean)
+	season: string | null;
 }
 
 export interface AllowedEmail {

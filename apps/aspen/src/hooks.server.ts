@@ -514,12 +514,21 @@ export const handle: Handle = async ({ event, resolve }) => {
 						typeof user.name === "string" &&
 						typeof user.isAdmin === "boolean"
 					) {
+						// Extract preferences if present
+						const prefs = user.preferences as Record<string, unknown> | undefined;
 						event.locals.user = {
 							id: user.id,
 							email: user.email,
 							name: user.name,
 							picture: typeof user.avatarUrl === "string" ? user.avatarUrl : undefined,
 							isAdmin: user.isAdmin,
+							preferences: prefs
+								? {
+										theme: typeof prefs.theme === "string" ? prefs.theme : null,
+										groveMode: typeof prefs.groveMode === "boolean" ? prefs.groveMode : null,
+										season: typeof prefs.season === "string" ? prefs.season : null,
+									}
+								: undefined,
 						};
 					} else {
 						console.error("[Auth] Invalid SessionDO response: user object has invalid fields");

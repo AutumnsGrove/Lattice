@@ -28,6 +28,12 @@ declare global {
 				provider?: string;
 				/** Whether user has admin privileges */
 				isAdmin?: boolean;
+				/** User preferences from Heartwood (cross-domain persistent) */
+				preferences?: {
+					theme: string | null;
+					groveMode: boolean | null;
+					season: string | null;
+				};
 			} | null;
 
 			/** Routing context based on subdomain */

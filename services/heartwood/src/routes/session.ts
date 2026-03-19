@@ -109,6 +109,11 @@ session.post("/validate", async (c) => {
 						tier: subscription?.tier || "seedling",
 						tenantId: tenant?.tenantId ?? null,
 						subdomain: tenant?.subdomain ?? null,
+						preferences: {
+							theme: user.theme || null,
+							groveMode: user.grove_mode === 1 ? true : user.grove_mode === 0 ? false : null,
+							season: user.season || null,
+						},
 					},
 					session: {
 						id: parsedSession.sessionId,
@@ -149,6 +154,11 @@ session.post("/validate", async (c) => {
 							tier: subscription?.tier || "seedling",
 							tenantId: tenant?.tenantId ?? null,
 							subdomain: tenant?.subdomain ?? null,
+							preferences: {
+								theme: user.theme || null,
+								groveMode: user.grove_mode === 1 ? true : user.grove_mode === 0 ? false : null,
+								season: user.season || null,
+							},
 						},
 						session: null, // No DO session for JWT auth
 					});
@@ -186,6 +196,11 @@ session.post("/validate", async (c) => {
 						tier: subscription?.tier || "seedling",
 						tenantId: tenant?.tenantId ?? null,
 						subdomain: tenant?.subdomain ?? null,
+						preferences: {
+							theme: user.theme || null,
+							groveMode: user.grove_mode === 1 ? true : user.grove_mode === 0 ? false : null,
+							season: user.season || null,
+						},
 					},
 					session: null, // No DO session for legacy auth
 				});
@@ -213,6 +228,11 @@ session.post("/validate", async (c) => {
 				tier: subscription?.tier || "seedling",
 				tenantId: tenant?.tenantId ?? null,
 				subdomain: tenant?.subdomain ?? null,
+				preferences: {
+					theme: null,
+					groveMode: null,
+					season: null,
+				},
 			},
 			session: null, // Better Auth manages its own sessions
 		});
@@ -730,6 +750,11 @@ session.post("/validate-service", async (c) => {
 			tier: subscription?.tier || "seedling",
 			tenantId: tenant?.tenantId ?? null,
 			subdomain: tenant?.subdomain ?? null,
+			preferences: {
+				theme: user.theme || null,
+				groveMode: user.grove_mode === 1 ? true : user.grove_mode === 0 ? false : null,
+				season: user.season || null,
+			},
 		},
 		session: {
 			id: parsedSession.sessionId,

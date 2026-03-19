@@ -17,6 +17,7 @@
 	import FriendsLoader from "@autumnsgrove/lattice/ui/components/chrome/FriendsLoader.svelte";
 	import { themeStore } from "@autumnsgrove/lattice/ui/stores/theme.svelte";
 	import { groveModeStore } from "@autumnsgrove/lattice/ui/stores/grove-mode.svelte";
+	import { seasonStore } from "@autumnsgrove/lattice/ui/stores/season.svelte";
 	import VineBackground from "@autumnsgrove/lattice/ui/components/nature/VineBackground.svelte";
 
 	// grove-entrance-dismiss: fade out the pre-hydration loading overlay
@@ -26,6 +27,14 @@
 		if (entrance) {
 			entrance.classList.add("ge-hidden");
 			entrance.addEventListener("transitionend", () => entrance.remove(), { once: true });
+		}
+
+		// Hydrate preference stores from Heartwood user record (cross-domain persistent)
+		const prefs = data.user?.preferences;
+		if (prefs) {
+			themeStore.hydrateFromServer(prefs.theme);
+			groveModeStore.hydrateFromServer(prefs.groveMode);
+			seasonStore.hydrateFromServer(prefs.season);
 		}
 	});
 
