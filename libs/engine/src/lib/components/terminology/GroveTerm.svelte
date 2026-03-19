@@ -60,19 +60,7 @@
 
 	// State (only used in interactive mode, but declared unconditionally for Svelte reactivity)
 	let popupOpen = $state(false);
-	let loading = $state(false);
 	let error = $state<string | null>(null);
-	let preloadTimer: ReturnType<typeof setTimeout> | null = null;
-
-	// Cleanup preload timer on unmount to prevent memory leaks
-	$effect(() => {
-		return () => {
-			if (preloadTimer) {
-				clearTimeout(preloadTimer);
-				preloadTimer = null;
-			}
-		};
-	});
 
 	// Normalize term to slug format
 	const slug = $derived(term.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''));
@@ -86,14 +74,9 @@
 		return null;
 	}
 
-	// Eagerly resolve entry from manifest
-	let entry = $state<GroveTermEntry | null>(null);
-	$effect(() => {
-		if (!entry && manifest) {
-			const found = findInManifest(manifest, slug);
-			if (found) entry = found;
-		}
-	});
+	// Synchronously resolve entry from manifest (must be $derived, not $effect,
+	// so it runs on both server and client — prevents SSR/hydration mismatch)
+	const entry = $derived(manifest ? findInManifest(manifest, slug) : null);
 
 	// Whether this term should show as Grove or standard
 	const showAsGrove = $derived(
@@ -111,49 +94,24 @@
 
 	// --- Interactive-only logic ---
 
-	function getEntryFromManifest(): GroveTermEntry | null {
-		if (manifest) return findInManifest(manifest, slug);
-		return null;
-	}
-
-	async function loadEntry() {
-		const fromManifest = getEntryFromManifest();
-		if (fromManifest) {
-			entry = fromManifest;
-			return;
+	function ensureEntry() {
+		if (!entry) {
+			error = `Term "${term}" not found`;
 		}
-		loading = false;
-		error = `Term "${term}" not found`;
 	}
 
 	function handleClick(event: MouseEvent) {
 		event.preventDefault();
 		popupOpen = true;
-		if (!entry && !loading) loadEntry();
+		ensureEntry();
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === 'Enter' || event.key === ' ') {
 			event.preventDefault();
 			popupOpen = true;
-			if (!entry && !loading) loadEntry();
+			ensureEntry();
 		}
-	}
-
-	function handlePointerEnter() {
-		if (entry || loading) return;
-		preloadTimer = setTimeout(() => loadEntry(), 150);
-	}
-
-	function handlePointerLeave() {
-		if (preloadTimer) {
-			clearTimeout(preloadTimer);
-			preloadTimer = null;
-		}
-	}
-
-	function handleFocus() {
-		if (!entry && !loading) loadEntry();
 	}
 
 	function handlePopupClose() {
@@ -181,9 +139,6 @@
 		aria-haspopup="dialog"
 		onclick={handleClick}
 		onkeydown={handleKeydown}
-		onpointerenter={handlePointerEnter}
-		onpointerleave={handlePointerLeave}
-		onfocus={handleFocus}
 	>
 		{#if showAsGrove}
 			{#if children}{@render children()}{:else}{displayText}{/if}
@@ -197,7 +152,7 @@
 		bind:open={popupOpen}
 		{entry}
 		{manifest}
-		{loading}
+		loading={false}
 		{error}
 		{href}
 		onclose={handlePopupClose}
