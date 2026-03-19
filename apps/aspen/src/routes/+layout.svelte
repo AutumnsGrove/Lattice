@@ -509,12 +509,12 @@
 	}
 	.nav-loading-bar-fill {
 		height: 100%;
-		background: var(--user-accent, var(--color-primary));
+		background: var(--grove-accent);
 		animation: nav-loading 1.5s ease-in-out infinite;
 		transform-origin: left;
 	}
 	:global(.dark) .nav-loading-bar-fill {
-		background: var(--grove-300);
+		background: var(--grove-accent);
 	}
 	@keyframes nav-loading {
 		0% {

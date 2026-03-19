@@ -721,8 +721,8 @@
 		color: rgb(59, 130, 246);
 	}
 	.meta-tag--config {
-		background: rgba(16, 185, 129, 0.12);
-		color: rgb(16, 185, 129);
+		background: rgba(16, 185, 129, 0.12); /* accent-ok: artifact type category tag */
+		color: rgb(16, 185, 129); /* accent-ok: artifact type category tag */
 	}
 	.card-actions {
 		display: flex;

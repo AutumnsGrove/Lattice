@@ -151,7 +151,7 @@
 
 	:global(.pulse-page-hero) {
 		padding: 2rem 2rem 1.75rem !important;
-		border: 1px solid var(--grove-overlay-8, rgba(34, 197, 94, 0.08));
+		border: 1px solid var(--grove-accent-8);
 	}
 
 	.hero-content {
@@ -168,13 +168,13 @@
 		align-items: center;
 		justify-content: center;
 		border-radius: 50%;
-		background: var(--grove-overlay-8, rgba(34, 197, 94, 0.08));
-		color: var(--grove-600, #16a34a);
+		background: var(--grove-accent-8);
+		color: var(--grove-accent);
 	}
 
 	:global(.dark) .hero-icon-ring {
-		background: rgba(74, 222, 128, 0.1);
-		color: var(--grove-400, #4ade80);
+		background: var(--grove-accent-10);
+		color: var(--grove-accent);
 	}
 
 	.hero-text {
@@ -205,14 +205,14 @@
 		padding: 0.25rem 0.625rem 0.25rem 0.5rem;
 		font-size: 0.8rem;
 		font-weight: 500;
-		color: var(--grove-700, #15803d);
-		background: var(--grove-overlay-8, rgba(34, 197, 94, 0.08));
+		color: var(--grove-accent-dark);
+		background: var(--grove-accent-8);
 		border-radius: 999px;
 	}
 
 	:global(.dark) .hero-today {
-		color: var(--grove-300, #86efac);
-		background: rgba(74, 222, 128, 0.1);
+		color: var(--grove-accent);
+		background: var(--grove-accent-10);
 	}
 
 	/* ── Footer ── */

@@ -523,7 +523,7 @@
 		opacity: 1;
 	}
 	:global(.dark) .back-link {
-		color: #86efac;
+		color: var(--grove-accent);
 	}
 	.title-row {
 		display: flex;

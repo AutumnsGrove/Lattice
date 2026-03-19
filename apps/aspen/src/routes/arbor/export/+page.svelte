@@ -532,7 +532,7 @@
 
 	.delivery-option:has(input:checked) {
 		border-color: var(--color-primary);
-		background: rgba(44, 95, 45, 0.05);
+		background: var(--grove-accent-5);
 	}
 
 	.delivery-option input[type="radio"] {
@@ -574,7 +574,7 @@
 		gap: 0.5rem;
 		margin: 0 0 1.25rem 0;
 		padding: 0.75rem 1rem;
-		background: rgba(44, 95, 45, 0.05);
+		background: var(--grove-accent-5);
 		border-radius: var(--border-radius-small);
 		font-size: 0.85rem;
 		color: var(--color-text-muted);
@@ -708,16 +708,16 @@
 	}
 
 	.badge-success {
-		background: rgba(34, 197, 94, 0.15);
-		color: #16a34a;
-		border: 1px solid rgba(34, 197, 94, 0.3);
+		background: var(--grove-accent-15);
+		color: var(--grove-accent-dark);
+		border: 1px solid var(--grove-accent-30);
 		font-weight: 600;
 	}
 
 	:global(.dark) .badge-success {
-		background: rgba(34, 197, 94, 0.2);
-		color: #4ade80;
-		border: 1px solid rgba(34, 197, 94, 0.5);
+		background: var(--grove-accent-20);
+		color: var(--grove-accent);
+		border: 1px solid var(--grove-accent-50);
 	}
 
 	.badge-muted {

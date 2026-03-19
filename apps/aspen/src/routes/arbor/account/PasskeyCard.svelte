@@ -162,7 +162,7 @@
 	:global(.header-icon) {
 		width: 1.25rem;
 		height: 1.25rem;
-		color: hsl(var(--grove-600));
+		color: var(--grove-accent);
 	}
 
 	.passkey-count {
@@ -289,7 +289,7 @@
 	:global(.passkey-icon) {
 		width: 1.5rem;
 		height: 1.5rem;
-		color: hsl(var(--grove-600));
+		color: var(--grove-accent);
 		flex-shrink: 0;
 	}
 

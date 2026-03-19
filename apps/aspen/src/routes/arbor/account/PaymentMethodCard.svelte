@@ -127,7 +127,7 @@
 	}
 
 	.portal-button:hover:not(:disabled) {
-		background: var(--color-primary-dark, #15803d);
+		background: var(--grove-accent-dark);
 	}
 
 	:global(.external-icon) {
@@ -152,8 +152,8 @@
 		align-items: flex-start;
 		gap: 1rem;
 		padding: 1rem;
-		background: var(--color-success-bg, rgba(34, 197, 94, 0.1));
-		border: 1px solid var(--color-success-border, rgba(34, 197, 94, 0.3));
+		background: var(--grove-accent-10);
+		border: 1px solid var(--grove-accent-30);
 		border-radius: 0.5rem;
 		margin-bottom: 1rem;
 	}
@@ -161,14 +161,14 @@
 	.comped-icon {
 		flex-shrink: 0;
 		padding: 0.5rem;
-		background: var(--color-success-icon-bg, rgba(34, 197, 94, 0.2));
+		background: var(--grove-accent-20);
 		border-radius: 0.375rem;
 	}
 
 	:global(.gift-icon) {
 		width: 1.5rem;
 		height: 1.5rem;
-		color: var(--color-success, #22c55e);
+		color: var(--grove-accent);
 	}
 
 	.comped-content {

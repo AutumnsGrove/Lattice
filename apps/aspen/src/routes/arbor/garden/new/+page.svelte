@@ -546,7 +546,7 @@
 		opacity: 1;
 	}
 	:global(.dark) .back-link {
-		color: #86efac;
+		color: var(--grove-accent);
 	}
 	.page-header h1 {
 		margin: 0;

@@ -537,9 +537,9 @@
 		color: var(--color-error, #ef4444);
 	}
 	.alert-success {
-		background: rgba(34, 197, 94, 0.1);
-		border: 1px solid rgba(34, 197, 94, 0.3);
-		color: var(--color-success, #22c55e);
+		background: var(--grove-accent-10);
+		border: 1px solid var(--grove-accent-30);
+		color: var(--color-success, #22c55e); /* accent-ok — semantic success text */
 	}
 	:global(.alert-icon) {
 		width: 1.25rem;
@@ -719,7 +719,7 @@
 		margin-bottom: 0.5rem;
 	}
 	:global(.text-green) {
-		color: #22c55e;
+		color: #22c55e; /* accent-ok — semantic "configured" status indicator */
 	}
 
 	.regen-btn {
@@ -795,7 +795,7 @@
 		display: inline-block;
 	}
 	.health-green {
-		background: #22c55e;
+		background: #22c55e; /* accent-ok — webhook health status indicator */
 	}
 	.health-yellow {
 		background: #f59e0b;

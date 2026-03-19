@@ -323,13 +323,13 @@
 
 	.stat-icon {
 		padding: 0.5rem;
-		background: rgba(34, 197, 94, 0.1);
+		background: var(--grove-accent-10);
 		border-radius: var(--border-radius-small);
 		color: var(--color-primary);
 	}
 
 	:global(.dark) .stat-icon {
-		background: rgba(34, 197, 94, 0.15);
+		background: var(--grove-accent-15);
 	}
 
 	.stat-content {
@@ -420,20 +420,20 @@
 	}
 
 	.glass-roadmap {
-		background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
+		background: linear-gradient(135deg, var(--grove-accent-10), var(--grove-accent-5));
 		backdrop-filter: blur(12px);
 		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(34, 197, 94, 0.2);
+		border: 1px solid var(--grove-accent-20);
 	}
 
 	:global(.dark) .glass-roadmap {
-		background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.08));
-		border-color: rgba(34, 197, 94, 0.25);
+		background: linear-gradient(135deg, var(--grove-accent-15), var(--grove-accent-8));
+		border-color: var(--grove-accent-25);
 	}
 
 	.roadmap-card:hover {
 		transform: scale(1.01);
-		box-shadow: 0 8px 32px rgba(34, 197, 94, 0.15);
+		box-shadow: 0 8px 32px var(--grove-accent-15);
 	}
 
 	.roadmap-header {
@@ -448,15 +448,15 @@
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.375rem 0.75rem;
-		background: rgba(34, 197, 94, 0.15);
+		background: var(--grove-accent-15);
 		border-radius: 9999px;
 		font-size: 0.875rem;
 		font-weight: 500;
-		color: var(--grove-700, #166534);
+		color: var(--grove-accent-dark);
 	}
 
 	:global(.dark) .roadmap-badge {
-		color: var(--grove-400, #4ade80);
+		color: var(--grove-accent);
 	}
 
 	.roadmap-content {
@@ -494,33 +494,33 @@
 
 	.progress-fill {
 		height: 100%;
-		background: #16a34a;
+		background: var(--grove-accent-dark);
 		border-radius: 9999px;
 		transition: width 0.5s ease;
 	}
 
 	:global(.dark) .progress-fill {
-		background: #22c55e;
+		background: var(--grove-accent);
 	}
 
 	/* Rooted badge in header */
 	.rooted-badge {
-		background: rgba(34, 197, 94, 0.15);
-		color: var(--grove-700, #166534);
+		background: var(--grove-accent-15);
+		color: var(--grove-accent-dark);
 	}
 
 	:global(.dark) .rooted-badge {
-		color: var(--grove-400, #4ade80);
+		color: var(--grove-accent);
 	}
 
 	/* Greenhouse badge in header */
 	.greenhouse-badge {
-		background: rgba(16, 185, 129, 0.15);
+		background: rgba(16, 185, 129, 0.15); /* accent-ok: greenhouse maturity badge */
 		color: #065f46;
 	}
 
 	:global(.dark) .greenhouse-badge {
-		background: rgba(16, 185, 129, 0.2);
+		background: rgba(16, 185, 129, 0.2); /* accent-ok: greenhouse maturity badge */
 		color: #6ee7b7;
 	}
 </style>

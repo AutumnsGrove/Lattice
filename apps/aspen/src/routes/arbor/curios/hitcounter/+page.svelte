@@ -417,24 +417,24 @@
 		justify-content: center;
 		width: 2rem;
 		height: 2.75rem;
-		background: rgb(var(--grove-950, 5 46 22) / 0.92);
-		color: rgb(var(--grove-400, 74 222 128));
+		background: color-mix(in srgb, var(--grove-accent-dark) 92%, transparent);
+		color: var(--grove-accent);
 		font-family: "Courier New", Courier, monospace;
 		font-size: 1.5rem;
 		font-weight: 700;
 		border-radius: 3px;
-		border: 1px solid rgb(var(--grove-800, 22 101 52) / 0.6);
+		border: 1px solid color-mix(in srgb, var(--grove-accent-dark) 60%, transparent);
 		backdrop-filter: blur(4px);
-		text-shadow: 0 0 6px rgb(var(--grove-400, 74 222 128) / 0.4);
+		text-shadow: 0 0 6px var(--grove-accent-40);
 	}
 
 	.classic-plabel {
-		color: rgb(var(--grove-400, 74 222 128) / 0.7);
+		color: var(--grove-accent-70);
 	}
 
 	:global(.dark) .classic-digit {
 		background: rgb(var(--cream-100, 37 35 32) / 0.08);
-		border-color: rgb(var(--grove-700, 21 128 61) / 0.4);
+		border-color: var(--grove-accent-40);
 	}
 
 	/* ─── Odometer Preview ─── */
@@ -522,7 +522,7 @@
 		padding: 0.75rem 1rem;
 		background: linear-gradient(180deg, #1a2e1a 0%, #0d1f0d 100%);
 		border-radius: 4px;
-		border: 1px solid rgb(var(--grove-800, 22 101 52) / 0.5);
+		border: 1px solid var(--grove-accent-50);
 		box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
 	}
 
@@ -544,29 +544,29 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		color: rgb(var(--grove-400, 74 222 128) / 0.1);
+		color: var(--grove-accent-10);
 		font-size: inherit;
 		font-weight: inherit;
 	}
 
 	.lcd-active {
 		position: relative;
-		color: rgb(var(--grove-400, 74 222 128));
-		text-shadow: 0 0 8px rgb(var(--grove-400, 74 222 128) / 0.5);
+		color: var(--grove-accent);
+		text-shadow: 0 0 8px var(--grove-accent-50);
 	}
 
 	.lcd-plabel {
-		color: rgb(var(--grove-400, 74 222 128) / 0.6);
+		color: color-mix(in srgb, var(--grove-accent) 60%, transparent);
 		font-size: 0.7rem;
 	}
 
 	:global(.dark) .lcd-screen {
 		background: linear-gradient(180deg, #0d1a0d 0%, #050f05 100%);
-		border-color: rgb(var(--grove-800, 22 101 52) / 0.3);
+		border-color: var(--grove-accent-30);
 	}
 
 	:global(.dark) .lcd-active {
-		text-shadow: 0 0 10px rgb(var(--grove-400, 74 222 128) / 0.7);
+		text-shadow: 0 0 10px var(--grove-accent-70);
 	}
 
 	/* ─── Minimal Preview ─── */
@@ -582,18 +582,18 @@
 	}
 
 	.minimal-sep {
-		color: rgb(var(--grove-600, 22 163 74));
+		color: var(--grove-accent);
 		opacity: 0.5;
 	}
 
 	.minimal-number {
 		font-weight: 700;
-		color: rgb(var(--grove-600, 22 163 74));
+		color: var(--grove-accent);
 		font-size: 1.5rem;
 	}
 
 	:global(.dark) .minimal-number {
-		color: rgb(var(--grove-400, 74 222 128));
+		color: var(--grove-accent);
 	}
 
 	:global(.dark) .minimal-label {

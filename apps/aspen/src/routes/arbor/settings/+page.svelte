@@ -472,9 +472,9 @@
 	}
 
 	.status-dot.active {
-		background: var(--color-success, #16a34a);
+		background: var(--color-success, #16a34a); /* accent-ok — active state indicator */
 		opacity: 1;
-		box-shadow: 0 0 6px color-mix(in srgb, var(--color-success, #16a34a) 50%, transparent);
+		box-shadow: 0 0 6px color-mix(in srgb, var(--color-success, #16a34a) 50%, transparent); /* accent-ok */
 	}
 
 	.community-state {

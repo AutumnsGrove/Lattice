@@ -1117,9 +1117,9 @@
 	}
 
 	.alert-success {
-		background: hsl(var(--grove-600, 142 76% 36%) / 0.1);
-		border: 1px solid hsl(var(--grove-600, 142 76% 36%) / 0.3);
-		color: hsl(var(--grove-600, 142 76% 36%));
+		background: var(--grove-accent-10);
+		border: 1px solid var(--grove-accent-30);
+		color: var(--grove-accent);
 	}
 
 	:global(.alert-icon) {
@@ -1284,7 +1284,7 @@
 	}
 
 	.token-ok {
-		color: hsl(var(--grove-600, 142 76% 36%));
+		color: var(--grove-accent);
 	}
 
 	.token-fail {
@@ -1570,7 +1570,7 @@
 	}
 
 	.stat-generated {
-		color: hsl(var(--grove-600, 142 76% 36%));
+		color: var(--grove-accent);
 	}
 
 	.stat-skipped {

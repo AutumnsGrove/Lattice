@@ -26,7 +26,7 @@
 	h1 {
 		font-size: 6rem;
 		margin: 0 0 1rem 0;
-		color: #2c5f2d;
+		color: var(--grove-accent-dark);
 		line-height: 1;
 		transition: color 0.3s ease;
 	}
@@ -56,7 +56,7 @@
 	.home-link {
 		display: inline-block;
 		padding: 0.75rem 2rem;
-		background: #2c5f2d;
+		background: var(--grove-accent-dark);
 		color: white;
 		text-decoration: none;
 		border-radius: 20px;
@@ -70,14 +70,14 @@
 		color: var(--light-bg-primary);
 	}
 	.home-link:hover {
-		background: #4a9d4f;
+		background: var(--grove-accent);
 		transform: translateY(-2px) scale(1.05);
 		filter: brightness(1.1);
-		box-shadow: 0 4px 12px rgba(44, 95, 45, 0.3);
+		box-shadow: 0 4px 12px var(--grove-accent-30);
 	}
 	:global(.dark) .home-link:hover {
 		background: var(--accent-success-light);
-		box-shadow: 0 4px 12px rgba(92, 184, 95, 0.4);
+		box-shadow: 0 4px 12px var(--grove-accent-40);
 	}
 	@media (max-width: 768px) {
 		h1 {

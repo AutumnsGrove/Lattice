@@ -522,7 +522,7 @@
 	:global(.title-icon) {
 		width: 1.5rem;
 		height: 1.5rem;
-		color: var(--user-accent, var(--color-primary, #2c5f2d));
+		color: var(--grove-accent);
 	}
 
 	.page-subtitle {
@@ -575,22 +575,22 @@
 	}
 
 	.tab:focus-visible {
-		outline: 2px solid var(--user-accent, var(--color-primary, #2c5f2d));
+		outline: 2px solid var(--grove-accent);
 		outline-offset: -2px;
 	}
 
 	:global(.dark) .tab:focus-visible {
-		outline-color: var(--grove-300, #86efac);
+		outline-color: var(--grove-accent);
 	}
 
 	.tab.active {
-		color: var(--user-accent, var(--color-primary, #2c5f2d));
-		border-bottom-color: var(--user-accent, var(--color-primary, #2c5f2d));
+		color: var(--grove-accent);
+		border-bottom-color: var(--grove-accent);
 	}
 
 	:global(.dark) .tab.active {
-		color: var(--grove-300, #86efac);
-		border-bottom-color: var(--grove-300, #86efac);
+		color: var(--grove-accent);
+		border-bottom-color: var(--grove-accent);
 	}
 
 	/* Comment cards */
@@ -649,7 +649,7 @@
 	}
 
 	.comment-post {
-		color: var(--user-accent, var(--color-primary, #2c5f2d));
+		color: var(--grove-accent);
 		text-decoration: none;
 		font-weight: 500;
 	}
@@ -659,7 +659,7 @@
 	}
 
 	:global(.dark) .comment-post {
-		color: var(--grove-300, #86efac);
+		color: var(--grove-accent);
 	}
 
 	:global(.reply-icon) {
@@ -762,13 +762,13 @@
 	}
 
 	.mod-approve {
-		color: #15803d;
-		background: rgba(21, 128, 61, 0.08);
-		border-color: rgba(21, 128, 61, 0.2);
+		color: var(--grove-accent-dark);
+		background: var(--grove-accent-8);
+		border-color: var(--grove-accent-20);
 	}
 
 	.mod-approve:hover:not(:disabled) {
-		background: rgba(21, 128, 61, 0.15);
+		background: var(--grove-accent-15);
 	}
 
 	.mod-reject {
@@ -877,7 +877,7 @@
 	}
 
 	.toggle-btn:focus-visible {
-		outline: 2px solid var(--user-accent, var(--color-primary, #2c5f2d));
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 2px;
 		border-radius: 14px;
 	}
@@ -896,11 +896,11 @@
 	}
 
 	.toggle-btn.on .toggle-track {
-		background: var(--user-accent, var(--color-primary, #2c5f2d));
+		background: var(--grove-accent);
 	}
 
 	:global(.dark) .toggle-btn.on .toggle-track {
-		background: #10b981; /* emerald-500 — bright, clearly distinguishable from off */
+		background: var(--grove-accent);
 	}
 
 	.toggle-thumb {
@@ -934,7 +934,7 @@
 	}
 
 	.setting-select:focus-visible {
-		outline: 2px solid var(--user-accent, var(--color-primary, #2c5f2d));
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 2px;
 	}
 
@@ -953,7 +953,7 @@
 	.save-btn {
 		padding: 0.625rem 1.5rem;
 		min-height: 44px;
-		background: var(--user-accent, var(--color-primary, #2c5f2d));
+		background: var(--grove-accent);
 		color: white;
 		border: none;
 		border-radius: 6px;
@@ -974,12 +974,12 @@
 	}
 
 	.save-btn:focus-visible {
-		outline: 2px solid var(--user-accent, var(--color-primary, #2c5f2d));
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 2px;
 	}
 
 	:global(.dark) .save-btn {
-		background: #10b981; /* emerald-500 — hardcoded because CSS vars store RGB channels */
+		background: var(--grove-accent);
 		color: #1a1a1a;
 	}
 

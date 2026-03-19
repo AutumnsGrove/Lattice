@@ -227,8 +227,8 @@
 	}
 
 	.applied-badge {
-		background: rgba(34, 197, 94, 0.15);
-		color: rgb(74, 222, 128);
+		background: var(--grove-accent-15);
+		color: var(--grove-accent);
 	}
 
 	.cancelled-badge {

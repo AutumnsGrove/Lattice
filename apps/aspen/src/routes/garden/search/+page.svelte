@@ -240,7 +240,7 @@
 	}
 	.search-header h1 {
 		font-size: 2.5rem;
-		color: #2c5f2d;
+		color: var(--grove-accent-dark);
 		margin-bottom: 0.75rem;
 		letter-spacing: -0.02em;
 		transition: color 0.3s ease;
@@ -283,7 +283,7 @@
 		transition: color 0.3s ease;
 	}
 	.results-info strong {
-		color: #2c5f2d;
+		color: var(--grove-accent-dark);
 	}
 	:global(.dark) .results-info strong {
 		color: var(--accent-success);
@@ -343,15 +343,15 @@
 	/* Selected tag styling - uses higher specificity to override accent color */
 	.tags[style*="--accent-color"] :global(.accent-tag.selected-tag),
 	.tags :global(.selected-tag) {
-		background: #2c5f2d;
-		border-color: #2c5f2d;
+		background: var(--grove-accent-dark);
+		border-color: var(--grove-accent-dark);
 		color: white;
 		filter: none;
 	}
 
 	:global(.dark) .tags[style*="--accent-color"] :global(.accent-tag.selected-tag),
 	:global(.dark) .tags :global(.selected-tag) {
-		background: #16a34a;
-		border-color: #16a34a;
+		background: var(--grove-accent);
+		border-color: var(--grove-accent);
 	}
 </style>

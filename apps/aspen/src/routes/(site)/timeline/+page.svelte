@@ -108,13 +108,13 @@
 		align-items: center;
 		justify-content: center;
 		gap: 0.5rem;
-		color: #2c5f2d;
+		color: var(--grove-accent-dark);
 		margin: 0;
 		font-size: 1.75rem;
 	}
 
 	:global(.dark) .timeline-header h1 {
-		color: var(--grove-500, #4ade80);
+		color: var(--grove-accent);
 	}
 
 	.timeline-header p {

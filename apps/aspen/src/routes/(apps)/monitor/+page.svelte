@@ -182,7 +182,7 @@
 	.icon {
 		width: 4rem;
 		height: 4rem;
-		color: var(--color-accent, #2c5f2d);
+		color: var(--grove-accent);
 	}
 
 	h1 {
@@ -235,7 +235,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		color: var(--color-accent, #2c5f2d);
+		color: var(--grove-accent);
 	}
 
 	.feature-text {
@@ -290,7 +290,7 @@
 		font-size: 0.8rem;
 		font-weight: 500;
 		border-radius: 9999px;
-		background: var(--color-accent, #2c5f2d);
+		background: var(--grove-accent);
 		color: white;
 	}
 
@@ -331,7 +331,7 @@
 		align-items: center;
 		gap: 0.35rem;
 		font-weight: 600;
-		color: var(--color-accent, #2c5f2d);
+		color: var(--grove-accent);
 		text-decoration: none;
 		transition: opacity 0.2s;
 	}

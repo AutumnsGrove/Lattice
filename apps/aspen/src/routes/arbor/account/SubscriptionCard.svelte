@@ -213,8 +213,8 @@
 	}
 
 	.status-badge.active {
-		background: #dcfce7;
-		color: #166534;
+		background: var(--grove-accent-15);
+		color: var(--grove-accent-dark);
 	}
 
 	.status-badge.cancelled {
@@ -233,8 +233,8 @@
 	}
 
 	:global(.dark) .status-badge.active {
-		background: rgba(34, 197, 94, 0.2);
-		color: #86efac;
+		background: var(--grove-accent-20);
+		color: var(--grove-accent);
 	}
 
 	:global(.dark) .status-badge.cancelled {

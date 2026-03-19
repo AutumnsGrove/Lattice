@@ -783,7 +783,7 @@
 		opacity: 1;
 	}
 	:global(.dark) .back-link {
-		color: #86efac;
+		color: var(--grove-accent);
 	}
 	.title-row {
 		display: flex;
@@ -833,9 +833,9 @@
 		border: 1px solid rgba(245, 158, 11, 0.3);
 	}
 	.status-badge.published {
-		background: rgba(16, 185, 129, 0.1);
+		background: rgba(16, 185, 129, 0.1); /* accent-ok: published status indicator */
 		color: #065f46;
-		border: 1px solid rgba(16, 185, 129, 0.3);
+		border: 1px solid rgba(16, 185, 129, 0.3); /* accent-ok: published status indicator */
 	}
 	:global(.dark) .status-badge.draft {
 		background: rgba(251, 191, 36, 0.12);
@@ -843,9 +843,9 @@
 		border-color: rgba(251, 191, 36, 0.25);
 	}
 	:global(.dark) .status-badge.published {
-		background: rgba(16, 185, 129, 0.12);
+		background: rgba(16, 185, 129, 0.12); /* accent-ok: published status indicator */
 		color: #6ee7b7;
-		border-color: rgba(16, 185, 129, 0.25);
+		border-color: rgba(16, 185, 129, 0.25); /* accent-ok: published status indicator */
 	}
 	.status-dot {
 		width: 6px;
@@ -857,7 +857,7 @@
 		background: #f59e0b;
 	}
 	.status-dot.published {
-		background: #10b981;
+		background: var(--grove-accent);
 	}
 
 	/* More menu (overflow) */
@@ -1116,7 +1116,7 @@
 	}
 	.tag-preview {
 		padding: 0.2rem 0.6rem;
-		background: rgba(34, 197, 94, 0.7);
+		background: var(--grove-accent-70);
 		backdrop-filter: blur(4px);
 		color: white;
 		border-radius: 12px;
@@ -1216,8 +1216,8 @@
 	.toggle-vines-btn {
 		margin-top: 0.75rem;
 		padding: 0.5rem 1rem;
-		background: rgba(34, 197, 94, 0.1);
-		border: 1px solid rgba(34, 197, 94, 0.2);
+		background: var(--grove-accent-10);
+		border: 1px solid var(--grove-accent-20);
 		border-radius: var(--border-radius-button);
 		color: var(--color-primary);
 		font-size: 0.85rem;
@@ -1227,17 +1227,17 @@
 		align-self: flex-end;
 	}
 	.toggle-vines-btn:hover {
-		background: rgba(34, 197, 94, 0.18);
-		border-color: rgba(34, 197, 94, 0.35);
+		background: var(--grove-accent-20);
+		border-color: var(--grove-accent-35);
 	}
 	:global(.dark) .toggle-vines-btn {
-		background: rgba(74, 222, 128, 0.12);
-		border-color: rgba(74, 222, 128, 0.2);
-		color: #86efac;
+		background: var(--grove-accent-12);
+		border-color: var(--grove-accent-20);
+		color: var(--grove-accent);
 	}
 	:global(.dark) .toggle-vines-btn:hover {
-		background: rgba(74, 222, 128, 0.2);
-		border-color: rgba(74, 222, 128, 0.35);
+		background: var(--grove-accent-20);
+		border-color: var(--grove-accent-35);
 	}
 
 	/* Responsive */

@@ -112,7 +112,7 @@
 
 	.plan-option.current {
 		border-color: var(--color-primary);
-		background: rgba(44, 95, 45, 0.08);
+		background: var(--grove-accent-8);
 		cursor: default;
 	}
 
@@ -147,7 +147,7 @@
 	}
 
 	:global(.direction-icon.upgrade) {
-		color: #16a34a;
+		color: var(--grove-accent);
 	}
 
 	:global(.direction-icon.downgrade) {

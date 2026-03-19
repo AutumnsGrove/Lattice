@@ -333,6 +333,10 @@
 		dark: "hover:bg-bark-900/50 dark:hover:bg-cream-50/60 hover:shadow-xl hover:border-bark-600/40",
 	};
 
+	// Text color adjustments for dark/overlay variants
+	const isDarkText = $derived(resolved === "dark" || resolved === "overlay");
+	const titleClass = $derived(isDarkText ? "text-white" : "text-foreground");
+
 	const computedClass = $derived(
 		cn(
 			"rounded-xl transition-all duration-200",
@@ -353,10 +357,6 @@
 			className,
 		),
 	);
-
-	// Text color adjustments for dark/overlay variants
-	const isDarkText = $derived(resolved === "dark" || resolved === "overlay");
-	const titleClass = $derived(isDarkText ? "text-white" : "text-foreground");
 
 	const descriptionClass = $derived(isDarkText ? "text-cream-300" : "text-muted-foreground");
 </script>

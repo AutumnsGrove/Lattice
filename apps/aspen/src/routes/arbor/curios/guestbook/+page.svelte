@@ -1085,12 +1085,12 @@
 	}
 
 	.action-btn.approve {
-		color: hsl(var(--grove-600, 142 76% 36%));
+		color: var(--grove-accent);
 	}
 
 	.action-btn.approve:hover {
-		background: hsl(var(--grove-600, 142 76% 36%) / 0.1);
-		border-color: hsl(var(--grove-600, 142 76% 36%));
+		background: var(--grove-accent-10);
+		border-color: var(--grove-accent);
 	}
 
 	.action-btn.delete {

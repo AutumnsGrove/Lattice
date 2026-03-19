@@ -325,7 +325,7 @@
 	}
 
 	.post-meta .author-name a:hover {
-		color: #2c5f2d;
+		color: var(--grove-accent-dark);
 		text-decoration: underline;
 	}
 
@@ -402,16 +402,16 @@
 		font-size: 0.875rem;
 		font-weight: 500;
 		color: var(--accent-success);
-		background: var(--accent-success-faint, rgba(44, 95, 45, 0.08));
-		border: 1px solid var(--accent-success-border, rgba(44, 95, 45, 0.2));
+		background: var(--grove-accent-8);
+		border: 1px solid var(--grove-accent-20);
 		border-radius: 6px;
 		text-decoration: none;
 		transition: all 0.15s ease;
 	}
 
 	.edit-link:hover {
-		background: var(--accent-success-faint-hover, rgba(44, 95, 45, 0.15));
-		border-color: var(--accent-success-border-hover, rgba(44, 95, 45, 0.3));
+		background: var(--grove-accent-15);
+		border-color: var(--grove-accent-30);
 	}
 
 	/* Comment count badge — floats at right edge of glass meta box */
@@ -438,7 +438,7 @@
 
 	.comment-count-badge:hover {
 		background: rgba(255, 255, 255, 0.8);
-		color: var(--user-accent, var(--color-primary, #2c5f2d));
+		color: var(--grove-accent);
 		transform: translateY(-50%) scale(1.08);
 	}
 
@@ -450,16 +450,16 @@
 
 	:global(.dark) .comment-count-badge:hover {
 		background: rgba(255, 255, 255, 0.12);
-		color: var(--grove-300, #86efac);
+		color: var(--grove-accent);
 	}
 
 	.comment-count-badge:focus-visible {
-		outline: 2px solid var(--user-accent, var(--color-primary, #2c5f2d));
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 2px;
 	}
 
 	:global(.dark) .comment-count-badge:focus-visible {
-		outline-color: var(--grove-300, #86efac);
+		outline-color: var(--grove-accent);
 	}
 
 	:global(.comment-badge-icon) {
@@ -468,11 +468,11 @@
 	}
 
 	:global(.comment-badge-icon.has-comments) {
-		color: var(--user-accent, var(--color-primary, #2c5f2d));
+		color: var(--grove-accent);
 	}
 
 	:global(.dark) :global(.comment-badge-icon.has-comments) {
-		color: var(--grove-300, #86efac);
+		color: var(--grove-accent);
 	}
 
 	@media (prefers-reduced-motion: reduce) {

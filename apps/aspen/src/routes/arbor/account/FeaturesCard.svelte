@@ -153,7 +153,7 @@
 		width: 40px;
 		height: 40px;
 		border-radius: var(--border-radius-button);
-		background: var(--color-primary-subtle, rgba(34, 197, 94, 0.1));
+		background: var(--grove-accent-10);
 		color: var(--color-primary);
 		flex-shrink: 0;
 	}
@@ -188,7 +188,7 @@
 		display: inline-block;
 		margin-left: 0.25rem;
 		padding: 0.125rem 0.5rem;
-		background: var(--color-primary-subtle, rgba(34, 197, 94, 0.15));
+		background: var(--grove-accent-15);
 		color: var(--color-primary);
 		border-radius: 9999px;
 		font-size: 0.75rem;

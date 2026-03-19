@@ -55,7 +55,7 @@
 	.export-summary {
 		margin: 0 0 1rem 0;
 		padding: 0.75rem 1rem;
-		background: rgba(44, 95, 45, 0.05);
+		background: var(--grove-accent-5);
 		border-radius: var(--border-radius-small);
 		font-size: 0.85rem;
 		color: var(--color-text-muted);
@@ -65,14 +65,14 @@
 		display: flex;
 		gap: 0.75rem;
 		padding: 1rem;
-		background: rgba(44, 95, 45, 0.08);
-		border: 1px solid rgba(44, 95, 45, 0.2);
+		background: var(--grove-accent-8);
+		border: 1px solid var(--grove-accent-20);
 		border-radius: var(--border-radius-standard);
 	}
 
 	:global(.dark) .zip-export-callout {
-		background: rgba(34, 197, 94, 0.08);
-		border-color: rgba(34, 197, 94, 0.2);
+		background: var(--grove-accent-8);
+		border-color: var(--grove-accent-20);
 	}
 
 	:global(.callout-icon) {

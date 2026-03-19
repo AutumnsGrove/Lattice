@@ -565,7 +565,7 @@
 	}
 
 	.form-message.success {
-		color: #059669;
+		color: var(--grove-accent); /* accent-ok: guestbook submission feedback */
 	}
 
 	.form-message.error {
