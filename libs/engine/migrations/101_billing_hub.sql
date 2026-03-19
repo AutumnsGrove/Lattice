@@ -18,6 +18,9 @@
 --   npx wrangler d1 execute grove-engine-db --file=libs/engine/migrations/101_billing_hub.sql --local
 --   npx wrangler d1 execute grove-engine-db --file=libs/engine/migrations/101_billing_hub.sql --remote
 
+-- Disable FK enforcement during table rebuilds (re-enabled at end)
+PRAGMA foreign_keys = OFF;
+
 -- =============================================================================
 -- STEP 1: Rebuild tenants table with correct plan CHECK
 -- =============================================================================
@@ -193,6 +196,10 @@ CREATE INDEX IF NOT EXISTS idx_billing_audit_action ON billing_audit_log(action,
 CREATE INDEX IF NOT EXISTS idx_billing_audit_provider ON billing_audit_log(provider_event_id)
   WHERE provider_event_id IS NOT NULL;
 
+
+-- Re-enable FK enforcement and verify integrity
+PRAGMA foreign_keys = ON;
+PRAGMA foreign_key_check;
 
 -- =============================================================================
 -- MIGRATION NOTES
