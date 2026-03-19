@@ -126,7 +126,7 @@
 	}
 
 	.music-box:focus-visible {
-		outline: 2px solid rgb(var(--grove-400, 74 222 128));
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 4px;
 		border-radius: 0.5rem;
 	}
@@ -212,13 +212,13 @@
 	.note {
 		position: absolute;
 		font-size: 1rem;
-		color: rgb(var(--grove-600, 22 163 74));
+		color: var(--grove-accent-dark);
 		opacity: 0;
 		animation: note-float 2.4s ease-out infinite;
 	}
 
 	:global(.dark) .note {
-		color: rgb(var(--grove-400, 74 222 128));
+		color: var(--grove-accent);
 	}
 
 	@keyframes note-float {

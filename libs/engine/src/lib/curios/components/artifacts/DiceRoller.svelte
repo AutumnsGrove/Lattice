@@ -105,7 +105,7 @@
 	}
 
 	.dice-roller:focus-visible {
-		outline: 2px solid rgb(var(--grove-400, 74 222 128));
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 4px;
 		border-radius: 0.5rem;
 	}
@@ -128,11 +128,11 @@
 	}
 
 	.dice-svg path {
-		fill: rgb(var(--grove-800, 22 101 52));
+		fill: var(--grove-accent-dark);
 	}
 
 	:global(.dark) .dice-svg path {
-		fill: rgb(var(--grove-900, 14 80 42) / 0.8);
+		fill: var(--grove-accent-dark);
 	}
 
 	.dice-value {

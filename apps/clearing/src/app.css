@@ -97,7 +97,7 @@
 	--color-accent-bg: rgb(var(--grove-950));
 	--color-accent-border: rgb(var(--grove-900));
 	--color-accent-text: rgb(var(--grove-200));
-	--color-accent-text-muted: rgb(var(--grove-400));
+	--color-accent-text-muted: var(--grove-accent);
 }
 
 /* ═══════════════════════════════════════════════════════════════

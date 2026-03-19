@@ -784,7 +784,7 @@
 		width: 48px;
 		height: 48px;
 		border-radius: 50%;
-		background: var(--color-accent, #2c5f2d);
+		background: var(--grove-accent);
 		border: none;
 		color: white;
 		cursor: pointer;
@@ -799,7 +799,7 @@
 	}
 
 	.toc-button:hover {
-		background: var(--color-accent-hover, #3a7a3c);
+		background: var(--grove-accent-dark);
 		transform: scale(1.05);
 		box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 	}
@@ -809,7 +809,7 @@
 	}
 
 	.toc-button:focus-visible {
-		outline: 2px solid var(--color-grove-500, #2c5f2d);
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 2px;
 	}
 
@@ -890,25 +890,25 @@
 	}
 
 	.toc-link:hover {
-		background: rgba(44, 95, 45, 0.08);
-		color: var(--color-accent, #2c5f2d);
+		background: var(--grove-accent-8);
+		color: var(--grove-accent);
 		padding-left: 1rem;
 	}
 
 	:global(.dark) .toc-link:hover {
-		background: rgba(74, 222, 128, 0.1);
-		color: var(--color-accent, #4ade80);
+		background: var(--grove-accent-10);
+		color: var(--grove-accent);
 	}
 
 	.toc-item.active .toc-link {
-		background: rgba(44, 95, 45, 0.12);
-		color: var(--color-accent, #2c5f2d);
+		background: var(--grove-accent-12);
+		color: var(--grove-accent);
 		font-weight: 600;
 	}
 
 	:global(.dark) .toc-item.active .toc-link {
-		background: rgba(74, 222, 128, 0.15);
-		color: var(--color-accent, #4ade80);
+		background: var(--grove-accent-15);
+		color: var(--grove-accent);
 	}
 
 	/* Scrollbar styling for TOC menu */

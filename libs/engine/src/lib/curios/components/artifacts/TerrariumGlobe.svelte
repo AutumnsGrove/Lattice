@@ -16,16 +16,16 @@
 		<svg viewBox="0 0 60 40" class="plants-svg" aria-hidden="true">
 			<!-- Small fern -->
 			<g class="plant plant-1">
-				<path d="M12 38 Q12 28 8 22" fill="none" stroke="rgb(var(--grove-500, 34 197 94))" stroke-width="1.2" opacity="0.7" />
-				<path d="M12 38 Q12 30 16 24" fill="none" stroke="rgb(var(--grove-600, 22 163 74))" stroke-width="1" opacity="0.6" />
-				<ellipse cx="8" cy="21" rx="3" ry="4" fill="rgb(var(--grove-500, 34 197 94))" opacity="0.5" />
-				<ellipse cx="16" cy="23" rx="2.5" ry="3.5" fill="rgb(var(--grove-600, 22 163 74))" opacity="0.4" />
+				<path d="M12 38 Q12 28 8 22" fill="none" stroke="var(--grove-accent)" stroke-width="1.2" opacity="0.7" />
+				<path d="M12 38 Q12 30 16 24" fill="none" stroke="var(--grove-accent-dark)" stroke-width="1" opacity="0.6" />
+				<ellipse cx="8" cy="21" rx="3" ry="4" fill="var(--grove-accent)" opacity="0.5" />
+				<ellipse cx="16" cy="23" rx="2.5" ry="3.5" fill="var(--grove-accent-dark)" opacity="0.4" />
 			</g>
 			<!-- Tall grass -->
 			<g class="plant plant-2">
-				<line x1="30" y1="38" x2="28" y2="18" stroke="rgb(var(--grove-500, 34 197 94))" stroke-width="1" opacity="0.6" />
-				<line x1="32" y1="38" x2="34" y2="20" stroke="rgb(var(--grove-600, 22 163 74))" stroke-width="1" opacity="0.5" />
-				<line x1="31" y1="38" x2="31" y2="16" stroke="rgb(var(--grove-400, 74 222 128))" stroke-width="0.8" opacity="0.4" />
+				<line x1="30" y1="38" x2="28" y2="18" stroke="var(--grove-accent)" stroke-width="1" opacity="0.6" />
+				<line x1="32" y1="38" x2="34" y2="20" stroke="var(--grove-accent-dark)" stroke-width="1" opacity="0.5" />
+				<line x1="31" y1="38" x2="31" y2="16" stroke="var(--grove-accent)" stroke-width="0.8" opacity="0.4" />
 			</g>
 			<!-- Small mushroom -->
 			<g class="plant plant-3">

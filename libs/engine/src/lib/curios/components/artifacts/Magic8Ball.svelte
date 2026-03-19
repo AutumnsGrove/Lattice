@@ -71,7 +71,7 @@
 	}
 
 	.magic8ball:focus-visible {
-		outline: 2px solid rgb(var(--grove-400, 74 222 128));
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 4px;
 		border-radius: 50%;
 	}

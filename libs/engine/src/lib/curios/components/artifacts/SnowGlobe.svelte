@@ -66,8 +66,8 @@
 			{/if}
 			<!-- Tiny tree in the globe -->
 			<svg class="globe-tree" viewBox="0 0 30 40" aria-hidden="true">
-				<polygon points="15,4 24,18 6,18" fill="rgb(var(--grove-600, 22 163 74))" opacity="0.7" />
-				<polygon points="15,10 26,26 4,26" fill="rgb(var(--grove-700, 21 128 61))" opacity="0.6" />
+				<polygon points="15,4 24,18 6,18" fill="var(--grove-accent-dark)" opacity="0.7" />
+				<polygon points="15,10 26,26 4,26" fill="var(--grove-accent-dark)" opacity="0.6" />
 				<rect x="13" y="26" width="4" height="6" fill="#8B6914" rx="1" opacity="0.5" />
 			</svg>
 		</div>
@@ -89,7 +89,7 @@
 	}
 
 	.snow-globe:focus-visible {
-		outline: 2px solid rgb(var(--grove-400, 74 222 128));
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 4px;
 		border-radius: 0.5rem;
 	}

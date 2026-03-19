@@ -92,7 +92,7 @@
 	--color-accent-border: rgb(var(--grove-900));
 	--color-accent-text: rgb(var(--grove-200));
 	--color-accent-subtle: rgb(var(--grove-900));
-	--color-accent-muted: rgb(var(--grove-400));
+	--color-accent-muted: var(--grove-accent);
 	--color-divider: #363c44;
 
 	--color-error: #f87171;
@@ -228,7 +228,7 @@
 	.input-field:focus {
 		outline: none;
 		border-color: var(--color-primary);
-		box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+		box-shadow: 0 0 0 3px var(--grove-accent-15);
 	}
 
 	.input-field.error {

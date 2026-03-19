@@ -122,12 +122,12 @@
 	}
 
 	a.compass-label:hover {
-		color: rgb(var(--grove-600, 22 163 74));
+		color: var(--grove-accent-dark);
 		opacity: 1;
 	}
 
 	:global(.dark) a.compass-label:hover {
-		color: rgb(var(--grove-400, 74 222 128));
+		color: var(--grove-accent);
 	}
 
 	@media (prefers-reduced-motion: reduce) {

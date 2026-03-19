@@ -129,8 +129,8 @@
 	--color-accent-bg: rgb(var(--grove-950));
 	--color-accent-border: rgb(var(--grove-900));
 	--color-accent-text: rgb(var(--grove-200));
-	--color-accent-text-muted: rgb(var(--grove-400));
-	--color-accent-text-subtle: rgb(var(--grove-500));
+	--color-accent-text-muted: var(--grove-accent);
+	--color-accent-text-subtle: var(--grove-accent);
 
 	/* Status Colors - Dark Mode */
 	--color-error: #f87171;
@@ -376,7 +376,7 @@
 	.input-field:focus {
 		outline: none;
 		border-color: var(--color-primary);
-		box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+		box-shadow: 0 0 0 3px var(--grove-accent-15);
 	}
 
 	.card {

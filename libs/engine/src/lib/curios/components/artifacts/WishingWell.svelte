@@ -137,7 +137,7 @@
 	}
 
 	.wishing-well:focus-visible {
-		outline: 2px solid rgb(var(--grove-400, 74 222 128));
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 4px;
 		border-radius: 0.5rem;
 	}
@@ -220,11 +220,11 @@
 		font-size: 0.9rem;
 		font-weight: 700;
 		font-variant-numeric: tabular-nums;
-		color: rgb(var(--grove-600, 22 163 74));
+		color: var(--grove-accent-dark);
 	}
 
 	:global(.dark) .well-count {
-		color: rgb(var(--grove-400, 74 222 128));
+		color: var(--grove-accent);
 	}
 
 	.well-label {

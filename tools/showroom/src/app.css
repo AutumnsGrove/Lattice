@@ -39,9 +39,9 @@
 	--color-surface: rgba(15, 23, 42, 0.7);
 	--color-surface-hover: rgba(30, 41, 59, 0.8);
 	--color-border: rgba(255, 255, 255, 0.1);
-	--color-accent: rgb(var(--grove-500));
-	--color-accent-muted: rgb(var(--grove-400));
-	--color-accent-subtle: rgb(var(--grove-700));
+	--color-accent: var(--grove-accent);
+	--color-accent-muted: var(--grove-accent);
+	--color-accent-subtle: var(--grove-accent);
 }
 
 html {

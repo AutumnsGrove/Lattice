@@ -127,16 +127,16 @@
 		font-size: 0.85rem;
 		font-weight: 700;
 		font-variant-numeric: tabular-nums;
-		color: rgb(var(--grove-600, 22 163 74));
+		color: var(--grove-accent-dark);
 	}
 
 	.hourglass-time.expired {
-		color: rgb(var(--grove-400, 74 222 128));
+		color: var(--grove-accent);
 		animation: expire-glow 2s ease-in-out infinite;
 	}
 
 	:global(.dark) .hourglass-time {
-		color: rgb(var(--grove-400, 74 222 128));
+		color: var(--grove-accent);
 	}
 
 	.sand-stream {

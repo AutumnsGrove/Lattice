@@ -88,7 +88,7 @@
 	--color-accent-border: rgb(var(--grove-900));
 	--color-accent-text: rgb(var(--grove-200));
 	--color-accent-subtle: rgb(var(--grove-900));
-	--color-accent-muted: rgb(var(--grove-400));
+	--color-accent-muted: var(--grove-accent);
 	--color-divider: #363c44;
 
 	--color-error: #f87171;
@@ -381,12 +381,12 @@
 }
 
 .greenhouse-toggle.greenhouse-active {
-	color: rgb(var(--grove-500));
+	color: var(--grove-accent);
 }
 
 .greenhouse-toggle.greenhouse-active:hover {
-	color: rgb(var(--grove-400));
-	background-color: rgba(34, 197, 94, 0.08);
+	color: var(--grove-accent);
+	background-color: var(--grove-accent-10);
 }
 
 .greenhouse-banner {
@@ -403,7 +403,7 @@
 }
 
 .dark .greenhouse-banner {
-	color: rgb(var(--grove-300));
+	color: var(--grove-accent);
 	background: linear-gradient(to right, rgba(34, 197, 94, 0.05), rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
 	border-bottom-color: rgba(34, 197, 94, 0.15);
 }

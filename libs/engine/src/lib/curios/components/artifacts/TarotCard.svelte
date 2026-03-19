@@ -85,7 +85,7 @@
 	}
 
 	.tarot-card:focus-visible {
-		outline: 2px solid rgb(var(--grove-400, 74 222 128));
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 4px;
 		border-radius: 0.5rem;
 	}
@@ -138,7 +138,7 @@
 	.back-star {
 		width: 100%;
 		height: 100%;
-		color: rgb(var(--grove-400, 74 222 128));
+		color: var(--grove-accent);
 	}
 
 	.card-front {
@@ -157,7 +157,7 @@
 		font-size: 0.65rem;
 		font-weight: 600;
 		opacity: 0.4;
-		color: rgb(var(--grove-600, 22 163 74));
+		color: var(--grove-accent-dark);
 		font-variant-numeric: oldstyle-nums;
 	}
 
