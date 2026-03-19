@@ -166,9 +166,9 @@
 	--grove-accent-70: color-mix(in srgb, var(--grove-accent) 70%, transparent);
 	--grove-accent-80: color-mix(in srgb, var(--grove-accent) 80%, transparent);
 
-	/* Shade variants */
-	--grove-accent-dark:  color-mix(in srgb, var(--grove-accent) 80%, black);
-	--grove-accent-light: color-mix(in srgb, var(--grove-accent) 80%, white);
+	/* Shade variants — mixed with warm tones, not pure white/black */
+	--grove-accent-dark:  color-mix(in srgb, var(--grove-accent) 70%, #3d2914);
+	--grove-accent-light: color-mix(in srgb, var(--grove-accent) 70%, #faf6f0);
 
 	/* Shadows */
 	--shadow-sm: 0 1px 2px 0 rgb(61 41 20 / 0.05);
@@ -286,10 +286,12 @@
 	--color-error-text: #fecaca;
 
 	/* ── Grove Accent Scale — Dark Mode ──
-	   No redefinition needed — color-mix() with --grove-accent
-	   adapts automatically since --user-accent is the same in both modes.
-	   The opacity stops from :root cascade through unchanged.
+	   Opacity stops cascade unchanged. Shade variants swap direction:
+	   "dark" becomes the lighter readable shade (for text on dark bg),
+	   "light" becomes the deeper muted shade (for subdued elements).
 	   ──────────────────────────────────────────────────── */
+	--grove-accent-dark: color-mix(in srgb, var(--grove-accent) 75%, #faf6f0);
+	--grove-accent-light: color-mix(in srgb, var(--grove-accent) 60%, #1a1614);
 
 	/* Shadows — Dark Mode */
 	--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);

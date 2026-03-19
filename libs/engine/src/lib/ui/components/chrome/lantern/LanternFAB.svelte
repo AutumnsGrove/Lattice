@@ -47,7 +47,7 @@
 		background: var(--color-primary, #2c5f2d);
 		box-shadow:
 			0 2px 8px rgba(0, 0, 0, 0.15),
-			0 0 0 0 rgba(44, 95, 45, 0.4);
+			0 0 0 0 var(--grove-accent-40);
 		transition:
 			background-color 0.2s ease,
 			transform 0.2s ease,
@@ -83,12 +83,12 @@
 		100% {
 			box-shadow:
 				0 2px 8px rgba(0, 0, 0, 0.15),
-				0 0 0 0 rgba(44, 95, 45, 0.3);
+				0 0 0 0 var(--grove-accent-30);
 		}
 		50% {
 			box-shadow:
 				0 2px 8px rgba(0, 0, 0, 0.15),
-				0 0 0 6px rgba(44, 95, 45, 0);
+				0 0 0 6px transparent;
 		}
 	}
 

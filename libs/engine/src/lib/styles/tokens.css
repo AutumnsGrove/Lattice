@@ -105,8 +105,8 @@
 	--grove-accent-8:  color-mix(in srgb, var(--grove-accent) 8%, transparent);
 	--grove-accent-10: color-mix(in srgb, var(--grove-accent) 10%, transparent);
 	--grove-accent-12: color-mix(in srgb, var(--grove-accent) 12%, transparent);
-	--grove-accent-15: var(--grove-accent-15);
-	--grove-accent-20: var(--grove-accent-20);
+	--grove-accent-15: color-mix(in srgb, var(--grove-accent) 15%, transparent);
+	--grove-accent-20: color-mix(in srgb, var(--grove-accent) 20%, transparent);
 	--grove-accent-25: color-mix(in srgb, var(--grove-accent) 25%, transparent);
 	--grove-accent-30: color-mix(in srgb, var(--grove-accent) 30%, transparent);
 	--grove-accent-35: color-mix(in srgb, var(--grove-accent) 35%, transparent);
@@ -114,8 +114,8 @@
 	--grove-accent-50: color-mix(in srgb, var(--grove-accent) 50%, transparent);
 	--grove-accent-70: color-mix(in srgb, var(--grove-accent) 70%, transparent);
 	--grove-accent-80: color-mix(in srgb, var(--grove-accent) 80%, transparent);
-	--grove-accent-dark:  color-mix(in srgb, var(--grove-accent) 80%, black);
-	--grove-accent-light: color-mix(in srgb, var(--grove-accent) 80%, white);
+	--grove-accent-dark:  color-mix(in srgb, var(--grove-accent) 70%, #3d2914);
+	--grove-accent-light: color-mix(in srgb, var(--grove-accent) 70%, #faf6f0);
 
 	/* Legacy overlay aliases — maps old names to accent scale.
 	   New code should use --grove-accent-N directly. */

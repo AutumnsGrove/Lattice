@@ -131,7 +131,7 @@
 		backdrop-filter: blur(12px);
 		-webkit-backdrop-filter: blur(12px);
 		border: 1px solid rgba(255, 255, 255, 0.5);
-		border-left: 3px solid #2c5f2d;
+		border-left: 3px solid var(--grove-accent-dark);
 		border-radius: 0 10px 10px 0;
 		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
 		color: var(--light-text-secondary);
@@ -140,18 +140,18 @@
 	.gutter-comment:hover {
 		background: rgba(255, 255, 255, 0.8);
 		box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-		border-left-color: #3a7e3c;
+		border-left-color: var(--grove-accent);
 	}
 	:global(.dark) .gutter-comment {
-		background: rgba(16, 50, 37, 0.5);
-		border-color: var(--grove-accent-15);
-		border-left-color: var(--accent-success);
+		background: rgba(33, 28, 23, 0.65);
+		border-color: rgba(255, 255, 255, 0.06);
+		border-left-color: var(--grove-accent);
 		color: var(--light-text-tertiary);
 		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 	}
 	:global(.dark) .gutter-comment:hover {
-		background: rgba(16, 50, 37, 0.6);
-		border-left-color: #5cb85f;
+		background: rgba(33, 28, 23, 0.75);
+		border-left-color: var(--grove-accent);
 		box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 	}
 	.gutter-comment :global(p) {
@@ -161,11 +161,11 @@
 		margin-bottom: 0;
 	}
 	.gutter-comment :global(a) {
-		color: #2c5f2d;
+		color: var(--grove-accent-dark);
 		text-decoration: underline;
 	}
 	:global(.dark) .gutter-comment :global(a) {
-		color: var(--accent-success);
+		color: var(--grove-accent);
 	}
 	.gutter-photo {
 		margin: 0;
@@ -185,12 +185,12 @@
 		transform: translateY(-2px);
 	}
 	:global(.dark) .gutter-photo {
-		background: rgba(16, 50, 37, 0.4);
-		border-color: var(--grove-accent-15);
+		background: rgba(33, 28, 23, 0.55);
+		border-color: rgba(255, 255, 255, 0.06);
 		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 	}
 	:global(.dark) .gutter-photo:hover {
-		background: rgba(16, 50, 37, 0.55);
+		background: rgba(33, 28, 23, 0.65);
 		box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 	}
 	.image-button {
@@ -280,8 +280,8 @@
 		font-style: italic;
 	}
 	:global(.dark) .gutter-gallery-empty {
-		background: rgba(16, 50, 37, 0.3);
-		border-color: var(--grove-accent-20);
+		background: rgba(33, 28, 23, 0.45);
+		border-color: rgba(255, 255, 255, 0.08);
 	}
 	/* Emoji styles - with glass background */
 	.gutter-emoji {
@@ -301,12 +301,12 @@
 		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 	}
 	:global(.dark) .gutter-emoji {
-		background: rgba(16, 50, 37, 0.35);
-		border-color: var(--grove-accent-12);
+		background: rgba(33, 28, 23, 0.5);
+		border-color: rgba(255, 255, 255, 0.06);
 		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
 	}
 	:global(.dark) .gutter-emoji:hover {
-		background: rgba(16, 50, 37, 0.5);
+		background: rgba(33, 28, 23, 0.6);
 		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 	}
 	.gutter-emoji img {

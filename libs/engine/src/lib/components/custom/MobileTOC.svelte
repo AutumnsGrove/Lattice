@@ -258,7 +258,7 @@
 		height: 44px;
 		border-radius: 50%;
 		/* Uses accent color for consistency with Grove theme */
-		background: var(--accent-success, #2c5f2d);
+		background: var(--grove-accent-dark);
 		border: none;
 		color: white;
 		cursor: pointer;
@@ -271,7 +271,7 @@
 			transform 0.2s ease;
 	}
 	.toc-button:hover {
-		background: var(--accent-success-dark, #234a24);
+		background: var(--grove-accent);
 	}
 	.toc-button:active {
 		transform: scale(0.95);
@@ -355,10 +355,10 @@
 		opacity: 1;
 	}
 	.toc-link:hover {
-		color: var(--accent-success, #2c5f2d);
+		color: var(--grove-accent-dark);
 	}
 	.toc-item.active .toc-link {
-		color: var(--accent-success, #2c5f2d);
+		color: var(--grove-accent-dark);
 		font-weight: 600;
 	}
 	/* Indentation based on header level */

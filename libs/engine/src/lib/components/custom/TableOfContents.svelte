@@ -125,7 +125,7 @@
 		background: rgba(255, 255, 255, 0.6);
 		backdrop-filter: blur(12px);
 		-webkit-backdrop-filter: blur(12px);
-		border: 1px solid rgba(255, 255, 255, 0.4);
+		border: 1px solid rgba(0, 0, 0, 0.06);
 		border-radius: 16px;
 		box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
 		transition: all 0.3s ease;
@@ -135,12 +135,12 @@
 		box-shadow: 0 6px 28px rgba(0, 0, 0, 0.08);
 	}
 	:global(.dark) .toc {
-		background: rgba(16, 50, 37, 0.45);
-		border-color: var(--grove-accent-15);
+		background: rgba(33, 28, 23, 0.65);
+		border-color: rgba(255, 255, 255, 0.06);
 		box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
 	}
 	:global(.dark) .toc:hover {
-		background: rgba(16, 50, 37, 0.55);
+		background: rgba(33, 28, 23, 0.75);
 		box-shadow: 0 6px 28px rgba(0, 0, 0, 0.25);
 	}
 	.toc-title {
@@ -194,20 +194,21 @@
 		opacity: 1;
 	}
 	.toc-link:hover {
-		color: var(--accent-success, #2c5f2d);
+		color: var(--grove-accent-dark);
 		padding-left: 0.5rem;
 	}
 	.toc-item.active .toc-link {
-		color: var(--accent-success, #2c5f2d);
+		color: var(--grove-accent-dark);
 		font-weight: 600;
 		/* Active indicator */
-		background: var(--accent-success-faint, rgba(44, 95, 45, 0.1));
+		background: var(--grove-accent-10);
 		padding: 0.375rem 0.75rem;
 		margin-left: -0.75rem;
 		margin-right: -0.75rem;
 		border-radius: 8px;
 	}
 	:global(.dark) .toc-item.active .toc-link {
+		color: var(--grove-accent);
 		background: var(--grove-accent-10);
 	}
 	/* Indentation based on header level */
