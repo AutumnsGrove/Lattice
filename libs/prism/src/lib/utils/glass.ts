@@ -184,3 +184,20 @@ export function generateMidnightBloomGlass(): ThemeGlass {
 		darkBorder: MIDNIGHT_BLOOM.border,
 	});
 }
+
+/**
+ * CSS backdrop-filter blur values for each Prism blur key.
+ * Maps GlassVariant['blur'] → CSS value for `backdrop-filter`.
+ */
+export const BLUR_CSS: Record<GlassVariant["blur"], string> = {
+	none: "none",
+	sm: "blur(4px)",
+	md: "blur(8px)",
+	lg: "blur(12px)",
+} as const;
+
+/**
+ * Default ThemeGlass configuration using standard colors.
+ * Use as a fallback when no theme-specific glass is available.
+ */
+export const DEFAULT_GLASS: ThemeGlass = generateGlass();

@@ -47,7 +47,9 @@ export {
 	hexToRgba,
 	GLASS_OPACITY,
 	GLASS_BLUR,
+	BLUR_CSS,
 	BORDER_OPACITY,
+	DEFAULT_GLASS,
 	MIDNIGHT_BLOOM,
 	type GlassGeneratorOptions,
 } from "./lib/utils/glass.js";
