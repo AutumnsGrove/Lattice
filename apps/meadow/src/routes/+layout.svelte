@@ -3,6 +3,7 @@
 	import { themeStore } from '@autumnsgrove/lattice/ui/stores';
 	import { GroveMessages } from '@autumnsgrove/lattice/ui';
 	import { CurioCursorsLayer, CurioAmbientLayer } from '@autumnsgrove/lattice/ui/content/curios';
+	import VineBackground from '@autumnsgrove/lattice/ui/components/nature/VineBackground.svelte';
 
 	let { children, data } = $props();
 
@@ -10,7 +11,8 @@
 	// Access themeStore.resolvedTheme directly - no need for $effect initialization.
 </script>
 
-<div class="min-h-screen leaf-pattern">
+<div class="min-h-screen relative">
+	<VineBackground />
 	{#if data?.messages?.length}
 		<GroveMessages messages={data.messages} centered={true} />
 	{/if}

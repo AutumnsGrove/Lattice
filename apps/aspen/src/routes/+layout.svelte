@@ -2,7 +2,6 @@
 	import { onMount } from "svelte";
 	import "../app.css";
 	import "@autumnsgrove/lattice/styles/tokens.css";
-	import "@autumnsgrove/lattice/styles/vine-pattern.css";
 	import { page } from "$app/state";
 	import { navigating } from "$app/stores";
 	import { fade } from "svelte/transition";
@@ -18,6 +17,7 @@
 	import FriendsLoader from "@autumnsgrove/lattice/ui/components/chrome/FriendsLoader.svelte";
 	import { themeStore } from "@autumnsgrove/lattice/ui/stores/theme.svelte";
 	import { groveModeStore } from "@autumnsgrove/lattice/ui/stores/grove-mode.svelte";
+	import VineBackground from "@autumnsgrove/lattice/ui/components/nature/VineBackground.svelte";
 
 	// grove-entrance-dismiss: fade out the pre-hydration loading overlay
 	// once SvelteKit has hydrated and this layout is interactive
@@ -150,10 +150,11 @@
 	</div>
 {:else}
 	<div
-		class="layout leaf-pattern"
+		class="layout relative"
 		style:--user-accent={data.siteSettings?.accent_color || null}
 		style:--color-primary={data.siteSettings?.accent_color || null}
 	>
+		<VineBackground />
 		<!-- Unified Header with chrome components -->
 		<Header
 			navItems={tenantNavItems}

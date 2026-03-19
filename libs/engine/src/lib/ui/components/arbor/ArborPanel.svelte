@@ -21,6 +21,7 @@
 	import ArborSidebarFooter from "./ArborSidebarFooter.svelte";
 	import ArborOverlay from "./ArborOverlay.svelte";
 	import type { ArborPanelProps } from "./types";
+	import VineBackground from "$lib/ui/components/nature/VineBackground.svelte";
 
 	let {
 		navItems,
@@ -74,7 +75,8 @@
 	</div>
 {/if}
 
-<div class="arbor-layout" class:leaf-pattern={showLeafPattern}>
+<div class="arbor-layout">
+	<VineBackground visible={showLeafPattern} />
 	<a href="#arbor-main" class="arbor-skip-link">Skip to main content</a>
 
 	<ArborOverlay />
@@ -139,6 +141,7 @@
 	}
 
 	.arbor-layout {
+		position: relative;
 		display: flex;
 		min-height: 100vh;
 		background: transparent;

@@ -5,6 +5,7 @@
 	import { Footer, ThemeToggle, MobileMenu, seasonStore, themeStore } from '@autumnsgrove/lattice/ui/chrome';
 	import { GroveMessages } from '@autumnsgrove/lattice/ui';
 	import { navIcons, metricIcons, natureIcons, featureIcons } from '@autumnsgrove/prism/icons';
+	import VineBackground from '@autumnsgrove/lattice/ui/components/nature/VineBackground.svelte';
 	import type { NavItem, FooterLink } from '@autumnsgrove/lattice/ui/chrome';
 
 	// Centralized external links to prevent drift
@@ -71,7 +72,8 @@
 	<title>Welcome to Grove</title>
 </svelte:head>
 
-<div class="min-h-screen bg-page leaf-pattern flex flex-col">
+<div class="min-h-screen bg-page flex flex-col relative">
+	<VineBackground />
 	<!-- Unified Header -->
 	<header class="sticky top-0 z-40 py-4 px-6 border-b border-default bg-surface/95 backdrop-blur-sm">
 		<div class="max-w-2xl mx-auto flex items-center justify-between">
