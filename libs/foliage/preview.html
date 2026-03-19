@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Foliage Theme Preview — All 10 Themes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,700;1,400&family=Cormorant:ital,wght@0,400;0,700;1,400&family=EB+Garamond:ital,wght@0,400;0,700;1,400&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,400&family=IBM+Plex+Mono:ital,wght@0,400;0,700;1,400&family=Instrument+Sans:wght@400;700&family=Lora:ital,wght@0,400;0,700;1,400&family=Manrope:wght@400;700&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Nunito:wght@400;700&family=Plus+Jakarta+Sans:wght@400;700&family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: system-ui, sans-serif;
+    background: #1a1a1a;
+    color: #e0e0e0;
+    padding: 2rem;
+  }
+
+  h1 { font-size: 1.8rem; margin-bottom: 0.5rem; color: #fff; }
+  .subtitle { color: #888; margin-bottom: 2rem; font-size: 0.95rem; }
+
+  .controls {
+    display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap;
+  }
+  .controls button {
+    padding: 0.5rem 1rem; border: 1px solid #444; background: #2a2a2a;
+    color: #ccc; border-radius: 6px; cursor: pointer; font-size: 0.85rem;
+    transition: all 0.2s;
+  }
+  .controls button:hover { background: #333; border-color: #666; }
+  .controls button.active { background: #444; border-color: #888; color: #fff; }
+
+  .grid-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(560px, 1fr));
+    gap: 2rem;
+  }
+
+  .single-view { display: none; }
+  .single-view.active { display: block; }
+
+  .theme-card {
+    border-radius: 12px; overflow: hidden; border: 1px solid #333;
+    transition: transform 0.2s;
+  }
+  .theme-card:hover { transform: translateY(-2px); }
+
+  .theme-header {
+    padding: 0.75rem 1rem; background: #222;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid #333;
+  }
+  .theme-name { font-weight: 700; font-size: 0.95rem; color: #fff; }
+  .theme-meta { display: flex; gap: 0.5rem; align-items: center; }
+
+  .badge {
+    font-size: 0.7rem; padding: 2px 8px; border-radius: 99px;
+    font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .badge.seedling { background: #16a34a22; color: #4ade80; }
+  .badge.sapling { background: #f59e0b22; color: #fbbf24; }
+  .badge.layout-badge { background: #3b82f622; color: #60a5fa; }
+  .badge.season { background: #a78bfa22; color: #c4b5fd; }
+
+  .theme-preview {
+    padding: 2rem; min-height: 380px;
+    display: flex; flex-direction: column; gap: 1.25rem;
+  }
+
+  .theme-preview.has-sidebar {
+    display: grid; grid-template-columns: 180px 1fr; gap: 1.5rem;
+  }
+
+  .sidebar-sim {
+    display: flex; flex-direction: column; gap: 0.75rem;
+    padding-right: 1rem;
+  }
+  .sidebar-sim .site-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem; }
+  .sidebar-sim .nav-link { font-size: 0.85rem; opacity: 0.7; }
+  .sidebar-sim .nav-link.active-link { opacity: 1; font-weight: 600; }
+
+  .main-content { display: flex; flex-direction: column; gap: 1rem; }
+
+  .post-title { font-size: 1.5rem; font-weight: 700; line-height: 1.3; }
+  .post-date { font-size: 0.8rem; opacity: 0.6; }
+  .post-body { font-size: 0.95rem; line-height: 1.7; }
+  .post-body a { text-decoration: underline; text-underline-offset: 2px; }
+  .post-tag {
+    display: inline-block; font-size: 0.75rem; padding: 3px 10px;
+    border-radius: 99px; border: 1px solid;
+  }
+  .post-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+  .glass-card {
+    padding: 1rem; border-radius: 8px; border: 1px solid;
+    backdrop-filter: blur(8px);
+  }
+  .glass-card-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; }
+  .glass-card-text { font-size: 0.8rem; opacity: 0.8; line-height: 1.5; }
+
+  .centered-layout { display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .centered-layout .main-content { max-width: 500px; align-items: center; }
+  .centered-layout .post-body { text-align: left; }
+
+  .focused-preview { max-width: 900px; margin: 0 auto; border-radius: 16px; overflow: hidden; border: 1px solid #333; }
+  .focused-preview .theme-preview { min-height: 500px; padding: 3rem; }
+  .focused-preview .post-title { font-size: 2rem; }
+  .focused-preview .post-body { font-size: 1.05rem; }
+
+  .swatch-row { display: flex; gap: 4px; margin-top: 0.5rem; }
+  .swatch { width: 24px; height: 24px; border-radius: 4px; border: 1px solid rgba(128,128,128,0.3); }
+  .font-info { font-size: 0.7rem; color: #888; margin-top: 0.25rem; padding: 0 1rem 0.75rem; background: #222; }
+</style>
+</head>
+<body>
+
+<h1>Foliage Theme Preview</h1>
+<p class="subtitle">All 10 themes as they currently exist. Colors, fonts, and layout type. Arrow keys navigate in focused view.</p>
+
+<div class="controls" id="controls"></div>
+<div class="grid-view" id="gridView"></div>
+<div class="single-view" id="singleView"></div>
+
+<script>
+// All theme data is hardcoded — no external input
+const themes = [
+  { id: "grove", name: "Grove", tier: "seedling", season: "all", layout: { type: "sidebar", maxWidth: "1200px", spacing: "comfortable" }, colors: { background: "#fefdfb", surface: "#fefdfb", foreground: "#3d2914", foregroundMuted: "#6f4d39", accent: "#16a34a", border: "#faf8f3" }, fonts: { heading: "system-ui, sans-serif", body: "system-ui, sans-serif", mono: "ui-monospace, monospace" }, description: "Default Grove. Warm cream, earthy brown, green accents." },
+  { id: "minimal", name: "Minimal", tier: "seedling", season: "all", layout: { type: "no-sidebar", maxWidth: "680px", spacing: "spacious" }, colors: { background: "#ffffff", surface: "#fafafa", foreground: "#2a1b0d", foregroundMuted: "#6f4d39", accent: "#2a1b0d", border: "#eeeeee" }, fonts: { heading: "'Instrument Sans', system-ui, sans-serif", body: "'Merriweather', Georgia, serif", mono: "'IBM Plex Mono', ui-monospace, monospace" }, description: "Typography-first. Narrow column, serif body, accent matches text." },
+  { id: "night-garden", name: "Night Garden", tier: "seedling", season: "winter", layout: { type: "sidebar", maxWidth: "1200px", spacing: "comfortable" }, colors: { background: "#0c0a14", surface: "#1a1625", foreground: "#f8fafc", foregroundMuted: "#a78bfa", accent: "#c4b5fd", border: "#2e2640" }, fonts: { heading: "'Manrope', system-ui, sans-serif", body: "'Manrope', system-ui, sans-serif", mono: "'IBM Plex Mono', ui-monospace, monospace" }, description: "Midnight bloom. Deep purple-black, violet accents." },
+  { id: "zine", name: "Zine", tier: "sapling", season: "all", layout: { type: "grid", maxWidth: "1400px", spacing: "compact" }, colors: { background: "#fdfcf8", surface: "#ffffff", foreground: "#2a1b0d", foregroundMuted: "#6f4d39", accent: "#ff3366", border: "#2a1b0d" }, fonts: { heading: "'Bodoni Moda', Impact, serif", body: "'Plus Jakarta Sans', system-ui, sans-serif", mono: "'IBM Plex Mono', ui-monospace, monospace" }, description: "Bold magazine. Hot pink, high-contrast borders, grid layout." },
+  { id: "moodboard", name: "Moodboard", tier: "sapling", season: "all", layout: { type: "masonry", maxWidth: "1600px", spacing: "compact" }, colors: { background: "#f5f5f5", surface: "#ffffff", foreground: "#333333", foregroundMuted: "#666666", accent: "#e11d48", border: "#e0e0e0" }, fonts: { heading: "'Cormorant', Georgia, serif", body: "'Instrument Sans', system-ui, sans-serif", mono: "'IBM Plex Mono', ui-monospace, monospace" }, description: "Pinterest-inspired. Neutral gray, rose accent, masonry." },
+  { id: "typewriter", name: "Typewriter", tier: "sapling", season: "autumn", layout: { type: "centered", maxWidth: "600px", spacing: "spacious" }, colors: { background: "#f5f2ea", surface: "#faf8f3", foreground: "#2a1b0d", foregroundMuted: "#6f4d39", accent: "#8a6347", border: "#e2ddd0" }, fonts: { heading: "'IBM Plex Mono', 'Courier New', monospace", body: "'IBM Plex Mono', 'Courier New', monospace", mono: "'IBM Plex Mono', 'Courier New', monospace" }, description: "All monospace. Aged paper, centered narrow column." },
+  { id: "solarpunk", name: "Solarpunk", tier: "sapling", season: "summer", layout: { type: "full-width", maxWidth: "100%", spacing: "comfortable" }, colors: { background: "#f0fdf4", surface: "#ffffff", foreground: "#166534", foregroundMuted: "#15803d", accent: "#fbbf24", border: "#bbf7d0" }, fonts: { heading: "'Quicksand', system-ui, sans-serif", body: "'Quicksand', system-ui, sans-serif", mono: "'IBM Plex Mono', ui-monospace, monospace" }, description: "Bright optimism. Green tint, sunny amber accent, full-width." },
+  { id: "cozy-cabin", name: "Cozy Cabin", tier: "sapling", season: "autumn", layout: { type: "sidebar", maxWidth: "1000px", spacing: "comfortable" }, colors: { background: "#2a1b0d", surface: "#3d2914", foreground: "#fdfcf8", foregroundMuted: "#ccb59c", accent: "#f59e0b", border: "#5a3f30" }, fonts: { heading: "'Lora', Georgia, serif", body: "'Lora', Georgia, serif", mono: "'IBM Plex Mono', ui-monospace, monospace" }, description: "Dark warm brown, cream text, amber firelight." },
+  { id: "ocean", name: "Ocean", tier: "sapling", season: "summer", layout: { type: "no-sidebar", maxWidth: "800px", spacing: "spacious" }, colors: { background: "#f0f9ff", surface: "#ffffff", foreground: "#0c4a6e", foregroundMuted: "#075985", accent: "#0ea5e9", border: "#bae6fd" }, fonts: { heading: "'EB Garamond', Georgia, serif", body: "'EB Garamond', Georgia, serif", mono: "'IBM Plex Mono', ui-monospace, monospace" }, description: "Cool blue. Serif elegance, no sidebar, reading column." },
+  { id: "wildflower", name: "Wildflower", tier: "sapling", season: "spring", layout: { type: "sidebar", maxWidth: "1200px", spacing: "comfortable" }, colors: { background: "#fef7ff", surface: "#ffffff", foreground: "#581c87", foregroundMuted: "#6d28d9", accent: "#ec4899", border: "#f5d0fe" }, fonts: { heading: "'Fraunces', Georgia, serif", body: "'Nunito', system-ui, sans-serif", mono: "'IBM Plex Mono', ui-monospace, monospace" }, description: "Spring garden. Purple canvas, pink accent, ornamental headings." }
+];
+
+function buildControls() {
+  const c = document.getElementById("controls");
+  const gridBtn = document.createElement("button");
+  gridBtn.textContent = "Grid (all 10)";
+  gridBtn.className = "active";
+  gridBtn.addEventListener("click", showGrid);
+  c.appendChild(gridBtn);
+
+  const focusBtn = document.createElement("button");
+  focusBtn.textContent = "Focused View";
+  focusBtn.id = "btn-focused";
+  focusBtn.addEventListener("click", showFocused);
+  c.appendChild(focusBtn);
+
+  const sep = document.createElement("span");
+  sep.style.cssText = "color:#555; padding:0.5rem;";
+  sep.textContent = "|";
+  c.appendChild(sep);
+
+  themes.forEach(t => {
+    const btn = document.createElement("button");
+    btn.textContent = t.name;
+    btn.className = "theme-btn";
+    btn.dataset.theme = t.id;
+    btn.addEventListener("click", () => focusTheme(t.id));
+    c.appendChild(btn);
+  });
+}
+
+function createThemeCard(theme, focused) {
+  const c = theme.colors;
+  const hasSidebar = theme.layout.type === "sidebar";
+  const isCentered = theme.layout.type === "centered";
+  const isGrid = theme.layout.type === "grid";
+
+  const card = document.createElement("div");
+  card.className = "theme-card" + (focused ? " focused-preview" : "");
+  card.id = "card-" + theme.id;
+
+  // Header
+  const header = document.createElement("div");
+  header.className = "theme-header";
+
+  const name = document.createElement("span");
+  name.className = "theme-name";
+  name.textContent = theme.name;
+  header.appendChild(name);
+
+  const meta = document.createElement("div");
+  meta.className = "theme-meta";
+  meta.appendChild(makeBadge(theme.tier, theme.tier));
+  meta.appendChild(makeBadge(theme.layout.type, "layout-badge"));
+  if (theme.season !== "all") meta.appendChild(makeBadge(theme.season, "season"));
+  header.appendChild(meta);
+  card.appendChild(header);
+
+  // Font info row
+  const info = document.createElement("div");
+  info.className = "font-info";
+  const hFont = theme.fonts.heading.split(",")[0].replace(/'/g, "");
+  const bFont = theme.fonts.body.split(",")[0].replace(/'/g, "");
+  info.textContent = theme.description;
+
+  const details = document.createElement("div");
+  details.style.marginTop = "0.25rem";
+  details.appendChild(makeText("H: " + hFont + "  B: " + bFont + "  Max: " + theme.layout.maxWidth + "  " + theme.layout.spacing));
+
+  const swatchRow = document.createElement("div");
+  swatchRow.className = "swatch-row";
+  Object.entries(c).forEach(([k, v]) => {
+    const s = document.createElement("div");
+    s.className = "swatch";
+    s.style.background = v;
+    s.title = k + ": " + v;
+    swatchRow.appendChild(s);
+  });
+  details.appendChild(swatchRow);
+  info.appendChild(details);
+  card.appendChild(info);
+
+  // Preview area
+  const preview = document.createElement("div");
+  preview.className = "theme-preview" + (hasSidebar ? " has-sidebar" : "") + (isCentered ? " centered-layout" : "");
+  preview.style.background = c.background;
+
+  if (hasSidebar) {
+    const sidebar = document.createElement("div");
+    sidebar.className = "sidebar-sim";
+    sidebar.style.borderColor = c.border;
+
+    const sTitle = document.createElement("div");
+    sTitle.className = "site-title";
+    sTitle.style.color = c.foreground;
+    sTitle.style.fontFamily = theme.fonts.heading;
+    sTitle.textContent = "alice's grove";
+    sidebar.appendChild(sTitle);
+
+    ["writing", "about", "projects", "links"].forEach((item, i) => {
+      const link = document.createElement("div");
+      link.className = "nav-link" + (i === 0 ? " active-link" : "");
+      link.style.color = i === 0 ? c.accent : c.foregroundMuted;
+      link.style.fontFamily = theme.fonts.body;
+      link.textContent = item;
+      sidebar.appendChild(link);
+    });
+    preview.appendChild(sidebar);
+  }
+
+  const main = document.createElement("div");
+  main.className = "main-content";
+
+  const title = document.createElement("div");
+  title.className = "post-title";
+  title.style.color = c.foreground;
+  title.style.fontFamily = theme.fonts.heading;
+  title.textContent = "Notes on Building a Space That Feels Like Home";
+  main.appendChild(title);
+
+  const date = document.createElement("div");
+  date.className = "post-date";
+  date.style.color = c.foregroundMuted;
+  date.style.fontFamily = theme.fonts.body;
+  date.textContent = "March 12, 2026";
+  main.appendChild(date);
+
+  const body = document.createElement("div");
+  body.className = "post-body";
+  body.style.color = c.foreground;
+  body.style.fontFamily = theme.fonts.body;
+  body.appendChild(document.createTextNode("There's something about a personal website that a social media profile can never quite capture. It's the difference between renting a room and "));
+  const link = document.createElement("a");
+  link.style.color = c.accent;
+  link.textContent = "building your own house";
+  body.appendChild(link);
+  body.appendChild(document.createTextNode(". Every choice matters \u2014 the colors on the walls, the way the light falls, the typeface that carries your words. This is my corner of the internet, and I've been thinking about what it means to make it feel like "));
+  const em = document.createElement("em");
+  em.textContent = "mine";
+  body.appendChild(em);
+  body.appendChild(document.createTextNode("."));
+  main.appendChild(body);
+
+  const tags = document.createElement("div");
+  tags.className = "post-tags";
+  ["personal", "web", "design"].forEach(t => {
+    const tag = document.createElement("span");
+    tag.className = "post-tag";
+    tag.style.color = c.accent;
+    tag.style.borderColor = c.accent + "40";
+    tag.style.fontFamily = theme.fonts.body;
+    tag.textContent = t;
+    tags.appendChild(tag);
+  });
+  main.appendChild(tags);
+
+  // Glass card for grid/masonry
+  if (isGrid || theme.layout.type === "masonry") {
+    const glass = document.createElement("div");
+    glass.className = "glass-card";
+    glass.style.background = c.surface + "cc";
+    glass.style.borderColor = c.border;
+
+    const gTitle = document.createElement("div");
+    gTitle.className = "glass-card-title";
+    gTitle.style.color = c.foreground;
+    gTitle.style.fontFamily = theme.fonts.heading;
+    gTitle.textContent = "Pinned Note";
+    glass.appendChild(gTitle);
+
+    const gText = document.createElement("div");
+    gText.className = "glass-card-text";
+    gText.style.color = c.foregroundMuted;
+    gText.style.fontFamily = theme.fonts.body;
+    gText.textContent = "Currently reading: The Mushroom at the End of the World";
+    glass.appendChild(gText);
+
+    main.appendChild(glass);
+  }
+
+  preview.appendChild(main);
+  card.appendChild(preview);
+  return card;
+}
+
+function makeBadge(text, className) {
+  const b = document.createElement("span");
+  b.className = "badge " + className;
+  b.textContent = text;
+  return b;
+}
+
+function makeText(str) {
+  const s = document.createElement("span");
+  s.textContent = str;
+  return s;
+}
+
+function renderGrid() {
+  const grid = document.getElementById("gridView");
+  grid.replaceChildren();
+  themes.forEach(t => grid.appendChild(createThemeCard(t, false)));
+}
+
+function showGrid() {
+  document.getElementById("gridView").style.display = "grid";
+  document.getElementById("singleView").className = "single-view";
+  document.querySelectorAll("#controls button").forEach(b => b.classList.remove("active"));
+  document.querySelector("#controls button").classList.add("active");
+  document.querySelectorAll(".theme-btn").forEach(b => b.classList.remove("active"));
+}
+
+let currentFocused = 0;
+
+function showFocused() {
+  document.getElementById("gridView").style.display = "none";
+  const sv = document.getElementById("singleView");
+  sv.className = "single-view active";
+  sv.replaceChildren(createThemeCard(themes[currentFocused], true));
+  document.querySelectorAll("#controls button").forEach(b => b.classList.remove("active"));
+  document.getElementById("btn-focused").classList.add("active");
+  highlightThemeBtn(themes[currentFocused].id);
+}
+
+function focusTheme(id) {
+  currentFocused = themes.findIndex(t => t.id === id);
+  document.getElementById("gridView").style.display = "none";
+  const sv = document.getElementById("singleView");
+  sv.className = "single-view active";
+  sv.replaceChildren(createThemeCard(themes[currentFocused], true));
+  document.querySelectorAll("#controls button").forEach(b => b.classList.remove("active"));
+  document.getElementById("btn-focused").classList.add("active");
+  highlightThemeBtn(id);
+}
+
+function highlightThemeBtn(id) {
+  document.querySelectorAll(".theme-btn").forEach(b => {
+    b.classList.toggle("active", b.dataset.theme === id);
+  });
+}
+
+document.addEventListener("keydown", (e) => {
+  if (document.getElementById("singleView").className.includes("active")) {
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      e.preventDefault();
+      currentFocused = (currentFocused + 1) % themes.length;
+      showFocused();
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      e.preventDefault();
+      currentFocused = (currentFocused - 1 + themes.length) % themes.length;
+      showFocused();
+    }
+  }
+});
+
+buildControls();
+renderGrid();
+</script>
+</body>
+</html>
