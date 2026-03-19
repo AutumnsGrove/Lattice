@@ -3,7 +3,7 @@
 
 name = "grove-webhook-cleanup"
 main = "src/index.ts"
-compatibility_date = "2025-01-01"
+compatibility_date = "2025-12-01"
 
 # =============================================================================
 # Cron Trigger - Daily at 3:00 AM UTC

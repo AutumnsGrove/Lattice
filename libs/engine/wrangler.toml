@@ -10,7 +10,7 @@
 # 6. Set secrets: npx wrangler secret put SESSION_SECRET (etc.)
 
 name = "grove-lattice"
-compatibility_date = "2025-01-01"
+compatibility_date = "2025-12-01"
 # nodejs_compat_v2 is enabled in Cloudflare Pages dashboard
 
 # Cloudflare Pages Functions output directory

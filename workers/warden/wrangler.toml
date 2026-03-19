@@ -14,7 +14,7 @@
 
 name = "grove-warden"
 main = "src/index.ts"
-compatibility_date = "2025-01-01"
+compatibility_date = "2025-12-01"
 compatibility_flags = ["nodejs_compat"]
 
 # Routing: warden.grove.place traffic is handled by grove-router via service binding.

@@ -3,7 +3,7 @@
 # Migrated from libs/engine/ (grove-lattice Pages project) to Worker mode.
 
 name = "grove-aspen"
-compatibility_date = "2025-01-01"
+compatibility_date = "2025-12-01"
 compatibility_flags = ["nodejs_compat"]
 
 # Worker entry point (SvelteKit adapter-cloudflare output)
