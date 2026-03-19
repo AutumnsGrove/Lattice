@@ -137,7 +137,7 @@
 	}
 
 	.delta-up {
-		color: #22c55e;
+		color: var(--grove-accent);
 	}
 
 	.delta-down {

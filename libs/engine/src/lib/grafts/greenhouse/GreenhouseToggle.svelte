@@ -70,11 +70,11 @@
 
 	.greenhouse-toggle:focus-visible {
 		outline: none;
-		box-shadow: 0 0 0 2px var(--color-surface, white), 0 0 0 4px #10b981;
+		box-shadow: 0 0 0 2px var(--color-surface, white), 0 0 0 4px var(--grove-accent);
 	}
 
 	:global(.dark) .greenhouse-toggle:focus-visible {
-		box-shadow: 0 0 0 2px #1e293b, 0 0 0 4px #10b981;
+		box-shadow: 0 0 0 2px #1e293b, 0 0 0 4px var(--grove-accent);
 	}
 
 	.greenhouse-toggle.disabled {
@@ -92,7 +92,7 @@
 	}
 
 	.greenhouse-toggle.enabled .toggle-track {
-		background: #10b981; /* emerald-500 */
+		background: var(--grove-accent); /* emerald-500 */
 	}
 
 	:global(.dark) .toggle-track {
@@ -100,7 +100,7 @@
 	}
 
 	:global(.dark) .greenhouse-toggle.enabled .toggle-track {
-		background: #059669; /* emerald-600 */
+		background: var(--grove-accent-dark); /* emerald-600 */
 	}
 
 	.toggle-thumb {

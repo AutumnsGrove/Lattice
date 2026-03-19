@@ -303,7 +303,7 @@
 
 	:global(.greenhouse-admin .message-card.success) {
 		border-color: var(--accent-success);
-		background: rgba(34, 197, 94, 0.05);
+		background: var(--grove-accent-5);
 	}
 
 	:global(.greenhouse-admin .message-card.error) {
@@ -355,7 +355,7 @@
 	}
 
 	.stat-value.active {
-		color: #22c55e;
+		color: var(--grove-accent);
 	}
 
 	.stat-value.disabled {

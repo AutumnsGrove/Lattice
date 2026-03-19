@@ -171,11 +171,14 @@ NEVER use raw hex values. Always use Grove's CSS custom properties.
 color: var(--color-text);
 background: var(--color-surface);
 border-color: var(--color-divider);
+background: var(--grove-accent);        /* accent color */
+background: var(--grove-accent-20);     /* accent at 20% opacity */
 
 /* ❌ Never hardcode */
 color: #333;
 background: white;
 border-color: #e5e5e5;
+background: #22c55e;  /* user's accent might not be green! */
 ```
 
 **Semantic color usage:**
@@ -185,10 +188,15 @@ border-color: #e5e5e5;
 | `--color-text-muted` | Secondary/helper text |
 | `--color-surface` | Page/card backgrounds |
 | `--color-divider` | Borders, separators |
-| `--color-accent` | Links, interactive highlights |
-| `--color-success` | Confirmations (NOT accent green) |
+| `--grove-accent` | Accent color (solid) — user-chosen, may not be green |
+| `--grove-accent-dark` | Accent hover/pressed states |
+| `--grove-accent-light` | Accent lightened variant |
+| `--grove-accent-N` | Accent at N% opacity (stops: 5-80) |
+| `--color-success` | Confirmations (NOT accent — always green) |
 | `--color-error` | Errors (NOT random red) |
 | `--color-warning` | Warnings (use sparingly) |
+
+**Accent vs. brand green:** The `--grove-accent-*` scale is the user's chosen accent color. Brand greens (Grove logo, nature SVGs) stay as palette tokens. If a pre-commit hook flags brand green, suppress with `// accent-ok`.
 
 ---
 

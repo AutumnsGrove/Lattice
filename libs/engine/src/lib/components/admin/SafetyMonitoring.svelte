@@ -380,7 +380,7 @@
 	}
 
 	.stat-icon.stat-pass {
-		background: rgba(34, 197, 94, 0.15);
+		background: rgba(34, 197, 94, 0.15); /* accent-ok: semantic success status */
 	}
 
 	.stat-icon.stat-flag {
@@ -431,7 +431,7 @@
 	:global(.section-icon) {
 		width: 1.25rem;
 		height: 1.25rem;
-		color: var(--user-accent, var(--color-primary));
+		color: var(--grove-accent);
 	}
 
 	.section-header h2 {
@@ -603,9 +603,9 @@
 	}
 
 	.action-allow {
-		background: rgba(34, 197, 94, 0.2);
+		background: rgba(34, 197, 94, 0.2); /* accent-ok: semantic "allow" action */
 		color: rgb(34, 197, 94);
-		border-color: rgba(34, 197, 94, 0.3);
+		border-color: rgba(34, 197, 94, 0.3); /* accent-ok */
 	}
 
 	.action-warn {
@@ -670,12 +670,12 @@
 	}
 
 	.btn-clear {
-		background: rgba(34, 197, 94, 0.15);
+		background: rgba(34, 197, 94, 0.15); /* accent-ok: semantic "safe content" action */
 		color: rgb(34, 197, 94);
 	}
 
 	.btn-clear:hover:not(:disabled) {
-		background: rgba(34, 197, 94, 0.3);
+		background: rgba(34, 197, 94, 0.3); /* accent-ok */
 	}
 
 	.btn-remove {
@@ -751,9 +751,9 @@
 	}
 
 	.success-banner {
-		background: rgba(34, 197, 94, 0.15);
+		background: rgba(34, 197, 94, 0.15); /* accent-ok: semantic success feedback */
 		color: rgb(34, 197, 94);
-		border: 1px solid rgba(34, 197, 94, 0.3);
+		border: 1px solid rgba(34, 197, 94, 0.3); /* accent-ok */
 	}
 
 	.error-banner {

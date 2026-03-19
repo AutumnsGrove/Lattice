@@ -132,7 +132,7 @@ _The glade is complete. But the conductor looks with its own eyes..._
 
 **Component Audit Gate (MANDATORY before page-level verification):**
 
-Before capturing full pages, the conductor audits every component the Chameleon built or modified in isolation using Showroom. This gate catches design token violations, off-grid spacing, missing focus styles, and hardcoded colors that page-level captures miss.
+Before capturing full pages, the conductor audits every component the Chameleon built or modified in isolation using Showroom. This gate catches design token violations, off-grid spacing, missing focus styles, and hardcoded colors (including accent surfaces that should use `var(--grove-accent-*)` tokens) that page-level captures miss.
 
 ```bash
 # For each component built or modified by the Chameleon:

@@ -125,7 +125,7 @@
 		left: 0;
 		z-index: 10000;
 		padding: 0.5rem 1rem;
-		background: var(--color-primary, #16a34a);
+		background: var(--grove-accent);
 		color: #fff;
 		font-size: 0.875rem;
 		font-weight: 600;
@@ -270,8 +270,8 @@
 	}
 
 	:global(.dark) .arbor-demo-banner {
-		background: var(--grove-900, #14532d);
-		color: var(--grove-200, #bbf7d0);
+		background: var(--grove-accent-dark);
+		color: var(--grove-accent-light);
 	}
 
 	.arbor-demo-icon {

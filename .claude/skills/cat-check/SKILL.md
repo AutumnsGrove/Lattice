@@ -81,7 +81,7 @@ Quick-scan for the most obvious vibes violations. These are the things that make
 | Check | Looking For | Red Flag |
 |-------|------------|----------|
 | **Microcopy** | Grove voice in all strings | "Submit", "No items found", "Loading...", "An error occurred" |
-| **Color tokens** | `var(--color-*)` everywhere | Hardcoded hex values (`#333`, `white`, `#e5e5e5`) |
+| **Color tokens** | `var(--color-*)` and `var(--grove-accent-*)` everywhere | Hardcoded hex values (`#333`, `white`, `#e5e5e5`, green hex for accent) |
 | **Spacing grid** | 4px increments only | `p-5`, `p-7`, arbitrary margin/padding values |
 | **Empty states** | Inviting, warm language | Blank white space, "No data" |
 | **Loading states** | Skeleton screens | Spinners, "Loading..." text |
@@ -280,7 +280,7 @@ Use cat metaphors:
 
 2. 🐱 **SNIFF** — "Sniffing the air... Found 3 immediate red flags: the save button says 'Submit', the empty preferences section is blank white space, and there's a spinner instead of a skeleton screen for the loading state."
 
-3. 🐱 **CIRCLE** — "Circling the page... The form layout uses good spacing (16px between fields, on the grid). Color tokens are correct throughout — no hardcoded hex. But the error messages are generic ('Invalid input' on three fields), the disabled state is dead gray instead of warm muted, and the success toast says 'Settings saved successfully' instead of just 'Saved.'"
+3. 🐱 **CIRCLE** — "Circling the page... The form layout uses good spacing (16px between fields, on the grid). Color tokens are correct — accent buttons use `var(--grove-accent)`, no hardcoded green hex. But the error messages are generic ('Invalid input' on three fields), the disabled state is dead gray instead of warm muted, and the success toast says 'Settings saved successfully' instead of just 'Saved.'"
 
 4. 🐱 **SETTLE** — "Score: 🐱🐱🐱 (3/5). The cat sat down but isn't comfortable. The bones are good — spacing, tokens, layout all work. But the voice is cold. Every string sounds like a template, not a person. And that spinner needs to be a skeleton screen."
 

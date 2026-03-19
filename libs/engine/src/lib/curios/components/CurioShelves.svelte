@@ -576,7 +576,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: linear-gradient(135deg, rgba(74, 222, 128, 0.15), rgba(34, 197, 94, 0.08));
+		background: linear-gradient(135deg, var(--grove-accent-15), var(--grove-accent-8));
 		border-radius: 0.375rem;
 	}
 
@@ -1130,7 +1130,7 @@
 	}
 
 	:global(.dark) .cover-placeholder {
-		background: linear-gradient(135deg, rgba(74, 222, 128, 0.1), rgba(34, 197, 94, 0.05));
+		background: linear-gradient(135deg, var(--grove-accent-10), var(--grove-accent-5));
 	}
 
 	:global(.dark) .cover-image {

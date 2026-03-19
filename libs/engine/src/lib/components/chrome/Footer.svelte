@@ -207,16 +207,16 @@
 	}
 
 	.grove-mode-active {
-		color: var(--color-accent, #16a34a);
+		color: var(--grove-accent);
 	}
 
 	.grove-mode-active:hover {
-		color: var(--color-accent-muted, #15803d);
+		color: var(--grove-accent-dark);
 	}
 
 	/* Focus indicator for keyboard navigation */
 	.grove-mode-toggle:focus-visible {
-		outline: 2px solid var(--color-accent, #16a34a);
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 2px;
 		border-radius: 4px;
 	}

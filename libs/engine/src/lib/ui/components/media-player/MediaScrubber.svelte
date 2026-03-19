@@ -23,11 +23,15 @@
 	const seasonAccent = $derived.by(() => {
 		const season = seasonStore.current;
 		const dark = themeStore.resolvedTheme === "dark";
+		const accentVar =
+			typeof document !== "undefined"
+				? getComputedStyle(document.documentElement).getPropertyValue("--grove-accent").trim()
+				: "";
 		switch (season) {
 			case "spring":
 				return dark ? "#a3e635" : "#84cc16";
 			case "summer":
-				return dark ? "#4ade80" : "#16a34a";
+				return accentVar || (dark ? "#4ade80" : "#16a34a"); // accent-ok: JS canvas fallback
 			case "autumn":
 				return dark ? "#f59e0b" : "#d97706";
 			case "winter":
@@ -35,7 +39,7 @@
 			case "midnight":
 				return dark ? "#8b5cf6" : "#7c3aed";
 			default:
-				return dark ? "#4ade80" : "#16a34a";
+				return accentVar || (dark ? "#4ade80" : "#16a34a"); // accent-ok: JS canvas fallback
 		}
 	});
 

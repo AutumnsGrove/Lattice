@@ -78,7 +78,7 @@ export function createGroveTermCache(): GroveTermCache {
  */
 export const GROVE_TERM_COLORS: Record<GroveTermCategory, { light: string; dark: string }> = {
 	foundational: { light: "#b45309", dark: "#d97706" }, // Amber-700/600 (darker for contrast)
-	platform: { light: "#15803d", dark: "#16a34a" }, // Green-700/600
+	platform: { light: "var(--grove-accent)", dark: "var(--grove-accent)" }, // Green-700/600
 	content: { light: "#7c3aed", dark: "#8b5cf6" }, // Violet-600/500
 	tools: { light: "#b45309", dark: "#d97706" }, // Amber-700/600
 	operations: { light: "#475569", dark: "#64748b" }, // Slate-600/500 (darker for contrast)

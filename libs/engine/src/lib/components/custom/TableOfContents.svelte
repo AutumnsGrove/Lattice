@@ -136,7 +136,7 @@
 	}
 	:global(.dark) .toc {
 		background: rgba(16, 50, 37, 0.45);
-		border-color: rgba(74, 222, 128, 0.15);
+		border-color: var(--grove-accent-15);
 		box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
 	}
 	:global(.dark) .toc:hover {
@@ -208,7 +208,7 @@
 		border-radius: 8px;
 	}
 	:global(.dark) .toc-item.active .toc-link {
-		background: rgba(74, 222, 128, 0.1);
+		background: var(--grove-accent-10);
 	}
 	/* Indentation based on header level */
 	.level-1 .toc-link {

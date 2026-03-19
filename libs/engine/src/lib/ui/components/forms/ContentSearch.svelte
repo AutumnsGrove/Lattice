@@ -315,7 +315,7 @@
 
 	.content-search-input:focus {
 		outline: none;
-		border-color: var(--accent, #2c5f2d);
+		border-color: var(--grove-accent);
 	}
 
 	.content-search-input::placeholder {
@@ -343,7 +343,7 @@
 	}
 
 	.content-search-clear:focus {
-		outline: 2px solid var(--accent, #2c5f2d);
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 2px;
 	}
 
@@ -376,7 +376,7 @@
 	}
 
 	:global(.dark) .content-search-input:focus {
-		border-color: var(--accent, #4ade80);
+		border-color: var(--grove-accent);
 	}
 
 	:global(.dark) .content-search-input::placeholder {
@@ -393,6 +393,6 @@
 	}
 
 	:global(.dark) .content-search-clear:focus {
-		outline-color: var(--accent, #4ade80);
+		outline-color: var(--grove-accent);
 	}
 </style>

@@ -48,7 +48,7 @@
 		align-items: center;
 		justify-content: center;
 		gap: 0.75rem;
-		color: var(--accent-color, var(--editor-accent, #8bc48b));
+		color: var(--grove-accent);
 	}
 
 	.loader-label {

@@ -110,7 +110,7 @@ Once CI passes, verify manually:
 
 **Component audit gate (for UI features):**
 
-If the elephant built or modified UI components, it audits each one in isolation using Showroom BEFORE page-level Glimpse. Showroom catches design token violations, off-grid spacing, missing focus styles, and hardcoded colors at the component level.
+If the elephant built or modified UI components, it audits each one in isolation using Showroom BEFORE page-level Glimpse. Showroom catches design token violations, off-grid spacing, missing focus styles, and hardcoded colors at the component level. Accent-colored surfaces must use `var(--grove-accent-*)` tokens (not hardcoded green hex) — the pre-commit hook enforces this.
 
 ```bash
 # For each component built or modified:

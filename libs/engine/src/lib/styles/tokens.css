@@ -94,31 +94,54 @@
 	--color-bg-tertiary: hsl(0 0% 94%);
 	--color-border: hsl(0 0% 88%);
 
-	/* Grove overlay tokens - centralized green overlays for glassmorphism */
-	/* Base RGB values for color mixing */
+	/* ── Grove Accent Scale ──────────────────────────────
+	   Canonical source: @autumnsgrove/prism/css (grove-tokens.css)
+	   Duplicated here for engine-only consumers.
+	   See Prism for the full accent scale documentation.
+	   ──────────────────────────────────────────────────── */
+	--grove-accent: var(--user-accent, #22c55e);
+	--grove-accent-5:  color-mix(in srgb, var(--grove-accent) 5%, transparent);
+	--grove-accent-6:  color-mix(in srgb, var(--grove-accent) 6%, transparent);
+	--grove-accent-8:  color-mix(in srgb, var(--grove-accent) 8%, transparent);
+	--grove-accent-10: color-mix(in srgb, var(--grove-accent) 10%, transparent);
+	--grove-accent-12: color-mix(in srgb, var(--grove-accent) 12%, transparent);
+	--grove-accent-15: var(--grove-accent-15);
+	--grove-accent-20: var(--grove-accent-20);
+	--grove-accent-25: color-mix(in srgb, var(--grove-accent) 25%, transparent);
+	--grove-accent-30: color-mix(in srgb, var(--grove-accent) 30%, transparent);
+	--grove-accent-35: color-mix(in srgb, var(--grove-accent) 35%, transparent);
+	--grove-accent-40: color-mix(in srgb, var(--grove-accent) 40%, transparent);
+	--grove-accent-50: color-mix(in srgb, var(--grove-accent) 50%, transparent);
+	--grove-accent-70: color-mix(in srgb, var(--grove-accent) 70%, transparent);
+	--grove-accent-80: color-mix(in srgb, var(--grove-accent) 80%, transparent);
+	--grove-accent-dark:  color-mix(in srgb, var(--grove-accent) 80%, black);
+	--grove-accent-light: color-mix(in srgb, var(--grove-accent) 80%, white);
+
+	/* Legacy overlay aliases — maps old names to accent scale.
+	   New code should use --grove-accent-N directly. */
+	--grove-overlay-4: var(--grove-accent-5);
+	--grove-overlay-5: var(--grove-accent-5);
+	--grove-overlay-8: var(--grove-accent-8);
+	--grove-overlay-10: var(--grove-accent-10);
+	--grove-overlay-12: var(--grove-accent-12);
+	--grove-overlay-15: var(--grove-accent-15);
+	--grove-overlay-18: var(--grove-accent-20);
+	--grove-overlay-20: var(--grove-accent-20);
+	--grove-overlay-25: var(--grove-accent-25);
+	--grove-overlay-30: var(--grove-accent-30);
+	--grove-overlay-35: var(--grove-accent-35);
+	--grove-overlay-70: var(--grove-accent-70);
+
+	/* Legacy border aliases */
+	--grove-border-subtle: var(--grove-accent-10);
+	--grove-border: var(--grove-accent-20);
+	--grove-border-strong: var(--grove-accent-35);
+
+	/* Legacy RGB values — kept for any remaining rgba() consumers */
 	--grove-green-rgb: 34, 197, 94;
 	--grove-green-light-rgb: 74, 222, 128;
 	--grove-green-dark-rgb: 74, 124, 89;
 	--grove-sage-rgb: 167, 199, 183;
-
-	/* Grove overlays - light mode (use grove green) */
-	--grove-overlay-4: rgba(34, 197, 94, 0.04);
-	--grove-overlay-5: rgba(34, 197, 94, 0.05);
-	--grove-overlay-8: rgba(34, 197, 94, 0.08);
-	--grove-overlay-10: rgba(34, 197, 94, 0.1);
-	--grove-overlay-12: rgba(34, 197, 94, 0.12);
-	--grove-overlay-15: rgba(34, 197, 94, 0.15);
-	--grove-overlay-18: rgba(34, 197, 94, 0.18);
-	--grove-overlay-20: rgba(34, 197, 94, 0.2);
-	--grove-overlay-25: rgba(34, 197, 94, 0.25);
-	--grove-overlay-30: rgba(34, 197, 94, 0.3);
-	--grove-overlay-35: rgba(34, 197, 94, 0.35);
-	--grove-overlay-70: rgba(34, 197, 94, 0.7);
-
-	/* Grove borders - light mode */
-	--grove-border-subtle: rgba(34, 197, 94, 0.1);
-	--grove-border: rgba(34, 197, 94, 0.2);
-	--grove-border-strong: rgba(34, 197, 94, 0.35);
 
 	/* Glass backgrounds - light mode */
 	--glass-bg: rgba(255, 255, 255, 0.85);
@@ -139,7 +162,7 @@
 	--shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.08);
 	--shadow-md: 0 4px 24px rgba(0, 0, 0, 0.08);
 	--shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
-	--shadow-grove: 0 8px 32px rgba(34, 197, 94, 0.15);
+	--shadow-grove: 0 8px 32px var(--grove-accent-15);
 
 	/* Grove-specific shadow tokens for Tailwind preset */
 	--shadow-grove-sm: 0 1px 2px 0 rgb(61 41 20 / 0.05);
@@ -148,7 +171,7 @@
 	--shadow-grove-lg: 0 8px 24px -8px rgb(61 41 20 / 0.12), 0 4px 8px -4px rgb(61 41 20 / 0.06);
 	--shadow-grove-xl: 0 16px 48px -16px rgb(61 41 20 / 0.15), 0 8px 16px -8px rgb(61 41 20 / 0.08);
 	--shadow-grove-inner: inset 0 1px 2px 0 rgb(61 41 20 / 0.05);
-	--shadow-grove-glow: 0 0 0 3px rgb(22 163 74 / 0.15);
+	--shadow-grove-glow: 0 0 0 3px var(--grove-accent-15);
 
 	/* Dark mode values - flattened HSL values */
 	--color-text-dark: hsl(0 0% 94%);
@@ -186,7 +209,7 @@
 	/* Post viewer */
 	--viewer-border: #e0e0e0;
 	--viewer-bg: #fafafa;
-	--viewer-hover-shadow: rgba(44, 95, 45, 0.15);
+	--viewer-hover-shadow: var(--grove-accent-15);
 	--viewer-date-text: #888;
 	--viewer-content-text: #555;
 	--viewer-footer-border: #e8e8e8;
@@ -301,24 +324,23 @@
 	--tag-bg: hsl(270 38% 60%);
 	--tag-bg-hover: hsl(270 38% 55%);
 
-	/* Grove overlays - dark mode (use lighter grove green) */
-	--grove-overlay-4: rgba(74, 222, 128, 0.04);
-	--grove-overlay-5: rgba(74, 222, 128, 0.05);
-	--grove-overlay-8: rgba(74, 222, 128, 0.08);
-	--grove-overlay-10: rgba(74, 222, 128, 0.1);
-	--grove-overlay-12: rgba(74, 222, 128, 0.12);
-	--grove-overlay-15: rgba(74, 222, 128, 0.15);
-	--grove-overlay-18: rgba(74, 222, 128, 0.18);
-	--grove-overlay-20: rgba(74, 222, 128, 0.2);
-	--grove-overlay-25: rgba(74, 222, 128, 0.25);
-	--grove-overlay-30: rgba(74, 222, 128, 0.3);
-	--grove-overlay-35: rgba(74, 222, 128, 0.35);
-	--grove-overlay-70: rgba(74, 222, 128, 0.7);
-
-	/* Grove borders - dark mode */
-	--grove-border-subtle: rgba(74, 124, 89, 0.2);
-	--grove-border: rgba(74, 222, 128, 0.2);
-	--grove-border-strong: rgba(74, 222, 128, 0.35);
+	/* Legacy overlay/border aliases — dark mode
+	   (same as light mode; accent scale cascades through) */
+	--grove-overlay-4: var(--grove-accent-5);
+	--grove-overlay-5: var(--grove-accent-5);
+	--grove-overlay-8: var(--grove-accent-8);
+	--grove-overlay-10: var(--grove-accent-10);
+	--grove-overlay-12: var(--grove-accent-12);
+	--grove-overlay-15: var(--grove-accent-15);
+	--grove-overlay-18: var(--grove-accent-20);
+	--grove-overlay-20: var(--grove-accent-20);
+	--grove-overlay-25: var(--grove-accent-25);
+	--grove-overlay-30: var(--grove-accent-30);
+	--grove-overlay-35: var(--grove-accent-35);
+	--grove-overlay-70: var(--grove-accent-70);
+	--grove-border-subtle: var(--grove-accent-10);
+	--grove-border: var(--grove-accent-20);
+	--grove-border-strong: var(--grove-accent-35);
 
 	/* Glass backgrounds - dark mode (dark grove tint) */
 	--glass-bg: rgba(20, 30, 25, 0.92);
@@ -336,7 +358,7 @@
 	--shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.2);
 	--shadow-md: 0 4px 24px rgba(0, 0, 0, 0.3);
 	--shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3);
-	--shadow-grove: 0 8px 32px rgba(74, 222, 128, 0.15);
+	--shadow-grove: 0 8px 32px var(--grove-accent-15);
 
 	/* Grove-specific shadow tokens - dark mode */
 	--shadow-grove-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
@@ -345,7 +367,7 @@
 	--shadow-grove-lg: 0 8px 24px -8px rgb(0 0 0 / 0.5), 0 4px 8px -4px rgb(0 0 0 / 0.3);
 	--shadow-grove-xl: 0 16px 48px -16px rgb(0 0 0 / 0.6), 0 8px 16px -8px rgb(0 0 0 / 0.4);
 	--shadow-grove-inner: inset 0 1px 2px 0 rgb(0 0 0 / 0.2);
-	--shadow-grove-glow: 0 0 0 3px rgb(74 222 128 / 0.2);
+	--shadow-grove-glow: 0 0 0 3px var(--grove-accent-20);
 
 	/* Dark mode component-specific overrides */
 	/* Blog header */
@@ -360,7 +382,7 @@
 	/* Post viewer */
 	--viewer-border: #3a3a3a;
 	--viewer-bg: #1a1a1a;
-	--viewer-hover-shadow: rgba(92, 184, 95, 0.2);
+	--viewer-hover-shadow: var(--grove-accent-20);
 	--viewer-date-text: #a8a8a8;
 	--viewer-content-text: #c8c8c8;
 	--viewer-footer-border: #333;

@@ -363,7 +363,7 @@
 	}
 
 	.mic-button.transcribing {
-		background: var(--grove-accent-green, #22c55e);
+		background: var(--grove-accent);
 		color: white;
 	}
 

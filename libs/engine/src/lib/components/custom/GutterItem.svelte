@@ -144,7 +144,7 @@
 	}
 	:global(.dark) .gutter-comment {
 		background: rgba(16, 50, 37, 0.5);
-		border-color: rgba(74, 222, 128, 0.15);
+		border-color: var(--grove-accent-15);
 		border-left-color: var(--accent-success);
 		color: var(--light-text-tertiary);
 		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
@@ -186,7 +186,7 @@
 	}
 	:global(.dark) .gutter-photo {
 		background: rgba(16, 50, 37, 0.4);
-		border-color: rgba(74, 222, 128, 0.15);
+		border-color: var(--grove-accent-15);
 		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 	}
 	:global(.dark) .gutter-photo:hover {
@@ -281,7 +281,7 @@
 	}
 	:global(.dark) .gutter-gallery-empty {
 		background: rgba(16, 50, 37, 0.3);
-		border-color: rgba(74, 222, 128, 0.2);
+		border-color: var(--grove-accent-20);
 	}
 	/* Emoji styles - with glass background */
 	.gutter-emoji {
@@ -302,7 +302,7 @@
 	}
 	:global(.dark) .gutter-emoji {
 		background: rgba(16, 50, 37, 0.35);
-		border-color: rgba(74, 222, 128, 0.12);
+		border-color: var(--grove-accent-12);
 		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
 	}
 	:global(.dark) .gutter-emoji:hover {

@@ -61,7 +61,7 @@
 
 /* Blockquote */
 .note-editor .tiptap blockquote {
-  border-left: 3px solid rgb(var(--grove-300, 134 239 172));
+  border-left: 3px solid var(--grove-accent);
   padding-left: 0.75rem;
   margin: 0.5rem 0;
   opacity: 0.85;
@@ -101,7 +101,7 @@
 
 /* Links */
 .note-editor .tiptap a {
-  color: rgb(var(--grove-600, 22 163 74));
+  color: var(--grove-accent);
   text-decoration: underline;
   text-underline-offset: 2px;
 }

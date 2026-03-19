@@ -227,20 +227,20 @@
 	}
 
 	.action-btn:hover {
-		color: var(--user-accent, var(--color-primary, #2c5f2d));
+		color: var(--grove-accent);
 	}
 
 	.action-btn:focus-visible {
-		outline: 2px solid var(--user-accent, var(--color-primary, #2c5f2d));
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 2px;
 	}
 
 	:global(.dark) .action-btn:focus-visible {
-		outline-color: var(--grove-300, #86efac);
+		outline-color: var(--grove-accent);
 	}
 
 	:global(.dark) .action-btn:hover {
-		color: var(--grove-300, #86efac);
+		color: var(--grove-accent);
 	}
 
 	.action-btn-danger:hover {

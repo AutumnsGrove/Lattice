@@ -78,7 +78,7 @@
 		--code-text: #e7e5e4;
 		--code-comment: #78716c;
 		--code-keyword: #f59e0b;
-		--code-string: #22c55e;
+		--code-string: var(--grove-accent);
 		--code-function: #3b82f6;
 		--grove-amber-100: #fef3c7;
 		--grove-amber-600: #d97706;

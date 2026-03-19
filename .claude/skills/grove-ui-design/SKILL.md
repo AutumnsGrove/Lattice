@@ -179,10 +179,14 @@ Import from: `@autumnsgrove/lattice/ui/nature` or `$lib/components/nature/palett
 
 #### Core Palettes (Year-Round)
 
+> **Accent colors:** These palette hex values are for nature SVGs, illustrations, and brand use. For CSS accent-colored surfaces (buttons, links, highlights), use `var(--grove-accent-*)` tokens instead — the user's accent color may not be green. See the accent scale: `var(--grove-accent)` (solid), `var(--grove-accent-dark)` (hover), `var(--grove-accent-N)` (opacity tints, stops 5-80). Pre-commit hook enforces this.
+
 ```typescript
 import { greens, bark, earth, natural } from "@autumnsgrove/lattice/ui/nature";
 
 // Greens - organized dark-to-light for atmospheric depth
+// NOTE: Use these for nature components and brand illustrations.
+// For accent-colored UI surfaces, use var(--grove-accent-*) instead.
 greens.darkForest; // #0d4a1c - Background trees
 greens.deepGreen; // #166534 - Mid-distance
 greens.grove; // #16a34a - Grove brand primary

@@ -75,7 +75,7 @@ Run each compliance category against the diff:
 2. **Fetch Safety & CSRF** — no bare `fetch()`, proper CSRF validation on mutations
 3. **Barrel Import Safety** — direct imports, not through mega-barrels
 4. **Svelte 5 Patterns** — runes, not stores; correct `$derived.by()` usage
-5. **Tailwind & Design Tokens** — valid token families, no hardcoded colors, no phantom classes
+5. **Tailwind & Design Tokens** — valid token families, no hardcoded colors, no phantom classes, accent surfaces use `--grove-accent-*` (enforced by pre-commit hook)
 6. **Rootwork Type Safety** — `parseFormData()`, `safeJsonParse()`, `isRedirect()`/`isHttpError()` at trust boundaries, no unsafe `as` casts
 7. **Security Patterns** — no prototype pollution, timing-safe comparisons, crypto randomness
 8. **Test Coverage** — new code has corresponding tests
@@ -181,7 +181,7 @@ Use crane metaphors:
    - SDK Compliance: FAIL — hand-rolled rate limit with KV at `src/routes/onboard/+page.server.ts:12` (use Threshold)
    - Fetch & CSRF: WARN — bare `fetch()` to external API at `src/lib/onboard/verify.ts:30`
    - Barrel Imports: WARN — `import { Button } from "$lib/ui"` at `src/routes/onboard/+page.svelte:3`
-   - Foliage: FAIL — `color: #4a7c59` hardcoded at `src/routes/onboard/+page.svelte:87` (use `--grove-forest`)
+   - Foliage: FAIL — `color: #4a7c59` hardcoded at `src/routes/onboard/+page.svelte:87` (use `var(--grove-accent)` for accent, or mark `// accent-ok` if brand green)
    - Svelte 5: PASS
    - Security: PASS
    - Tests: WARN — no test file for `src/lib/onboard/upload.ts`
@@ -221,7 +221,7 @@ FAILURES (must fix before merge):
    Raw `env.BUCKET.put()` — use `FileManager` from `@autumnsgrove/lattice/amber`
 
 4. ✗ src/routes/onboard/+page.svelte:87
-   Hardcoded `#4a7c59` — use `var(--grove-forest)` from Foliage tokens
+   Hardcoded `#4a7c59` — use `var(--grove-accent)` for accent surfaces, or `// accent-ok` if intentional brand green
 
 WARNINGS (address if possible):
 

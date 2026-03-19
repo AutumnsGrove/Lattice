@@ -250,10 +250,10 @@
 		background: rgba(30, 30, 30, 0.7);
 	}
 	.domain-checker__input--available {
-		border-color: var(--accent-success-dark, #16a34a);
+		border-color: var(--grove-accent);
 	}
 	.domain-checker__input--available:focus {
-		border-color: var(--accent-success-dark, #16a34a);
+		border-color: var(--grove-accent);
 	}
 	.domain-checker__input--taken,
 	.domain-checker__input--error {
@@ -276,7 +276,7 @@
 		color: var(--color-text-subtle);
 	}
 	:global(.domain-checker__check) {
-		color: var(--accent-success-dark, #16a34a);
+		color: var(--grove-accent);
 	}
 	:global(.domain-checker__x) {
 		color: var(--accent-danger, #dc2626);
@@ -303,12 +303,12 @@
 		font-size: 0.9rem;
 	}
 	.domain-checker__result--available {
-		background: rgba(22, 163, 74, 0.08);
-		color: var(--accent-success-dark, #16a34a);
+		background: var(--grove-accent-8);
+		color: var(--grove-accent);
 	}
 	:global(.dark) .domain-checker__result--available {
-		background: rgba(22, 163, 74, 0.15);
-		color: #4ade80;
+		background: var(--grove-accent-15);
+		color: var(--grove-accent);
 	}
 	.domain-checker__result--taken {
 		background: rgba(220, 38, 38, 0.08);

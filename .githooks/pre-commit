@@ -457,6 +457,105 @@ fi
 echo ""
 
 # ============================================================================
+# HARDCODED ACCENT COLOR CHECK (Prism accent gateway)
+# ============================================================================
+# All accent colors must go through --grove-accent-* tokens from Prism.
+# Catches hardcoded green hex values and rgba() patterns that bypass the
+# accent system, meaning users with non-green accents see wrong colors.
+#
+# What's caught:
+#   - Green hex: #22c55e, #4ade80, #16a34a, #86efac, #15803d, #10b981, #059669
+#   - Green rgba: rgba(34, 197, 94, ...), rgba(74, 222, 128, ...), rgba(22, 163, 74, ...)
+#   - Old scale tokens: var(--grove-500, ...), var(--grove-400, ...), etc.
+#   - Inline color-mix with fallback hex (should use pre-computed --grove-accent-N)
+#
+# What's exempt:
+#   - Token definitions (prism/, foliage/themes/, config/presets.ts)
+#   - Brand assets (Logo*, nature/, vine-pattern, TerrariumGlobe)
+#   - Test files, email templates
+#   - heartwood/colors.ts (semantic success/status)
+#   - Lines with // accent-ok or /* accent-ok */
+#
+# Fix: Use Prism accent tokens instead:
+#   var(--grove-accent)      — solid accent color
+#   var(--grove-accent-15)   — 15% opacity tint
+#   var(--grove-accent-dark) — darkened variant
+
+staged_accent_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.\(svelte\|css\)$' || true)
+
+if [ -n "$staged_accent_files" ]; then
+    accent_hits=""
+    for f in $staged_accent_files; do
+        # Skip exempt paths
+        case "$f" in
+            libs/prism/*) continue ;;
+            libs/foliage/src/lib/themes/*) continue ;;
+            libs/engine/src/lib/config/presets.ts) continue ;;
+            libs/engine/src/lib/heartwood/colors.ts) continue ;;
+            libs/engine/src/lib/styles/tokens.css) continue ;;
+            *Logo*|*nature/*|*vine-pattern*|*TerrariumGlobe*) continue ;;
+            *email*|*template*) continue ;;
+            *.test.*|*.spec.*) continue ;;
+        esac
+
+        staged_content=$(git show ":$f" 2>/dev/null || true)
+        [ -z "$staged_content" ] && continue
+
+        # Pattern 1: Hardcoded green hex values (case-insensitive)
+        while IFS=: read -r line_num line_content; do
+            [ -z "$line_num" ] && continue
+            if echo "$line_content" | grep -q 'accent-ok'; then continue; fi
+            accent_hits="${accent_hits}  ${f}:${line_num}: $(echo "$line_content" | sed 's/^[[:space:]]*//')
+"
+        done < <(echo "$staged_content" | grep -in '#\(22c55e\|4ade80\|16a34a\|86efac\|15803d\|10b981\|059669\|166534\|14532d\|dcfce7\|bbf7d0\|f0fdf4\)' 2>/dev/null || true)
+
+        # Pattern 2: Green rgba patterns
+        while IFS=: read -r line_num line_content; do
+            [ -z "$line_num" ] && continue
+            if echo "$line_content" | grep -q 'accent-ok'; then continue; fi
+            accent_hits="${accent_hits}  ${f}:${line_num}: $(echo "$line_content" | sed 's/^[[:space:]]*//')
+"
+        done < <(echo "$staged_content" | grep -n 'rgba\s*(\s*\(34,\s*197,\s*94\|74,\s*222,\s*128\|22,\s*163,\s*74\|74,\s*124,\s*89\)' 2>/dev/null || true)
+
+        # Pattern 3: Old grove scale token references (var(--grove-300 through --grove-700)
+        while IFS=: read -r line_num line_content; do
+            [ -z "$line_num" ] && continue
+            if echo "$line_content" | grep -q 'accent-ok'; then continue; fi
+            accent_hits="${accent_hits}  ${f}:${line_num}: $(echo "$line_content" | sed 's/^[[:space:]]*//')
+"
+        done < <(echo "$staged_content" | grep -n 'var(--grove-[3-7]00' 2>/dev/null || true)
+    done
+
+    accent_hits=$(echo "$accent_hits" | sed '/^$/d')
+
+    if [ -n "$accent_hits" ]; then
+        echo -e "${RED}✗ Hardcoded accent color detected${NC}"
+        echo -e "${YELLOW}All accent colors must use --grove-accent-* tokens from Prism.${NC}"
+        echo -e "${YELLOW}Hardcoded greens break non-green accent themes (purple, blue, etc.):${NC}"
+        echo ""
+        echo "$accent_hits"
+        echo ""
+        echo -e "${YELLOW}Fix: Use Prism accent tokens instead:${NC}"
+        echo -e "  ${BLUE}var(--grove-accent)${NC}       — solid accent color"
+        echo -e "  ${BLUE}var(--grove-accent-15)${NC}    — 15% opacity tint"
+        echo -e "  ${BLUE}var(--grove-accent-dark)${NC}  — darkened for hover"
+        echo -e "  ${BLUE}var(--grove-accent-light)${NC} — lightened variant"
+        echo ""
+        echo -e "${YELLOW}Available stops: 5, 6, 8, 10, 12, 15, 20, 25, 30, 35, 40, 50, 70, 80${NC}"
+        echo ""
+        echo -e "${YELLOW}To suppress (brand assets, palette defs): add ${BLUE}// accent-ok${YELLOW}${NC}"
+        echo ""
+        checks_failed=1
+    else
+        echo -e "${GREEN}✓ No hardcoded accent colors (Prism accent gateway enforced)${NC}"
+    fi
+else
+    echo -e "${GREEN}✓ Accent color check skipped (no .svelte/.css files staged)${NC}"
+fi
+
+echo ""
+
+# ============================================================================
 # FINAL RESULTS
 # ============================================================================
 if [ $checks_failed -eq 1 ]; then

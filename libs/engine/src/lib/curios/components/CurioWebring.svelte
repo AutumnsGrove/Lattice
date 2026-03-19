@@ -94,25 +94,25 @@
 	.webring-nav {
 		padding: 0.25rem 0.5rem;
 		text-decoration: none;
-		color: rgb(var(--grove-400, 74 222 128));
+		color: var(--grove-accent);
 		font-weight: 500;
-		border: 1px solid rgb(var(--grove-400, 74 222 128) / 0.3);
+		border: 1px solid var(--grove-accent-30);
 		border-radius: 0.25rem;
 		transition: all 0.2s ease;
 	}
 
 	:global(.dark) .webring-nav {
-		color: rgb(var(--grove-300, 134 239 172));
+		color: var(--grove-accent);
 	}
 
 	.webring-nav:hover {
-		background: rgb(var(--grove-400, 74 222 128) / 0.1);
-		border-color: rgb(var(--grove-400, 74 222 128) / 0.6);
+		background: var(--grove-accent-10);
+		border-color: var(--grove-accent-60);
 	}
 
 	:global(.dark) .webring-nav:hover {
-		background: rgb(var(--grove-300, 134 239 172) / 0.15);
-		border-color: rgb(var(--grove-300, 134 239 172) / 0.6);
+		background: var(--grove-accent-15);
+		border-color: var(--grove-accent-60);
 	}
 
 	.webring-name {

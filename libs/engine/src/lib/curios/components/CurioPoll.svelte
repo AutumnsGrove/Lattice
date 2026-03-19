@@ -155,7 +155,7 @@
 
 	function getBarColor(option: PollOption): string {
 		if (option.color) return option.color;
-		return "var(--color-primary, #22c55e)";
+		return "var(--grove-accent)";
 	}
 
 	function containerClass(): string {
@@ -383,7 +383,7 @@
 	}
 
 	.poll-glass .poll-question {
-		color: var(--color-primary, #16a34a);
+		color: var(--grove-accent);
 	}
 
 	.poll-badge {
@@ -400,8 +400,8 @@
 	}
 
 	.poll-badge-closed {
-		background: color-mix(in srgb, var(--color-primary, #22c55e) 15%, transparent);
-		color: var(--color-primary, #16a34a);
+		background: var(--grove-accent-15);
+		color: var(--grove-accent);
 	}
 
 	/* ─── Description ─── */
@@ -618,7 +618,7 @@
 		padding: 0.5rem 1.25rem;
 		border: none;
 		border-radius: 0.5rem;
-		background: var(--color-primary, #22c55e);
+		background: var(--grove-accent);
 		color: white;
 		font-size: 0.875rem;
 		font-weight: 600;
@@ -658,7 +658,7 @@
 
 	.poll-voted-badge {
 		font-size: 0.75rem;
-		color: var(--color-primary, #22c55e);
+		color: var(--grove-accent);
 		font-weight: 500;
 		margin-left: auto;
 	}

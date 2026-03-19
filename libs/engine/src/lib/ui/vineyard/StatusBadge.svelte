@@ -45,9 +45,9 @@
   }
 
   .status-badge[data-status="ready"] {
-    background-color: #22c55e;
+    background-color: var(--grove-accent);
     color: white;
-    box-shadow: 0 1px 3px rgba(34, 197, 94, 0.3);
+    box-shadow: 0 1px 3px var(--grove-accent-30);
   }
 
   .status-badge[data-status="preview"] {

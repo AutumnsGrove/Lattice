@@ -93,7 +93,7 @@
     --grove-stone-100: #f5f5f4;
     --grove-stone-800: #292524;
     --grove-glass-border: rgba(245, 158, 11, 0.2);
-    --status-ready: #22c55e;
+    --status-ready: var(--grove-accent);
     --status-in-progress: #f97316;
     --status-planned: #9ca3af;
   }
@@ -146,7 +146,7 @@
   }
 
   .roadmap-built .group-icon {
-    background: rgba(34, 197, 94, 0.1);
+    background: var(--grove-accent-10);
     color: var(--status-ready);
   }
 

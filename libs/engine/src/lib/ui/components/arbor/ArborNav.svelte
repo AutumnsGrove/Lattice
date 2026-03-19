@@ -124,28 +124,28 @@
 
 	.arbor-nav-item:hover {
 		background: var(--grove-overlay-12);
-		color: var(--user-accent, var(--color-primary));
+		color: var(--grove-accent);
 	}
 
 	.arbor-nav-item:focus-visible {
-		outline: 2px solid var(--user-accent, var(--color-primary, #16a34a));
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 2px;
 	}
 
 	.arbor-nav-item.active {
 		background: var(--grove-overlay-15);
-		color: var(--user-accent, var(--color-primary));
+		color: var(--grove-accent);
 		font-weight: 500;
 	}
 
 	:global(.dark) .arbor-nav-item:hover {
 		background: var(--grove-overlay-12);
-		color: var(--grove-300, #86efac);
+		color: var(--grove-accent);
 	}
 
 	:global(.dark) .arbor-nav-item.active {
 		background: var(--grove-overlay-15);
-		color: var(--grove-300, #86efac);
+		color: var(--grove-accent);
 	}
 
 	:global(.dark) .arbor-nav-item {
@@ -171,13 +171,13 @@
 		width: 8px;
 		height: 8px;
 		border-radius: 50%;
-		background: var(--user-accent, var(--color-primary, #2c5f2d));
+		background: var(--grove-accent);
 		opacity: 0.75;
 		animation: arbor-dot-breathe 3s ease-in-out infinite;
 	}
 
 	:global(.dark) .arbor-activity-dot {
-		background: var(--grove-300, #86efac);
+		background: var(--grove-accent);
 		opacity: 0.65;
 	}
 

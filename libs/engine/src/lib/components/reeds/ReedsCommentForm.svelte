@@ -230,8 +230,8 @@
 
 	.form-textarea:focus {
 		outline: none;
-		border-color: var(--user-accent, var(--color-primary, #2c5f2d));
-		box-shadow: 0 0 0 2px var(--user-accent-faint, rgba(44, 95, 45, 0.1));
+		border-color: var(--grove-accent);
+		box-shadow: 0 0 0 2px var(--grove-accent-10);
 	}
 
 	:global(.dark) .form-textarea {
@@ -241,7 +241,7 @@
 	}
 
 	:global(.dark) .form-textarea:focus {
-		border-color: var(--grove-300, #86efac);
+		border-color: var(--grove-accent);
 		box-shadow: 0 0 0 2px rgba(134, 239, 172, 0.15);
 	}
 
@@ -291,7 +291,7 @@
 	}
 
 	.mode-option input[type="radio"] {
-		accent-color: var(--user-accent, var(--color-primary, #2c5f2d));
+		accent-color: var(--grove-accent);
 	}
 
 	.mode-hint {
@@ -311,7 +311,7 @@
 		font-weight: 600;
 		font-family: inherit;
 		color: white;
-		background: var(--user-accent, var(--color-primary, #2c5f2d));
+		background: var(--grove-accent);
 		border: none;
 		border-radius: 6px;
 		cursor: pointer;
@@ -323,7 +323,7 @@
 	}
 
 	.btn-submit:focus-visible {
-		outline: 2px solid var(--user-accent, var(--color-primary, #2c5f2d));
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 2px;
 	}
 
@@ -350,7 +350,7 @@
 	}
 
 	.btn-cancel:focus-visible {
-		outline: 2px solid var(--user-accent, var(--color-primary, #2c5f2d));
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 2px;
 	}
 

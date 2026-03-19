@@ -201,17 +201,17 @@
 
 	.arbor-help-link:hover {
 		background: var(--grove-overlay-20);
-		color: var(--user-accent, var(--color-primary));
+		color: var(--grove-accent);
 	}
 
 	.arbor-help-link:focus-visible {
-		outline: 2px solid var(--user-accent, var(--color-primary, #16a34a));
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 2px;
 	}
 
 	:global(.dark) .arbor-help-link:hover {
 		background: var(--grove-overlay-18);
-		color: var(--grove-300, #86efac);
+		color: var(--grove-accent);
 	}
 
 	/* Collapsed icon-only links */
@@ -237,17 +237,17 @@
 
 	.arbor-help-link-icon:hover {
 		background: var(--grove-overlay-20);
-		color: var(--user-accent, var(--color-primary));
+		color: var(--grove-accent);
 	}
 
 	.arbor-help-link-icon:focus-visible {
-		outline: 2px solid var(--user-accent, var(--color-primary, #16a34a));
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 2px;
 	}
 
 	:global(.dark) .arbor-help-link-icon:hover {
 		background: var(--grove-overlay-18);
-		color: var(--grove-300, #86efac);
+		color: var(--grove-accent);
 	}
 
 	:global(.arbor-help-icon) {
@@ -283,17 +283,17 @@
 
 	.arbor-logout-btn:hover {
 		background: var(--grove-overlay-20);
-		color: var(--user-accent, var(--color-primary));
+		color: var(--grove-accent);
 	}
 
 	.arbor-logout-btn:focus-visible {
-		outline: 2px solid var(--user-accent, var(--color-primary, #16a34a));
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 2px;
 	}
 
 	:global(.dark) .arbor-logout-btn:hover {
 		background: var(--grove-overlay-18);
-		color: var(--grove-300, #86efac);
+		color: var(--grove-accent);
 	}
 
 	.arbor-logout-btn-icon {
@@ -320,17 +320,17 @@
 
 	.arbor-logout-btn-icon:hover {
 		background: var(--grove-overlay-20);
-		color: var(--user-accent, var(--color-primary));
+		color: var(--grove-accent);
 	}
 
 	.arbor-logout-btn-icon:focus-visible {
-		outline: 2px solid var(--user-accent, var(--color-primary, #16a34a));
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 2px;
 	}
 
 	:global(.dark) .arbor-logout-btn-icon:hover {
 		background: var(--grove-overlay-18);
-		color: var(--grove-300, #86efac);
+		color: var(--grove-accent);
 	}
 
 	:global(.arbor-logout-icon) {

@@ -243,7 +243,7 @@
 
 	:global(.upload-admin .message-card.success) {
 		border-color: var(--accent-success);
-		background: rgba(34, 197, 94, 0.05);
+		background: var(--grove-accent-5);
 	}
 
 	:global(.upload-admin .message-card.error) {
@@ -295,7 +295,7 @@
 	}
 
 	.stat-value.active {
-		color: #22c55e;
+		color: var(--grove-accent);
 	}
 
 	.stat-value.disabled {
@@ -463,8 +463,8 @@
 	}
 
 	.status-badge.enabled {
-		color: #16a34a;
-		background: rgba(34, 197, 94, 0.1);
+		color: var(--grove-accent);
+		background: var(--grove-accent-10);
 	}
 
 	.status-badge.suspended {

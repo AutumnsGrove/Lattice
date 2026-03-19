@@ -4,6 +4,8 @@
 
 All colors import from `@autumnsgrove/lattice/ui/nature` unless noted.
 
+> **Accent Colors vs. Brand Palette:** The hex values below are the BRAND palette definitions — they are correct here as a reference. However, when USING these colors in CSS or Svelte for **accent-colored surfaces** (buttons, links, highlights, focus rings), ALWAYS use `var(--grove-accent-*)` tokens instead of hardcoding hex values. The user's accent color may not be green. The `greens.grove`, `greens.meadow`, `greens.spring`, and `greens.mint` values should NOT appear as hardcoded hex in components — use the accent scale: `var(--grove-accent)`, `var(--grove-accent-dark)`, `var(--grove-accent-light)`, or `var(--grove-accent-N)` for opacity tints (stops: 5, 6, 8, 10, 12, 15, 20, 25, 30, 35, 40, 50, 70, 80). Brand-only usage (logo, nature SVGs) can keep hardcoded values with a `// accent-ok` comment. Pre-commit hook enforces this.
+
 ---
 
 ## Core Palettes (Year-Round)

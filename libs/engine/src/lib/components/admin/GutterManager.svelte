@@ -874,7 +874,7 @@
 	}
 
 	:global(.dark) .vines-header h3 {
-		color: #86efac;
+		color: var(--grove-accent);
 	}
 
 	.add-btn {
@@ -893,7 +893,7 @@
 	}
 
 	:global(.dark) .add-btn {
-		color: #86efac;
+		color: var(--grove-accent);
 	}
 
 	.add-btn:hover {
@@ -964,7 +964,7 @@
 	}
 
 	:global(.dark) .item-type {
-		color: #86efac;
+		color: var(--grove-accent);
 	}
 
 	:global(.type-icon) {
@@ -1076,7 +1076,7 @@
 
 	:global(.dark) .action-btn:hover:not(:disabled) {
 		background: var(--grove-overlay-15);
-		color: #86efac;
+		color: var(--grove-accent);
 	}
 
 	.action-btn:disabled {
@@ -1216,25 +1216,25 @@
 	}
 
 	.anchor-option.selected {
-		background: rgba(34, 197, 94, 0.15);
-		border-color: rgba(34, 197, 94, 0.4);
+		background: var(--grove-accent-15);
+		border-color: var(--grove-accent-40);
 		color: var(--color-primary);
 	}
 
 	:global(.dark) .anchor-option {
 		background: rgba(16, 50, 37, 0.35);
-		border-color: rgba(74, 222, 128, 0.1);
+		border-color: var(--grove-accent-10);
 	}
 
 	:global(.dark) .anchor-option:hover {
 		background: rgba(16, 50, 37, 0.5);
-		border-color: rgba(74, 222, 128, 0.2);
+		border-color: var(--grove-accent-20);
 	}
 
 	:global(.dark) .anchor-option.selected {
-		background: rgba(74, 222, 128, 0.15);
-		border-color: rgba(74, 222, 128, 0.4);
-		color: #86efac;
+		background: var(--grove-accent-15);
+		border-color: var(--grove-accent-40);
+		color: var(--grove-accent);
 	}
 
 	.anchor-icon {
@@ -1290,7 +1290,7 @@
 	}
 
 	:global(.dark) .selected-check {
-		color: #86efac;
+		color: var(--grove-accent);
 	}
 
 	.no-anchors-hint {
@@ -1387,8 +1387,8 @@
 	}
 
 	:global(.dark) .add-image-btn:hover {
-		border-color: #86efac;
-		color: #86efac;
+		border-color: var(--grove-accent);
+		color: var(--grove-accent);
 	}
 
 	/* Image Picker */
@@ -1438,7 +1438,7 @@
 	}
 
 	:global(.dark) .image-option:hover {
-		border-color: #86efac;
+		border-color: var(--grove-accent);
 	}
 
 	.image-option img {
@@ -1488,15 +1488,15 @@
 
 	.embed-resolved {
 		padding: 0.75rem;
-		background: rgba(34, 197, 94, 0.06);
-		border: 1px solid rgba(34, 197, 94, 0.2);
+		background: var(--grove-accent-6);
+		border: 1px solid var(--grove-accent-20);
 		border-radius: 10px;
 		margin-bottom: 1rem;
 	}
 
 	:global(.dark) .embed-resolved {
-		background: rgba(74, 222, 128, 0.06);
-		border-color: rgba(74, 222, 128, 0.15);
+		background: var(--grove-accent-6);
+		border-color: var(--grove-accent-15);
 	}
 
 	.embed-resolved-badge {
@@ -1513,15 +1513,15 @@
 	}
 
 	:global(.dark) .embed-provider-name {
-		color: #86efac;
+		color: var(--grove-accent);
 	}
 
 	.embed-resolved-label {
 		font-size: 0.7rem;
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
-		color: #22c55e;
-		background: rgba(34, 197, 94, 0.1);
+		color: var(--grove-accent);
+		background: var(--grove-accent-10);
 		padding: 0.15rem 0.4rem;
 		border-radius: 4px;
 		font-weight: 600;
@@ -1577,12 +1577,12 @@
 
 	:global(.dark) .form-input {
 		background: rgba(15, 23, 42, 0.6);
-		border-color: rgba(74, 222, 128, 0.15);
+		border-color: var(--grove-accent-15);
 		color: #e5e7eb;
 	}
 
 	:global(.dark) .form-input:focus {
-		border-color: #86efac;
+		border-color: var(--grove-accent);
 	}
 
 	:global(.dark) .form-hint {
@@ -1591,7 +1591,7 @@
 
 	:global(.dark) .form-hint code {
 		background: rgba(15, 23, 42, 0.6);
-		color: #86efac;
+		color: var(--grove-accent);
 	}
 
 	:global(.dark) .anchors-label {
@@ -1600,7 +1600,7 @@
 
 	:global(.dark) .no-anchors-hint {
 		background: rgba(15, 23, 42, 0.3);
-		border-color: rgba(74, 222, 128, 0.1);
+		border-color: var(--grove-accent-10);
 	}
 
 	:global(.dark) .no-anchors-hint p {
@@ -1609,17 +1609,17 @@
 
 	:global(.dark) .image-preview {
 		background: rgba(15, 23, 42, 0.6);
-		border-color: rgba(74, 222, 128, 0.15);
+		border-color: var(--grove-accent-15);
 	}
 
 	:global(.dark) .gallery-image-item {
 		background: rgba(15, 23, 42, 0.6);
-		border-color: rgba(74, 222, 128, 0.15);
+		border-color: var(--grove-accent-15);
 	}
 
 	:global(.dark) .image-grid {
 		background: rgba(15, 23, 42, 0.6);
-		border-color: rgba(74, 222, 128, 0.15);
+		border-color: var(--grove-accent-15);
 	}
 
 	:global(.dark) .loading,
@@ -1650,7 +1650,7 @@
 
 	:global(.dark) .add-image-btn {
 		color: #9ca3af;
-		border-color: rgba(74, 222, 128, 0.15);
+		border-color: var(--grove-accent-15);
 	}
 
 	/* Screen reader only utility */

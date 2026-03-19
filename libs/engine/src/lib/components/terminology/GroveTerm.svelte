@@ -218,7 +218,7 @@
 		transition: all 0.15s ease;
 
 		--gt-foundational: #d97706;
-		--gt-platform: #16a34a;
+		--gt-platform: var(--grove-accent);
 		--gt-content: #a855f7;
 		--gt-tools: #f59e0b;
 		--gt-operations: #6b7280;
@@ -226,7 +226,7 @@
 
 	:global(.dark) .grove-term {
 		--gt-foundational: #fbbf24;
-		--gt-platform: #22c55e;
+		--gt-platform: var(--grove-accent);
 		--gt-content: #c084fc;
 		--gt-tools: #fcd34d;
 		--gt-operations: #9ca3af;
@@ -268,13 +268,13 @@
 	}
 
 	.grove-term--foundational:hover, .grove-term--foundational:focus-visible { background-color: rgba(217, 119, 6, 0.1); }
-	.grove-term--platform:hover, .grove-term--platform:focus-visible { background-color: rgba(22, 163, 74, 0.1); }
+	.grove-term--platform:hover, .grove-term--platform:focus-visible { background-color: var(--grove-accent-10); }
 	.grove-term--content:hover, .grove-term--content:focus-visible { background-color: rgba(168, 85, 247, 0.1); }
 	.grove-term--tools:hover, .grove-term--tools:focus-visible { background-color: rgba(245, 158, 11, 0.1); }
 	.grove-term--operations:hover, .grove-term--operations:focus-visible { background-color: rgba(107, 114, 128, 0.1); }
 
 	.grove-term:focus-visible {
-		outline: 2px solid var(--color-primary, #16a34a);
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 2px;
 		border-radius: 2px;
 	}

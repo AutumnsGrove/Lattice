@@ -212,7 +212,7 @@
 	.form-select:focus,
 	.form-textarea:focus {
 		outline: none;
-		border-color: var(--color-primary, #059669);
+		border-color: var(--grove-accent);
 		box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
 	}
 
@@ -225,7 +225,7 @@
 
 	:global(.dark) .form-select:focus,
 	:global(.dark) .form-textarea:focus {
-		border-color: var(--color-primary-light, #10b981);
+		border-color: var(--grove-accent);
 		box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
 	}
 

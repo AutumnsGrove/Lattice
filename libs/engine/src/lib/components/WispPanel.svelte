@@ -2,6 +2,7 @@
   import { slide, fade } from "svelte/transition";
   import { Button } from "$lib/ui/components/primitives/button";
   import { MAX_CONTENT_LENGTH } from "$lib/config/wisp.js";
+  import { api } from "$lib/utils/api";
 
   /**
    * @typedef {Object} Props
@@ -241,25 +242,20 @@
     analysisError = null;
 
     try {
-      const res = await fetch("/api/grove/wisp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const data = await api.post("/api/grove/wisp", {
           content,
           action,
           mode: selectedMode,
           context: { title: postTitle, slug: postSlug }
-        })
       });
 
-      if (res.ok) {
-        results = await res.json();
+      if (data) {
+        results = data;
         if (action === "grammar") activeTab = "grammar";
         else if (action === "tone") activeTab = "tone";
         else if (action === "readability") activeTab = "readability";
       } else {
-        const error = await res.json();
-        analysisError = error.error || "Analysis failed";
+        analysisError = "Analysis failed";
       }
     } catch (err) {
       analysisError = "Could not connect to Wisp";
@@ -776,7 +772,7 @@
   }
 
   .mode-selector input[type="radio"] {
-    accent-color: var(--color-accent, #8bc48b);
+    accent-color: var(--grove-accent);
   }
 
   /* Actions */

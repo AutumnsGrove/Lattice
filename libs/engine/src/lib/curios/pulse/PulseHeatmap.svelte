@@ -130,35 +130,35 @@
   }
 
   .level-1 {
-    background: var(--grove-overlay-15, rgba(34, 197, 94, 0.15));
+    background: var(--grove-overlay-15);
   }
 
   .level-2 {
-    background: var(--grove-overlay-30, rgba(34, 197, 94, 0.3));
+    background: var(--grove-overlay-30);
   }
 
   .level-3 {
-    background: var(--grove-overlay-50, rgba(34, 197, 94, 0.5));
+    background: var(--grove-overlay-50);
   }
 
   .level-4 {
-    background: var(--grove-overlay-70, rgba(34, 197, 94, 0.75));
+    background: var(--grove-overlay-70);
   }
 
   :global(.dark) .level-1 {
-    background: rgba(74, 222, 128, 0.12);
+    background: var(--grove-accent-12);
   }
 
   :global(.dark) .level-2 {
-    background: rgba(74, 222, 128, 0.25);
+    background: var(--grove-accent-25);
   }
 
   :global(.dark) .level-3 {
-    background: rgba(74, 222, 128, 0.45);
+    background: var(--grove-accent-45);
   }
 
   :global(.dark) .level-4 {
-    background: rgba(74, 222, 128, 0.7);
+    background: var(--grove-accent-70);
   }
 
   @media (prefers-reduced-motion: reduce) {

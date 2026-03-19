@@ -177,7 +177,7 @@
 		font-size: 1rem;
 	}
 	:global(.dark) .heatmap-header h3 {
-		color: var(--grove-500, #4ade80);
+		color: var(--grove-accent);
 	}
 	.total-commits {
 		font-size: 0.85rem;

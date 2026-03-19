@@ -162,6 +162,51 @@ export default {
 
 > **Note:** Engine has a deprecated re-export stub at `src/lib/ui/tailwind.preset.js` for backward compat. New code should import from Prism directly.
 
+### CRITICAL: Accent Colors — The Grove Accent Scale
+
+**NEVER hardcode green hex values (`#22c55e`, `#4ade80`, `#16a34a`, etc.) or `rgba(34, 197, 94, ...)` in CSS.** This is enforced by pre-commit hook. Users choose their accent color (purple, blue, red, etc.) and hardcoded green breaks their customization.
+
+**Use `--grove-accent-*` tokens from Prism instead:**
+
+| Token                    | What it is            | Use for                          |
+| ------------------------ | --------------------- | -------------------------------- |
+| `var(--grove-accent)`    | Solid accent color    | Buttons, links, active text      |
+| `var(--grove-accent-5)`  | 5% opacity tint       | Very subtle backgrounds          |
+| `var(--grove-accent-10)` | 10% opacity tint      | Subtle borders, hover bg         |
+| `var(--grove-accent-15)` | 15% opacity tint      | Light backgrounds, selected bg   |
+| `var(--grove-accent-20)` | 20% opacity tint      | Borders, focus rings             |
+| `var(--grove-accent-30)` | 30% opacity tint      | Strong borders, box shadows      |
+| `var(--grove-accent-40)` | 40% opacity tint      | Active borders                   |
+| `var(--grove-accent-50)` | 50% opacity tint      | Medium intensity                 |
+| `var(--grove-accent-70)` | 70% opacity tint      | High intensity overlays          |
+| `var(--grove-accent-80)` | 80% opacity tint      | Near-solid overlays              |
+| `var(--grove-accent-dark)`  | Darkened (80% + black) | Hover states on accent bg     |
+| `var(--grove-accent-light)` | Lightened (80% + white) | Light accent variant         |
+
+**Full scale:** 5, 6, 8, 10, 12, 15, 20, 25, 30, 35, 40, 50, 70, 80 + dark/light
+
+**Examples:**
+
+```svelte
+<style>
+  /* ✅ CORRECT — uses accent tokens */
+  .btn { background: var(--grove-accent); }
+  .btn:hover { background: var(--grove-accent-dark); }
+  .subtle-bg { background: var(--grove-accent-10); }
+  .border { border: 1px solid var(--grove-accent-20); }
+  .glow { box-shadow: 0 0 8px var(--grove-accent-30); }
+
+  /* ❌ WRONG — hardcoded green, breaks non-green accents */
+  .btn { background: #22c55e; }
+  .subtle-bg { background: rgba(34, 197, 94, 0.1); }
+  .border { border: 1px solid var(--grove-500, #22c55e); }
+</style>
+```
+
+**When green IS correct:** Brand assets (Grove logo, nature SVGs), seasonal decorations, and semantic success/status colors (`--success`, `text-success`) are intentionally green. Mark these with `// accent-ok` to suppress the pre-commit hook.
+
+**Defined in:** `libs/prism/src/lib/css/grove-tokens.css` (SSOT) and `libs/engine/src/lib/styles/tokens.css` (engine duplicate)
+
 ## Architecture Notes
 
 - Multi-tenant architecture with subdomain routing

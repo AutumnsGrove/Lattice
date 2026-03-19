@@ -200,13 +200,13 @@
 		height: 2.25rem;
 		/* Frosted glass cell — grove palette */
 		background: rgb(var(--grove-950, 5 46 22) / 0.92);
-		color: rgb(var(--grove-400, 74 222 128));
+		color: var(--grove-accent);
 		font-size: 1.25rem;
 		font-weight: bold;
 		border-radius: 3px;
 		border: 1px solid rgb(var(--grove-800, 22 101 52) / 0.6);
 		backdrop-filter: blur(4px);
-		text-shadow: 0 0 6px rgb(var(--grove-400, 74 222 128) / 0.4);
+		text-shadow: 0 0 6px var(--grove-accent-40);
 		/* Entrance: fade + glow pulse */
 		animation: classic-enter 0.6s ease-out both;
 	}
@@ -214,26 +214,26 @@
 	@keyframes classic-enter {
 		0% {
 			opacity: 0;
-			text-shadow: 0 0 12px rgb(var(--grove-400, 74 222 128) / 0.8);
+			text-shadow: 0 0 12px var(--grove-accent-80);
 		}
 		60% {
 			opacity: 1;
-			text-shadow: 0 0 10px rgb(var(--grove-400, 74 222 128) / 0.6);
+			text-shadow: 0 0 10px var(--grove-accent-60);
 		}
 		100% {
 			opacity: 1;
-			text-shadow: 0 0 6px rgb(var(--grove-400, 74 222 128) / 0.4);
+			text-shadow: 0 0 6px var(--grove-accent-40);
 		}
 	}
 
 	.hitcounter--classic .classic-label {
-		color: rgb(var(--grove-400, 74 222 128) / 0.7);
+		color: var(--grove-accent-70);
 	}
 
 	/* Classic dark mode — lighter glass */
 	:global(.dark) .hitcounter--classic .classic-digit {
 		background: rgb(var(--cream-100, 37 35 32) / 0.08);
-		border-color: rgb(var(--grove-700, 21 128 61) / 0.4);
+		border-color: var(--grove-accent-40);
 	}
 
 	/* ═══════════════════════════════════════════════════════════════════
@@ -358,15 +358,15 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		color: rgb(var(--grove-400, 74 222 128) / 0.1);
+		color: var(--grove-accent-10);
 		font-size: inherit;
 		font-weight: inherit;
 	}
 
 	.hitcounter--lcd .lcd-active {
 		position: relative;
-		color: rgb(var(--grove-400, 74 222 128));
-		text-shadow: 0 0 8px rgb(var(--grove-400, 74 222 128) / 0.5);
+		color: var(--grove-accent);
+		text-shadow: 0 0 8px var(--grove-accent-50);
 	}
 
 	@keyframes lcd-flicker {
@@ -385,7 +385,7 @@
 	}
 
 	.hitcounter--lcd .lcd-label {
-		color: rgb(var(--grove-400, 74 222 128) / 0.6);
+		color: var(--grove-accent-60);
 		font-size: 0.7rem;
 	}
 
@@ -396,7 +396,7 @@
 	}
 
 	:global(.dark) .hitcounter--lcd .lcd-active {
-		text-shadow: 0 0 10px rgb(var(--grove-400, 74 222 128) / 0.7);
+		text-shadow: 0 0 10px var(--grove-accent-70);
 	}
 
 	/* ═══════════════════════════════════════════════════════════════════
@@ -422,7 +422,7 @@
 	}
 
 	.hitcounter--minimal .minimal-leaf {
-		color: rgb(var(--grove-600, 22 163 74));
+		color: var(--grove-accent);
 		align-self: center;
 		flex-shrink: 0;
 	}
@@ -430,12 +430,12 @@
 	.hitcounter--minimal .minimal-number {
 		font-size: 1.1rem;
 		font-weight: 700;
-		color: rgb(var(--grove-600, 22 163 74));
+		color: var(--grove-accent);
 	}
 
 	/* Minimal dark mode — green brightens, label warms */
 	:global(.dark) .hitcounter--minimal .minimal-number {
-		color: rgb(var(--grove-400, 74 222 128));
+		color: var(--grove-accent);
 	}
 
 	:global(.dark) .hitcounter--minimal .minimal-label {

@@ -88,7 +88,7 @@
 		font-weight: 600;
 		white-space: nowrap;
 		overflow: hidden;
-		color: var(--user-accent, var(--color-primary));
+		color: var(--grove-accent);
 	}
 
 	.arbor-admin-label {
@@ -145,7 +145,7 @@
 	}
 
 	.arbor-collapse-btn:focus-visible {
-		outline: 2px solid var(--color-primary, #16a34a);
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 2px;
 	}
 
@@ -177,7 +177,7 @@
 	}
 
 	.arbor-close-sidebar:focus-visible {
-		outline: 2px solid var(--color-primary, #16a34a);
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 2px;
 	}
 

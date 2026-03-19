@@ -66,16 +66,16 @@
 	}
 
 	:global(.dark) .lantern-fab {
-		background: var(--accent-success, #22c55e);
+		background: var(--grove-accent);
 		color: var(--bark-950, #0a1f0d);
 		box-shadow:
 			0 2px 8px rgba(0, 0, 0, 0.3),
-			0 0 0 0 rgba(34, 197, 94, 0.3);
+			0 0 0 0 var(--grove-accent-30);
 	}
 
 	:global(.dark) .lantern-fab:hover,
 	:global(.dark) .lantern-fab.open {
-		background: var(--grove-400, #4ade80);
+		background: var(--grove-accent);
 	}
 
 	@keyframes lantern-pulse {
@@ -98,7 +98,7 @@
 	}
 
 	:global(.dark) .lantern-fab:focus-visible {
-		outline-color: var(--accent-success);
+		outline-color: var(--grove-accent);
 	}
 
 	@media (prefers-reduced-motion: reduce) {

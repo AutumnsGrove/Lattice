@@ -289,7 +289,7 @@
 		color: var(--color-primary, #2c5f2d);
 	}
 	:global(.dark) .item-icon {
-		color: var(--grove-500, #4ade80);
+		color: var(--grove-accent);
 	}
 
 	/* Date items */
@@ -352,10 +352,10 @@
 		filter: blur(3px);
 	}
 	.decoration-sparkle {
-		background: var(--grove-500, #4ade80);
+		background: var(--grove-accent);
 		width: 6px;
 		height: 6px;
-		box-shadow: 0 0 4px var(--grove-500, #4ade80);
+		box-shadow: 0 0 4px var(--grove-accent);
 	}
 	.decoration-flower {
 		background: #c4a0b0;

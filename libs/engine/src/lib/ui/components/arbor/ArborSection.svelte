@@ -105,7 +105,7 @@
   :global(.arbor-section-icon) {
     width: 1.5rem;
     height: 1.5rem;
-    color: var(--user-accent, var(--color-primary));
+    color: var(--grove-accent);
     flex-shrink: 0;
   }
 

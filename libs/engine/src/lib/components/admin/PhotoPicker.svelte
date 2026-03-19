@@ -570,16 +570,16 @@
 			color 0.15s ease;
 	}
 	.manual-url-toggle:hover {
-		border-color: var(--grove-500, #22c55e);
-		color: var(--grove-600, #16a34a);
+		border-color: var(--grove-accent);
+		color: var(--grove-accent);
 	}
 	:global(.dark) .manual-url-toggle {
 		border-color: rgba(255, 255, 255, 0.15);
 		color: var(--color-foreground-subtle-dark, #999);
 	}
 	:global(.dark) .manual-url-toggle:hover {
-		border-color: var(--grove-500, #22c55e);
-		color: var(--grove-400, #4ade80);
+		border-color: var(--grove-accent);
+		color: var(--grove-accent);
 	}
 	.manual-url-row {
 		display: flex;
@@ -604,7 +604,7 @@
 		transition: border-color 0.15s ease;
 	}
 	.manual-url-input:focus {
-		border-color: var(--grove-500, #22c55e);
+		border-color: var(--grove-accent);
 	}
 	:global(.dark) .manual-url-input {
 		background: rgba(0, 0, 0, 0.2);
@@ -618,7 +618,7 @@
 		min-width: 44px;
 		min-height: 44px;
 		padding: 0.5rem;
-		background: var(--grove-500, #22c55e);
+		background: var(--grove-accent);
 		border: none;
 		border-radius: 6px;
 		color: white;
@@ -629,7 +629,7 @@
 			opacity 0.15s ease;
 	}
 	.manual-url-add:hover {
-		background: var(--grove-600, #16a34a);
+		background: var(--grove-accent-dark);
 	}
 	.manual-url-add:disabled {
 		opacity: 0.4;
@@ -662,7 +662,7 @@
 		transition: border-color 0.15s ease;
 	}
 	.search-input:focus {
-		border-color: var(--grove-500, #22c55e);
+		border-color: var(--grove-accent);
 	}
 	:global(.dark) .search-input {
 		background: rgba(0, 0, 0, 0.2);
@@ -711,12 +711,12 @@
 		transform: scale(1.02);
 	}
 	.picker-thumb:focus-visible {
-		outline: 2px solid var(--grove-500, #22c55e);
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 2px;
 	}
 	.picker-thumb.selected {
-		border-color: var(--grove-500, #22c55e);
-		box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.3);
+		border-color: var(--grove-accent);
+		box-shadow: 0 0 0 2px var(--grove-accent-30);
 	}
 	.picker-thumb img {
 		width: 100%;
@@ -730,7 +730,7 @@
 		right: 4px;
 		width: 24px;
 		height: 24px;
-		background: var(--grove-500, #22c55e);
+		background: var(--grove-accent);
 		color: white;
 		border-radius: 50%;
 		display: flex;
@@ -797,7 +797,7 @@
 		color: var(--color-foreground-subtle, #999);
 	}
 	.picker-empty-hint a {
-		color: var(--grove-500, #22c55e);
+		color: var(--grove-accent);
 		text-decoration: underline;
 	}
 	.picker-error {
@@ -806,7 +806,7 @@
 	.retry-link {
 		background: transparent;
 		border: none;
-		color: var(--grove-500, #22c55e);
+		color: var(--grove-accent);
 		text-decoration: underline;
 		cursor: pointer;
 		font-size: 0.85rem;
@@ -828,16 +828,16 @@
 		align-items: center;
 		gap: 0.25rem;
 		padding: 0.25rem 0.5rem;
-		background: rgba(34, 197, 94, 0.12);
-		border: 1px solid rgba(34, 197, 94, 0.3);
+		background: var(--grove-accent-12);
+		border: 1px solid var(--grove-accent-30);
 		border-radius: 12px;
 		font-size: 0.75rem;
-		color: var(--grove-700, #15803d);
+		color: var(--grove-accent-dark);
 		max-width: 200px;
 	}
 	:global(.dark) .selected-pill {
-		background: rgba(34, 197, 94, 0.15);
-		color: var(--grove-400, #4ade80);
+		background: var(--grove-accent-15);
+		color: var(--grove-accent);
 	}
 	.selected-pill-url {
 		overflow: hidden;
@@ -927,7 +927,7 @@
 	.picker-insert {
 		padding: 0.5rem 0.75rem;
 		min-height: 44px;
-		background: var(--grove-500, #22c55e);
+		background: var(--grove-accent);
 		border: none;
 		border-radius: 6px;
 		font-size: 0.8rem;
@@ -939,7 +939,7 @@
 			opacity 0.15s ease;
 	}
 	.picker-insert:hover {
-		background: var(--grove-600, #16a34a);
+		background: var(--grove-accent-dark);
 	}
 	.picker-insert:disabled {
 		opacity: 0.4;
@@ -957,7 +957,7 @@
 	.search-input:focus-visible,
 	.retry-link:focus-visible,
 	.selected-pill-remove:focus-visible {
-		outline: 2px solid var(--grove-500, #22c55e);
+		outline: 2px solid var(--grove-accent);
 		outline-offset: 2px;
 	}
 </style>

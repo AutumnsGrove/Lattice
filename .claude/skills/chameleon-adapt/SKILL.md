@@ -123,6 +123,8 @@ _The chameleon shifts its hues, matching the forest around it..._
 
 Apply the seasonal color palette from `@autumnsgrove/lattice/ui/nature`. Match palette choice to the emotional tone identified in READ. Use seasonal helper functions (`getSeasonalGreens`, `getCherryColors`) for consistent depth across the scene.
 
+**Accent colors:** For any accent-colored surfaces (buttons, links, highlights, focus rings), use `var(--grove-accent-*)` tokens — NOT hardcoded green hex values. The user's accent color may not be green. Use `var(--grove-accent)` for solid, `var(--grove-accent-dark)` for hover, and `var(--grove-accent-N)` for opacity tints. The pre-commit hook enforces this. Brand greens (nature SVGs, logo) are fine with `// accent-ok`.
+
 Also apply Grove terminology through GroveTerm components — never hardcode Grove-specific words in user-facing text.
 
 **Reference:** Load `references/color-palette.md` for all color tokens with hex values, seasonal palettes (Spring/Summer/Autumn/Winter/Midnight), accent palettes, helper functions, and background gradient patterns.

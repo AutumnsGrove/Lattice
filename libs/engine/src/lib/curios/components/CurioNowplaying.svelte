@@ -179,7 +179,7 @@
 
 	.bar {
 		width: 3px;
-		background: rgb(var(--grove-400, 74 222 128));
+		background: var(--grove-accent);
 		border-radius: 1px;
 		animation: nowplaying-bounce 1s ease-in-out infinite;
 	}

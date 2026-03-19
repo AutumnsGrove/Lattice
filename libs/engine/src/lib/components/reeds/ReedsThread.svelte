@@ -303,7 +303,7 @@
 	}
 
 	.reeds-sign-in a {
-		color: var(--user-accent, var(--color-primary, #2c5f2d));
+		color: var(--grove-accent);
 		font-weight: 600;
 		text-decoration: none;
 	}
@@ -321,6 +321,6 @@
 	}
 
 	:global(.dark) .reeds-sign-in a {
-		color: var(--grove-300, #86efac);
+		color: var(--grove-accent);
 	}
 </style>

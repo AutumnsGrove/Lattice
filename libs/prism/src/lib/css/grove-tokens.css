@@ -138,10 +138,42 @@
 	--color-error-border: #fecaca;
 	--color-error-text: #991b1b;
 
+	/* ── Grove Accent Scale ──────────────────────────────
+	   The user's chosen accent color with pre-computed opacity stops.
+	   Set by the app via --user-accent on :root (defaults to grove green).
+	   Components reference these tokens — NEVER hardcode green hex values.
+
+	   Usage:
+	     var(--grove-accent)      — solid accent color
+	     var(--grove-accent-15)   — 15% opacity tint
+	     var(--grove-accent-dark) — darkened for hover states
+	   ──────────────────────────────────────────────────── */
+	--grove-accent: var(--user-accent, #22c55e);
+
+	/* Opacity stops */
+	--grove-accent-5:  color-mix(in srgb, var(--grove-accent) 5%, transparent);
+	--grove-accent-6:  color-mix(in srgb, var(--grove-accent) 6%, transparent);
+	--grove-accent-8:  color-mix(in srgb, var(--grove-accent) 8%, transparent);
+	--grove-accent-10: color-mix(in srgb, var(--grove-accent) 10%, transparent);
+	--grove-accent-12: color-mix(in srgb, var(--grove-accent) 12%, transparent);
+	--grove-accent-15: color-mix(in srgb, var(--grove-accent) 15%, transparent);
+	--grove-accent-20: color-mix(in srgb, var(--grove-accent) 20%, transparent);
+	--grove-accent-25: color-mix(in srgb, var(--grove-accent) 25%, transparent);
+	--grove-accent-30: color-mix(in srgb, var(--grove-accent) 30%, transparent);
+	--grove-accent-35: color-mix(in srgb, var(--grove-accent) 35%, transparent);
+	--grove-accent-40: color-mix(in srgb, var(--grove-accent) 40%, transparent);
+	--grove-accent-50: color-mix(in srgb, var(--grove-accent) 50%, transparent);
+	--grove-accent-70: color-mix(in srgb, var(--grove-accent) 70%, transparent);
+	--grove-accent-80: color-mix(in srgb, var(--grove-accent) 80%, transparent);
+
+	/* Shade variants */
+	--grove-accent-dark:  color-mix(in srgb, var(--grove-accent) 80%, black);
+	--grove-accent-light: color-mix(in srgb, var(--grove-accent) 80%, white);
+
 	/* Shadows */
 	--shadow-sm: 0 1px 2px 0 rgb(61 41 20 / 0.05);
 	--shadow-md: 0 4px 6px -1px rgb(61 41 20 / 0.1);
-	--shadow-focus: 0 0 0 2px rgb(var(--cream)), 0 0 0 4px rgb(var(--grove-500));
+	--shadow-focus: 0 0 0 2px rgb(var(--cream)), 0 0 0 4px var(--grove-accent);
 }
 
 /* ─── DARK MODE ──────────────────────────────────────────────── */
@@ -253,8 +285,14 @@
 	--color-error-border: rgba(220, 38, 38, 0.3);
 	--color-error-text: #fecaca;
 
+	/* ── Grove Accent Scale — Dark Mode ──
+	   No redefinition needed — color-mix() with --grove-accent
+	   adapts automatically since --user-accent is the same in both modes.
+	   The opacity stops from :root cascade through unchanged.
+	   ──────────────────────────────────────────────────── */
+
 	/* Shadows — Dark Mode */
 	--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
 	--shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3);
-	--shadow-focus: 0 0 0 2px rgb(var(--cream)), 0 0 0 4px rgb(var(--grove-500));
+	--shadow-focus: 0 0 0 2px rgb(var(--cream)), 0 0 0 4px var(--grove-accent);
 }
