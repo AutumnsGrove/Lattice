@@ -343,7 +343,10 @@
 			// When glass prop is provided and variant is theme-driven, use CSS custom properties
 			isThemeVariant ? "glass-card-themed" : variantClasses[resolved],
 			border && `border ${isThemeVariant ? "glass-card-themed-border" : borderClasses[resolved]}`,
-			hoverable && `cursor-pointer ${hoverClasses[resolved]}`,
+			hoverable &&
+				(isThemeVariant
+					? "cursor-pointer glass-card-themed-hover"
+					: `cursor-pointer ${hoverClasses[resolved]}`),
 			"shadow-sm",
 			className,
 		),
@@ -448,5 +451,16 @@
 	}
 	:global(.dark) .glass-card-themed-border {
 		border-color: var(--_glass-border-dark);
+	}
+
+	/* Theme-driven hover: brighten the glass surface instead of overriding with Tailwind colors */
+	.glass-card-themed-hover:hover {
+		filter: brightness(1.08);
+		box-shadow:
+			0 10px 15px -3px rgba(0, 0, 0, 0.1),
+			0 4px 6px -4px rgba(0, 0, 0, 0.1);
+	}
+	:global(.dark) .glass-card-themed-hover:hover {
+		filter: brightness(1.15);
 	}
 </style>
