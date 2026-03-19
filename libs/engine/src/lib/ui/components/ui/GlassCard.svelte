@@ -342,10 +342,12 @@
 			gossamer && "overflow-hidden",
 			// When glass prop is provided and variant is theme-driven, use CSS custom properties
 			isThemeVariant ? "glass-card-themed" : variantClasses[resolved],
+			// Ensure dark-text variants keep white text even in theme-driven mode
+			isThemeVariant && isDarkText && "text-white",
 			border && `border ${isThemeVariant ? "glass-card-themed-border" : borderClasses[resolved]}`,
 			hoverable &&
 				(isThemeVariant
-					? "cursor-pointer glass-card-themed-hover"
+					? "cursor-pointer glass-card-themed-hover hover:shadow-lg"
 					: `cursor-pointer ${hoverClasses[resolved]}`),
 			"shadow-sm",
 			className,
@@ -453,12 +455,10 @@
 		border-color: var(--_glass-border-dark);
 	}
 
-	/* Theme-driven hover: brighten the glass surface instead of overriding with Tailwind colors */
+	/* Theme-driven hover: brighten the glass surface instead of overriding with Tailwind colors.
+	   Shadow is handled via Tailwind hover:shadow-lg class to avoid hardcoded rgba values. */
 	.glass-card-themed-hover:hover {
 		filter: brightness(1.08);
-		box-shadow:
-			0 10px 15px -3px rgba(0, 0, 0, 0.1),
-			0 4px 6px -4px rgba(0, 0, 0, 0.1);
 	}
 	:global(.dark) .glass-card-themed-hover:hover {
 		filter: brightness(1.15);

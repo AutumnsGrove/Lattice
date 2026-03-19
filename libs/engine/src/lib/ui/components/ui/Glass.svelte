@@ -227,7 +227,7 @@
 	};
 
 	// Frosted variant has its own blur (lg); other variants use the intensity prop
-	const hasBuiltInBlur = variant === "frosted";
+	const hasBuiltInBlur = $derived(variant === "frosted");
 
 	const computedClass = $derived(
 		cn(
