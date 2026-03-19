@@ -126,6 +126,12 @@
 </script>
 
 <svelte:head>
+	<!-- Inject user accent on :root so the Prism accent scale resolves correctly.
+	     The scale tokens (--grove-accent-10, etc.) are defined on :root — if --user-accent
+	     is only set on a child div, they evaluate before it cascades and fall back to green. -->
+	{#if data.siteSettings?.accent_color}
+		{@html `<style>:root{--user-accent:${data.siteSettings.accent_color};}</style>`}
+	{/if}
 	{#if context?.type === "tenant"}
 		<title>{siteName}</title>
 		<link rel="alternate" type="application/rss+xml" title="{siteName} RSS Feed" href="/api/feed" />
