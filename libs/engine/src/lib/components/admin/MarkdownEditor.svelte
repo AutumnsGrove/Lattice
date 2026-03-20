@@ -668,8 +668,7 @@
 		isUpdating = false;
 	}
 
-	/** @param {string} text */
-	async function insertAtCursor(text) {
+	async function insertAtCursor(text: string) {
 		if (!textareaRef || isUpdating) return;
 		isUpdating = true;
 		isProgrammaticUpdate = true;
@@ -687,8 +686,7 @@
 	}
 
 	// Toolbar actions
-	/** @param {number} level */
-	function insertHeading(level) {
+	function insertHeading(level: number) {
 		insertAtCursor("#".repeat(level) + " ");
 	}
 
@@ -700,8 +698,7 @@
 		insertAtCursor("![alt text](image-url)");
 	}
 
-	/** @param {string[]} urls */
-	function handlePhotoInsert(urls) {
+	function handlePhotoInsert(urls: string[]) {
 		showPhotoPicker = false;
 		if (urls.length === 0) return;
 		if (urls.length === 1) {
@@ -767,10 +764,8 @@
 	});
 
 	// Full preview modal focus management
-	/** @type {HTMLElement | null} */
-	let previouslyFocusedBeforePreview = null;
-	/** @type {HTMLDivElement | null} */
-	let fullPreviewModalRef = $state(null);
+	let previouslyFocusedBeforePreview: HTMLElement | null = null;
+	let fullPreviewModalRef: HTMLDivElement | null = $state(null);
 
 	$effect(() => {
 		if (showFullPreview) {
@@ -791,8 +786,7 @@
 	});
 
 	// Drag and drop handlers
-	/** @param {DragEvent} e */
-	function handleDragEnter(e) {
+	function handleDragEnter(e: DragEvent) {
 		e.preventDefault();
 		if (readonly) return;
 		if (e.dataTransfer?.types?.includes("Files")) {
@@ -800,8 +794,7 @@
 		}
 	}
 
-	/** @param {DragEvent} e */
-	function handleDragOver(e) {
+	function handleDragOver(e: DragEvent) {
 		e.preventDefault();
 		if (readonly) return;
 		if (e.dataTransfer?.types?.includes("Files")) {

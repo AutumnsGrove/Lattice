@@ -679,19 +679,19 @@
 								<Input
 									type="text"
 									value={image.alt}
-									oninput={(/** @type {Event} */ e) =>
-										updateGalleryImage(i, "alt", /** @type {HTMLInputElement} */ (e.target).value)}
+									oninput={(e) =>
+										updateGalleryImage(i, "alt", (e.currentTarget as HTMLInputElement).value)}
 									placeholder="Alt text"
 									class="small"
 								/>
 								<Input
 									type="text"
 									value={image.caption}
-									oninput={(/** @type {Event} */ e) =>
+									oninput={(e) =>
 										updateGalleryImage(
 											i,
 											"caption",
-											/** @type {HTMLInputElement} */ (e.target).value,
+											(e.currentTarget as HTMLInputElement).value,
 										)}
 									placeholder="Caption"
 									class="small"

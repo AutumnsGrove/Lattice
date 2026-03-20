@@ -153,15 +153,14 @@
 		const bottomPadding = 32; // Padding from bottom of content
 
 		let lastBottom = 0; // Track the bottom edge of the last positioned item
-		/** @type {string[]} */
-		const newOverflowingAnchors = [];
+		const newOverflowingAnchors: string[] = [];
 
 		// Get all unique anchors that have items
 		const anchors = getUniqueAnchors();
 
 		// Sort anchors by their position in the document
 		const anchorPositions = anchors
-			.map((/** @type {string} */ anchor) => {
+			.map((anchor) => {
 				const el = findAnchorElement(anchor);
 				return {
 					anchor,
@@ -170,48 +169,40 @@
 					top: el ? el.offsetTop : Infinity,
 				};
 			})
-			.sort((/** @type {{ top: number }} */ a, /** @type {{ top: number }} */ b) => a.top - b.top);
+			.sort((a, b) => a.top - b.top);
 
-		anchorPositions.forEach(
-			(
-				/** @type {{ anchor: string; key: string; element: HTMLElement | null; top: number }} */ {
-					anchor,
-					key,
-					element,
-				},
-			) => {
-				const groupEl = anchorGroupElements[key];
+		anchorPositions.forEach(({ anchor: _anchor, key, element }) => {
+			const groupEl = anchorGroupElements[key];
 
-				if (element && groupEl) {
-					// Desired position (aligned with anchor element)
-					let desiredTop = element.offsetTop - gutterTop;
+			if (element && groupEl) {
+				// Desired position (aligned with anchor element)
+				let desiredTop = element.offsetTop - gutterTop;
 
-					// Get the height of this gutter group
-					const groupHeight = groupEl.offsetHeight;
+				// Get the height of this gutter group
+				const groupHeight = groupEl.offsetHeight;
 
-					// Check for collision with previous item
-					if (desiredTop < lastBottom + minGap) {
-						// Push down to avoid overlap
-						desiredTop = lastBottom + minGap;
-					}
-
-					// Check if this item would overflow past the content
-					const effectiveContentHeight = contentHeight > 0 ? contentHeight : Infinity;
-					if (desiredTop + groupHeight > effectiveContentHeight - bottomPadding) {
-						// This item overflows - mark it and hide it in the gutter
-						newOverflowingAnchors.push(key);
-						itemPositions[key] = -9999; // Hide off-screen
-					} else {
-						itemPositions[key] = desiredTop;
-						// Update lastBottom for next iteration
-						lastBottom = desiredTop + groupHeight;
-					}
-				} else if (groupEl) {
-					// Element not found - hide this group
-					itemPositions[key] = -9999;
+				// Check for collision with previous item
+				if (desiredTop < lastBottom + minGap) {
+					// Push down to avoid overlap
+					desiredTop = lastBottom + minGap;
 				}
-			},
-		);
+
+				// Check if this item would overflow past the content
+				const effectiveContentHeight = contentHeight > 0 ? contentHeight : Infinity;
+				if (desiredTop + groupHeight > effectiveContentHeight - bottomPadding) {
+					// This item overflows - mark it and hide it in the gutter
+					newOverflowingAnchors.push(key);
+					itemPositions[key] = -9999; // Hide off-screen
+				} else {
+					itemPositions[key] = desiredTop;
+					// Update lastBottom for next iteration
+					lastBottom = desiredTop + groupHeight;
+				}
+			} else if (groupEl) {
+				// Element not found - hide this group
+				itemPositions[key] = -9999;
+			}
+		});
 
 		// Update overflowing anchors and notify parent
 		overflowingAnchors = newOverflowingAnchors;
