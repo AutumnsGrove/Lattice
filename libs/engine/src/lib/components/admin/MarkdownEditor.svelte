@@ -138,8 +138,7 @@
 	let curioQuery = $state("");
 	let curioAutocompletePos = $state({ top: 0, left: 0 });
 	let curioTriggerStart = $state(0); // character index where :: begins
-	/** @type {CurioAutocomplete | null} */
-	let curioAutocompleteRef = $state(null);
+	let curioAutocompleteRef: { handleKey: (e: KeyboardEvent) => boolean } | null = $state(null);
 
 	// Editor settings
 	let editorSettings = $state({
@@ -156,9 +155,8 @@
 	let isFiresideMode = $state(false);
 
 	// Voice mode (Scribe transcription)
-	/** @type {"raw" | "draft"} */
-	let voiceMode = $state(/** @type {"raw" | "draft"} */ ("raw"));
-	let voiceError = $state(/** @type {string | null} */ (null));
+	let voiceMode: "raw" | "draft" = $state("raw");
+	let voiceError: string | null = $state(null);
 
 	// Initialize composables
 	const editorTheme = useEditorTheme();
@@ -167,7 +165,7 @@
 	const draftManager = useDraftManager({
 		draftKey,
 		getContent: () => content,
-		setContent: (/** @type {string} */ c) => (content = c),
+		setContent: (c: string) => (content = c),
 		onDraftRestored,
 		readonly,
 		getMetadata: () => ({ title: previewTitle }),
@@ -181,9 +179,8 @@
 	let debouncedContent = $state(content);
 	// NOT $state - these are cleanup handles, not reactive state
 	// Using $state here causes infinite loops (effect writes to state it reads)
-	/** @type {ReturnType<typeof setTimeout> | null} */
-	let debounceTimer = null;
-	let isMounted = true;
+	let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+	let isMounted: boolean = true;
 
 	// Update debounced content after 150ms of no typing
 	$effect(() => {
@@ -249,8 +246,7 @@
 		return availableAnchors;
 	}
 
-	/** @param {string} name */
-	export function insertAnchor(name) {
+	export function insertAnchor(name: string) {
 		insertAtCursor(`<!-- anchor:${name} -->\n`);
 	}
 
@@ -356,10 +352,8 @@
 	/**
 	 * Handle curio selection from autocomplete.
 	 * Replaces the :: trigger + query with the full directive.
-	 * @param {string} directiveText - e.g. "::guestbook::" or "::poll[]::"
-	 * @param {number} cursorOffset - where to place cursor within the directive text
 	 */
-	async function handleCurioSelect(directiveText, cursorOffset) {
+	async function handleCurioSelect(directiveText: string, cursorOffset: number) {
 		if (!textareaRef) return;
 		isUpdating = true;
 		isProgrammaticUpdate = true;
@@ -388,8 +382,7 @@
 	}
 
 	// Keyboard handlers (simplified - removed slash commands and command palette)
-	/** @param {KeyboardEvent} e */
-	function handleKeydown(e) {
+	function handleKeydown(e: KeyboardEvent) {
 		// Curio autocomplete intercepts keys first when open
 		if (showCurioAutocomplete && curioAutocompleteRef) {
 			const handled = curioAutocompleteRef.handleKey(e);

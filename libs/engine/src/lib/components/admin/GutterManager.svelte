@@ -172,10 +172,11 @@
 	let cdnFilter = $state("");
 
 	// Debounced CDN filter to avoid excessive API calls
-	const debouncedFilterRequest = debounce(async (query) => {
+	const debouncedFilterRequest = debounce(async (query: unknown) => {
 		cdnLoading = true;
 		try {
-			const cacheKey = query ? `cdn_${query}` : "cdn_root";
+			const queryStr = query ? String(query) : "";
+			const cacheKey = queryStr ? `cdn_${queryStr}` : "cdn_root";
 
 			// Check cache first
 			const cachedResult = getCachedImage(cacheKey);
@@ -190,15 +191,15 @@
 			}
 
 			const params = new URLSearchParams();
-			if (query) params.set("prefix", String(query));
+			if (queryStr) params.set("prefix", queryStr);
 			params.set("limit", "50");
 
 			const response = await fetch(`/api/images/list?${params}`); // csrf-ok
-			const data = await response.json();
+			const data = (await response.json()) as { images: CdnImage[] };
 
 			if (response.ok) {
 				const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"];
-				const filtered = data.images.filter((/** @type {CdnImage} */ img) => {
+				const filtered = data.images.filter((img: CdnImage) => {
 					const key = img.key.toLowerCase();
 					return imageExtensions.some((ext) => key.endsWith(ext));
 				});
@@ -238,8 +239,7 @@
 		showAddModal = true;
 	}
 
-	/** @param {number} index */
-	function openEditModal(index) {
+	function openEditModal(index: number) {
 		const item = gutterItems[index];
 		itemType = item.type;
 		itemAnchor = item.anchor || "";
@@ -264,8 +264,7 @@
 	}
 
 	function saveItem() {
-		/** @type {GutterItem} */
-		const newItem = {
+		const newItem: GutterItem = {
 			type: itemType,
 			anchor: itemAnchor,
 		};
@@ -296,19 +295,12 @@
 		closeModal();
 	}
 
-	/** @param {number} index */
-	function deleteItem(index) {
-		gutterItems = gutterItems.filter(
-			(/** @type {GutterItem} */ _, /** @type {number} */ i) => i !== index,
-		);
+	function deleteItem(index: number) {
+		gutterItems = gutterItems.filter((_: GutterItem, i: number) => i !== index);
 		toast.success("Vine removed");
 	}
 
-	/**
-	 * @param {number} index
-	 * @param {number} direction
-	 */
-	function moveItem(index, direction) {
+	function moveItem(index: number, direction: number) {
 		const newIndex = index + direction;
 		if (newIndex < 0 || newIndex >= gutterItems.length) return;
 
@@ -320,8 +312,7 @@
 	}
 
 	// Generate anchor name from text
-	/** @param {string} text */
-	function generateAnchorName(text) {
+	function generateAnchorName(text: string) {
 		return text
 			.toLowerCase()
 			.replace(/[^a-z0-9\s-]/g, "")
@@ -345,8 +336,7 @@
 		debouncedFilterRequest(cdnFilter);
 	}
 
-	/** @param {(url: string) => void} callback */
-	function openImagePicker(callback) {
+	function openImagePicker(callback: (url: string) => void) {
 		imagePickerCallback = callback;
 		showImagePicker = true;
 		loadCdnImages();

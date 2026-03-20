@@ -72,16 +72,16 @@
 		<figure class="gutter-photo">
 			<button
 				class="image-button"
-				onclick={() => openLightbox(imageSrc, item.caption || "Gutter image", item.caption || "")}
+				onclick={() => openLightbox(imageSrc ?? "", item.caption || "Gutter image", item.caption || "")}
 			>
-				<img src={imageSrc} alt={item.caption || "Gutter image"} loading="lazy" decoding="async" />
+				<img src={imageSrc ?? ""} alt={item.caption || "Gutter image"} loading="lazy" decoding="async" />
 			</button>
 			{#if item.caption}
 				<figcaption>{item.caption}</figcaption>
 			{/if}
 		</figure>
 	{:else if item.type === "gallery"}
-		{#if item.images?.length > 0}
+		{#if (item.images?.length ?? 0) > 0}
 			<div class="gutter-gallery">
 				<GlassCarousel
 					images={item.images.map(

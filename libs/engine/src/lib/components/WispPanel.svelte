@@ -344,21 +344,21 @@
       <!-- Content length indicator -->
       <div
         class="content-length"
-        class:warn={contentLengthStatus().status === "warn"}
-        class:over={contentLengthStatus().status === "over"}
+        class:warn={contentLengthStatus.status === "warn"}
+        class:over={contentLengthStatus.status === "over"}
         aria-live="polite"
       >
         <span class="length-text">
-          {contentLengthStatus().len.toLocaleString()} / {MAX_CONTENT_LENGTH.toLocaleString()}
+          {contentLengthStatus.len.toLocaleString()} / {MAX_CONTENT_LENGTH.toLocaleString()}
         </span>
         <div class="length-bar">
-          <div class="length-fill" style="width: {contentLengthStatus().pct}%"></div>
+          <div class="length-fill" style="width: {contentLengthStatus.pct}%"></div>
         </div>
       </div>
 
       <!-- Vibes section - the ASCII art atmosphere -->
       <div class="vibes-section">
-        <pre class="ascii-vibe" aria-hidden="true">{displayVibe()}</pre>
+        <pre class="ascii-vibe" aria-hidden="true">{displayVibe}</pre>
       </div>
 
       <!-- Mode selector -->
@@ -378,7 +378,7 @@
         <button
           class="action-btn"
           onclick={() => runAnalysis("grammar")}
-          disabled={isAnalyzing || contentLengthStatus().status === "over"}
+          disabled={isAnalyzing || contentLengthStatus.status === "over"}
           aria-busy={isAnalyzing}
         >
           grammar
@@ -386,7 +386,7 @@
         <button
           class="action-btn"
           onclick={() => runAnalysis("tone")}
-          disabled={isAnalyzing || contentLengthStatus().status === "over"}
+          disabled={isAnalyzing || contentLengthStatus.status === "over"}
           aria-busy={isAnalyzing}
         >
           tone
@@ -402,7 +402,7 @@
         <button
           class="action-btn action-full"
           onclick={() => runAnalysis("all")}
-          disabled={isAnalyzing || contentLengthStatus().status === "over"}
+          disabled={isAnalyzing || contentLengthStatus.status === "over"}
           aria-busy={isAnalyzing}
         >
           {isAnalyzing ? "thinking..." : "full check"}
