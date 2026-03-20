@@ -9,7 +9,7 @@ import type { LumenToolCall } from "@autumnsgrove/lattice/lumen";
 import { SCHEMA_REGISTRY } from "@autumnsgrove/lattice/reverie";
 import type { DomainId, DomainSchema, FieldDefinition } from "@autumnsgrove/lattice/reverie";
 import type { ChangePreview } from "../types";
-import { safeParseJson } from "@autumnsgrove/lattice/utils";
+import { safeParseJson } from "@autumnsgrove/lattice/utils/json";
 
 // =============================================================================
 // Types

@@ -13,9 +13,11 @@ import { createMockEnv } from "../test-helpers";
 vi.mock("@autumnsgrove/lattice/server/secrets-manager", () => {
 	const mockSafeGetSecret = vi.fn().mockResolvedValue(null);
 	return {
-		SecretsManager: vi.fn().mockImplementation(() => ({
-			safeGetSecret: mockSafeGetSecret,
-		})),
+		SecretsManager: vi.fn().mockImplementation(
+			class {
+				safeGetSecret = mockSafeGetSecret;
+			} as any,
+		),
 		_mockSafeGetSecret: mockSafeGetSecret,
 	};
 });
