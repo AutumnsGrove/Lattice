@@ -1,18 +1,19 @@
 # Svelte File Desync Audit
 
-> **Scope:** 661 `.svelte` files across `libs/` and `apps/` (excluding `node_modules`, `.svelte-kit`, `_archived`)
+> **Scope:** 643 `.svelte` files across `libs/` and `apps/` (excluding `node_modules`, `.svelte-kit`, `_archived`, `apps/ivy`)
 > **Date:** 2026-03-20
 > **Purpose:** Identify drift, inconsistency, and convention splits accumulated across hundreds of agent sessions
+> **Out of scope:** `apps/ivy` — intentional outlier, not in active development
 
 ---
 
 ## Executive Summary
 
-The codebase is in **surprisingly good shape** for Svelte 5 migration (~94% adopted), but has clear drift in **6 major dimensions**:
+The codebase is in **surprisingly good shape** for Svelte 5 migration (~96% adopted), but has clear drift in **6 major dimensions**:
 
 | Dimension | Severity | Scope |
 |-----------|----------|-------|
-| Plain JS script blocks (missing `lang="ts"`) | **HIGH** | 49 files |
+| Plain JS script blocks (missing `lang="ts"`) | **HIGH** | 45 files |
 | `cn()` import path inconsistency | **MEDIUM** | 46 files |
 | Event handler pattern split (`on:click` vs `onclick`) | **HIGH** | ~2,980 Svelte 4 vs 5 Svelte 5 |
 | Style block approach fragmentation | **MEDIUM** | 3 competing patterns |
@@ -25,12 +26,12 @@ The codebase is in **surprisingly good shape** for Svelte 5 migration (~94% adop
 
 ### 1a. TypeScript vs Plain JavaScript
 
-**92.1% of files use `<script lang="ts">`** — but 49 files still use plain `<script>`.
+**~93% of files use `<script lang="ts">`** — but 45 files still use plain `<script>`.
 
 | Location | `lang="ts"` | Plain JS | Coverage |
 |----------|-------------|----------|----------|
 | libs/ | 362 | 24 | 94.0% |
-| apps/ | 245 | 24 | 89.7% |
+| apps/ (excl. ivy) | 232 | 19 | 92.4% |
 | tools/ | 1 | 2 | 33.3% |
 
 **Plain JS in libs/engine (24 files — HIGH priority):**
@@ -44,27 +45,24 @@ The codebase is in **surprisingly good shape** for Svelte 5 migration (~94% adop
 - `ui/components/icons/`: IconLegend
 - `grafts/`: GreenhouseAdminPanel, UploadManagementPanel
 
-**Plain JS in apps/aspen (23 route files) + 1 in apps/domains**
+**Plain JS in apps/aspen (18 route files) + 1 in apps/domains**
 
 ### 1b. Svelte 4 vs Svelte 5 Reactivity
 
+With Ivy excluded, the codebase is **effectively 100% Svelte 5** for reactivity patterns:
+
 | Pattern | Count | Status |
 |---------|-------|--------|
-| `$:` reactive statements (Svelte 4) | **1 file** | Nearly eliminated |
+| `$:` reactive statements (Svelte 4) | **0 files** | Fully migrated |
 | `$state` (Svelte 5) | 262 files | Well adopted |
 | `$derived` (Svelte 5) | 365 files | Most used rune |
 | `$effect` (Svelte 5) | 158 files | Appropriate use |
-| `export let` props (Svelte 4) | **4 files** | All in apps/ivy |
-| `$props()` (Svelte 5) | 598 files | 97%+ adopted |
+| `export let` props (Svelte 4) | **0 files** | Fully migrated |
+| `$props()` (Svelte 5) | 594 files | 100% adopted |
 | `<svelte:component>` (Svelte 4) | **1 file** | Acceptable (dynamic icons) |
 | `<script context="module">` | **0** | Fully migrated |
 
-**Svelte 4 holdouts (all in Ivy app):**
-- `apps/ivy/src/components/ui/Button.svelte` — `export let`
-- `apps/ivy/src/components/compose/ComposeModal.svelte` — `export let`
-- `apps/ivy/src/components/mail/EmailView.svelte` — `export let`
-- `apps/ivy/src/components/mail/ThreadList.svelte` — `export let`
-- `apps/ivy/src/routes/(app)/thread/[id]/+page.svelte` — `$:` reactive statement
+The single `<svelte:component>` usage is in `apps/aspen/src/routes/arbor/curios/+page.svelte` for dynamically rendering icon components — a legitimate use case.
 
 ---
 
@@ -78,7 +76,10 @@ The codebase is in **surprisingly good shape** for Svelte 5 migration (~94% adop
 | `$lib/utils` | **46 files** | NO — missing `/ui` segment |
 | `@autumnsgrove/lattice/ui/utils` | 13 files | YES (for apps) |
 
-All 46 wrong imports are in `libs/engine/src/lib/ui/components/primitives/` (shadcn components) + 1 in Timeline.
+All 46 wrong imports are in `libs/engine/src/lib/ui/components/primitives/` (shadcn components) + 1 in Timeline. Full list:
+
+- All 37 shadcn primitive files (badge, button, input, card/*, dialog/*, sheet/*, select/*, tabs/*, table/*, accordion/*, separator, skeleton, textarea)
+- `libs/engine/src/lib/curios/timeline/Timeline.svelte`
 
 ### 2b. Icon Imports
 
@@ -125,12 +126,11 @@ This is the **single largest desync** in the codebase.
 
 | Pattern | Count | Version |
 |---------|-------|---------|
-| `<slot>` (legacy) | **2 files** | Svelte 4 |
+| `<slot>` (legacy) | **1 file** | Svelte 4 |
 | `{@render children()}` (snippets) | 118 files | Svelte 5 |
 
-**Legacy slot files:**
+**Legacy slot file:**
 - `libs/vineyard/src/lib/components/vineyard/VineyardLayout.svelte`
-- `apps/ivy/src/components/ui/Button.svelte`
 
 ---
 
@@ -140,9 +140,9 @@ Three competing approaches coexist:
 
 | Approach | Count | % |
 |----------|-------|---|
-| No `<style>` block (Tailwind-only) | 321 files | 48.6% |
-| `<style lang="postcss">` | 263 files | 39.8% |
-| `<style>` (plain CSS) | 77 files | 11.6% |
+| No `<style>` block (Tailwind-only) | 321 files | 49.9% |
+| `<style lang="postcss">` | 263 files | 40.9% |
+| `<style>` (plain CSS) | 77 files | 12.0% |
 
 **Mixed approach** (~200+ files) use both a style block AND heavy Tailwind, which is fine but creates cognitive load when there's no clear convention for *when* to use which.
 
@@ -161,7 +161,7 @@ No SCSS usage found (good — consistent with Tailwind/PostCSS stack).
   - `components/WispButton.svelte` — `#2a2a2a`, `#3a3a3a`, `#8bc48b`
 
 ### Inline Styles
-- **138 files** (20.9%) use `style="..."` attributes
+- **138 files** (21.5%) use `style="..."` attributes
 - Many are legitimate (dynamic widths, CSS custom property injection, computed positions)
 - Some could be converted to Tailwind arbitrary values or CSS classes
 
@@ -171,12 +171,12 @@ No SCSS usage found (good — consistent with Tailwind/PostCSS stack).
 
 | Pattern | Count | % |
 |---------|-------|---|
-| Files with `interface Props` | 276 | 41.8% |
-| Files with JSDoc (`@type`, `@param`) | 341 | 51.6% |
-| Files with comprehensive docs (JSDoc + examples) | ~80 | 12% |
-| Files with NO documentation | ~320 | 49% |
-| HTML template comments (`<!-- -->`) | 204 | 30.8% |
-| TODO/FIXME/HACK comments | 13 total | Very clean |
+| Files with `interface Props` | 276 | 42.9% |
+| Files with JSDoc (`@type`, `@param`) | 341 | 53.0% |
+| Files with comprehensive docs (JSDoc + examples) | ~80 | 12.4% |
+| Files with NO documentation | ~300 | 46.7% |
+| HTML template comments (`<!-- -->`) | 204 | 31.7% |
+| TODO/FIXME/HACK comments | 8 total | Very clean |
 
 **The split:** Some files have rich JSDoc with `@prop`, `@example` blocks. Others have TypeScript interfaces only. Nearly half have nothing. There's no clear convention for *which style to use when*.
 
@@ -194,7 +194,7 @@ No SCSS usage found (good — consistent with Tailwind/PostCSS stack).
 Naming is **consistent and intentional** — no drift here.
 
 ### Oversized Components
-74 files exceed 500 lines (11.2%). Top offenders:
+74 files exceed 500 lines (11.5%). Top offenders:
 
 | File | Lines |
 |------|-------|
@@ -215,9 +215,9 @@ Naming is **consistent and intentional** — no drift here.
 
 | Pattern | Count | Coverage |
 |---------|-------|----------|
-| Files with `aria-*` attributes | 390 | 59.0% |
-| Files with `aria-label` | 260 | 41.7% |
-| Files with `role=` | 172 | 26.0% |
+| Files with `aria-*` attributes | 390 | 60.7% |
+| Files with `aria-label` | 260 | 40.4% |
+| Files with `role=` | 172 | 26.7% |
 | `<img>` tags missing `alt` | 28 instances | 15 files |
 
 **Files with missing `alt` attributes:**
@@ -242,35 +242,35 @@ Naming is **consistent and intentional** — no drift here.
 ## Prioritized Remediation Plan
 
 ### Phase 1 — Quick Wins (Mechanical, low risk)
-1. **Add `lang="ts"` to 49 plain JS svelte files** — no logic changes needed
+1. **Add `lang="ts"` to 45 plain JS svelte files** — no logic changes needed
 2. **Fix 46 `cn()` import paths** — `$lib/utils` → `$lib/ui/utils` in primitives
 3. **Fix 1 Lucide import** — BeeIcon.svelte → use Prism icons
-4. **Migrate 4 Ivy `export let` → `$props()`**
-5. **Convert 1 `$:` → `$derived`/`$effect`** in Ivy
-6. **Convert 2 `<slot>` → `{@render children()}`**
+4. **Convert 1 `<slot>` → `{@render children()}`** in VineyardLayout
 
 ### Phase 2 — Event Handler Migration (Large, systematic)
-7. **Migrate `on:` directives → event props** across ~2,980 occurrences
+5. **Migrate `on:` directives → event props** across ~2,980 occurrences
    - This is the biggest single task — should be done app-by-app or directory-by-directory
 
 ### Phase 3 — Design Token Compliance
-8. **Replace hardcoded colors** in 166 files with CSS custom properties
-9. **Audit inline styles** — convert mechanical ones to Tailwind/classes
+6. **Replace hardcoded colors** in 166 files with CSS custom properties
+7. **Audit inline styles** — convert mechanical ones to Tailwind/classes
 
 ### Phase 4 — Code Quality
-10. **Break up oversized components** (>500 lines, especially >1000 lines)
-11. **Add missing `alt` attributes** to 28 image instances
-12. **Standardize documentation approach** — pick JSDoc OR TypeScript interfaces, not both
-13. **Decide style block convention** — when to use `<style lang="postcss">` vs Tailwind-only
+8. **Break up oversized components** (>500 lines, especially >1000 lines)
+9. **Add missing `alt` attributes** to 28 image instances
+10. **Standardize documentation approach** — pick JSDoc OR TypeScript interfaces, not both
+11. **Decide style block convention** — when to use `<style lang="postcss">` vs Tailwind-only
 
 ---
 
 ## What's Working Well
 
-- **Svelte 5 rune adoption: 94%+** — impressive for a large codebase
+- **Svelte 5 rune adoption: ~96%** — impressive for a large codebase
+- **Svelte 5 props: 100%** (excluding Ivy) — fully migrated to `$props()`
+- **Svelte 5 reactivity: 100%** (excluding Ivy) — zero `$:` statements remain
 - **File naming: 100% consistent** — PascalCase standard with intentional kebab-case for primitives
 - **Store patterns: 100% auto-subscription** — no manual `.subscribe()` drift
 - **No `clsx`/`classnames` leaks** — all use `cn()` wrapper
-- **Very low TODO/FIXME count (13 total)** — clean, completed work
+- **Very low TODO/FIXME count (8 total)** — clean, completed work
 - **No module script drift** — fully migrated from `context="module"`
 - **Icon system: 99.6% compliant** — only 1 Lucide leak
