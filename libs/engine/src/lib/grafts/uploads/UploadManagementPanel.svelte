@@ -155,7 +155,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					{#each filteredTenants() as tenant (tenant.tenantId)}
+					{#each filteredTenants as tenant (tenant.tenantId)}
 						<tr>
 							<td>
 								<div class="tenant-info">
