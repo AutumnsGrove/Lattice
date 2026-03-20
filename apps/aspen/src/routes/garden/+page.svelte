@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { goto } from "$app/navigation";
 	import Card from "@autumnsgrove/lattice/ui/components/ui/Card.svelte";
 	import Badge from "@autumnsgrove/lattice/ui/components/ui/Badge.svelte";

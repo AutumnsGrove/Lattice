@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	/**
 	 * LightboxCaption - Shared caption component for lightbox viewers
 	 * Displays image captions with consistent styling

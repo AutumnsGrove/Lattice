@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import Lightbox from "$lib/ui/components/gallery/Lightbox.svelte";
 	import GlassCarousel from "$lib/ui/components/ui/GlassCarousel.svelte";
 	import EmbedWidget from "$lib/ui/components/content/EmbedWidget.svelte";

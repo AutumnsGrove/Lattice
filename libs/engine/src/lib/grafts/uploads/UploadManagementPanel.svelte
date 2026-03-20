@@ -16,7 +16,7 @@
   />
   ```
 -->
-<script>
+<script lang="ts">
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import Button from "$lib/ui/components/ui/Button.svelte";
 	import { stateIcons, navIcons, actionIcons, authIcons } from "@autumnsgrove/prism/icons";

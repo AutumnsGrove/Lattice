@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { copyToClipboard as copyText } from "@autumnsgrove/lattice/utils/share";
 	import Button from "@autumnsgrove/lattice/ui/components/ui/Button.svelte";
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";

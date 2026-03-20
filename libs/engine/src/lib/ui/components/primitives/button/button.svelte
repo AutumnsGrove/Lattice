@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { cn } from "$lib/utils";
+	import { cn } from "$lib/ui/utils";
 	import { buttonVariants, type ButtonProps } from "./button-variants";
 
 	// svelte-ignore custom_element_props_identifier

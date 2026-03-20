@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import { apiRequest } from "$lib/utils/api";
 	import { tick } from "svelte";

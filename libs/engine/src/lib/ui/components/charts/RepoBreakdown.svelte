@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   /**
    * RepoBreakdown - Shows which repositories had activity
    * A simple horizontal stacked bar or pill visualization

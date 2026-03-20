@@ -3,7 +3,7 @@
 	import { stateIcons } from "@autumnsgrove/prism/icons";
 	import type { Snippet } from "svelte";
 	import * as Dialog from "./index.js";
-	import { cn } from "$lib/utils";
+	import { cn } from "$lib/ui/utils";
 
 	// svelte-ignore custom_element_props_identifier
 	let {

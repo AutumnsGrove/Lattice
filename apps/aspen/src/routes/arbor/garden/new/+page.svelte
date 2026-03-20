@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { goto, beforeNavigate } from "$app/navigation";
 	import { browser } from "$app/environment";
 	import { onMount } from "svelte";

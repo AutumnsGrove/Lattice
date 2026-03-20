@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	/**
 	 * DomainChecker — Self-service domain availability checker
 	 *

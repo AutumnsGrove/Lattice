@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { WithElementRef } from "bits-ui";
 	import type { HTMLAnchorAttributes } from "svelte/elements";
-	import { cn } from "$lib/utils";
+	import { cn } from "$lib/ui/utils";
 	import { badgeVariants, type BadgeVariant } from "./badge-variants";
 
 	// svelte-ignore custom_element_props_identifier

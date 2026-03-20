@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	/**
 	 * ZoomableImage - Image with zoom and pan functionality
 	 * Click to cycle through zoom levels, drag to pan when zoomed

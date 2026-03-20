@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { onMount } from "svelte";
 	import "../app.css";
 	import "@autumnsgrove/lattice/styles/tokens.css";

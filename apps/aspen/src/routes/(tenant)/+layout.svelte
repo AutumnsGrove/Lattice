@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	/**
 	 * Tenant Blog Layout
 	 *

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import CollapsibleSection from '../ui/CollapsibleSection.svelte';
 
 	/** @type {{ iconsUsed?: string[] }} */

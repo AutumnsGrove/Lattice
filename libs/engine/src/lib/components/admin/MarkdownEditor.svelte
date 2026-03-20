@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import MarkdownIt from "markdown-it";
 	import { tick, untrack } from "svelte";
 

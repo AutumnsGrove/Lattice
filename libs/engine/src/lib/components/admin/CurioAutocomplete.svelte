@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { CURIO_METADATA } from "$lib/utils/markdown-directives";
   import { tick } from "svelte";
 

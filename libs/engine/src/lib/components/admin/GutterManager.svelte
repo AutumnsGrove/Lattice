@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import Input from "$lib/ui/components/ui/Input.svelte";
 	import Button from "$lib/ui/components/ui/Button.svelte";
 	import Dialog from "$lib/ui/components/ui/Dialog.svelte";

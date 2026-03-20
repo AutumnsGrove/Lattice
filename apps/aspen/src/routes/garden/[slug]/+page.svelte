@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import ContentWithGutter from "@autumnsgrove/lattice/components/custom/ContentWithGutter.svelte";
 	import ReedsThread from "@autumnsgrove/lattice/components/reeds/ReedsThread.svelte";
 	import Button from "@autumnsgrove/lattice/ui/components/ui/Button.svelte";

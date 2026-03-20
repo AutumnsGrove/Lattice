@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   /**
    * WispButton - Toolbar integration button for Wisp
    *

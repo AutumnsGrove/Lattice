@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Select as SelectPrimitive, type WithoutChild } from "bits-ui";
 	import { navIcons } from "@autumnsgrove/prism/icons";
-	import { cn } from "$lib/utils";
+	import { cn } from "$lib/ui/utils";
 
 	// svelte-ignore custom_element_props_identifier
 	let {

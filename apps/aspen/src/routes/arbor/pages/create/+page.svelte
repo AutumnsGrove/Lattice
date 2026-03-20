@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { goto } from "$app/navigation";
 	import MarkdownEditor from "@autumnsgrove/lattice/components/admin/MarkdownEditor.svelte";
 	import Input from "@autumnsgrove/lattice/ui/components/ui/Input.svelte";

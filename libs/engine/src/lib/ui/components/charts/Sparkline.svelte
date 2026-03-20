@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   /**
    * Sparkline - A simple SVG sparkline chart
    * Shows activity trend over time (commits, LOC, etc.)

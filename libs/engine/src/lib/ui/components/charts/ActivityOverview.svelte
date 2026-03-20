@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   /**
    * ActivityOverview - Weekly activity visualization
    * Shows a GitHub-style contribution chart for recent days

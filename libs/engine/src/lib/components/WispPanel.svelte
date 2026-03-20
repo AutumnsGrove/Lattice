@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { slide, fade } from "svelte/transition";
   import { Button } from "$lib/ui/components/primitives/button";
   import { MAX_CONTENT_LENGTH } from "$lib/config/wisp.js";

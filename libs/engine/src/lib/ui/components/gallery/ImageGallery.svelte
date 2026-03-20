@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import ZoomableImage from './ZoomableImage.svelte';
 	import LightboxCaption from './LightboxCaption.svelte';
 
