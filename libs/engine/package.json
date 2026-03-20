@@ -6,7 +6,7 @@
     "@autumnsgrove/infra": "workspace:*",
     "@autumnsgrove/prism": "workspace:*",
     "@jsquash/jxl": "^1.3.0",
-    "@react-email/components": "^1.0.7",
+    "@react-email/components": "^1.0.10",
     "@react-email/render": "^2.0.4",
     "@tiptap/core": "^3.19.0",
     "@tiptap/extension-bubble-menu": "^3.19.0",
