@@ -17,9 +17,9 @@
 		"sanitize-html": "^2.14.0"
 	},
 	"devDependencies": {
-		"@cloudflare/workers-types": "^4.20251128.0",
+		"@cloudflare/workers-types": "^4.20260210.0",
 		"@types/sanitize-html": "^2.13.0",
-		"typescript": "^5.7.0",
+		"typescript": "^5.9.3",
 		"vitest": "^4.1.0",
 		"wrangler": "^4.63.0"
 	}

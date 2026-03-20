@@ -13,8 +13,8 @@
 		"@autumnsgrove/lattice": "workspace:*"
 	},
 	"devDependencies": {
-		"@cloudflare/workers-types": "^4.20251128.0",
-		"typescript": "^5.7.0",
+		"@cloudflare/workers-types": "^4.20260210.0",
+		"typescript": "^5.9.3",
 		"wrangler": "^4.63.0"
 	}
 }
