@@ -179,10 +179,14 @@
 <style>
 	.blog-header-title {
 		font-size: 2.5rem;
-		color: var(--blog-header-title);
+		color: var(--grove-accent-dark);
 		margin-bottom: 0.75rem;
 		letter-spacing: -0.02em;
 		transition: color 0.3s ease;
+	}
+
+	:global(.dark) .blog-header-title {
+		color: var(--grove-accent);
 	}
 
 	@media (max-width: 768px) {
@@ -192,7 +196,7 @@
 	}
 
 	.blog-header-text {
-		color: var(--blog-header-text);
+		color: var(--color-text-muted);
 		font-size: 1.1rem;
 		transition: color 0.3s ease;
 	}
@@ -216,7 +220,7 @@
 	}
 
 	.description {
-		color: var(--blog-header-text);
+		color: var(--color-text-muted);
 		line-height: 1.6;
 		margin: 0;
 		transition: color 0.3s ease;
