@@ -46,7 +46,7 @@ const actions: Record<string, ServiceAction> = {
 
 	find_similar: {
 		schema: z.object({
-			url: z.string().url(),
+			url: z.url(),
 			num_results: z.number().int().min(1).max(100).default(10),
 			include_domains: z.array(z.string()).optional(),
 			exclude_domains: z.array(z.string()).optional(),

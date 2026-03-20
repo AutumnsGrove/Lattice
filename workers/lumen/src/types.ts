@@ -81,7 +81,7 @@ const ToolDefinitionSchema = z.object({
 	function: z.object({
 		name: z.string().max(64),
 		description: z.string().max(1024),
-		parameters: z.record(z.unknown()),
+		parameters: z.record(z.string(), z.unknown()),
 		strict: z.boolean().optional(),
 	}),
 });
@@ -120,7 +120,7 @@ export const InferenceRequestSchema = z.object({
 			skip_pii_scrub: z.boolean().optional(),
 			songbird: z.boolean().optional(),
 			tenant_api_key: z.string().max(500).optional(),
-			metadata: z.record(z.unknown()).optional(),
+			metadata: z.record(z.string(), z.unknown()).optional(),
 			tools: z.array(ToolDefinitionSchema).max(64).optional(),
 			tool_choice: ToolChoiceSchema.optional(),
 		})

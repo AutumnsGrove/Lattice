@@ -1533,8 +1533,8 @@ importers:
         specifier: ^4.11.9
         version: 4.11.9
       zod:
-        specifier: ^3.24.0
-        version: 3.25.76
+        specifier: ^4.3.6
+        version: 4.3.6
     devDependencies:
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.13.3
@@ -1654,8 +1654,8 @@ importers:
         specifier: ^4.11.9
         version: 4.11.9
       zod:
-        specifier: ^3.24.0
-        version: 3.25.76
+        specifier: ^4.3.6
+        version: 4.3.6
     devDependencies:
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.13.3
@@ -1682,8 +1682,8 @@ importers:
         specifier: ^4.11.9
         version: 4.11.9
       zod:
-        specifier: ^3.24.0
-        version: 3.25.76
+        specifier: ^4.3.6
+        version: 4.3.6
     devDependencies:
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.13.3
@@ -1751,8 +1751,8 @@ importers:
         specifier: ^4.11.9
         version: 4.11.9
       zod:
-        specifier: ^3.24.0
-        version: 3.25.76
+        specifier: ^4.3.6
+        version: 4.3.6
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20260317.1

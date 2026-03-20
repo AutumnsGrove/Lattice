@@ -32,7 +32,7 @@ const actions: Record<string, ServiceAction> = {
 
 	crawl: {
 		schema: z.object({
-			url: z.string().url(),
+			url: z.url(),
 			max_depth: z.number().int().min(1).max(5).default(1),
 			max_breadth: z.number().int().min(1).max(20).default(10),
 			limit: z.number().int().min(1).max(50).default(10),
@@ -50,7 +50,7 @@ const actions: Record<string, ServiceAction> = {
 
 	extract: {
 		schema: z.object({
-			urls: z.array(z.string().url()).min(1).max(20),
+			urls: z.array(z.url()).min(1).max(20),
 			include_images: z.boolean().default(false),
 		}),
 		buildRequest: (params, apiKey) => ({

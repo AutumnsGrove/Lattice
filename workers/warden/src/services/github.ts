@@ -149,7 +149,7 @@ const actions: Record<string, ServiceAction> = {
 			repo: z.string(),
 			workflow_id: z.union([z.string(), z.number()]),
 			ref: z.string().default("main"),
-			inputs: z.record(z.string()).optional(),
+			inputs: z.record(z.string(), z.string()).optional(),
 		}),
 		buildRequest: (params, token) => ({
 			url: `${BASE_URL}/repos/${params.owner}/${params.repo}/actions/workflows/${params.workflow_id}/dispatches`,

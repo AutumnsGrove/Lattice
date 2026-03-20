@@ -26,7 +26,7 @@ const actions: Record<string, ServiceAction> = {
 			limit: z.number().int().min(1).max(100).default(10),
 			starting_after: z.string().optional(),
 			ending_before: z.string().optional(),
-			email: z.string().email().optional(),
+			email: z.email().optional(),
 		}),
 		buildRequest: (params, key) => {
 			const qs = new URLSearchParams();
