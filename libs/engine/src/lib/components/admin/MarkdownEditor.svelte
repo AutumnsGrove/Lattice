@@ -803,17 +803,15 @@
 		}
 	}
 
-	/** @param {DragEvent} e */
-	function handleDragLeave(e) {
+	function handleDragLeave(e: DragEvent) {
 		e.preventDefault();
-		const target = /** @type {HTMLElement} */ (e.currentTarget);
-		if (!target.contains(/** @type {Node | null} */ (e.relatedTarget))) {
+		const target = e.currentTarget as HTMLElement;
+		if (!target.contains(e.relatedTarget as Node | null)) {
 			isDragging = false;
 		}
 	}
 
-	/** @param {DragEvent} e */
-	async function handleDrop(e) {
+	async function handleDrop(e: DragEvent) {
 		e.preventDefault();
 		isDragging = false;
 		if (readonly) return;
@@ -832,8 +830,7 @@
 		}
 	}
 
-	/** @param {File} file */
-	async function uploadImage(file) {
+	async function uploadImage(file: File) {
 		// Pre-check: is the feature enabled via grafts?
 		if (!uploadsEnabled) {
 			toast.warning(
