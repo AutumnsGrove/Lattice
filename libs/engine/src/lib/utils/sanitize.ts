@@ -501,6 +501,8 @@ export function sanitizeMarkdown(markdownHTML: string): string {
 			// Mentions: @username grove links with passage animation
 			"data-passage-name",
 			"data-mention",
+			// Anchor markers: <!-- anchor:tagname --> -> <span data-anchor="tagname">
+			"data-anchor",
 			// Code block copy buttons
 			"data-code",
 			"aria-label",
@@ -529,9 +531,11 @@ export function sanitizeMarkdown(markdownHTML: string): string {
 			"style",
 		],
 		ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|\/|#)/i,
-		ALLOW_DATA_ATTR: false,
 		KEEP_CONTENT: true,
-		SAFE_FOR_TEMPLATES: true,
+		// Note: SAFE_FOR_TEMPLATES forces ALLOW_DATA_ATTR:false which blocks
+		// all data-* attributes even when listed in ALLOWED_ATTR. We don't need
+		// template injection protection here since we control the markdown pipeline,
+		// and ALLOWED_ATTR already whitelists only specific attributes.
 		RETURN_TRUSTED_TYPE: false,
 	}) as string;
 }

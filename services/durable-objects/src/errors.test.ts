@@ -58,6 +58,7 @@ describe("DO_ERRORS catalog", () => {
 
 describe("logDoError", () => {
 	beforeEach(() => {
+		vi.restoreAllMocks();
 		vi.spyOn(console, "error").mockImplementation(() => {});
 	});
 

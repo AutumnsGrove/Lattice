@@ -81,6 +81,7 @@ describe("FORAGE_ERRORS catalog", () => {
 
 describe("logForageError", () => {
 	beforeEach(() => {
+		vi.restoreAllMocks();
 		vi.spyOn(console, "error").mockImplementation(() => {});
 	});
 
