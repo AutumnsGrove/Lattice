@@ -21,7 +21,7 @@
 		"@cloudflare/workers-types": "^4.20260210.0",
 		"@sveltejs/adapter-cloudflare": "^7.2.6",
 		"@sveltejs/kit": "^2.50.2",
-		"@sveltejs/vite-plugin-svelte": "^4.0.4",
+		"@sveltejs/vite-plugin-svelte": "^6.2.4",
 		"@tailwindcss/typography": "^0.5.19",
 		"@testing-library/svelte": "^5.3.1",
 		"@types/markdown-it": "^14.1.2",
@@ -32,7 +32,7 @@
 		"svelte-check": "^4.3.6",
 		"tailwindcss": "^3.4.19",
 		"typescript": "^5.9.3",
-		"vite": "^5.4.21",
+		"vite": "^7.3.1",
 		"vitest": "^4.0.18",
 		"wrangler": "^4.64.0"
 	},
