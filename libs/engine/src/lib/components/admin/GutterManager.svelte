@@ -342,8 +342,7 @@
 		loadCdnImages();
 	}
 
-	/** @param {CdnImage} image */
-	function selectImage(image) {
+	function selectImage(image: CdnImage) {
 		if (imagePickerCallback) {
 			imagePickerCallback(image.url);
 		}
@@ -363,19 +362,11 @@
 		});
 	}
 
-	/** @param {number} index */
-	function removeGalleryImage(index) {
-		galleryImages = galleryImages.filter(
-			(/** @type {GalleryImage} */ _, /** @type {number} */ i) => i !== index,
-		);
+	function removeGalleryImage(index: number) {
+		galleryImages = galleryImages.filter((_: GalleryImage, i: number) => i !== index);
 	}
 
-	/**
-	 * @param {number} index
-	 * @param {keyof GalleryImage} field
-	 * @param {string} value
-	 */
-	function updateGalleryImage(index, field, value) {
+	function updateGalleryImage(index: number, field: keyof GalleryImage, value: string) {
 		galleryImages[index][field] = value;
 		galleryImages = [...galleryImages];
 	}
@@ -443,8 +434,7 @@
 	const debouncedResolveEmbed = debounce(resolveEmbedUrl, 600);
 
 	// Get preview of item content
-	/** @param {GutterItem} item */
-	function getItemPreview(item) {
+	function getItemPreview(item: GutterItem) {
 		if (item.type === "comment" && item.content) {
 			return item.content.substring(0, 50) + (item.content.length > 50 ? "..." : "");
 		}

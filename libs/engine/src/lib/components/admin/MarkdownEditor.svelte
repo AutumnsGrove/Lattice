@@ -469,8 +469,7 @@
 		}
 	}
 
-	/** @param {KeyboardEvent} e */
-	function handleGlobalKeydown(e) {
+	function handleGlobalKeydown(e: KeyboardEvent) {
 		if (e.key === "Escape") {
 			// Close curio autocomplete first (handled inline by textarea keydown too,
 			// but this catches Escape when textarea isn't focused)
@@ -525,9 +524,8 @@
 
 	/**
 	 * Handle accepting a draft from Fireside mode
-	 * @param {{ title: string, content: string, marker: string }} draft
 	 */
-	function handleFiresideDraft(draft) {
+	function handleFiresideDraft(draft: { title: string; content: string; marker: string }) {
 		// Set the content (with the marker appended)
 		content = draft.content + "\n\n" + draft.marker;
 
@@ -556,9 +554,12 @@
 	/**
 	 * Handle transcription result from VoiceInput.
 	 * Inserts transcribed text at cursor position.
-	 * @param {{ text: string, gutterContent?: Array<{type: string, content: string, anchor?: string}>, rawTranscript?: string }} result
 	 */
-	function handleTranscription(result) {
+	function handleTranscription(result: {
+		text: string;
+		gutterContent?: Array<{ type: string; content: string; anchor?: string }>;
+		rawTranscript?: string;
+	}) {
 		voiceError = null;
 
 		if (!textareaRef) return;
@@ -596,9 +597,8 @@
 
 	/**
 	 * Handle voice input error.
-	 * @param {{ message: string }} error
 	 */
-	function handleVoiceError(error) {
+	function handleVoiceError(error: { message: string }) {
 		voiceError = error.message;
 
 		// Clear error after 5 seconds
@@ -608,8 +608,7 @@
 	}
 
 	// Editor mode switching
-	/** @param {"write" | "split" | "preview"} mode */
-	function setEditorMode(mode) {
+	function setEditorMode(mode: "write" | "split" | "preview") {
 		editorMode = mode;
 		if (browser) {
 			localStorage.setItem("editor-mode", mode);
@@ -622,7 +621,7 @@
 	}
 
 	function cycleEditorMode() {
-		const modes = /** @type {const} */ (["write", "split", "preview"]);
+		const modes = ["write", "split", "preview"] as const;
 		const currentIndex = modes.indexOf(editorMode);
 		const nextIndex = (currentIndex + 1) % modes.length;
 		setEditorMode(modes[nextIndex]);
@@ -649,11 +648,7 @@
 	}
 
 	// Text manipulation helpers
-	/**
-	 * @param {string} before
-	 * @param {string} after
-	 */
-	async function wrapSelection(before, after) {
+	async function wrapSelection(before: string, after: string) {
 		if (!textareaRef || isUpdating) return;
 		isUpdating = true;
 		isProgrammaticUpdate = true;
