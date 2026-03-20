@@ -1,22 +1,7 @@
 <script lang="ts">
 	import { tick } from "svelte";
 	import GutterItem from "./GutterItem.svelte";
-
-	interface GutterItemType {
-		type?: string;
-		file?: string;
-		src?: string;
-		url?: string;
-		anchor?: string;
-		content?: string;
-		[key: string]: unknown;
-	}
-
-	interface HeaderType {
-		id: string;
-		text: string;
-		level?: number;
-	}
+	import type { GutterItem as GutterItemType, Header as HeaderType } from "$lib/utils/gutter";
 
 	interface Props {
 		items?: GutterItemType[];

@@ -3,30 +3,13 @@
 	import GlassCarousel from "$lib/ui/components/ui/GlassCarousel.svelte";
 	import EmbedWidget from "$lib/ui/components/content/EmbedWidget.svelte";
 	import { sanitizeHTML } from "$lib/utils/sanitize";
-
-	interface GutterItemData {
-		type?: string;
-		anchor?: string;
-		content?: string;
-		src?: string;
-		url?: string;
-		file?: string;
-		caption?: string;
-		alt?: string;
-		images?: Array<{ url?: string; alt?: string; caption?: string }>;
-		embedUrl?: string;
-		embedProvider?: string;
-		embedHtml?: string;
-		embedTitle?: string;
-		embedThumbnail?: string;
-		[key: string]: unknown;
-	}
+	import type { GutterItem as GutterItemData } from "$lib/utils/gutter";
 
 	interface Props {
 		item?: GutterItemData;
 	}
 
-	let { item = {} }: Props = $props();
+	let { item = {} as GutterItemData }: Props = $props();
 
 	let lightboxOpen = $state(false);
 	let lightboxSrc = $state("");
@@ -65,7 +48,7 @@
 			aria-label="Gutter annotation - click images to enlarge"
 		>
 			<!-- eslint-disable-next-line svelte/no-at-html-tags -- trusted SVG content -->
-			{@html sanitizeHTML(item.content)}
+			{@html sanitizeHTML(item.content ?? "")}
 		</div>
 	{:else if item.type === "photo" || item.type === "image"}
 		{@const imageSrc = item.src || item.url || item.file}
