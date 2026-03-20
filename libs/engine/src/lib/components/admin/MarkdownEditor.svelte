@@ -860,10 +860,12 @@
 			formData.append("file", file);
 			formData.append("folder", "blog");
 
-			const result = await apiRequest("/api/images/upload", {
+			const result = await apiRequest<{ url: string }>("/api/images/upload", {
 				method: "POST",
 				body: formData,
 			});
+
+			if (!result) throw new Error("Upload failed: no response from server");
 
 			const altText =
 				file.name
@@ -897,8 +899,7 @@
 		}
 	}
 
-	/** @param {ClipboardEvent} e */
-	function handlePaste(e) {
+	function handlePaste(e: ClipboardEvent) {
 		if (readonly) return;
 
 		const items = Array.from(e.clipboardData?.items || []);
