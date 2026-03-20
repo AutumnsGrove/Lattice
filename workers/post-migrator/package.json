@@ -2,6 +2,7 @@
   "name": "grove-post-migrator",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "Cloudflare Worker for hot/warm/cold storage migration (cron-triggered)",
   "scripts": {
     "dev": "wrangler dev",
@@ -11,10 +12,10 @@
     "test:run": "vitest run"
   },
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.12.11",
+    "@cloudflare/vitest-pool-workers": "^0.13.3",
     "@cloudflare/workers-types": "^4.20260210.0",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.4",
+    "vitest": "^4.1.0",
     "wrangler": "^4.64.0"
   }
 }

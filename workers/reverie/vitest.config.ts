@@ -1,9 +1,24 @@
-import { defineWorkersConfig } from "@cloudflare/vitest-pool-workers/config";
+import { cloudflareTest } from "@cloudflare/vitest-pool-workers";
+import { defineConfig } from "vitest/config";
 import path from "node:path";
 
 const engineSrc = path.resolve(__dirname, "../../libs/engine/src/lib");
 
-export default defineWorkersConfig({
+export default defineConfig({
+	plugins: [
+		cloudflareTest({
+			// Define worker config directly instead of wrangler.toml to avoid
+			// miniflare trying to resolve service bindings (LUMEN, AUTH) that
+			// don't exist in the local test environment. Tests mock all external
+			// dependencies — we only need the Workers runtime + D1/KV bindings.
+			main: "./src/index.ts",
+			miniflare: {
+				compatibilityDate: "2025-01-01",
+				compatibilityFlags: ["nodejs_compat"],
+				d1Databases: ["DB", "CURIO_DB"],
+			},
+		}),
+	],
 	// Resolve workspace subpath imports to source (Vite can't follow
 	// package.json "exports" for workspace packages in the worker pool).
 	resolve: {
@@ -17,19 +32,5 @@ export default defineWorkersConfig({
 	test: {
 		globals: true,
 		include: ["src/**/*.test.ts"],
-		poolOptions: {
-			workers: {
-				// Define worker config directly instead of wrangler.toml to avoid
-				// miniflare trying to resolve service bindings (LUMEN, AUTH) that
-				// don't exist in the local test environment. Tests mock all external
-				// dependencies — we only need the Workers runtime + D1/KV bindings.
-				main: "./src/index.ts",
-				miniflare: {
-					compatibilityDate: "2025-01-01",
-					compatibilityFlags: ["nodejs_compat"],
-					d1Databases: ["DB", "CURIO_DB"],
-				},
-			},
-		},
 	},
 });
