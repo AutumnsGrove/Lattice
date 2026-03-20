@@ -58,7 +58,7 @@
 		"url": "https://github.com/AutumnsGrove/Gossamer.git"
 	},
 	"peerDependencies": {
-		"svelte": "^5.0.0"
+		"svelte": "^5.50.1"
 	},
 	"peerDependenciesMeta": {
 		"svelte": {
@@ -72,7 +72,7 @@
 		"canvas": "^3.2.1",
 		"gif-encoder-2": "^1.0.5",
 		"jsdom": "^27.4.0",
-		"svelte": "^5.0.0",
+		"svelte": "^5.50.1",
 		"svelte-check": "^4.0.0",
 		"tsx": "^4.21.0",
 		"typescript": "^5.9.3",

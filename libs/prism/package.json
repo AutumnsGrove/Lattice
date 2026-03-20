@@ -40,7 +40,7 @@
 		"@lucide/svelte": "^0.577.0"
 	},
 	"devDependencies": {
-		"svelte": "^5.0.0",
+		"svelte": "^5.50.1",
 		"typescript": "^5.9.3",
 		"vitest": "^4.1.0"
 	},

@@ -771,8 +771,8 @@
   "license": "AGPL-3.0-only",
   "name": "@autumnsgrove/lattice",
   "peerDependencies": {
-    "@sveltejs/kit": "^2.0.0",
-    "svelte": "^5.0.0",
+    "@sveltejs/kit": "^2.50.2",
+    "svelte": "^5.50.1",
     "tailwindcss": "^3.4.0"
   },
   "publishConfig": {
