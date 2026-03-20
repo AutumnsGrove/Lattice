@@ -39,12 +39,12 @@
 		"vite": "^7.3.1",
 		"vitest": "^4.1.0",
 		"tailwindcss": "^3.4.19",
-		"wrangler": "^3.0.0"
+		"wrangler": "^4.76.0"
 	},
 	"dependencies": {
 		"@autumnsgrove/lattice": "workspace:*",
 		"@autumnsgrove/prism": "workspace:*",
-		"@cloudflare/workers-types": "^4.20260210.0",
+		"@cloudflare/workers-types": "^4.20260317.1",
 		"@lucide/svelte": "^0.562.0",
 		"bits-ui": "^2.14.4"
 	}

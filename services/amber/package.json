@@ -8,9 +8,9 @@
 		"fflate": "^0.8.1"
 	},
 	"devDependencies": {
-		"@cloudflare/workers-types": "^4.20260210.0",
+		"@cloudflare/workers-types": "^4.20260317.1",
 		"typescript": "^5.9.3",
 		"vitest": "^4.1.0",
-		"wrangler": "^3.0.0"
+		"wrangler": "^4.76.0"
 	}
 }

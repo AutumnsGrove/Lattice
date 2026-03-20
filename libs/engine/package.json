@@ -32,7 +32,7 @@
   },
   "description": "The shared framework powering Grove — blogging platform, glassmorphism UI components, Loom Durable Objects SDK, Lumen AI routing, auth utilities, feature flags, and email infrastructure for SvelteKit on Cloudflare Workers.",
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260210.0",
+    "@cloudflare/workers-types": "^4.20260317.1",
     "@lucide/svelte": "^0.577.0",
     "@sveltejs/adapter-cloudflare": "^7.2.6",
     "@sveltejs/kit": "^2.50.2",

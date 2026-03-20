@@ -13,7 +13,7 @@
     "deploy": "pnpm run build && wrangler pages deploy .svelte-kit/cloudflare"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260210.0",
+    "@cloudflare/workers-types": "^4.20260317.1",
     "@sveltejs/adapter-cloudflare": "^7.2.6",
     "@sveltejs/kit": "^2.50.2",
     "@sveltejs/vite-plugin-svelte": "^4.0.4",
@@ -24,7 +24,7 @@
     "tailwindcss": "^3.4.19",
     "typescript": "^5.9.3",
     "vite": "^5.4.21",
-    "wrangler": "^4.54.0"
+    "wrangler": "^4.76.0"
   },
   "dependencies": {
     "@autumnsgrove/vineyard": "link:../../../Vineyard",

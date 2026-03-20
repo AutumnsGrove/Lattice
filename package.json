@@ -49,7 +49,7 @@
 		"svelte-eslint-parser": "^0.43.0",
 		"tsx": "^4.21.0",
 		"typescript-eslint": "^8.0.0",
-		"wrangler": "^4.64.0"
+		"wrangler": "^4.76.0"
 	},
 	"main": "./libs/engine/dist/index.js",
 	"types": "./libs/engine/dist/index.d.ts",

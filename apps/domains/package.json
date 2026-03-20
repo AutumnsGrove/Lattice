@@ -18,7 +18,7 @@
   "devDependencies": {
     "@autumnsgrove/prism": "workspace:*",
     "vitest": "^4.1.0",
-    "@cloudflare/workers-types": "^4.20260210.0",
+    "@cloudflare/workers-types": "^4.20260317.1",
     "@sveltejs/adapter-cloudflare": "^7.2.6",
     "@sveltejs/kit": "^2.50.2",
     "@sveltejs/vite-plugin-svelte": "^6.2.4",
@@ -29,7 +29,7 @@
     "tailwindcss": "^3.4.19",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
-    "wrangler": "^4.64.0"
+    "wrangler": "^4.76.0"
   },
   "dependencies": {
     "@autumnsgrove/lattice": "workspace:*",
