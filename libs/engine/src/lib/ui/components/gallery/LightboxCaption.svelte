@@ -5,7 +5,11 @@
 	 *
 	 * @prop {string} caption - The caption text to display
 	 */
-	let { caption = '' } = $props();
+	interface Props {
+		caption?: string;
+	}
+
+	let { caption = '' }: Props = $props();
 </script>
 
 {#if caption}

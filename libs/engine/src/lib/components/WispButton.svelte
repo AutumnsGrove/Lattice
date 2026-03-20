@@ -6,23 +6,21 @@
    * Use this in editor toolbars or floating action buttons.
    */
 
-  /**
-   * @typedef {Object} Props
-   * @property {boolean} enabled - Whether Wisp is enabled for this user
-   * @property {boolean} isOpen - Whether the panel is currently open
-   * @property {() => void} onClick - Callback when button is clicked
-   * @property {'icon' | 'text' | 'both'} variant - Display variant
-   * @property {string} className - Additional CSS classes
-   */
+  interface Props {
+    enabled?: boolean;
+    isOpen?: boolean;
+    onClick?: () => void;
+    variant?: 'icon' | 'text' | 'both';
+    className?: string;
+  }
 
-  /** @type {Props} */
   let {
     enabled = false,
     isOpen = false,
     onClick = () => {},
     variant = "both",
     className = "",
-  } = $props();
+  }: Props = $props();
 </script>
 
 {#if enabled}

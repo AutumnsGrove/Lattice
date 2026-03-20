@@ -4,19 +4,36 @@
 	import EmbedWidget from "$lib/ui/components/content/EmbedWidget.svelte";
 	import { sanitizeHTML } from "$lib/utils/sanitize";
 
-	let { item = {} } = $props();
+	interface GutterItemData {
+		type?: string;
+		anchor?: string;
+		content?: string;
+		src?: string;
+		url?: string;
+		file?: string;
+		caption?: string;
+		alt?: string;
+		images?: Array<{ url?: string; alt?: string; caption?: string }>;
+		embedUrl?: string;
+		embedProvider?: string;
+		embedHtml?: string;
+		embedTitle?: string;
+		embedThumbnail?: string;
+		[key: string]: unknown;
+	}
+
+	interface Props {
+		item?: GutterItemData;
+	}
+
+	let { item = {} }: Props = $props();
 
 	let lightboxOpen = $state(false);
 	let lightboxSrc = $state("");
 	let lightboxAlt = $state("");
 	let lightboxCaption = $state("");
 
-	/**
-	 * @param {string} src
-	 * @param {string} alt
-	 * @param {string} [caption]
-	 */
-	function openLightbox(src, alt, caption = "") {
+	function openLightbox(src: string, alt: string, caption = "") {
 		lightboxSrc = src;
 		lightboxAlt = alt;
 		lightboxCaption = caption;
@@ -28,11 +45,10 @@
 	}
 
 	// Handle clicks or keyboard activation on images within markdown content
-	/** @param {Event} event */
-	function handleContentClick(event) {
-		const target = /** @type {HTMLElement} */ (event.target);
+	function handleContentClick(event: Event) {
+		const target = event.target as HTMLElement;
 		if (target.tagName === "IMG") {
-			const img = /** @type {HTMLImageElement} */ (target);
+			const img = target as HTMLImageElement;
 			openLightbox(img.src, img.alt);
 		}
 	}

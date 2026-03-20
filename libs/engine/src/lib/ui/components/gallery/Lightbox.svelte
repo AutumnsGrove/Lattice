@@ -6,16 +6,23 @@
 	 * Lightbox - Full-screen image viewer
 	 * Click to expand images to full size with zoom and pan support
 	 */
-	/** @type {{ src?: string, alt?: string, caption?: string, isOpen?: boolean, onClose?: () => void }} */
-	let { src = '', alt = '', caption = '', isOpen = false, onClose = () => {} } = $props();
+	interface Props {
+		src?: string;
+		alt?: string;
+		caption?: string;
+		isOpen?: boolean;
+		onClose?: () => void;
+	}
 
-	function handleKeydown(/** @type {KeyboardEvent} */ event) {
+	let { src = '', alt = '', caption = '', isOpen = false, onClose = () => {} }: Props = $props();
+
+	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === 'Escape') {
 			onClose();
 		}
 	}
 
-	function handleBackdropClick(/** @type {MouseEvent} */ event) {
+	function handleBackdropClick(event: MouseEvent) {
 		if (event.target === event.currentTarget) {
 			onClose();
 		}

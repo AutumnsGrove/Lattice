@@ -2,25 +2,31 @@
   import { CURIO_METADATA } from "$lib/utils/markdown-directives";
   import { tick } from "svelte";
 
-  /**
-   * @typedef {Object} CurioStatusItem
-   * @property {string} slug
-   * @property {string} name
-   * @property {boolean} enabled
-   */
+  interface CurioStatusItem {
+    slug: string;
+    name: string;
+    enabled: boolean;
+  }
+
+  interface Props {
+    query?: string;
+    configuredCurios?: CurioStatusItem[];
+    position?: { top: number; left: number };
+    onselect?: (directiveText: string, cursorOffset: number) => void;
+    onclose?: () => void;
+  }
 
   // Props
   let {
     query = "",
-    configuredCurios = /** @type {CurioStatusItem[]} */ ([]),
+    configuredCurios = [],
     position = { top: 0, left: 0 },
-    onselect = /** @type {(directiveText: string, cursorOffset: number) => void} */ (() => {}),
+    onselect = () => {},
     onclose = () => {},
-  } = $props();
+  }: Props = $props();
 
   let activeIndex = $state(0);
-  /** @type {HTMLElement | null} */
-  let listRef = $state(null);
+  let listRef: HTMLElement | null = $state(null);
 
   // Build lookup map from configured curios
   const configuredMap = $derived.by(() => {
@@ -67,18 +73,13 @@
     }
   });
 
-  /**
-   * Get the configured status for a curio.
-   * @param {string} id
-   * @returns {{ configured: boolean, enabled: boolean }}
-   */
-  function getStatus(id) {
+  function getStatus(id: string): { configured: boolean; enabled: boolean } {
     // Map curio metadata IDs to the slug used in the status data
     // Most are the same, but a few differ
-    const slugMap = /** @type {Record<string, string>} */ ({
+    const slugMap: Record<string, string> = {
       poll: "polls",
       statusbadges: "statusbadge",
-    });
+    };
     const slug = slugMap[id] || id;
 
     if (configuredMap.has(slug)) {
@@ -87,11 +88,7 @@
     return { configured: false, enabled: false };
   }
 
-  /**
-   * Build the directive text and cursor offset for a selected curio.
-   * @param {typeof CURIO_METADATA[number]} item
-   */
-  function buildDirective(item) {
+  function buildDirective(item: (typeof CURIO_METADATA)[number]) {
     if (item.requiresArg) {
       // ::name[]:: — cursor goes between the brackets
       const text = `::${item.id}[]::`;
@@ -104,11 +101,7 @@
     return { text, cursorOffset };
   }
 
-  /**
-   * Select a curio from the list.
-   * @param {typeof CURIO_METADATA[number]} item
-   */
-  function selectItem(item) {
+  function selectItem(item: (typeof CURIO_METADATA)[number]) {
     const { text, cursorOffset } = buildDirective(item);
     onselect(text, cursorOffset);
   }
@@ -116,10 +109,8 @@
   /**
    * Handle keyboard navigation. Called by parent MarkdownEditor.
    * Returns true if the key was handled (should preventDefault).
-   * @param {KeyboardEvent} e
-   * @returns {boolean}
    */
-  export function handleKey(e) {
+  export function handleKey(e: KeyboardEvent): boolean {
     const total = filteredItems.total;
     if (total === 0) return false;
 

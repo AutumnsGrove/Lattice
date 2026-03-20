@@ -31,29 +31,46 @@
 	// Import composables (simplified - removed command palette, slash commands, ambient sounds, snippets, and writing sessions)
 	import { useEditorTheme, useDraftManager } from "./composables";
 
-	/**
-	 * @typedef {Object} StoredDraft
-	 * @property {string} content
-	 * @property {number} savedAt
-	 * @property {number} [wordCount]
-	 */
+	type StoredDraft = {
+		content: string;
+		savedAt: number;
+		wordCount?: number;
+	};
 
-	/**
-	 * @typedef {Object} GutterItemProp
-	 * @property {string} type
-	 * @property {string} [anchor]
-	 * @property {string} [content]
-	 * @property {string} [url]
-	 * @property {string} [file]
-	 * @property {string} [caption]
-	 * @property {Array<{url: string, alt?: string, caption?: string}>} [images]
-	 */
+	type GutterItemProp = {
+		type: string;
+		anchor?: string;
+		content?: string;
+		url?: string;
+		file?: string;
+		caption?: string;
+		images?: Array<{ url: string; alt?: string; caption?: string }>;
+	};
 
-	/**
-	 * @typedef {Object.<string, boolean>} GraftsRecord
-	 * Graft flags for this tenant - component reads what it needs.
+	/** Graft flags for this tenant - component reads what it needs.
 	 * Known flags: fireside_mode (AI-assisted prompts), scribe_mode (voice-to-text)
 	 */
+	type GraftsRecord = Record<string, boolean>;
+
+	interface Props {
+		content?: string;
+		onSave?: () => void;
+		saving?: boolean;
+		readonly?: boolean;
+		draftKey?: string | null;
+		onDraftRestored?: (draft: StoredDraft) => void;
+		previewTitle?: string;
+		previewDate?: string;
+		previewTags?: string[];
+		gutterItems?: GutterItemProp[];
+		firesideAssisted?: boolean;
+		/** All grafts for this tenant - component reads what it needs */
+		grafts?: GraftsRecord;
+		/** Curio configuration status for autocomplete — loaded server-side */
+		configuredCurios?: { slug: string; name: string; enabled: boolean }[];
+		/** Server-side draft slug for cross-device sync (null disables server sync) */
+		serverDraftSlug?: string | null;
+	}
 
 	// Props
 	let {
@@ -61,20 +78,17 @@
 		onSave = () => {},
 		saving = false,
 		readonly = false,
-		draftKey = /** @type {string | null} */ (null),
-		onDraftRestored = /** @type {(draft: StoredDraft) => void} */ (() => {}),
+		draftKey = null,
+		onDraftRestored = () => {},
 		previewTitle = $bindable(""),
 		previewDate = "",
-		previewTags = /** @type {string[]} */ ([]),
-		gutterItems = /** @type {GutterItemProp[]} */ ([]),
+		previewTags = [],
+		gutterItems = [],
 		firesideAssisted = $bindable(false),
-		/** All grafts for this tenant - component reads what it needs */
-		grafts = /** @type {GraftsRecord} */ ({}),
-		/** Curio configuration status for autocomplete — loaded server-side */
-		configuredCurios = /** @type {{ slug: string, name: string, enabled: boolean }[]} */ ([]),
-		/** Server-side draft slug for cross-device sync (null disables server sync) */
-		serverDraftSlug = /** @type {string | null} */ (null),
-	} = $props();
+		grafts = {},
+		configuredCurios = [],
+		serverDraftSlug = null,
+	}: Props = $props();
 
 	// Derived graft flags - add new ones here as they're created
 	const wispEnabled = $derived(grafts?.wisp_enabled ?? false);
@@ -83,17 +97,13 @@
 	const uploadsEnabled = $derived(grafts?.image_uploads ?? true);
 
 	// Core refs and state
-	/** @type {HTMLTextAreaElement | null} */
-	let textareaRef = $state(null);
-	/** @type {HTMLElement | null} */
-	let previewRef = $state(null);
-	/** @type {HTMLElement | null} */
-	let lineNumbersRef = $state(null);
+	let textareaRef: HTMLTextAreaElement | null = $state(null);
+	let previewRef: HTMLElement | null = $state(null);
+	let lineNumbersRef: HTMLElement | null = $state(null);
 
 	// Editor mode: "write" (source only), "split" (source + preview), "preview" (preview only)
 	// Initialize from localStorage synchronously to avoid flash of wrong mode
-	/** @type {"write" | "split" | "preview"} */
-	let editorMode = $state(
+	let editorMode: "write" | "split" | "preview" = $state(
 		(() => {
 			if (browser) {
 				const saved = localStorage.getItem("editor-mode");
@@ -114,10 +124,8 @@
 	let isDragging = $state(false);
 	let isUploading = $state(false);
 	let uploadProgress = $state("");
-	/** @type {string | null} */
-	let uploadError = $state(null);
-	/** @type {File | null} */
-	let lastFailedFile = $state(null);
+	let uploadError: string | null = $state(null);
+	let lastFailedFile: File | null = $state(null);
 
 	// Full preview mode
 	let showFullPreview = $state(false);
