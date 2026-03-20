@@ -43,6 +43,14 @@ var rootHelpCategories = []ui.HelpCategory{
 		},
 	},
 	{
+		Title: "Tasks",
+		Icon:  "\U0001FABF",
+		Style: ui.SafeWriteStyle,
+		Commands: []ui.HelpCommand{
+			{Name: "todo", Desc: "Todoist task management (goose-migrate)"},
+		},
+	},
+	{
 		Title: "Publishing",
 		Icon:  "\U0001f4e6",
 		Style: ui.SafeWriteStyle,

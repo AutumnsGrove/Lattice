@@ -25,6 +25,7 @@ type Config struct {
 	Git          GitConfig           `toml:"git"`
 	GitHub       GitHubConfig        `toml:"github"`
 	Grove        GroveConfig         `toml:"grove"`
+	Todoist      TodoistConfig       `toml:"todoist"`
 	TUI          TUIConfig           `toml:"tui"`
 
 	// Runtime state (not from TOML)
@@ -92,6 +93,13 @@ type GitHubConfig struct {
 	ProjectNumber          *int              `toml:"project_number"`
 	ProjectFields          map[string]string `toml:"project_fields"`
 	ProjectValues          map[string]string `toml:"project_values"`
+}
+
+// TodoistConfig holds Todoist integration settings for gw todo.
+type TodoistConfig struct {
+	APIToken         string `toml:"api_token"`
+	DefaultProject   string `toml:"default_project"`
+	DefaultProjectID string `toml:"default_project_id"`
 }
 
 // GroveConfig holds Grove platform settings (auth, Lattice, tenant).
@@ -261,6 +269,7 @@ func (c *Config) Save() error {
 	diskCfg.Git = c.Git
 	diskCfg.GitHub = c.GitHub
 	diskCfg.Grove = c.Grove
+	diskCfg.Todoist = c.Todoist
 	diskCfg.Databases = c.Databases
 	diskCfg.KVNamespaces = c.KVNamespaces
 	diskCfg.R2Buckets = c.R2Buckets
