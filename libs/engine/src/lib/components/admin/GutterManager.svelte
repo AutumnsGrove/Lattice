@@ -106,10 +106,7 @@
 		return { raw: anchor, isHeading, headingLevel, isAnchorTag, displayText, type };
 	}
 
-	/**
-	 * Preprocess anchors into structured data with Map for O(1) lookup
-	 * @type {Map<string, ProcessedAnchor>}
-	 */
+	/** Preprocess anchors into structured data with Map for O(1) lookup */
 	let processedAnchorsMap = $derived.by(() => {
 		const map = new Map<string, ProcessedAnchor>();
 		for (const anchor of availableAnchors) {
@@ -402,7 +399,15 @@
 				throw new Error(`Failed to resolve: ${response.statusText}`);
 			}
 
-			const data = await response.json();
+			const data: {
+				type?: string;
+				provider?: string;
+				embedUrl?: string;
+				embedHtml?: string;
+				title?: string;
+				thumbnail?: string;
+				og?: { title?: string; image?: string };
+			} = await response.json();
 
 			if (data.type === "embed") {
 				embedProvider = data.provider || "";

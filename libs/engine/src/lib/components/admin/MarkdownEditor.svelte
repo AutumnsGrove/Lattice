@@ -29,23 +29,9 @@
 	import { browser } from "$app/environment";
 
 	// Import composables (simplified - removed command palette, slash commands, ambient sounds, snippets, and writing sessions)
-	import { useEditorTheme, useDraftManager } from "./composables";
+	import { useEditorTheme, useDraftManager, type StoredDraft } from "./composables";
 
-	type StoredDraft = {
-		content: string;
-		savedAt: number;
-		wordCount?: number;
-	};
-
-	type GutterItemProp = {
-		type: string;
-		anchor?: string;
-		content?: string;
-		url?: string;
-		file?: string;
-		caption?: string;
-		images?: Array<{ url: string; alt?: string; caption?: string }>;
-	};
+	import type { GutterItem as GutterItemProp } from "$lib/utils/gutter";
 
 	/** Graft flags for this tenant - component reads what it needs.
 	 * Known flags: fireside_mode (AI-assisted prompts), scribe_mode (voice-to-text)
@@ -228,7 +214,7 @@
 
 	// Extract available anchors from content
 	let availableAnchors = $derived.by(() => {
-		const anchors = [];
+		const anchors: string[] = [];
 		const headingRegex = /^(#{1,6})\s+(.+)$/gm;
 		let match;
 		while ((match = headingRegex.exec(content)) !== null) {
