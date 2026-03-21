@@ -255,7 +255,7 @@ describe("POST /api/lumen/transcribe - Validation", () => {
 				body: formData,
 			});
 
-			const result = (await POST(ctx as any)) as { status: number };
+			const result = (await POST(ctx as any)) as unknown as { status: number };
 			expect(result.status).toBe(200);
 		}
 	});
@@ -330,7 +330,7 @@ describe("POST /api/lumen/transcribe - Success", () => {
 			body: formData,
 		});
 
-		const result = (await POST(ctx as any)) as {
+		const result = (await POST(ctx as any)) as unknown as {
 			status: number;
 			body: {
 				success: boolean;
@@ -370,7 +370,7 @@ describe("POST /api/lumen/transcribe - Success", () => {
 			body: formData,
 		});
 
-		const result = (await POST(ctx as any)) as {
+		const result = (await POST(ctx as any)) as unknown as {
 			status: number;
 			body: {
 				success: boolean;
@@ -407,7 +407,7 @@ describe("POST /api/lumen/transcribe - Success", () => {
 			body: formData,
 		});
 
-		const result = (await POST(ctx as any)) as {
+		const result = (await POST(ctx as any)) as unknown as {
 			body: { mode: string };
 		};
 

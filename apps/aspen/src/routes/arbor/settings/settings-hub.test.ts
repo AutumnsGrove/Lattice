@@ -6,6 +6,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { assertLoaded } from "../../../test-utils";
 
 // ============================================================================
 // MOCK D1
@@ -52,7 +53,7 @@ function createMockDB(
 
 	return {
 		prepare(sql: string) {
-			const stmt = { ...mockStatement, _sql: sql, _bindings: [] };
+			const stmt = { ...mockStatement, _sql: sql, _bindings: [] as unknown[] };
 			stmt.bind = (...values: unknown[]) => {
 				stmt._bindings = values;
 				return stmt;
@@ -94,9 +95,10 @@ describe("Settings Hub — load()", () => {
 	it("should return defaults when no env bindings", async () => {
 		const { load } = await import("./+page.server.js");
 		const event = createLoadEvent({ db: undefined });
-		event.platform.env.DB = undefined;
+		event.platform.env.DB = undefined as unknown as ReturnType<typeof createMockDB>;
 
 		const result = await load(event as any);
+		assertLoaded(result);
 
 		expect(result.meadowOptIn).toBe(false);
 		expect(result.customBlazeCount).toBe(0);
@@ -109,6 +111,7 @@ describe("Settings Hub — load()", () => {
 		});
 
 		const result = await load(event as any);
+		assertLoaded(result);
 
 		expect(result.meadowOptIn).toBe(true);
 	});
@@ -120,6 +123,7 @@ describe("Settings Hub — load()", () => {
 		});
 
 		const result = await load(event as any);
+		assertLoaded(result);
 
 		expect(result.meadowOptIn).toBe(false);
 	});
@@ -131,6 +135,7 @@ describe("Settings Hub — load()", () => {
 		});
 
 		const result = await load(event as any);
+		assertLoaded(result);
 
 		expect(result.customBlazeCount).toBe(7);
 	});
@@ -156,6 +161,7 @@ describe("Settings Hub — load()", () => {
 
 		// Should not throw — per-query catch returns defaults
 		const result = await load(event as any);
+		assertLoaded(result);
 
 		expect(result.meadowOptIn).toBe(false);
 		expect(result.customBlazeCount).toBe(0);
@@ -167,6 +173,7 @@ describe("Settings Hub — load()", () => {
 		event.locals.tenantId = "" as any;
 
 		const result = await load(event as any);
+		assertLoaded(result);
 
 		expect(result.meadowOptIn).toBe(false);
 		expect(result.customBlazeCount).toBe(0);
