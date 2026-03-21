@@ -15,6 +15,7 @@
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
 	import { Blaze } from "@autumnsgrove/lattice/blazes/components";
 	import { GLOBAL_BLAZE_DEFAULTS } from "@autumnsgrove/lattice/blazes";
+	import type { GutterItem } from "@autumnsgrove/lattice/utils/markdown";
 
 	let { data } = $props();
 
@@ -25,7 +26,7 @@
 	let tagsInput = $state("");
 	let font = $state("default");
 	let content = $state("");
-	let gutterItems = $state<unknown[]>([]);
+	let gutterItems = $state<GutterItem[]>([]);
 	let status = $state("draft");
 	let featuredImage = $state("");
 	let shareToMeadow = $state(true);
@@ -42,7 +43,7 @@
 		try {
 			const res = await fetch("/api/blazes"); // csrf-ok — GET-only read
 			if (res.ok) {
-				const { blazes } = await res.json();
+				const { blazes } = (await res.json()) as { blazes: typeof availableBlazes };
 				if (Array.isArray(blazes) && blazes.length > 0) {
 					availableBlazes = blazes;
 				}

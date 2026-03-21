@@ -18,7 +18,7 @@ const mockTranscribe = vi.fn();
 const mockValidateCSRF = vi.fn(() => true);
 const mockGetVerifiedTenantId = vi.fn();
 const mockGetTenantSubscription = vi.fn();
-const mockValidateEnv = vi.fn(() => ({ valid: true }));
+const mockValidateEnv = vi.fn((): { valid: boolean; message?: string } => ({ valid: true }));
 
 // Mock SvelteKit error
 const _errorResponses: Map<number, { status: number; body: { message: string } }> = new Map();

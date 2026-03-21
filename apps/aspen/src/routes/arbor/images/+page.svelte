@@ -18,6 +18,7 @@
 		formatBytes,
 		compressionRatio,
 		formatName,
+		type ImageFormat,
 	} from "@autumnsgrove/lattice/utils";
 	import {
 		UPLOAD_ACCEPT_ATTR,
@@ -709,7 +710,7 @@
 			await api.delete("/api/images/delete", {
 				body: JSON.stringify({ key: imageToDelete.key }),
 			});
-			galleryImages = galleryImages.filter((img) => img.key !== imageToDelete.key);
+			galleryImages = galleryImages.filter((img) => img.key !== imageToDelete?.key);
 			toast.success("Image deleted");
 		} catch (err) {
 			toast.error("Failed to delete: " + (err instanceof Error ? err.message : "Unknown error"));
@@ -982,7 +983,7 @@
 										</span>
 									{/if}
 									{#if upload.format && upload.format !== "original"}
-										<span class="stat-pill format">{formatName(upload.format)}</span>
+										<span class="stat-pill format">{formatName(upload.format as ImageFormat)}</span>
 									{/if}
 									{#if upload.duplicate}
 										<span class="stat-pill duplicate">Reused existing</span>
@@ -997,7 +998,7 @@
 									<Button
 										variant="primary"
 										size="sm"
-										onclick={() => copyToClipboard(getCopyText(upload), upload.id)}
+										onclick={() => copyToClipboard(getCopyText(upload) ?? "", upload.id)}
 									>
 										{copiedItem === upload.id ? "Copied!" : `Copy ${copyFormat.toUpperCase()}`}
 									</Button>
@@ -1169,7 +1170,7 @@
 						<div class="gallery-info">
 							<span class="gallery-name" title={image.key}>{getFileName(image.key)}</span>
 							<div class="gallery-meta">
-								<span>{formatBytes(image.size)}</span>
+								<span>{formatBytes(image.size ?? 0)}</span>
 								{#if getDateFromPath(image.key)}
 									<span>{getDateFromPath(image.key)}</span>
 								{/if}

@@ -20,6 +20,53 @@
 	import { groveModeStore } from "@autumnsgrove/lattice/ui/stores/grove-mode.svelte";
 	import { seasonStore } from "@autumnsgrove/lattice/ui/stores/season.svelte";
 	import VineBackground from "@autumnsgrove/lattice/ui/components/nature/VineBackground.svelte";
+	import type { AppContext } from "../app.d.ts";
+
+	/** Shape returned by +layout.server.ts load function */
+	interface LayoutData {
+		user: {
+			id: string;
+			email: string;
+			name?: string;
+			picture?: string;
+			provider?: string;
+			isAdmin?: boolean;
+			preferences?: {
+				theme: string | null;
+				groveMode: boolean | null;
+				season: string | null;
+			};
+		} | null;
+		context: AppContext;
+		isOwner: boolean;
+		siteSettings: {
+			font_family: string;
+			accent_color?: string;
+			grove_title?: string;
+			avatar_url?: string;
+			show_grove_logo?: string;
+			[key: string]: string | undefined;
+		};
+		navPages: Array<{ slug: string; title: string }>;
+		navPageLimit: number;
+		enabledCuriosCount: number;
+		csrfToken?: string;
+		showTimeline: boolean;
+		showGallery: boolean;
+		humanJsonEnabled: boolean;
+		preferredSeason: string | null;
+		dbAccessError: boolean;
+		lanternData: {
+			homeGrove: string;
+			displayName: string;
+			enabled: boolean;
+			visitingGrove: {
+				tenantId: string;
+				subdomain: string;
+				name: string;
+			} | null;
+		} | null;
+	}
 
 	// grove-entrance-dismiss: fade out the pre-hydration loading overlay
 	// once SvelteKit has hydrated and this layout is interactive
@@ -39,7 +86,7 @@
 		}
 	});
 
-	let { children, data }: { children: import("svelte").Snippet; data: Record<string, unknown> } =
+	let { children, data }: { children: import("svelte").Snippet; data: LayoutData } =
 		$props();
 
 	// Navigation loading state — shows a progress bar during all page transitions

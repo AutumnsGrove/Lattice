@@ -161,6 +161,9 @@ declare global {
 				REVERIE?: Fetcher;
 				/** API key for authenticating to the Reverie worker */
 				REVERIE_API_KEY?: string;
+
+				/** Dev-only: enables simulated auth for Glimpse visual testing (never set in prod) */
+				DEV_AUTH_ENABLED?: string;
 			};
 			context: {
 				waitUntil(promise: Promise<unknown>): void;
