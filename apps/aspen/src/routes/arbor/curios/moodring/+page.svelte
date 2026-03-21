@@ -58,7 +58,7 @@
 <div class="moodring-page">
 	<header class="page-header">
 		<div class="title-row">
-			<Circle class="header-icon" />
+			<stateIcons.circle class="header-icon" />
 			<h1>Mood Ring</h1>
 		</div>
 		<p class="subtitle">
@@ -178,7 +178,7 @@
 
 			<div class="form-actions">
 				<GlassButton type="submit" variant="accent">
-					<Save class="btn-icon" />
+					<actionIcons.save class="btn-icon" />
 					Save Settings
 				</GlassButton>
 			</div>
@@ -207,7 +207,7 @@
 					class="glass-input note-input"
 				/>
 				<GlassButton type="submit" variant="accent">
-					<Plus class="btn-icon" />
+					<actionIcons.plus class="btn-icon" />
 					Log
 				</GlassButton>
 			</div>

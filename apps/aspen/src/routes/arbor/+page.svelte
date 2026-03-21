@@ -19,19 +19,17 @@
 		toolIcons,
 	} from "@autumnsgrove/prism/icons";
 
-	/**
-	 * @typedef {Object} DashboardStats
-	 * @property {number} postCount
-	 * @property {number} totalWords
-	 * @property {number} draftCount
-	 * @property {string[]} topTags
-	 * @property {number} accountAgeDays
-	 */
+	interface DashboardStats {
+		postCount: number;
+		totalWords: number;
+		draftCount: number;
+		topTags: string[];
+		accountAgeDays: number;
+	}
 
 	let { data } = $props();
 
-	/** @type {DashboardStats | null} */
-	let stats = $state(null);
+	let stats = $state<DashboardStats | null>(null);
 	let loading = $state(true);
 
 	// Current roadmap phase config
@@ -70,8 +68,7 @@
 	// Get display name for greeting (see docs/grove-user-identity.md)
 	const userName = $derived(getUserDisplayName(data.user));
 
-	/** @param {number} num */
-	function formatNumber(num) {
+	function formatNumber(num: number) {
 		if (num >= 1000000) return (num / 1000000).toFixed(1) + "M";
 		if (num >= 1000) return (num / 1000).toFixed(1) + "K";
 		return num.toString();

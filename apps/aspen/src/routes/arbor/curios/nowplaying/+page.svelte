@@ -69,12 +69,12 @@
 	<header class="page-header">
 		<div class="header-top">
 			<GlassButton href="/arbor/curios" variant="ghost" class="back-link">
-				<ArrowLeft class="w-4 h-4" />
+				<navIcons.arrowLeft class="w-4 h-4" />
 				Back to Curios
 			</GlassButton>
 		</div>
 		<div class="title-row">
-			<Music class="header-icon" />
+			<blazeIcons.music class="header-icon" />
 			<h1>Now Playing</h1>
 		</div>
 		<p class="subtitle">Share what you're listening to — music fills the grove.</p>
@@ -89,7 +89,7 @@
 					<img src={currentTrack.albumArtUrl} alt="" class="album-art" width="64" height="64" />
 				{:else}
 					<div class="album-art-placeholder">
-						<Music class="w-6 h-6" />
+						<blazeIcons.music class="w-6 h-6" />
 					</div>
 				{/if}
 				<div class="track-info">
@@ -324,7 +324,7 @@
 					}}
 				>
 					<GlassButton type="submit" variant="ghost" class="clear-btn">
-						<Trash2 class="w-4 h-4" />
+						<actionIcons.trash class="w-4 h-4" />
 						Clear
 					</GlassButton>
 				</form>

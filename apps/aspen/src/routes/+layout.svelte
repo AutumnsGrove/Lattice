@@ -11,6 +11,7 @@
 	import PassageTransition from "@autumnsgrove/lattice/ui/components/ui/PassageTransition.svelte";
 	import { fontMap, DEFAULT_FONT } from "@autumnsgrove/lattice/ui/tokens/fonts";
 	import { getSeasonFavicons } from "@autumnsgrove/lattice/ui/season-meta";
+	import type { Season } from "@autumnsgrove/lattice/ui/types/season";
 	import Header from "@autumnsgrove/lattice/components/chrome/Header.svelte";
 	import { buildTenantNavItems } from "@autumnsgrove/lattice/ui/components/chrome/tenant-nav";
 	import Lantern from "@autumnsgrove/lattice/ui/components/chrome/lantern/Lantern.svelte";
@@ -91,8 +92,7 @@
 	);
 
 	// Handle search - navigate to blog search
-	/** @param {string} query */
-	function handleSearch(query) {
+	function handleSearch(query: string) {
 		goto(`/blog/search?q=${encodeURIComponent(query)}`);
 	}
 
@@ -118,7 +118,7 @@
 
 	// Seasonal favicons — always resolve favicon paths, using preferred season or default (#1304)
 	// Rendered exclusively from <svelte:head> to avoid duplicate <link> tags with app.html
-	const favicons = $derived(getSeasonFavicons(data.preferredSeason || "summer"));
+	const favicons = $derived(getSeasonFavicons((data.preferredSeason || "summer") as Season));
 
 	function toggleTheme() {
 		themeStore.toggle();
@@ -179,8 +179,7 @@
 			onSearch={handleSearch}
 			resourceLinks={[]}
 			connectLinks={[]}
-			showLogo={data.siteSettings?.show_grove_logo === true ||
-				data.siteSettings?.show_grove_logo === "true"}
+			showLogo={data.siteSettings?.show_grove_logo === "true"}
 			logoSize="lg"
 			maxWidth="wide"
 			showSidebarToggle={isAdminPage}
