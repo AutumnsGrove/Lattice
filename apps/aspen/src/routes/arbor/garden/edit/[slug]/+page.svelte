@@ -25,18 +25,18 @@
 	let tagsInput = $state("");
 	let font = $state("default");
 	let content = $state("");
-	let gutterItems = $state(/** @type {any[]} */ ([]));
+	let gutterItems = $state<unknown[]>([]);
 	let status = $state("draft");
 	let featuredImage = $state("");
 	let shareToMeadow = $state(true);
 	let originalSlug = $state("");
 	let slugError = $state("");
-	/** @type {string | null} */
-	let selectedBlaze = $state(null);
+	let selectedBlaze = $state<string | null>(null);
 
 	// Blaze picker — fetched from API to include tenant custom blazes
-	/** @type {Array<{slug: string, label: string, icon: string, color: string}>} */
-	let availableBlazes = $state([...GLOBAL_BLAZE_DEFAULTS]);
+	let availableBlazes = $state<Array<{ slug: string; label: string; icon: string; color: string }>>(
+		[...GLOBAL_BLAZE_DEFAULTS],
+	);
 
 	onMount(async () => {
 		try {
@@ -59,20 +59,23 @@
 		originalSlug = data.post.slug || "";
 		description = data.post.description || "";
 		tagsInput = Array.isArray(data.post.tags) ? data.post.tags.join(", ") : "";
-		font = /** @type {any} */ (data.post).font || "default";
+		font = ((data.post as Record<string, unknown>).font as string) || "default";
 		content = data.post.markdown_content || "";
-		gutterItems = data.post.gutter_content
-			? JSON.parse(/** @type {string} */ (data.post.gutter_content))
-			: [];
-		status = /** @type {any} */ (data.post).status || "draft";
-		featuredImage = /** @type {any} */ (data.post).featured_image || "";
-		shareToMeadow = /** @type {any} */ (data.post).meadow_exclude !== 1;
-		selectedBlaze = /** @type {any} */ (data.post).blaze || null;
+		gutterItems = data.post.gutter_content ? JSON.parse(data.post.gutter_content as string) : [];
+		status = ((data.post as Record<string, unknown>).status as string) || "draft";
+		featuredImage = ((data.post as Record<string, unknown>).featured_image as string) || "";
+		shareToMeadow = (data.post as Record<string, unknown>).meadow_exclude !== 1;
+		selectedBlaze = ((data.post as Record<string, unknown>).blaze as string) || null;
 	});
 
 	// Editor reference for anchor insertion
-	/** @type {any} */
-	let editorRef = $state(null);
+	interface EditorRef {
+		clearDraft(): void;
+		flushDraft(): void;
+		getAvailableAnchors?(): string[];
+		insertAnchor?(name: string): void;
+	}
+	let editorRef = $state<EditorRef | null>(null);
 
 	// UI state
 	let saving = $state(false);
@@ -89,8 +92,7 @@
 
 	// Details summary — shows populated metadata at a glance when collapsed
 	let detailsSummary = $derived.by(() => {
-		/** @type {string[]} */
-		const parts = [];
+		const parts: string[] = [];
 		if (featuredImage) parts.push("cover image");
 		if (description.trim()) parts.push("description");
 		const tagCount = parseTags(tagsInput).length;
@@ -123,16 +125,14 @@
 		hasUnsavedChanges = hasChanges;
 	});
 
-	/** @param {string} input */
-	function parseTags(input) {
+	function parseTags(input: string) {
 		return input
 			.split(",")
-			.map((/** @type {string} */ tag) => tag.trim())
-			.filter((/** @type {string} */ tag) => tag.length > 0);
+			.map((tag) => tag.trim())
+			.filter((tag) => tag.length > 0);
 	}
 
-	/** @param {string} value */
-	function validateSlug(value) {
+	function validateSlug(value: string) {
 		if (!value) {
 			slugError = "Slug is required";
 			return;
@@ -295,8 +295,7 @@
 	}
 
 	/** Format a Unix timestamp (seconds or ms) to a human-readable locale string */
-	/** @param {number | string | null | undefined} val */
-	function formatTimestamp(val) {
+	function formatTimestamp(val: number | string | null | undefined) {
 		if (!val) return "";
 		const ms = typeof val === "number" && val < 1e12 ? val * 1000 : Number(val);
 		return new Date(ms).toLocaleString();
@@ -340,8 +339,7 @@
 	}
 
 	// Flush draft and warn about unsaved changes on page unload
-	/** @param {BeforeUnloadEvent} e */
-	function handleBeforeUnload(e) {
+	function handleBeforeUnload(e: BeforeUnloadEvent) {
 		// Always flush the draft to localStorage so content survives session expiry
 		editorRef?.flushDraft();
 
@@ -475,7 +473,10 @@
 		<!-- Add details strip -->
 		<div class="details-strip">
 			<button class="details-toggle" onclick={toggleDetails}>
-				<navIcons.chevronRight size={16} class="details-chevron {detailsExpanded ? 'rotated' : ''}" />
+				<navIcons.chevronRight
+					size={16}
+					class="details-chevron {detailsExpanded ? 'rotated' : ''}"
+				/>
 				<span class="details-label">Add details</span>
 				{#if !detailsExpanded && detailsSummary}
 					<span class="details-summary">{detailsSummary}</span>
@@ -657,7 +658,9 @@
 							<p class="info-item">
 								<span class="info-label">Created:</span>
 								<span class="info-value">
-									{formatTimestamp(/** @type {any} */ (data.post).created_at)}
+									{formatTimestamp(
+										(data.post as Record<string, unknown>).created_at as number | string | null,
+									)}
 								</span>
 							</p>
 						{/if}
@@ -665,7 +668,9 @@
 							<p class="info-item">
 								<span class="info-label">Published:</span>
 								<span class="info-value">
-									{formatTimestamp(/** @type {any} */ (data.post).published_at)}
+									{formatTimestamp(
+										(data.post as Record<string, unknown>).published_at as number | string | null,
+									)}
 								</span>
 							</p>
 						{/if}
@@ -673,7 +678,9 @@
 							<p class="info-item">
 								<span class="info-label">Last updated:</span>
 								<span class="info-value">
-									{formatTimestamp(/** @type {any} */ (data.post).updated_at)}
+									{formatTimestamp(
+										(data.post as Record<string, unknown>).updated_at as number | string | null,
+									)}
 								</span>
 							</p>
 						{/if}
@@ -681,7 +688,9 @@
 							<p class="info-item">
 								<span class="info-label">Last synced:</span>
 								<span class="info-value">
-									{new Date(/** @type {any} */ (data.post).last_synced).toLocaleString()}
+									{new Date(
+										(data.post as Record<string, unknown>).last_synced as string | number,
+									).toLocaleString()}
 								</span>
 							</p>
 						{/if}
@@ -713,7 +722,7 @@
 						<GutterManager
 							bind:gutterItems
 							availableAnchors={editorRef?.getAvailableAnchors?.() || []}
-							onInsertAnchor={(/** @type {string} */ name) => editorRef?.insertAnchor(name)}
+							onInsertAnchor={(name: string) => editorRef?.insertAnchor?.(name)}
 						/>
 					</aside>
 				{/if}

@@ -57,8 +57,7 @@
 	}
 
 	// Validate URL for safe schemes (prevent javascript: XSS)
-	/** @param {string | null | undefined} url */
-	function isValidUrl(url) {
+	function isValidUrl(url: string | null | undefined) {
 		if (!url) return true;
 		const trimmed = url.trim();
 		// Allow relative paths starting with /
@@ -93,8 +92,8 @@
 
 		try {
 			// Build hero object if enabled
-			/** @type {{ title: string; subtitle: string; cta?: { text: string; link: string } } | null} */
-			let hero = null;
+			let hero: { title: string; subtitle: string; cta?: { text: string; link: string } } | null =
+				null;
 			if (hasHero && heroTitle.trim()) {
 				hero = {
 					title: heroTitle.trim(),

@@ -31,8 +31,52 @@
 		normalizeFileForUpload,
 	} from "@autumnsgrove/lattice/utils/upload-validation";
 
-	/** @type {{ data: { jxl: { jxlEnabled: boolean; jxlRolloutPercentage: number; jxlKillSwitchActive: boolean }; grafts?: Record<string, boolean> } }} */
-	let { data } = $props();
+	interface GalleryImage {
+		key: string;
+		url: string;
+		thumbnailUrl?: string;
+		dominantColor?: string;
+		uploaded?: string;
+		size?: number;
+		imageWidth?: number;
+		imageHeight?: number;
+		customMetadata?: {
+			altText?: string;
+			description?: string;
+			filename?: string;
+			imageFormat?: string;
+			originalSize?: string;
+			storedSize?: string;
+		};
+	}
+
+	interface UploadItem {
+		id: number;
+		name: string;
+		status: string;
+		stage: string;
+		progress: number;
+		url: string | null;
+		error: string | null;
+		aiData: { filename: string; altText: string; description: string } | null;
+		originalSize: number;
+		processedSize: number | null;
+		format: string | null;
+		markdown: string | null;
+		html: string | null;
+		svelte: string | null;
+		duplicate: boolean;
+		originalFile: File;
+	}
+
+	let {
+		data,
+	}: {
+		data: {
+			jxl: { jxlEnabled: boolean; jxlRolloutPercentage: number; jxlKillSwitchActive: boolean };
+			grafts?: Record<string, boolean>;
+		};
+	} = $props();
 
 	// Feature flag for image uploads (cascaded from Arbor layout grafts)
 	const uploadsEnabled = $derived(data.grafts?.image_uploads ?? true);
@@ -43,9 +87,8 @@
 
 	// Upload options (defaults with AI analysis enabled)
 	let quality = $state(80);
-	/** @type {'auto' | 'jxl' | 'webp' | 'original'} */
 	// Default to 'auto' if JXL feature is enabled, otherwise 'webp'
-	let imageFormat = $state(/** @type {'auto' | 'jxl' | 'webp' | 'original'} */ ("webp"));
+	let imageFormat = $state<"auto" | "jxl" | "webp" | "original">("webp");
 	let fullResolution = $state(false);
 	let jxlSupported = $state(false);
 	let useAiAnalysis = $state(false);
@@ -62,8 +105,7 @@
 
 	// Upload state
 	let isDragging = $state(false);
-	/** @type {any[]} */
-	let uploads = $state([]);
+	let uploads = $state<UploadItem[]>([]);
 	let uploading = $state(false);
 
 	// Copy format preference - load from localStorage or default to 'url'
@@ -80,29 +122,23 @@
 	});
 
 	// Gallery state
-	/** @type {any[]} */
-	let galleryImages = $state([]);
+	let galleryImages = $state<GalleryImage[]>([]);
 	let galleryLoading = $state(false);
-	/** @type {string | null} */
-	let galleryError = $state(null);
-	/** @type {string | null} */
-	let galleryCursor = $state(null);
+	let galleryError = $state<string | null>(null);
+	let galleryCursor = $state<string | null>(null);
 	let galleryHasMore = $state(false);
 	let galleryFilter = $state("");
 	let gallerySortBy = $state("date-desc");
 
 	// UI state
-	/** @type {string | number | null} */
-	let copiedItem = $state(null);
+	let copiedItem = $state<string | number | null>(null);
 	let deleteModalOpen = $state(false);
-	/** @type {any} */
-	let imageToDelete = $state(null);
+	let imageToDelete = $state<GalleryImage | null>(null);
 	let deleting = $state(false);
 
 	// Multi-select state
 	let selectionMode = $state(false);
-	/** @type {Set<string>} */
-	let selectedImages = $state(new Set());
+	let selectedImages = $state<Set<string>>(new Set());
 	let bulkDeleteModalOpen = $state(false);
 	let bulkDeleting = $state(false);
 
@@ -134,12 +170,10 @@
 			const data = await api.get(`/api/images/list?${params}`);
 
 			// Filter to show only allowed image types in gallery
-			const filteredImages = data.images.filter(
-				/** @param {any} img */ (img) => {
-					const key = img.key.toLowerCase();
-					return ALLOWED_EXTENSIONS.some((ext) => key.endsWith(`.${ext}`));
-				},
-			);
+			const filteredImages = data.images.filter((img: GalleryImage) => {
+				const key = img.key.toLowerCase();
+				return ALLOWED_EXTENSIONS.some((ext) => key.endsWith(`.${ext}`));
+			});
 
 			if (append) {
 				galleryImages = [...galleryImages, ...filteredImages];
@@ -243,13 +277,11 @@
 		}
 	}
 
-	/** @param {string} key */
-	function getFileName(key) {
+	function getFileName(key: string) {
 		return key.split("/").pop();
 	}
 
-	/** @param {string} key */
-	function getDateFromPath(key) {
+	function getDateFromPath(key: string) {
 		// Extract date from photos/YYYY/MM/DD/filename format
 		const match = key.match(/photos\/(\d{4})\/(\d{2})\/(\d{2})/);
 		if (match) {
@@ -258,36 +290,31 @@
 		return null;
 	}
 
-	/** @param {DragEvent} e */
-	function handleDragOver(e) {
+	function handleDragOver(e: DragEvent) {
 		e.preventDefault();
 		isDragging = true;
 	}
 
-	/** @param {DragEvent} e */
-	function handleDragLeave(e) {
+	function handleDragLeave(e: DragEvent) {
 		e.preventDefault();
 		isDragging = false;
 	}
 
-	/** @param {DragEvent} e */
-	function handleDrop(e) {
+	function handleDrop(e: DragEvent) {
 		e.preventDefault();
 		isDragging = false;
 		const files = e.dataTransfer ? Array.from(e.dataTransfer.files) : [];
 		uploadFiles(files);
 	}
 
-	/** @param {Event} e */
-	function handleFileSelect(e) {
-		const target = /** @type {HTMLInputElement} */ (e.target);
+	function handleFileSelect(e: Event) {
+		const target = e.target as HTMLInputElement;
 		const files = target.files ? Array.from(target.files) : [];
 		uploadFiles(files);
 		target.value = "";
 	}
 
-	/** @param {File[]} files */
-	async function uploadFiles(files) {
+	async function uploadFiles(files: File[]) {
 		// Normalize and validate each file against allowed types
 		const validFiles = [];
 		const rejectedFiles = [];
@@ -345,8 +372,7 @@
 		loadGallery();
 	}
 
-	/** @param {File} file */
-	async function uploadSingleFile(file) {
+	async function uploadSingleFile(file: File) {
 		const uploadItem = {
 			id: Date.now() + Math.random(),
 			name: file.name,
@@ -358,7 +384,7 @@
 			aiData: null,
 			originalSize: file.size,
 			processedSize: null,
-			format: /** @type {string | null} */ (null),
+			format: null as string | null,
 			markdown: null,
 			html: null,
 			svelte: null,
@@ -368,8 +394,7 @@
 
 		uploads = [uploadItem, ...uploads];
 
-		/** @param {any} updates */
-		const updateUpload = (updates) => {
+		const updateUpload = (updates: Partial<UploadItem>) => {
 			uploads = uploads.map((u) => (u.id === uploadItem.id ? { ...u, ...updates } : u));
 		};
 
@@ -394,9 +419,17 @@
 
 			// Step 3: Process image (JXL/WebP conversion, quality, EXIF strip)
 			// Skip processing for non-renderable formats (TIFF, HEIC, RAW) and GIFs
-			let processedBlob = file;
-			/** @type {any} */
-			let processResult = {
+			let processedBlob: File | Blob = file;
+			let processResult: {
+				originalSize: number;
+				processedSize: number;
+				format: string;
+				blob?: Blob;
+				width?: number;
+				height?: number;
+				skipped?: boolean;
+				reason?: string;
+			} = {
 				originalSize: file.size,
 				processedSize: file.size,
 				format: file.name.split(".").pop()?.toLowerCase() || "original",
@@ -411,7 +444,7 @@
 					format: imageFormat,
 					fullResolution,
 				});
-				processedBlob = processResult.blob;
+				processedBlob = processResult.blob!;
 			}
 
 			updateUpload({
@@ -422,10 +455,8 @@
 			});
 
 			// Step 3b: Generate thumbnail + extract dominant color in parallel
-			/** @type {{ blob: Blob; width: number; height: number } | null} */
-			let thumbResult = null;
-			/** @type {string | null} */
-			let dominantColor = null;
+			let thumbResult: { blob: Blob; width: number; height: number } | null = null;
+			let dominantColor: string | null = null;
 			try {
 				const [thumb, color] = await Promise.all([
 					generateThumbnail(file, { maxWidth: 400, quality: 60 }),
@@ -469,8 +500,7 @@
 			// Without this, the server rejects the upload because the extension doesn't match the MIME type
 			let uploadName = file.name;
 			if (processedBlob.type && processedBlob.type !== file.type) {
-				/** @type {Record<string, string>} */
-				const extForMime = {
+				const extForMime: Record<string, string> = {
 					"image/webp": ".webp",
 					"image/jxl": ".jxl",
 					"image/gif": ".gif",
@@ -561,16 +591,14 @@
 		}
 	}
 
-	/** @param {any} upload */
-	function getCopyText(upload) {
+	function getCopyText(upload: UploadItem) {
 		if (copyFormat === "url") return upload.url;
 		if (copyFormat === "markdown") return upload.markdown;
 		if (copyFormat === "html") return upload.html;
 		return upload.url;
 	}
 
-	/** @param {any} image */
-	function getCopyTextForGallery(image) {
+	function getCopyTextForGallery(image: GalleryImage) {
 		const url = image.url;
 		const alt = image.customMetadata?.altText || "Image";
 		if (copyFormat === "url") return url;
@@ -579,11 +607,7 @@
 		return url;
 	}
 
-	/**
-	 * @param {string} text
-	 * @param {string | number | null} [itemId]
-	 */
-	async function copyToClipboard(text, itemId = null) {
+	async function copyToClipboard(text: string, itemId: string | number | null = null) {
 		const result = await copyText(text);
 		if (result.success) {
 			copiedItem = itemId;
@@ -599,15 +623,13 @@
 		uploads = uploads.filter((u) => u.status === "processing");
 	}
 
-	/** @param {any} upload */
-	async function retryUpload(upload) {
+	async function retryUpload(upload: UploadItem) {
 		if (!upload.originalFile) return;
 		uploads = uploads.filter((u) => u.id !== upload.id);
 		await uploadSingleFile(upload.originalFile);
 	}
 
-	/** @param {any} image */
-	function confirmDelete(image) {
+	function confirmDelete(image: GalleryImage) {
 		imageToDelete = image;
 		deleteModalOpen = true;
 	}
@@ -624,8 +646,7 @@
 		}
 	}
 
-	/** @param {string} key */
-	function toggleImageSelection(key) {
+	function toggleImageSelection(key: string) {
 		const next = new Set(selectedImages);
 		if (next.has(key)) {
 			next.delete(key);
@@ -639,7 +660,7 @@
 		if (selectedImages.size === galleryImages.length) {
 			selectedImages = new Set();
 		} else {
-			selectedImages = new Set(galleryImages.map((/** @type {any} */ img) => img.key));
+			selectedImages = new Set(galleryImages.map((img) => img.key));
 		}
 	}
 
@@ -663,7 +684,7 @@
 
 			// Remove successfully deleted images from gallery
 			const deletedKeys = new Set(result?.deleted ?? keys);
-			galleryImages = galleryImages.filter((/** @type {any} */ img) => !deletedKeys.has(img.key));
+			galleryImages = galleryImages.filter((img) => !deletedKeys.has(img.key));
 
 			const failedCount = result?.failed?.length ?? 0;
 			if (failedCount > 0) {
@@ -1125,7 +1146,7 @@
 						aria-checked={selectionMode ? selectedImages.has(image.key) : undefined}
 						tabindex={selectionMode ? 0 : undefined}
 						onkeydown={selectionMode
-							? (/** @type {KeyboardEvent} */ e) => {
+							? (e: KeyboardEvent) => {
 									if (e.key === "Enter" || e.key === " ") {
 										e.preventDefault();
 										toggleImageSelection(image.key);
@@ -1208,7 +1229,7 @@
 				src={imageToDelete.url}
 				alt="Preview"
 				onerror={(e) => {
-					const el = /** @type {HTMLImageElement} */ (e.currentTarget);
+					const el = e.currentTarget as HTMLImageElement;
 					el.style.display = "none";
 					el.nextElementSibling?.classList.remove("hidden");
 				}}

@@ -39,8 +39,8 @@
 		}
 	});
 
-	/** @type {{ children: import('svelte').Snippet, data: any }} */
-	let { children, data } = $props();
+	let { children, data }: { children: import("svelte").Snippet; data: Record<string, unknown> } =
+		$props();
 
 	// Navigation loading state — shows a progress bar during all page transitions
 	let isNavigating = $derived(!!$navigating);
