@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import { DomainChecker } from "@autumnsgrove/lattice/ui/components/domain";
 

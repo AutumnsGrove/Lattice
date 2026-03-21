@@ -27,7 +27,7 @@
   {/if}
   ```
 -->
-<script>
+<script lang="ts">
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import Button from "$lib/ui/components/ui/Button.svelte";
 	import GreenhouseEnrollTable from "./GreenhouseEnrollTable.svelte";
@@ -35,26 +35,25 @@
 	import CultivateFlagTable from "./CultivateFlagTable.svelte";
 	import { stateIcons, natureIcons, actionIcons, authIcons } from "@autumnsgrove/prism/icons";
 
-	/**
-	 * @typedef {import('../../feature-flags/types.js').GreenhouseTenant} GreenhouseTenant
-	 * @typedef {import('../../feature-flags/admin.js').FeatureFlagSummary} FeatureFlagSummary
-	 */
+	import type { GreenhouseTenant } from "../../feature-flags/types.js";
+	import type { FeatureFlagSummary } from "../../feature-flags/admin.js";
 
-	/** @type {{
-	 *   tenants?: GreenhouseTenant[];
-	 *   tenantNames?: Record<string, string>;
-	 *   availableTenants?: Record<string, string>;
-	 *   featureFlags?: FeatureFlagSummary[];
-	 *   onEnroll?: (tenantId: string, notes: string) => void;
-	 *   onToggle?: (tenantId: string, enabled: boolean) => void;
-	 *   onRemove?: (tenantId: string) => void;
-	 *   onCultivate?: (flagId: string) => void;
-	 *   onPrune?: (flagId: string) => void;
-	 *   enrollLoading?: boolean;
-	 *   loadingFlagId?: string;
-	 *   formResult?: { success?: boolean; error?: string; message?: string };
-	 *   class?: string;
-	 * }} */
+	interface Props {
+		tenants?: GreenhouseTenant[];
+		tenantNames?: Record<string, string>;
+		availableTenants?: Record<string, string>;
+		featureFlags?: FeatureFlagSummary[];
+		onEnroll?: (tenantId: string, notes: string) => void;
+		onToggle?: (tenantId: string, enabled: boolean) => void;
+		onRemove?: (tenantId: string) => void;
+		onCultivate?: (flagId: string) => void;
+		onPrune?: (flagId: string) => void;
+		enrollLoading?: boolean;
+		loadingFlagId?: string;
+		formResult?: { success?: boolean; error?: string; message?: string };
+		class?: string;
+	}
+
 	let {
 		tenants = [],
 		tenantNames = {},
@@ -69,7 +68,7 @@
 		loadingFlagId,
 		formResult,
 		class: className = "",
-	} = $props();
+	}: Props = $props();
 
 	// Dialog state
 	let showEnrollDialog = $state(false);
@@ -81,21 +80,18 @@
 	const availableCount = $derived(Object.keys(availableTenants).length);
 
 	// Handle enrollment
-	/** @param {string} tenantId @param {string} notes */
-	function handleEnroll(tenantId, notes) {
+	function handleEnroll(tenantId: string, notes: string) {
 		showEnrollDialog = false;
 		onEnroll?.(tenantId, notes);
 	}
 
 	// Handle toggle
-	/** @param {string} tenantId @param {boolean} enabled */
-	function handleToggle(tenantId, enabled) {
+	function handleToggle(tenantId: string, enabled: boolean) {
 		onToggle?.(tenantId, enabled);
 	}
 
 	// Handle remove with confirmation
-	/** @param {string} tenantId */
-	function handleRemove(tenantId) {
+	function handleRemove(tenantId: string) {
 		if (!confirm("Remove this tenant from the greenhouse program?")) {
 			return;
 		}
@@ -103,8 +99,7 @@
 	}
 
 	// Handle flag cultivate/prune
-	/** @param {string} flagId @param {boolean} enabled */
-	function handleFlagToggle(flagId, enabled) {
+	function handleFlagToggle(flagId: string, enabled: boolean) {
 		if (enabled) {
 			onCultivate?.(flagId);
 		} else {

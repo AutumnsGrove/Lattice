@@ -314,7 +314,6 @@
 					<span class="blaze-preview-label">Preview</span>
 					<Blaze
 						definition={{
-							slug: newBlazeSlug || "preview",
 							label: newBlazeLabel || "Preview",
 							icon: newBlazeIcon,
 							color: newBlazeColor,

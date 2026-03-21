@@ -1,11 +1,15 @@
-<script>
+<script lang="ts">
 	/**
 	 * LightboxCaption - Shared caption component for lightbox viewers
 	 * Displays image captions with consistent styling
 	 *
 	 * @prop {string} caption - The caption text to display
 	 */
-	let { caption = '' } = $props();
+	interface Props {
+		caption?: string;
+	}
+
+	let { caption = '' }: Props = $props();
 </script>
 
 {#if caption}

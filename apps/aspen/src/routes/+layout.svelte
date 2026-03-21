@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { onMount } from "svelte";
 	import "../app.css";
 	import "@autumnsgrove/lattice/styles/tokens.css";
@@ -11,6 +11,7 @@
 	import PassageTransition from "@autumnsgrove/lattice/ui/components/ui/PassageTransition.svelte";
 	import { fontMap, DEFAULT_FONT } from "@autumnsgrove/lattice/ui/tokens/fonts";
 	import { getSeasonFavicons } from "@autumnsgrove/lattice/ui/season-meta";
+	import type { Season } from "@autumnsgrove/lattice/ui/types/season";
 	import Header from "@autumnsgrove/lattice/components/chrome/Header.svelte";
 	import { buildTenantNavItems } from "@autumnsgrove/lattice/ui/components/chrome/tenant-nav";
 	import Lantern from "@autumnsgrove/lattice/ui/components/chrome/lantern/Lantern.svelte";
@@ -19,6 +20,53 @@
 	import { groveModeStore } from "@autumnsgrove/lattice/ui/stores/grove-mode.svelte";
 	import { seasonStore } from "@autumnsgrove/lattice/ui/stores/season.svelte";
 	import VineBackground from "@autumnsgrove/lattice/ui/components/nature/VineBackground.svelte";
+	import type { AppContext } from "../app.d.ts";
+
+	/** Shape returned by +layout.server.ts load function */
+	interface LayoutData {
+		user: {
+			id: string;
+			email: string;
+			name?: string;
+			picture?: string;
+			provider?: string;
+			isAdmin?: boolean;
+			preferences?: {
+				theme: string | null;
+				groveMode: boolean | null;
+				season: string | null;
+			};
+		} | null;
+		context: AppContext;
+		isOwner: boolean;
+		siteSettings: {
+			font_family: string;
+			accent_color?: string;
+			grove_title?: string;
+			avatar_url?: string;
+			show_grove_logo?: string;
+			[key: string]: string | undefined;
+		};
+		navPages: Array<{ slug: string; title: string }>;
+		navPageLimit: number;
+		enabledCuriosCount: number;
+		csrfToken?: string;
+		showTimeline: boolean;
+		showGallery: boolean;
+		humanJsonEnabled: boolean;
+		preferredSeason: string | null;
+		dbAccessError: boolean;
+		lanternData: {
+			homeGrove: string;
+			displayName: string;
+			enabled: boolean;
+			visitingGrove: {
+				tenantId: string;
+				subdomain: string;
+				name: string;
+			} | null;
+		} | null;
+	}
 
 	// grove-entrance-dismiss: fade out the pre-hydration loading overlay
 	// once SvelteKit has hydrated and this layout is interactive
@@ -38,8 +86,8 @@
 		}
 	});
 
-	/** @type {{ children: import('svelte').Snippet, data: any }} */
-	let { children, data } = $props();
+	let { children, data }: { children: import("svelte").Snippet; data: LayoutData } =
+		$props();
 
 	// Navigation loading state — shows a progress bar during all page transitions
 	let isNavigating = $derived(!!$navigating);
@@ -91,8 +139,7 @@
 	);
 
 	// Handle search - navigate to blog search
-	/** @param {string} query */
-	function handleSearch(query) {
+	function handleSearch(query: string) {
 		goto(`/blog/search?q=${encodeURIComponent(query)}`);
 	}
 
@@ -118,7 +165,7 @@
 
 	// Seasonal favicons — always resolve favicon paths, using preferred season or default (#1304)
 	// Rendered exclusively from <svelte:head> to avoid duplicate <link> tags with app.html
-	const favicons = $derived(getSeasonFavicons(data.preferredSeason || "summer"));
+	const favicons = $derived(getSeasonFavicons((data.preferredSeason || "summer") as Season));
 
 	function toggleTheme() {
 		themeStore.toggle();
@@ -179,8 +226,7 @@
 			onSearch={handleSearch}
 			resourceLinks={[]}
 			connectLinks={[]}
-			showLogo={data.siteSettings?.show_grove_logo === true ||
-				data.siteSettings?.show_grove_logo === "true"}
+			showLogo={data.siteSettings?.show_grove_logo === "true"}
 			logoSize="lg"
 			maxWidth="wide"
 			showSidebarToggle={isAdminPage}

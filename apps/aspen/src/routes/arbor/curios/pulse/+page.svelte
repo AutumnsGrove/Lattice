@@ -7,7 +7,13 @@
 	import Badge from "@autumnsgrove/lattice/ui/components/ui/Badge.svelte";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 	import { api } from "@autumnsgrove/lattice/utils/api";
-	import { metricIcons, navIcons, actionIcons, stateIcons, featureIcons } from "@autumnsgrove/prism/icons";
+	import {
+		metricIcons,
+		navIcons,
+		actionIcons,
+		stateIcons,
+		featureIcons,
+	} from "@autumnsgrove/prism/icons";
 
 	const { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -130,13 +136,13 @@
 <div class="pulse-config">
 	<header class="page-header">
 		<a href="/arbor/curios" class="back-link">
-			<ChevronLeft class="back-icon" />
+			<navIcons.chevronLeft class="back-icon" />
 			<span>Back to Curios</span>
 		</a>
 
 		<div class="header-content">
 			<div class="title-row">
-				<Activity class="header-icon" />
+				<metricIcons.activity class="header-icon" />
 				<h1>Pulse</h1>
 				<Badge variant={enabled ? "default" : "secondary"}>
 					{enabled ? "Enabled" : "Disabled"}
@@ -151,14 +157,14 @@
 
 	{#if errorMessage || form?.error}
 		<div class="alert alert-error">
-			<AlertCircle class="alert-icon" />
+			<stateIcons.alertCircle class="alert-icon" />
 			<span>{errorMessage || form?.error}</span>
 		</div>
 	{/if}
 
 	{#if successMessage || form?.success}
 		<div class="alert alert-success">
-			<CheckCircle2 class="alert-icon" />
+			<stateIcons.checkCircle2 class="alert-icon" />
 			<span>{successMessage || "Configuration saved successfully!"}</span>
 		</div>
 	{/if}
@@ -225,7 +231,7 @@
 		<!-- Webhook Setup -->
 		<GlassCard class="config-section">
 			<div class="section-header">
-				<Globe class="section-icon" />
+				<navIcons.globe class="section-icon" />
 				<h2>Webhook Setup</h2>
 			</div>
 
@@ -240,9 +246,9 @@
 						onclick={() => copyToClipboard(data.webhookUrl, "url")}
 					>
 						{#if urlCopied}
-							<CheckCircle2 size={14} />
+							<stateIcons.checkCircle2 size={14} />
 						{:else}
-							<Copy size={14} />
+							<actionIcons.copy size={14} />
 						{/if}
 					</button>
 				</div>
@@ -258,14 +264,18 @@
 					<div class="copy-field secret-field">
 						<code class="copy-value">{showSecret ? generatedSecret : "••••••••••••••••"}</code>
 						<button type="button" class="copy-btn" onclick={() => (showSecret = !showSecret)}>
-							{#if showSecret}<EyeOff size={14} />{:else}<Eye size={14} />{/if}
+							{#if showSecret}<stateIcons.eyeOff size={14} />{:else}<stateIcons.eye
+									size={14}
+								/>{/if}
 						</button>
 						<button
 							type="button"
 							class="copy-btn"
 							onclick={() => copyToClipboard(generatedSecret!, "secret")}
 						>
-							{#if secretCopied}<CheckCircle2 size={14} />{:else}<Copy size={14} />{/if}
+							{#if secretCopied}<stateIcons.checkCircle2 size={14} />{:else}<actionIcons.copy
+									size={14}
+								/>{/if}
 						</button>
 					</div>
 					<p class="field-help warning">
@@ -277,7 +287,7 @@
 					<!-- svelte-ignore a11y_label_has_associated_control -->
 					<label class="field-label">Webhook Secret</label>
 					<p class="secret-status">
-						<CheckCircle2 size={14} class="text-green" /> Secret configured
+						<stateIcons.checkCircle2 size={14} class="text-green" /> Secret configured
 					</p>
 					<button
 						type="button"
@@ -286,9 +296,9 @@
 						onclick={regenerateSecret}
 					>
 						{#if isRegenerating}
-							<Loader2 size={14} class="spinning" /> Regenerating...
+							<stateIcons.loader size={14} class="spinning" /> Regenerating...
 						{:else}
-							<RefreshCw size={14} /> Regenerate Secret
+							<actionIcons.refresh size={14} /> Regenerate Secret
 						{/if}
 					</button>
 					<p class="field-help">
@@ -320,7 +330,7 @@
 		<!-- Webhook Health -->
 		<GlassCard class="config-section">
 			<div class="section-header">
-				<BarChart3 class="section-icon" />
+				<metricIcons.barChart class="section-icon" />
 				<h2>Status</h2>
 			</div>
 
@@ -352,7 +362,7 @@
 		<!-- Repository Filtering -->
 		<GlassCard class="config-section">
 			<div class="section-header">
-				<Filter class="section-icon" />
+				<actionIcons.filter class="section-icon" />
 				<h2>Repository Filtering</h2>
 			</div>
 
@@ -386,7 +396,7 @@
 		<!-- Display Options -->
 		<GlassCard class="config-section">
 			<div class="section-header">
-				<Activity class="section-icon" />
+				<metricIcons.activity class="section-icon" />
 				<h2>Display Options</h2>
 			</div>
 
@@ -455,13 +465,13 @@
 		<div class="form-actions">
 			<GlassButton type="submit" variant="accent" disabled={isSubmitting}>
 				{#if saveConfirmed}
-					<CheckCircle2 class="button-icon" />
+					<stateIcons.checkCircle2 class="button-icon" />
 					Saved!
 				{:else if isSubmitting}
-					<Loader2 class="button-icon spinning" />
+					<stateIcons.loader class="button-icon spinning" />
 					Saving...
 				{:else}
-					<Save class="button-icon" />
+					<actionIcons.save class="button-icon" />
 					Save Configuration
 				{/if}
 			</GlassButton>

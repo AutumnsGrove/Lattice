@@ -1,71 +1,63 @@
-<script>
+<script lang="ts">
   import { slide, fade } from "svelte/transition";
   import { Button } from "$lib/ui/components/primitives/button";
   import { MAX_CONTENT_LENGTH } from "$lib/config/wisp.js";
   import { api } from "$lib/utils/api";
 
-  /**
-   * @typedef {Object} Props
-   * @property {string} content - Content to analyze
-   * @property {boolean} enabled - Whether Wisp is enabled
-   * @property {string} postTitle - Optional post title for context
-   * @property {string} postSlug - Optional post slug for logging
-   * @property {(original: string, suggestion: string) => void} onApplyFix - Callback when user applies a fix
-   */
+  interface GrammarSuggestion {
+    original: string;
+    suggestion: string;
+    reason?: string;
+    severity?: string;
+  }
 
-  /**
-   * @typedef {Object} GrammarSuggestion
-   * @property {string} original
-   * @property {string} suggestion
-   * @property {string} [reason]
-   * @property {string} [severity]
-   */
+  interface ToneTrait {
+    trait: string;
+    score: number;
+  }
 
-  /**
-   * @typedef {Object} ToneTrait
-   * @property {string} trait
-   * @property {number} score
-   */
+  interface WispTone {
+    analysis?: string;
+    traits?: ToneTrait[];
+    suggestions?: string[];
+  }
 
-  /**
-   * @typedef {Object} WispTone
-   * @property {string} [analysis]
-   * @property {ToneTrait[]} [traits]
-   * @property {string[]} [suggestions]
-   */
+  interface WispReadability {
+    fleschKincaid?: number;
+    readingTime?: string;
+    wordCount?: number;
+    sentenceCount?: number;
+    sentenceStats?: { average: number; longest: number };
+    suggestions?: string[];
+  }
 
-  /**
-   * @typedef {Object} WispReadability
-   * @property {number} [fleschKincaid]
-   * @property {string} [readingTime]
-   * @property {number} [wordCount]
-   * @property {number} [sentenceCount]
-   * @property {{ average: number, longest: number }} [sentenceStats]
-   * @property {string[]} [suggestions]
-   */
+  interface WispMeta {
+    tokensUsed?: number;
+    cost?: number;
+  }
 
-  /**
-   * @typedef {Object} WispMeta
-   * @property {number} [tokensUsed]
-   * @property {number} [cost]
-   */
+  interface WispResults {
+    grammar?: { overallScore?: number; suggestions?: GrammarSuggestion[] };
+    tone?: WispTone;
+    readability?: WispReadability;
+    meta?: WispMeta;
+  }
 
-  /**
-   * @typedef {Object} WispResults
-   * @property {{ overallScore?: number, suggestions?: GrammarSuggestion[] }} [grammar]
-   * @property {WispTone} [tone]
-   * @property {WispReadability} [readability]
-   * @property {WispMeta} [meta]
-   */
+  interface Props {
+    content?: string;
+    enabled?: boolean;
+    postTitle?: string;
+    postSlug?: string;
+    onApplyFix?: (original: string, suggestion: string) => void;
+  }
 
-  /** @type {Props} */
   let {
     content = "",
     enabled = false,
     postTitle = "",
     postSlug = "",
-    onApplyFix = (original, suggestion) => {},
-  } = $props();
+    onApplyFix = (_original: string, _suggestion: string) => {},
+  }: Props = $props();
 
   // Panel state
   let isOpen = $state(false);
@@ -73,10 +65,8 @@
 
   // Analysis state
   let isAnalyzing = $state(false);
-  /** @type {string | null} */
-  let analysisError = $state(null);
-  /** @type {WispResults | null} */
-  let results = $state(null);
+  let analysisError = $state<string | null>(null);
+  let results = $state<WispResults | null>(null);
   let activeTab = $state("grammar");
   let selectedMode = $state("quick"); // quick or thorough
 
@@ -132,7 +122,7 @@
   };
 
   // Get current vibe based on state
-  let currentVibe = $derived(() => {
+  let currentVibe = $derived.by(() => {
     if (isAnalyzing) return vibes.analyzing;
     if (analysisError) return vibes.error;
     if ((results?.grammar?.overallScore ?? 0) >= 90) return vibes.grammarGood;
@@ -186,11 +176,10 @@
   ];
 
   let vibeIndex = $state(0);
-  /** @type {HTMLElement | null} */
-  let panelRef = $state(null);
+  let panelRef = $state<HTMLElement | null>(null);
 
   // Content length status
-  let contentLengthStatus = $derived(() => {
+  let contentLengthStatus = $derived.by(() => {
     const len = content.length;
     const pct = Math.round((len / MAX_CONTENT_LENGTH) * 100);
     if (len > MAX_CONTENT_LENGTH) return { status: "over", pct: 100, len };
@@ -210,8 +199,7 @@
   });
 
   // Handle keyboard navigation
-  /** @param {KeyboardEvent} e */
-  function handleKeydown(e) {
+  function handleKeydown(e: KeyboardEvent) {
     if (e.key === "Escape" && isOpen) {
       e.preventDefault();
       minimize();
@@ -219,10 +207,10 @@
   }
 
   // Get the display vibe
-  let displayVibe = $derived(() => {
+  let displayVibe = $derived.by(() => {
     if (isAnalyzing) return vibes.analyzing;
     if (analysisError) return vibes.error;
-    if (results) return currentVibe();
+    if (results) return currentVibe;
     return seasonalVibes[vibeIndex];
   });
 
@@ -250,7 +238,7 @@
       });
 
       if (data) {
-        results = data;
+        results = data as WispResults;
         if (action === "grammar") activeTab = "grammar";
         else if (action === "tone") activeTab = "tone";
         else if (action === "readability") activeTab = "readability";
@@ -265,8 +253,7 @@
   }
 
   // Apply a grammar fix
-  /** @param {GrammarSuggestion} suggestion */
-  function applyFix(suggestion) {
+  function applyFix(suggestion: GrammarSuggestion) {
     onApplyFix(suggestion.original, suggestion.suggestion);
     // Remove from list
     if (results?.grammar?.suggestions) {
@@ -299,8 +286,7 @@
   }
 
   // Severity colors
-  /** @param {string} [severity] */
-  function getSeverityClass(severity) {
+  function getSeverityClass(severity: string | undefined) {
     switch (severity) {
       case "error": return "severity-error";
       case "warning": return "severity-warning";
@@ -309,8 +295,7 @@
   }
 
   // Format score as visual bar
-  /** @param {number | null | undefined} score */
-  function formatScore(score) {
+  function formatScore(score: number | null | undefined) {
     if (score === null || score === undefined) return "░░░░░░░░░░";
     const filled = Math.round(score / 10);
     const empty = 10 - filled;
@@ -359,21 +344,21 @@
       <!-- Content length indicator -->
       <div
         class="content-length"
-        class:warn={contentLengthStatus().status === "warn"}
-        class:over={contentLengthStatus().status === "over"}
+        class:warn={contentLengthStatus.status === "warn"}
+        class:over={contentLengthStatus.status === "over"}
         aria-live="polite"
       >
         <span class="length-text">
-          {contentLengthStatus().len.toLocaleString()} / {MAX_CONTENT_LENGTH.toLocaleString()}
+          {contentLengthStatus.len.toLocaleString()} / {MAX_CONTENT_LENGTH.toLocaleString()}
         </span>
         <div class="length-bar">
-          <div class="length-fill" style="width: {contentLengthStatus().pct}%"></div>
+          <div class="length-fill" style="width: {contentLengthStatus.pct}%"></div>
         </div>
       </div>
 
       <!-- Vibes section - the ASCII art atmosphere -->
       <div class="vibes-section">
-        <pre class="ascii-vibe" aria-hidden="true">{displayVibe()}</pre>
+        <pre class="ascii-vibe" aria-hidden="true">{displayVibe}</pre>
       </div>
 
       <!-- Mode selector -->
@@ -393,7 +378,7 @@
         <button
           class="action-btn"
           onclick={() => runAnalysis("grammar")}
-          disabled={isAnalyzing || contentLengthStatus().status === "over"}
+          disabled={isAnalyzing || contentLengthStatus.status === "over"}
           aria-busy={isAnalyzing}
         >
           grammar
@@ -401,7 +386,7 @@
         <button
           class="action-btn"
           onclick={() => runAnalysis("tone")}
-          disabled={isAnalyzing || contentLengthStatus().status === "over"}
+          disabled={isAnalyzing || contentLengthStatus.status === "over"}
           aria-busy={isAnalyzing}
         >
           tone
@@ -417,7 +402,7 @@
         <button
           class="action-btn action-full"
           onclick={() => runAnalysis("all")}
-          disabled={isAnalyzing || contentLengthStatus().status === "over"}
+          disabled={isAnalyzing || contentLengthStatus.status === "over"}
           aria-busy={isAnalyzing}
         >
           {isAnalyzing ? "thinking..." : "full check"}

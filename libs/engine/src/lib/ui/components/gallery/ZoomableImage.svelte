@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	/**
 	 * ZoomableImage - Image with zoom and pan functionality
 	 * Click to cycle through zoom levels, drag to pan when zoomed
@@ -8,7 +8,14 @@
 	 * @prop {boolean} isActive - When false, resets zoom/pan state
 	 * @prop {string} class - Additional CSS classes
 	 */
-	let { src = '', alt = '', isActive = true, class: className = '' } = $props();
+	interface Props {
+		src?: string;
+		alt?: string;
+		isActive?: boolean;
+		class?: string;
+	}
+
+	let { src = '', alt = '', isActive = true, class: className = '' }: Props = $props();
 
 	// Zoom state: 0 = normal, 1 = medium zoom (1.5x), 2 = max zoom (2.5x)
 	let zoomLevel = $state(0);
@@ -56,7 +63,7 @@
 	}
 
 	// Mouse event handlers for drag/pan
-	function handleMouseDown(/** @type {MouseEvent} */ event) {
+	function handleMouseDown(event: MouseEvent) {
 		if (zoomLevel === 0) return;
 
 		isDragging = true;
@@ -68,7 +75,7 @@
 		event.preventDefault();
 	}
 
-	function handleMouseMove(/** @type {MouseEvent} */ event) {
+	function handleMouseMove(event: MouseEvent) {
 		if (!isDragging) return;
 
 		const deltaX = event.clientX - dragStartX;
@@ -84,7 +91,7 @@
 	}
 
 	// Touch event handlers for drag/pan on mobile
-	function handleTouchStart(/** @type {TouchEvent} */ event) {
+	function handleTouchStart(event: TouchEvent) {
 		if (zoomLevel === 0) return;
 
 		// Only handle single touch for panning
@@ -99,7 +106,7 @@
 		}
 	}
 
-	function handleTouchMove(/** @type {TouchEvent} */ event) {
+	function handleTouchMove(event: TouchEvent) {
 		if (!isDragging || event.touches.length !== 1) return;
 
 		const deltaX = event.touches[0].clientX - dragStartX;
@@ -116,7 +123,7 @@
 	}
 
 	// Click handler that distinguishes between click and drag
-	function handleClick(/** @type {MouseEvent} */ event) {
+	function handleClick(event: MouseEvent) {
 		// If we dragged more than 5px, don't treat as click
 		if (totalDragDistance > 5) {
 			totalDragDistance = 0;
@@ -126,7 +133,7 @@
 	}
 
 	// Keyboard handler for accessibility
-	function handleKeydown(/** @type {KeyboardEvent} */ event) {
+	function handleKeydown(event: KeyboardEvent) {
 		if (event.key === 'Enter' || event.key === ' ') {
 			event.preventDefault();
 			cycleZoom();

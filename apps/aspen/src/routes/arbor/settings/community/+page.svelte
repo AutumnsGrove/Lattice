@@ -182,7 +182,9 @@
 			<h2>
 				<GroveIcon
 					service="grove"
-					style="width: 1.25rem; height: 1.25rem; color: var(--user-accent, var(--color-primary)); display: inline-block; vertical-align: text-bottom; margin-right: 0.375rem;"
+					size={20}
+					color="var(--user-accent, var(--color-primary))"
+					class="inline-block align-text-bottom mr-1.5"
 				/>
 				Canopy
 			</h2>
@@ -285,7 +287,9 @@
 			<h2>
 				<GroveIcon
 					service="meadow"
-					style="width: 1.25rem; height: 1.25rem; color: var(--user-accent, var(--color-primary)); display: inline-block; vertical-align: text-bottom; margin-right: 0.375rem;"
+					size={20}
+					color="var(--user-accent, var(--color-primary))"
+					class="inline-block align-text-bottom mr-1.5"
 				/>
 				Meadow
 			</h2>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Select as SelectPrimitive } from "bits-ui";
-	import { cn } from "$lib/utils";
+	import { cn } from "$lib/ui/utils";
 
 	// svelte-ignore custom_element_props_identifier
 	let {

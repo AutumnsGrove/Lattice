@@ -95,7 +95,9 @@
 <Glass variant="accent" class="error-bg border-error/30 p-6 rounded-lg mb-8">
 	<div class="danger-header">
 		<div>
-			<h2 class="flex items-center gap-2"><stateIcons.warning class="w-5 h-5" /> Mass Email Zone</h2>
+			<h2 class="flex items-center gap-2">
+				<stateIcons.warning class="w-5 h-5" /> Mass Email Zone
+			</h2>
 			<p>
 				Use with extreme care. This copies all {data.totalActive} subscriber email{data.totalActive ===
 				1
@@ -127,7 +129,9 @@
 
 	{#if subscribers.length === 0}
 		<div class="empty-state">
-			<div class="empty-icon"><featureIcons.mailOpen class="w-12 h-12 text-foreground-muted" /></div>
+			<div class="empty-icon">
+				<featureIcons.mailOpen class="w-12 h-12 text-foreground-muted" />
+			</div>
 			<p>No subscribers yet</p>
 		</div>
 	{:else}
@@ -159,7 +163,7 @@
 									onclick={() => copyEmail(subscriber.email)}
 								>
 									{#if copiedEmail === subscriber.email}
-										<Check class="w-4 h-4" /> Copied
+										<stateIcons.check class="w-4 h-4" /> Copied
 									{:else}
 										<actionIcons.copy class="w-4 h-4" /> Copy
 									{/if}

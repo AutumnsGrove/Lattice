@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	/**
 	 * DomainChecker — Self-service domain availability checker
 	 *
@@ -16,34 +16,33 @@
 
 	import { stateIcons, navIcons } from "@autumnsgrove/prism/icons";
 	import { TIERS } from "$lib/config/tiers";
+	import type { TierKey } from "$lib/config/tiers";
 
-	/** @type {{ username: string; userTier: string; variant?: "inline" | "modal" }} */
-	let { username, userTier, variant = "inline" } = $props();
+	interface Props {
+		username: string;
+		userTier: string;
+		variant?: "inline" | "modal";
+	}
+
+	let { username, userTier, variant = "inline" }: Props = $props();
+
+	type DomainStatus = "idle" | "checking" | "available" | "registered" | "unknown" | "error";
 
 	// Domain input state
 	let domainInput = $state("");
-	/** @type {"idle" | "checking" | "available" | "registered" | "unknown" | "error"} */
-	let domainStatus = $state("idle");
-	/** @type {string | null} */
-	let domainError = $state(null);
-	/** @type {string | null} */
-	let registrar = $state(null);
-	/** @type {string} */
-	let checkedDomain = $state("");
-	/** @type {ReturnType<typeof setTimeout>} */
-	let debounceTimer;
+	let domainStatus: DomainStatus = $state("idle");
+	let domainError: string | null = $state(null);
+	let registrar: string | null = $state(null);
+	let checkedDomain: string = $state("");
+	let debounceTimer: ReturnType<typeof setTimeout>;
 
 	// Tier checks
 	const hasCustomDomain = $derived(
-		TIERS[/** @type {import("$lib/config/tiers").TierKey} */ (userTier)]?.features?.customDomain ?? false,
+		TIERS[userTier as TierKey]?.features?.customDomain ?? false,
 	);
 	const oakTier = TIERS.oak;
 
-	/**
-	 * Check domain availability via the engine API
-	 * @param {string} value
-	 */
-	async function checkDomain(value) {
+	async function checkDomain(value: string) {
 		const trimmed = value.trim();
 
 		if (!trimmed) {
@@ -64,9 +63,7 @@
 
 		try {
 			const res = await fetch(`/api/check-domain?domain=${encodeURIComponent(query)}`); // csrf-ok: GET-only read
-			const result = /** @type {{ domain: string; status: string; registrar?: string; error?: string }} */ (
-				await res.json()
-			);
+			const result = (await res.json()) as { domain: string; status: string; registrar?: string; error?: string };
 
 			// Only update if this is still the current check
 			if (checkedDomain !== query) return;

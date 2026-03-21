@@ -23,7 +23,6 @@
 	import Accordion from "@autumnsgrove/lattice/ui/components/ui/Accordion.svelte";
 	import Skeleton from "@autumnsgrove/lattice/ui/components/ui/Skeleton.svelte";
 	import Spinner from "@autumnsgrove/lattice/ui/components/ui/Spinner.svelte";
-	import CollapsibleSection from "@autumnsgrove/lattice/ui/components/ui/CollapsibleSection.svelte";
 	import {
 		StatusBadge,
 		ScoreBar,
@@ -80,6 +79,10 @@
 	let scoreValue = $state(75);
 	let creditValue = $state(42);
 	let logoSeason = $state<"spring" | "summer" | "autumn" | "winter" | "midnight">("summer");
+	// GlassLogoArchive only supports 4 seasons (no midnight) — derive a fallback
+	const archiveSeason = $derived<"spring" | "summer" | "autumn" | "winter">(
+		logoSeason === "midnight" ? "summer" : logoSeason,
+	);
 	let glassVariant = $state<"surface" | "overlay" | "card" | "tint" | "accent" | "muted">(
 		"surface",
 	);
@@ -448,15 +451,15 @@
 				</p>
 				<div class="flex justify-center gap-8 items-end">
 					<div class="text-center">
-						<LogoArchive size={48} season={logoSeason} />
+						<LogoArchive class="w-12 h-12" season={archiveSeason} />
 						<p class="text-xs text-bark-500 mt-2">Static</p>
 					</div>
 					<div class="text-center">
-						<LogoArchive size={48} season={logoSeason} breathing />
+						<LogoArchive class="w-12 h-12" season={archiveSeason} breathing />
 						<p class="text-xs text-bark-500 mt-2">Breathing</p>
 					</div>
 					<div class="text-center">
-						<LogoArchive size={48} season={logoSeason} animate />
+						<LogoArchive class="w-12 h-12" season={archiveSeason} breathing />
 						<p class="text-xs text-bark-500 mt-2">Animate</p>
 					</div>
 				</div>
@@ -473,15 +476,15 @@
 				</p>
 				<div class="flex justify-center gap-8 items-end">
 					<div class="text-center">
-						<GlassLogoArchive size={64} season={logoSeason} />
+						<GlassLogoArchive class="w-16 h-20" season={archiveSeason} />
 						<p class="text-xs text-bark-500 mt-2">Default</p>
 					</div>
 					<div class="text-center">
-						<GlassLogoArchive size={64} season={logoSeason} variant="frosted" />
+						<GlassLogoArchive class="w-16 h-20" season={archiveSeason} variant="frosted" />
 						<p class="text-xs text-bark-500 mt-2">Frosted</p>
 					</div>
 					<div class="text-center">
-						<GlassLogoArchive size={64} season={logoSeason} variant="ethereal" breathing />
+						<GlassLogoArchive class="w-16 h-20" season={archiveSeason} variant="ethereal" breathing />
 						<p class="text-xs text-bark-500 mt-2">Ethereal + Breathing</p>
 					</div>
 				</div>
@@ -605,7 +608,7 @@
 					<Button variant="secondary">Secondary</Button>
 					<Button variant="outline">Outline</Button>
 					<Button variant="ghost">Ghost</Button>
-					<Button variant="destructive">Destructive</Button>
+					<Button variant="danger">Danger</Button>
 					<Button disabled>Disabled</Button>
 				</div>
 			</GlassCard>
@@ -616,7 +619,7 @@
 				<div class="flex flex-wrap gap-2">
 					<Badge variant="default">Default</Badge>
 					<Badge variant="secondary">Secondary</Badge>
-					<Badge variant="outline">Outline</Badge>
+					<Badge variant="tag">Tag</Badge>
 					<Badge variant="destructive">Destructive</Badge>
 				</div>
 			</GlassCard>
@@ -647,13 +650,16 @@
 			<GlassCard title="Select" variant="default">
 				<p class="text-sm text-bark-600 mb-4">Dropdown selection with customizable options</p>
 				<div class="space-y-3 max-w-xs">
-					<Select bind:value={selectValue}>
-						<option value="">Pick your favorite season...</option>
-						<option value="spring">Spring - Fresh beginnings</option>
-						<option value="summer">Summer - Warm and bright</option>
-						<option value="autumn">Autumn - Cozy vibes</option>
-						<option value="winter">Winter - Peaceful quiet</option>
-					</Select>
+					<Select
+						bind:value={selectValue}
+						placeholder="Pick your favorite season..."
+						options={[
+							{ value: "spring", label: "Spring - Fresh beginnings" },
+							{ value: "summer", label: "Summer - Warm and bright" },
+							{ value: "autumn", label: "Autumn - Cozy vibes" },
+							{ value: "winter", label: "Winter - Peaceful quiet" },
+						]}
+					/>
 					{#if selectValue}
 						<p class="text-sm text-grove-600">Excellent choice: {selectValue}!</p>
 					{/if}
@@ -674,16 +680,18 @@
 			<!-- Tabs -->
 			<GlassCard title="Tabs" variant="default">
 				<p class="text-sm text-bark-600 mb-4">Tabbed interface for organizing content</p>
-				<Tabs bind:value={selectedTab}>
-					{#snippet tabs()}
-						<button data-value="first" class="tab-trigger">First Tab</button>
-						<button data-value="second" class="tab-trigger">Second Tab</button>
-						<button data-value="third" class="tab-trigger">Third Tab</button>
-					{/snippet}
-					{#snippet content()}
-						{#if selectedTab === "first"}
+				<Tabs
+					bind:value={selectedTab}
+					tabs={[
+						{ value: "first", label: "First Tab" },
+						{ value: "second", label: "Second Tab" },
+						{ value: "third", label: "Third Tab" },
+					]}
+				>
+					{#snippet content(tab)}
+						{#if tab.value === "first"}
 							<p class="text-bark-600 p-4">This is the first tab content. Welcome!</p>
-						{:else if selectedTab === "second"}
+						{:else if tab.value === "second"}
 							<p class="text-bark-600 p-4">Second tab here. You found it!</p>
 						{:else}
 							<p class="text-bark-600 p-4">Third tab - the journey continues!</p>
@@ -695,29 +703,27 @@
 			<!-- Accordion -->
 			<GlassCard title="Accordion" variant="default">
 				<p class="text-sm text-bark-600 mb-4">Collapsible content sections</p>
-				<Accordion>
-					<CollapsibleSection
-						title="What is Grove?"
-						open={accordionOpen === "grove"}
-						ontoggle={() => (accordionOpen = accordionOpen === "grove" ? null : "grove")}
-					>
-						Grove is a cozy corner of the internet where your words feel at home.
-					</CollapsibleSection>
-					<CollapsibleSection
-						title="Why Vineyard?"
-						open={accordionOpen === "vineyard"}
-						ontoggle={() => (accordionOpen = accordionOpen === "vineyard" ? null : "vineyard")}
-					>
-						Every vine starts somewhere - this is where we cultivate our components.
-					</CollapsibleSection>
-					<CollapsibleSection
-						title="Can I contribute?"
-						open={accordionOpen === "contribute"}
-						ontoggle={() => (accordionOpen = accordionOpen === "contribute" ? null : "contribute")}
-					>
-						Yes! Grove is built with love and welcomes contributions.
-					</CollapsibleSection>
-				</Accordion>
+				<Accordion
+					type="single"
+					collapsible
+					items={[
+						{
+							value: "grove",
+							title: "What is Grove?",
+							content: "Grove is a cozy corner of the internet where your words feel at home.",
+						},
+						{
+							value: "vineyard",
+							title: "Why Vineyard?",
+							content: "Every vine starts somewhere - this is where we cultivate our components.",
+						},
+						{
+							value: "contribute",
+							title: "Can I contribute?",
+							content: "Yes! Grove is built with love and welcomes contributions.",
+						},
+					]}
+				/>
 			</GlassCard>
 
 			<!-- Dialog -->
@@ -764,17 +770,18 @@
 				</p>
 				<div class="space-y-6">
 					<div class="flex flex-wrap gap-2">
-						<StatusBadge status="success" label="Active" />
-						<StatusBadge status="warning" label="Pending" />
-						<StatusBadge status="error" label="Failed" />
-						<StatusBadge status="info" label="Info" />
+						<StatusBadge status="completed" />
+						<StatusBadge status="needs_confirmation" />
+						<StatusBadge status="failed" />
+						<StatusBadge status="pending" />
+						<StatusBadge status="running" />
 					</div>
 					<div class="max-w-sm space-y-4">
 						<div>
 							<label for="score-slider" class="text-sm text-bark-600 mb-1 block"
 								>ScoreBar ({scoreValue}%)</label
 							>
-							<ScoreBar value={scoreValue} max={100} />
+							<ScoreBar score={scoreValue} />
 							<input
 								id="score-slider"
 								type="range"

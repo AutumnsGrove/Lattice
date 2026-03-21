@@ -418,9 +418,9 @@ describe("Export Audit Logging", () => {
 	});
 
 	it("should handle null counts gracefully", () => {
-		const posts = undefined;
-		const pages = undefined;
-		const media = undefined;
+		const posts = undefined as unknown[] | undefined;
+		const pages = undefined as unknown[] | undefined;
+		const media = undefined as unknown[] | undefined;
 
 		const auditDetails = {
 			type: "full",
@@ -527,8 +527,8 @@ describe("Export Tenant Isolation", () => {
 	});
 
 	it("should reject export for unverified tenant", () => {
-		const requestedTenantId = "tenant-bob";
-		const verifiedTenantId = "tenant-alice";
+		const requestedTenantId: string = "tenant-bob";
+		const verifiedTenantId: string = "tenant-alice";
 
 		// Alice should not be able to export Bob's data
 		const canExport = requestedTenantId === verifiedTenantId;

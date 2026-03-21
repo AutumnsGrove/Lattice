@@ -1,31 +1,39 @@
-<script>
+<script lang="ts">
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import { apiRequest } from "$lib/utils/api";
 	import { tick } from "svelte";
 	import { stateIcons, navIcons, featureIcons, actionIcons } from "@autumnsgrove/prism/icons";
 
-	/**
-	 * @typedef {Object} PickerImage
-	 * @property {string} key
-	 * @property {string} url
-	 * @property {number} size
-	 * @property {string | null} custom_title
-	 * @property {string} parsed_slug
-	 */
+	interface PickerImage {
+		key: string;
+		url: string;
+		size: number;
+		custom_title: string | null;
+		parsed_slug: string;
+	}
 
-	/** @type {{ onInsert: (urls: string[]) => void, onClose: () => void, galleryEnabled?: boolean }} */
-	let { onInsert, onClose, galleryEnabled = false } = $props();
+	interface ImageListResponse {
+		images: PickerImage[];
+		cursor: string | null;
+		truncated: boolean;
+	}
 
-	/** @type {PickerImage[]} */
-	let images = $state([]);
+	interface Props {
+		onInsert: (urls: string[]) => void;
+		onClose: () => void;
+		galleryEnabled?: boolean;
+	}
+
+	let { onInsert, onClose, galleryEnabled = false }: Props = $props();
+
+	let images: PickerImage[] = $state([]);
 	let loading = $state(true);
-	let error = $state(/** @type {string | null} */ (null));
+	let error: string | null = $state(null);
 	let searchQuery = $state("");
 
-	/** @type {Set<string>} */
-	let selected = $state(new Set());
+	let selected: Set<string> = $state(new Set());
 
-	let cursor = $state(/** @type {string | null} */ (null));
+	let cursor: string | null = $state(null);
 	let hasMore = $state(false);
 	let loadingMore = $state(false);
 
@@ -36,26 +44,23 @@
 	// Screen reader announcement for selection changes
 	let selectionAnnouncement = $state("");
 
-	/** @type {HTMLInputElement | null} */
-	let manualInputRef = $state(null);
+	let manualInputRef: HTMLInputElement | null = $state(null);
 
-	/** @type {HTMLDivElement | null} */
-	let panelRef = $state(null);
+	let panelRef: HTMLDivElement | null = $state(null);
 
 	// Focus trap: keep Tab cycling within the dialog
 	$effect(() => {
 		if (!panelRef) return;
 		const panel = panelRef;
 
-		/** @param {KeyboardEvent} e */
-		function trapFocus(e) {
+		function trapFocus(e: KeyboardEvent) {
 			if (e.key !== "Tab") return;
 			const focusable = panel.querySelectorAll(
 				'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])',
 			);
 			if (focusable.length === 0) return;
-			const first = /** @type {HTMLElement} */ (focusable[0]);
-			const last = /** @type {HTMLElement} */ (focusable[focusable.length - 1]);
+			const first = focusable[0] as HTMLElement;
+			const last = focusable[focusable.length - 1] as HTMLElement;
 
 			if (e.shiftKey && document.activeElement === first) {
 				e.preventDefault();
@@ -74,7 +79,7 @@
 	$effect(() => {
 		if (panelRef) {
 			tick().then(() => {
-				const first = /** @type {HTMLElement | null} */ (panelRef?.querySelector("button, input"));
+				const first = panelRef?.querySelector("button, input") as HTMLElement | null;
 				first?.focus();
 			});
 		}
@@ -102,10 +107,10 @@
 		try {
 			const params = new URLSearchParams({ limit: "50", sortBy: "date-desc" });
 			if (searchQuery) params.set("search", searchQuery);
-			const result = await apiRequest(`/api/images/list?${params}`);
-			images = result.images || [];
-			cursor = result.cursor || null;
-			hasMore = !!result.truncated;
+			const result = await apiRequest<ImageListResponse>(`/api/images/list?${params}`);
+			images = result?.images ?? [];
+			cursor = result?.cursor ?? null;
+			hasMore = !!result?.truncated;
 		} catch (err) {
 			error = err instanceof Error ? err.message : "Failed to load photos";
 			images = [];
@@ -124,10 +129,10 @@
 				cursor,
 			});
 			if (searchQuery) params.set("search", searchQuery);
-			const result = await apiRequest(`/api/images/list?${params}`);
-			images = [...images, ...(result.images || [])];
-			cursor = result.cursor || null;
-			hasMore = !!result.truncated;
+			const result = await apiRequest<ImageListResponse>(`/api/images/list?${params}`);
+			images = [...images, ...(result?.images ?? [])];
+			cursor = result?.cursor ?? null;
+			hasMore = !!result?.truncated;
 		} catch {
 			// silently fail on load-more
 		} finally {
@@ -135,8 +140,7 @@
 		}
 	}
 
-	/** @type {ReturnType<typeof setTimeout> | null} */
-	let searchTimer = null;
+	let searchTimer: ReturnType<typeof setTimeout> | null = null;
 
 	function handleSearchInput() {
 		if (searchTimer) clearTimeout(searchTimer);
@@ -146,8 +150,7 @@
 		}, 300);
 	}
 
-	/** @param {string} url */
-	function toggleSelect(url) {
+	function toggleSelect(url: string) {
 		const next = new Set(selected);
 		if (next.has(url)) {
 			next.delete(url);
@@ -181,8 +184,7 @@
 		}, 1500);
 	}
 
-	/** @param {KeyboardEvent} e */
-	function handleManualKeydown(e) {
+	function handleManualKeydown(e: KeyboardEvent) {
 		if (e.key === "Enter") {
 			e.preventDefault();
 			addManualUrl();
@@ -190,18 +192,15 @@
 	}
 
 	/** Arrow key navigation within the photo grid */
-	/** @param {KeyboardEvent} e */
-	function handleGridKeydown(e) {
+	function handleGridKeydown(e: KeyboardEvent) {
 		if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) return;
 		e.preventDefault();
 
 		const current = document.activeElement;
 		if (!current || !panelRef) return;
 
-		const thumbs = /** @type {HTMLElement[]} */ (
-			Array.from(panelRef.querySelectorAll(".picker-thumb"))
-		);
-		const idx = thumbs.indexOf(/** @type {HTMLElement} */ (current));
+		const thumbs = Array.from(panelRef.querySelectorAll<HTMLElement>(".picker-thumb"));
+		const idx = thumbs.indexOf(current as HTMLElement);
 		if (idx === -1) return;
 
 		// Detect column count from CSS grid
@@ -220,15 +219,13 @@
 		onInsert(Array.from(selected));
 	}
 
-	/** @param {MouseEvent} e */
-	function handleBackdropClick(e) {
+	function handleBackdropClick(e: MouseEvent) {
 		if (e.target === e.currentTarget) {
 			onClose();
 		}
 	}
 
-	/** @param {KeyboardEvent} e */
-	function handleKeydown(e) {
+	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === "Escape") {
 			e.stopPropagation();
 			onClose();

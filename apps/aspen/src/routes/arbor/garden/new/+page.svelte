@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { goto, beforeNavigate } from "$app/navigation";
 	import { browser } from "$app/environment";
 	import { onMount } from "svelte";
@@ -14,6 +14,7 @@
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
 	import { Blaze } from "@autumnsgrove/lattice/blazes/components";
 	import { GLOBAL_BLAZE_DEFAULTS } from "@autumnsgrove/lattice/blazes";
+	import type { GutterItem } from "@autumnsgrove/lattice/utils/markdown";
 
 	// Page data from admin layout (includes grafts cascade)
 	let { data } = $props();
@@ -26,23 +27,22 @@
 	let tagsInput = $state("");
 	let font = $state("default");
 	let content = $state("");
-	/** @type {any[]} */
-	let gutterItems = $state([]);
+	let gutterItems = $state<GutterItem[]>([]);
 	let firesideAssisted = $state(false);
 	let featuredImage = $state("");
 	let shareToMeadow = $state(true);
-	/** @type {string | null} */
-	let selectedBlaze = $state(null);
+	let selectedBlaze = $state<string | null>(null);
 
 	// Blaze picker — fetched from API to include tenant custom blazes
-	/** @type {Array<{slug: string, label: string, icon: string, color: string}>} */
-	let availableBlazes = $state([...GLOBAL_BLAZE_DEFAULTS]);
+	let availableBlazes = $state<Array<{ slug: string; label: string; icon: string; color: string }>>(
+		[...GLOBAL_BLAZE_DEFAULTS],
+	);
 
 	onMount(async () => {
 		try {
 			const res = await fetch("/api/blazes"); // csrf-ok — GET-only read
 			if (res.ok) {
-				const { blazes } = await res.json();
+				const { blazes } = (await res.json()) as { blazes: typeof availableBlazes };
 				if (Array.isArray(blazes) && blazes.length > 0) {
 					availableBlazes = blazes;
 				}
@@ -53,13 +53,17 @@
 	});
 
 	// Editor reference for anchor insertion
-	/** @type {any} */
-	let editorRef = $state(null);
+	interface EditorRef {
+		clearDraft(): void;
+		flushDraft(): void;
+		getAvailableAnchors?(): string[];
+		insertAnchor?(name: string): void;
+	}
+	let editorRef = $state<EditorRef | null>(null);
 
 	// UI state
 	let saving = $state(false);
-	/** @type {string | null} */
-	let error = $state(null);
+	let error = $state<string | null>(null);
 	let slugManuallyEdited = $state(false);
 	let navigatingAfterSave = $state(false);
 	let showGutter = $state(
@@ -71,8 +75,7 @@
 
 	// Details summary — shows populated metadata at a glance when collapsed
 	let detailsSummary = $derived.by(() => {
-		/** @type {string[]} */
-		const parts = [];
+		const parts: string[] = [];
 		if (featuredImage) parts.push("cover image");
 		if (description.trim()) parts.push("description");
 		const tagCount = parseTags(tagsInput).length;
@@ -113,15 +116,12 @@
 		slugManuallyEdited = true;
 	}
 
-	/**
-	 * Parse tags from comma-separated input
-	 * @param {string} input
-	 */
-	function parseTags(input) {
+	/** Parse tags from comma-separated input */
+	function parseTags(input: string) {
 		return input
 			.split(",")
-			.map((/** @type {string} */ tag) => tag.trim())
-			.filter((/** @type {string} */ tag) => tag.length > 0);
+			.map((tag) => tag.trim())
+			.filter((tag) => tag.length > 0);
 	}
 
 	/** Save as draft — zero validation, API handles untitled naming */
@@ -164,8 +164,7 @@
 	}
 
 	// Flush draft and warn about unsaved changes on page unload
-	/** @param {BeforeUnloadEvent} e */
-	function handleBeforeUnload(e) {
+	function handleBeforeUnload(e: BeforeUnloadEvent) {
 		if (navigatingAfterSave) return;
 
 		// Always flush the draft to localStorage so content survives session expiry
@@ -298,7 +297,10 @@
 		<!-- Add details strip -->
 		<div class="details-strip">
 			<button class="details-toggle" onclick={toggleDetails}>
-				<navIcons.chevronRight size={16} class="details-chevron {detailsExpanded ? 'rotated' : ''}" />
+				<navIcons.chevronRight
+					size={16}
+					class="details-chevron {detailsExpanded ? 'rotated' : ''}"
+				/>
 				<span class="details-label">Add details</span>
 				{#if !detailsExpanded && detailsSummary}
 					<span class="details-summary">{detailsSummary}</span>
@@ -497,7 +499,7 @@
 						<GutterManager
 							bind:gutterItems
 							availableAnchors={editorRef?.getAvailableAnchors?.() || []}
-							onInsertAnchor={(/** @type {string} */ name) => editorRef?.insertAnchor(name)}
+							onInsertAnchor={(name: string) => editorRef?.insertAnchor?.(name)}
 						/>
 					</aside>
 				{/if}

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { goto } from "$app/navigation";
 	import Card from "@autumnsgrove/lattice/ui/components/ui/Card.svelte";
 	import Badge from "@autumnsgrove/lattice/ui/components/ui/Badge.svelte";
@@ -13,24 +13,16 @@
 	// Get accent color from site settings (falls back to default if not set)
 	const accentColor = $derived(data.siteSettings?.accent_color || null);
 
-	/**
-	 * @param {MouseEvent} event
-	 * @param {string} slug
-	 */
-	function handleCardClick(event, slug) {
+	function handleCardClick(event: MouseEvent, slug: string) {
 		// Don't navigate if clicking on a tag link or badge
-		const target = /** @type {HTMLElement} */ (event.target);
+		const target = event.target as HTMLElement;
 		if (target.closest("a")) {
 			return;
 		}
 		goto(`/garden/${slug}`);
 	}
 
-	/**
-	 * @param {KeyboardEvent} event
-	 * @param {string} slug
-	 */
-	function handleCardKeydown(event, slug) {
+	function handleCardKeydown(event: KeyboardEvent, slug: string) {
 		if (event.key === "Enter" || event.key === " ") {
 			event.preventDefault();
 			goto(`/garden/${slug}`);
@@ -131,8 +123,8 @@
 		{#each data.posts as post (post.slug)}
 			<Card
 				hoverable
-				onclick={(/** @type {MouseEvent} */ e) => handleCardClick(e, post.slug)}
-				onkeydown={(/** @type {KeyboardEvent} */ e) => handleCardKeydown(e, post.slug)}
+				onclick={(e: MouseEvent) => handleCardClick(e, post.slug)}
+				onkeydown={(e: KeyboardEvent) => handleCardKeydown(e, post.slug)}
 				role="button"
 				tabindex="0"
 			>

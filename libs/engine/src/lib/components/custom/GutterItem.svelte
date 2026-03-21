@@ -1,22 +1,22 @@
-<script>
+<script lang="ts">
 	import Lightbox from "$lib/ui/components/gallery/Lightbox.svelte";
 	import GlassCarousel from "$lib/ui/components/ui/GlassCarousel.svelte";
 	import EmbedWidget from "$lib/ui/components/content/EmbedWidget.svelte";
 	import { sanitizeHTML } from "$lib/utils/sanitize";
+	import type { GutterItem as GutterItemData } from "$lib/utils/gutter";
 
-	let { item = {} } = $props();
+	interface Props {
+		item?: GutterItemData;
+	}
+
+	let { item = {} as GutterItemData }: Props = $props();
 
 	let lightboxOpen = $state(false);
 	let lightboxSrc = $state("");
 	let lightboxAlt = $state("");
 	let lightboxCaption = $state("");
 
-	/**
-	 * @param {string} src
-	 * @param {string} alt
-	 * @param {string} [caption]
-	 */
-	function openLightbox(src, alt, caption = "") {
+	function openLightbox(src: string, alt: string, caption = "") {
 		lightboxSrc = src;
 		lightboxAlt = alt;
 		lightboxCaption = caption;
@@ -28,11 +28,10 @@
 	}
 
 	// Handle clicks or keyboard activation on images within markdown content
-	/** @param {Event} event */
-	function handleContentClick(event) {
-		const target = /** @type {HTMLElement} */ (event.target);
+	function handleContentClick(event: Event) {
+		const target = event.target as HTMLElement;
 		if (target.tagName === "IMG") {
-			const img = /** @type {HTMLImageElement} */ (target);
+			const img = target as HTMLImageElement;
 			openLightbox(img.src, img.alt);
 		}
 	}
@@ -49,32 +48,30 @@
 			aria-label="Gutter annotation - click images to enlarge"
 		>
 			<!-- eslint-disable-next-line svelte/no-at-html-tags -- trusted SVG content -->
-			{@html sanitizeHTML(item.content)}
+			{@html sanitizeHTML(item.content ?? "")}
 		</div>
 	{:else if item.type === "photo" || item.type === "image"}
 		{@const imageSrc = item.src || item.url || item.file}
 		<figure class="gutter-photo">
 			<button
 				class="image-button"
-				onclick={() => openLightbox(imageSrc, item.caption || "Gutter image", item.caption || "")}
+				onclick={() => openLightbox(imageSrc ?? "", item.caption || "Gutter image", item.caption || "")}
 			>
-				<img src={imageSrc} alt={item.caption || "Gutter image"} loading="lazy" decoding="async" />
+				<img src={imageSrc ?? ""} alt={item.caption || "Gutter image"} loading="lazy" decoding="async" />
 			</button>
 			{#if item.caption}
 				<figcaption>{item.caption}</figcaption>
 			{/if}
 		</figure>
 	{:else if item.type === "gallery"}
-		{#if item.images?.length > 0}
+		{#if item.images && item.images.length > 0}
 			<div class="gutter-gallery">
 				<GlassCarousel
-					images={item.images.map(
-						(/** @type {{url?: string, alt?: string, caption?: string}} */ img) => ({
-							url: img.url || "",
-							alt: img.alt || "Gallery image",
-							caption: img.caption || "",
-						}),
-					)}
+					images={item.images.map((img) => ({
+						url: img.url || "",
+						alt: img.alt || "Gallery image",
+						caption: img.caption || "",
+					}))}
 					variant="frosted"
 					showArrows={false}
 					class="gutter-carousel"

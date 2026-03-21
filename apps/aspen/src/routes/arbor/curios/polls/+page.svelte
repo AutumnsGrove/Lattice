@@ -85,12 +85,12 @@
 	<header class="page-header">
 		<div class="header-top">
 			<GlassButton href="/arbor/curios" variant="ghost" class="back-link">
-				<ArrowLeft class="w-4 h-4" />
+				<navIcons.arrowLeft class="w-4 h-4" />
 				Back to Curios
 			</GlassButton>
 		</div>
 		<div class="title-row">
-			<BarChart3 class="header-icon" />
+			<metricIcons.barChart class="header-icon" />
 			<h1>Polls</h1>
 		</div>
 		<p class="subtitle">Ask your visitors anything — live results, no login required.</p>
@@ -99,7 +99,7 @@
 	<div class="section-header">
 		<h3>Your Polls</h3>
 		<GlassButton variant="accent" onclick={() => (showCreateForm = !showCreateForm)}>
-			<Plus class="w-4 h-4" />
+			<actionIcons.plus class="w-4 h-4" />
 			New Poll
 		</GlassButton>
 	</div>
@@ -317,7 +317,7 @@
 									title="Duplicate poll"
 									aria-label="Duplicate poll"
 								>
-									<Copy class="w-4 h-4" />
+									<actionIcons.copy class="w-4 h-4" />
 								</button>
 							</form>
 							<!-- Archive -->
@@ -342,7 +342,7 @@
 										title="Archive poll"
 										aria-label="Archive poll"
 									>
-										<Archive class="w-4 h-4" />
+										<featureIcons.archive class="w-4 h-4" />
 									</button>
 								</form>
 							{/if}
@@ -365,7 +365,7 @@
 								>
 									<input type="hidden" name="pollId" value={poll.id} />
 									<button type="submit" class="remove-btn" aria-label="Permanently delete poll">
-										<Trash2 class="w-4 h-4" />
+										<actionIcons.trash class="w-4 h-4" />
 									</button>
 								</form>
 							{/if}

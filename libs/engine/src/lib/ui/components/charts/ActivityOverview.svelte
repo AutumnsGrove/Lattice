@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   /**
    * ActivityOverview - Weekly activity visualization
    * Shows a GitHub-style contribution chart for recent days
@@ -8,28 +8,31 @@
    */
   import Sparkline from './Sparkline.svelte';
 
-  /**
-   * @typedef {Object} ActivityData
-   * @property {string} activity_date
-   * @property {number} commit_count
-   */
+  interface ActivityData {
+    activity_date: string;
+    commit_count: number;
+  }
 
-  /**
-   * @typedef {Object} LocData
-   * @property {number} additions
-   * @property {number} deletions
-   */
+  interface LocData {
+    additions: number;
+    deletions: number;
+  }
+
+  interface Props {
+    data?: ActivityData[];
+    locData?: LocData;
+    days?: number;
+  }
 
   let {
-    data = /** @type {ActivityData[]} */ ([]),
-    locData = /** @type {LocData} */ ({ additions: 0, deletions: 0 }),
+    data = [],
+    locData = { additions: 0, deletions: 0 },
     days = 14
-  } = $props();
+  }: Props = $props();
 
   // Format date as YYYY-MM-DD in local timezone (not UTC!)
   // This matches how GitHub attributes contributions to user's timezone
-  /** @param {Date} date */
-  function formatDateKey(date) {
+  function formatDateKey(date: Date): string {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -39,12 +42,11 @@
   // Ensure we have the right number of days, using local timezone
   // Use $derived.by to cache the result (not $derived with arrow function which returns the function)
   const filledData = $derived.by(() => {
-    const result = [];
+    const result: { date: string; commits: number; dayOfWeek: string; isToday: boolean }[] = [];
     const today = new Date();
 
     // Build activity map for quick lookup
-    /** @type {Record<string, number>} */
-    const activityMap = {};
+    const activityMap: Record<string, number> = {};
     for (const item of data) {
       activityMap[item.activity_date] = item.commit_count;
     }
@@ -74,8 +76,7 @@
   const peakCommits = $derived(Math.max(...filledData.map(d => d.commits), 0));
 
   // Get intensity level for heatmap (0-4)
-  /** @param {number} commits */
-  function getIntensity(commits) {
+  function getIntensity(commits: number): number {
     if (commits === 0) return 0;
     if (commits <= 2) return 1;
     if (commits <= 5) return 2;

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { ArborPanel } from "@autumnsgrove/lattice/ui/components/arbor";
 	import Toast from "@autumnsgrove/lattice/ui/components/ui/Toast.svelte";
 	import { defaultSuite, resolveIcon } from "@autumnsgrove/lattice/ui/components/ui/groveicon";

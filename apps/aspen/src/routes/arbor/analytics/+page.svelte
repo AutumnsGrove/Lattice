@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";

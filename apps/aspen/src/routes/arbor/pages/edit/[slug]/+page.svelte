@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { goto, beforeNavigate } from "$app/navigation";
 	import { browser } from "$app/environment";
 	import MarkdownEditor from "@autumnsgrove/lattice/components/admin/MarkdownEditor.svelte";
@@ -10,24 +10,23 @@
 	import { navIcons, actionIcons } from "@autumnsgrove/prism/icons";
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
 
-	/**
-	 * @typedef {Object} PageData
-	 * @property {string} slug
-	 * @property {string} title
-	 * @property {string} description
-	 * @property {string} markdown_content
-	 * @property {{ title?: string; subtitle?: string; cta?: { text: string; link: string } } | null} hero
-	 * @property {string} gutter_content
-	 * @property {string | null} font
-	 * @property {number} show_in_nav
-	 * @property {number | string | null} created_at
-	 * @property {number | string | null} updated_at
-	 */
+	interface PageData {
+		slug: string;
+		title: string;
+		description: string;
+		markdown_content: string;
+		hero: { title?: string; subtitle?: string; cta?: { text: string; link: string } } | null;
+		gutter_content: string;
+		font: string | null;
+		show_in_nav: number;
+		created_at: number | string | null;
+		updated_at: number | string | null;
+	}
 
-	/**
-	 * @type {{ data: { page: PageData, curios?: { slug: string, name: string, enabled: boolean }[] } }}
-	 */
-	let { data } = $props();
+	let {
+		data,
+	}: { data: { page: PageData; curios?: { slug: string; name: string; enabled: boolean }[] } } =
+		$props();
 
 	/** System pages that cannot be deleted */
 	const PROTECTED_SLUGS = ["home", "about"];
@@ -63,8 +62,11 @@
 	});
 
 	// Editor reference for anchor insertion
-	/** @type {any} */
-	let editorRef = $state(null);
+	interface EditorRef {
+		clearDraft(): void;
+		flushDraft(): void;
+	}
+	let editorRef = $state<EditorRef | null>(null);
 
 	// UI state
 	let saving = $state(false);
@@ -77,8 +79,7 @@
 
 	// Details summary — shows populated metadata at a glance when collapsed
 	let detailsSummary = $derived.by(() => {
-		/** @type {string[]} */
-		const parts = [];
+		const parts: string[] = [];
 		if (description.trim()) parts.push("description");
 		if (font && font !== "default") parts.push(font);
 		if (showInNav) parts.push("in nav");
@@ -109,8 +110,7 @@
 	});
 
 	/** Format a timestamp (unix seconds, unix ms, or ISO string) to locale string */
-	/** @param {number | string | null | undefined} val */
-	function formatTimestamp(val) {
+	function formatTimestamp(val: number | string | null | undefined) {
 		if (!val) return "";
 		if (typeof val === "number") {
 			return new Date(val < 1e12 ? val * 1000 : val).toLocaleString();
@@ -135,8 +135,8 @@
 
 		try {
 			// Build hero object if enabled
-			/** @type {{ title: string; subtitle: string; cta?: { text: string; link: string } } | null} */
-			let hero = null;
+			let hero: { title: string; subtitle: string; cta?: { text: string; link: string } } | null =
+				null;
 			if (hasHero && heroTitle.trim()) {
 				hero = {
 					title: heroTitle.trim(),
@@ -185,8 +185,7 @@
 	}
 
 	// Flush draft and warn about unsaved changes on page unload
-	/** @param {BeforeUnloadEvent} e */
-	function handleBeforeUnload(e) {
+	function handleBeforeUnload(e: BeforeUnloadEvent) {
 		editorRef?.flushDraft();
 
 		if (hasUnsavedChanges) {
@@ -294,7 +293,10 @@
 		<!-- Details strip -->
 		<div class="details-strip">
 			<button class="details-toggle" onclick={toggleDetails}>
-				<navIcons.chevronRight size={16} class="details-chevron {detailsExpanded ? 'rotated' : ''}" />
+				<navIcons.chevronRight
+					size={16}
+					class="details-chevron {detailsExpanded ? 'rotated' : ''}"
+				/>
 				<span class="details-label">Page details</span>
 				{#if !detailsExpanded && detailsSummary}
 					<span class="details-summary">{detailsSummary}</span>

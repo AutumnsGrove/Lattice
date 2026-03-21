@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import MarkdownIt from "markdown-it";
 	import { tick, untrack } from "svelte";
 
@@ -29,31 +29,34 @@
 	import { browser } from "$app/environment";
 
 	// Import composables (simplified - removed command palette, slash commands, ambient sounds, snippets, and writing sessions)
-	import { useEditorTheme, useDraftManager } from "./composables";
+	import { useEditorTheme, useDraftManager, type StoredDraft } from "./composables";
 
-	/**
-	 * @typedef {Object} StoredDraft
-	 * @property {string} content
-	 * @property {number} savedAt
-	 * @property {number} [wordCount]
-	 */
+	import type { GutterItem as GutterItemProp } from "$lib/utils/gutter";
 
-	/**
-	 * @typedef {Object} GutterItemProp
-	 * @property {string} type
-	 * @property {string} [anchor]
-	 * @property {string} [content]
-	 * @property {string} [url]
-	 * @property {string} [file]
-	 * @property {string} [caption]
-	 * @property {Array<{url: string, alt?: string, caption?: string}>} [images]
-	 */
-
-	/**
-	 * @typedef {Object.<string, boolean>} GraftsRecord
-	 * Graft flags for this tenant - component reads what it needs.
+	/** Graft flags for this tenant - component reads what it needs.
 	 * Known flags: fireside_mode (AI-assisted prompts), scribe_mode (voice-to-text)
 	 */
+	type GraftsRecord = Record<string, boolean>;
+
+	interface Props {
+		content?: string;
+		onSave?: () => void;
+		saving?: boolean;
+		readonly?: boolean;
+		draftKey?: string | null;
+		onDraftRestored?: (draft: StoredDraft) => void;
+		previewTitle?: string;
+		previewDate?: string;
+		previewTags?: string[];
+		gutterItems?: GutterItemProp[];
+		firesideAssisted?: boolean;
+		/** All grafts for this tenant - component reads what it needs */
+		grafts?: GraftsRecord;
+		/** Curio configuration status for autocomplete — loaded server-side */
+		configuredCurios?: { slug: string; name: string; enabled: boolean }[];
+		/** Server-side draft slug for cross-device sync (null disables server sync) */
+		serverDraftSlug?: string | null;
+	}
 
 	// Props
 	let {
@@ -61,20 +64,17 @@
 		onSave = () => {},
 		saving = false,
 		readonly = false,
-		draftKey = /** @type {string | null} */ (null),
-		onDraftRestored = /** @type {(draft: StoredDraft) => void} */ (() => {}),
+		draftKey = null,
+		onDraftRestored = () => {},
 		previewTitle = $bindable(""),
 		previewDate = "",
-		previewTags = /** @type {string[]} */ ([]),
-		gutterItems = /** @type {GutterItemProp[]} */ ([]),
+		previewTags = [],
+		gutterItems = [],
 		firesideAssisted = $bindable(false),
-		/** All grafts for this tenant - component reads what it needs */
-		grafts = /** @type {GraftsRecord} */ ({}),
-		/** Curio configuration status for autocomplete — loaded server-side */
-		configuredCurios = /** @type {{ slug: string, name: string, enabled: boolean }[]} */ ([]),
-		/** Server-side draft slug for cross-device sync (null disables server sync) */
-		serverDraftSlug = /** @type {string | null} */ (null),
-	} = $props();
+		grafts = {},
+		configuredCurios = [],
+		serverDraftSlug = null,
+	}: Props = $props();
 
 	// Derived graft flags - add new ones here as they're created
 	const wispEnabled = $derived(grafts?.wisp_enabled ?? false);
@@ -83,17 +83,13 @@
 	const uploadsEnabled = $derived(grafts?.image_uploads ?? true);
 
 	// Core refs and state
-	/** @type {HTMLTextAreaElement | null} */
-	let textareaRef = $state(null);
-	/** @type {HTMLElement | null} */
-	let previewRef = $state(null);
-	/** @type {HTMLElement | null} */
-	let lineNumbersRef = $state(null);
+	let textareaRef: HTMLTextAreaElement | null = $state(null);
+	let previewRef: HTMLElement | null = $state(null);
+	let lineNumbersRef: HTMLElement | null = $state(null);
 
 	// Editor mode: "write" (source only), "split" (source + preview), "preview" (preview only)
 	// Initialize from localStorage synchronously to avoid flash of wrong mode
-	/** @type {"write" | "split" | "preview"} */
-	let editorMode = $state(
+	let editorMode: "write" | "split" | "preview" = $state(
 		(() => {
 			if (browser) {
 				const saved = localStorage.getItem("editor-mode");
@@ -114,10 +110,8 @@
 	let isDragging = $state(false);
 	let isUploading = $state(false);
 	let uploadProgress = $state("");
-	/** @type {string | null} */
-	let uploadError = $state(null);
-	/** @type {File | null} */
-	let lastFailedFile = $state(null);
+	let uploadError: string | null = $state(null);
+	let lastFailedFile: File | null = $state(null);
 
 	// Full preview mode
 	let showFullPreview = $state(false);
@@ -130,8 +124,7 @@
 	let curioQuery = $state("");
 	let curioAutocompletePos = $state({ top: 0, left: 0 });
 	let curioTriggerStart = $state(0); // character index where :: begins
-	/** @type {CurioAutocomplete | null} */
-	let curioAutocompleteRef = $state(null);
+	let curioAutocompleteRef: { handleKey: (e: KeyboardEvent) => boolean } | null = $state(null);
 
 	// Editor settings
 	let editorSettings = $state({
@@ -148,9 +141,8 @@
 	let isFiresideMode = $state(false);
 
 	// Voice mode (Scribe transcription)
-	/** @type {"raw" | "draft"} */
-	let voiceMode = $state(/** @type {"raw" | "draft"} */ ("raw"));
-	let voiceError = $state(/** @type {string | null} */ (null));
+	let voiceMode: "raw" | "draft" = $state("raw");
+	let voiceError: string | null = $state(null);
 
 	// Initialize composables
 	const editorTheme = useEditorTheme();
@@ -159,7 +151,7 @@
 	const draftManager = useDraftManager({
 		draftKey,
 		getContent: () => content,
-		setContent: (/** @type {string} */ c) => (content = c),
+		setContent: (c: string) => (content = c),
 		onDraftRestored,
 		readonly,
 		getMetadata: () => ({ title: previewTitle }),
@@ -173,9 +165,8 @@
 	let debouncedContent = $state(content);
 	// NOT $state - these are cleanup handles, not reactive state
 	// Using $state here causes infinite loops (effect writes to state it reads)
-	/** @type {ReturnType<typeof setTimeout> | null} */
-	let debounceTimer = null;
-	let isMounted = true;
+	let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+	let isMounted: boolean = true;
 
 	// Update debounced content after 150ms of no typing
 	$effect(() => {
@@ -223,7 +214,7 @@
 
 	// Extract available anchors from content
 	let availableAnchors = $derived.by(() => {
-		const anchors = [];
+		const anchors: string[] = [];
 		const headingRegex = /^(#{1,6})\s+(.+)$/gm;
 		let match;
 		while ((match = headingRegex.exec(content)) !== null) {
@@ -241,8 +232,7 @@
 		return availableAnchors;
 	}
 
-	/** @param {string} name */
-	export function insertAnchor(name) {
+	export function insertAnchor(name: string) {
 		insertAtCursor(`<!-- anchor:${name} -->\n`);
 	}
 
@@ -348,10 +338,8 @@
 	/**
 	 * Handle curio selection from autocomplete.
 	 * Replaces the :: trigger + query with the full directive.
-	 * @param {string} directiveText - e.g. "::guestbook::" or "::poll[]::"
-	 * @param {number} cursorOffset - where to place cursor within the directive text
 	 */
-	async function handleCurioSelect(directiveText, cursorOffset) {
+	async function handleCurioSelect(directiveText: string, cursorOffset: number) {
 		if (!textareaRef) return;
 		isUpdating = true;
 		isProgrammaticUpdate = true;
@@ -380,8 +368,7 @@
 	}
 
 	// Keyboard handlers (simplified - removed slash commands and command palette)
-	/** @param {KeyboardEvent} e */
-	function handleKeydown(e) {
+	function handleKeydown(e: KeyboardEvent) {
 		// Curio autocomplete intercepts keys first when open
 		if (showCurioAutocomplete && curioAutocompleteRef) {
 			const handled = curioAutocompleteRef.handleKey(e);
@@ -468,8 +455,7 @@
 		}
 	}
 
-	/** @param {KeyboardEvent} e */
-	function handleGlobalKeydown(e) {
+	function handleGlobalKeydown(e: KeyboardEvent) {
 		if (e.key === "Escape") {
 			// Close curio autocomplete first (handled inline by textarea keydown too,
 			// but this catches Escape when textarea isn't focused)
@@ -524,9 +510,8 @@
 
 	/**
 	 * Handle accepting a draft from Fireside mode
-	 * @param {{ title: string, content: string, marker: string }} draft
 	 */
-	function handleFiresideDraft(draft) {
+	function handleFiresideDraft(draft: { title: string; content: string; marker: string }) {
 		// Set the content (with the marker appended)
 		content = draft.content + "\n\n" + draft.marker;
 
@@ -555,9 +540,12 @@
 	/**
 	 * Handle transcription result from VoiceInput.
 	 * Inserts transcribed text at cursor position.
-	 * @param {{ text: string, gutterContent?: Array<{type: string, content: string, anchor?: string}>, rawTranscript?: string }} result
 	 */
-	function handleTranscription(result) {
+	function handleTranscription(result: {
+		text: string;
+		gutterContent?: Array<{ type: string; content: string; anchor?: string }>;
+		rawTranscript?: string;
+	}) {
 		voiceError = null;
 
 		if (!textareaRef) return;
@@ -595,9 +583,8 @@
 
 	/**
 	 * Handle voice input error.
-	 * @param {{ message: string }} error
 	 */
-	function handleVoiceError(error) {
+	function handleVoiceError(error: { message: string }) {
 		voiceError = error.message;
 
 		// Clear error after 5 seconds
@@ -607,8 +594,7 @@
 	}
 
 	// Editor mode switching
-	/** @param {"write" | "split" | "preview"} mode */
-	function setEditorMode(mode) {
+	function setEditorMode(mode: "write" | "split" | "preview") {
 		editorMode = mode;
 		if (browser) {
 			localStorage.setItem("editor-mode", mode);
@@ -621,7 +607,7 @@
 	}
 
 	function cycleEditorMode() {
-		const modes = /** @type {const} */ (["write", "split", "preview"]);
+		const modes = ["write", "split", "preview"] as const;
 		const currentIndex = modes.indexOf(editorMode);
 		const nextIndex = (currentIndex + 1) % modes.length;
 		setEditorMode(modes[nextIndex]);
@@ -648,11 +634,7 @@
 	}
 
 	// Text manipulation helpers
-	/**
-	 * @param {string} before
-	 * @param {string} after
-	 */
-	async function wrapSelection(before, after) {
+	async function wrapSelection(before: string, after: string) {
 		if (!textareaRef || isUpdating) return;
 		isUpdating = true;
 		isProgrammaticUpdate = true;
@@ -672,8 +654,7 @@
 		isUpdating = false;
 	}
 
-	/** @param {string} text */
-	async function insertAtCursor(text) {
+	async function insertAtCursor(text: string) {
 		if (!textareaRef || isUpdating) return;
 		isUpdating = true;
 		isProgrammaticUpdate = true;
@@ -691,8 +672,7 @@
 	}
 
 	// Toolbar actions
-	/** @param {number} level */
-	function insertHeading(level) {
+	function insertHeading(level: number) {
 		insertAtCursor("#".repeat(level) + " ");
 	}
 
@@ -704,8 +684,7 @@
 		insertAtCursor("![alt text](image-url)");
 	}
 
-	/** @param {string[]} urls */
-	function handlePhotoInsert(urls) {
+	function handlePhotoInsert(urls: string[]) {
 		showPhotoPicker = false;
 		if (urls.length === 0) return;
 		if (urls.length === 1) {
@@ -771,10 +750,8 @@
 	});
 
 	// Full preview modal focus management
-	/** @type {HTMLElement | null} */
-	let previouslyFocusedBeforePreview = null;
-	/** @type {HTMLDivElement | null} */
-	let fullPreviewModalRef = $state(null);
+	let previouslyFocusedBeforePreview: HTMLElement | null = null;
+	let fullPreviewModalRef: HTMLDivElement | null = $state(null);
 
 	$effect(() => {
 		if (showFullPreview) {
@@ -795,8 +772,7 @@
 	});
 
 	// Drag and drop handlers
-	/** @param {DragEvent} e */
-	function handleDragEnter(e) {
+	function handleDragEnter(e: DragEvent) {
 		e.preventDefault();
 		if (readonly) return;
 		if (e.dataTransfer?.types?.includes("Files")) {
@@ -804,8 +780,7 @@
 		}
 	}
 
-	/** @param {DragEvent} e */
-	function handleDragOver(e) {
+	function handleDragOver(e: DragEvent) {
 		e.preventDefault();
 		if (readonly) return;
 		if (e.dataTransfer?.types?.includes("Files")) {
@@ -814,17 +789,15 @@
 		}
 	}
 
-	/** @param {DragEvent} e */
-	function handleDragLeave(e) {
+	function handleDragLeave(e: DragEvent) {
 		e.preventDefault();
-		const target = /** @type {HTMLElement} */ (e.currentTarget);
-		if (!target.contains(/** @type {Node | null} */ (e.relatedTarget))) {
+		const target = e.currentTarget as HTMLElement;
+		if (!target.contains(e.relatedTarget as Node | null)) {
 			isDragging = false;
 		}
 	}
 
-	/** @param {DragEvent} e */
-	async function handleDrop(e) {
+	async function handleDrop(e: DragEvent) {
 		e.preventDefault();
 		isDragging = false;
 		if (readonly) return;
@@ -843,8 +816,7 @@
 		}
 	}
 
-	/** @param {File} file */
-	async function uploadImage(file) {
+	async function uploadImage(file: File) {
 		// Pre-check: is the feature enabled via grafts?
 		if (!uploadsEnabled) {
 			toast.warning(
@@ -874,10 +846,12 @@
 			formData.append("file", file);
 			formData.append("folder", "blog");
 
-			const result = await apiRequest("/api/images/upload", {
+			const result = await apiRequest<{ url: string }>("/api/images/upload", {
 				method: "POST",
 				body: formData,
 			});
+
+			if (!result) throw new Error("Upload failed: no response from server");
 
 			const altText =
 				file.name
@@ -911,8 +885,7 @@
 		}
 	}
 
-	/** @param {ClipboardEvent} e */
-	function handlePaste(e) {
+	function handlePaste(e: ClipboardEvent) {
 		if (readonly) return;
 
 		const items = Array.from(e.clipboardData?.items || []);

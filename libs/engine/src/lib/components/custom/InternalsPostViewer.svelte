@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import GlassCard from "../../ui/components/ui/GlassCard.svelte";
 
 	/**

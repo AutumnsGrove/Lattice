@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import Input from "$lib/ui/components/ui/Input.svelte";
 	import Button from "$lib/ui/components/ui/Button.svelte";
 	import Dialog from "$lib/ui/components/ui/Dialog.svelte";
@@ -7,55 +7,58 @@
 	import { featureIcons, actionIcons, navIcons, stateIcons } from "@autumnsgrove/prism/icons";
 	import { debounce } from "$lib/utils/debounce";
 
-	/**
-	 * @typedef {Object} GutterItem
-	 * @property {string} type
-	 * @property {string} [anchor]
-	 * @property {string} [content]
-	 * @property {string} [url]
-	 * @property {string} [file]
-	 * @property {string} [caption]
-	 * @property {GalleryImage[]} [images]
-	 * @property {string} [embedUrl]
-	 * @property {string} [embedProvider]
-	 * @property {string} [embedHtml]
-	 * @property {string} [embedTitle]
-	 * @property {string} [embedThumbnail]
-	 */
+	interface GutterItem {
+		type: string;
+		anchor?: string;
+		content?: string;
+		url?: string;
+		file?: string;
+		caption?: string;
+		images?: GalleryImage[];
+		embedUrl?: string;
+		embedProvider?: string;
+		embedHtml?: string;
+		embedTitle?: string;
+		embedThumbnail?: string;
+	}
 
-	/**
-	 * @typedef {Object} GalleryImage
-	 * @property {string} url
-	 * @property {string} [alt]
-	 * @property {string} [caption]
-	 */
+	interface GalleryImage {
+		url: string;
+		alt?: string;
+		caption?: string;
+	}
 
-	/**
-	 * @typedef {Object} CdnImage
-	 * @property {string} key
-	 * @property {string} url
-	 */
+	interface CdnImage {
+		key: string;
+		url: string;
+	}
 
-	/**
-	 * @typedef {Object} ProcessedAnchor
-	 * @property {string} raw - Original anchor string
-	 * @property {boolean} isHeading - Whether this is a heading anchor
-	 * @property {number} headingLevel - Heading level (1-6) or 0 if not a heading
-	 * @property {boolean} isAnchorTag - Whether this is a custom anchor tag
-	 * @property {string} displayText - Human-readable display text
-	 * @property {string} type - Anchor type for accessibility labels
-	 */
+	interface ProcessedAnchor {
+		/** Original anchor string */
+		raw: string;
+		/** Whether this is a heading anchor */
+		isHeading: boolean;
+		/** Heading level (1-6) or 0 if not a heading */
+		headingLevel: number;
+		/** Whether this is a custom anchor tag */
+		isAnchorTag: boolean;
+		/** Human-readable display text */
+		displayText: string;
+		/** Anchor type for accessibility labels */
+		type: string;
+	}
+
+	interface ImageCacheEntry {
+		url: string;
+		timestamp: number;
+	}
 
 	// Image Cache with TTL - prevents redundant CDN requests on repeated opens
-	const imageCache = new Map();
+	const imageCache = new Map<string, ImageCacheEntry>();
 	const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
-	/**
-	 * Get cached image URL if still valid
-	 * @param {string} key
-	 * @returns {string | null}
-	 */
-	function getCachedImage(key) {
+	/** Get cached image URL if still valid */
+	function getCachedImage(key: string): string | null {
 		const cached = imageCache.get(key);
 		if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
 			return cached.url;
@@ -63,28 +66,23 @@
 		return null;
 	}
 
-	/**
-	 * Store image URL in cache with timestamp
-	 * @param {string} key
-	 * @param {string} url
-	 */
-	function setCachedImage(key, url) {
+	/** Store image URL in cache with timestamp */
+	function setCachedImage(key: string, url: string): void {
 		imageCache.set(key, { url, timestamp: Date.now() });
 	}
 
 	// Props
 	let {
-		gutterItems = $bindable(/** @type {GutterItem[]} */ ([])),
-		onInsertAnchor = /** @type {(anchorName: string) => void} */ ((anchorName) => {}),
-		availableAnchors = /** @type {string[]} */ ([]),
+		gutterItems = $bindable<GutterItem[]>([]),
+		onInsertAnchor = (_anchorName: string) => {},
+		availableAnchors = [] as string[],
 	} = $props();
 
 	/**
 	 * Extract heading level from an anchor string (capped at 1-6)
-	 * @param {string | undefined} anchor
-	 * @returns {number} Heading level 1-6, or 0 if not a heading
+	 * Returns heading level 1-6, or 0 if not a heading
 	 */
-	function getHeadingLevel(anchor) {
+	function getHeadingLevel(anchor: string | undefined): number {
 		if (!anchor) return 0;
 		// Only match valid heading levels (1-6 hash marks)
 		const match = anchor.match(/^#{1,6}/);
@@ -93,10 +91,8 @@
 
 	/**
 	 * Process a raw anchor string into structured data
-	 * @param {string} anchor - The raw anchor string
-	 * @returns {ProcessedAnchor}
 	 */
-	function createProcessedAnchor(anchor) {
+	function createProcessedAnchor(anchor: string): ProcessedAnchor {
 		const isHeading = anchor.startsWith("#");
 		const headingLevel = getHeadingLevel(anchor);
 		const isAnchorTag = anchor.startsWith("anchor:");
@@ -110,12 +106,9 @@
 		return { raw: anchor, isHeading, headingLevel, isAnchorTag, displayText, type };
 	}
 
-	/**
-	 * Preprocess anchors into structured data with Map for O(1) lookup
-	 * @type {Map<string, ProcessedAnchor>}
-	 */
+	/** Preprocess anchors into structured data with Map for O(1) lookup */
 	let processedAnchorsMap = $derived.by(() => {
-		const map = new Map();
+		const map = new Map<string, ProcessedAnchor>();
 		for (const anchor of availableAnchors) {
 			const processed = createProcessedAnchor(anchor);
 			map.set(anchor, processed);
@@ -136,12 +129,8 @@
 		type: "paragraph",
 	};
 
-	/**
-	 * Get processed anchor data for display (O(1) Map lookup)
-	 * @param {string | undefined} anchor
-	 * @returns {ProcessedAnchor}
-	 */
-	function getProcessedAnchor(anchor) {
+	/** Get processed anchor data for display (O(1) Map lookup) */
+	function getProcessedAnchor(anchor: string | undefined): ProcessedAnchor {
 		if (!anchor) return emptyAnchor;
 		// O(1) lookup in Map instead of O(n) find on array
 		const cached = processedAnchorsMap.get(anchor);
@@ -152,11 +141,9 @@
 
 	// State
 	let showAddModal = $state(false);
-	/** @type {number | null} */
-	let editingIndex = $state(null);
+	let editingIndex: number | null = $state(null);
 	let showImagePicker = $state(false);
-	/** @type {((url: string) => void) | null} */
-	let imagePickerCallback = $state(null);
+	let imagePickerCallback: ((url: string) => void) | null = $state(null);
 
 	// Form state for add/edit
 	let itemType = $state("comment");
@@ -164,8 +151,7 @@
 	let itemContent = $state("");
 	let itemCaption = $state("");
 	let itemUrl = $state("");
-	/** @type {GalleryImage[]} */
-	let galleryImages = $state([]);
+	let galleryImages: GalleryImage[] = $state([]);
 
 	// Embed-specific form state
 	let embedUrl = $state("");
@@ -178,16 +164,16 @@
 	let embedError = $state("");
 
 	// Image picker state
-	/** @type {CdnImage[]} */
-	let cdnImages = $state([]);
+	let cdnImages: CdnImage[] = $state([]);
 	let cdnLoading = $state(false);
 	let cdnFilter = $state("");
 
 	// Debounced CDN filter to avoid excessive API calls
-	const debouncedFilterRequest = debounce(async (query) => {
+	const debouncedFilterRequest = debounce(async (query: unknown) => {
 		cdnLoading = true;
 		try {
-			const cacheKey = query ? `cdn_${query}` : "cdn_root";
+			const queryStr = query ? String(query) : "";
+			const cacheKey = queryStr ? `cdn_${queryStr}` : "cdn_root";
 
 			// Check cache first
 			const cachedResult = getCachedImage(cacheKey);
@@ -202,15 +188,15 @@
 			}
 
 			const params = new URLSearchParams();
-			if (query) params.set("prefix", String(query));
+			if (queryStr) params.set("prefix", queryStr);
 			params.set("limit", "50");
 
 			const response = await fetch(`/api/images/list?${params}`); // csrf-ok
-			const data = await response.json();
+			const data = (await response.json()) as { images: CdnImage[] };
 
 			if (response.ok) {
 				const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"];
-				const filtered = data.images.filter((/** @type {CdnImage} */ img) => {
+				const filtered = data.images.filter((img: CdnImage) => {
 					const key = img.key.toLowerCase();
 					return imageExtensions.some((ext) => key.endsWith(ext));
 				});
@@ -250,8 +236,7 @@
 		showAddModal = true;
 	}
 
-	/** @param {number} index */
-	function openEditModal(index) {
+	function openEditModal(index: number) {
 		const item = gutterItems[index];
 		itemType = item.type;
 		itemAnchor = item.anchor || "";
@@ -276,8 +261,7 @@
 	}
 
 	function saveItem() {
-		/** @type {GutterItem} */
-		const newItem = {
+		const newItem: GutterItem = {
 			type: itemType,
 			anchor: itemAnchor,
 		};
@@ -308,19 +292,12 @@
 		closeModal();
 	}
 
-	/** @param {number} index */
-	function deleteItem(index) {
-		gutterItems = gutterItems.filter(
-			(/** @type {GutterItem} */ _, /** @type {number} */ i) => i !== index,
-		);
+	function deleteItem(index: number) {
+		gutterItems = gutterItems.filter((_: GutterItem, i: number) => i !== index);
 		toast.success("Vine removed");
 	}
 
-	/**
-	 * @param {number} index
-	 * @param {number} direction
-	 */
-	function moveItem(index, direction) {
+	function moveItem(index: number, direction: number) {
 		const newIndex = index + direction;
 		if (newIndex < 0 || newIndex >= gutterItems.length) return;
 
@@ -332,8 +309,7 @@
 	}
 
 	// Generate anchor name from text
-	/** @param {string} text */
-	function generateAnchorName(text) {
+	function generateAnchorName(text: string) {
 		return text
 			.toLowerCase()
 			.replace(/[^a-z0-9\s-]/g, "")
@@ -357,15 +333,13 @@
 		debouncedFilterRequest(cdnFilter);
 	}
 
-	/** @param {(url: string) => void} callback */
-	function openImagePicker(callback) {
+	function openImagePicker(callback: (url: string) => void) {
 		imagePickerCallback = callback;
 		showImagePicker = true;
 		loadCdnImages();
 	}
 
-	/** @param {CdnImage} image */
-	function selectImage(image) {
+	function selectImage(image: CdnImage) {
 		if (imagePickerCallback) {
 			imagePickerCallback(image.url);
 		}
@@ -385,19 +359,11 @@
 		});
 	}
 
-	/** @param {number} index */
-	function removeGalleryImage(index) {
-		galleryImages = galleryImages.filter(
-			(/** @type {GalleryImage} */ _, /** @type {number} */ i) => i !== index,
-		);
+	function removeGalleryImage(index: number) {
+		galleryImages = galleryImages.filter((_: GalleryImage, i: number) => i !== index);
 	}
 
-	/**
-	 * @param {number} index
-	 * @param {keyof GalleryImage} field
-	 * @param {string} value
-	 */
-	function updateGalleryImage(index, field, value) {
+	function updateGalleryImage(index: number, field: keyof GalleryImage, value: string) {
 		galleryImages[index][field] = value;
 		galleryImages = [...galleryImages];
 	}
@@ -433,7 +399,15 @@
 				throw new Error(`Failed to resolve: ${response.statusText}`);
 			}
 
-			const data = await response.json();
+			const data: {
+				type?: string;
+				provider?: string;
+				embedUrl?: string;
+				embedHtml?: string;
+				title?: string;
+				thumbnail?: string;
+				og?: { title?: string; image?: string };
+			} = await response.json();
 
 			if (data.type === "embed") {
 				embedProvider = data.provider || "";
@@ -465,8 +439,7 @@
 	const debouncedResolveEmbed = debounce(resolveEmbedUrl, 600);
 
 	// Get preview of item content
-	/** @param {GutterItem} item */
-	function getItemPreview(item) {
+	function getItemPreview(item: GutterItem) {
 		if (item.type === "comment" && item.content) {
 			return item.content.substring(0, 50) + (item.content.length > 50 ? "..." : "");
 		}
@@ -711,19 +684,19 @@
 								<Input
 									type="text"
 									value={image.alt}
-									oninput={(/** @type {Event} */ e) =>
-										updateGalleryImage(i, "alt", /** @type {HTMLInputElement} */ (e.target).value)}
+									oninput={(e) =>
+										updateGalleryImage(i, "alt", (e.currentTarget as HTMLInputElement).value)}
 									placeholder="Alt text"
 									class="small"
 								/>
 								<Input
 									type="text"
 									value={image.caption}
-									oninput={(/** @type {Event} */ e) =>
+									oninput={(e) =>
 										updateGalleryImage(
 											i,
 											"caption",
-											/** @type {HTMLInputElement} */ (e.target).value,
+											(e.currentTarget as HTMLInputElement).value,
 										)}
 									placeholder="Caption"
 									class="small"

@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	/**
 	 * DomainCheckerModal — Accessible modal wrapper for DomainChecker
 	 *
@@ -18,16 +18,21 @@
 	import { DialogOverlay } from "$lib/ui/components/primitives/dialog";
 	import DomainChecker from "./DomainChecker.svelte";
 
-	/** @type {{ open?: boolean; username: string; userTier: string; onclose?: () => void }} */
-	let { open = $bindable(false), username, userTier, onclose } = $props();
+	interface Props {
+		open?: boolean;
+		username: string;
+		userTier: string;
+		onclose?: () => void;
+	}
+
+	let { open = $bindable(false), username, userTier, onclose }: Props = $props();
 
 	function handleClose() {
 		open = false;
 		onclose?.();
 	}
 
-	/** @param {boolean} isOpen */
-	function handleOpenChange(isOpen) {
+	function handleOpenChange(isOpen: boolean) {
 		if (!isOpen && open) {
 			handleClose();
 		}

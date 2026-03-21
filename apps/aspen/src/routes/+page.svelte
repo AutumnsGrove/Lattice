@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import InternalsPostViewer from "@autumnsgrove/lattice/components/custom/InternalsPostViewer.svelte";
 	import Button from "@autumnsgrove/lattice/ui/components/ui/Button.svelte";
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";

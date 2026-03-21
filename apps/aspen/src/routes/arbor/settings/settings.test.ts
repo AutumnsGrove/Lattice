@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { assertLoaded, assertActionResult } from "../../../test-utils";
 
 // ============================================================================
 // MOCKS
@@ -218,11 +219,12 @@ describe("Arbor Settings Page", () => {
 			// Arrange
 			const { load } = await import("./profile/+page.server.js");
 			const event = createLoadEvent({ db: undefined });
-			event.platform.env.DB = undefined;
-			event.platform.env.CACHE_KV = undefined;
+			event.platform.env.DB = undefined as unknown as ReturnType<typeof createMockDB>;
+			event.platform.env.CACHE_KV = undefined as unknown as Record<string, unknown>;
 
 			// Act
 			const result = await load(event as any);
+			assertLoaded(result);
 
 			// Assert
 			expect(result.isWayfinder).toBe(false);
@@ -248,6 +250,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await load(event as any);
+			assertLoaded(result);
 
 			// Assert
 			expect(result.greenhouseStatus.inGreenhouse).toBe(true);
@@ -264,6 +267,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await load(event as any);
+			assertLoaded(result);
 
 			// Assert
 			expect(result.greenhouseStatus.inGreenhouse).toBe(false);
@@ -289,6 +293,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await load(event as any);
+			assertLoaded(result);
 
 			// Assert
 			expect(result.tenantGrafts).toEqual(grafts);
@@ -306,6 +311,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await load(event as any);
+			assertLoaded(result);
 
 			// Assert
 			expect(result.tenantGrafts).toEqual([]);
@@ -332,6 +338,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await load(event as any);
+			assertLoaded(result);
 
 			// Assert
 			expect(result.isWayfinder).toBe(true);
@@ -350,6 +357,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await load(event as any);
+			assertLoaded(result);
 
 			// Assert
 			expect(result.isWayfinder).toBe(false);
@@ -378,6 +386,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await load(event as any);
+			assertLoaded(result);
 
 			// Assert
 			expect(result.currentSubdomain).toBe("autumn");
@@ -396,6 +405,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await load(event as any);
+			assertLoaded(result);
 
 			// Assert — raw plan returned, not the validated tier
 			expect(result.tenantPlan).toBe("invalid");
@@ -412,6 +422,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await load(event as any);
+			assertLoaded(result);
 
 			// Assert
 			expect(result.currentSubdomain).toBe("");
@@ -433,6 +444,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await load(event as any);
+			assertLoaded(result);
 
 			// Assert
 			expect(result.oauthAvatarUrl).toBe("https://example.com/avatar.jpg");
@@ -453,6 +465,7 @@ describe("Arbor Settings Page", () => {
 
 			// Assert
 			const result = await load(event as any);
+			assertLoaded(result);
 			expect(result.oauthAvatarUrl).toBeNull();
 		});
 	});
@@ -466,10 +479,11 @@ describe("Arbor Settings Page", () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
 			const event = createActionEvent({ formData: { newUsername: "newname" } });
-			event.platform.env.DB = undefined;
+			event.platform.env.DB = undefined as unknown as ReturnType<typeof createMockDB>;
 
 			// Act
 			const result = await actions.changeUsername(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.status).toBe(500);
@@ -483,6 +497,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.changeUsername(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.status).toBe(403);
@@ -496,6 +511,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.changeUsername(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.status).toBe(400);
@@ -512,6 +528,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.changeUsername(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.status).toBe(404);
@@ -525,6 +542,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.changeUsername(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.status).toBe(400);
@@ -544,6 +562,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.changeUsername(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.status).toBe(400);
@@ -562,6 +581,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.changeUsername(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.status).toBe(429);
@@ -583,6 +603,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.changeUsername(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.success).toBe(true);
@@ -599,6 +620,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.changeUsername(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.status).toBe(500);
@@ -620,6 +642,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.changeUsername(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.success).toBe(true);
@@ -634,6 +657,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.changeUsername(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.status).toBe(403);
@@ -650,10 +674,11 @@ describe("Arbor Settings Page", () => {
 			// Arrange
 			const { actions } = await import("./profile/+page.server.js");
 			const event = createActionEvent({ formData: { graftId: "graft-1", enabled: "true" } });
-			event.platform.env.CACHE_KV = undefined;
+			event.platform.env.CACHE_KV = undefined as unknown as Record<string, unknown>;
 
 			// Act
 			const result = await actions.toggleGraft(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.status).toBe(500);
@@ -670,6 +695,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.toggleGraft(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.status).toBe(403);
@@ -688,6 +714,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.toggleGraft(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.status).toBe(403);
@@ -706,6 +733,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.toggleGraft(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.status).toBe(400);
@@ -726,6 +754,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.toggleGraft(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.success).toBe(true);
@@ -747,6 +776,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.toggleGraft(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.success).toBe(true);
@@ -767,6 +797,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.toggleGraft(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.status).toBe(500);
@@ -793,6 +824,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.resetGrafts(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.success).toBe(true);
@@ -814,6 +846,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.resetGrafts(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.success).toBe(true);
@@ -834,6 +867,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.resetGrafts(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.success).toBe(true);
@@ -852,6 +886,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.resetGrafts(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.status).toBe(403);
@@ -873,6 +908,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.enrollTenant(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.status).toBe(403);
@@ -888,6 +924,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.enrollTenant(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.status).toBe(400);
@@ -907,6 +944,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.enrollTenant(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.success).toBe(true);
@@ -925,6 +963,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.enrollTenant(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.success).toBe(true);
@@ -942,6 +981,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.enrollTenant(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.status).toBe(500);
@@ -959,6 +999,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.removeTenant(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.status).toBe(403);
@@ -975,6 +1016,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.removeTenant(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.success).toBe(true);
@@ -992,6 +1034,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.removeTenant(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.status).toBe(500);
@@ -1008,6 +1051,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.toggleTenant(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.status).toBe(403);
@@ -1024,6 +1068,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.toggleTenant(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.success).toBe(true);
@@ -1041,6 +1086,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.toggleTenant(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.success).toBe(true);
@@ -1062,6 +1108,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.cultivateFlag(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.status).toBe(403);
@@ -1078,6 +1125,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.cultivateFlag(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.success).toBe(true);
@@ -1094,6 +1142,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.cultivateFlag(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.status).toBe(400);
@@ -1110,6 +1159,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.pruneFlag(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.status).toBe(403);
@@ -1126,6 +1176,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.pruneFlag(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.success).toBe(true);
@@ -1142,6 +1193,7 @@ describe("Arbor Settings Page", () => {
 
 			// Act
 			const result = await actions.pruneFlag(event as any);
+			assertActionResult(result);
 
 			// Assert
 			expect(result.status).toBe(400);

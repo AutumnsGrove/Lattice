@@ -241,7 +241,7 @@
 			localRole: "self",
 			errorMessages: CHAT_ERROR_MESSAGES,
 			defaultError: "Couldn't send your message.",
-			async onSend(text) {
+			async onSend(text: string) {
 				conn.send({
 					type: "message",
 					conversation_id: convId,

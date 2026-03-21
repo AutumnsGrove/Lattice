@@ -101,7 +101,7 @@ const MOCK_MESSAGE = {
 	conversation_id: "conv-1",
 	sender_id: "tenant-alice",
 	content: "Hello!",
-	content_type: "text",
+	content_type: "text" as const,
 	metadata: null,
 	created_at: "2026-01-01T00:00:00.000Z",
 	retracted_at: null,

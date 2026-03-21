@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import Button from "@autumnsgrove/lattice/ui/components/ui/Button.svelte";
 	import Badge from "@autumnsgrove/lattice/ui/components/ui/Badge.svelte";
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
@@ -19,7 +19,7 @@
 	import { api } from "@autumnsgrove/lattice/utils";
 
 	// Map curio slugs to icons
-	const curioIcons = {
+	const curioIcons: Record<string, typeof metricIcons.calendar> = {
 		timeline: metricIcons.calendar,
 		gallery: featureIcons.image,
 		journey: navIcons.map,
@@ -44,19 +44,16 @@
 
 	let { data } = $props();
 
-	/** @type {Record<string, boolean>} */
-	let togglingNav = $state({});
+	let togglingNav = $state<Record<string, boolean>>({});
 
-	/** @type {{ slug: string, title: string } | null} */
-	let pageToDelete = $state(null);
+	let pageToDelete = $state<{ slug: string; title: string } | null>(null);
 	let showDeleteDialog = $state(false);
 	let deleting = $state(false);
 
 	/** System pages that cannot be deleted */
 	const PROTECTED_SLUGS = ["home", "about"];
 
-	/** @param {{ slug: string, title: string }} page */
-	function confirmDelete(page) {
+	function confirmDelete(page: { slug: string; title: string }) {
 		pageToDelete = page;
 		showDeleteDialog = true;
 	}
@@ -68,9 +65,7 @@
 		try {
 			await api.delete(`/api/pages/${pageToDelete.slug}`);
 			// Remove from local list
-			data.pages = data.pages.filter(
-				(/** @type {{ slug: string }} */ p) => p.slug !== pageToDelete?.slug,
-			);
+			data.pages = data.pages.filter((p: { slug: string }) => p.slug !== pageToDelete?.slug);
 			showDeleteDialog = false;
 			pageToDelete = null;
 			toast.success("Page deleted");
@@ -90,7 +85,7 @@
 	// Count pages currently in nav (excluding home/about which are hardcoded)
 	let navPagesUsed = $derived(
 		data.pages.filter(
-			(/** @type {{ show_in_nav: number; slug: string }} */ p) =>
+			(p: { show_in_nav: number; slug: string }) =>
 				p.show_in_nav && p.slug !== "home" && p.slug !== "about",
 		).length,
 	);
@@ -100,8 +95,7 @@
 	let slotsUsed = $derived(navPagesUsed + enabledCuriosCount);
 	let atLimit = $derived(slotsUsed >= navLimit);
 
-	/** @param {string | number} dateValue */
-	function formatDate(dateValue) {
+	function formatDate(dateValue: string | number) {
 		if (!dateValue) return "-";
 		// Handle unix timestamp in seconds (from SQLite unixepoch())
 		// JavaScript Date expects milliseconds, so multiply by 1000
@@ -113,12 +107,8 @@
 		});
 	}
 
-	/**
-	 * Toggle navigation visibility for a page
-	 * @param {string} slug
-	 * @param {boolean} currentValue
-	 */
-	async function toggleNav(slug, currentValue) {
+	/** Toggle navigation visibility for a page */
+	async function toggleNav(slug: string, currentValue: boolean) {
 		const newValue = !currentValue;
 
 		// Check limit when trying to add (not remove)
@@ -133,9 +123,7 @@
 			await api.patch(`/api/pages/${slug}`, { show_in_nav: newValue });
 
 			// Update local state
-			const pageIndex = data.pages.findIndex(
-				(/** @type {{ slug: string }} */ p) => p.slug === slug,
-			);
+			const pageIndex = data.pages.findIndex((p: { slug: string }) => p.slug === slug);
 			if (pageIndex !== -1) {
 				data.pages[pageIndex].show_in_nav = newValue ? 1 : 0;
 			}

@@ -131,7 +131,7 @@
 <div class="shelves-admin">
 	<header class="page-header">
 		<div class="title-row">
-			<BookMarked class="header-icon" />
+			<actionIcons.bookMarked class="header-icon" />
 			<h1>Shelves</h1>
 		</div>
 		<p class="subtitle">
@@ -143,7 +143,7 @@
 	<!-- Create New Shelf -->
 	<GlassCard class="create-section">
 		<h2 class="section-title">
-			<Plus class="section-icon" />
+			<actionIcons.plus class="section-icon" />
 			Create a Shelf
 		</h2>
 		<form method="POST" action="?/addShelf" use:enhance class="create-form">
@@ -244,9 +244,9 @@
 							onclick={() => (editingShelf = editingShelf === shelf.id ? null : shelf.id)}
 						>
 							{#if editingShelf === shelf.id}
-								<ChevronUp />
+								<navIcons.chevronUp />
 							{:else}
-								<Settings />
+								<actionIcons.settings />
 							{/if}
 						</button>
 						<button
@@ -261,7 +261,7 @@
 								deleteConfirmOpen = true;
 							}}
 						>
-							<Trash2 />
+							<actionIcons.trash />
 						</button>
 					</div>
 				</div>
@@ -362,7 +362,7 @@
 										title="Edit item"
 										onclick={() => (editingItem = editingItem === item.id ? null : item.id)}
 									>
-										<Settings />
+										<actionIcons.settings />
 									</button>
 									<form method="POST" action="?/removeItem" use:enhance>
 										<input type="hidden" name="itemId" value={item.id} />
@@ -371,7 +371,7 @@
 											class="icon-btn icon-btn--small icon-btn--danger"
 											title="Remove item"
 										>
-											<Trash2 />
+											<actionIcons.trash />
 										</button>
 									</form>
 								</div>
@@ -584,7 +584,7 @@
 						</form>
 					{:else}
 						<GlassButton variant="ghost" onclick={() => (addingItemTo = shelf.id)}>
-							<Plus class="btn-icon" />
+							<actionIcons.plus class="btn-icon" />
 							Add Item
 						</GlassButton>
 					{/if}

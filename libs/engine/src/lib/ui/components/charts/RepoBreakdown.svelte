@@ -1,23 +1,29 @@
-<script>
+<script lang="ts">
   /**
    * RepoBreakdown - Shows which repositories had activity
    * A simple horizontal stacked bar or pill visualization
    */
 
-  /**
-   * @typedef {Object} RepoData
-   * @property {string} name
-   * @property {number} [commits]
-   * @property {number} [additions]
-   * @property {number} [deletions]
-   */
+  interface RepoData {
+    name: string;
+    commits?: number;
+    additions?: number;
+    deletions?: number;
+  }
+
+  interface Props {
+    repos?: RepoData[];
+    mode?: 'commits' | 'loc';
+    maxWidth?: number;
+    showLegend?: boolean;
+  }
 
   let {
-    repos = /** @type {RepoData[]} */ ([]),
-    mode = /** @type {'commits' | 'loc'} */ ('commits'),
+    repos = [],
+    mode = 'commits',
     maxWidth = 150,
     showLegend = true
-  } = $props();
+  }: Props = $props();
 
   // Color palette for repos
   const colors = [
@@ -31,15 +37,14 @@
     '#e67e22', // dark orange
   ];
 
-  function getTotal() {
+  function getTotal(): number {
     if (mode === 'commits') {
-      return repos.reduce((/** @type {number} */ sum, /** @type {RepoData} */ r) => sum + (r.commits || 1), 0) || 1;
+      return repos.reduce((sum, r) => sum + (r.commits || 1), 0) || 1;
     }
-    return repos.reduce((/** @type {number} */ sum, /** @type {RepoData} */ r) => sum + (r.additions || 0) + (r.deletions || 0), 0) || 1;
+    return repos.reduce((sum, r) => sum + (r.additions || 0) + (r.deletions || 0), 0) || 1;
   }
 
-  /** @param {RepoData} repo */
-  function getValue(repo) {
+  function getValue(repo: RepoData): number {
     if (mode === 'commits') {
       return repo.commits || 1;
     }
@@ -48,7 +53,7 @@
 
   const total = $derived(getTotal());
   const segments = $derived(
-    repos.map((/** @type {RepoData} */ repo, /** @type {number} */ i) => ({
+    repos.map((repo, i) => ({
       name: repo.name,
       value: getValue(repo),
       percent: (getValue(repo) / total) * 100,

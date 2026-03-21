@@ -1,34 +1,28 @@
-<script>
+<script lang="ts">
 	import { tick } from "svelte";
 	import GutterItem from "./GutterItem.svelte";
+	import type { GutterItem as GutterItemType, Header as HeaderType } from "$lib/utils/gutter";
 
-	/**
-	 * @typedef {{ type?: string; file?: string; src?: string; url?: string; anchor?: string; content?: string; [key: string]: unknown }} GutterItemType
-	 * @typedef {{ id: string; text: string; level?: number }} HeaderType
-	 */
+	interface Props {
+		items?: GutterItemType[];
+		headers?: HeaderType[];
+		contentHeight?: number;
+		onOverflowChange?: (anchors: string[]) => void;
+	}
 
 	let {
-		items = /** @type {GutterItemType[]} */ ([]),
-		headers = /** @type {HeaderType[]} */ ([]),
+		items = [],
+		headers = [],
 		contentHeight = 0,
-		onOverflowChange = /** @type {(anchors: string[]) => void} */ (() => {}),
-	} = $props();
+		onOverflowChange = () => {},
+	}: Props = $props();
 
-	/** @type {HTMLElement | undefined} */
-	let gutterElement = $state();
-	/** @type {Record<string, number>} */
-	let itemPositions = $state({});
-	/** @type {Record<string, HTMLElement>} */
-	let anchorGroupElements = $state({});
-	/** @type {string[]} */
-	let overflowingAnchors = $state([]);
+	let gutterElement = $state<HTMLElement | undefined>();
+	let itemPositions = $state<Record<string, number>>({});
+	let anchorGroupElements = $state<Record<string, HTMLElement>>({});
+	let overflowingAnchors = $state<string[]>([]);
 
-	/**
-	 * Parse anchor string to determine anchor type and value
-	 * @param {string | undefined} anchor
-	 * @returns {{ type: string; value: string | number | null }}
-	 */
-	function parseAnchor(anchor) {
+	function parseAnchor(anchor: string | undefined): { type: string; value: string | number | null } {
 		if (!anchor) {
 			return { type: "none", value: null };
 		}
@@ -55,18 +49,13 @@
 		return { type: "header", value: anchor };
 	}
 
-	/**
-	 * Generate a unique key for an anchor (used for grouping and positioning)
-	 * @param {string} anchor
-	 * @returns {string}
-	 */
-	function getAnchorKey(anchor) {
+	function getAnchorKey(anchor: string): string {
 		const parsed = parseAnchor(anchor);
 		switch (parsed.type) {
 			case "header": {
 				// For headers, use the header ID
 				const headerText = anchor.replace(/^#+\s*/, "");
-				const header = headers.find((/** @type {HeaderType} */ h) => h.text === headerText);
+				const header = headers.find((h) => h.text === headerText);
 				return header ? `header:${header.id}` : `header:${anchor}`;
 			}
 			case "paragraph":
@@ -78,11 +67,7 @@
 		}
 	}
 
-	/**
-	 * Get all unique anchors from items (preserving order)
-	 * @returns {string[]}
-	 */
-	function getUniqueAnchors() {
+	function getUniqueAnchors(): string[] {
 		const seen = new Set();
 		const anchors = [];
 		for (const item of items) {
@@ -94,38 +79,24 @@
 		return anchors;
 	}
 
-	/**
-	 * Group items by their anchor
-	 * @param {string} anchor
-	 * @returns {GutterItemType[]}
-	 */
-	function getItemsForAnchor(anchor) {
-		return items.filter((/** @type {GutterItemType} */ item) => item.anchor === anchor);
+	function getItemsForAnchor(anchor: string): GutterItemType[] {
+		return items.filter((item) => item.anchor === anchor);
 	}
 
-	/**
-	 * Get items that don't have a valid anchor (show at top)
-	 * @returns {GutterItemType[]}
-	 */
-	function getOrphanItems() {
-		return items.filter((/** @type {GutterItemType} */ item) => {
+	function getOrphanItems(): GutterItemType[] {
+		return items.filter((item) => {
 			if (!item.anchor) return true;
 			const parsed = parseAnchor(item.anchor);
 			if (parsed.type === "header") {
 				const headerText = item.anchor.replace(/^#+\s*/, "");
-				return !headers.find((/** @type {HeaderType} */ h) => h.text === headerText);
+				return !headers.find((h) => h.text === headerText);
 			}
 			// Paragraph and tag anchors are valid if they have values
 			return parsed.type === "none";
 		});
 	}
 
-	/**
-	 * Find the DOM element for an anchor
-	 * @param {string} anchor
-	 * @returns {HTMLElement | null}
-	 */
-	function findAnchorElement(anchor) {
+	function findAnchorElement(anchor: string): HTMLElement | null {
 		const parsed = parseAnchor(anchor);
 		const contentEl = document.querySelector(".content-body");
 		if (!contentEl) return null;
@@ -133,7 +104,7 @@
 		switch (parsed.type) {
 			case "header": {
 				const headerText = anchor.replace(/^#+\s*/, "");
-				const header = headers.find((/** @type {HeaderType} */ h) => h.text === headerText);
+				const header = headers.find((h) => h.text === headerText);
 				if (header) {
 					return document.getElementById(header.id);
 				}
@@ -144,14 +115,12 @@
 				if (typeof parsed.value !== "number") return null;
 				const index = parsed.value - 1; // Convert to 0-based index
 				if (index >= 0 && index < paragraphs.length) {
-					return /** @type {HTMLElement} */ (paragraphs[index]);
+					return paragraphs[index] as HTMLElement;
 				}
 				return null;
 			}
 			case "tag": {
-				return /** @type {HTMLElement | null} */ (
-					contentEl.querySelector(`[data-anchor="${parsed.value}"]`)
-				);
+				return contentEl.querySelector<HTMLElement>(`[data-anchor="${parsed.value}"]`);
 			}
 			default:
 				return null;
@@ -169,15 +138,14 @@
 		const bottomPadding = 32; // Padding from bottom of content
 
 		let lastBottom = 0; // Track the bottom edge of the last positioned item
-		/** @type {string[]} */
-		const newOverflowingAnchors = [];
+		const newOverflowingAnchors: string[] = [];
 
 		// Get all unique anchors that have items
 		const anchors = getUniqueAnchors();
 
 		// Sort anchors by their position in the document
 		const anchorPositions = anchors
-			.map((/** @type {string} */ anchor) => {
+			.map((anchor) => {
 				const el = findAnchorElement(anchor);
 				return {
 					anchor,
@@ -186,48 +154,40 @@
 					top: el ? el.offsetTop : Infinity,
 				};
 			})
-			.sort((/** @type {{ top: number }} */ a, /** @type {{ top: number }} */ b) => a.top - b.top);
+			.sort((a, b) => a.top - b.top);
 
-		anchorPositions.forEach(
-			(
-				/** @type {{ anchor: string; key: string; element: HTMLElement | null; top: number }} */ {
-					anchor,
-					key,
-					element,
-				},
-			) => {
-				const groupEl = anchorGroupElements[key];
+		anchorPositions.forEach(({ anchor: _anchor, key, element }) => {
+			const groupEl = anchorGroupElements[key];
 
-				if (element && groupEl) {
-					// Desired position (aligned with anchor element)
-					let desiredTop = element.offsetTop - gutterTop;
+			if (element && groupEl) {
+				// Desired position (aligned with anchor element)
+				let desiredTop = element.offsetTop - gutterTop;
 
-					// Get the height of this gutter group
-					const groupHeight = groupEl.offsetHeight;
+				// Get the height of this gutter group
+				const groupHeight = groupEl.offsetHeight;
 
-					// Check for collision with previous item
-					if (desiredTop < lastBottom + minGap) {
-						// Push down to avoid overlap
-						desiredTop = lastBottom + minGap;
-					}
-
-					// Check if this item would overflow past the content
-					const effectiveContentHeight = contentHeight > 0 ? contentHeight : Infinity;
-					if (desiredTop + groupHeight > effectiveContentHeight - bottomPadding) {
-						// This item overflows - mark it and hide it in the gutter
-						newOverflowingAnchors.push(key);
-						itemPositions[key] = -9999; // Hide off-screen
-					} else {
-						itemPositions[key] = desiredTop;
-						// Update lastBottom for next iteration
-						lastBottom = desiredTop + groupHeight;
-					}
-				} else if (groupEl) {
-					// Element not found - hide this group
-					itemPositions[key] = -9999;
+				// Check for collision with previous item
+				if (desiredTop < lastBottom + minGap) {
+					// Push down to avoid overlap
+					desiredTop = lastBottom + minGap;
 				}
-			},
-		);
+
+				// Check if this item would overflow past the content
+				const effectiveContentHeight = contentHeight > 0 ? contentHeight : Infinity;
+				if (desiredTop + groupHeight > effectiveContentHeight - bottomPadding) {
+					// This item overflows - mark it and hide it in the gutter
+					newOverflowingAnchors.push(key);
+					itemPositions[key] = -9999; // Hide off-screen
+				} else {
+					itemPositions[key] = desiredTop;
+					// Update lastBottom for next iteration
+					lastBottom = desiredTop + groupHeight;
+				}
+			} else if (groupEl) {
+				// Element not found - hide this group
+				itemPositions[key] = -9999;
+			}
+		});
 
 		// Update overflowing anchors and notify parent
 		overflowingAnchors = newOverflowingAnchors;

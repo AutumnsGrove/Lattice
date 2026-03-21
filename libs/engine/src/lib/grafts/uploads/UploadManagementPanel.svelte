@@ -16,12 +16,12 @@
   />
   ```
 -->
-<script>
+<script lang="ts">
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import Button from "$lib/ui/components/ui/Button.svelte";
 	import { stateIcons, navIcons, actionIcons, authIcons } from "@autumnsgrove/prism/icons";
+	import type { UploadManagementPanelProps } from "./types.js";
 
-	/** @type {import('./types.js').UploadManagementPanelProps} */
 	let {
 		tenants = [],
 		tenantNames = {},
@@ -29,7 +29,7 @@
 		onUnsuspend,
 		formResult,
 		class: className = "",
-	} = $props();
+	}: UploadManagementPanelProps = $props();
 
 	// Search filter
 	let searchQuery = $state("");
@@ -40,7 +40,7 @@
 	const suspendedCount = $derived(tenants.filter((t) => t.suspended).length);
 
 	// Filtered tenants
-	const filteredTenants = $derived(() => {
+	const filteredTenants = $derived.by(() => {
 		if (!searchQuery.trim()) return tenants;
 		const q = searchQuery.toLowerCase();
 		return tenants.filter((t) => {
@@ -49,8 +49,7 @@
 		});
 	});
 
-	/** @param {string} tenantId */
-	function handleToggle(tenantId) {
+	function handleToggle(tenantId: string) {
 		const tenant = tenants.find((t) => t.tenantId === tenantId);
 		if (!tenant) return;
 
@@ -156,7 +155,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					{#each filteredTenants() as tenant (tenant.tenantId)}
+					{#each filteredTenants as tenant (tenant.tenantId)}
 						<tr>
 							<td>
 								<div class="tenant-info">

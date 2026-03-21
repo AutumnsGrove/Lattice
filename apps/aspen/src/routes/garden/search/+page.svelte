@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { page } from "$app/state";
 	import { goto } from "$app/navigation";
 	import Card from "@autumnsgrove/lattice/ui/components/ui/Card.svelte";
@@ -30,17 +30,16 @@
 		}));
 	});
 
-	/**
-	 * Filter function for ContentSearch component
-	 * @param {{ titleLower: string, descriptionLower: string, tagsLower: string[] }} post
-	 * @param {string} query
-	 */
-	function filterPost(post, query) {
+	/** Filter function for ContentSearch component */
+	function filterPost(
+		post: { titleLower: string; descriptionLower: string; tagsLower: string[] },
+		query: string,
+	) {
 		const q = query.toLowerCase();
 		return (
 			post.titleLower.includes(q) ||
 			post.descriptionLower.includes(q) ||
-			post.tagsLower.some((/** @type {string} */ tag) => tag.includes(q))
+			post.tagsLower.some((tag) => tag.includes(q))
 		);
 	}
 
@@ -48,8 +47,18 @@
 	// FIX: Initialize directly with data.posts to avoid derived state timing issues
 	// ContentSearch will update this via handleSearchChange callback
 	// svelte-ignore state_referenced_locally
-	/** @type {any[]} */
-	let searchResults = $state(
+	let searchResults = $state<
+		Array<{
+			slug: string;
+			title: string;
+			description: string;
+			date: string;
+			tags: string[];
+			titleLower: string;
+			descriptionLower: string;
+			tagsLower: string[];
+		}>
+	>(
 		data.posts.map((post) => ({
 			...post,
 			titleLower: post.title.toLowerCase(),
@@ -57,11 +66,7 @@
 			tagsLower: post.tags.map((tag) => tag.toLowerCase()),
 		})),
 	);
-	/**
-	 * @param {string} _query
-	 * @param {any[]} results
-	 */
-	function handleSearchChange(_query, results) {
+	function handleSearchChange(_query: string, results: typeof searchResults) {
 		searchResults = results;
 	}
 
@@ -71,9 +76,7 @@
 		if (selectedTag) {
 			// FIX: Use pre-computed tagsLower for case-insensitive comparison (better performance)
 			const tagLower = selectedTag.toLowerCase();
-			return searchResults.filter((post) =>
-				post.tagsLower.some((/** @type {string} */ tag) => tag === tagLower),
-			);
+			return searchResults.filter((post) => post.tagsLower.some((tag) => tag === tagLower));
 		}
 		return searchResults;
 	});
@@ -88,8 +91,7 @@
 		goto(newUrl, { replaceState: true, keepFocus: true });
 	}
 
-	/** @param {string} tag */
-	function selectTag(tag) {
+	function selectTag(tag: string) {
 		if (selectedTag === tag) {
 			selectedTag = "";
 		} else {

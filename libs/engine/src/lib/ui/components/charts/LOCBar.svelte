@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   /**
    * LOCBar - Lines of Code visualization
    * Shows additions and deletions as a horizontal stacked bar

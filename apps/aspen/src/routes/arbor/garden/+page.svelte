@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import Button from "@autumnsgrove/lattice/ui/components/ui/Button.svelte";
 	import Badge from "@autumnsgrove/lattice/ui/components/ui/Badge.svelte";
 	import GlassConfirmDialog from "@autumnsgrove/lattice/ui/components/ui/GlassConfirmDialog.svelte";
@@ -13,13 +13,11 @@
 
 	let { data } = $props();
 
-	/** @type {{ slug: string, title: string } | null} */
-	let bloomToDelete = $state(null);
+	let bloomToDelete = $state<{ slug: string; title: string } | null>(null);
 	let showDeleteDialog = $state(false);
 	let deleting = $state(false);
 
-	/** @param {string} dateString */
-	function formatDate(dateString) {
+	function formatDate(dateString: string) {
 		return new Date(dateString).toLocaleDateString("en-US", {
 			year: "numeric",
 			month: "short",
@@ -27,8 +25,7 @@
 		});
 	}
 
-	/** @param {{ slug: string, title: string }} bloom */
-	function confirmDelete(bloom) {
+	function confirmDelete(bloom: { slug: string; title: string }) {
 		bloomToDelete = bloom;
 		showDeleteDialog = true;
 	}
@@ -40,9 +37,7 @@
 		try {
 			await api.delete(`/api/blooms/${bloomToDelete.slug}`);
 			// Remove from local list
-			data.posts = data.posts.filter(
-				(/** @type {{ slug: string }} */ p) => p.slug !== bloomToDelete?.slug,
-			);
+			data.posts = data.posts.filter((p: { slug: string }) => p.slug !== bloomToDelete?.slug);
 			showDeleteDialog = false;
 			bloomToDelete = null;
 		} catch (error) {
@@ -64,11 +59,12 @@
 	{#if data.isExampleSite}
 		<div class="mb-6 p-4 bg-warning-bg border border-warning rounded-lg">
 			<p class="m-0 text-warning text-sm">
-				<strong><phaseIcons.sparkles class="w-4 h-4 inline-block" /> Welcome to the Example Site!</strong> This <GroveTerm
-					term="arbor"
-					standard="dashboard">admin panel</GroveTerm
-				> is publicly accessible so you can explore Grove's features. On your own site, this panel is
-				private and only accessible to you.
+				<strong
+					><phaseIcons.sparkles class="w-4 h-4 inline-block" /> Welcome to the Example Site!</strong
+				>
+				This <GroveTerm term="arbor" standard="dashboard">admin panel</GroveTerm> is publicly accessible
+				so you can explore Grove's features. On your own site, this panel is private and only accessible
+				to you.
 			</p>
 		</div>
 	{/if}
