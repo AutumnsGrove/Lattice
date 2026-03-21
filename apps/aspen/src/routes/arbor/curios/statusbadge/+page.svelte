@@ -62,12 +62,12 @@
 	<header class="page-header">
 		<div class="header-top">
 			<GlassButton href="/arbor/curios" variant="ghost" class="back-link">
-				<ArrowLeft class="w-4 h-4" />
+				<navIcons.arrowLeft class="w-4 h-4" />
 				Back to Curios
 			</GlassButton>
 		</div>
 		<div class="title-row">
-			<Shield class="header-icon" />
+			<authIcons.shield class="header-icon" />
 			<h1>Status Badges</h1>
 		</div>
 		<p class="subtitle">
@@ -82,7 +82,7 @@
 			<h3>Active Badges</h3>
 			{#if availableBadgeTypes.length > 0}
 				<GlassButton variant="accent" onclick={() => (showAddForm = !showAddForm)}>
-					<Plus class="w-4 h-4" />
+					<actionIcons.plus class="w-4 h-4" />
 					Add Badge
 				</GlassButton>
 			{/if}
@@ -129,7 +129,7 @@
 								class="remove-btn"
 								aria-label="Remove {def?.name ?? badge.badgeType} badge"
 							>
-								<Trash2 class="w-4 h-4" />
+								<actionIcons.trash class="w-4 h-4" />
 							</button>
 						</form>
 					</div>

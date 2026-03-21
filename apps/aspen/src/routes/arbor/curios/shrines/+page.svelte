@@ -142,7 +142,7 @@
 <div class="shrines-page">
 	<header class="page-header">
 		<div class="title-row">
-			<Heart class="header-icon" aria-hidden="true" />
+			<natureIcons.heart class="header-icon" aria-hidden="true" />
 			<h1>Personal Shrines</h1>
 		</div>
 		<p class="subtitle">
@@ -155,7 +155,7 @@
 	<section class="add-section">
 		{#if !showAddForm}
 			<GlassButton variant="accent" onclick={() => (showAddForm = true)}>
-				<Plus class="btn-icon" />
+				<actionIcons.plus class="btn-icon" />
 				Create a Shrine
 			</GlassButton>
 		{:else}
@@ -219,7 +219,7 @@
 
 					<div class="form-actions">
 						<GlassButton type="submit" variant="accent">
-							<Plus class="btn-icon" />
+							<actionIcons.plus class="btn-icon" />
 							Create Shrine
 						</GlassButton>
 						<GlassButton variant="ghost" onclick={() => (showAddForm = false)}>Cancel</GlassButton>
@@ -236,7 +236,7 @@
 				<div class="editor-header">
 					<h2>Editing: {editingShrine.title}</h2>
 					<GlassButton variant="ghost" onclick={stopEditing} aria-label="Close editor">
-						<X class="btn-icon" />
+						<stateIcons.x class="btn-icon" />
 					</GlassButton>
 				</div>
 
@@ -266,7 +266,7 @@
 										title="Reset to template"
 										aria-label="Reset to template"
 									>
-										<RotateCcw class="btn-icon" />
+										<actionIcons.rotateCcw class="btn-icon" />
 									</GlassButton>
 								</form>
 							</div>
@@ -302,7 +302,7 @@
 											item.x,
 										)}, {Math.round(item.y)}"
 									>
-										<X size={14} />
+										<stateIcons.x size={14} />
 									</button>
 								</div>
 							{/each}
@@ -492,7 +492,7 @@
 								</select>
 								<GlassButton variant="accent" onclick={addItem}>Add</GlassButton>
 								<GlassButton variant="ghost" onclick={() => (showAddItem = false)}>
-									<X class="btn-icon" />
+									<stateIcons.x class="btn-icon" />
 								</GlassButton>
 							</div>
 						{:else}
@@ -501,7 +501,7 @@
 								onclick={() => (showAddItem = true)}
 								class="add-item-btn"
 							>
-								<Plus class="btn-icon" />
+								<actionIcons.plus class="btn-icon" />
 								Add Item
 							</GlassButton>
 						{/if}
@@ -517,7 +517,7 @@
 						>
 							<input type="hidden" name="shrineId" value={editingShrine.id} />
 							<GlassButton type="submit" variant="accent" class="save-btn">
-								<Save class="btn-icon" />
+								<actionIcons.save class="btn-icon" />
 								Save Contents
 							</GlassButton>
 						</form>
@@ -531,7 +531,7 @@
 	<section class="shrines-section">
 		{#if data.shrines.length === 0}
 			<GlassCard class="empty-card">
-				<Heart class="empty-icon" aria-hidden="true" />
+				<natureIcons.heart class="empty-icon" aria-hidden="true" />
 				<p>No shrines yet.</p>
 				<p class="empty-hint">Create a shrine to dedicate space for something meaningful.</p>
 			</GlassCard>
@@ -572,9 +572,9 @@
 										: `Edit contents of ${shrine.title}`}
 								>
 									{#if editingShrineId === shrine.id}
-										<X class="btn-icon" />
+										<stateIcons.x class="btn-icon" />
 									{:else}
-										<Pencil class="btn-icon" />
+										<actionIcons.edit class="btn-icon" />
 									{/if}
 								</GlassButton>
 								<form method="POST" action="?/togglePublish" use:enhance>
@@ -589,9 +589,9 @@
 											: `Publish ${shrine.title}`}
 									>
 										{#if shrine.isPublished}
-											<EyeOff class="btn-icon" />
+											<stateIcons.eyeOff class="btn-icon" />
 										{:else}
-											<Eye class="btn-icon" />
+											<stateIcons.eye class="btn-icon" />
 										{/if}
 									</GlassButton>
 								</form>
@@ -604,7 +604,7 @@
 										title="Remove shrine"
 										aria-label={`Remove ${shrine.title}`}
 									>
-										<Trash2 class="btn-icon" />
+										<actionIcons.trash class="btn-icon" />
 									</GlassButton>
 								</form>
 							</div>
