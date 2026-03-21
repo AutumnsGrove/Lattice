@@ -263,6 +263,40 @@ Naming is **consistent and intentional** — no drift here.
 
 ---
 
+## Remediation Progress (PR #1521, 2026-03-21)
+
+### Phase 1 — Complete
+
+| Item | Before | After | Status |
+|------|--------|-------|--------|
+| Plain JS script blocks | 45 files | 0 files | **Done** — all converted to `lang="ts"` with proper TS interfaces |
+| `cn()` import paths | 46 wrong | 1 remaining (Timeline) | **Done** — 45 shadcn primitives fixed |
+| Bare Lucide icons | ~62 usages | 0 remaining | **Done** — 61 migrated to Prism; BeeIcon uses `@lucide/lab` (intentional `// prism-ok`) |
+| `<slot>` → snippet | 1 file | 0 files | **Already done** — VineyardLayout was already using `{@render children()}`; only the doc comment referenced `<slot>` |
+| Engine export `"types"` conditions | 12 missing | 0 missing | **Done** — all `.svelte` exports have types |
+
+### Bonus: Aspen Type Safety
+
+Drove `apps/aspen` svelte-check from **415 errors → 0 errors**:
+- Created `assertLoaded`/`assertActionResult` test utilities for SvelteKit type narrowing
+- Fixed 4 `$derived` → `$derived.by` runtime bugs in WispPanel and UploadManagementPanel
+- Converted JSDoc type annotations to TypeScript across ~30 route components
+- Typed root layout data prop, vineyard showcase, community settings
+- Fixed component prop mismatches in vineyard showcase (Season, StatusBadge, Tabs, Select, Accordion)
+
+### Remaining (Phase 2+)
+
+| Item | Scope | Priority |
+|------|-------|----------|
+| Event handler migration (`on:` → `onclick`) | ~2,980 occurrences | Phase 2 |
+| Hardcoded colors → design tokens | 166 files | Phase 3 |
+| Oversized components (>500 lines) | 74 files | Phase 4 |
+| Missing `alt` attributes | 28 instances, 15 files | Phase 4 |
+| Style block convention decision | 3 competing patterns | Phase 4 |
+| Documentation approach standardization | ~300 undocumented files | Phase 4 |
+
+---
+
 ## What's Working Well
 
 - **Svelte 5 rune adoption: ~96%** — impressive for a large codebase

@@ -4,7 +4,7 @@
 
   Usage:
   <VineyardLayout tool="amber" tagline="Your files, preserved" status="preview">
-    <slot />
+    Content goes here
   </VineyardLayout>
 -->
 <script lang="ts">
