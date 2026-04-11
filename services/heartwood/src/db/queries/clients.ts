@@ -1,5 +1,6 @@
 import { safeParseJson } from "@autumnsgrove/lattice/utils";
 import type { Client, D1DatabaseOrSession } from "../../types.js";
+import { type Subdomain, validateSubdomain } from "../../types/branded.js";
 
 const WILDCARD_CLIENTS: Record<string, { pattern: RegExp; baseDomain: string }> = {
 	// NOTE: "groveengine" is a legacy client_id baked into D1 production data,
@@ -12,21 +13,26 @@ const WILDCARD_CLIENTS: Record<string, { pattern: RegExp; baseDomain: string }> 
 	},
 };
 
+// Returns a format-validated Subdomain, not a confirmed tenant. Pair with isActiveTenant().
 export function extractSubdomainFromRedirectUri(
 	clientId: string,
 	redirectUri: string,
-): string | null {
+): Subdomain | null {
 	const config = WILDCARD_CLIENTS[clientId];
 	if (!config) return null;
 
 	const match = redirectUri.match(config.pattern);
-	return match ? match[1].toLowerCase() : null;
+	if (!match) return null;
+
+	// Funnel through the validator so it stays the only way to make a Subdomain.
+	return validateSubdomain(match[1]);
 }
 
-export async function isActiveTenant(engineDb: D1Database, subdomain: string): Promise<boolean> {
+// Takes a Subdomain so unvalidated strings can't reach the query (compile error).
+export async function isActiveTenant(engineDb: D1Database, subdomain: Subdomain): Promise<boolean> {
 	const result = await engineDb
 		.prepare("SELECT 1 FROM tenants WHERE subdomain = ? AND active = 1")
-		.bind(subdomain.toLowerCase())
+		.bind(subdomain)
 		.first<{ 1: number }>();
 	return result !== null;
 }

@@ -16,6 +16,47 @@ The core insight: **cheap AI attempts + an incorruptible verifier = reliable out
 
 -----
 
+## Where Grove Already Stands (Status as of 2026-04-11)
+
+Grove is not starting from zero on this. When I first wrote this doc I wasn't aware how much of the verification stack had already been built — and then we audited and found it's probably 60% of the way there. The layers below are the actual state.
+
+> **Freshness note:** the "Already in place" list below is a snapshot from April 2026 and has not been re-audited since (hook sizes, package counts and dependency versions may have drifted). The Heartwood pilot was re-applied onto current main on 2026-11-20.
+
+### Already in place
+
+- **Pre-commit hook** — `.githooks/pre-commit` (473 lines) runs a layered gate: Prettier, ESLint, `tsc --noEmit`, CSRF `fetch()` check, engine barrel export check, Prism icon gateway enforcement, barrel-cascade detection. A single failure blocks the commit. **This is Layer 4 running at the commit boundary, already.**
+- **Pre-push hook** — `.githooks/pre-push` runs lockfile-sync + parallel type-checks across packages before any push.
+- **CI gate with PR comments** — commit `7bcf3ad` adds PR comments when lint or CI gate fails.
+- **Rootwork** — `AgentUsage/rootwork_type_safety.md` documents the "validate at the boundary, trust inside the boundary" contract with four utilities (`parseFormData`, `safeJsonParse`, `createTypedCacheReader`, `isRedirect`/`isHttpError`). MANDATORY policy: no `as` casts, no unvalidated `JSON.parse`, no exceptions. **Layer 2 is already policy at the edge.**
+- **Zod 4** in every core package (`apps/*`, `libs/engine`, `services/heartwood`, `services/pulse`). Zod 3 still lives in four workers (`lumen`, `reverie`, `reverie-exec`, `warden`) pending migration.
+- **Vitest 4** across all 40 packages (commit `b00a9a8`).
+
+### What was actually missing
+
+| Layer | Status before | Gap |
+| ----- | ------------- | --- |
+| 1. Branded types | ❌ Not systematic | No `ValidatedSubdomain`, `SessionToken`, etc. All identifiers are plain `string`. |
+| 2. Runtime validators (Rootwork) | ✅ At HTTP edges | Internal boundaries — Worker ↔ D1, DO ↔ DO — still trust-by-default |
+| 3. Property-based testing | ❌ Not installed | No `fast-check`, no invariant-style tests |
+| 4. Verification loop | ✅ Pre-commit + pre-push + CI | Property tests not yet plugged into the pre-commit hook |
+
+### Phase 1 pilot — Heartwood `Subdomain` brand + property tests
+
+The first slice (built 2026-04-11, re-applied onto current main 2026-11-20) lives in `services/heartwood`:
+
+- **`services/heartwood/src/types/branded.ts`** — `Subdomain` branded type + `validateSubdomain()` constructor. Generic `Brand<T, B>` helper for future brands.
+- **`services/heartwood/src/db/queries/clients.ts`** — `extractSubdomainFromRedirectUri()` now returns `Subdomain | null`; `isActiveTenant()` accepts `Subdomain` and trusts its normalisation. Blast radius: 1 internal caller (`validateRedirectUriForClient`, same file). `db/queries.ts` is a barrel that re-exports these.
+- **`services/heartwood/src/db/queries.property.test.ts`** — 16 property tests with `fast-check` covering round-trips, idempotency, case-normalisation, oversized-string rejection, nested-subdomain attack rejection, protocol downgrade, and no-crash invariants.
+- **`fast-check ^4.6.0`** added as a devDependency in `services/heartwood`.
+
+All 35 existing queries tests still pass. The property tests run in 562ms. Typecheck is clean.
+
+This is the reference pattern — every other critical-path component that adopts verified development should follow this shape: branded type + constructor + property tests for invariants + retrofit the target function.
+
+-----
+
+-----
+
 ## Table of Contents
 
 - [Background: What Leanstral Taught Us](#background-what-leanstral-taught-us)
@@ -119,7 +160,7 @@ Now it's a **compile error** to pass an unvalidated string to `getConfig`. The t
 
 ### Layer 2: Runtime Validators at Every Boundary (Rootwork Extension)
 
-Rootwork already handles aggressive type checking at Grove's boundaries. This layer formalizes and extends that pattern using schema validators (Zod, Valibot, or equivalent) at **every point where data enters or exits a trust zone.**
+**Rootwork is already live policy.** See `AgentUsage/rootwork_type_safety.md` — the contract is "validate at the boundary, trust inside the boundary," with four utilities (`parseFormData`, `safeJsonParse`, `createTypedCacheReader`, `isRedirect`/`isHttpError`). MANDATORY: no `as` casts, no unvalidated `JSON.parse`. This document's job is to extend that pattern to the boundaries Rootwork doesn't cover yet — specifically the internal ones (D1 results, DO messages).
 
 **Trust boundaries in Grove's architecture:**
 
@@ -342,17 +383,17 @@ Any skill that involves code generation should reference this document's princip
 
 ## Priority Targets
 
-These Grove components should adopt verified development first, ranked by the severity of bugs in each:
+These Grove components should adopt verified development first, ranked by the severity of bugs in each. The "Status" column tracks real adoption.
 
-| Priority     | Component                          | Why                                      | Key Properties to Verify                                                   |
-| ------------ | ---------------------------------- | ---------------------------------------- | -------------------------------------------------------------------------- |
-| 🔴 Critical  | **Heartwood** (auth)               | Auth bugs = security incidents           | Session round-trip, token validation idempotency, tenant isolation          |
-| 🔴 Critical  | **Envelope encryption** (KEK/DEK)  | Crypto bugs = data exposure              | Encrypt/decrypt round-trip, key isolation per tenant, no plaintext leakage  |
-| 🔴 Critical  | **Warden** (API gateway)           | Gateway bugs = unauthorized access       | Challenge-response validity, rate limit enforcement, route authorization    |
-| 🟡 High      | **Thorn** (content moderation)     | Moderation gaps = harmful content served | Flagged content never appears in feeds, false-positive rate bounded         |
-| 🟡 High      | **Rootwork** (boundary validation) | Validation gaps = injection/corruption   | Invalid input always rejected, valid input always accepted                  |
-| 🟢 Standard  | **Loom DOs** (coordination)        | Coordination bugs = data inconsistency   | Message ordering, state convergence, no lost updates                        |
-| 🟢 Standard  | **Amber** (storage)                | Storage bugs = data loss                 | Upload/download round-trip, metadata consistency                            |
+| Priority     | Component                          | Why                                      | Status                                                                      |
+| ------------ | ---------------------------------- | ---------------------------------------- | --------------------------------------------------------------------------- |
+| 🔴 Critical  | **Heartwood** (auth)               | Auth bugs = security incidents           | 🟡 Pilot live — `Subdomain` brand + 16 property tests on redirect parsing. Next: `SessionToken` brand + round-trip properties on `parseSessionCookie`. |
+| 🔴 Critical  | **Envelope encryption** (KEK/DEK)  | Crypto bugs = data exposure              | ⚪ Not started — encrypt/decrypt round-trip, per-tenant key isolation, no plaintext leakage |
+| 🔴 Critical  | **Warden** (API gateway)           | Gateway bugs = unauthorized access       | ⚪ Not started — challenge-response validity, rate limit enforcement, route authorization |
+| 🟡 High      | **Thorn** (content moderation)     | Moderation gaps = harmful content served | ⚪ Not started — flagged content never appears in feeds, false-positive rate bounded |
+| 🟡 High      | **Rootwork** (boundary validation) | Validation gaps = injection/corruption   | 🟢 Edge done — needs internal-boundary extension (D1 results, DO messages) |
+| 🟢 Standard  | **Loom DOs** (coordination)        | Coordination bugs = data inconsistency   | ⚪ Not started — message ordering, state convergence, no lost updates       |
+| 🟢 Standard  | **Amber** (storage)                | Storage bugs = data loss                 | ⚪ Not started — upload/download round-trip, metadata consistency           |
 
 -----
 
@@ -371,12 +412,13 @@ If you are an agent working in the Grove codebase, follow these rules:
 
 ## Future Directions
 
-### Near-Term (Actionable Now)
+### Near-Term (Next concrete steps after the Heartwood pilot)
 
-- Adopt `fast-check` in Grove's test suite for critical paths
-- Introduce branded types systematically, starting with Heartwood and encryption
-- Extend Rootwork patterns to internal boundaries (Worker ↔ D1, DO ↔ DO)
-- Update Frog Cycle skill to reference this document's Phase 1 specification step
+- **Extend the Heartwood brand kit** — add `SessionToken`, `ClientId`, `UserId`, `VerifiedEmail`. Most valuable is `SessionToken` because `parseSessionCookie()` has the richest invariants to verify (encrypt/decrypt round-trip, format tolerance, tamper rejection).
+- **Extend Rootwork to internal boundaries** — new `parseD1Result(schema, row)` utility and `parseDOMessage(schema, payload)` utility. Keep the existing Rootwork philosophy ("validate at the boundary, trust inside"), just apply it at more boundaries. This is the specific piece you said you liked — it's a natural extension, not a new pattern.
+- **Install `fast-check` in the other critical services** — encryption lives in `libs/engine` or a shared utility; add there next. Warden and Thorn after.
+- **Add a property-test step to `.githooks/pre-push`** — once a handful of critical services have property tests, make them gate pushes too. Pre-commit stays lean; pre-push is where property tests belong (slower, run less often).
+- **Update Frog Cycle skill** — one-paragraph addition to its red-phase instructions: "also write branded types and property tests, not just unit tests." The skill already does TDD; this just sharpens the spec.
 
 ### Medium-Term (Watch and Evaluate)
 
