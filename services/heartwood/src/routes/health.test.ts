@@ -28,7 +28,8 @@ function createApp() {
 	return app;
 }
 
-const mockEnv = createMockEnv();
+const SERVICE_SECRET = "test-service-secret-value";
+const mockEnv = createMockEnv({ SERVICE_SECRET });
 
 beforeEach(() => {
 	vi.clearAllMocks();
@@ -100,7 +101,11 @@ describe("GET /health/replication", () => {
 		vi.mocked(createDbSession).mockReturnValue(mockDb as any);
 
 		const app = createApp();
-		const res = await app.request("/health/replication", { method: "GET" }, mockEnv);
+		const res = await app.request(
+			"/health/replication",
+			{ method: "GET", headers: { Authorization: `Bearer ${SERVICE_SECRET}` } },
+			mockEnv,
+		);
 
 		expect(res.status).toBe(200);
 		const json: any = (await res.json()) as any;
@@ -120,10 +125,46 @@ describe("GET /health/replication", () => {
 		vi.mocked(createDbSession).mockReturnValue(mockDb as any);
 
 		const app = createApp();
-		const res = await app.request("/health/replication", { method: "GET" }, mockEnv);
+		const res = await app.request(
+			"/health/replication",
+			{ method: "GET", headers: { Authorization: `Bearer ${SERVICE_SECRET}` } },
+			mockEnv,
+		);
 
 		expect(res.status).toBe(500);
 		const json: any = (await res.json()) as any;
 		expect(json.status).toBe("error");
+	});
+
+	it("rejects requests with no Authorization header", async () => {
+		const app = createApp();
+		const res = await app.request("/health/replication", { method: "GET" }, mockEnv);
+
+		expect(res.status).toBe(401);
+		expect(createDbSession).not.toHaveBeenCalled();
+	});
+
+	it("rejects requests with an incorrect service secret", async () => {
+		const app = createApp();
+		const res = await app.request(
+			"/health/replication",
+			{ method: "GET", headers: { Authorization: "Bearer wrong-secret" } },
+			mockEnv,
+		);
+
+		expect(res.status).toBe(401);
+		expect(createDbSession).not.toHaveBeenCalled();
+	});
+
+	it("fails closed when SERVICE_SECRET is unset, even with a correctly-shaped Bearer header", async () => {
+		const app = createApp();
+		const envWithoutSecret = createMockEnv({ SERVICE_SECRET: undefined });
+		const res = await app.request(
+			"/health/replication",
+			{ method: "GET", headers: { Authorization: "Bearer " } },
+			envWithoutSecret,
+		);
+
+		expect(res.status).toBe(401);
 	});
 });
