@@ -2,9 +2,9 @@
 
 Start here next time. The Plant local-dev/signup handoff from 2026-08-24 is
 fully closed out (see "Previous handoff, closed" below). This doc also
-covers a slice of the chunk-by-chunk code review sweep tracked in
-**GH #1583** that got finished within this same session — see
-"Slice completed this session" below for what's left to pick up next.
+covers two slices of the chunk-by-chunk code review sweep tracked in
+**GH #1583** finished across this and the prior session — see
+"Slices completed" below for what's left to pick up next.
 
 ## Where the audit stands
 
@@ -82,44 +82,66 @@ fixes in commit `6b0044428`:
   name is reused/ambiguous if it comes up again elsewhere in the sweep.
 - 632/632 tests passing (up from 629), typecheck and lint clean.
 
-## Next slice, planned and confirmed: `services/heartwood/src/middleware`
+## Slice completed this session: `services/heartwood/src/middleware`
 
-The issue's own loc counts for the two remaining `heartwood` sub-chunks
-(`db`+`middleware` at "4.1k", `lib`+`services`+`durables`+`auth`+`utils` at
-"4.6k") are stale — from 2026-08-28. Rescoped `db`+`middleware` with real
-counts before picking a next slice:
+All 6 files reviewed (bearerAuth, cookieAuth, cors, csrf, rateLimit,
+security). Findings posted to
+[issue comment](https://github.com/AutumnsGrove/Lattice/issues/1583#issuecomment-5589192521):
 
-| Area | Files | Source LOC | Test coverage |
-|---|---|---|---|
-| `middleware/` | 6 (cors, csrf, bearerAuth, cookieAuth, rateLimit, security) | 826 | **`cookieAuth.ts` has zero tests** — despite being one of the admin-check paths already flagged twice (`admin.ts`, and the "who is an admin" unification note) |
-| `db/queries/` | 10 (users, sessions, auth-flow, admin, subscriptions, clients, device-codes, audit, rate-limiting, index) | 1,514 | **Zero test files across the entire directory** — routes only exercise it indirectly through mocked `createDbSession` |
-| `db/session.ts` + `db/auth.schema.ts` | 2 | 278 | covered via `queries.test.ts` |
-| `db/queries.ts` | — | 104 | just a re-export barrel (`export { ... } from "./queries/index.js"`) — no logic, skip entirely |
-| `db/migrations/` | SQL | 587 | schema-correctness lens, not a code review target — lower priority, handle separately if at all |
+- **HIGH** — `cookieAuth.ts`'s `adminCookieAuth()` never checked ban status
+  on any of its 3 auth paths (Bearer, `grove_session`→SessionDO, `access_token`
+  cookie fallback) — `isUserAdmin` only checks `is_admin`/Wayfinder email, not
+  `ba_user.banned`. Same bug class as `user.ts`'s L-2 finding two chunks ago,
+  but that fix stayed local to `user.ts` and never propagated here. A banned
+  admin's still-valid credential kept full `/admin/*` access. Fixed by
+  extracting `isUserBanned` out of `user.ts` into `db/queries/admin.ts`
+  (shared, exported via barrel) and calling it on all 3 paths in
+  `cookieAuth.ts` before the admin check.
+- **LOW** — Path 3's cookie read used an unanchored regex
+  (`/access_token=([^;]+)/`), matchable as a substring inside any cookie name
+  ending in `access_token=`. Not currently exploitable (no colliding cookie
+  name exists in the repo) but the exact-match `parseCookieHeader` helper
+  already exists for this reason — switched to it, added a regression test.
+- **LOW** — `cors.ts` had no `Vary: Origin` on its dynamic per-origin CORS
+  response. Confirmed non-exploitable today (no caching layer anywhere in
+  the worker) but added as standard hardening.
+- `bearerAuth.ts`, `csrf.ts`, `rateLimit.ts`, `security.ts` — no findings,
+  already well-tested.
+- **Noted, not fixed**: `adminCookieAuth()` has no CSRF/Origin check wired
+  in — moot today since its only caller (`admin.ts`) is GET-only, but a
+  latent risk if a mutating admin route is ever added under the same
+  `admin.use("/*", adminCookieAuth())` pattern.
+- Added `cookieAuth.test.ts` (15 tests, was zero coverage). 644/644 tests
+  passing (up from 632), typecheck and lint clean.
 
-**Decision (confirmed with Autumn 2026-09-08): `middleware/` next.** Reasoning:
-it's the tightest, highest-blast-radius unit — every request passes through
-some subset of these 6 files — and it directly continues the "who
-determines admin/auth" thread from the `admin.ts` and `betterAuth.ts`
-findings. `db/queries/` is bigger raw risk (zero tests on the entire SQL
-layer) but 1,514 loc needs splitting into two ~750-loc sub-slices when its
-turn comes — don't attempt it in one sitting.
+## Next slice, planned: `db/queries/`, split in two
 
-**After `middleware/`, in order:**
-1. `db/queries/` split in two — group A (identity/auth-flow: `users.ts`,
-   `auth-flow.ts`, `sessions.ts`, `device-codes.ts`, `clients.ts`, ~849 loc)
-   and group B (account/billing: `admin.ts`, `audit.ts`, `subscriptions.ts`,
-   `rate-limiting.ts`, ~603 loc; skip `index.ts`, it's a barrel).
-2. `db/session.ts` + `db/auth.schema.ts` (278 loc, small enough for one pass).
-3. `heartwood/src/lib` + `services` + `durables` + `auth` + `utils` (needs
-   its own real-size rescope when we get there — the "4.6k" figure is
-   equally stale).
+1,514 loc across `services/heartwood/src/db/queries/` — **zero test files
+across the entire directory**, routes only exercise it indirectly through
+mocked `createDbSession`. Per the split already scoped last session:
 
-Watch for the same recurring patterns flagged in the `routes/` sweep:
-logout/session-revocation gaps, the `users`/`ba_user` table split, and
-tests that mock away the auth check itself (check test files first — the
-`cookieAuth.ts` gap above is exactly this pattern, just with zero tests
-rather than a mocked-away one).
+- **Group A** (identity/auth-flow): `users.ts`, `auth-flow.ts`, `sessions.ts`,
+  `device-codes.ts`, `clients.ts` — ~849 loc.
+- **Group B** (account/billing): `admin.ts`, `audit.ts`, `subscriptions.ts`,
+  `rate-limiting.ts` — ~603 loc. Skip `index.ts`, it's a barrel.
+
+Do group A first — it's the auth-critical half and continues the "who is
+this user, which table backs them" thread from `user.ts`/`middleware/`.
+
+**After `db/queries/` (both groups):**
+1. `db/session.ts` + `db/auth.schema.ts` (278 loc, covered via
+   `queries.test.ts` already — small enough for one pass).
+2. `heartwood/src/lib` + `services` + `durables` + `auth` + `utils` (needs
+   its own real-size rescope when we get there — the issue's "4.6k" figure
+   is stale, same as `db`+`middleware`'s "4.1k" was).
+
+Watch for the same recurring patterns: logout/session-revocation gaps, the
+`users`/`ba_user` table split, tests that mock away the auth check itself,
+and now also **ban-check gaps on any auth path that doesn't route through
+the shared `isUserBanned`/`isUserAdmin` pair** — this is the third time
+this exact bug class has shown up (`user.ts`, then `cookieAuth.ts`), so
+check every raw `SELECT ... FROM users`/`ba_user` in `db/queries/` for
+whether it should be going through the shared helpers instead.
 
 Beyond `heartwood` entirely, the issue's next 🔴 security-critical items in
 priority order are `libs/grove-crypto` (884 loc), `libs/thorn` (2.9k loc),
@@ -130,17 +152,19 @@ rescoped yet either; verify with `wc -l` before committing to a slice size.
 
 1. Pull the issue fresh (`gh issue view 1583 --comments`) in case anything
    landed since this doc was written.
-2. Review `services/heartwood/src/middleware`'s 6 files (826 loc). Start
-   with `cookieAuth.ts` given its test-coverage gap, then the other 5.
+2. Review `db/queries/` group A first (`users.ts`, `auth-flow.ts`,
+   `sessions.ts`, `device-codes.ts`, `clients.ts`, ~849 loc) — no test files
+   exist for any of it yet, so budget time for writing coverage alongside
+   the review, not just fixing bugs.
 3. Fix what's found in the same session unless it's cross-cutting/needs
    sign-off (see `betterAuth.ts`'s CORS fix vs. `verify.ts`'s
    deliberately-flagged-not-fixed introspection auth gap for the pattern
    to follow).
 4. Comment on #1583 with findings + fixes, using the same structure prior
-   comments use (severity-grouped, "Deliberately not fixed" section if
+   comments use (severity-grouped, "Noted, not fixed" section if
    applicable, test coverage note, verification line, "Next:" pointer).
 5. The `services/heartwood` parent checkbox on the issue stays unchecked
-   until `db/queries/` (both sub-slices) and
+   until `db/queries/` group B and
    `lib`+`services`+`durables`+`auth`+`utils` are also done — check it once
    the last of those lands.
 

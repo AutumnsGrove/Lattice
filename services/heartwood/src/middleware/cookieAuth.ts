@@ -10,11 +10,16 @@
 import type { Context, Next } from "hono";
 import type { Env } from "../types.js";
 import { verifyAccessToken } from "../services/jwt.js";
-import { isUserAdmin } from "../db/queries.js";
+import { isUserAdmin, isUserBanned } from "../db/queries.js";
 import { createDbSession } from "../db/session.js";
 import { extractBearerToken } from "./bearerAuth.js";
-import { getSessionFromRequest } from "../lib/session.js";
+import { getSessionFromRequest, parseCookieHeader } from "../lib/session.js";
 import type { SessionDO } from "../durables/SessionDO.js";
+
+const UNAUTHORIZED = {
+	error: "unauthorized",
+	error_description: "Missing or invalid credentials",
+} as const;
 
 /**
  * Admin auth middleware that supports:
@@ -41,6 +46,10 @@ export function adminCookieAuth() {
 			}
 
 			const db = createDbSession(c.env);
+			if (await isUserBanned(db, payload.sub)) {
+				return c.json(UNAUTHORIZED, 401);
+			}
+
 			const isAdmin = await isUserAdmin(db, payload.sub);
 			if (!isAdmin) {
 				return c.json({ error: "forbidden", error_description: "Admin access required" }, 403);
@@ -63,6 +72,10 @@ export function adminCookieAuth() {
 
 			if (result.valid) {
 				const db = createDbSession(c.env);
+				if (await isUserBanned(db, parsedSession.userId)) {
+					return c.json(UNAUTHORIZED, 401);
+				}
+
 				// Single definition of "who is an admin" (isUserAdmin) — this
 				// path previously re-implemented the check inline, which is
 				// exactly the kind of duplication that can silently drift from
@@ -77,15 +90,23 @@ export function adminCookieAuth() {
 			}
 		}
 
-		// Path 3: Fallback to access_token cookie (JWT)
-		const cookieHeader = c.req.header("Cookie") || "";
-		const accessTokenMatch = cookieHeader.match(/access_token=([^;]+)/);
+		// Path 3: Fallback to access_token cookie (JWT). Exact key lookup via
+		// parseCookieHeader, not a substring regex — an unanchored regex would
+		// match inside any cookie name that merely ends in "access_token=",
+		// which any *.grove.place subdomain can set (see parseCookieHeader's
+		// doc comment in lib/session.ts).
+		const cookies = parseCookieHeader(c.req.header("Cookie") ?? null);
+		const accessTokenCookie = cookies["access_token"];
 
-		if (accessTokenMatch) {
-			const payload = await verifyAccessToken(c.env, accessTokenMatch[1]);
+		if (accessTokenCookie) {
+			const payload = await verifyAccessToken(c.env, accessTokenCookie);
 
 			if (payload?.sub) {
 				const db = createDbSession(c.env);
+				if (await isUserBanned(db, payload.sub)) {
+					return c.json(UNAUTHORIZED, 401);
+				}
+
 				const isAdmin = await isUserAdmin(db, payload.sub);
 				if (isAdmin) {
 					return next();
@@ -95,12 +116,6 @@ export function adminCookieAuth() {
 			}
 		}
 
-		return c.json(
-			{
-				error: "unauthorized",
-				error_description: "Missing or invalid credentials",
-			},
-			401,
-		);
+		return c.json(UNAUTHORIZED, 401);
 	};
 }

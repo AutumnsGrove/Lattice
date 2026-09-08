@@ -83,7 +83,14 @@ export {
 } from "./subscriptions.js";
 
 // Admin
-export { isEmailAdmin, isUserAdmin, getAdminStats, getAllUsers, getAuditLogs } from "./admin.js";
+export {
+	isEmailAdmin,
+	isUserAdmin,
+	isUserBanned,
+	getAdminStats,
+	getAllUsers,
+	getAuditLogs,
+} from "./admin.js";
 
 // Device Codes (RFC 8628)
 export {

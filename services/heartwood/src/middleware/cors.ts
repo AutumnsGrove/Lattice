@@ -69,6 +69,10 @@ function getCorsHeaders(origin: string | undefined, isLocalDev: boolean): Record
 		"Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
 		"Access-Control-Allow-Headers": "Content-Type, Authorization",
 		"Access-Control-Max-Age": "86400",
+		// Allow-Origin varies per-request (echoed from an allowlist check), so
+		// any cache sitting in front of this worker must key on Origin too —
+		// otherwise a response cached for one origin could be served to another.
+		Vary: "Origin",
 	};
 
 	if (

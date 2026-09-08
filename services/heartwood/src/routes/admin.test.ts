@@ -17,6 +17,7 @@ vi.mock("../db/queries.js", () => ({
 	checkRateLimit: vi.fn(),
 	// cookieAuth dependencies
 	isUserAdmin: vi.fn(),
+	isUserBanned: vi.fn(),
 }));
 
 // Mock db session
@@ -62,6 +63,7 @@ import {
 	getAuditLogs,
 	getAllClients,
 	isUserAdmin,
+	isUserBanned,
 } from "../db/queries.js";
 import { verifyAccessToken } from "../services/jwt.js";
 
@@ -92,6 +94,7 @@ beforeEach(() => {
 	// individual tests override this to exercise the other outcomes.
 	vi.mocked(verifyAccessToken).mockResolvedValue(ADMIN_TOKEN_PAYLOAD);
 	vi.mocked(isUserAdmin).mockResolvedValue(true);
+	vi.mocked(isUserBanned).mockResolvedValue(false);
 });
 
 // =============================================================================
