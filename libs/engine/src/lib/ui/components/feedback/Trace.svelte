@@ -147,6 +147,12 @@
 			<span class={cn(sizeClasses.prompt, "font-medium")}> Thanks for your feedback! </span>
 		</div>
 	{:else}
+		<noscript>
+			<p class={cn(sizeClasses.prompt, "text-muted-foreground text-center")}>
+				Enable JavaScript to leave feedback — these buttons need it to record your vote.
+			</p>
+		</noscript>
+
 		<!-- Prompt -->
 		<p class={cn(sizeClasses.prompt, "text-muted-foreground text-center")}>
 			{prompt}
