@@ -97,6 +97,7 @@
 				{@const IconComponent = header.icon && isValidIcon(header.icon) ? header.icon : null}
 				<li
 					class="toc-item level-{header.level ?? 2}"
+					style:--toc-depth={header.depth ?? 0}
 					class:active={activeId === header.id}
 					class:has-icon={!!IconComponent}
 				>
@@ -211,25 +212,12 @@
 		color: var(--grove-accent);
 		background: var(--grove-accent-10);
 	}
-	/* Indentation based on header level */
+	/* Indentation follows nesting depth (half-rem steps), not raw heading level */
+	.toc-item .toc-link {
+		padding-left: calc(var(--toc-depth, 0) * 0.5rem);
+	}
 	.level-1 .toc-link {
-		padding-left: 0;
 		font-weight: 600;
-	}
-	.level-2 .toc-link {
-		padding-left: 0;
-	}
-	.level-3 .toc-link {
-		padding-left: 1rem;
-	}
-	.level-4 .toc-link {
-		padding-left: 2rem;
-	}
-	.level-5 .toc-link {
-		padding-left: 3rem;
-	}
-	.level-6 .toc-link {
-		padding-left: 4rem;
 	}
 	/* Scrollbar styling - hidden by default, visible on hover */
 	.toc {

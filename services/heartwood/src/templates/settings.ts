@@ -356,7 +356,7 @@ export function getSettingsPageHTML(options: SettingsPageOptions): string {
     <div class="card">
       <div class="user-info">
         <div class="avatar">
-          ${user.image ? `<img src="${escapeHtml(user.image)}" alt="Avatar">` : (user.name?.[0] || user.email[0]).toUpperCase()}
+          ${user.image ? `<img src="${escapeHtml(user.image)}" alt="Avatar">` : escapeHtml((user.name?.[0] || user.email[0]).toUpperCase())}
         </div>
         <div class="user-details">
           <h2>${escapeHtml(user.name || "User")}</h2>

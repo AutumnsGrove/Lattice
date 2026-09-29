@@ -85,6 +85,7 @@ export {
 	// Admin
 	isEmailAdmin,
 	isUserAdmin,
+	isUserBanned,
 	getAdminStats,
 	getAllUsers,
 	getAuditLogs,

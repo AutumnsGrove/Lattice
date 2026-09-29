@@ -12,6 +12,27 @@ export async function isUserAdmin(db: D1DatabaseOrSession, userId: string): Prom
 	return user.is_admin === 1 || isEmailAdmin(user.email);
 }
 
+/**
+ * SessionDO.validateSession and verifyAccessToken only check expiry/
+ * signature — neither has visibility into ban status, unlike the Better
+ * Auth fallback path (which does check banned/ban_expires). Since
+ * 0002_migrate_users.sql gave every pre-migration `users` row a matching
+ * `ba_user` row too, `ba_user` is a ban-status superset covering both auth
+ * sources, so a single check here closes the gap for every caller of
+ * isUserAdmin without needing a second table. Moved here (from a
+ * user.ts-local helper) so admin-auth callers like middleware/cookieAuth.ts
+ * can share it — isUserAdmin alone does not check ban status.
+ */
+export async function isUserBanned(db: D1DatabaseOrSession, userId: string): Promise<boolean> {
+	const row = await db
+		.prepare("SELECT banned, ban_expires FROM ba_user WHERE id = ?")
+		.bind(userId)
+		.first<{ banned: number | null; ban_expires: number | null }>();
+	if (!row?.banned) return false;
+	if (row.ban_expires && row.ban_expires * 1000 < Date.now()) return false; // ban expired
+	return true;
+}
+
 export async function getAdminStats(
 	db: D1DatabaseOrSession,
 	engineDb?: D1Database,

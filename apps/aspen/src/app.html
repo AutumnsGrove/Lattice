@@ -58,7 +58,9 @@
 	<body data-sveltekit-preload-data="hover">
 		<!-- Grove Entrance — warm loading overlay before SvelteKit hydrates.
          Pure HTML+CSS so it paints on first frame, no JS required.
-         Dismissed by root +layout.svelte onMount (see grove-entrance-dismiss). -->
+         Dismissed by root +layout.svelte onMount (see grove-entrance-dismiss).
+         With JS disabled, the <noscript> block below hides it instead, since
+         nothing will ever add .ge-hidden. -->
 		<div id="grove-entrance" aria-hidden="true">
 			<div class="ge-backdrop"></div>
 			<div class="ge-content">
@@ -110,6 +112,13 @@
 				></div>
 			</div>
 		</div>
+		<noscript>
+			<style>
+				#grove-entrance {
+					display: none;
+				}
+			</style>
+		</noscript>
 		<style>
 			/* Grove Entrance — inline styles for pre-hydration loading overlay */
 			#grove-entrance {

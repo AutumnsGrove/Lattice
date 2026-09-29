@@ -94,6 +94,12 @@
 	}
 </script>
 
+<noscript>
+	<p class="reeds-noscript-notice">
+		Enable JavaScript to {parentId ? "reply" : "leave a comment"} — this form can't submit without it.
+	</p>
+</noscript>
+
 <form class="reeds-form" class:compact onsubmit={handleSubmit}>
 	{#if !compact}
 		<h3 class="form-heading">Leave a thought</h3>
@@ -166,6 +172,21 @@
 </form>
 
 <style>
+	.reeds-noscript-notice {
+		margin: 0 0 0.75rem 0;
+		padding: 0.75rem 1rem;
+		font-size: 0.85rem;
+		color: var(--color-text-muted, #888);
+		background: var(--grove-overlay-8, rgba(0, 0, 0, 0.04));
+		border: 1px solid var(--grove-border-subtle, rgba(0, 0, 0, 0.12));
+		border-radius: 8px;
+	}
+
+	:global(.dark) .reeds-noscript-notice {
+		color: var(--grove-text-muted, #999);
+		border-color: rgba(255, 255, 255, 0.1);
+	}
+
 	.reeds-form {
 		padding: 1.25rem;
 		background: var(--glass-bg, rgba(255, 255, 255, 0.7));

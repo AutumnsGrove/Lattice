@@ -1,187 +1,203 @@
-# Handoff — Plant local dev + signup flow (2026-08-24)
+# Handoff — Code review sweep, next slice (2026-09-08)
 
-Start here tomorrow. This describes what got built, what got fixed, what's
-still unverified, and what to expect from Autumn's next pass (a wave of
-small UI/UX polish notes on the signup flow itself, now that it's actually
-testable).
+Start here next time. The Plant local-dev/signup handoff from 2026-08-24 is
+fully closed out (see "Previous handoff, closed" below). This doc also
+covers two slices of the chunk-by-chunk code review sweep tracked in
+**GH #1583** finished across this and the prior session — see
+"Slices completed" below for what's left to pick up next.
 
-## Why this session happened
+## Where the audit stands
 
-Autumn wanted to polish the Plant signup flow (landing → profile → plans →
-success) but had no way to run it locally — Plant and Landing were never
-wired into `scripts/dev-stack.sh`, and Google OAuth can't be exercised
-offline. The ask: a local demo-mode bypass (click a button, get a
-placeholder email, walk the real signup code paths) mirroring the
-`DEMO_MODE_SECRET` pattern Aspen already has for Arbor.
+GH #1583 ("Targeted code review sweep: chunk-by-chunk across the monorepo")
+is the live source of truth — not `docs/audits/stability-audit-plan.md`
+(untracked, dated 2026-05-20, a much bigger abandoned 30-slice "read every
+file" plan). Ignore that file; don't let it get committed or confused with
+the real tracker.
 
-That surfaced three real, previously-invisible bugs — not local-only
-quirks, actual defects that were blocking anyone from ever exercising this
-flow outside production. All are now fixed and merged into both `main` and
-`beta`.
+**Done so far** (11 comments on the issue, chronological):
 
-## What's committed (main + beta, both pushed and in sync)
+1. `services/grove-router` (338 loc) — clean.
+2. `services/heartwood/src/routes` — 10 of 13 files reviewed:
+   - `session.ts`, `token.ts`, `device.ts`, `cdn.ts` — reviewed, fixed.
+   - `subscription.ts` — **2 CRITICAL** (self-serve tier upgrade + `count`
+     paywall bypass), both fixed. Tests had been asserting the vulnerable
+     behavior as correct.
+   - `admin.ts` — HIGH (NaN pagination bound dumped entire users table),
+     fixed.
+   - `status.ts` — **deleted**, not fixed. 20 issues found (2 HIGH, 6
+     MEDIUM, 12 LOW) but zero production callers — traced every reference,
+     confirmed dead, removed rather than hardened.
+   - `betterAuth.ts` — HIGH x3: sign-out never cleared `grove_session`,
+     2FA bridge used the pre-verification session (one config flag from a
+     live bypass), CORS wildcard on `*.grove.place` closed.
+   - `user.ts` — HIGH: avatar/preference writes silently no-op'd for
+     Better-Auth-only accounts (`users` vs `ba_user` table split), fixed.
+   - `verify.ts` — HIGH: `/logout` only revoked refresh tokens, never
+     SessionDO/Better Auth/D1 sessions or cookies. Same bug class as
+     `betterAuth.ts`'s sign-out gap. Fixed; also wired up a fully-built
+     rate limiter nobody had imported.
 
-1. **`feat(plant): local demo-mode signup bypass + dev-stack wiring`**
-   (`c6790130c` on main)
-   - `apps/plant/src/routes/auth/demo/+server.ts` — dev-only endpoint,
-     gated behind `DEMO_MODE_SECRET` (unset/inert in production). Reuses
-     the *real* `resolveOnboarding`/`upsertOnboarding` functions from the
-     OAuth callback service, so a demo signup produces an identical
-     `user_onboarding` row to a real Google sign-in — just with a
-     generated `demo+<id>@grove.place` email instead of a Google identity.
-   - "Skip sign-in (Dev Mode)" button on Plant's homepage.
-   - Green `DemoBadge` chip (reused from Aspen's component) shown in
-     Plant's header throughout the flow while demo mode is active — same
-     `grove_demo_mode` cookie mechanism as Aspen.
-   - `scripts/dev-stack.sh`: Plant (port 5175) and Landing (port 5174) now
-     run as their own `wrangler dev` processes (like Heartwood already
-     does), sharing Aspen's local D1/KV via `--persist-to`. Landing's
-     build failure is now a warning, not a hard stop — see "Known issue:
-     Landing" below.
+**Recurring patterns across this whole sweep, worth watching for in
+upcoming files:**
+- **Logout/session revocation gaps** — two separate route files each only
+  revoked *one* of the several session mechanisms in play (SessionDO,
+  Better Auth, legacy D1, refresh tokens, cookies). Check any
+  session-touching code in `health.ts`/`settings.ts`/`login.ts` for the
+  same shape.
+- **`users` vs `ba_user` split** — the Better Auth migration left two user
+  identity tables; several files silently assumed one or the other.
+  `settings.ts` is called out in the `user.ts` writeup as hitting the same
+  duplication — expect to find it there too.
+- **Tests mocking away the auth check itself** — the single most common
+  root cause of a shipped bug surviving review. `admin.ts` and
+  `betterAuth.ts` both had suites that mocked auth to an unconditional
+  pass, meaning zero 401/403 assertions existed. Check this first in each
+  new file's test suite before reading the route logic.
+- **CORS wildcard on `*.grove.place`** — already closed in `cors.ts`
+  itself, but worth a quick re-check anywhere a file references CORS
+  directly instead of the shared middleware.
 
-2. **`perf(shade): use global wrangler instead of npx in dev-stack.sh`**
-   (`53051509b`)
-   - Swapped all `npx wrangler` → bare `wrangler` (repo pins `^4.76.0`;
-     Autumn's global install was upgraded to 4.125.0 to match). Full
-     stack boot went from ~6 minutes to ~100 seconds.
+## Slice completed this session: `health.ts` + `settings.ts` + `login.ts`
 
-3. **`fix(plant): local wrangler dev CSRF + Wanderer tenant creation bugs`**
-   (`f0edc63f3`) — **the big one, two real bugs:**
+Closes out `services/heartwood/src/routes` (13/13 files now reviewed).
+Findings posted to
+[issue comment](https://github.com/AutumnsGrove/Lattice/issues/1583#issuecomment-5589019489),
+fixes in commit `6b0044428`:
 
-   - **CSRF blocked every state-changing POST locally.** `wrangler dev`
-     simulates Plant/Landing's production route (`plant.grove.place/*`
-     from `wrangler.toml`) by rewriting the `Host`/`Origin` headers the
-     app sees to the production hostname, over plain HTTP. Plant's CSRF
-     check (`validateCSRF` in `libs/engine/src/lib/utils/csrf.ts`)
-     correctly requires HTTPS for any non-localhost origin, so profile
-     save, plan selection, etc. all 403'd with a generic "Cross-site
-     request blocked" — which the client then displayed as an even more
-     generic "Something went wrong. Please try again." (see
-     `apps/plant/src/lib/submit-form.ts:69`, the fallback used when a
-     response has no `.error` field).
-     **Fix:** `--local-upstream localhost` on Plant and Landing's
-     `wrangler dev` invocations in `dev-stack.sh`. Also pinned explicit
-     `--inspector-port` per process (9229/9230/9231/9232) — without it,
-     processes starting close together intermittently fail to bind with
-     `Address already in use`.
+- **MEDIUM** — `GET /health/replication` was unauthenticated and leaked D1
+  replication internals (region, row counts, query duration, session
+  bookmark) to any caller. Gated behind the existing fail-closed
+  `SERVICE_SECRET` pattern (matches `session.ts`/`subscription.ts`). Base
+  `/health` stays open — Clearing's uptime monitor depends on it.
+- **LOW** — both health handlers swallowed caught DB errors with zero
+  logging; added `console.error`. `settings.ts`'s template had one
+  unescaped character (avatar-initial fallback) among otherwise-consistent
+  `escapeHtml` usage; not exploitable, fixed for consistency.
+- `login.ts` — no findings. Simple hardcoded-host redirect, no open-redirect
+  surface, existing test coverage already solid.
+- The `settings.ts` file turned out to just be an unauthenticated
+  HTML-render route (login prompt vs. account page) — it does **not**
+  actually hit the `users`/`ba_user` split predicted from `user.ts`'s
+  writeup. That prediction didn't pan out; worth remembering this file
+  name is reused/ambiguous if it comes up again elsewhere in the sweep.
+- 632/632 tests passing (up from 629), typecheck and lint clean.
 
-   - **Wanderer (free tier) tenant creation was broken everywhere except
-     production.** `tenants.plan` and `platform_billing.plan` both have
-     `CHECK` constraints that never got `'wanderer'` added when the free
-     tier was renamed from `'free'`. Migrations `111`/`112` documented
-     this exact bug back in April but shipped as no-ops — the original
-     fix attempt assumed `PRAGMA foreign_keys=OFF` would let a
-     rename-and-recreate migration through; it doesn't (D1 wraps a
-     migration file in one implicit transaction, so the pragma is a
-     no-op), and `tenants` has 27 dependent tables via FK, so the
-     original author correctly bailed rather than risk it. Someone hand-
-     patched **production** directly, outside migration history — so this
-     only ever blocked *fresh* database bootstraps (local dev, CI, any
-     future prod rebuild from migration history alone).
-     **Fix:** migrations `116`/`117`. Two SQLite tricks were tried and
-     ruled out first (`PRAGMA foreign_keys=OFF` — no-op mid-transaction;
-     `PRAGMA writable_schema` direct edit — D1 rejects with
-     `SQLITE_AUTH`). What actually works: build the corrected table under
-     a temp name, copy data in, drop the original, rename the temp table
-     into the vacated name — the 27 dependent tables keep referencing the
-     unchanged literal name `"tenants"` throughout, so their FK clauses
-     never need touching. **Verified twice**: once against the live
-     session DB, once from a completely fresh `dev-stack.sh reset`
-     bootstrap. `PRAGMA foreign_key_check` came back clean (zero
-     violations) both times.
+## Slice completed this session: `services/heartwood/src/middleware`
 
-4. **`fix(plant): tenant blog/admin links point at live grove.place in
-   local dev`** (`4c8657122`) — found by Autumn clicking through live.
-   - The "Visit My Blog" / "go to your admin dashboard" links on
-     `success`, `tour`, and `comped` were hardcoded to
-     `https://{subdomain}.grove.place`. Locally that's the *real*
-     production site, which has never heard of a locally-created demo
-     tenant — clicking through silently bounced to a real
-     `login.grove.place` flow instead of the local Aspen instance being
-     tested.
-   - **Fix:** new `apps/plant/src/lib/tenant-url.ts` — shared
-     `buildBlogUrl`/`buildAdminUrl` helpers that branch on
-     `localhost`/`127.0.0.1`. Locally they point at Aspen's fixed dev
-     port (`localhost:5173`) using the `?subdomain=` simulation Aspen's
-     own `hooks.server.ts` already supports (`extractSubdomain()`,
-     option 2). In production, unchanged.
-   - **⚠️ Not yet visually verified.** `svelte-check` passes and the logic
-     was read carefully, but this couldn't be proven by curl — `tenant`
-     state is set by client-side JS polling `/success/check`, which curl
-     never executes. **First thing to check tomorrow**: click "Visit My
-     Blog" for real in a browser and confirm it lands on
-     `localhost:5173/?subdomain=<name>` showing the new tenant's blog,
-     and that the admin dashboard link lands on `localhost:5173/arbor?subdomain=<name>`.
+All 6 files reviewed (bearerAuth, cookieAuth, cors, csrf, rateLimit,
+security). Findings posted to
+[issue comment](https://github.com/AutumnsGrove/Lattice/issues/1583#issuecomment-5589192521):
 
-## How to resume tomorrow
+- **HIGH** — `cookieAuth.ts`'s `adminCookieAuth()` never checked ban status
+  on any of its 3 auth paths (Bearer, `grove_session`→SessionDO, `access_token`
+  cookie fallback) — `isUserAdmin` only checks `is_admin`/Wayfinder email, not
+  `ba_user.banned`. Same bug class as `user.ts`'s L-2 finding two chunks ago,
+  but that fix stayed local to `user.ts` and never propagated here. A banned
+  admin's still-valid credential kept full `/admin/*` access. Fixed by
+  extracting `isUserBanned` out of `user.ts` into `db/queries/admin.ts`
+  (shared, exported via barrel) and calling it on all 3 paths in
+  `cookieAuth.ts` before the admin check.
+- **LOW** — Path 3's cookie read used an unanchored regex
+  (`/access_token=([^;]+)/`), matchable as a substring inside any cookie name
+  ending in `access_token=`. Not currently exploitable (no colliding cookie
+  name exists in the repo) but the exact-match `parseCookieHeader` helper
+  already exists for this reason — switched to it, added a regression test.
+- **LOW** — `cors.ts` had no `Vary: Origin` on its dynamic per-origin CORS
+  response. Confirmed non-exploitable today (no caching layer anywhere in
+  the worker) but added as standard hardening.
+- `bearerAuth.ts`, `csrf.ts`, `rateLimit.ts`, `security.ts` — no findings,
+  already well-tested.
+- **Noted, not fixed**: `adminCookieAuth()` has no CSRF/Origin check wired
+  in — moot today since its only caller (`admin.ts`) is GET-only, but a
+  latent risk if a mutating admin route is ever added under the same
+  `admin.use("/*", adminCookieAuth())` pattern.
+- Added `cookieAuth.test.ts` (15 tests, was zero coverage). 644/644 tests
+  passing (up from 632), typecheck and lint clean.
 
-```bash
-./scripts/dev-stack.sh full
-```
+## Next slice, planned: `db/queries/`, split in two
 
-Takes ~100 seconds now (was ~6 minutes before the wrangler fix). Then:
+1,514 loc across `services/heartwood/src/db/queries/` — **zero test files
+across the entire directory**, routes only exercise it indirectly through
+mocked `createDbSession`. Per the split already scoped last session:
 
-- **Aspen**: `http://localhost:5173`
-- **Plant**: `http://localhost:5175` — click **"Skip sign-in (Dev Mode)"**
-  on the homepage, or use the `Plant demo signup:` URL the script prints
-  at the end
-- **Heartwood**: `http://localhost:8787` (auth API, underneath)
-- **Landing**: usually *not* running — see known issue below
+- **Group A** (identity/auth-flow): `users.ts`, `auth-flow.ts`, `sessions.ts`,
+  `device-codes.ts`, `clients.ts` — ~849 loc.
+- **Group B** (account/billing): `admin.ts`, `audit.ts`, `subscriptions.ts`,
+  `rate-limiting.ts` — ~603 loc. Skip `index.ts`, it's a barrel.
 
-Full signup path to test: demo button → profile (fill name/color/interests)
-→ plans (pick **Wanderer** — the only tier that creates a tenant
-immediately without needing Stripe/billing-api running) → success → click
-"Visit My Blog" / "Take the Tour".
+Do group A first — it's the auth-critical half and continues the "who is
+this user, which table backs them" thread from `user.ts`/`middleware/`.
 
-If ports are stuck/weird from a previous session, don't fight it —
-`ps aux | grep -E "wrangler|workerd" | grep -v grep | grep -v esbuild | awk '{print $2}' | xargs kill -9`
-then relaunch. Tonight's session burned a lot of time on zombie `wrangler
-dev`/`workerd` processes surviving `pkill -f` pattern matches; killing by
-explicit PID is what actually worked.
+**After `db/queries/` (both groups):**
+1. `db/session.ts` + `db/auth.schema.ts` (278 loc, covered via
+   `queries.test.ts` already — small enough for one pass).
+2. `heartwood/src/lib` + `services` + `durables` + `auth` + `utils` (needs
+   its own real-size rescope when we get there — the issue's "4.6k" figure
+   is stale, same as `db`+`middleware`'s "4.1k" was).
 
-## Known issue: Landing doesn't build locally (not fixed, not urgent)
+Watch for the same recurring patterns: logout/session-revocation gaps, the
+`users`/`ba_user` table split, tests that mock away the auth check itself,
+and now also **ban-check gaps on any auth path that doesn't route through
+the shared `isUserBanned`/`isUserAdmin` pair** — this is the third time
+this exact bug class has shown up (`user.ts`, then `cookieAuth.ts`), so
+check every raw `SELECT ... FROM users`/`ba_user` in `db/queries/` for
+whether it should be going through the shared helpers instead.
 
-`apps/landing`'s `/knowledge/exhibit/sister-museum` page is `prerender =
-true` and fetches from `raw.githubusercontent.com` at build time. In this
-session's sandboxed environment (no outbound network during build) that
-fetch 500'd and failed the whole Landing build. `dev-stack.sh` already
-treats this as non-fatal — it warns and skips Landing, Aspen and Plant
-still come up fine. Autumn confirmed this is a known thing and said
-she's planning to remove the sister-museum page eventually. **Not
-something to fix reactively** unless it comes up again on a real network.
+Beyond `heartwood` entirely, the issue's next 🔴 security-critical items in
+priority order are `libs/grove-crypto` (884 loc), `libs/thorn` (2.9k loc),
+`services/billing-api` (7.6k loc) — those loc counts haven't been
+rescoped yet either; verify with `wc -l` before committing to a slice size.
 
-## What to expect next session
+## How to resume
 
-Autumn said explicitly: there will be **a lot of small comments** on
-little things that need cleaning up in the signup flow now that it's
-actually clickable end-to-end for the first time. Expect a punch list
-covering things like spacing, copy, button placement, step-indicator
-behavior, error message wording, etc. — normal UI polish work, not
-architecture. Come in ready to triage a list rather than dig for bugs;
-the big structural bugs (CSRF, tenant creation, dead links) are the ones
-this session found and fixed.
+1. Pull the issue fresh (`gh issue view 1583 --comments`) in case anything
+   landed since this doc was written.
+2. Review `db/queries/` group A first (`users.ts`, `auth-flow.ts`,
+   `sessions.ts`, `device-codes.ts`, `clients.ts`, ~849 loc) — no test files
+   exist for any of it yet, so budget time for writing coverage alongside
+   the review, not just fixing bugs.
+3. Fix what's found in the same session unless it's cross-cutting/needs
+   sign-off (see `betterAuth.ts`'s CORS fix vs. `verify.ts`'s
+   deliberately-flagged-not-fixed introspection auth gap for the pattern
+   to follow).
+4. Comment on #1583 with findings + fixes, using the same structure prior
+   comments use (severity-grouped, "Noted, not fixed" section if
+   applicable, test coverage note, verification line, "Next:" pointer).
+5. The `services/heartwood` parent checkbox on the issue stays unchecked
+   until `db/queries/` group B and
+   `lib`+`services`+`durables`+`auth`+`utils` are also done — check it once
+   the last of those lands.
 
-Also worth doing early next session, before diving into polish:
-- Visually confirm the tenant-url.ts fix (see ⚠️ above)
-- Click all the way through Wanderer signup → tour → arbor at least once
-  in an actual browser, not just via curl, to catch anything curl can't
-  see (client-side reactivity, layout, visual bugs)
+## Previous handoff, closed (Plant local dev + signup, 2026-08-24)
 
-## Files touched this session
+Everything in the prior handoff's "before diving into polish" checklist is
+verified done, most of it by Autumn clicking through manually rather than
+automated testing:
 
-```
-apps/plant/src/routes/auth/demo/+server.ts        (new)
-apps/plant/src/routes/+page.server.ts              (new)
-apps/plant/src/routes/+page.svelte                 (dev-mode button)
-apps/plant/src/routes/+layout.server.ts             (isDemoMode)
-apps/plant/src/routes/+layout.svelte                 (DemoBadge)
-apps/plant/src/app.d.ts                             (DEMO_MODE_SECRET type)
-apps/plant/src/lib/tenant-url.ts                    (new)
-apps/plant/src/routes/success/+page.svelte
-apps/plant/src/routes/tour/+page.svelte
-apps/plant/src/routes/comped/+page.svelte
-apps/plant/.dev.vars                                (new, gitignored — DEMO_MODE_SECRET)
-scripts/dev-stack.sh
-libs/engine/migrations/116_tenants_plan_check_fix.sql       (new)
-libs/engine/migrations/117_platform_billing_plan_check_fix.sql (new)
-```
+- **`tenant-url.ts` fix** — confirmed working. Clicking "Visit My Blog"
+  correctly routed to `localhost:5173` (proved indirectly: it collided with
+  an unrelated local process — Polaris — squatting that port, rather than
+  going to production `grove.place`, which is exactly what the fix was
+  supposed to prevent).
+- **Full Wanderer signup → tenant → post flow** — done in a real browser.
+  New tenant `swag-swag-swag2` created on the `wanderer` plan, confirmed in
+  D1 with correct FK/CHECK-constraint behavior (migrations 116/117 from
+  that session hold up). A real post (`a-long-time`, published, 5 words)
+  was written in Arbor and verified saved with both markdown and rendered
+  HTML content, correct `storage_location`, and reachable at its public
+  route.
+- **Landing's local build issue** — did not reproduce this session; built
+  clean.
+
+Two minor **local-only** findings from this session, explicitly not worth
+issues per Autumn: a CSP violation blocking `Lexend-Regular.ttf` from
+`cdn.grove.place` on Plant (`font-src` not set, falls back to
+`default-src 'self'`), and a `TenantDO` "SQL not enabled" Loom error on
+Aspen that falls back to D1 gracefully (likely stale local DO storage
+state from before a Loom migration).
+
+Also: if `apps/aspen`'s port 5173 is ever unreachable during local dev,
+check for `Polaris/web`'s `vite dev` running on the same port before
+assuming Aspen itself failed — `wrangler dev`'s fatal-address-in-use crash
+prints late in the log and the dev-stack script's "All workers ready"
+banner doesn't re-verify bind success.

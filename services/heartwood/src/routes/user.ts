@@ -14,6 +14,7 @@ import {
 	updateBetterAuthUserAvatar,
 	updateUserPreferences,
 	createAuditLog,
+	isUserBanned,
 } from "../db/queries.js";
 import { getSessionFromRequest } from "../lib/session.js";
 import { createDbSession } from "../db/session.js";
@@ -63,24 +64,6 @@ async function resolveUserId(req: Request, env: Env): Promise<ResolvedUser | nul
 	if (betterAuthUser) return { userId: betterAuthUser.id, authSource: "betterauth" };
 
 	return null;
-}
-
-/**
- * SessionDO.validateSession only checks session expiry — it has no
- * visibility into ban status, unlike the Better Auth fallback path (which
- * does check banned/ban_expires). Since 0002_migrate_users.sql gave every
- * pre-migration `users` row a matching `ba_user` row too, `ba_user` is a
- * ban-status superset covering both auth sources, so a single check here
- * closes the gap for the SessionDO branch without needing a second table.
- */
-async function isUserBanned(db: D1DatabaseOrSession, userId: string): Promise<boolean> {
-	const row = await db
-		.prepare("SELECT banned, ban_expires FROM ba_user WHERE id = ?")
-		.bind(userId)
-		.first<{ banned: number | null; ban_expires: number | null }>();
-	if (!row?.banned) return false;
-	if (row.ban_expires && row.ban_expires * 1000 < Date.now()) return false; // ban expired
-	return true;
 }
 
 /**

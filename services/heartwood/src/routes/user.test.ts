@@ -18,12 +18,16 @@ import { Hono } from "hono";
 import type { Env } from "../types.js";
 import { createMockEnv } from "../test-helpers.js";
 
-vi.mock("../db/queries.js", () => ({
-	updateUserAvatar: vi.fn(),
-	updateBetterAuthUserAvatar: vi.fn(),
-	updateUserPreferences: vi.fn(),
-	createAuditLog: vi.fn().mockResolvedValue(undefined),
-}));
+vi.mock("../db/queries.js", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("../db/queries.js")>();
+	return {
+		...actual,
+		updateUserAvatar: vi.fn(),
+		updateBetterAuthUserAvatar: vi.fn(),
+		updateUserPreferences: vi.fn(),
+		createAuditLog: vi.fn().mockResolvedValue(undefined),
+	};
+});
 
 vi.mock("../db/session.js", () => ({
 	createDbSession: vi.fn().mockReturnValue({

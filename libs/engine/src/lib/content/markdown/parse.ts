@@ -7,24 +7,45 @@ import type { Header, Frontmatter, ParsedContent } from "./types.js";
 
 export { generateHeadingId } from "./heading-id.js";
 
+const HEADER_LINE = /^(#{1,6})\s+(.+)$/;
+// Thematic break (---, ***, ___). Callers also require a blank line before it,
+// so a setext underline ("Title\n---") isn't mistaken for a divider.
+const DIVIDER_LINE = /^ {0,3}([-*_])( ?\1){2,}\s*$/;
+
+/**
+ * Extract headings for the table of contents.
+ *
+ * `depth` is nesting relative to the nearest shallower heading, so skipped
+ * levels don't add indentation (h1 → h3 → h5 is depth 0, 1, 2). A divider
+ * resets the tree: the next heading starts back at depth 0.
+ */
 export function extractHeaders(markdown: string): Header[] {
 	const headers: Header[] = [];
-
 	const markdownWithoutCodeBlocks = markdown.replace(/```[\s\S]*?```/g, "");
 
-	const headerRegex = /^(#{1,6})\s+(.+)$/gm;
+	let ancestors: number[] = [];
+	let prevBlank = true;
 
-	let match;
-	while ((match = headerRegex.exec(markdownWithoutCodeBlocks)) !== null) {
-		const level = match[1].length;
-		const rawText = match[2].trim();
+	for (const line of markdownWithoutCodeBlocks.split("\n")) {
+		const isBlank = line.trim() === "";
 
-		if (rawText.includes(SUPPRESS_MARKER)) continue;
+		if (prevBlank && DIVIDER_LINE.test(line)) {
+			ancestors = [];
+		} else {
+			const match = HEADER_LINE.exec(line);
+			if (match) {
+				const level = match[1].length;
+				const text = match[2].trim();
 
-		const text = rawText;
-		const id = generateHeadingId(text);
+				if (!text.includes(SUPPRESS_MARKER)) {
+					while (ancestors.length && ancestors[ancestors.length - 1] >= level) ancestors.pop();
+					headers.push({ level, text, id: generateHeadingId(text), depth: ancestors.length });
+					ancestors.push(level);
+				}
+			}
+		}
 
-		headers.push({ level, text, id });
+		prevBlank = isBlank;
 	}
 
 	return headers;
