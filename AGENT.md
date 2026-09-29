@@ -224,14 +224,14 @@ Apps auto-deploy via GitHub Actions on push to main. Resource IDs are hardcoded 
 
 ### Beta Deployment (Aspen only)
 
-Aspen has a second live deployment for testing real changes against real Cloudflare infrastructure before every Wanderer sees them — **not** an isolated staging environment. `grove-aspen-beta` shares the exact same `grove-engine-db` D1, KV, and R2 as production `grove-aspen`. A post written in beta is a row in the same table the public site reads. Full design: `docs/plans/planned/beta-environment-architecture.md`.
+Aspen has a second live deployment for testing real changes against real Cloudflare infrastructure before every Wanderer sees them — **not** an isolated staging environment. It's where new features get tried first, so it's normal and intended for `beta` to run ahead of `main`. `grove-aspen-beta` shares the exact same `grove-engine-db` D1, KV, and R2 as production `grove-aspen`. A post written in beta is a row in the same table the public site reads. Full design: `docs/plans/planned/beta-environment-architecture.md`.
 
 **URL shape:** `<tenant>-beta.grove.place` (e.g. `autumn-beta.grove.place`) — single-label, **not** `beta.<tenant>.grove.place`. This zone's Cloudflare edge cert only covers `*.grove.place` (one level); a two-level host fails the TLS handshake before any request reaches grove-router. Don't "fix" this back to the dot form without provisioning Cloudflare Advanced Certificate Manager (paid) first.
 
 **How a change reaches beta:**
 
 1. Land the change on `main` as normal.
-2. `git checkout beta && git merge main --ff-only && git push origin beta` — beta is always a fast-forward of main, never diverges with its own commits.
+2. `git checkout beta && git merge main && git push origin beta` — beta is a trial ground, so it's expected to carry commits that aren't on `main` yet (features being tried out on purpose). Merge `main` into it and keep those commits; never reset or force beta to match `main`. Try `--ff-only` first if you like, but a refusal just means beta has its own work — merge instead.
 3. `.github/workflows/deploy-aspen-beta.yml` (triggers on push to `beta`, same path filters as `deploy-aspen.yml`) redeploys `grove-aspen-beta` via `_deploy-worker.yml` with `deploy-env: beta` (→ `wrangler deploy --env beta`) and `service-name-override: aspen-beta` (keeps its failure-tracking issue separate from prod's).
 4. A same-SHA branch push (nothing new to diff against path filters) won't auto-trigger — use `gh workflow run deploy-aspen-beta.yml --ref beta` to force it.
 
