@@ -120,7 +120,23 @@ describe("markdown.ts - Comprehensive Tests", () => {
 				level: 1,
 				text: "Hello World",
 				id: "hello-world",
+				depth: 0,
 			});
+		});
+
+		it("nests by relative depth, ignoring skipped levels", () => {
+			const headers = extractHeaders("# A\n\n### B\n\n##### C\n\n## D\n\n# E");
+			expect(headers.map((h) => h.depth)).toEqual([0, 1, 2, 1, 0]);
+		});
+
+		it("resets the tree at a divider", () => {
+			const headers = extractHeaders("# A\n\n#### B\n\n-----\n\n#### C\n\n##### D");
+			expect(headers.map((h) => h.depth)).toEqual([0, 1, 0, 1]);
+		});
+
+		it("does not treat a setext underline as a divider", () => {
+			const headers = extractHeaders("# A\n\nTitle\n---\n\n### B");
+			expect(headers.map((h) => h.depth)).toEqual([0, 1]);
 		});
 
 		it("extracts multiple header levels", () => {

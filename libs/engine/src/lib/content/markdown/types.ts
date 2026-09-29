@@ -2,6 +2,8 @@ export interface Header {
 	level: number;
 	text: string;
 	id: string;
+	/** Nesting relative to the nearest shallower heading; dividers reset it to 0 */
+	depth?: number;
 }
 
 export interface Frontmatter {

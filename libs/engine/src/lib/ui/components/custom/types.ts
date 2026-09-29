@@ -59,6 +59,8 @@ export interface TOCHeader {
 	text: string;
 	/** Header level (1-6) for indentation. Defaults to 2 if not provided */
 	level?: number;
+	/** Nesting depth for indentation (0 = flush left). Defaults to 0 if not provided */
+	depth?: number;
 	/** Optional Svelte component to render as an icon. Validated at runtime via isValidIcon() */
 	icon?: IconComponent;
 }
