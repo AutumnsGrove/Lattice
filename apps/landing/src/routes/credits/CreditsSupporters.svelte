@@ -179,7 +179,7 @@
 								</p>
 							</div>
 							<div class="supporter-item">
-								<span class="supporter-name">Arturo Martinez</span>
+								<span class="supporter-name">Arturo M</span>
 								<span class="supporter-desc"
 									>— best friend who keeps me grounded, doesn't feed my ego but still believes in
 									the vision</span
