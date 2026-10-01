@@ -42,8 +42,8 @@
 			id: "critical",
 			label: "Critical",
 			description: "Active exploitation or data exposure",
-			color: "text-[var(--color-error-text)]",
-			bg: "bg-[var(--color-error-bg)] border-[var(--color-error)]",
+			color: "text-error-foreground",
+			bg: "bg-error-bg border-error",
 		},
 		{
 			id: "high",
