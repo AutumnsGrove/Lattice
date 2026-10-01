@@ -444,7 +444,7 @@
 						`gw db query --write "UPDATE tenants SET active = 0 WHERE subdomain = '${data.tenant.subdomain}'"`,
 						'suspend'
 					)}
-				class="shrink-0 p-2 rounded-lg hover:bg-error hover:bg-opacity-20 transition-colors"
+				class="shrink-0 p-2 rounded-lg hover:bg-error/20 transition-colors"
 				aria-label={copiedCommand === 'suspend' ? 'Copied!' : 'Copy suspend command'}
 			>
 				{#if copiedCommand === 'suspend'}
@@ -497,7 +497,7 @@
 				type="button"
 				onclick={() =>
 					copyCommand(`gw tenant delete ${data.tenant.subdomain} --write`, 'delete')}
-				class="shrink-0 p-2 rounded-lg hover:bg-error hover:bg-opacity-20 transition-colors"
+				class="shrink-0 p-2 rounded-lg hover:bg-error/20 transition-colors"
 				aria-label={copiedCommand === 'delete' ? 'Copied!' : 'Copy delete command'}
 			>
 				{#if copiedCommand === 'delete'}

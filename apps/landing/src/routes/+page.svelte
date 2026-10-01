@@ -116,7 +116,7 @@
 <main class="min-h-screen flex flex-col items-center px-6 py-12">
 	<!-- Error Banner -->
 	{#if error}
-		<div role="alert" class="mb-8 w-full max-w-md p-4 bg-error border border-error rounded-lg">
+		<div role="alert" class="mb-8 w-full max-w-md p-4 bg-error-bg border border-error/30 rounded-lg">
 			<div class="flex items-start gap-3">
 				<svg
 					class="w-5 h-5 text-error flex-shrink-0 mt-0.5"
