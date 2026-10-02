@@ -145,11 +145,16 @@ apply_migrations() {
     # column" error on a second run is expected and ignored.
     dim "  → heartwood (groveauth)"
     for m in 0001_better_auth 0011_ba_user_two_factor_enabled 0015_rate_limits_table; do
-        wrangler d1 execute groveauth \
+        if ! out=$(wrangler d1 execute groveauth \
             --local \
             -c services/heartwood/wrangler.toml \
-            --file "services/heartwood/src/db/migrations/$m.sql" \
-            >/dev/null 2>&1 || true
+            --file "services/heartwood/src/db/migrations/$m.sql" 2>&1); then
+            # A re-run of 0011's ALTER is expected to fail; anything else is real.
+            if ! grep -qi "duplicate column" <<<"$out"; then
+                warn "Heartwood migration $m failed — email-code sign-in may not work locally"
+                echo "$out" | tail -3 | sed 's/^/      /'
+            fi
+        fi
     done
 
     log "Migrations complete."
