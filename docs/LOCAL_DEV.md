@@ -133,7 +133,7 @@ The dev log only happens when `AUTH_BASE_URL` starts with `http://localhost`.
 **Behavior locally:**
 
 - Codes expire after 10 minutes, are stored hashed in the local `ba_verification` table, and are burned after 3 wrong guesses.
-- The send limit is relaxed locally (the login hub under `vite dev` can't see a real client IP, so every request shares one rate-limit bucket). In production it's 3 codes per 10 minutes per IP.
+- The send limit is relaxed locally (the login hub under `vite dev` can't see a real client IP, so every request shares one rate-limit bucket). In production it's 3 codes per 10 minutes per IP, plus a per-address cap in Zephyr (5 per minute, 20 per day).
 - With no `?redirect=`, the hub sends you to Plant (`http://localhost:5175`); in production it falls back to `https://grove.place`. Localhost redirects are only accepted in dev builds.
 - The local Heartwood database is set up by `dev-stack.sh` from the three migrations Better Auth needs (`0001`, `0011`, `0015`). To start clean: `./scripts/dev-stack.sh reset`.
 
