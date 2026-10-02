@@ -144,14 +144,14 @@ Zephyr recognizes six email types. Each type has its own rate limits, retry beha
 |------|-----------|---------|---------|--------------|----------|
 | `transactional` | 60 | 1,000 | 3 | `hello@grove.place` | One-to-one triggered emails |
 | `notification` | 60 | 1,000 | 3 | `porch@grove.place` | System notifications (Porch replies) |
-| `verification` | 20 | 1,000 | 3 | `hello@grove.place` | Auth codes (email sign-in) |
+| `verification` | 5 | 20 | 3 | `hello@grove.place` | Auth codes (email sign-in) |
 | `sequence` | 100 | 5,000 | 3 | `autumn@grove.place` | Onboarding drip emails |
 | `lifecycle` | 60 | 500 | 3 | `hello@grove.place` | Payment, renewal, trial |
 | `broadcast` | 1,000 | 10,000 | 1 | `autumn@grove.place` | Marketing, announcements |
 
-Rate limits are per-tenant. The rate limiter uses atomic D1 counters (INSERT ... ON CONFLICT DO UPDATE) to avoid race conditions from concurrent requests. If the rate limit check itself fails (D1 outage, etc.), Zephyr fails open and allows the request through.
+Rate limits are per-tenant, except `verification`, which is counted per recipient (see below). The rate limiter uses atomic D1 counters (INSERT ... ON CONFLICT DO UPDATE) to avoid race conditions from concurrent requests. If the rate limit check itself fails (D1 outage, etc.), Zephyr fails open and allows the request through.
 
-Verification emails have tighter limits than most types (20/min, 1,000/day) because they're security-sensitive. Broadcast has the loosest because marketing volume is higher.
+Verification emails have the tightest limits (5/min, 20/day) because they're security-sensitive, and they're counted **per recipient address** (case-insensitive). That keeps one sender from using up a shared budget and locking everyone else out of sign-in, and it caps how many codes any single inbox can be sent. Broadcast has the loosest limits because marketing volume is higher.
 
 ---
 
@@ -308,7 +308,7 @@ The template name you passed doesn't match anything in the email-render worker's
 
 ### "ZEPHYR-050: Rate limit exceeded"
 
-You've exceeded the per-minute or per-day limit for that email type and tenant. Verification emails have a tighter cap (20/min). If you're hitting limits in production, check if your code is retrying in a loop or if the email type is wrong for your use case.
+You've exceeded the per-minute or per-day limit for that email type and tenant. Verification emails have the tightest cap (5/min per recipient). If you're hitting limits in production, check if your code is retrying in a loop or if the email type is wrong for your use case.
 
 ### "ZEPHYR-060: Provider error" (Resend API failure)
 

@@ -125,9 +125,54 @@ describe("checkRateLimit", () => {
 		expect(result.message).toContain("per day");
 	});
 
+	describe("per-recipient scoping", () => {
+		const keyBoundFor = (db: ReturnType<typeof createMockD1>) => db.queries.map((q) => q.params[0]);
+
+		it("counts verification emails per recipient, case-insensitively", async () => {
+			mockDb = createMockD1();
+			const db = mockDb as unknown as D1Database;
+
+			await checkRateLimit(db, "default", "verification", "Friend@Example.com ");
+			await checkRateLimit(db, "default", "verification", "other@example.com");
+
+			expect(keyBoundFor(mockDb)).toEqual([
+				"default:friend@example.com",
+				"default:friend@example.com",
+				"default:other@example.com",
+				"default:other@example.com",
+			]);
+		});
+
+		it("keeps other email types on the shared tenant counter", async () => {
+			mockDb = createMockD1();
+
+			await checkRateLimit(
+				mockDb as unknown as D1Database,
+				"default",
+				"transactional",
+				"friend@example.com",
+			);
+
+			expect(new Set(keyBoundFor(mockDb))).toEqual(new Set(["default"]));
+		});
+
+		it("reports status for one recipient's verification counter", async () => {
+			mockDb = createMockD1();
+
+			await getRateLimitStatus(
+				mockDb as unknown as D1Database,
+				"default",
+				"verification",
+				"friend@example.com",
+			);
+
+			expect(new Set(keyBoundFor(mockDb))).toEqual(new Set(["default:friend@example.com"]));
+		});
+	});
+
 	it("should have different limits for different email types", async () => {
-		// Test verification type (20/min, 1000/day)
-		mockDb = createMockD1({ minute: 20, day: 20 });
+		// Test verification type (5/min, 20/day per recipient)
+		mockDb = createMockD1({ minute: 5, day: 5 });
 		const verificationResult = await checkRateLimit(
 			mockDb as unknown as D1Database,
 			"test-tenant",

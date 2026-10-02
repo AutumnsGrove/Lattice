@@ -149,11 +149,11 @@ describe("Zephyr Email Pipeline", () => {
 			const validation = validateRequest(request);
 			expect(validation.valid).toBe(true);
 
-			// But rate limit is exhausted (20 per minute for verification)
+			// But rate limit is exhausted (5 per minute for verification)
 			const dbAtLimit = {
 				prepare: vi.fn(() => ({
 					bind: vi.fn(() => ({
-						first: vi.fn().mockResolvedValue({ count: 21 }),
+						first: vi.fn().mockResolvedValue({ count: 6 }),
 						all: vi.fn().mockResolvedValue({ results: [] }),
 						run: vi.fn().mockResolvedValue({ success: true }),
 					})),

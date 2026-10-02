@@ -1,14 +1,15 @@
 /**
  * Rate Limiting Middleware
  *
- * Per-tenant rate limiting by email type.
+ * Per-tenant rate limiting by email type. Types listed in
+ * PER_RECIPIENT_RATE_LIMIT_TYPES are counted per recipient within the tenant.
  *
  * Uses atomic increment counters to avoid race conditions.
  * Fixed: Previously counted from zephyr_logs which had a race condition
  * where concurrent requests would all see stale counts before logging.
  */
 
-import { RATE_LIMITS } from "../types";
+import { PER_RECIPIENT_RATE_LIMIT_TYPES, RATE_LIMITS } from "../types";
 import type { EmailType, RateLimitConfig } from "../types";
 
 export interface RateLimitResult {
@@ -85,6 +86,15 @@ async function getCounter(
 }
 
 /**
+ * Counter key for a request: the tenant, narrowed to one recipient for
+ * per-recipient types (e.g. "default:friend@example.com").
+ */
+function counterKey(tenant: string, type: EmailType, recipient?: string): string {
+	if (!PER_RECIPIENT_RATE_LIMIT_TYPES.has(type) || !recipient) return tenant;
+	return `${tenant}:${recipient.trim().toLowerCase()}`;
+}
+
+/**
  * Check if request is within rate limits using atomic increments
  *
  * This approach prevents race conditions by atomically incrementing
@@ -97,6 +107,7 @@ export async function checkRateLimit(
 	recipient: string,
 ): Promise<RateLimitResult> {
 	const limits = RATE_LIMITS[type];
+	const key = counterKey(tenant, type, recipient);
 	const now = Date.now();
 	const minuteBucket = getMinuteBucket(now);
 	const dayBucket = getDayBucket(now);
@@ -104,8 +115,8 @@ export async function checkRateLimit(
 	try {
 		// Atomically increment both counters and get new values
 		const [minuteCount, dayCount] = await Promise.all([
-			incrementCounter(db, "zephyr_rate_limits", tenant, type, minuteBucket),
-			incrementCounter(db, "zephyr_rate_limits_daily", tenant, type, dayBucket),
+			incrementCounter(db, "zephyr_rate_limits", key, type, minuteBucket),
+			incrementCounter(db, "zephyr_rate_limits_daily", key, type, dayBucket),
 		]);
 
 		// Check minute limit (count includes current request)
@@ -139,7 +150,7 @@ export async function checkRateLimit(
 }
 
 /**
- * Get rate limit status for a tenant
+ * Get rate limit status for a tenant (or, for per-recipient types, one recipient)
  *
  * Uses atomic counter tables for accurate counts.
  */
@@ -147,18 +158,20 @@ export async function getRateLimitStatus(
 	db: D1Database,
 	tenant: string,
 	type: EmailType,
+	recipient?: string,
 ): Promise<{
 	perMinute: { limit: number; used: number; remaining: number };
 	perDay: { limit: number; used: number; remaining: number };
 }> {
 	const limits = RATE_LIMITS[type];
+	const key = counterKey(tenant, type, recipient);
 	const now = Date.now();
 	const minuteBucket = getMinuteBucket(now);
 	const dayBucket = getDayBucket(now);
 
 	const [minuteCount, dayCount] = await Promise.all([
-		getCounter(db, "zephyr_rate_limits", tenant, type, minuteBucket),
-		getCounter(db, "zephyr_rate_limits_daily", tenant, type, dayBucket),
+		getCounter(db, "zephyr_rate_limits", key, type, minuteBucket),
+		getCounter(db, "zephyr_rate_limits_daily", key, type, dayBucket),
 	]);
 
 	return {

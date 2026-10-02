@@ -134,11 +134,18 @@ export interface RateLimitConfig {
 export const RATE_LIMITS: Record<EmailType, RateLimitConfig> = {
 	transactional: { perMinute: 60, perDay: 1000 },
 	notification: { perMinute: 60, perDay: 1000 },
-	verification: { perMinute: 20, perDay: 1000 },
+	verification: { perMinute: 5, perDay: 20 },
 	sequence: { perMinute: 100, perDay: 5000 },
 	lifecycle: { perMinute: 60, perDay: 500 },
 	broadcast: { perMinute: 1000, perDay: 10000 },
 };
+
+/**
+ * Email types whose limits apply to each recipient separately instead of to the
+ * whole tenant. Sign-in codes need this: a shared counter would let one sender
+ * lock every Wanderer out, and would not stop a single inbox being flooded.
+ */
+export const PER_RECIPIENT_RATE_LIMIT_TYPES: ReadonlySet<EmailType> = new Set(["verification"]);
 
 // =============================================================================
 // Logging
