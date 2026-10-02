@@ -104,11 +104,6 @@ jobs:
         run: pnpm run package
         working-directory: libs/engine
 
-      - name: Build vineyard
-        if: matrix.needs-vineyard
-        run: pnpm run package
-        working-directory: libs/vineyard
-
       - name: SvelteKit sync
         if: matrix.run-build
         run: pnpm exec svelte-kit sync

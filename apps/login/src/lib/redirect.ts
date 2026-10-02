@@ -14,64 +14,62 @@
  */
 export const DEFAULT_REDIRECT = "https://grove.place";
 
+/** Where the local dev stack sends you when no redirect is given (Plant, port 5175). */
+export const DEV_DEFAULT_REDIRECT = "http://localhost:5175";
+
 /** Allowed redirect patterns */
 const ALLOWED_PATTERNS = [
-  /^https:\/\/([a-z0-9-]+\.)?grove\.place(\/|$)/i,
-  /^https:\/\/autumnsgrove\.com(\/|$)/i,
+	/^https:\/\/([a-z0-9-]+\.)?grove\.place(\/|$)/i,
+	/^https:\/\/autumnsgrove\.com(\/|$)/i,
 ];
 
 /** Also allow localhost in development */
-const DEV_PATTERNS = [
-  /^http:\/\/localhost(:\d+)?(\/|$)/,
-  /^http:\/\/127\.0\.0\.1(:\d+)?(\/|$)/,
-];
+const DEV_PATTERNS = [/^http:\/\/localhost(:\d+)?(\/|$)/, /^http:\/\/127\.0\.0\.1(:\d+)?(\/|$)/];
 
 /**
  * Validate and sanitize a redirect URL.
  * Returns the URL if safe, or the default redirect if not.
  */
-export function validateRedirectUrl(
-  url: string | null | undefined,
-  isDev = false,
-): string {
-  if (!url) return DEFAULT_REDIRECT;
+export function validateRedirectUrl(url: string | null | undefined, isDev = false): string {
+	const fallback = isDev ? DEV_DEFAULT_REDIRECT : DEFAULT_REDIRECT;
+	if (!url) return fallback;
 
-  // Block dangerous URI schemes immediately
-  const lower = url.toLowerCase().trim();
-  if (
-    lower.startsWith("javascript:") ||
-    lower.startsWith("data:") ||
-    lower.startsWith("vbscript:") ||
-    lower.startsWith("//")
-  ) {
-    return DEFAULT_REDIRECT;
-  }
+	// Block dangerous URI schemes immediately
+	const lower = url.toLowerCase().trim();
+	if (
+		lower.startsWith("javascript:") ||
+		lower.startsWith("data:") ||
+		lower.startsWith("vbscript:") ||
+		lower.startsWith("//")
+	) {
+		return fallback;
+	}
 
-  // Relative URLs are safe (same-origin)
-  if (url.startsWith("/") && !url.startsWith("//")) return url;
+	// Relative URLs are safe (same-origin)
+	if (url.startsWith("/") && !url.startsWith("//")) return url;
 
-  try {
-    // Must be a valid absolute URL with http(s) scheme
-    const parsed = new URL(url);
-    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
-      return DEFAULT_REDIRECT;
-    }
+	try {
+		// Must be a valid absolute URL with http(s) scheme
+		const parsed = new URL(url);
+		if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+			return fallback;
+		}
 
-    // Check against allowed production patterns
-    for (const pattern of ALLOWED_PATTERNS) {
-      if (pattern.test(url)) return url;
-    }
+		// Check against allowed production patterns
+		for (const pattern of ALLOWED_PATTERNS) {
+			if (pattern.test(url)) return url;
+		}
 
-    // In dev, also allow localhost
-    if (isDev) {
-      for (const pattern of DEV_PATTERNS) {
-        if (pattern.test(url)) return url;
-      }
-    }
+		// In dev, also allow localhost
+		if (isDev) {
+			for (const pattern of DEV_PATTERNS) {
+				if (pattern.test(url)) return url;
+			}
+		}
 
-    console.warn("[Redirect] Blocked unsafe redirect URL");
-    return DEFAULT_REDIRECT;
-  } catch {
-    return DEFAULT_REDIRECT;
-  }
+		console.warn("[Redirect] Blocked unsafe redirect URL");
+		return fallback;
+	} catch {
+		return fallback;
+	}
 }

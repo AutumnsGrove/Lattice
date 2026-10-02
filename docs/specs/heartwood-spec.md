@@ -1,6 +1,6 @@
 ---
 title: Heartwood — Centralized Authentication
-description: One identity across all Grove properties with Google OAuth and magic links
+description: One identity across all Grove properties with Google OAuth and passwordless email codes
 category: specs
 specCategory: platform-services
 icon: shieldcheck
@@ -63,7 +63,7 @@ GroveAuth is a centralized authentication service that handles all authenticatio
 ### Goals
 
 - **Single source of truth** for user authentication
-- **Multiple auth providers** (Google, Magic Code)
+- **Multiple auth providers** (Google, Email Code)
 - **Secure token-based sessions** that client sites can verify
 - **Simple integration** for any site in the AutumnsGrove ecosystem
 - **Admin-only access** (no public registration - allowlist based)
@@ -99,7 +99,7 @@ GroveAuth is a centralized authentication service that handles all authenticatio
 │                       auth.grove.place                              │
 │                                                                     │
 │  ┌─────────────────────────┐  ┌─────────────────────────┐           │
-│  │      Google OAuth       │  │   Magic Code (Email)    │           │
+│  │      Google OAuth       │  │   Email Code (OTP)      │           │
 │  └─────────────────────────┘  └─────────────────────────┘           │
 │                                                                     │
 │  ┌─────────────────────────────────────────────────────┐            │
@@ -128,7 +128,7 @@ GroveAuth is a centralized authentication service that handles all authenticatio
 
 | Component        | Responsibility                                                                |
 | ---------------- | ----------------------------------------------------------------------------- |
-| **GroveAuth**    | OAuth flows, magic code, token generation, user verification                  |
+| **GroveAuth**    | OAuth flows, email codes, token generation, user verification                  |
 | **Client Sites** | Redirect to GroveAuth, exchange codes, validate tokens, manage local sessions |
 | **lattice**      | Helper functions for client sites to integrate with GroveAuth                 |
 
@@ -189,22 +189,49 @@ GroveAuth is a centralized authentication service that handles all authenticatio
 - Name (display purposes)
 - Profile picture URL (optional)
 
-### 2. Magic Code (Email)
+### 2. Email Code (passwordless)
 
-**Purpose**: Fallback for users who prefer email-based auth
+**Purpose**: A path for Wanderers who don't want to use Google. No passwords, ever.
+
+**Implementation**: Better Auth's `emailOTP` plugin, configured in `services/heartwood/src/auth/index.ts`. One flow serves both sign-in and sign-up: an unknown email becomes a new account once its code is proven.
 
 **Flow**:
 
-1. User enters email
-2. 6-digit code sent via Resend API
-3. User enters code to verify
-4. Session created on successful verification
+1. Wanderer enters their email on the login hub (`login.grove.place`)
+2. Heartwood generates a 6-digit code and stores it **hashed** in `ba_verification`
+3. The code is emailed through Zephyr (`type: "verification"`, sent as `auth@grove.place`)
+4. Wanderer types the code on the same page (the code can be entered on any device — there is no link to click)
+5. Heartwood verifies it, creates the account if needed, and issues the session cookies (`better-auth.session_token` + `grove_session`)
 
-**Constraints**:
+**Constraints** (defined once: limits in `services/heartwood/src/utils/constants.ts`, code length in `libs/engine/src/lib/auth/login/email-code.ts` so Heartwood and the login hub can't drift apart):
 
-- Code expires in 10 minutes
-- Rate limit: 3 codes per email per minute
-- Lockout: 5 failed attempts = 15-minute lockout
+- Code is 6 digits, expires in 10 minutes, and works once
+- 3 wrong guesses burn the code (request a new one)
+- Signup is open to anyone with a working email
+
+**Abuse limits**: three layers, each covering a gap the others leave.
+
+| Layer | Limit | Scope | Stops |
+| ----- | ----- | ----- | ----- |
+| Heartwood (Better Auth) send | 3 codes per 10 minutes | per client IP | One person spamming the send button |
+| Heartwood (Better Auth) verify | 5 submissions per minute | per client IP | Fast guessing from one place |
+| Zephyr `verification` | 5 per minute, 20 per day | **per recipient address** (case-insensitive) | Flooding one inbox from many IPs |
+
+- Zephyr counts `verification` emails per recipient, not per tenant. A shared counter would let one sender use up the budget for every Wanderer and lock sign-in for the whole platform. Other email types still share a per-tenant counter. See `PER_RECIPIENT_RATE_LIMIT_TYPES` in `services/zephyr/src/types.ts`.
+- The per-recipient cap also bounds guessing: at most 20 codes a day per address, 3 guesses each.
+- The exact email-OTP rules must come **before** the `/sign-in/*` wildcard in `rateLimit.customRules`. Better Auth uses the first matching key in insertion order, and a test in `auth/index.test.ts` pins this.
+- The login hub forwards the platform-derived client address (`getClientAddress()`, never a client-supplied header) because service-binding requests carry no IP of their own.
+
+**Failure behavior**:
+
+- The send endpoint answers identically for known and unknown emails (no account probing).
+- A Zephyr rate-limit rejection surfaces as `429` (`HW-SVC-043`); any other delivery failure is `500` (`HW-SVC-042`). The login hub passes `429` through, reports upstream `5xx` as `502`, and shows a friendly message either way (`LOGIN-022`, `LOGIN-023` log hub-side failures).
+- In local dev (`AUTH_BASE_URL` on localhost) the code is printed to the Heartwood log, the send limit is relaxed, and delivery failures don't block sign-in.
+
+**Known properties**:
+
+- Like Google sign-in, email-code sign-in does not trigger the TOTP prompt for accounts with 2FA enabled. Better Auth's two-factor hook only gates credential-style sign-in paths.
+- Anyone who knows an address can burn that address's pending code with 3 wrong guesses. The Wanderer just requests a fresh one. We accept this in exchange for the tight guessing bound.
 
 ---
 
@@ -973,12 +1000,12 @@ export interface GroveAuthClient {
 
 ### Rate Limiting
 
-| Endpoint        | Limit                                        |
-| --------------- | -------------------------------------------- |
-| `/magic/send`   | 3 per email per minute, 10 per IP per minute |
-| `/magic/verify` | 5 attempts before 15-min lockout             |
-| `/token`        | 20 per client per minute                     |
-| `/verify`       | 100 per client per minute                    |
+| Endpoint                                  | Limit                                                      |
+| ----------------------------------------- | ---------------------------------------------------------- |
+| `/email-otp/send-verification-otp`        | 3 per 10 minutes per IP; 5/min and 20/day per recipient    |
+| `/sign-in/email-otp`                      | 5 per minute per IP; 3 wrong guesses burn the code         |
+| `/token`                                  | 20 per client per minute                                   |
+| `/verify`                                 | 100 per client per minute                                  |
 
 ### Security Headers
 
@@ -1018,7 +1045,7 @@ AUTH_BASE_URL = "https://auth.grove.place"
 # JWT_PUBLIC_KEY - RSA public key for verifying JWTs (PEM format)
 # GOOGLE_CLIENT_ID - Google OAuth client ID
 # GOOGLE_CLIENT_SECRET - Google OAuth client secret
-# RESEND_API_KEY - Resend API key for sending emails
+# ZEPHYR_API_KEY - Zephyr gateway key (sign-in code emails are sent through Zephyr)
 ```
 
 ### D1 Database Binding
@@ -1061,7 +1088,7 @@ groveauth/
 │   ├── services/
 │   │   ├── jwt.ts            # JWT creation/verification
 │   │   ├── oauth.ts          # OAuth provider helpers
-│   │   ├── email.ts          # Email sending (Resend)
+│   │   ├── email.ts          # Sign-in code email (via Zephyr)
 │   │   └── user.ts           # User management
 │   ├── db/
 │   │   ├── schema.sql        # Database schema

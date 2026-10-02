@@ -60,7 +60,6 @@ const DEPENDENTS = {
 	"libs/engine": ENGINE_CONSUMERS,
 	"libs/infra": ENGINE_CONSUMERS, // shared Vite config — affects every SvelteKit target
 	"libs/prism": ENGINE_CONSUMERS, // design tokens + icon gateway
-	"libs/vineyard": ["libs/engine"], // engine builds vineyard as a package dep
 	"libs/shutter": [],
 	"libs/grove-agent": ["workers/onboarding"], // sole consumer
 };
@@ -74,7 +73,6 @@ const PACKAGES = {
 	},
 	"libs/foliage": { typecheck: "pnpm check", hasTests: true, isSvelteKit: true },
 	"libs/gossamer": { typecheck: null, hasTests: false, isSvelteKit: false },
-	"libs/vineyard": { typecheck: "pnpm check", hasTests: true, isSvelteKit: false },
 	"apps/landing": {
 		typecheck: "pnpm check",
 		hasTests: true,

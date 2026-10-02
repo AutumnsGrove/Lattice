@@ -9,50 +9,45 @@
  */
 
 import { redirect } from "@sveltejs/kit";
+import { dev } from "$app/environment";
 import type { RequestHandler } from "./$types";
 import { validateRedirectUrl } from "$lib/redirect";
 
 export const GET: RequestHandler = async ({ url, cookies }) => {
-  // Try query param first, then fall back to cookie.
-  // The cookie fallback handles the case where Better Auth's OAuth redirect
-  // drops the ?redirect= query parameter from the callbackURL.
-  const redirectParam = url.searchParams.get("redirect");
-  const redirectCookie = cookies.get("grove_auth_redirect");
-  // The cookie value is stored with encodeURIComponent() by the login page,
-  // so we must decode it before validation (e.g. "%2Ffeed" → "/feed").
-  const decodedCookie = redirectCookie
-    ? decodeURIComponent(redirectCookie)
-    : undefined;
-  const redirectTo = validateRedirectUrl(redirectParam || decodedCookie);
+	// Try query param first, then fall back to cookie.
+	// The cookie fallback handles the case where Better Auth's OAuth redirect
+	// drops the ?redirect= query parameter from the callbackURL.
+	const redirectParam = url.searchParams.get("redirect");
+	const redirectCookie = cookies.get("grove_auth_redirect");
+	// The cookie value is stored with encodeURIComponent() by the login page,
+	// so we must decode it before validation (e.g. "%2Ffeed" → "/feed").
+	const decodedCookie = redirectCookie ? decodeURIComponent(redirectCookie) : undefined;
+	const redirectTo = validateRedirectUrl(redirectParam || decodedCookie, dev);
 
-  // Clean up the fallback cookie now that we've read it
-  if (redirectCookie) {
-    cookies.delete("grove_auth_redirect", { path: "/" });
-  }
+	// Clean up the fallback cookie now that we've read it
+	if (redirectCookie) {
+		cookies.delete("grove_auth_redirect", { path: "/" });
+	}
 
-  // Verify that a BA session cookie exists (presence check only).
-  // We don't validate the token here — Heartwood handles session validation
-  // on every authenticated API call. This check catches the common failure
-  // case (OAuth completed but cookie wasn't set) so we can redirect to
-  // sign-in with a helpful error rather than silently sending the user
-  // to a destination where they'd be unauthenticated.
-  // Heartwood sets cookies with domain=.grove.place, so they're visible here.
-  // Domain spoofing is not a concern: SvelteKit's cookies.get() only returns
-  // cookies that the browser sent for the current origin — browsers enforce
-  // cookie domain scoping before the request even reaches the server.
-  const hasSession =
-    cookies.get("better-auth.session_token") ||
-    cookies.get("__Secure-better-auth.session_token");
+	// Verify that a BA session cookie exists (presence check only).
+	// We don't validate the token here — Heartwood handles session validation
+	// on every authenticated API call. This check catches the common failure
+	// case (OAuth completed but cookie wasn't set) so we can redirect to
+	// sign-in with a helpful error rather than silently sending the user
+	// to a destination where they'd be unauthenticated.
+	// Heartwood sets cookies with domain=.grove.place, so they're visible here.
+	// Domain spoofing is not a concern: SvelteKit's cookies.get() only returns
+	// cookies that the browser sent for the current origin — browsers enforce
+	// cookie domain scoping before the request even reaches the server.
+	const hasSession =
+		cookies.get("better-auth.session_token") || cookies.get("__Secure-better-auth.session_token");
 
-  if (!hasSession) {
-    // No session — something went wrong during auth
-    // Redirect back to sign-in with an error hint
-    throw redirect(
-      302,
-      `/?error=no_session&redirect=${encodeURIComponent(redirectTo)}`,
-    );
-  }
+	if (!hasSession) {
+		// No session — something went wrong during auth
+		// Redirect back to sign-in with an error hint
+		throw redirect(302, `/?error=no_session&redirect=${encodeURIComponent(redirectTo)}`);
+	}
 
-  // Session exists — send them on their way
-  throw redirect(302, redirectTo);
+	// Session exists — send them on their way
+	throw redirect(302, redirectTo);
 };

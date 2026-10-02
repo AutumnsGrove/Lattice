@@ -10,8 +10,19 @@
  */
 
 import { redirect, fail } from "@sveltejs/kit";
+import { dev } from "$app/environment";
 import type { Actions } from "./$types";
+import { logGroveError } from "@autumnsgrove/lattice/errors";
 import { validateRedirectUrl } from "$lib/redirect";
+import { LOGIN_ERRORS } from "$lib/errors";
+import {
+	EMAIL_CODE_MESSAGES,
+	normalizeEmail,
+	normalizeCode,
+	messageForSendFailure,
+	messageForVerifyFailure,
+	statusForUpstreamFailure,
+} from "$lib/email-code";
 
 const DEFAULT_AUTH_URL = "https://login.grove.place";
 
@@ -65,7 +76,165 @@ function parseRawSetCookie(
 	return { name, value, options };
 }
 
+/**
+ * POST JSON to a Heartwood Better Auth endpoint over the AUTH service binding.
+ *
+ * Service-binding requests carry no client IP of their own, so Better Auth's
+ * per-IP rate limits would otherwise put every Wanderer in one shared bucket.
+ * We forward the platform-derived address (never a client-supplied header).
+ */
+function postToHeartwood(
+	env: NonNullable<App.Platform["env"]>,
+	origin: string,
+	clientIp: string,
+	path: string,
+	body: Record<string, string>,
+): Promise<Response> {
+	const authBaseUrl = env.GROVEAUTH_URL ?? DEFAULT_AUTH_URL;
+	return env.AUTH.fetch(`${authBaseUrl}${path}`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			Origin: origin,
+			"cf-connecting-ip": clientIp,
+			"x-forwarded-for": clientIp,
+		},
+		body: JSON.stringify(body),
+		redirect: "manual",
+	});
+}
+
 export const actions: Actions = {
+	/**
+	 * Email code, step 1 — ask Heartwood to email a 6-digit code.
+	 *
+	 * One flow for sign-in and sign-up: Heartwood creates the account the first
+	 * time a code is proven. Always answers the same way whether or not the email
+	 * already has an account, so this can't be used to probe for registered emails.
+	 */
+	sendCode: async ({ request, platform, url, getClientAddress }) => {
+		const formData = await request.formData();
+		const redirectTo = validateRedirectUrl(formData.get("redirect")?.toString(), dev);
+		const email = normalizeEmail(formData.get("email"));
+
+		if (!email) {
+			return fail(400, { step: "email" as const, error: EMAIL_CODE_MESSAGES.INVALID_EMAIL });
+		}
+		if (!platform?.env?.AUTH) {
+			return fail(503, {
+				step: "email" as const,
+				email,
+				error: EMAIL_CODE_MESSAGES.SERVICE_UNAVAILABLE,
+			});
+		}
+
+		let response: Response;
+		try {
+			response = await postToHeartwood(
+				platform.env,
+				url.origin,
+				getClientAddress(),
+				"/api/auth/email-otp/send-verification-otp",
+				{ email, type: "sign-in" },
+			);
+		} catch (fetchErr) {
+			logGroveError("Login", LOGIN_ERRORS.EMAIL_CODE_SEND_FAILED, { cause: fetchErr });
+			return fail(503, { step: "email" as const, email, error: EMAIL_CODE_MESSAGES.SEND_FAILED });
+		}
+
+		if (!response.ok) {
+			logGroveError("Login", LOGIN_ERRORS.EMAIL_CODE_SEND_FAILED, { status: response.status });
+			return fail(statusForUpstreamFailure(response.status), {
+				step: "email" as const,
+				email,
+				error: messageForSendFailure(response.status),
+			});
+		}
+
+		return { step: "code" as const, email, redirect: redirectTo };
+	},
+
+	/**
+	 * Email code, step 2 — verify the code and finish signing in.
+	 *
+	 * On success Heartwood's session cookies are forwarded to the browser
+	 * (scoped to .grove.place) and we hand off to /callback, exactly like Google.
+	 */
+	verifyCode: async ({ request, cookies, platform, url, getClientAddress }) => {
+		const formData = await request.formData();
+		const redirectTo = validateRedirectUrl(formData.get("redirect")?.toString(), dev);
+		const email = normalizeEmail(formData.get("email"));
+		const code = normalizeCode(formData.get("code"));
+
+		if (!email) {
+			return fail(400, { step: "email" as const, error: EMAIL_CODE_MESSAGES.INVALID_EMAIL });
+		}
+		if (!code) {
+			return fail(400, {
+				step: "code" as const,
+				email,
+				redirect: redirectTo,
+				error: EMAIL_CODE_MESSAGES.INVALID_CODE_FORMAT,
+			});
+		}
+		if (!platform?.env?.AUTH) {
+			return fail(503, {
+				step: "code" as const,
+				email,
+				redirect: redirectTo,
+				error: EMAIL_CODE_MESSAGES.SERVICE_UNAVAILABLE,
+			});
+		}
+
+		let response: Response;
+		try {
+			response = await postToHeartwood(
+				platform.env,
+				url.origin,
+				getClientAddress(),
+				"/api/auth/sign-in/email-otp",
+				{ email, otp: code },
+			);
+		} catch (fetchErr) {
+			logGroveError("Login", LOGIN_ERRORS.EMAIL_CODE_VERIFY_UNAVAILABLE, { cause: fetchErr });
+			return fail(503, {
+				step: "code" as const,
+				email,
+				redirect: redirectTo,
+				error: EMAIL_CODE_MESSAGES.VERIFY_FAILED,
+			});
+		}
+
+		if (!response.ok) {
+			let errorCode: string | undefined;
+			try {
+				errorCode = ((await response.json()) as { code?: string }).code;
+			} catch {
+				/* non-JSON error body — fall through to the generic message */
+			}
+			return fail(statusForUpstreamFailure(response.status), {
+				step: "code" as const,
+				email,
+				redirect: redirectTo,
+				error: messageForVerifyFailure(response.status, errorCode),
+			});
+		}
+
+		// Forward Heartwood's session cookies (better-auth.session_token + grove_session).
+		// `encode` is identity: Better Auth's signed values are already URL-encoded, and
+		// SvelteKit's default would encode them a second time and break the signature.
+		const cfHeaders = response.headers as unknown as { getAll?(name: string): string[] };
+		const setCookies = cfHeaders.getAll?.("set-cookie") ?? response.headers.getSetCookie();
+		for (const raw of setCookies) {
+			const parsed = parseRawSetCookie(raw);
+			if (parsed) {
+				cookies.set(parsed.name, parsed.value, { ...parsed.options, encode: (v) => v });
+			}
+		}
+
+		throw redirect(302, `/callback?redirect=${encodeURIComponent(redirectTo)}`);
+	},
+
 	/**
 	 * Google OAuth — triggers the OAuth redirect entirely server-side.
 	 *
@@ -75,7 +244,7 @@ export const actions: Actions = {
 	 */
 	google: async ({ request, cookies, platform, url }) => {
 		const formData = await request.formData();
-		const redirectTo = validateRedirectUrl(formData.get("redirect")?.toString());
+		const redirectTo = validateRedirectUrl(formData.get("redirect")?.toString(), dev);
 		// Relative URL — Heartwood resolves it against the login origin (login.grove.place).
 		// Safe because AUTH is a service binding; this never becomes a public redirect target.
 		const callbackURL = `/callback?redirect=${encodeURIComponent(redirectTo)}`;

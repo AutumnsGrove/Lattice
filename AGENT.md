@@ -188,7 +188,7 @@ Multi-tenant blog platform where users get their own blogs on subdomains (userna
 - **Framework:** SvelteKit 2.0+
 - **Backend:** Cloudflare Workers, D1 (SQLite), KV, R2 Storage
 - **Infrastructure:** Wrangler (app deployment)
-- **Auth:** Heartwood (Google OAuth 2.0 + PKCE)
+- **Auth:** Heartwood (Google OAuth 2.0 + PKCE, passwordless email codes)
 - **Payments:** Stripe
 - **Email:** Resend
 - **Styling:** Tailwind CSS

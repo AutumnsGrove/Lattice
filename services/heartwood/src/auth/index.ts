@@ -14,13 +14,25 @@
 import { betterAuth } from "better-auth";
 import { withCloudflare } from "better-auth-cloudflare";
 import type { CloudflareGeolocation } from "better-auth-cloudflare";
-import { twoFactor } from "better-auth/plugins";
+import { APIError } from "better-auth/api";
+import { twoFactor, emailOTP } from "better-auth/plugins";
 import { drizzle } from "drizzle-orm/d1";
 import { logGroveError } from "@autumnsgrove/lattice/errors";
 import { HW_SVC_ERRORS } from "../errors.js";
 import type { Env } from "../types.js";
 import { schema } from "../db/auth.schema.js";
 import { getRequestContext, bridgeSessionToSessionDO } from "../lib/sessionBridge.js";
+import { sendLoginCodeEmail } from "../services/email.js";
+import {
+	EMAIL_OTP_LENGTH,
+	EMAIL_OTP_EXPIRES_IN,
+	EMAIL_OTP_ALLOWED_ATTEMPTS,
+	EMAIL_OTP_SEND_LIMIT,
+	EMAIL_OTP_SEND_LIMIT_LOCAL,
+	EMAIL_OTP_SEND_WINDOW,
+	EMAIL_OTP_VERIFY_LIMIT,
+	EMAIL_OTP_VERIFY_WINDOW,
+} from "../utils/constants.js";
 
 /**
  * Paths where Better Auth's twoFactor plugin creates a real session first,
@@ -158,7 +170,14 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 				enabled: true,
 				window: 60,
 				max: 100,
+				// Exact email-OTP rules must come BEFORE the "/sign-in/*" wildcard:
+				// Better Auth applies the first matching key in insertion order.
 				customRules: {
+					"/email-otp/send-verification-otp": {
+						window: EMAIL_OTP_SEND_WINDOW,
+						max: isLocalDev ? EMAIL_OTP_SEND_LIMIT_LOCAL : EMAIL_OTP_SEND_LIMIT,
+					},
+					"/sign-in/email-otp": { window: EMAIL_OTP_VERIFY_WINDOW, max: EMAIL_OTP_VERIFY_LIMIT },
 					"/sign-in/*": { window: 60, max: 20 },
 					"/sign-up/*": { window: 60, max: 10 },
 					"/callback/*": { window: 60, max: 30 },
@@ -183,6 +202,7 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 						"http://localhost:5173",
 						"http://localhost:5174",
 						"http://localhost:5175",
+						"http://localhost:5176", // login hub (apps/login) under dev-stack
 						"http://localhost:8787",
 					]
 				: []),
@@ -277,6 +297,40 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 				backupCodeOptions: {
 					length: 10,
 					count: 10,
+				},
+			}),
+
+			// Passwordless email codes: "sign in / sign up with email".
+			// One flow for both — an unknown email becomes a new account once the
+			// code is proven (disableSignUp stays false: signup is open to all).
+			// Codes are stored hashed in ba_verification and burned after
+			// EMAIL_OTP_ALLOWED_ATTEMPTS wrong guesses.
+			emailOTP({
+				otpLength: EMAIL_OTP_LENGTH,
+				expiresIn: EMAIL_OTP_EXPIRES_IN,
+				allowedAttempts: EMAIL_OTP_ALLOWED_ATTEMPTS,
+				storeOTP: "hashed",
+				sendVerificationOTP: async ({ email, otp, type }) => {
+					// Local dev: Zephyr may have no Resend key, so surface the code
+					// in the Heartwood terminal. Never reachable in production —
+					// isLocalDev is derived from the localhost AUTH_BASE_URL.
+					if (isLocalDev) {
+						console.log(`[LoginCode:dev] ${type} code for ${email}: ${otp}`);
+					}
+					// Awaited on purpose: every email (new or existing account) takes
+					// the same path, and a delivery failure should reach the user.
+					const result = await sendLoginCodeEmail(env, email, otp);
+					if (result === "sent" || isLocalDev) return;
+
+					if (result === "rate_limited") {
+						logGroveError("Heartwood", HW_SVC_ERRORS.LOGIN_CODE_RATE_LIMITED);
+						throw new APIError("TOO_MANY_REQUESTS", {
+							message: HW_SVC_ERRORS.LOGIN_CODE_RATE_LIMITED.userMessage,
+						});
+					}
+					throw new APIError("INTERNAL_SERVER_ERROR", {
+						message: HW_SVC_ERRORS.LOGIN_CODE_SEND_FAILED.userMessage,
+					});
 				},
 			}),
 		],

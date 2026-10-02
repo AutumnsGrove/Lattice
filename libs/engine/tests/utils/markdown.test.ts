@@ -54,9 +54,9 @@ describe("extractHeaders", () => {
 		const headers = extractHeaders(md);
 
 		expect(headers).toEqual([
-			{ level: 1, text: "Title", id: "title" },
-			{ level: 2, text: "Section", id: "section" },
-			{ level: 3, text: "Subsection", id: "subsection" },
+			{ level: 1, text: "Title", id: "title", depth: 0 },
+			{ level: 2, text: "Section", id: "section", depth: 1 },
+			{ level: 3, text: "Subsection", id: "subsection", depth: 2 },
 		]);
 	});
 
@@ -237,7 +237,7 @@ This is content.`;
 		expect(result.content).toContain("<h1");
 		expect(result.content).toContain("Hello");
 		expect(result.content).toContain("This is content.");
-		expect(result.headers).toEqual([{ level: 1, text: "Hello", id: "hello" }]);
+		expect(result.headers).toEqual([{ level: 1, text: "Hello", id: "hello", depth: 0 }]);
 	});
 
 	it("should handle content with no frontmatter", () => {
