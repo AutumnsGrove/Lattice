@@ -21,7 +21,7 @@ tags:
 
 Heartwood is Grove's centralized authentication service. It runs as a Cloudflare Worker (`groveauth`) and handles all user identity across the Grove ecosystem. Individual apps never implement their own auth logic. They redirect users to Heartwood, receive verified session tokens back, and validate those tokens on every request.
 
-Authentication methods: Google OAuth (PKCE), magic links (email), and passkeys (WebAuthn).
+Authentication methods: Google OAuth (PKCE) and passwordless email codes (a 6-digit code via Better Auth's `emailOTP` plugin — one flow for sign-in and sign-up).
 
 The public entry point is `login.grove.place`, which proxies all requests to the Heartwood worker via a Cloudflare service binding. The client library lives at `@autumnsgrove/lattice/heartwood`.
 

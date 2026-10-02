@@ -8,16 +8,8 @@
  * where concurrent requests would all see stale counts before logging.
  */
 
+import { RATE_LIMITS } from "../types";
 import type { EmailType, RateLimitConfig } from "../types";
-
-const RATE_LIMITS: Record<EmailType, RateLimitConfig> = {
-	transactional: { perMinute: 60, perDay: 1000 },
-	notification: { perMinute: 60, perDay: 1000 },
-	verification: { perMinute: 10, perDay: 100 },
-	sequence: { perMinute: 100, perDay: 5000 },
-	lifecycle: { perMinute: 60, perDay: 500 },
-	broadcast: { perMinute: 1000, perDay: 10000 },
-};
 
 export interface RateLimitResult {
 	allowed: boolean;

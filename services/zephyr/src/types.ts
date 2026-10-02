@@ -134,7 +134,7 @@ export interface RateLimitConfig {
 export const RATE_LIMITS: Record<EmailType, RateLimitConfig> = {
 	transactional: { perMinute: 60, perDay: 1000 },
 	notification: { perMinute: 60, perDay: 1000 },
-	verification: { perMinute: 10, perDay: 100 },
+	verification: { perMinute: 20, perDay: 1000 },
 	sequence: { perMinute: 100, perDay: 5000 },
 	lifecycle: { perMinute: 60, perDay: 500 },
 	broadcast: { perMinute: 1000, perDay: 10000 },

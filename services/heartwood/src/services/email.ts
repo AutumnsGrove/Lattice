@@ -1,64 +1,20 @@
 /**
- * Email Service - Send emails via Resend API
+ * Email Service - Send auth emails through the Zephyr gateway
  */
 
+import { createZephyrClient } from "@autumnsgrove/lattice/zephyr";
 import type { Env } from "../types.js";
-import { RESEND_API_URL, EMAIL_FROM } from "../utils/constants.js";
-
-interface SendEmailOptions {
-	to: string;
-	subject: string;
-	html: string;
-	text?: string;
-}
-
-interface ResendResponse {
-	id?: string;
-	error?: {
-		message: string;
-		name: string;
-	};
-}
+import { EMAIL_FROM_ADDRESS, EMAIL_FROM_NAME, EMAIL_OTP_EXPIRES_IN } from "../utils/constants.js";
 
 /**
- * Send an email via Resend API
+ * Send the 6-digit sign-in code email.
+ *
+ * Returns false (and logs) on any delivery failure so the caller can decide
+ * how loudly to fail — the code itself is never logged here.
  */
-export async function sendEmail(env: Env, options: SendEmailOptions): Promise<boolean> {
-	try {
-		const response = await fetch(RESEND_API_URL, {
-			method: "POST",
-			headers: {
-				Authorization: `Bearer ${env.RESEND_API_KEY}`,
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				from: EMAIL_FROM,
-				to: options.to,
-				subject: options.subject,
-				html: options.html,
-				text: options.text,
-			}),
-		});
-
-		const data = (await response.json()) as ResendResponse;
-
-		if (!response.ok || data.error) {
-			console.error("Resend API error:", data.error?.message || "Unknown error");
-			return false;
-		}
-
-		return true;
-	} catch (error) {
-		console.error("Failed to send email:", error);
-		return false;
-	}
-}
-
-/**
- * Send magic code email
- */
-export async function sendMagicCodeEmail(env: Env, email: string, code: string): Promise<boolean> {
-	const subject = "Your Grove login code";
+export async function sendLoginCodeEmail(env: Env, email: string, code: string): Promise<boolean> {
+	const minutes = Math.round(EMAIL_OTP_EXPIRES_IN / 60);
+	const subject = `${code} is your Grove sign-in code`;
 
 	const html = `
 <!DOCTYPE html>
@@ -78,10 +34,10 @@ export async function sendMagicCodeEmail(env: Env, email: string, code: string):
     <tr>
       <td style="padding: 30px; background-color: #1e2227; border-radius: 12px;">
         <h1 style="margin: 0 0 16px 0; font-size: 24px; color: #f5f2ea; font-weight: normal;">
-          Grove
+          Welcome in, Wanderer
         </h1>
         <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: rgba(245, 242, 234, 0.7);">
-          Here's your login code. It will expire in 10 minutes.
+          Here's your sign-in code. Type it into the page you came from — it's good for ${minutes} minutes.
         </p>
         <div style="background-color: rgba(22, 163, 74, 0.1); border-radius: 8px; padding: 24px; text-align: center; margin: 0 0 24px;">
           <span style="font-size: 36px; font-weight: 700; letter-spacing: 8px; color: #15803d; font-family: 'SF Mono', 'Menlo', monospace;">
@@ -89,10 +45,10 @@ export async function sendMagicCodeEmail(env: Env, email: string, code: string):
           </span>
         </div>
         <p style="margin: 0 0 8px 0; font-size: 14px; color: rgba(245, 242, 234, 0.5);">
-          If you didn't request this code, you can safely ignore this email.
+          If you didn't ask for this, you can safely ignore this email. No one can sign in without the code.
         </p>
         <p style="margin: 0; font-size: 14px; color: rgba(245, 242, 234, 0.5);">
-          This code is valid for 10 minutes and can only be used once.
+          It works once, and never share it with anyone.
         </p>
       </td>
     </tr>
@@ -109,21 +65,35 @@ export async function sendMagicCodeEmail(env: Env, email: string, code: string):
   `.trim();
 
 	const text = `
-Your Grove Login Code
+Welcome in, Wanderer
 
-Your code is: ${code}
+Your Grove sign-in code is: ${code}
 
-This code will expire in 10 minutes.
+Type it into the page you came from. It's good for ${minutes} minutes and works once.
 
-If you didn't request this code, you can safely ignore this email.
+If you didn't ask for this, you can safely ignore this email. No one can sign in without the code.
 
 — Grove
   `.trim();
 
-	return sendEmail(env, {
-		to: email,
-		subject,
-		html,
-		text,
-	});
+	try {
+		const result = await createZephyrClient(env).sendRaw({
+			type: "verification",
+			to: email,
+			subject,
+			html,
+			text,
+			from: EMAIL_FROM_ADDRESS,
+			fromName: EMAIL_FROM_NAME,
+		});
+
+		if (!result.success) {
+			console.error("[LoginCode] Zephyr send failed:", result.errorCode, result.errorMessage);
+			return false;
+		}
+		return true;
+	} catch (error) {
+		console.error("[LoginCode] Zephyr send threw:", error);
+		return false;
+	}
 }

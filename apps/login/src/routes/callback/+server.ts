@@ -9,6 +9,7 @@
  */
 
 import { redirect } from "@sveltejs/kit";
+import { dev } from "$app/environment";
 import type { RequestHandler } from "./$types";
 import { validateRedirectUrl } from "$lib/redirect";
 
@@ -21,7 +22,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 	// The cookie value is stored with encodeURIComponent() by the login page,
 	// so we must decode it before validation (e.g. "%2Ffeed" → "/feed").
 	const decodedCookie = redirectCookie ? decodeURIComponent(redirectCookie) : undefined;
-	const redirectTo = validateRedirectUrl(redirectParam || decodedCookie);
+	const redirectTo = validateRedirectUrl(redirectParam || decodedCookie, dev);
 
 	// Clean up the fallback cookie now that we've read it
 	if (redirectCookie) {

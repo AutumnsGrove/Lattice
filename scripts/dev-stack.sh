@@ -137,11 +137,20 @@ apply_migrations() {
     fi
 
     # Heartwood DB
+    # Heartwood's SQL lives in src/db/migrations (no migrations_dir configured, so
+    # `wrangler d1 migrations apply` finds nothing and used to fail silently,
+    # leaving the local auth DB empty). Apply just the files Better Auth needs
+    # locally — the older numbered files assume legacy tables and aren't replayable.
+    # All three are safe to re-run except the ALTER in 0011, whose "duplicate
+    # column" error on a second run is expected and ignored.
     dim "  → heartwood (groveauth)"
-    wrangler d1 migrations apply groveauth \
-        --local \
-        -c services/heartwood/wrangler.toml \
-        2>&1 | grep -E "applied|Already|Migrations" || true
+    for m in 0001_better_auth 0011_ba_user_two_factor_enabled 0015_rate_limits_table; do
+        wrangler d1 execute groveauth \
+            --local \
+            -c services/heartwood/wrangler.toml \
+            --file "services/heartwood/src/db/migrations/$m.sql" \
+            >/dev/null 2>&1 || true
+    done
 
     log "Migrations complete."
 }
@@ -359,6 +368,7 @@ start_workers() {
     dim "  Primary:   grove-aspen (port 5173) + auxiliary grove-durable-objects, grove-zephyr"
     dim "  Landing:   grove-landing (port 5174) — separate process"
     dim "  Plant:     grove-plant (port 5175) — separate process"
+    dim "  Login:     grove-login (port 5176) — vite dev, separate process"
     echo ""
 
     # Shared local state directory. Only wrangler dev invocations that point
@@ -391,9 +401,29 @@ start_workers() {
     fi
     log "Heartwood ready."
 
+    # Login hub — the page that hosts "Continue with email" (code sign-in).
+    # Runs under `vite dev` (hot reload, no build step); its AUTH service
+    # binding finds Heartwood through wrangler's dev registry. Port 5176 is
+    # in Heartwood's local trustedOrigins. Email codes print in the
+    # [heartwood] log lines above — look for "[LoginCode:dev]".
+    (cd apps/login && pnpm exec vite dev --port 5176 --strictPort) \
+        2>&1 | sed "s/^/  ${DIM}[login]${RESET} /" &
+    LOGIN_PID=$!
+    PIDS+=("$LOGIN_PID")
+
+    log "Waiting for login (port 5176)..."
+    if ! wait_for_port 5176 "login"; then
+        warn "Login hub didn't start on 5176 — email-code sign-in won't be testable (rest of the stack continues)"
+    fi
+
     # wrangler dev serves each app's built .svelte-kit/output — it does NOT
     # watch source files the way `vite dev` does. Always rebuild here so
     # edits made before this run are actually reflected, not a stale bundle.
+    # Point every app's "Sign in" button at the local login hub (5176) instead of
+    # production login.grove.place. The engine reads VITE_LOGIN_URL at build time
+    # (libs/engine/src/lib/auth/login/config.ts), so it must be set before the builds.
+    export VITE_LOGIN_URL="http://localhost:5176"
+
     log "Building aspen, plant, landing (wrangler dev serves build output, not source)..."
     (cd apps/aspen && pnpm run build) || {
         err "Aspen build failed — see output above"
@@ -546,6 +576,7 @@ main() {
             fi
             echo -e "  ${CYAN}Plant:${RESET}     http://localhost:5175 (onboarding/signup)"
             echo -e "  ${CYAN}Heartwood:${RESET} http://localhost:8787 (auth API)"
+            echo -e "  ${CYAN}Login:${RESET}     http://localhost:5176 (email-code sign-in; codes print in [heartwood] logs)"
             echo -e "  ${CYAN}DOs:${RESET}       via service binding (grove-durable-objects)"
             echo -e "  ${CYAN}Email:${RESET}     via service binding (grove-zephyr)"
             echo ""

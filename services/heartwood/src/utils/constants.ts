@@ -67,9 +67,16 @@ export const GOOGLE_AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
 export const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 export const GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinfo";
 
-// Resend
-export const RESEND_API_URL = "https://api.resend.com/emails";
-export const EMAIL_FROM = "Grove <auth@grove.place>";
+// Email sign-in codes (sent via Zephyr)
+export const EMAIL_FROM_ADDRESS = "auth@grove.place";
+export const EMAIL_FROM_NAME = "Grove";
+export const EMAIL_OTP_LENGTH = 6;
+export const EMAIL_OTP_EXPIRES_IN = 10 * 60; // 10 minutes in seconds
+export const EMAIL_OTP_ALLOWED_ATTEMPTS = 3; // wrong guesses before the code is burned
+export const EMAIL_OTP_SEND_LIMIT = 3; // codes per window, per email/IP
+export const EMAIL_OTP_SEND_WINDOW = 10 * 60; // 10 minutes in seconds
+// Local dev has no real client IP (every request shares one bucket), so don't throttle testing.
+export const EMAIL_OTP_SEND_LIMIT_LOCAL = 1000;
 
 // Security headers
 export const SECURITY_HEADERS = {

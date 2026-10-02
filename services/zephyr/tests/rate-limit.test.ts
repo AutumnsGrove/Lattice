@@ -126,8 +126,8 @@ describe("checkRateLimit", () => {
 	});
 
 	it("should have different limits for different email types", async () => {
-		// Test verification type (stricter limits: 10/min, 100/day)
-		mockDb = createMockD1({ minute: 10, day: 10 });
+		// Test verification type (20/min, 1000/day)
+		mockDb = createMockD1({ minute: 20, day: 20 });
 		const verificationResult = await checkRateLimit(
 			mockDb as unknown as D1Database,
 			"test-tenant",

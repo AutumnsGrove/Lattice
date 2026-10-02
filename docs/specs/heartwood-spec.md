@@ -189,22 +189,29 @@ GroveAuth is a centralized authentication service that handles all authenticatio
 - Name (display purposes)
 - Profile picture URL (optional)
 
-### 2. Magic Code (Email)
+### 2. Email Code (passwordless)
 
-**Purpose**: Fallback for users who prefer email-based auth
+**Purpose**: A path for Wanderers who don't want to use Google. No passwords, ever.
+
+**Implementation**: Better Auth's `emailOTP` plugin, configured in `services/heartwood/src/auth/index.ts`. One flow serves both sign-in and sign-up: an unknown email becomes a new account once its code is proven.
 
 **Flow**:
 
-1. User enters email
-2. 6-digit code sent via Resend API
-3. User enters code to verify
-4. Session created on successful verification
+1. Wanderer enters their email on the login hub (`login.grove.place`)
+2. Heartwood generates a 6-digit code and stores it **hashed** in `ba_verification`
+3. The code is emailed through Zephyr (`type: "verification"`, sent as `auth@grove.place`)
+4. Wanderer types the code on the same page (the code can be entered on any device — there is no link to click)
+5. Heartwood verifies it, creates the account if needed, and issues the session cookies (`better-auth.session_token` + `grove_session`)
 
-**Constraints**:
+**Constraints** (all defined once in `services/heartwood/src/utils/constants.ts`):
 
-- Code expires in 10 minutes
-- Rate limit: 3 codes per email per minute
-- Lockout: 5 failed attempts = 15-minute lockout
+- Code expires in 10 minutes and works once
+- 3 wrong guesses burn the code (request a new one)
+- Sending is limited to 3 codes per 10 minutes per client IP; verifying is limited to 5 per minute
+- The send endpoint answers identically for known and unknown emails (no account probing)
+- Signup is open to anyone with a working email
+
+**Known property**: like Google sign-in, email-code sign-in does not trigger the TOTP prompt for accounts with 2FA enabled. Better Auth's two-factor hook only gates credential-style sign-in paths.
 
 ---
 
