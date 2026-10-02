@@ -188,7 +188,7 @@ Multi-tenant blog platform where users get their own blogs on subdomains (userna
 - **Framework:** SvelteKit 2.0+
 - **Backend:** Cloudflare Workers, D1 (SQLite), KV, R2 Storage
 - **Infrastructure:** Wrangler (app deployment)
-- **Auth:** Heartwood (Google OAuth 2.0 + PKCE)
+- **Auth:** Heartwood (Google OAuth 2.0 + PKCE, passwordless email codes)
 - **Payments:** Stripe
 - **Email:** Resend
 - **Styling:** Tailwind CSS
@@ -241,7 +241,7 @@ Apps auto-deploy via GitHub Actions on push to main. Resource IDs are hardcoded 
 
 ### Beta Deployment (Aspen only)
 
-Aspen has a second live deployment for testing real changes against real Cloudflare infrastructure before every Wanderer sees them — **not** an isolated staging environment. `grove-aspen-beta` shares the exact same `grove-engine-db` D1, KV, and R2 as production `grove-aspen`. A post written in beta is a row in the same table the public site reads. Full design: `docs/plans/planned/beta-environment-architecture.md`.
+Aspen has a second live deployment for testing real changes against real Cloudflare infrastructure before every Wanderer sees them — **not** an isolated staging environment. It's where new features get tried first, so it's normal and intended for `beta` to run ahead of `main`. `grove-aspen-beta` shares the exact same `grove-engine-db` D1, KV, and R2 as production `grove-aspen`. A post written in beta is a row in the same table the public site reads. Full design: `docs/plans/planned/beta-environment-architecture.md`.
 
 **URL shape:** `<tenant>-beta.grove.place` (e.g. `autumn-beta.grove.place`) — single-label, **not** `beta.<tenant>.grove.place`. This zone's Cloudflare edge cert only covers `*.grove.place` (one level); a two-level host fails the TLS handshake before any request reaches grove-router. Don't "fix" this back to the dot form without provisioning Cloudflare Advanced Certificate Manager (paid) first.
 
@@ -255,9 +255,10 @@ Aspen has a second live deployment for testing real changes against real Cloudfl
 
 **How a change reaches beta:**
 
-1. Commit and push to `beta` directly (or merge `main` into `beta` first if you're resyncing rather than adding new beta-only work).
-2. `.github/workflows/deploy-aspen-beta.yml` (triggers on push to `beta`, same path filters as `deploy-aspen.yml`) redeploys `grove-aspen-beta` via `_deploy-worker.yml` with `deploy-env: beta` (→ `wrangler deploy --env beta`) and `service-name-override: aspen-beta` (keeps its failure-tracking issue separate from prod's).
-3. A same-SHA branch push (nothing new to diff against path filters) won't auto-trigger — use `gh workflow run deploy-aspen-beta.yml --ref beta` to force it.
+1. Land the change on `main` as normal.
+2. `git checkout beta && git merge main && git push origin beta` — beta is a trial ground, so it's expected to carry commits that aren't on `main` yet (features being tried out on purpose). Merge `main` into it and keep those commits; never reset or force beta to match `main`. Try `--ff-only` first if you like, but a refusal just means beta has its own work — merge instead.
+3. `.github/workflows/deploy-aspen-beta.yml` (triggers on push to `beta`, same path filters as `deploy-aspen.yml`) redeploys `grove-aspen-beta` via `_deploy-worker.yml` with `deploy-env: beta` (→ `wrangler deploy --env beta`) and `service-name-override: aspen-beta` (keeps its failure-tracking issue separate from prod's).
+4. A same-SHA branch push (nothing new to diff against path filters) won't auto-trigger — use `gh workflow run deploy-aspen-beta.yml --ref beta` to force it.
 
 **Routing:** `services/grove-router` holds an `ASPEN_BETA` service binding alongside `ASPEN`. It checks the subdomain (`parts[0]`) for a trailing `-beta` suffix and dispatches there instead of the default `ASPEN` target, forwarding `X-Forwarded-Host` unchanged. Aspen's own `hooks.server.ts` strips the `-beta` suffix to recover the real tenant and sets `locals.isBeta`, which `+layout.svelte` uses to show a `BetaBadge` next to the site title in the header.
 

@@ -63,7 +63,8 @@ Multi-config wrangler dev (port 5173):
 | Service | Port | Notes |
 |---------|------|-------|
 | Aspen | 5173 | Primary worker — the blog frontend |
-| Heartwood | 8787 | Auth API (Google OAuth, session management) |
+| Heartwood | 8787 | Auth API (Google OAuth, email codes, session management) |
+| Login hub | 5176 | `apps/login` under `vite dev` — hosts "Continue with email" |
 | Durable Objects | — | No dedicated port; reached via service binding |
 | Zephyr | — | No dedicated port; reached via service binding |
 
@@ -99,6 +100,42 @@ openssl ecparam -genkey -name prime256v1 -noout | openssl pkcs8 -topk8 -nocrypt
 ```
 
 `ZEPHYR_API_KEY` can be left as a placeholder locally — auth still works, email just won't deliver (see [What's Not Local](#whats-not-local)).
+
+---
+
+## Auth Setup (Email Code)
+
+No Google credentials needed. Sign in or sign up with just an email address and a 6-digit code.
+
+1. Run `./scripts/dev-stack.sh`.
+2. Open **http://localhost:5175** (Plant) and click **Sign in with Grove** — or go straight to the login hub at **http://localhost:5176**.
+3. Enter any email and press **Continue with email**.
+4. Find the code (see below) and type it into the page. A first-time email creates a new account; a known one signs in.
+
+`dev-stack.sh` points every app's sign-in button at the local hub by exporting `VITE_LOGIN_URL=http://localhost:5176` before building them. Without it, the buttons go to production `login.grove.place`.
+
+**Finding the code.** Local Zephyr has no `ZEPHYR_API_KEY`, so nothing is emailed. Heartwood prints the code instead:
+
+```
+[heartwood] [LoginCode:dev] sign-in code for you@example.com: 123456
+```
+
+If you didn't start the stack from your own terminal (or the log is buffered), read it from Heartwood's local log store:
+
+```bash
+curl -s -X POST http://localhost:8787/cdn-cgi/local/explorer/api/local/observability/query \
+  -H 'Content-Type: application/json' \
+  -d '{"sql":"SELECT created_at, message FROM logs WHERE message LIKE '"'"'%LoginCode:dev%'"'"' ORDER BY ts_ms DESC LIMIT 5"}'
+```
+
+The dev log only happens when `AUTH_BASE_URL` starts with `http://localhost`.
+
+**Behavior locally:**
+
+- Codes expire after 10 minutes, are stored hashed in the local `ba_verification` table, and are burned after 3 wrong guesses.
+- The send limit is relaxed locally (the login hub under `vite dev` can't see a real client IP, so every request shares one rate-limit bucket). In production it's 3 codes per 10 minutes per IP, plus a per-address cap in Zephyr (5 per minute, 20 per day).
+- With no `?redirect=`, the hub sends you to Plant (`http://localhost:5175`); in production it falls back to `https://grove.place`. Localhost redirects are only accepted in dev builds.
+- The local Heartwood database is set up by `dev-stack.sh` from the three migrations Better Auth needs (`0001`, `0011`, `0015`). To start clean: `./scripts/dev-stack.sh reset`.
 
 ---
 
@@ -157,7 +194,7 @@ A few things genuinely need the cloud:
 |-------|-----|-----------|
 | **Workers AI** | Always remote (Cloudflare's GPU infra) | May incur small charges; disable AI features locally if needed |
 | **Stripe webhooks** | Needs a public URL to receive events | Use [ngrok](https://ngrok.com/) or a Cloudflare Tunnel for billing flow testing |
-| **Email delivery** | Zephyr has no Resend key locally | Auth still completes; emails just silently don't send |
+| **Email delivery** | Zephyr has no Resend key locally | Auth still completes; sign-in codes print in the Heartwood log (see [Email Code](#auth-setup-email-code)) |
 | **CDN fonts** | Loads from `cdn.grove.place` | Works fine, just slightly slower on first load |
 
 ---

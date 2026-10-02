@@ -58,6 +58,20 @@ export const LOGIN_ERRORS = {
 		adminMessage: "Requested route does not exist.",
 	},
 
+	EMAIL_CODE_SEND_FAILED: {
+		code: "LOGIN-022",
+		category: "admin" as const,
+		userMessage: "We couldn't send your sign-in code. Please try again in a moment.",
+		adminMessage: "Heartwood rejected or failed a send-verification-otp request.",
+	},
+
+	EMAIL_CODE_VERIFY_UNAVAILABLE: {
+		code: "LOGIN-023",
+		category: "admin" as const,
+		userMessage: "We couldn't sign you in. Please try again.",
+		adminMessage: "Heartwood could not be reached to verify a sign-in code.",
+	},
+
 	// ─────────────────────────────────────────────────────────────────────────
 	// Internal Errors (080-099)
 	// ─────────────────────────────────────────────────────────────────────────

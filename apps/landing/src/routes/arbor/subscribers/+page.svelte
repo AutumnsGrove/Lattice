@@ -106,7 +106,7 @@
 				<div class="flex flex-wrap gap-3">
 					<button
 						onclick={copyAllEmails}
-						class="px-4 py-2 bg-error text-error-foreground font-sans text-sm rounded-lg hover:bg-error transition-colors flex items-center gap-2"
+						class="px-4 py-2 bg-destructive text-destructive-foreground font-sans text-sm rounded-lg hover:bg-destructive/90 transition-colors flex items-center gap-2"
 					>
 						{#if copiedAll}
 							<Check class="w-4 h-4" />

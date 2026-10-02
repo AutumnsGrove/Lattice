@@ -356,10 +356,6 @@
   color: var(--color-accent-text-subtle);
 }
 
-.text-error {
-  color: var(--color-error);
-}
-
 /* Background utilities */
 .bg-page {
   background-color: var(--color-background);
@@ -376,9 +372,6 @@
 .bg-accent {
   background-color: var(--color-accent-bg);
 }
-.bg-error {
-  background-color: var(--color-error-bg);
-}
 
 /* Border utilities */
 .border-default {
@@ -392,9 +385,6 @@
 }
 .border-accent {
   border-color: var(--color-accent-border);
-}
-.border-error {
-  border-color: var(--color-error-border);
 }
 
 /* Divider color for text elements like "·" separators */

@@ -753,7 +753,7 @@
 						<button
 							type="submit"
 							disabled={isRevoking}
-							class="flex-1 px-4 py-2 rounded-lg bg-error text-destructive-foreground hover:bg-error/90 transition-colors flex items-center justify-center gap-2"
+							class="flex-1 px-4 py-2 rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors flex items-center justify-center gap-2"
 						>
 							{#if isRevoking}
 								<Loader2 class="w-4 h-4 animate-spin" />

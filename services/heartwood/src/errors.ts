@@ -81,6 +81,20 @@ export const HW_SVC_ERRORS = {
 		adminMessage: "Audit log retention must be at least 30 days.",
 	},
 
+	LOGIN_CODE_SEND_FAILED: {
+		code: "HW-SVC-042",
+		category: "admin" as const,
+		userMessage: "We couldn't send your sign-in code. Please try again in a moment.",
+		adminMessage: "Zephyr failed to deliver a sign-in code email.",
+	},
+
+	LOGIN_CODE_RATE_LIMITED: {
+		code: "HW-SVC-043",
+		category: "user" as const,
+		userMessage: "Too many sign-in codes were requested for this email. Please wait a few minutes.",
+		adminMessage: "Zephyr per-recipient verification rate limit hit for a sign-in code.",
+	},
+
 	// ─────────────────────────────────────────────────────────────────────────
 	// Internal Errors (080-099)
 	// ─────────────────────────────────────────────────────────────────────────

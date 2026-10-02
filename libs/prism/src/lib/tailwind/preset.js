@@ -123,11 +123,15 @@ export default {
 				},
 				// Divider: alias for border — commonly hallucinated by LLMs
 				divider: "rgb(var(--cream-200) / <alpha-value>)",
-				// Error: alias for destructive — commonly hallucinated by LLMs
+				// Error: status token, same shape as warning. Theme-aware via CSS vars
+				// (also commonly hallucinated by LLMs as an alias for destructive).
+				// foreground is readable text ON bg, not white-on-solid-red; use
+				// destructive-foreground for solid destructive buttons.
 				error: {
-					DEFAULT: "#dc2626",
-					foreground: "#ffffff",
-					bg: "#fef2f2",
+					DEFAULT: "hsl(var(--error, 0 72% 51%) / <alpha-value>)",
+					foreground: "hsl(var(--error-foreground, 0 70% 30%) / <alpha-value>)",
+					bg: "hsl(var(--error-bg, 0 86% 97%) / <alpha-value>)",
+					muted: "hsl(var(--error-muted, 0 84% 60%) / <alpha-value>)",
 				},
 				// Status colors: semantic tokens for state communication
 				warning: {

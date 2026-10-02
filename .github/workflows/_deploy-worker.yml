@@ -38,11 +38,6 @@ on:
         required: false
         type: boolean
         default: false
-      needs-vineyard:
-        description: Build libs/vineyard (engine-only dependency)
-        required: false
-        type: boolean
-        default: false
       run-deploy:
         description: >
           Run `wrangler deploy` at the end. Set false for library-only
@@ -165,11 +160,6 @@ jobs:
         if: inputs.needs-engine
         run: pnpm run package
         working-directory: libs/engine
-
-      - name: Build vineyard
-        if: inputs.needs-vineyard
-        run: pnpm run package
-        working-directory: libs/vineyard
 
       # Worker build & deploy
       - name: SvelteKit sync

@@ -110,6 +110,12 @@
 	/* Foreground */
 	--foreground-faint: 25 15% 62%;
 
+	/* Status: Error */
+	--error: 0 72% 51%;
+	--error-foreground: 0 70% 30%;
+	--error-bg: 0 86% 97%;
+	--error-muted: 0 84% 60%;
+
 	/* Status: Warning */
 	--warning: 38 92% 50%;
 	--warning-foreground: 38 92% 20%;
@@ -249,6 +255,12 @@
 
 	/* Foreground */
 	--foreground-faint: 30 20% 60%;
+
+	/* Status: Error */
+	--error: 0 91% 71%;
+	--error-foreground: 0 90% 88%;
+	--error-bg: 0 60% 14%;
+	--error-muted: 0 84% 60%;
 
 	/* Status: Warning */
 	--warning: 38 92% 50%;

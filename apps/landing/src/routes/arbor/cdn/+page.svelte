@@ -461,7 +461,7 @@
 								<div class="flex gap-2">
 									<button
 										onclick={() => deleteFile(file.id)}
-										class="px-3 py-1.5 bg-error text-error-foreground text-sm rounded-lg hover:bg-error transition-colors"
+										class="px-3 py-1.5 bg-destructive text-destructive-foreground text-sm rounded-lg hover:bg-destructive/90 transition-colors"
 									>
 										Delete
 									</button>
