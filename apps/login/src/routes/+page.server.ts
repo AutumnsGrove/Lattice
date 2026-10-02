@@ -12,13 +12,16 @@
 import { redirect, fail } from "@sveltejs/kit";
 import { dev } from "$app/environment";
 import type { Actions } from "./$types";
+import { logGroveError } from "@autumnsgrove/lattice/errors";
 import { validateRedirectUrl } from "$lib/redirect";
+import { LOGIN_ERRORS } from "$lib/errors";
 import {
 	EMAIL_CODE_MESSAGES,
 	normalizeEmail,
 	normalizeCode,
 	messageForSendFailure,
 	messageForVerifyFailure,
+	statusForUpstreamFailure,
 } from "$lib/email-code";
 
 const DEFAULT_AUTH_URL = "https://login.grove.place";
@@ -135,13 +138,13 @@ export const actions: Actions = {
 				{ email, type: "sign-in" },
 			);
 		} catch (fetchErr) {
-			console.error("[Email code] Send: service binding fetch error:", fetchErr);
+			logGroveError("Login", LOGIN_ERRORS.EMAIL_CODE_SEND_FAILED, { cause: fetchErr });
 			return fail(503, { step: "email" as const, email, error: EMAIL_CODE_MESSAGES.SEND_FAILED });
 		}
 
 		if (!response.ok) {
-			console.error("[Email code] Send: Heartwood responded", response.status);
-			return fail(response.status === 429 ? 429 : 400, {
+			logGroveError("Login", LOGIN_ERRORS.EMAIL_CODE_SEND_FAILED, { status: response.status });
+			return fail(statusForUpstreamFailure(response.status), {
 				step: "email" as const,
 				email,
 				error: messageForSendFailure(response.status),
@@ -193,7 +196,7 @@ export const actions: Actions = {
 				{ email, otp: code },
 			);
 		} catch (fetchErr) {
-			console.error("[Email code] Verify: service binding fetch error:", fetchErr);
+			logGroveError("Login", LOGIN_ERRORS.EMAIL_CODE_VERIFY_UNAVAILABLE, { cause: fetchErr });
 			return fail(503, {
 				step: "code" as const,
 				email,
@@ -209,7 +212,7 @@ export const actions: Actions = {
 			} catch {
 				/* non-JSON error body — fall through to the generic message */
 			}
-			return fail(response.status === 429 ? 429 : 400, {
+			return fail(statusForUpstreamFailure(response.status), {
 				step: "code" as const,
 				email,
 				redirect: redirectTo,

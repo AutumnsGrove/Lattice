@@ -70,7 +70,7 @@ export const GOOGLE_USERINFO_URL = "https://www.googleapis.com/oauth2/v2/userinf
 // Email sign-in codes (sent via Zephyr)
 export const EMAIL_FROM_ADDRESS = "auth@grove.place";
 export const EMAIL_FROM_NAME = "Grove";
-export const EMAIL_OTP_LENGTH = 6;
+export { EMAIL_OTP_LENGTH } from "@autumnsgrove/lattice/auth/login/email-code";
 export const EMAIL_OTP_EXPIRES_IN = 10 * 60; // 10 minutes in seconds
 export const EMAIL_OTP_ALLOWED_ATTEMPTS = 3; // wrong guesses before the code is burned
 export const EMAIL_OTP_SEND_LIMIT = 3; // codes per window, per client IP (Zephyr also caps each recipient)

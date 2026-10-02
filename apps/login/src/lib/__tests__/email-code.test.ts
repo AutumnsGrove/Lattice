@@ -5,6 +5,7 @@ import {
 	normalizeCode,
 	messageForSendFailure,
 	messageForVerifyFailure,
+	statusForUpstreamFailure,
 } from "../email-code";
 
 describe("normalizeEmail", () => {
@@ -68,5 +69,15 @@ describe("messageForVerifyFailure", () => {
 		expect(messageForVerifyFailure(429, "INVALID_OTP")).toBe(EMAIL_CODE_MESSAGES.RATE_LIMITED);
 		expect(messageForVerifyFailure(500)).toBe(EMAIL_CODE_MESSAGES.VERIFY_FAILED);
 		expect(messageForVerifyFailure(400, "SOMETHING_NEW")).toBe(EMAIL_CODE_MESSAGES.VERIFY_FAILED);
+	});
+});
+
+describe("statusForUpstreamFailure", () => {
+	it("keeps rate limits, blames upstream outages on the gateway, and treats the rest as bad input", () => {
+		expect(statusForUpstreamFailure(429)).toBe(429);
+		expect(statusForUpstreamFailure(500)).toBe(502);
+		expect(statusForUpstreamFailure(503)).toBe(502);
+		expect(statusForUpstreamFailure(400)).toBe(400);
+		expect(statusForUpstreamFailure(403)).toBe(400);
 	});
 });
