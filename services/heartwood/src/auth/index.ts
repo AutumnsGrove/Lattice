@@ -14,6 +14,7 @@
 import { betterAuth } from "better-auth";
 import { withCloudflare } from "better-auth-cloudflare";
 import type { CloudflareGeolocation } from "better-auth-cloudflare";
+import { APIError } from "better-auth/api";
 import { twoFactor, emailOTP } from "better-auth/plugins";
 import { drizzle } from "drizzle-orm/d1";
 import { logGroveError } from "@autumnsgrove/lattice/errors";
@@ -29,6 +30,8 @@ import {
 	EMAIL_OTP_SEND_LIMIT,
 	EMAIL_OTP_SEND_LIMIT_LOCAL,
 	EMAIL_OTP_SEND_WINDOW,
+	EMAIL_OTP_VERIFY_LIMIT,
+	EMAIL_OTP_VERIFY_WINDOW,
 } from "../utils/constants.js";
 
 /**
@@ -174,7 +177,7 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 						window: EMAIL_OTP_SEND_WINDOW,
 						max: isLocalDev ? EMAIL_OTP_SEND_LIMIT_LOCAL : EMAIL_OTP_SEND_LIMIT,
 					},
-					"/sign-in/email-otp": { window: 60, max: 5 },
+					"/sign-in/email-otp": { window: EMAIL_OTP_VERIFY_WINDOW, max: EMAIL_OTP_VERIFY_LIMIT },
 					"/sign-in/*": { window: 60, max: 20 },
 					"/sign-up/*": { window: 60, max: 10 },
 					"/callback/*": { window: 60, max: 30 },
@@ -316,10 +319,18 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 					}
 					// Awaited on purpose: every email (new or existing account) takes
 					// the same path, and a delivery failure should reach the user.
-					const sent = await sendLoginCodeEmail(env, email, otp);
-					if (!sent && !isLocalDev) {
-						throw new Error("Failed to send sign-in code");
+					const result = await sendLoginCodeEmail(env, email, otp);
+					if (result === "sent" || isLocalDev) return;
+
+					if (result === "rate_limited") {
+						logGroveError("Heartwood", HW_SVC_ERRORS.LOGIN_CODE_RATE_LIMITED);
+						throw new APIError("TOO_MANY_REQUESTS", {
+							message: HW_SVC_ERRORS.LOGIN_CODE_RATE_LIMITED.userMessage,
+						});
 					}
+					throw new APIError("INTERNAL_SERVER_ERROR", {
+						message: HW_SVC_ERRORS.LOGIN_CODE_SEND_FAILED.userMessage,
+					});
 				},
 			}),
 		],

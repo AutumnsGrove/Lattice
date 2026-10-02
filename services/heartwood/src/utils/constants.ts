@@ -73,8 +73,10 @@ export const EMAIL_FROM_NAME = "Grove";
 export const EMAIL_OTP_LENGTH = 6;
 export const EMAIL_OTP_EXPIRES_IN = 10 * 60; // 10 minutes in seconds
 export const EMAIL_OTP_ALLOWED_ATTEMPTS = 3; // wrong guesses before the code is burned
-export const EMAIL_OTP_SEND_LIMIT = 3; // codes per window, per email/IP
+export const EMAIL_OTP_SEND_LIMIT = 3; // codes per window, per client IP (Zephyr also caps each recipient)
 export const EMAIL_OTP_SEND_WINDOW = 10 * 60; // 10 minutes in seconds
+export const EMAIL_OTP_VERIFY_LIMIT = 5; // code submissions per window, per client IP
+export const EMAIL_OTP_VERIFY_WINDOW = 60; // 1 minute in seconds
 // Local dev has no real client IP (every request shares one bucket), so don't throttle testing.
 export const EMAIL_OTP_SEND_LIMIT_LOCAL = 1000;
 

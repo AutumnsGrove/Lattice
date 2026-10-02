@@ -13,6 +13,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createMockDb, createMockEnv } from "../test-helpers.js";
 import {
+	EMAIL_OTP_SEND_LIMIT,
+	EMAIL_OTP_SEND_LIMIT_LOCAL,
+	EMAIL_OTP_SEND_WINDOW,
+	EMAIL_OTP_VERIFY_LIMIT,
+	EMAIL_OTP_VERIFY_WINDOW,
+} from "../utils/constants.js";
+import {
+	createAuth,
 	isPendingTwoFactorSignInPath,
 	readBetterAuthRateLimitEntry,
 	writeBetterAuthRateLimitEntry,
@@ -133,5 +141,44 @@ describe("writeBetterAuthRateLimitEntry", () => {
 			expect.any(Error),
 		);
 		consoleSpy.mockRestore();
+	});
+});
+
+describe("email-code rate limit rules", () => {
+	// Better Auth applies the FIRST customRules key that matches the path, in
+	// insertion order, so the exact email-OTP rules must precede "/sign-in/*".
+	// Resolve rules the same way Better Auth does, against the real config.
+	function resolveRule(path: string, authBaseUrl: string) {
+		const auth = createAuth(createMockEnv({ AUTH_BASE_URL: authBaseUrl }));
+		const { customRules } = (
+			auth.options as unknown as {
+				rateLimit: { customRules: Record<string, { window: number; max: number }> };
+			}
+		).rateLimit;
+		const key = Object.keys(customRules).find((pattern) =>
+			pattern.endsWith("/*") ? path.startsWith(pattern.slice(0, -1)) : pattern === path,
+		);
+		return key ? customRules[key] : undefined;
+	}
+
+	it("limits sending codes by its own rule, not the /sign-in/* wildcard", () => {
+		expect(resolveRule("/email-otp/send-verification-otp", "https://login.grove.place")).toEqual({
+			window: EMAIL_OTP_SEND_WINDOW,
+			max: EMAIL_OTP_SEND_LIMIT,
+		});
+	});
+
+	it("relaxes the send limit only for a localhost AUTH_BASE_URL", () => {
+		expect(resolveRule("/email-otp/send-verification-otp", "http://localhost:8787")).toEqual({
+			window: EMAIL_OTP_SEND_WINDOW,
+			max: EMAIL_OTP_SEND_LIMIT_LOCAL,
+		});
+	});
+
+	it("limits verifying codes by its own rule, not the /sign-in/* wildcard", () => {
+		expect(resolveRule("/sign-in/email-otp", "https://login.grove.place")).toEqual({
+			window: EMAIL_OTP_VERIFY_WINDOW,
+			max: EMAIL_OTP_VERIFY_LIMIT,
+		});
 	});
 });

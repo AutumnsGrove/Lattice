@@ -3,16 +3,24 @@
  */
 
 import { createZephyrClient } from "@autumnsgrove/lattice/zephyr";
+import { logGroveError } from "@autumnsgrove/lattice/errors";
+import { HW_SVC_ERRORS } from "../errors.js";
 import type { Env } from "../types.js";
 import { EMAIL_FROM_ADDRESS, EMAIL_FROM_NAME, EMAIL_OTP_EXPIRES_IN } from "../utils/constants.js";
+
+export type LoginCodeSendResult = "sent" | "rate_limited" | "failed";
 
 /**
  * Send the 6-digit sign-in code email.
  *
- * Returns false (and logs) on any delivery failure so the caller can decide
- * how loudly to fail — the code itself is never logged here.
+ * Reports the outcome instead of throwing so the caller can decide how loudly
+ * to fail — the code itself is never logged here.
  */
-export async function sendLoginCodeEmail(env: Env, email: string, code: string): Promise<boolean> {
+export async function sendLoginCodeEmail(
+	env: Env,
+	email: string,
+	code: string,
+): Promise<LoginCodeSendResult> {
 	const minutes = Math.round(EMAIL_OTP_EXPIRES_IN / 60);
 	const subject = `${code} is your Grove sign-in code`;
 
@@ -87,13 +95,15 @@ If you didn't ask for this, you can safely ignore this email. No one can sign in
 			fromName: EMAIL_FROM_NAME,
 		});
 
-		if (!result.success) {
-			console.error("[LoginCode] Zephyr send failed:", result.errorCode, result.errorMessage);
-			return false;
-		}
-		return true;
+		if (result.success) return "sent";
+		if (result.errorCode === "RATE_LIMITED") return "rate_limited";
+
+		logGroveError("Heartwood", HW_SVC_ERRORS.LOGIN_CODE_SEND_FAILED, {
+			detail: result.errorCode,
+		});
+		return "failed";
 	} catch (error) {
-		console.error("[LoginCode] Zephyr send threw:", error);
-		return false;
+		logGroveError("Heartwood", HW_SVC_ERRORS.LOGIN_CODE_SEND_FAILED, { cause: error });
+		return "failed";
 	}
 }

@@ -46,8 +46,6 @@ export interface Env {
 	JWT_PUBLIC_KEY: string;
 	GOOGLE_CLIENT_ID: string;
 	GOOGLE_CLIENT_SECRET: string;
-	/** @deprecated Magic links now route through Zephyr — remove after confirming migration */
-	RESEND_API_KEY: string;
 	SESSION_SECRET: string;
 }
 

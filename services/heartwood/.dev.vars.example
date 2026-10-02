@@ -20,8 +20,5 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret_here
 JWT_PRIVATE_KEY=your_jwt_private_key_here
 JWT_PUBLIC_KEY=your_jwt_public_key_here
 
-# Zephyr email gateway API key (for magic link emails)
+# Zephyr email gateway API key (sign-in code emails)
 ZEPHYR_API_KEY=your_zephyr_api_key_here
-
-# Resend API key (deprecated — Zephyr handles email now, but still referenced)
-# RESEND_API_KEY=re_your_resend_key_here

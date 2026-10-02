@@ -34,7 +34,7 @@ describe("sendLoginCodeEmail", () => {
 
 		const ok = await sendLoginCodeEmail(env, "wanderer@example.com", "123456");
 
-		expect(ok).toBe(true);
+		expect(ok).toBe("sent");
 		expect(fetchMock).toHaveBeenCalledTimes(1);
 		const [, init] = fetchMock.mock.calls[0];
 		const body = JSON.parse(init.body as string);
@@ -46,7 +46,7 @@ describe("sendLoginCodeEmail", () => {
 		expect(body.text).toContain("123456");
 	});
 
-	it("returns false when Zephyr reports a failure", async () => {
+	it("reports rate_limited when Zephyr caps the recipient", async () => {
 		const { env } = envWithZephyr(
 			new Response(
 				JSON.stringify({ success: false, errorCode: "RATE_LIMITED", errorMessage: "slow down" }),
@@ -54,13 +54,24 @@ describe("sendLoginCodeEmail", () => {
 			),
 		);
 
-		expect(await sendLoginCodeEmail(env, "wanderer@example.com", "123456")).toBe(false);
+		expect(await sendLoginCodeEmail(env, "wanderer@example.com", "123456")).toBe("rate_limited");
 	});
 
-	it("returns false (does not throw) when the binding call rejects", async () => {
+	it("reports failed when Zephyr reports any other failure", async () => {
+		const { env } = envWithZephyr(
+			new Response(
+				JSON.stringify({ success: false, errorCode: "PROVIDER_ERROR", errorMessage: "nope" }),
+				{ status: 502 },
+			),
+		);
+
+		expect(await sendLoginCodeEmail(env, "wanderer@example.com", "123456")).toBe("failed");
+	});
+
+	it("reports failed (does not throw) when the binding call rejects", async () => {
 		const { env } = envWithZephyr(new Error("binding down"));
 
-		await expect(sendLoginCodeEmail(env, "wanderer@example.com", "123456")).resolves.toBe(false);
+		await expect(sendLoginCodeEmail(env, "wanderer@example.com", "123456")).resolves.toBe("failed");
 	});
 
 	it("never logs the code itself on failure", async () => {

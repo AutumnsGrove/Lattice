@@ -151,7 +151,6 @@ export function createMockEnv(overrides: Partial<Env> = {}): Env {
 		JWT_PUBLIC_KEY: TEST_RSA_PUBLIC_KEY,
 		GOOGLE_CLIENT_ID: "test-google-client-id",
 		GOOGLE_CLIENT_SECRET: "test-google-client-secret",
-		RESEND_API_KEY: "test-resend-api-key",
 		SESSION_SECRET: "test-session-secret-at-least-32-chars",
 		ZEPHYR_URL: "https://zephyr.test.grove.place",
 		ZEPHYR_API_KEY: "test-zephyr-api-key",
