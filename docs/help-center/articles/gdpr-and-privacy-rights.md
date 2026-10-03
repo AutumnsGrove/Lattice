@@ -70,7 +70,8 @@ If you believe we're processing your data inappropriately, let us know. We'll re
 
 When you sign up:
 - **Email address** — For login and notifications
-- **Authentication tokens** — For secure sign-in via Google OAuth
+- **Authentication tokens** — For secure sign-in via Google OAuth (if you choose Google)
+- **Sign-in codes** — If you sign in with an emailed code, we store a hashed copy for up to 10 minutes so we can check it. It's discarded once used or expired.
 
 We don't collect your name unless you choose to display one. We don't require phone numbers, addresses, or government ID.
 
@@ -118,7 +119,7 @@ Grove uses a small number of third-party services:
 
 - **Cloudflare** — CDN and security (no persistent tracking)
 - **Stripe** — Payment processing (required for subscriptions)
-- **Google** — OAuth authentication only
+- **Google** — OAuth authentication only, and only if you choose to sign in with Google
 - **AI providers** — Content moderation with zero data retention
 
 We don't sell data to anyone. We don't use advertising networks. We don't share your information except as required to provide the service.
