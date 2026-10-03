@@ -3,7 +3,7 @@ title: What is Heartwood?
 description: Grove's centralized authentication system that keeps your identity secure across all properties
 category: help
 section: how-it-works
-lastUpdated: '2026-01-28'
+lastUpdated: '2026-10-03'
 keywords:
   - heartwood
   - authentication
@@ -38,7 +38,7 @@ When you click "Sign In" anywhere in Grove, you're redirected to Heartwood. You'
 
 **Google Sign-In** — If you have a Google account, this is the fastest path. Click the button, authenticate with Google, and you're done. Grove never sees your Google password; we just verify your email address through Google's systems.
 
-**Magic Code** — Prefer not to use Google? Enter your email address, and we'll send you a six-digit code. Enter the code, and you're in. The code expires after ten minutes and can only be used once.
+**Email Code** — Prefer not to use Google? Enter your email address, and we'll send you a six-digit code. Type it in, and you're in. The code expires after ten minutes, works once, and is burned after three wrong guesses. New to Grove? The same screen creates your account. Behind the scenes we store only a scrambled (hashed) version of the code, so even we can't read it back.
 
 Either way, Heartwood creates a secure session and sends you back to wherever you were trying to go. The whole process takes seconds.
 
@@ -48,7 +48,7 @@ Behind the scenes, Heartwood uses industry-standard security practices: PKCE for
 
 **One identity, everywhere.** Your Grove account works across all properties. No more remembering which password goes where.
 
-**No passwords to remember.** Between Google Sign-In and magic codes, you never have to create or remember a Grove-specific password.
+**No passwords to remember.** Between Google Sign-In and email codes, you never have to create or remember a Grove-specific password.
 
 **Security without complexity.** Heartwood handles the hard parts—token rotation, session management, rate limiting—so you can focus on writing.
 

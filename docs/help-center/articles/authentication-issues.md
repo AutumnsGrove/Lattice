@@ -3,7 +3,7 @@ title: Trouble Signing In
 description: What to try when you can't log in to your Grove account
 category: help
 section: troubleshooting
-lastUpdated: '2026-02-08'
+lastUpdated: '2026-10-03'
 slug: authentication-issues
 order: 2
 keywords:
@@ -12,6 +12,9 @@ keywords:
   - can't log in
   - authentication
   - Google
+  - email code
+  - code not arriving
+  - code expired
   - session
   - cookies
   - locked out
@@ -60,13 +63,31 @@ Grove needs cookies to keep you logged in. If your browser or a privacy extensio
 
 Make sure cookies are allowed for `grove.place`. If you're using a privacy-focused browser like Brave or Firefox with strict tracking protection, you may need to add an exception.
 
-## Make sure you're using the right Google account
+## Signing in with an emailed code
 
-Grove uses Google for authentication. If you have multiple Google accounts, it's easy to accidentally pick the wrong one during sign-in.
+If you chose **Continue with email**, these are the usual snags.
 
-Check which Google account you're currently signed into in your browser. If it's not the one you used to create your Grove account, sign out of Google first, then try the Grove sign-in flow again and select the correct account.
+**The code never arrived.** Give it a minute or two, then check your spam or junk folder. The email comes from `auth@grove.place` and the subject line starts with your six digits. Make sure the address you typed is spelled right. If it's wrong, click **Use a different email** and start over.
 
-Your Grove account is tied to a specific Google account. There's no way to switch which one is connected.
+**"That code has expired."** Codes last 10 minutes. Click **Send a new code** and use the newest email. Older codes stop working once a new one is sent.
+
+**"That code doesn't match."** Check for a typo, and make sure you're reading the newest email if you've asked for more than one. Spaces and dashes are fine.
+
+**"That code has been used up."** A code allows three wrong guesses, then it's burned. Click **Send a new code**.
+
+**"Too many tries."** To keep inboxes from being flooded, we limit how many codes can be sent: three every 10 minutes. Wait a few minutes and try again. This one resolves itself.
+
+> 💡 **Tip:** If codes keep failing, try Continue with Google instead, as long as your Google account uses the same email address.
+
+## Make sure you're using the right account
+
+Your Grove account is tied to your **email address**. Whichever way you sign in, that address is what Grove recognizes.
+
+**Using Google?** If you have several Google accounts, it's easy to pick the wrong one. Check which one your browser is signed into. If it isn't the one you used for Grove, sign out of Google first, then try again and select the right account.
+
+**Using email?** Double-check the address. A different address, even a similar one, is a different account, and signing in with it will start a brand new blog setup. If you land on onboarding when you expected your existing blog, that's the most likely reason.
+
+Both methods work for the same address, so you're free to switch between Google and an emailed code. To use a different email entirely, that would be a separate account.
 
 ## Check Grove's status
 
@@ -76,7 +97,7 @@ If there's an active incident, we're already working on it. You don't need to co
 
 ## Your session might have expired
 
-Grove sessions last about 30 days. After that, you'll see the sign-in screen again. This is normal—just sign in again with your Google account.
+Grove sessions last about 30 days. After that, you'll see the sign-in screen again. This is normal—just sign in again with Google or an emailed code.
 
 If you're being signed out more frequently than that, clearing your cookies (step one above) usually resolves it.
 
