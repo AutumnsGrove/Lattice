@@ -7,6 +7,7 @@
 #
 # Usage:
 #   ./scripts/dev-stack.sh                Full stack (workers + aspen)
+#   ./scripts/dev-stack.sh fast           Fast: skips builds, Aspen under `vite dev` (HMR)
 #   ./scripts/dev-stack.sh workers        Workers only (no SvelteKit apps)
 #   ./scripts/dev-stack.sh seed           Apply migrations + seed data only
 #   ./scripts/dev-stack.sh reset          Nuke local DBs and re-seed
@@ -38,6 +39,8 @@ RESET='\033[0m'
 WRANGLER_PID=""
 ASPEN_PID=""
 PIDS=()
+# 1 in `fast` mode: no production builds, Aspen runs under `vite dev`.
+FAST_MODE=0
 
 log()  { echo -e "${GREEN}[grove]${RESET} $1"; }
 warn() { echo -e "${YELLOW}[grove]${RESET} $1"; }
@@ -102,11 +105,20 @@ preflight() {
     # published dist/, not source, so a stale dist silently serves old
     # component code even after source edits. Missing-file check alone
     # isn't enough (that only catches a dist that was never built).
-    log "Building engine dist (apps/aspen and workers import from dist, not source)..."
-    (cd libs/engine && pnpm run package) || {
-        err "Engine package build failed — see output above"
-        exit 1
-    }
+    # Fast mode skips the rebuild only when no engine source is newer than the
+    # stamp left by the last successful build, so a stale dist is still caught.
+    local engine_stamp="libs/engine/dist/.dev-stack-built"
+    if [ "$FAST_MODE" -eq 1 ] && [ -f "$engine_stamp" ] &&
+        [ -z "$(find libs/engine/src libs/engine/package.json -newer "$engine_stamp" -print -quit)" ]; then
+        log "Engine dist is up to date — skipping rebuild."
+    else
+        log "Building engine dist (apps/aspen and workers import from dist, not source)..."
+        (cd libs/engine && pnpm run package) || {
+            err "Engine package build failed — see output above"
+            exit 1
+        }
+        touch "$engine_stamp"
+    fi
 
     # Check for .dev.vars files (warn but don't block)
     local services=("apps/aspen" "apps/plant" "apps/landing" "services/heartwood" "services/zephyr" "services/durable-objects")
@@ -434,15 +446,17 @@ start_workers() {
     # (libs/engine/src/lib/auth/login/config.ts), so it must be set before the builds.
     export VITE_LOGIN_URL="http://localhost:5176"
 
-    log "Building aspen, plant, landing (wrangler dev serves build output, not source)..."
-    (cd apps/aspen && pnpm run build) || {
-        err "Aspen build failed — see output above"
-        exit 1
-    }
-    (cd apps/plant && pnpm run build) || {
-        err "Plant build failed — see output above"
-        exit 1
-    }
+    if [ "$FAST_MODE" -eq 0 ]; then
+        log "Building aspen, plant, landing (wrangler dev serves build output, not source)..."
+        (cd apps/aspen && pnpm run build) || {
+            err "Aspen build failed — see output above"
+            exit 1
+        }
+        (cd apps/plant && pnpm run build) || {
+            err "Plant build failed — see output above"
+            exit 1
+        }
+    fi
 
     # Landing prerenders a couple of pages that fetch from GitHub at build
     # time (e.g. /knowledge/exhibit/sister-museum) — a flaky network or an
@@ -452,9 +466,40 @@ start_workers() {
     # Not `local` — main() reads this after start_workers() returns to
     # decide whether to print the Landing URL in the summary banner.
     landing_ready=1
-    if ! (cd apps/landing && pnpm run build); then
+    if [ "$FAST_MODE" -eq 1 ]; then
+        landing_ready=0
+    elif ! (cd apps/landing && pnpm run build); then
         warn "Landing build failed (often a transient GitHub fetch during prerender) — skipping landing, rest of the stack will still start"
         landing_ready=0
+    fi
+
+    if [ "$FAST_MODE" -eq 1 ]; then
+        # Fast mode: Aspen runs under `vite dev` (HMR, no build). Its platform
+        # proxy (svelte.config.js) reaches the DO and zephyr workers through
+        # wrangler's dev registry, so those still run here. --persist-to keeps
+        # their state in aspen's shared dir. --port avoids Heartwood's 8787 —
+        # the first config in a multi-config list claims the listening port.
+        wrangler dev \
+            -c services/durable-objects/wrangler.toml \
+            -c services/zephyr/wrangler.toml \
+            --persist-to "$shared_state" \
+            --port 8790 \
+            --inspector-port 9230 \
+            2>&1 | sed "s/^/  ${DIM}[workers]${RESET} /" &
+        PIDS+=("$!")
+
+        (cd apps/aspen && pnpm exec vite dev --port 5173 --strictPort) \
+            2>&1 | sed "s/^/  ${DIM}[aspen]${RESET} /" &
+        ASPEN_PID=$!
+        PIDS+=("$ASPEN_PID")
+
+        log "Waiting for aspen (vite dev, port 5173)..."
+        if ! wait_for_port 5173 "aspen"; then
+            err "Aspen (vite dev) failed to start within 30 seconds"
+            exit 1
+        fi
+        log "Fast mode ready (plant/landing skipped)."
+        return 0
     fi
 
     # Start main multi-config (aspen + auxiliary DOs/zephyr, which are
@@ -544,6 +589,7 @@ main() {
         return 0
     fi
 
+    [ "$mode" = "fast" ] && FAST_MODE=1
     preflight
 
     case "$mode" in
@@ -553,6 +599,17 @@ main() {
             ;;
         reset)
             reset_databases
+            ;;
+        fast)
+            apply_migrations
+            seed_data "blog"
+            start_workers
+            echo ""
+            echo -e "  ${CYAN}Aspen (vite dev, HMR):${RESET} http://localhost:5173"
+            print_demo_tenant_urls
+            echo ""
+            log "Fast mode running. Press Ctrl+C to stop."
+            wait
             ;;
         workers)
             apply_migrations
