@@ -10,6 +10,13 @@ const config = {
 				include: ["/*"],
 				exclude: ["<all>"],
 			},
+			platformProxy: {
+				// `vite dev` gets platform.env from this proxy. Persist into Aspen's
+				// shared state (where dev-stack.sh migrates and seeds) — any other dir
+				// silently gets its own empty copy of D1/KV. See AGENT.md.
+				persist: { path: "../aspen/.wrangler/state/v3" },
+				remoteBindings: false,
+			},
 		}),
 		csrf: {
 			trustedOrigins: [

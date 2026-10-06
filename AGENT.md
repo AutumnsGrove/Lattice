@@ -222,7 +222,7 @@ bun x tsc --noEmit        # Type check
 pnpm install                 # workspace deps, once
 
 ./scripts/dev-stack.sh        # full stack: workers + Aspen
-./scripts/dev-stack.sh fast    # fast: Aspen under `vite dev` (HMR), no production builds
+./scripts/dev-stack.sh fast    # fast: Aspen/Plant/Landing under `vite dev` (HMR), no production builds
 ./scripts/dev-stack.sh workers # workers only, no SvelteKit apps
 ./scripts/dev-stack.sh seed    # apply migrations + seed data only
 ./scripts/dev-stack.sh reset   # nuke local DBs and re-seed
@@ -230,12 +230,12 @@ pnpm install                 # workspace deps, once
 
 `dev-stack.sh` builds `libs/engine`'s dist if it's missing, and rebuilds `apps/aspen`'s `.svelte-kit/output` on every full-mode run before starting `wrangler dev` — both are consumed as built output, not live source, so a stale build silently serves old component code with no error. After editing engine source, run `cd libs/engine && pnpm run package` (or use `fast` mode, which rebuilds a stale engine dist itself) before relaunching.
 
-**Fast mode (`fast`):** skips the Aspen/Plant/Landing production builds and serves Aspen from `vite dev` on 5173 with hot reload — about 40–50s to start versus ~3 min. Heartwood, the durable-objects worker and Zephyr still run under `wrangler dev`; Aspen reaches them through wrangler's dev registry. Plant and Landing are skipped (use the full mode for signup/onboarding). It skips the engine rebuild when no `libs/engine` source is newer than the last build.
+**Fast mode (`fast`):** skips the Aspen/Plant/Landing production builds and serves Aspen (5173), Landing (5174) and Plant (5175) from `vite dev` with hot reload — about 1 min to start versus ~3 min. Heartwood, the durable-objects worker and Zephyr still run under `wrangler dev`; Aspen reaches them through wrangler's dev registry. It skips the engine rebuild when no `libs/engine` source is newer than the last build.
 
-**How `vite dev` gets bindings:** Aspen's `platform.env` comes from adapter-cloudflare's `platformProxy` (wrangler's `getPlatformProxy`), configured in `apps/aspen/svelte.config.js` — **not** from `@cloudflare/vite-plugin` (SvelteKit isn't compatible with it, and it isn't needed). Two settings there must stay in sync with the rest of the stack, and neither fails loudly when wrong:
+**How `vite dev` gets bindings:** each app's `platform.env` comes from adapter-cloudflare's `platformProxy` (wrangler's `getPlatformProxy`), configured in that app's `svelte.config.js` (aspen, plant, landing) — **not** from `@cloudflare/vite-plugin` (SvelteKit isn't compatible with it, and it isn't needed). Two settings there must stay in sync with the rest of the stack, and neither fails loudly when wrong:
 
-- `persist.path` must be `apps/aspen/.wrangler/state/v3`, the same dir `dev-stack.sh` migrates and seeds. Any other dir silently gets its own stale copy of the D1 file, which looks like a "stale schema" bug (`no such table` for migrated tables).
-- `envFiles` points at `apps/aspen/.dev.vars`. The proxy otherwise looks for `.dev.vars` next to `configPath` (`libs/engine`), so `DEMO_MODE_SECRET` never arrives and demo login falls through to production login.
+- `persist.path` must resolve to `apps/aspen/.wrangler/state/v3` (plant and landing use `../aspen/.wrangler/state/v3`), the same dir `dev-stack.sh` migrates and seeds. Any other dir silently gets its own stale copy of the D1 file, which looks like a "stale schema" bug (`no such table` for migrated tables).
+- Aspen's `envFiles` points at `apps/aspen/.dev.vars` (plant and landing keep their `.dev.vars` next to their own wrangler config, so they need none). The proxy otherwise looks for `.dev.vars` next to `configPath` (`libs/engine`), so `DEMO_MODE_SECRET` never arrives and demo login falls through to production login.
 
 **Local durable objects:** `services/durable-objects/wrangler.toml` deliberately has no `[[migrations]]` (history was reset 2026-06-27; the classes already exist in Cloudflare — don't re-add them, re-applying `v1` breaks deploys). Miniflare only enables SQLite for classes a migration declares, so `dev-stack.sh` generates a gitignored `wrangler.local.toml` with a `new_sqlite_classes` migration appended and runs that instead. Without it every Loom DO fails locally with `SQL is not enabled for this Durable Object class`.
 
