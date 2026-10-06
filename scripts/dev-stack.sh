@@ -7,7 +7,7 @@
 #
 # Usage:
 #   ./scripts/dev-stack.sh                Full stack (workers + aspen)
-#   ./scripts/dev-stack.sh fast           Fast: skips builds, Aspen under `vite dev` (HMR)
+#   ./scripts/dev-stack.sh fast           Fast: skips builds, Aspen/Plant/Landing under `vite dev` (HMR)
 #   ./scripts/dev-stack.sh workers        Workers only (no SvelteKit apps)
 #   ./scripts/dev-stack.sh seed           Apply migrations + seed data only
 #   ./scripts/dev-stack.sh reset          Nuke local DBs and re-seed
@@ -517,7 +517,24 @@ start_workers() {
             err "Aspen (vite dev) failed to start within 30 seconds"
             exit 1
         fi
-        log "Fast mode ready (plant/landing skipped)."
+        # Plant and Landing run under vite dev too. Their svelte.config.js
+        # platformProxy persists into aspen's shared state. Non-fatal, like
+        # Landing in the full mode — Aspen is what most work needs.
+        (cd apps/plant && pnpm exec vite dev --port 5175 --strictPort) \
+            2>&1 | sed "s/^/  ${DIM}[plant]${RESET} /" &
+        PIDS+=("$!")
+        (cd apps/landing && pnpm exec vite dev --port 5174 --strictPort) \
+            2>&1 | sed "s/^/  ${DIM}[landing]${RESET} /" &
+        PIDS+=("$!")
+
+        log "Waiting for plant (port 5175) and landing (port 5174)..."
+        wait_for_port 5175 "plant" || warn "Plant (vite dev) didn't start on 5175"
+        landing_ready=1
+        wait_for_port 5174 "landing" || {
+            warn "Landing (vite dev) didn't start on 5174"
+            landing_ready=0
+        }
+        log "Fast mode ready."
         return 0
     fi
 
@@ -624,8 +641,19 @@ main() {
             seed_data "blog"
             start_workers
             echo ""
-            echo -e "  ${CYAN}Aspen (vite dev, HMR):${RESET} http://localhost:5173"
+            echo -e "  ${CYAN}Aspen (vite dev, HMR):${RESET}   http://localhost:5173"
+            echo -e "  ${CYAN}Plant (vite dev, HMR):${RESET}   http://localhost:5175"
+            if [ "${landing_ready:-0}" -eq 1 ]; then
+                echo -e "  ${CYAN}Landing (vite dev, HMR):${RESET} http://localhost:5174"
+            fi
             print_demo_tenant_urls
+            local plant_url landing_url
+            if plant_url=$(plant_demo_url); then
+                echo -e "  ${CYAN}Plant demo signup:${RESET} $plant_url"
+            fi
+            if [ "${landing_ready:-0}" -eq 1 ] && landing_url=$(landing_arbor_demo_url); then
+                echo -e "  ${CYAN}Landing Wayfinder /arbor:${RESET} $landing_url"
+            fi
             echo ""
             log "Fast mode running. Press Ctrl+C to stop."
             wait
