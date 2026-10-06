@@ -16,9 +16,7 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 	if (env?.DB && locals.tenantId) {
 		// Per-query error handling — one failing doesn't break the other
 		const [blazeResult, timelineCurio, galleryCurio, journeyCurio] = await Promise.all([
-			env.DB.prepare(
-				"SELECT COUNT(*) as count FROM blazes WHERE tenant_id = ? AND scope = 'tenant'",
-			)
+			env.DB.prepare("SELECT COUNT(*) as count FROM blaze_definitions WHERE tenant_id = ?")
 				.bind(locals.tenantId)
 				.first<{ count: number }>()
 				.catch((err) => {
