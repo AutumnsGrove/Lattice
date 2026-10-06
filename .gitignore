@@ -87,3 +87,4 @@ tools/index-viz/uv.lock
 
 # gf ask vector index (machine-specific, ~55MB binary)
 .grove/
+services/durable-objects/wrangler.local.toml

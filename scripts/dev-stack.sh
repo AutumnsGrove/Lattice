@@ -383,7 +383,26 @@ wait_for_port() {
     return 1
 }
 
+# ── Local DO config ──────────────────────────────────────────────────
+# Production's durable-objects wrangler.toml deliberately has no [[migrations]]
+# (history was reset 2026-06-27; the classes already exist in Cloudflare), but
+# miniflare only enables SQLite for classes a migration declares. Without one,
+# every Loom DO fails locally with "SQL is not enabled for this Durable Object
+# class". Write a throwaway copy with a migration appended; class names come
+# from the config's own bindings so there's still one source of truth.
+write_local_do_config() {
+    local src="services/durable-objects/wrangler.toml"
+    local dst="services/durable-objects/wrangler.local.toml"
+    local classes
+    classes=$(sed -n 's/^class_name = "\(.*\)"/"\1"/p' "$src" | paste -sd, - | sed 's/,/, /g')
+    {
+        cat "$src"
+        printf '\n[[migrations]]\ntag = "local-sqlite"\nnew_sqlite_classes = [%s]\n' "$classes"
+    } >"$dst"
+}
+
 start_workers() {
+    write_local_do_config
     log "Starting workers..."
     echo ""
     dim "  Heartwood: groveauth (port 8787) — separate process"
@@ -480,7 +499,7 @@ start_workers() {
         # their state in aspen's shared dir. --port avoids Heartwood's 8787 —
         # the first config in a multi-config list claims the listening port.
         wrangler dev \
-            -c services/durable-objects/wrangler.toml \
+            -c services/durable-objects/wrangler.local.toml \
             -c services/zephyr/wrangler.toml \
             --persist-to "$shared_state" \
             --port 8790 \
@@ -510,7 +529,7 @@ start_workers() {
     # together, so a bare default risks one process failing to bind.
     wrangler dev \
         -c apps/aspen/wrangler.toml \
-        -c services/durable-objects/wrangler.toml \
+        -c services/durable-objects/wrangler.local.toml \
         -c services/zephyr/wrangler.toml \
         --inspector-port 9230 \
         2>&1 &
