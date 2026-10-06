@@ -25,6 +25,10 @@ const config = {
 					// stale copy of the D1 file.
 					path: ".wrangler/state/v3",
 				},
+				// The proxy resolves .dev.vars next to configPath (libs/engine), but
+				// Aspen's secrets (DEMO_MODE_SECRET, etc.) live in apps/aspen/.dev.vars.
+				// Path is relative to configPath's directory.
+				envFiles: ["../../apps/aspen/.dev.vars"],
 				remoteBindings: false,
 			},
 		}),
