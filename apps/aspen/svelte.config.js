@@ -20,7 +20,10 @@ const config = {
 			platformProxy: {
 				configPath: "../../libs/engine/wrangler.toml",
 				persist: {
-					path: "../../libs/engine/.wrangler/state/v3",
+					// Must match dev-stack.sh's shared_state (apps/aspen/.wrangler/state),
+					// where migrations are applied. A different dir silently gets its own
+					// stale copy of the D1 file.
+					path: ".wrangler/state/v3",
 				},
 				remoteBindings: false,
 			},
