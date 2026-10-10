@@ -194,7 +194,7 @@
 		<GlassCard variant="frosted" flush>
 			<div class="feature-body">
 				<div class="feature-icon">
-					<phaseIcons.sparkles class="icon" />
+					<featureIcons.bookUser class="icon" />
 				</div>
 				<div class="feature-content">
 					<div class="feature-title">
