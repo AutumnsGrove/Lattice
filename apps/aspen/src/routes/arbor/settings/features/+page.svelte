@@ -8,20 +8,66 @@
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 	import { api } from "@autumnsgrove/lattice/utils";
 
+	import Button from "@autumnsgrove/lattice/ui/components/ui/Button.svelte";
+	import {
+		CANOPY_CATEGORIES,
+		CANOPY_CATEGORY_LABELS,
+		CANOPY_SETTING_KEYS,
+		parseCanopyCategories,
+	} from "@autumnsgrove/lattice/platform/config/canopy-categories";
+
 	let { data } = $props();
 
 	// Sparks (writing prompts) — beta-only, defaults to on, opt-out via settings
 	let sparksEnabled = $state(true);
 	let savingSparks = $state(false);
 
+	// Canopy (public directory) — opt-in, defaults to off
+	let canopyVisible = $state(false);
+	let canopyBanner = $state("");
+	let canopyCategories = $state<string[]>([]);
+	let canopyShowForests = $state(true);
+	let savingCanopy = $state(false);
+
 	onMount(async () => {
 		try {
 			const settings = await api.get("/api/settings");
 			sparksEnabled = settings.sparks_enabled !== "false";
+			canopyVisible = settings[CANOPY_SETTING_KEYS.VISIBLE] === "true";
+			canopyBanner = settings[CANOPY_SETTING_KEYS.BANNER] ?? "";
+			canopyCategories = parseCanopyCategories(settings[CANOPY_SETTING_KEYS.CATEGORIES]);
+			canopyShowForests = settings[CANOPY_SETTING_KEYS.SHOW_FORESTS] !== "false";
 		} catch (error) {
 			console.error("Failed to fetch settings:", error);
 		}
 	});
+
+	function toggleCategory(id: string) {
+		canopyCategories = canopyCategories.includes(id)
+			? canopyCategories.filter((c) => c !== id)
+			: [...canopyCategories, id];
+	}
+
+	async function saveCanopySettings() {
+		savingCanopy = true;
+		try {
+			const entries: Record<string, string> = {
+				[CANOPY_SETTING_KEYS.VISIBLE]: String(canopyVisible),
+				[CANOPY_SETTING_KEYS.BANNER]: canopyBanner,
+				[CANOPY_SETTING_KEYS.CATEGORIES]: JSON.stringify(canopyCategories),
+				[CANOPY_SETTING_KEYS.SHOW_FORESTS]: String(canopyShowForests),
+			};
+			await Promise.all(
+				Object.entries(entries).map(([setting_key, setting_value]) =>
+					api.put("/api/admin/settings", { setting_key, setting_value }),
+				),
+			);
+			toast.success("Canopy settings saved");
+		} catch (error) {
+			toast.error(error instanceof Error ? error.message : "Couldn't save Canopy settings");
+		}
+		savingCanopy = false;
+	}
 
 	async function saveSparksSetting() {
 		savingSparks = true;
@@ -144,6 +190,70 @@
 			</div>
 		</GlassCard>
 
+		<!-- Canopy (public directory) -->
+		<GlassCard variant="frosted" flush>
+			<div class="feature-body">
+				<div class="feature-icon">
+					<phaseIcons.sparkles class="icon" />
+				</div>
+				<div class="feature-content">
+					<div class="feature-title">
+						<GroveTerm interactive term="canopy">Canopy</GroveTerm>
+						<Waystone slug="what-is-canopy" label="What is Canopy?" />
+					</div>
+					<p class="feature-description">
+						Grove's public directory. Turn this off and your grove leaves right away.
+					</p>
+
+					<label class="sparks-toggle">
+						<input type="checkbox" bind:checked={canopyVisible} />
+						<span>{canopyVisible ? "Listed in the Canopy" : "Not listed in the Canopy"}</span>
+					</label>
+
+					{#if canopyVisible}
+						<div class="canopy-field">
+							<label class="canopy-label" for="canopy-banner">Banner tagline</label>
+							<input
+								id="canopy-banner"
+								class="canopy-input"
+								type="text"
+								maxlength="160"
+								placeholder="A short line about your grove…"
+								bind:value={canopyBanner}
+							/>
+							<span class="canopy-count">{canopyBanner.length}/160</span>
+						</div>
+
+						<div class="canopy-field">
+							<span class="canopy-label">Categories</span>
+							<div class="category-grid">
+								{#each CANOPY_CATEGORIES as id (id)}
+									<label class="category-checkbox">
+										<input
+											type="checkbox"
+											checked={canopyCategories.includes(id)}
+											onchange={() => toggleCategory(id)}
+										/>
+										<span>{CANOPY_CATEGORY_LABELS[id]}</span>
+									</label>
+								{/each}
+							</div>
+						</div>
+
+						<label class="sparks-toggle">
+							<input type="checkbox" bind:checked={canopyShowForests} />
+							<span>Show in themed forest groupings</span>
+						</label>
+					{/if}
+
+					<div class="canopy-save">
+						<Button onclick={saveCanopySettings} disabled={savingCanopy}>
+							{savingCanopy ? "Saving…" : "Save Canopy settings"}
+						</Button>
+					</div>
+				</div>
+			</div>
+		</GlassCard>
 	</div>
 </ArborSection>
 
@@ -219,6 +329,66 @@
 
 	.sparks-toggle input[type="checkbox"] {
 		cursor: pointer;
+	}
+
+	.canopy-field {
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+		margin-top: 0.875rem;
+	}
+
+	.canopy-label {
+		font-size: 0.85rem;
+		font-weight: 500;
+		color: var(--color-text);
+	}
+
+	.canopy-input {
+		width: 100%;
+		padding: 0.5rem 0.75rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--border-radius-small, 0.375rem);
+		background: var(--color-surface, transparent);
+		color: var(--color-text);
+		font: inherit;
+		font-size: 0.875rem;
+	}
+
+	.canopy-count {
+		align-self: flex-end;
+		font-size: 0.75rem;
+		color: var(--color-text-muted);
+	}
+
+	.category-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+		gap: 0.5rem;
+	}
+
+	.category-checkbox {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		cursor: pointer;
+		padding: 0.5rem 0.625rem;
+		border: 1px solid var(--color-border);
+		border-radius: var(--border-radius-small, 0.375rem);
+		font-size: 0.875rem;
+		color: var(--color-text);
+	}
+
+	.category-checkbox:hover {
+		border-color: var(--user-accent, var(--color-primary));
+	}
+
+	.category-checkbox input[type="checkbox"] {
+		accent-color: var(--user-accent, var(--color-primary));
+	}
+
+	.canopy-save {
+		margin-top: 1rem;
 	}
 
 	.curio-count {
