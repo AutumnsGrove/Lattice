@@ -152,7 +152,8 @@
 						<Waystone slug="what-is-canopy" label="What is Canopy?" />
 					</div>
 					<p class="feature-description">
-						Grove's public directory. Turn this off and your grove leaves right away.
+						Grove's public directory. Turn this off and your grove leaves right away. You'll appear
+						once you've published your first <GroveTerm interactive term="bloom">bloom</GroveTerm>.
 					</p>
 
 					<label class="canopy-toggle">
