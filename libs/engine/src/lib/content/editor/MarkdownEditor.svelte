@@ -6,7 +6,7 @@
 	// Local instance for admin editor preview
 	const editorMd = new MarkdownIt({ html: false, linkify: true });
 	import { extractHeaders } from "$lib/content/markdown/markdown";
-	import { groveDirectivePlugin } from "$lib/content/markdown/directives";
+	import { groveDirectivePlugin } from "@autumnsgrove/grove-markdown/directives";
 	editorMd.use(groveDirectivePlugin);
 	editorMd.use(suppressHeadingPlugin);
 	import "$lib/styles/content.css";
