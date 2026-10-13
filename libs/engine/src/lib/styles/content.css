@@ -499,8 +499,12 @@
   cursor: zoom-in;
 }
 
+/* margin: 0 is explicit on purpose. The prose plugin only zeroes image margins
+   for `figure > *`, and once PostCarousel wraps the image in a button it is no
+   longer a direct child, so without this the mounted carousel grows by 4em. */
 .grove-gallery-item img {
   display: block;
+  margin: 0;
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
