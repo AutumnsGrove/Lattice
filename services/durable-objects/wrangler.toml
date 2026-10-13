@@ -90,3 +90,9 @@ bucket_name = "grove-media"
 [[r2_buckets]]
 binding = "EXPORTS_BUCKET"
 bucket_name = "grove-exports"
+
+# =============================================================================
+# Cron - Daily gallery_images reconcile (storage usage + quota depend on it)
+# =============================================================================
+[triggers]
+crons = ["30 3 * * *"]

@@ -80,7 +80,8 @@
 		evergreen: 100 * 1024 * 1024 * 1024
 	};
 
-	function formatStorage(bytes: number): string {
+	function formatStorage(bytes: number | null): string {
+		if (bytes === null) return 'Unable to load';
 		if (bytes === 0) return '0 B';
 		const units = ['B', 'KB', 'MB', 'GB'];
 		const i = Math.floor(Math.log(bytes) / Math.log(1024));
@@ -95,7 +96,8 @@
 		});
 	}
 
-	function storagePercent(used: number, plan: string): number {
+	function storagePercent(used: number | null, plan: string): number | null {
+		if (used === null) return null;
 		const limit = storageLimits[plan] || storageLimits.seedling;
 		return Math.min(100, Math.round((used / limit) * 100));
 	}
@@ -355,7 +357,9 @@
 <GlassCard class="mb-8 p-4">
 	<div class="flex items-center justify-between mb-2">
 		<span class="text-sm font-sans font-medium text-foreground">Storage Usage</span>
-		<span class="text-sm font-sans text-foreground-muted">{storagePct}%</span>
+		<span class="text-sm font-sans text-foreground-muted">
+			{storagePct === null ? 'Unable to load usage' : `${storagePct}%`}
+		</span>
 	</div>
 	<div class="w-full h-2 bg-surface-subtle rounded-full overflow-hidden">
 		<div
@@ -364,12 +368,12 @@
 			aria-valuemin={0}
 			aria-valuemax={100}
 			aria-label="Storage usage"
-			class="h-full rounded-full transition-all {storagePct > 90
+			class="h-full rounded-full transition-all {(storagePct ?? 0) > 90
 				? 'bg-error'
-				: storagePct > 70
+				: (storagePct ?? 0) > 70
 					? 'bg-warning'
 					: 'bg-grove-500'}"
-			style="width: {storagePct}%"
+			style="width: {storagePct ?? 0}%"
 		></div>
 	</div>
 </GlassCard>
