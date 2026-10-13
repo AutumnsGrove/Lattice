@@ -100,6 +100,14 @@ const GROVE_MARKDOWN_ATTRS: Record<string, string[]> = {
 	label: [],
 };
 
+/**
+ * The only inline style the server path permits: a bounded max-width on a
+ * <figure>, which is how ::image sizes itself. Every other style stays
+ * stripped (inline CSS is an injection vector), and the browser path still
+ * forbids `style` outright.
+ */
+const GROVE_FIGURE_STYLES = { figure: { "max-width": [/^\d{1,4}(px|%)$/] } };
+
 const GROVE_FORBIDDEN_TAGS = ["script", "iframe", "object", "embed", "link", "style", "form"];
 
 const GROVE_FORBIDDEN_ATTRS = [
@@ -181,7 +189,8 @@ function sanitizeServerSafe(html: string): string {
 	return sanitizeHtml(html, {
 		allowedTags: GROVE_MARKDOWN_TAGS,
 		disallowedTagsMode: "discard",
-		allowedAttributes: GROVE_MARKDOWN_ATTRS,
+		allowedAttributes: { ...GROVE_MARKDOWN_ATTRS, figure: ["style"] },
+		allowedStyles: GROVE_FIGURE_STYLES,
 		allowedSchemes: ["http", "https", "mailto", "tel"],
 		transformTags: {
 			a: tabnabbingTransform,
