@@ -454,62 +454,72 @@
    Grove Gallery (inline directive)
    ========================================================================== */
 
+/* One image at a time. Two or more images become a swipeable scroll-snap
+   strip that works with no JavaScript; PostCarousel (mounted by
+   ContentWithGutter) adds arrows, dots, keys, and a lightbox on top without
+   changing the box, so nothing shifts when it takes over. */
 .grove-gallery {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.75rem;
   margin: 1.5rem 0;
+}
+
+.grove-gallery:not([data-images="1"]):not([data-gallery-mounted]),
+.grove-gallery-track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
   border-radius: 8px;
-  overflow: hidden;
 }
 
-/* 5+ images: use 3 columns */
-.grove-gallery[data-images="5"],
-.grove-gallery[data-images="6"],
-.grove-gallery[data-images="7"],
-.grove-gallery[data-images="8"],
-.grove-gallery[data-images="9"] {
-  grid-template-columns: repeat(3, 1fr);
+.grove-gallery:not([data-images="1"]):not([data-gallery-mounted])::-webkit-scrollbar,
+.grove-gallery-track::-webkit-scrollbar {
+  display: none;
 }
 
-/* Single image: full width */
-.grove-gallery[data-images="1"] {
-  grid-template-columns: 1fr;
+/* Reserves the row PostCarousel puts its dots in, so they don't push content down */
+.grove-gallery:not([data-images="1"]) {
+  padding-bottom: 2rem;
 }
 
 .grove-gallery-item {
+  flex: 0 0 100%;
+  min-width: 0;
   margin: 0;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+}
+
+.grove-gallery-open {
+  display: block;
+  width: 100%;
   padding: 0;
-  overflow: hidden;
-  border-radius: 6px;
-  aspect-ratio: 4 / 3;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
 }
 
 .grove-gallery-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
   display: block;
-  transition: transform 0.3s ease;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 6px;
 }
 
-.grove-gallery-item img:hover {
-  transform: scale(1.03);
+/* A lone image keeps its own proportions */
+.grove-gallery[data-images="1"] img {
+  aspect-ratio: auto;
+  height: auto;
 }
 
-/* Responsive: single column on mobile */
-@media (max-width: 480px) {
-  .grove-gallery {
-    grid-template-columns: 1fr;
-  }
-
-  .grove-gallery[data-images="5"],
-  .grove-gallery[data-images="6"],
-  .grove-gallery[data-images="7"],
-  .grove-gallery[data-images="8"],
-  .grove-gallery[data-images="9"] {
-    grid-template-columns: 1fr;
-  }
+.grove-gallery-item figcaption {
+  padding: 0.6rem 0.5rem 0;
+  text-align: center;
+  font-size: 0.875rem;
+  font-style: italic;
+  line-height: 1.4;
+  color: var(--color-text-muted);
 }
 
 /* ==========================================================================

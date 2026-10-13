@@ -202,9 +202,75 @@
 	}
 
 	/**
-	 * Lazy hydration: Use IntersectionObserver to hydrate Hum cards and Curios
-	 * only when they scroll near the viewport. This prevents mounting dozens
-	 * of embeds simultaneously on long posts, which was causing browser lockup.
+	 * Mount a swipeable carousel over a ::gallery strip.
+	 * Returns a cleanup function that restores the server-rendered markup.
+	 *
+	 * Slide images, alt text, and captions are read back out of that markup, so
+	 * the HTML stays the single source of truth. `data-gallery-claimed` guards
+	 * against double-mounting while the component loads; `data-gallery-mounted`
+	 * is what switches off the strip's CSS (see .grove-gallery in content.css),
+	 * so it is only set at the moment of mounting. Setting it earlier would
+	 * stack the slides vertically until the component arrives.
+	 */
+	function mountGallery(el: Element): (() => void) | null {
+		if (el.hasAttribute("data-gallery-claimed")) return null;
+
+		const images = Array.from(el.querySelectorAll(".grove-gallery-item")).flatMap((item) => {
+			const img = item.querySelector("img");
+			const url = img?.getAttribute("src");
+			if (!img || !url) return [];
+			return [
+				{
+					url,
+					alt: img.getAttribute("alt") ?? "",
+					caption: item.querySelector("figcaption")?.textContent?.trim() ?? "",
+				},
+			];
+		});
+		if (images.length < 2) return null;
+
+		el.setAttribute("data-gallery-claimed", "true");
+		const originalHtml = el.innerHTML;
+		let cancelled = false;
+		let cleanup: (() => void) | null = null;
+
+		import("$lib/ui/components/gallery/PostCarousel.svelte")
+			.then((module) => {
+				if (cancelled) return;
+				el.innerHTML = "";
+				el.setAttribute("data-gallery-mounted", "true");
+				const component = mount(module.default, {
+					target: el as HTMLElement,
+					props: { images },
+				});
+				cleanup = () => unmount(component);
+			})
+			.catch((err) => {
+				// The server-rendered strip still works without the carousel chrome
+				console.warn("[Gallery] Failed to mount carousel:", err);
+			});
+
+		return () => {
+			cancelled = true;
+			cleanup?.();
+			el.innerHTML = originalHtml;
+			el.removeAttribute("data-gallery-mounted");
+			el.removeAttribute("data-gallery-claimed");
+		};
+	}
+
+	/** Mount whichever kind of embed this placeholder is. */
+	function mountEmbed(el: Element): (() => void) | null {
+		if (el.classList.contains("hum-card")) return mountHumCard(el);
+		if (el.classList.contains("grove-gallery")) return mountGallery(el);
+		return mountCurio(el);
+	}
+
+	/**
+	 * Lazy hydration: Use IntersectionObserver to hydrate Hum cards, Curios, and
+	 * gallery carousels only when they scroll near the viewport. This prevents
+	 * mounting dozens of embeds simultaneously on long posts, which was causing
+	 * browser lockup.
 	 */
 	$effect(() => {
 		if (!browser) return;
@@ -214,7 +280,7 @@
 
 		// Collect all hydratable elements in a single DOM query
 		const hydratables = contentEl.querySelectorAll(
-			".hum-card[data-hum-url]:not([data-hum-mounted]), .grove-curio[data-grove-curio]:not([data-curio-mounted])",
+			'.hum-card[data-hum-url]:not([data-hum-mounted]), .grove-curio[data-grove-curio]:not([data-curio-mounted]), .grove-gallery[data-images]:not([data-images="1"]):not([data-gallery-claimed])',
 		);
 		if (hydratables.length === 0) return;
 
@@ -223,12 +289,7 @@
 		// For short content (few embeds), hydrate immediately — no need for observer overhead
 		if (hydratables.length <= IMMEDIATE_HYDRATION_LIMIT) {
 			hydratables.forEach((el) => {
-				let cleanup: (() => void) | null;
-				if (el.classList.contains("hum-card")) {
-					cleanup = mountHumCard(el);
-				} else {
-					cleanup = mountCurio(el);
-				}
+				const cleanup = mountEmbed(el);
 				if (cleanup) cleanups.push(cleanup);
 			});
 
@@ -244,12 +305,7 @@
 					const el = entry.target;
 					observer.unobserve(el);
 
-					let cleanup: (() => void) | null;
-					if (el.classList.contains("hum-card")) {
-						cleanup = mountHumCard(el);
-					} else {
-						cleanup = mountCurio(el);
-					}
+					const cleanup = mountEmbed(el);
 					if (cleanup) cleanups.push(cleanup);
 				}
 			},
