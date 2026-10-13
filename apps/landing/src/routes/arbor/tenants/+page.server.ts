@@ -8,6 +8,7 @@
 
 import { redirect, error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
+import { getAllTenantsStorageUsed } from "@autumnsgrove/lattice/server/services/gallery-storage";
 
 interface Tenant {
 	id: string;
@@ -15,7 +16,8 @@ interface Tenant {
 	display_name: string;
 	email: string;
 	plan: string;
-	storage_used: number;
+	/** null when the storage query failed — distinct from a genuine 0 */
+	storage_used: number | null;
 	post_count: number;
 	beta_post_count: number;
 	custom_domain: string | null;
@@ -33,7 +35,6 @@ interface TenantStats {
 	sapling: number;
 	oak: number;
 	evergreen: number;
-	total_storage: number;
 	total_posts: number;
 	total_beta_posts: number;
 }
@@ -50,10 +51,9 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
 
 	const DB = platform.env.DB;
 
-	const [tenantsResult, statsResult] = await Promise.all([
+	const [tenantsResult, statsResult, storageResult] = await Promise.all([
 		DB.prepare(
 			`SELECT t.id, t.subdomain, t.display_name, t.email, t.plan,
-              COALESCE((SELECT SUM(m.size) FROM media m WHERE m.tenant_id = t.id), 0) as storage_used,
               COALESCE((SELECT COUNT(*) FROM posts p WHERE p.tenant_id = t.id), 0) as post_count,
               COALESCE((SELECT COUNT(*) FROM posts p WHERE p.tenant_id = t.id AND p.is_beta = 1), 0) as beta_post_count,
               t.custom_domain, t.theme, t.active, t.created_at, t.updated_at
@@ -74,7 +74,6 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
          COUNT(CASE WHEN plan = 'sapling' THEN 1 END) as sapling,
          COUNT(CASE WHEN plan = 'oak' THEN 1 END) as oak,
          COUNT(CASE WHEN plan = 'evergreen' THEN 1 END) as evergreen,
-         COALESCE((SELECT SUM(size) FROM media), 0) as total_storage,
          COALESCE((SELECT COUNT(*) FROM posts), 0) as total_posts,
          COALESCE((SELECT COUNT(*) FROM posts WHERE is_beta = 1), 0) as total_beta_posts
        FROM tenants`,
@@ -84,10 +83,17 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
 				console.error("[Tenants] Failed to load stats:", err);
 				return null;
 			}),
+		getAllTenantsStorageUsed(DB),
 	]);
 
+	// Storage is looked up separately so a failure can't blank the tenant list.
+	const tenants = (tenantsResult.results || []).map((t) => ({
+		...t,
+		storage_used: storageResult.ok ? (storageResult.byTenant.get(t.id) ?? 0) : null,
+	}));
+
 	return {
-		tenants: tenantsResult.results || [],
+		tenants,
 		stats: {
 			total: statsResult?.total || 0,
 			active: statsResult?.active || 0,
@@ -96,7 +102,7 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
 			sapling: statsResult?.sapling || 0,
 			oak: statsResult?.oak || 0,
 			evergreen: statsResult?.evergreen || 0,
-			total_storage: statsResult?.total_storage || 0,
+			total_storage: storageResult.ok ? storageResult.totalBytes : null,
 			total_posts: statsResult?.total_posts || 0,
 			total_beta_posts: statsResult?.total_beta_posts || 0,
 		},

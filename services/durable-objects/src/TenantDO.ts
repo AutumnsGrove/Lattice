@@ -22,6 +22,7 @@ import {
 	type LoomRequestContext,
 	safeJsonParse,
 } from "@autumnsgrove/loom";
+import { getTenantStorageUsed } from "@autumnsgrove/lattice/server/services/gallery-storage";
 import { TIERS, type TierKey, type PaidTierKey } from "./tiers.js";
 
 // ============================================================================
@@ -589,13 +590,13 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 			}
 		}
 
-		const row = await this.env.DB.prepare(
-			"SELECT COALESCE(SUM(COALESCE(file_size, 0)), 0) as used_bytes FROM gallery_images WHERE tenant_id = ?",
-		)
-			.bind(this.state_data.id)
-			.first<{ used_bytes: number }>();
+		const usage = await getTenantStorageUsed(this.env.DB, this.state_data.id);
+		if (!usage.ok) {
+			// Callers fail open on non-OK, same as when this query used to throw.
+			return new Response("Storage usage unavailable", { status: 500 });
+		}
 
-		const usedBytes = row?.used_bytes ?? 0;
+		const usedBytes = usage.bytes;
 		const allowed = usedBytes + pendingBytes + bytes <= storageBytes;
 
 		let reservationId: string | undefined;

@@ -2,6 +2,7 @@ import { error } from "@sveltejs/kit";
 import { ARBOR_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import type { PageServerLoad, Actions } from "./$types";
 import { type TierKey, getTier } from "@autumnsgrove/lattice/platform/config/tiers";
+import { getTenantStorageUsed } from "@autumnsgrove/lattice/server/services/gallery-storage";
 
 /**
  * Account & Subscription Management Page
@@ -123,18 +124,13 @@ export const load: PageServerLoad = async ({ locals, platform, parent, cookies }
 					console.error("[Account] Failed to load media count:", e);
 					return null;
 				}),
-			// Calculate actual storage from gallery_images.file_size (not stale tenants.storage_used or incomplete image_hashes)
-			platform.env.DB.prepare(
-				"SELECT COALESCE(SUM(COALESCE(file_size, 0)), 0) as total_bytes FROM gallery_images WHERE tenant_id = ?",
-			)
-				.bind(locals.tenantId)
-				.first<{ total_bytes: number }>()
-				.catch((e) => {
-					console.error("[Account] Failed to load storage size:", e);
-					return null;
-				}),
+			getTenantStorageUsed(platform.env.DB, locals.tenantId),
 		]);
-		storageUsedBytes = storageResult?.total_bytes ?? 0;
+		if (storageResult.ok) {
+			storageUsedBytes = storageResult.bytes;
+		} else {
+			usageError = true;
+		}
 		exportCounts = {
 			posts: postResult?.count ?? 0,
 			pages: pageResult?.count ?? 0,
