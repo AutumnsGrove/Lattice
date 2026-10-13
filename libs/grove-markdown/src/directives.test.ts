@@ -9,6 +9,7 @@ import { describe, it, expect } from "vitest";
 import MarkdownIt from "markdown-it";
 import { groveDirectivePlugin, CURIO_DIRECTIVES, MAX_GALLERY_IMAGES } from "./directives";
 import { renderMarkdown } from "./markdown";
+import { sanitizeMarkdown } from "./utils/sanitize";
 
 function createMd(): MarkdownIt {
 	const md = new MarkdownIt({ html: true });
@@ -197,6 +198,43 @@ describe("gallery through the full renderMarkdown pipeline", () => {
 		expect(result).not.toContain("<script");
 		expect(result).not.toContain("<b ");
 		expect(result).toContain("&lt;b onclick=x&gt;");
+	});
+});
+
+// Regression: ::image emits `style="max-width: …"` for its size option, but
+// the sanitizer forbade every `style`, so size= was silently ignored.
+describe("::image sizing through the full renderMarkdown pipeline", () => {
+	it("keeps the size preset as a max-width on the figure", () => {
+		const result = renderMarkdown("::image[https://cdn.grove.place/a.jpg, size=small]::");
+		expect(result).toMatch(/<figure[^>]*style="max-width:\s*25%"/);
+	});
+
+	it("keeps a custom pixel size", () => {
+		const result = renderMarkdown("::image[https://cdn.grove.place/a.jpg, size=300px]::");
+		expect(result).toMatch(/<figure[^>]*style="max-width:\s*300px"/);
+	});
+});
+
+describe("sanitizeMarkdown - inline style exception stays narrow", () => {
+	it("keeps only max-width on a figure, dropping other properties", () => {
+		const result = sanitizeMarkdown(
+			'<figure style="position:fixed;top:0;max-width:50%"><img src="https://x.test/a.jpg" /></figure>',
+		);
+		expect(result).toMatch(/style="max-width:\s*50%"/);
+		expect(result).not.toContain("position");
+	});
+
+	it("rejects non-length max-width values", () => {
+		const result = sanitizeMarkdown('<figure style="max-width:expression(alert(1))">x</figure>');
+		expect(result).not.toContain("style");
+		expect(result).not.toContain("expression");
+	});
+
+	it("still strips style from every other element", () => {
+		const result = sanitizeMarkdown(
+			'<p style="max-width:50%">a</p><div style="max-width:50%">b</div><img src="https://x.test/a.jpg" style="max-width:50%" />',
+		);
+		expect(result).not.toContain("style");
 	});
 });
 
