@@ -7,7 +7,8 @@
 
 import { describe, it, expect } from "vitest";
 import MarkdownIt from "markdown-it";
-import { groveDirectivePlugin, CURIO_DIRECTIVES } from "./directives";
+import { groveDirectivePlugin, CURIO_DIRECTIVES, MAX_GALLERY_IMAGES } from "./directives";
+import { renderMarkdown } from "./markdown";
 
 function createMd(): MarkdownIt {
 	const md = new MarkdownIt({ html: true });
@@ -34,6 +35,168 @@ describe("groveDirectivePlugin - gallery", () => {
 	it("returns nothing for empty gallery", () => {
 		const result = md.render("::gallery[]::");
 		expect(result).not.toContain("grove-gallery");
+	});
+
+	it("single-line form renders with empty alt and no captions", () => {
+		const result = md.render(
+			"::gallery[https://cdn.grove.place/a.jpg, https://cdn.grove.place/b.jpg]::",
+		);
+		expect(result).toContain('alt=""');
+		expect(result).not.toContain("figcaption");
+	});
+
+	it("single-line form drops non-http URLs", () => {
+		const result = md.render("::gallery[javascript:alert(1), https://cdn.grove.place/a.jpg]::");
+		expect(result).toContain('data-images="1"');
+		expect(result).not.toContain("javascript:");
+	});
+});
+
+// ============================================================================
+// Gallery Directive - block form (alt text + captions)
+// ============================================================================
+
+describe("groveDirectivePlugin - gallery block", () => {
+	const md = createMd();
+
+	it("renders images with alt text and captions", () => {
+		const result = md.render(
+			[
+				"::gallery",
+				'![Dawn over the ridge](https://cdn.grove.place/a.jpg "First light")',
+				"![Fog](https://cdn.grove.place/b.jpg)",
+				"::",
+			].join("\n"),
+		);
+		expect(result).toContain('class="grove-gallery"');
+		expect(result).toContain('data-images="2"');
+		expect(result).toContain('alt="Dawn over the ridge"');
+		expect(result).toContain("<figcaption>First light</figcaption>");
+		expect(result).toContain('src="https://cdn.grove.place/b.jpg"');
+		// Only the captioned image gets a figcaption
+		expect(result.match(/<figcaption>/g)).toHaveLength(1);
+	});
+
+	it("allows empty alt text", () => {
+		const result = md.render("::gallery\n![](https://cdn.grove.place/a.jpg)\n::");
+		expect(result).toContain('alt=""');
+		expect(result).toContain('data-images="1"');
+	});
+
+	it("keeps commas, quotes, and parentheses in captions intact", () => {
+		const result = md.render(
+			'::gallery\n![Paris](https://cdn.grove.place/a.jpg "Paris, 2024 — the "good" trip (finally)")\n::',
+		);
+		expect(result).toContain(
+			"<figcaption>Paris, 2024 — the &quot;good&quot; trip (finally)</figcaption>",
+		);
+	});
+
+	it("escapes HTML in alt text, captions, and URLs", () => {
+		const result = md.render(
+			[
+				"::gallery",
+				'![<script>alert(1)</script>](https://cdn.grove.place/a.jpg "<img src=x onerror=alert(1)>")',
+				'![x](https://cdn.grove.place/b.jpg"onerror="alert(1))',
+				"::",
+			].join("\n"),
+		);
+		expect(result).not.toContain("<script>");
+		expect(result).not.toContain("<img src=x");
+		expect(result).not.toContain('"onerror');
+		expect(result).toContain("&lt;script&gt;");
+	});
+
+	it("skips blank lines, non-image lines, and non-http URLs", () => {
+		const result = md.render(
+			[
+				"::gallery",
+				"",
+				"just some words",
+				"![bad](javascript:alert(1))",
+				"![data](data:image/png;base64,AAAA)",
+				"![good](https://cdn.grove.place/a.jpg)",
+				"::",
+			].join("\n"),
+		);
+		expect(result).toContain('data-images="1"');
+		expect(result).toContain('alt="good"');
+		expect(result).not.toContain("javascript:");
+		expect(result).not.toContain("data:image");
+	});
+
+	it("renders nothing for a block with no valid images", () => {
+		const result = md.render("::gallery\nnothing useful here\n::");
+		expect(result).not.toContain("grove-gallery");
+	});
+
+	it("caps the gallery at MAX_GALLERY_IMAGES", () => {
+		const lines = Array.from(
+			{ length: MAX_GALLERY_IMAGES + 5 },
+			(_, i) => `![${i}](https://cdn.grove.place/${i}.jpg)`,
+		);
+		const result = md.render(["::gallery", ...lines, "::"].join("\n"));
+		expect(result).toContain(`data-images="${MAX_GALLERY_IMAGES}"`);
+		expect(result).not.toContain(`/${MAX_GALLERY_IMAGES}.jpg`);
+	});
+
+	it("leaves an unterminated block as plain text without swallowing the post", () => {
+		const result = md.render(
+			"::gallery\n![a](https://cdn.grove.place/a.jpg)\n\nA paragraph after.\n",
+		);
+		expect(result).not.toContain("grove-gallery");
+		expect(result).toContain("A paragraph after.");
+	});
+
+	it("renders surrounding markdown normally", () => {
+		const result = md.render(
+			"Before\n\n::gallery\n![a](https://cdn.grove.place/a.jpg)\n::\n\n**After**",
+		);
+		expect(result).toContain("<p>Before</p>");
+		expect(result).toContain('class="grove-gallery"');
+		expect(result).toContain("<strong>After</strong>");
+	});
+
+	it("treats an indented block as code, not a gallery", () => {
+		const result = md.render("    ::gallery\n    ![a](https://cdn.grove.place/a.jpg)\n    ::");
+		expect(result).toContain("<pre>");
+		expect(result).not.toContain("grove-gallery");
+	});
+
+	it("is case-insensitive on the opening line", () => {
+		const result = md.render("::Gallery\n![a](https://cdn.grove.place/a.jpg)\n::");
+		expect(result).toContain('class="grove-gallery"');
+	});
+});
+
+// Regression: the plugin tests above never ran the output through
+// sanitizeMarkdown(), which stripped <figure>, <figcaption>, data-images and
+// loading — leaving captions as loose text between bare images.
+describe("gallery through the full renderMarkdown pipeline", () => {
+	it("keeps figures, captions, image count, and lazy loading after sanitizing", () => {
+		const result = renderMarkdown(
+			[
+				"::gallery",
+				'![Dawn](https://cdn.grove.place/a.jpg "First light, 6am")',
+				"![](https://cdn.grove.place/b.jpg)",
+				"::",
+			].join("\n"),
+		);
+		expect(result).toContain('data-images="2"');
+		expect(result).toContain('<figure class="grove-gallery-item">');
+		expect(result).toContain("<figcaption>First light, 6am</figcaption>");
+		expect(result).toContain('loading="lazy"');
+		expect(result).toContain('alt="Dawn"');
+	});
+
+	it("still strips script and event handlers", () => {
+		const result = renderMarkdown(
+			'::gallery\n![<script>alert(1)</script>](https://cdn.grove.place/a.jpg "<b onclick=x>hi</b>")\n::',
+		);
+		// Escaped to inert text, never a live tag or attribute
+		expect(result).not.toContain("<script");
+		expect(result).not.toContain("<b ");
+		expect(result).toContain("&lt;b onclick=x&gt;");
 	});
 });
 

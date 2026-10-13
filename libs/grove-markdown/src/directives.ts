@@ -7,7 +7,14 @@
  *   ::gallery[https://cdn.grove.place/a.jpg, https://cdn.grove.place/b.jpg]::
  *
  * A directive handler map dispatches by name. Currently supports:
- *   - gallery: renders an image grid
+ *   - gallery: renders a swipeable image carousel
+ *
+ * Galleries also have a multi-line block form that carries alt text and
+ * captions, written with ordinary markdown image syntax:
+ *   ::gallery
+ *   ![Alt text](https://cdn.grove.place/a.jpg "Caption")
+ *   ![](https://cdn.grove.place/b.jpg)
+ *   ::
  *
  * Future directives (callout, embed, aside) plug into the handler map.
  */
@@ -18,35 +25,72 @@ import { escapeHtml } from "./utils/escape-html.js";
 
 const MAX_CURIO_ARG_LENGTH = 200;
 
+/** Most images a single gallery renders; extras are dropped. */
+export const MAX_GALLERY_IMAGES = 20;
+
 // ============================================================================
 // Directive Handlers
 // ============================================================================
 
 type DirectiveHandler = (content: string) => string | null;
 
+interface GalleryItem {
+	url: string;
+	alt: string;
+	caption: string;
+}
+
 /**
- * Gallery directive: renders a CSS grid of images.
- *
- * Input content: comma-separated URLs
- * Output: .grove-gallery container with .grove-gallery-item figures
+ * Render gallery items as .grove-gallery with one .grove-gallery-item figure
+ * per image. Shared by the single-line and block forms so the URL filter,
+ * escaping, and image cap live in exactly one place.
  */
-function handleGallery(content: string): string | null {
-	const urls = content
-		.split(",")
-		.map((u) => u.trim())
-		.filter((u) => u.length > 0)
-		.filter((u) => u.startsWith("http://") || u.startsWith("https://"));
+function renderGallery(items: GalleryItem[]): string | null {
+	const valid = items.filter((item) => /^https?:\/\//i.test(item.url)).slice(0, MAX_GALLERY_IMAGES);
 
-	if (urls.length === 0) return null;
+	if (valid.length === 0) return null;
 
-	const items = urls
-		.map((url) => {
-			const safeUrl = escapeHtml(url);
-			return `<figure class="grove-gallery-item"><img src="${safeUrl}" alt="" loading="lazy" /></figure>`;
+	const figures = valid
+		.map(({ url, alt, caption }) => {
+			const img = `<img src="${escapeHtml(url)}" alt="${escapeHtml(alt)}" loading="lazy" />`;
+			const figcaption = caption ? `<figcaption>${escapeHtml(caption)}</figcaption>` : "";
+			return `<figure class="grove-gallery-item">${img}${figcaption}</figure>`;
 		})
 		.join("\n  ");
 
-	return `<div class="grove-gallery" data-images="${urls.length}">\n  ${items}\n</div>\n`;
+	return `<div class="grove-gallery" data-images="${valid.length}">\n  ${figures}\n</div>\n`;
+}
+
+/**
+ * Gallery directive, single-line form: ::gallery[url1, url2]::
+ *
+ * Comma-separated URLs with no alt text or captions. Kept so galleries
+ * written before the block form existed keep rendering.
+ */
+function handleGallery(content: string): string | null {
+	const items = content
+		.split(",")
+		.map((url) => ({ url: url.trim(), alt: "", caption: "" }))
+		.filter((item) => item.url.length > 0);
+
+	return renderGallery(items);
+}
+
+/** One block-form gallery line: ![alt](url) or ![alt](url "caption") */
+const GALLERY_IMAGE_LINE_RE = /^!\[([^\]]*)\]\(\s*(\S+?)(?:\s+"(.*)")?\s*\)$/;
+
+/**
+ * Parse the lines of a block-form gallery. Blank lines and lines that aren't
+ * a markdown image are skipped rather than failing the whole gallery.
+ */
+function parseGalleryLines(lines: string[]): GalleryItem[] {
+	const items: GalleryItem[] = [];
+	for (const line of lines) {
+		const match = GALLERY_IMAGE_LINE_RE.exec(line.trim());
+		if (!match) continue;
+		items.push({ url: match[2], alt: match[1].trim(), caption: (match[3] ?? "").trim() });
+	}
+	return items;
 }
 
 // ============================================================================
@@ -279,7 +323,7 @@ export const CURIO_METADATA = [
 		name: "Gallery",
 		requiresArg: true,
 		system: true,
-		description: "Comma-separated image URLs rendered as a grid",
+		description: "Swipeable image carousel with alt text and captions",
 	},
 	{
 		id: "image",
@@ -354,6 +398,60 @@ function directiveBlockRule(
 	return true;
 }
 
+/** Opening and closing lines of the multi-line gallery block */
+const GALLERY_OPEN_RE = /^::gallery$/i;
+const GALLERY_CLOSE_RE = /^::$/;
+
+/**
+ * markdown-it block rule for the multi-line gallery form:
+ *
+ *   ::gallery
+ *   ![alt](url "caption")
+ *   ::
+ *
+ * Needs a closing `::` line and at least one valid image; otherwise it
+ * declines so the lines render as ordinary text instead of swallowing the
+ * rest of the post.
+ */
+function galleryBlockRule(
+	state: StateBlock,
+	startLine: number,
+	endLine: number,
+	silent: boolean,
+): boolean {
+	// Indented 4+ spaces is a code block, not a directive
+	if (state.sCount[startLine] - state.blkIndent >= 4) return false;
+
+	const lineAt = (line: number) =>
+		state.src.slice(state.bMarks[line] + state.tShift[line], state.eMarks[line]).trim();
+
+	if (!GALLERY_OPEN_RE.test(lineAt(startLine))) return false;
+
+	let closeLine = -1;
+	for (let line = startLine + 1; line < endLine; line++) {
+		if (GALLERY_CLOSE_RE.test(lineAt(line))) {
+			closeLine = line;
+			break;
+		}
+	}
+	if (closeLine === -1) return false;
+
+	const inner: string[] = [];
+	for (let line = startLine + 1; line < closeLine; line++) inner.push(lineAt(line));
+
+	const html = renderGallery(parseGalleryLines(inner));
+	if (!html) return false;
+
+	if (silent) return true;
+
+	const token = state.push("html_block", "", 0);
+	token.content = html;
+	token.map = [startLine, closeLine + 1];
+
+	state.line = closeLine + 1;
+	return true;
+}
+
 // ============================================================================
 // Plugin Export
 // ============================================================================
@@ -367,6 +465,9 @@ function directiveBlockRule(
  */
 export function groveDirectivePlugin(md: MarkdownIt): void {
 	md.block.ruler.before("paragraph", "grove_directive", directiveBlockRule, {
+		alt: ["paragraph", "reference", "blockquote"],
+	});
+	md.block.ruler.before("paragraph", "grove_gallery_block", galleryBlockRule, {
 		alt: ["paragraph", "reference", "blockquote"],
 	});
 }

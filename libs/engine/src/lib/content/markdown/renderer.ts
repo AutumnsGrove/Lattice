@@ -2,7 +2,7 @@ import MarkdownIt from "markdown-it";
 import footnotePlugin from "markdown-it-footnote";
 import { sanitizeMarkdown } from "../../utils/sanitize.js";
 import { humPlugin } from "./hum.js";
-import { groveDirectivePlugin } from "./directives.js";
+import { groveDirectivePlugin } from "@autumnsgrove/grove-markdown/directives";
 import { mentionsPlugin } from "./mentions.js";
 import { suppressHeadingPlugin } from "./suppress.js";
 import { escapeHtml as escapeHtmlForAttr } from "../../utils/escape-html.js";
