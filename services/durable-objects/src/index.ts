@@ -8,6 +8,8 @@
  * Part of the Loom pattern - Grove's coordination layer.
  */
 
+import { syncAllTenantGalleries } from "@autumnsgrove/lattice/server/services/gallery-sync";
+
 // Export DO classes for Cloudflare to instantiate
 export { TenantDO } from "./TenantDO.js";
 export { PostMetaDO } from "./PostMetaDO.js";
@@ -42,6 +44,8 @@ export class FeedDO {
 interface Env {
 	THRESHOLD: DurableObjectNamespace;
 	TENANTS: DurableObjectNamespace;
+	DB: D1Database;
+	IMAGES: R2Bucket;
 	/** Shared secret for operator-only endpoints (e.g. rate limit reset). Not exposed to any tenant-facing app. */
 	OPS_ADMIN_KEY?: string;
 }
@@ -153,6 +157,10 @@ async function handleGetTenantDrafts(
 }
 
 export default {
+	/** Daily gallery_images reconcile so storage usage and quota never depend on a manual sync. */
+	async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
+		ctx.waitUntil(syncAllTenantGalleries(env.IMAGES, env.DB));
+	},
 	async queue(_batch: MessageBatch<unknown>): Promise<void> {
 		// Stub — queue consumer configured via CF dashboard
 	},

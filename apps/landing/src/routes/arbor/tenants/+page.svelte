@@ -52,7 +52,8 @@
 		}
 	};
 
-	function formatStorage(bytes: number): string {
+	function formatStorage(bytes: number | null): string {
+		if (bytes === null) return 'Unable to load';
 		if (bytes === 0) return '0 B';
 		const units = ['B', 'KB', 'MB', 'GB'];
 		const i = Math.floor(Math.log(bytes) / Math.log(1024));

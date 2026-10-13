@@ -22,6 +22,7 @@ import {
 	resetTenantGraftOverrides,
 } from "@autumnsgrove/lattice/platform/feature-flags";
 import { isWayfinder } from "@autumnsgrove/lattice/platform/config";
+import { getTenantStorageUsed } from "@autumnsgrove/lattice/server/services/gallery-storage";
 
 interface Tenant {
 	id: string;
@@ -29,7 +30,8 @@ interface Tenant {
 	display_name: string;
 	email: string;
 	plan: string;
-	storage_used: number;
+	/** null when the storage query failed — distinct from a genuine 0 */
+	storage_used: number | null;
 	post_count: number;
 	custom_domain: string | null;
 	theme: string;
@@ -70,14 +72,12 @@ export const load: PageServerLoad = async ({ parent, platform, params }) => {
 			.bind(id)
 			.first<{ count: number }>()
 			.catch(() => ({ count: 0 })),
-		DB.prepare("SELECT COUNT(*) as count FROM media WHERE tenant_id = ?")
+		// gallery_images is the primary image store (media table is legacy/empty)
+		DB.prepare("SELECT COUNT(*) as count FROM gallery_images WHERE tenant_id = ?")
 			.bind(id)
 			.first<{ count: number }>()
 			.catch(() => ({ count: 0 })),
-		DB.prepare("SELECT COALESCE(SUM(size), 0) as total FROM media WHERE tenant_id = ?")
-			.bind(id)
-			.first<{ total: number }>()
-			.catch(() => ({ total: 0 })),
+		getTenantStorageUsed(DB, id),
 		flagsEnv ? getGreenhouseTenant(id, flagsEnv) : Promise.resolve(null),
 	]);
 
@@ -90,7 +90,7 @@ export const load: PageServerLoad = async ({ parent, platform, params }) => {
 		: [{ tenantId: id, suspended: true, ruleId: null }, []];
 
 	return {
-		tenant: { ...tenant, storage_used: storageResult?.total || 0 },
+		tenant: { ...tenant, storage_used: storageResult.ok ? storageResult.bytes : null },
 		postCount: postResult?.count || 0,
 		pageCount: pageResult?.count || 0,
 		mediaCount: mediaResult?.count || 0,
