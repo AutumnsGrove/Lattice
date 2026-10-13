@@ -36,6 +36,76 @@ beforeEach(() => {
 	vi.stubGlobal("caches", { default: createFakeEdgeCache() });
 });
 
+// Regression: under `vite dev` Aspen runs in plain Node, where there is no
+// Cache API. The unguarded `caches.default` threw inside a promise that
+// hooks.server.ts starts early and awaits later, so the rejection went
+// unhandled and Node killed the whole dev server (not a 500) for any request
+// carrying a session cookie. Every other test here stubs a cache, which is
+// why this was never caught.
+describe("validateGroveSession without an edge cache (plain Node)", () => {
+	beforeEach(() => {
+		vi.stubGlobal("caches", undefined);
+	});
+
+	it("still validates against Heartwood instead of throwing", async () => {
+		const auth = createAuthFetcher(new Response(validBody, { status: 200 }));
+		const request = new Request("http://localhost:5173/", {
+			headers: { "X-Forwarded-For": "127.0.0.1" },
+		});
+
+		const response = await validateGroveSession(
+			auth,
+			request,
+			"session-token-1",
+			"grove_session=session-token-1",
+		);
+
+		expect(response?.status).toBe(200);
+		expect(auth.fetch).toHaveBeenCalledTimes(1);
+	});
+
+	it("does not cache, so every request is validated", async () => {
+		const auth = createAuthFetcher(() => new Response(validBody, { status: 200 }));
+		const request = new Request("http://localhost:5173/");
+
+		await validateGroveSession(auth, request, "session-token-1", "grove_session=session-token-1");
+		await validateGroveSession(auth, request, "session-token-1", "grove_session=session-token-1");
+
+		expect(auth.fetch).toHaveBeenCalledTimes(2);
+	});
+
+	it("tolerates a caches object that has no default cache", async () => {
+		vi.stubGlobal("caches", {});
+		const auth = createAuthFetcher(new Response(validBody, { status: 200 }));
+		const request = new Request("http://localhost:5173/");
+
+		const response = await validateGroveSession(
+			auth,
+			request,
+			"session-token-1",
+			"grove_session=session-token-1",
+		);
+
+		expect(response?.status).toBe(200);
+	});
+
+	it("still treats a failed validation as unauthenticated", async () => {
+		const auth = {
+			fetch: vi.fn().mockRejectedValue(new Error("heartwood down")),
+		} as unknown as Fetcher;
+		const request = new Request("http://localhost:5173/");
+
+		const response = await validateGroveSession(
+			auth,
+			request,
+			"session-token-1",
+			"grove_session=session-token-1",
+		);
+
+		expect(response).toBeNull();
+	});
+});
+
 describe("validateGroveSession", () => {
 	it("forwards the original request's CF-Connecting-IP to Heartwood", async () => {
 		const auth = createAuthFetcher(new Response(validBody, { status: 200 }));
