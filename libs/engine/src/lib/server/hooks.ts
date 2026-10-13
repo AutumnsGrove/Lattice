@@ -49,8 +49,12 @@ interface EdgeCache {
 	put(request: Request, response: Response): Promise<void>;
 }
 
-function getEdgeCache(): EdgeCache {
-	return (globalThis as unknown as { caches: { default: EdgeCache } }).caches.default;
+/**
+ * Undefined outside Workers (e.g. plain Node under `vite dev`, where there is
+ * no Cache API). Callers skip caching and validate against Heartwood directly.
+ */
+function getEdgeCache(): EdgeCache | undefined {
+	return (globalThis as unknown as { caches?: { default?: EdgeCache } }).caches?.default;
 }
 
 /** SHA-256 hex digest, used to key the session-validation cache without storing raw tokens. */
@@ -100,7 +104,7 @@ export async function validateGroveSession(
 		`https://session-validate.internal/${await sha256Hex(sessionCookie)}`,
 	);
 
-	const cached = await cache.match(cacheKey);
+	const cached = cache ? await cache.match(cacheKey) : undefined;
 	if (cached) return cached;
 
 	let response: Response;
@@ -120,7 +124,7 @@ export async function validateGroveSession(
 	// Only cache successful validations — a rate-limited or failed check
 	// should never be remembered, or a transient hiccup would lock the
 	// user out for the full cache window.
-	if (response.ok) {
+	if (cache && response.ok) {
 		const cacheable = new Response(response.clone().body, {
 			status: response.status,
 			headers: {
