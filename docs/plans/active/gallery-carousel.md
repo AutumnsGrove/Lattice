@@ -71,7 +71,6 @@ The goal: nobody should ever have to type `::gallery`.
 - **Editing is the same door.** If the cursor is inside a `::gallery` block, the toolbar photo button opens the builder pre-filled and replaces the block on save.
 - **`/gallery` in the curio palette** opens the builder instead of inserting an empty `::gallery[]::`.
 - **Gating:** `MarkdownEditor` takes a `galleryBuilder` prop. Aspen's editor pages pass `data.isBeta`, which comes from the root layout via `isBetaDeployment()` (true on `<tenant>-beta.grove.place`, and on localhost when running the beta branch). With it off, the picker behaves as today, except multi-select writes the legacy single-line form, which still renders as a carousel. This is the beta deployment doing its job, not a feature flag.
-- **Stale docstring, not ours to fix here:** `apps/aspen/src/lib/server/beta.ts` still warns that `data.isBeta` under `/arbor/**` means comped-invite enrollment. Arbor's layout no longer sets that field (verified), so `data.isBeta` there is the root layout's deployment flag. Worth a separate cleanup.
 - **Keep it cherry-pickable:** builder code lives in its own files (`GalleryBuilder.svelte`, a small parse/serialize module) with one gated mount point in the editor, so graduating to main later is a small diff.
 
 ---

@@ -12,10 +12,9 @@
  *   deployment. __GIT_BRANCH__ is baked in at build time (see vite.config.ts);
  *   gating on "localhost" keeps this from ever mattering on a real deployment.
  *
- * Note: this is unrelated to arbor/+layout.server.ts's own `isBeta` field,
- * which tracks comped beta-invite enrollment for a tenant — a different
- * concept that happens to share the name. Anything reading `data.isBeta`
- * under /arbor/** is getting that one, not this one.
+ * The root layout exposes this as `data.isBeta`, and every route (including
+ * /arbor/**) reads that same value. The old comped beta-invite enrollment
+ * meaning was retired; "beta" now only ever means this deployment.
  */
 export function isBetaDeployment(locals: App.Locals, url: URL): boolean {
 	const isLocalBetaBranch = url.hostname === "localhost" && __GIT_BRANCH__ === "beta";
