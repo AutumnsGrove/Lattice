@@ -429,6 +429,13 @@ function needsUnsafeEval(pathname: string): boolean {
 	);
 }
 
+/**
+ * Image hosts the local dev seed data points at (remote stock photos, nothing
+ * downloaded or stored). Only ever added to img-src on localhost, so the
+ * production policy is untouched.
+ */
+const LOCAL_SEED_IMAGE_HOSTS = ["https://images.unsplash.com", "https://images.pexels.com"];
+
 const aspenHandle: Handle = async ({ event, resolve }) => {
 	// Initialize context and user
 	event.locals.user = null;
@@ -1079,12 +1086,17 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 	const hasUnsafeEval = needsUnsafeEval(event.url.pathname);
 	const scriptSrc = `'self' 'nonce-${cspNonce}' ${hasUnsafeEval ? "'unsafe-eval' " : ""}https://cdn.jsdelivr.net https://challenges.cloudflare.com`;
 
+	// Exact hostname match on purpose: isLocalhost above is a substring check,
+	// which is too loose to gate a security header on.
+	const isExactLocalhost = event.url.hostname === "localhost" || event.url.hostname === "127.0.0.1";
+	const localImgSrc = isExactLocalhost ? ` ${LOCAL_SEED_IMAGE_HOSTS.join(" ")}` : "";
+
 	const csp = [
 		"default-src 'self'",
 		"upgrade-insecure-requests",
 		`script-src ${scriptSrc}`,
 		"style-src 'self' 'unsafe-inline'",
-		"img-src 'self' https://cdn.grove.place data: blob:",
+		`img-src 'self' https://cdn.grove.place data: blob:${localImgSrc}`,
 		"font-src 'self' https://cdn.grove.place",
 		"connect-src 'self' https://api.github.com https://grove.place https://*.grove.place https://challenges.cloudflare.com",
 		"frame-src https://challenges.cloudflare.com",

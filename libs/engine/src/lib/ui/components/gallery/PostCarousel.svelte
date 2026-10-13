@@ -77,6 +77,20 @@
 	}
 
 	$effect(() => () => cancelAnimationFrame(frame));
+
+	// The lightbox is position: fixed, but a post lives inside stacking contexts
+	// (the content column, the page chrome) where z-index only counts locally.
+	// Left in place it opens underneath the site header and hides its own close
+	// button. Moving it to <body> puts it above everything.
+	//
+	// Reparenting blurs a focused element, and the lightbox has already moved
+	// focus to its close button by the time this runs, so hand focus back.
+	function portal(node: HTMLElement) {
+		const focused = document.activeElement as HTMLElement | null;
+		document.body.appendChild(node);
+		if (focused && node.contains(focused)) focused.focus();
+		return { destroy: () => node.remove() };
+	}
 </script>
 
 <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
@@ -151,20 +165,22 @@
 	<p class="sr-only" aria-live="polite">Photo {current + 1} of {images.length}</p>
 </div>
 
-<Lightbox
-	isOpen={lightboxIndex !== null}
-	src={lightboxImage?.url ?? ""}
-	alt={lightboxImage?.alt ?? ""}
-	caption={lightboxImage?.caption ?? ""}
-	position={lightboxIndex === null ? "" : `${lightboxIndex + 1} of ${images.length}`}
-	onClose={closeLightbox}
-	onPrevious={lightboxIndex !== null && lightboxIndex > 0
-		? () => (lightboxIndex = (lightboxIndex ?? 0) - 1)
-		: undefined}
-	onNext={lightboxIndex !== null && lightboxIndex < images.length - 1
-		? () => (lightboxIndex = (lightboxIndex ?? 0) + 1)
-		: undefined}
-/>
+{#if lightboxIndex !== null}
+	<div use:portal>
+		<Lightbox
+			isOpen
+			src={lightboxImage?.url ?? ""}
+			alt={lightboxImage?.alt ?? ""}
+			caption={lightboxImage?.caption ?? ""}
+			position={`${lightboxIndex + 1} of ${images.length}`}
+			onClose={closeLightbox}
+			onPrevious={lightboxIndex > 0 ? () => (lightboxIndex = (lightboxIndex ?? 0) - 1) : undefined}
+			onNext={lightboxIndex < images.length - 1
+				? () => (lightboxIndex = (lightboxIndex ?? 0) + 1)
+				: undefined}
+		/>
+	</div>
+{/if}
 
 <style>
 	/* Slide and track styles are global (content.css) so the server-rendered
@@ -184,12 +200,20 @@
 		align-items: center;
 		justify-content: center;
 		border-radius: 50%;
-		border: 1px solid var(--color-border);
-		background: color-mix(in srgb, var(--color-surface) 85%, transparent);
-		color: var(--color-text);
+		/* These sit on top of a photo, so a dark scrim with a white icon reads on
+		   any image and in any theme (same treatment as the lightbox controls) */
+		border: 1px solid rgba(255, 255, 255, 0.4);
+		background: rgba(0, 0, 0, 0.5);
+		color: white;
 		cursor: pointer;
 		opacity: 0;
-		transition: opacity 0.2s;
+		transition:
+			opacity 0.2s,
+			background 0.2s;
+	}
+
+	.grove-carousel-nav:hover {
+		background: rgba(0, 0, 0, 0.7);
 	}
 
 	.grove-carousel-nav :global(svg) {

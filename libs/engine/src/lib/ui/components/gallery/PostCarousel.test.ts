@@ -175,6 +175,38 @@ describe("PostCarousel", () => {
 			expect(screen.getByText("1 of 3")).toBeInTheDocument();
 		});
 
+		// Regression: left inside the post it opened underneath the site header
+		// (a parent stacking context caps its z-index) and hid its own close button.
+		it("renders on <body>, outside the carousel and its stacking contexts", async () => {
+			const { container } = setup();
+			await fireEvent.click(
+				screen.getByRole("button", { name: "View photo 1 larger: Autumn forest" }),
+			);
+
+			const dialog = screen.getByRole("dialog", { name: "Image viewer" });
+			expect(container.contains(dialog)).toBe(false);
+			expect(document.body.contains(dialog)).toBe(true);
+		});
+
+		it("puts focus on Close when it opens, even after moving to <body>", async () => {
+			setup();
+			await fireEvent.click(
+				screen.getByRole("button", { name: "View photo 1 larger: Autumn forest" }),
+			);
+			await tick();
+			expect(screen.getByRole("button", { name: "Close" })).toHaveFocus();
+		});
+
+		it("removes the lightbox from <body> when it closes", async () => {
+			setup();
+			await fireEvent.click(
+				screen.getByRole("button", { name: "View photo 1 larger: Autumn forest" }),
+			);
+			await fireEvent.click(screen.getByRole("button", { name: "Close" }));
+			expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+			expect(document.querySelector(".lightbox-backdrop")).toBeNull();
+		});
+
 		it("steps through photos and hides the arrow at each end", async () => {
 			setup();
 			await fireEvent.click(
