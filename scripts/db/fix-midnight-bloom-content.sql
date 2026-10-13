@@ -302,6 +302,70 @@ So this is a small, late invitation, from someone whose job is to protect quiet 
 );
 
 -- ============================================
+-- POST 5: Slow Evenings, in Pictures
+-- ============================================
+-- Seeds every gallery case for the carousel work (issue #1590): block
+-- galleries with alt text and captions (3 and 6 images, mixed landscape and
+-- portrait), a caption full of commas and quotes, an image with no alt and one
+-- with no caption, the legacy single-line form, and a plain single image.
+-- Images are remote URLs (Unsplash / Pexels) — nothing is downloaded or stored.
+-- Added here, not in seed-midnight-bloom.sql, because this script DELETEs and
+-- re-inserts every post for the tenant (see post 4 above).
+INSERT INTO posts (id, tenant_id, slug, title, description, markdown_content, tags, status, published_at, created_at, updated_at)
+VALUES (
+  'example-post-slow-pictures',
+  'example-tenant-001',
+  'slow-evenings-in-pictures',
+  'Slow Evenings, in Pictures',
+  'Some nights are better shown than told',
+  'Some nights are better shown than told. These are a few I keep coming back to.
+
+## The Walk In
+
+Most of us take the long way to the cafe when the light is right. Swipe through; the path never looks the same twice.
+
+::gallery
+![Autumn forest in gold and green, light falling on a footpath](https://images.unsplash.com/photo-1604342767712-f7448911dc51?fm=jpg&q=70&w=1260&h=750&fit=crop "The long way in, mid-October")
+![Sunlit conifers with glowing moss underfoot](https://images.unsplash.com/photo-1767113345762-84cadd023105?fm=jpg&q=70&w=1260&h=750&fit=crop "Quiet enough to hear the moss")
+![Tall bookcases beside a window full of plants](https://images.pexels.com/photos/34269408/pexels-photo-34269408.jpeg?auto=compress&w=1260&h=750&fit=crop&dpr=1 "Where the walk ends")
+::
+
+## The Lamp Is Always On
+
+One lamp, one cup, and nowhere to be. This is a single image, so it should look exactly like any other photo in a post.
+
+![A blue and white teacup glowing under an amber lamp](https://images.pexels.com/photos/31042351/pexels-photo-31042351/free-photo-of-elegant-tea-setting-with-lamp-illumination.jpeg?auto=compress&w=1260&h=750&dpr=1)
+
+## Everything, All at Once
+
+For the regulars who want the whole evening in one place. Mixed shapes on purpose: the tea photos are tall, the rest are wide.
+
+::gallery
+![A blue and white teacup beside a glass server, under a lamp](https://images.pexels.com/photos/31042351/pexels-photo-31042351/free-photo-of-elegant-tea-setting-with-lamp-illumination.jpeg?auto=compress&w=1260&h=750&dpr=1 "Tea, two ways, and a lamp (always the lamp)")
+![A floral teacup on a saucer next to a painted vase](https://images.pexels.com/photos/33537000/pexels-photo-33537000/free-photo-of-cozy-evening-tea-with-vintage-lamp-decor.jpeg?auto=compress&w=1260&h=750&dpr=1 "Our "good" cups, saved for regulars, 2 AM, no questions")
+![Golden autumn forest](https://images.unsplash.com/photo-1604342767712-f7448911dc51?fm=jpg&q=70&w=1260&h=750&fit=crop)
+![](https://images.unsplash.com/photo-1767113345762-84cadd023105?fm=jpg&q=70&w=1260&h=750&fit=crop "A photo with a caption but no alt text")
+![Shelves of books beside a sunny window with plants](https://images.pexels.com/photos/34269408/pexels-photo-34269408.jpeg?auto=compress&w=1260&h=750&fit=crop&dpr=1 "Reading nook, third shelf down")
+![A green-awninged bookshop with a Queernival poster in the window](https://images.pexels.com/photos/33676229/pexels-photo-33676229.jpeg?auto=compress&w=1260&h=750&fit=crop&dpr=1 "Lost Books, our favorite neighbor")
+::
+
+## The Old Way
+
+Galleries used to be written as one long line of links, with no room for captions. Those still work, and should still turn into a carousel.
+
+::gallery[https://images.unsplash.com/photo-1604342767712-f7448911dc51?fm=jpg&q=70&w=1260&h=750&fit=crop, https://images.pexels.com/photos/33537000/pexels-photo-33537000/free-photo-of-cozy-evening-tea-with-vintage-lamp-decor.jpeg?auto=compress&w=1260&h=750&dpr=1]::
+
+*The kettle can wait ten more minutes. It always has.*
+
+— Elena',
+  '["photos", "gallery", "evenings"]',
+  'published',
+  unixepoch() - 86400 * 3,
+  unixepoch() - 86400 * 3,
+  unixepoch()
+);
+
+-- ============================================
 -- UPDATE TENANT POST COUNT
 -- ============================================
-UPDATE tenants SET post_count = 4 WHERE id = 'example-tenant-001';
+UPDATE tenants SET post_count = 5 WHERE id = 'example-tenant-001';
