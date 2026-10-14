@@ -7,8 +7,8 @@ on:
     paths:
       - "services/durable-objects/**"
       - "libs/engine/src/lib/durable-objects/**"
-      - "libs/engine/src/lib/loom/**"
-      - "libs/engine/src/lib/lumen/**"
+      - "libs/loom/**"
+      - "libs/engine/src/lib/ai/lumen/**"
       - "libs/engine/src/lib/zephyr/**"
   workflow_dispatch:
 
