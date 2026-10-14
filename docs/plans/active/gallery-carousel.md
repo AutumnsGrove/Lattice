@@ -1,6 +1,6 @@
 # Gallery Carousel + Builder
 
-**Issue:** #1590 · **Lands on:** beta first · **Status:** active
+**Issue:** #1590 · **Lands on:** beta first · **Status:** rendering shipped to main + beta; builder built on beta, awaiting sign-off
 
 A post with several photos should read like one photo with depth: swipe through, tap to see it big. And putting those photos in a post shouldn't take secret knowledge of directive syntax.
 
@@ -67,11 +67,12 @@ The single-line form can't hold per-image alt text or captions (`^::name[...]::$
 
 The goal: nobody should ever have to type `::gallery`.
 
-- **Photo picker → arrange step.** After selecting 2+ photos in `PhotoPicker`, a second step: reorder (drag, plus up/down buttons for keyboard and touch), alt text and caption per image, and a live carousel preview. "Insert" writes the block form.
+- **Photo picker → arrange step.** After selecting 2+ photos in `PhotoPicker`, a second step: reorder with up/down buttons (keyboard, screen reader, and touch all work; drag-and-drop was left out of v1), alt text and caption per image, and a live carousel preview (beside the list on wide screens, below it on narrow ones). "Insert gallery" writes the block form.
 - **Editing is the same door.** If the cursor is inside a `::gallery` block, the toolbar photo button opens the builder pre-filled and replaces the block on save.
-- **`/gallery` in the curio palette** opens the builder instead of inserting an empty `::gallery[]::`.
-- **Gating:** `MarkdownEditor` takes a `galleryBuilder` prop. Aspen's editor pages pass `data.isBeta`, which comes from the root layout via `isBetaDeployment()` (true on `<tenant>-beta.grove.place`, and on localhost when running the beta branch). With it off, the picker behaves as today, except multi-select writes the legacy single-line form, which still renders as a carousel. This is the beta deployment doing its job, not a feature flag.
-- **Keep it cherry-pickable:** builder code lives in its own files (`GalleryBuilder.svelte`, a small parse/serialize module) with one gated mount point in the editor, so graduating to main later is a small diff.
+- **Typing `::gallery`** (the editor's directive menu is triggered by `::`, not `/`) opens the builder, starting at the photo picker, instead of inserting an empty `::gallery[]::`.
+- **Gating: the branch is the gate.** There is no `galleryBuilder` prop or `isBeta` check. The builder's code exists only on the `beta` branch, which deploys only to `grove-aspen-beta`; a runtime check on top would be a feature flag in all but name. Graduating it is a cherry-pick of the builder commits.
+- **Keep it cherry-pickable:** the builder lives in its own files (`GalleryBuilder.svelte`, `gallery-block.ts`, and `serializeGallery` beside the parser in `grove-markdown`), with three small hooks in the editor (`MarkdownEditor`, `EditorCore`, `CurioAutocomplete`).
+- **Known gap, not from this work:** at phone widths the arbor editor's floating Details/Vines rail covers the toolbar's photo button, so on a phone the builder is reached by typing `::gallery`.
 
 ---
 
@@ -101,7 +102,7 @@ Each step has its own check.
 3. Scroll-snap CSS; remove the old grid rules (`data-images` 3-col selectors, hover zoom) → Glimpse capture at desktop/mobile, light/dark; no shift between server HTML and hydrated state.
 4. `PostCarousel` + lightbox + hydration hook → component tests for index/dots/keys/reduced-motion; manual check with the dev stack on a real post.
 5. Ship 1–4 to main + beta.
-6. Builder: parse/serialize module (round-trips the block form), `GalleryBuilder.svelte`, picker second step, edit-in-place, `/gallery` palette hook, `betaDeployment` plumbing → serialize/parse tests; click through on beta.
+6. Builder: serializer (round-trips the block form), `GalleryBuilder.svelte`, picker second step, edit-in-place, `::gallery` menu hook → serializer, locator, and component tests; clicked through in a real browser at desktop and phone widths. **Done on `beta`, not yet pushed.**
 7. Close #1590 once the builder has been used on beta; note in the issue what stays beta-only.
 
 ## Later (not v1)
