@@ -24,7 +24,7 @@
 		curioQuery: string;
 		curioAutocompletePos: { top: number; left: number };
 		curioAutocompleteRef: { handleKey: (e: KeyboardEvent) => boolean } | null;
-		onCurioSelect: (directiveText: string, cursorOffset: number) => void;
+		onCurioSelect: (directiveText: string, cursorOffset: number, id: string) => void;
 		onCurioClose: () => void;
 	}
 

@@ -6,12 +6,18 @@
 	// Local instance for admin editor preview
 	const editorMd = new MarkdownIt({ html: false, linkify: true });
 	import { extractHeaders } from "$lib/content/markdown/markdown";
-	import { groveDirectivePlugin } from "@autumnsgrove/grove-markdown/directives";
+	import {
+		groveDirectivePlugin,
+		serializeGallery,
+		type GalleryItem,
+	} from "@autumnsgrove/grove-markdown/directives";
 	editorMd.use(groveDirectivePlugin);
 	editorMd.use(suppressHeadingPlugin);
 	import "$lib/styles/content.css";
 	import { toast } from "$lib/ui/components/ui/toast";
 	import PhotoPicker from "../../components/admin/PhotoPicker.svelte";
+	import GalleryBuilder from "../../components/admin/GalleryBuilder.svelte";
+	import { findGalleryBlock } from "./gallery-block";
 	import { browser } from "$app/environment";
 	import { useEditorTheme, useDraftManager, type StoredDraft } from "./composables";
 	import FormattingToolbar from "./FormattingToolbar.svelte";
@@ -70,6 +76,15 @@
 
 	// Photo picker
 	let showPhotoPicker = $state(false);
+
+	// Gallery builder (null while closed). `range` is the existing gallery being
+	// edited; when it is null the finished gallery is inserted at `insertAt`.
+	let galleryBuilder = $state<{
+		items: GalleryItem[];
+		range: { from: number; to: number } | null;
+		insertAt: number;
+		startWithPicker: boolean;
+	} | null>(null);
 
 	// Curio autocomplete state
 	let showCurioAutocomplete = $state(false);
@@ -274,10 +289,28 @@
 		showCurioAutocomplete = true;
 	}
 
-	async function handleCurioSelect(directiveText: string, cursorOffset: number) {
+	async function handleCurioSelect(directiveText: string, cursorOffset: number, id: string) {
 		if (!textareaRef) return;
 		isUpdating = true;
 		isProgrammaticUpdate = true;
+
+		if (id === "gallery") {
+			// Galleries are built, not typed: drop the "::gallery" text that opened the
+			// menu and open the builder, which starts at the photo picker.
+			const pos = textareaRef.selectionStart;
+			content = content.substring(0, curioTriggerStart) + content.substring(pos);
+			showCurioAutocomplete = false;
+			await tick();
+			isProgrammaticUpdate = false;
+			isUpdating = false;
+			galleryBuilder = {
+				items: [],
+				range: null,
+				insertAt: curioTriggerStart,
+				startWithPicker: true,
+			};
+			return;
+		}
 
 		const pos = textareaRef.selectionStart;
 		const before = content.substring(0, curioTriggerStart);
@@ -477,6 +510,23 @@
 		isUpdating = false;
 	}
 
+	/** Replace content[from, to) with text, leaving the cursor just after it. */
+	async function replaceRange(from: number, to: number, text: string) {
+		if (!textareaRef || isUpdating) return;
+		isUpdating = true;
+		isProgrammaticUpdate = true;
+
+		content = content.substring(0, from) + text + content.substring(to);
+
+		await tick();
+
+		textareaRef.selectionStart = textareaRef.selectionEnd = from + text.length;
+		textareaRef.focus();
+
+		isProgrammaticUpdate = false;
+		isUpdating = false;
+	}
+
 	// Toolbar actions
 	function insertHeading(level: number) {
 		insertAtCursor("#".repeat(level) + " ");
@@ -513,8 +563,47 @@
 		if (urls.length === 1) {
 			insertAtCursor(`![Photo](${urls[0]})\n`);
 		} else {
-			insertAtCursor(`::gallery[${urls.join(", ")}]::\n`);
+			// Two or more become a gallery. The builder collects alt text and
+			// captions and writes the directive, so nobody types its syntax.
+			galleryBuilder = {
+				items: urls.map((url) => ({ url, alt: "", caption: "" })),
+				range: null,
+				insertAt: textareaRef?.selectionStart ?? content.length,
+				startWithPicker: false,
+			};
 		}
+	}
+
+	/** The toolbar photo button: reopen the gallery the cursor is in, otherwise pick photos. */
+	function handleShowPhotoPicker() {
+		const found = textareaRef ? findGalleryBlock(content, textareaRef.selectionStart) : null;
+		if (found) {
+			galleryBuilder = {
+				items: found.items,
+				range: { from: found.from, to: found.to },
+				insertAt: found.from,
+				startWithPicker: false,
+			};
+			return;
+		}
+		showPhotoPicker = true;
+	}
+
+	async function saveGallery(items: GalleryItem[]) {
+		const builder = galleryBuilder;
+		galleryBuilder = null;
+		if (!builder) return;
+
+		const block = serializeGallery(items);
+		if (builder.range) {
+			await replaceRange(builder.range.from, builder.range.to, block);
+			return;
+		}
+
+		// A new gallery starts on its own line
+		const at = Math.min(builder.insertAt, content.length);
+		const lead = at > 0 && content[at - 1] !== "\n" ? "\n" : "";
+		await replaceRange(at, at, `${lead}${block}\n`);
 	}
 
 	// Scroll sync
@@ -662,7 +751,7 @@
 		onInsertLink={insertLink}
 		onInsertFootnote={insertFootnote}
 		onInsertHeading={insertHeading}
-		onShowPhotoPicker={() => (showPhotoPicker = true)}
+		onShowPhotoPicker={handleShowPhotoPicker}
 		onSetEditorMode={setEditorMode}
 		onShowFullPreview={() => (showFullPreview = true)}
 		onToggleZenMode={toggleZenMode}
@@ -707,6 +796,18 @@
 		onInsert={handlePhotoInsert}
 		onClose={() => (showPhotoPicker = false)}
 		galleryEnabled={uploadsEnabled}
+	/>
+{/if}
+
+<!-- Gallery Builder -->
+{#if galleryBuilder}
+	<GalleryBuilder
+		items={galleryBuilder.items}
+		mode={galleryBuilder.range ? "edit" : "new"}
+		photoLibraryEnabled={uploadsEnabled}
+		startWithPicker={galleryBuilder.startWithPicker}
+		onSave={saveGallery}
+		onClose={() => (galleryBuilder = null)}
 	/>
 {/if}
 

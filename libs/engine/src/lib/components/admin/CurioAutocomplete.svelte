@@ -12,7 +12,7 @@
 		query?: string;
 		configuredCurios?: CurioStatusItem[];
 		position?: { top: number; left: number };
-		onselect?: (directiveText: string, cursorOffset: number) => void;
+		onselect?: (directiveText: string, cursorOffset: number, id: string) => void;
 		onclose?: () => void;
 	}
 
@@ -100,7 +100,7 @@
 
 	function selectItem(item: (typeof CURIO_METADATA)[number]) {
 		const { text, cursorOffset } = buildDirective(item);
-		onselect(text, cursorOffset);
+		onselect(text, cursorOffset, item.id);
 	}
 
 	/**
