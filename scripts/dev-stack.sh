@@ -224,6 +224,16 @@ seed_data() {
                 --file scripts/db/seed-tenant-003.sql \
                 -y 2>&1 | tail -3
 
+            # Image uploads: every tenant starts suspended (a safety gate), which
+            # makes any local upload fail with GROVE-API-047. Unsuspend the three
+            # seeded tenants the same way the real admin action does. Local only.
+            dim "  → Upload gate (unsuspend uploads for the seeded tenants)"
+            wrangler d1 execute grove-engine-db \
+                --local \
+                -c apps/aspen/wrangler.toml \
+                --file scripts/db/seed-upload-unsuspend.sql \
+                -y 2>&1 | tail -3
+
             # Comped/beta invite rows for apps/landing's Wayfinder-only
             # /arbor/comped-invites admin page — pending, used, and legacy
             # "beta"-typed invites so the list/filter/audit views have real

@@ -171,6 +171,8 @@ Run a specific profile:
 
 Seed scripts live in `scripts/db/`. Local D1 data lives in `.wrangler/state/v3/d1/` — that directory is gitignored, so it's yours to mess with. `seed-tenant-002.sql` and `seed-tenant-003.sql` are local-only (unlike Midnight Bloom's tenant row, which also lives in a real migration) — they never touch production.
 
+The seed also unsuspends image uploads for all three tenants (`seed-upload-unsuspend.sql`). Every real tenant starts with uploads suspended as a safety gate, so without this a local upload fails with `GROVE-API-047`. It writes the same per-tenant rule the real admin action does, and it is local-only. Never run it against a remote database.
+
 ### The Three Seeded Accounts
 
 | Tenant | Subdomain | Vibe |
@@ -193,6 +195,7 @@ A few things genuinely need the cloud:
 | Thing | Why | Workaround |
 |-------|-----|-----------|
 | **Workers AI** | Always remote (Cloudflare's GPU infra) | May incur small charges; disable AI features locally if needed |
+| **Image uploads** | Uploads run the Petal safety scan, which calls Workers AI. Locally the `AI` binding isn't set to run remotely, so the scan fails closed with `PETAL-023` / `GROVE-API-011` and nothing is stored. | Test the editor by pasting image URLs instead. To try real uploads, Wrangler's own warning suggests `remote = true` on the `[ai]` binding in `apps/aspen/wrangler.toml` (untested here; it uses real Workers AI, and the edit shouldn't be committed). |
 | **Stripe webhooks** | Needs a public URL to receive events | Use [ngrok](https://ngrok.com/) or a Cloudflare Tunnel for billing flow testing |
 | **Email delivery** | Zephyr has no Resend key locally | Auth still completes; sign-in codes print in the Heartwood log (see [Email Code](#auth-setup-email-code)) |
 | **CDN fonts** | Loads from `cdn.grove.place` | Works fine, just slightly slower on first load |
@@ -203,6 +206,12 @@ A few things genuinely need the cloud:
 
 **"Class extends value undefined" on startup**
 The engine dist isn't built. Run `pnpm -r run package` from the repo root, then try again.
+
+**Pages 500 after switching git branches**
+Aspen and the workers consume the engine's *built* `libs/engine/dist`, not its source, so after switching branches the build is stale and can import things the new branch doesn't have. Rebuild it: `cd libs/engine && pnpm run package`.
+
+**A request fails with `cause: "aborted"` right after rebuilding the engine**
+The durable-objects worker watches `libs/engine/dist`. While `pnpm run package` rewrites it the worker rebundles, and any request in flight at that moment is aborted. It recovers by itself ("Local server updated and ready"); just retry.
 
 **Port already in use**
 A stale wrangler process is probably running. Kill it:
