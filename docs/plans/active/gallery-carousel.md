@@ -67,11 +67,12 @@ The single-line form can't hold per-image alt text or captions (`^::name[...]::$
 
 The goal: nobody should ever have to type `::gallery`.
 
-- **Photo picker → arrange step.** After selecting 2+ photos in `PhotoPicker`, a second step: reorder with up/down buttons (keyboard, screen reader, and touch all work; drag-and-drop was left out of v1), alt text and caption per image, and a live carousel preview (beside the list on wide screens, below it on narrow ones). "Insert gallery" writes the block form.
-- **Editing is the same door.** If the cursor is inside a `::gallery` block, the toolbar photo button opens the builder pre-filled and replaces the block on save.
-- **Typing `::gallery`** (the editor's directive menu is triggered by `::`, not `/`) opens the builder, starting at the photo picker, instead of inserting an empty `::gallery[]::`.
+- **One modal, two steps.** The existing photo modal does both jobs; there is no separate gallery dialog. Pick photos in the first half. Picking a second photo turns it into a gallery automatically (and deselecting back to one turns it back, so it is always undoable), the button becomes "Arrange gallery", and the second half opens: reorder with up/down buttons (keyboard, screen reader, and touch all work; drag-and-drop was left out of v1), alt text and caption per photo, and a live carousel preview (beside the list on wide screens, below it on narrow ones). "Insert gallery" writes the block form. "Back to photos" returns with everything still selected and nothing typed lost.
+- **Single photos get a description too.** With exactly one photo selected there is an optional "Describe this photo" box, so it inserts as `![your description](url)` instead of the old hard-coded `![Photo](url)`. A one-line hint ("Pick more than one to make a gallery") covers discoverability without a toggle.
+- **Editing is the same door.** If the cursor is inside a `::gallery` block, the toolbar photo button opens the modal on the arrange step, pre-filled, and replaces the block on save. Cut a gallery down to one photo and it becomes a plain image.
+- **Typing `::gallery`** (the editor's directive menu is triggered by `::`, not `/`) opens the same modal instead of inserting an empty `::gallery[]::`.
 - **Gating: the branch is the gate.** There is no `galleryBuilder` prop or `isBeta` check. The builder's code exists only on the `beta` branch, which deploys only to `grove-aspen-beta`; a runtime check on top would be a feature flag in all but name. Graduating it is a cherry-pick of the builder commits.
-- **Keep it cherry-pickable:** the builder lives in its own files (`GalleryBuilder.svelte`, `gallery-block.ts`, and `serializeGallery` beside the parser in `grove-markdown`), with three small hooks in the editor (`MarkdownEditor`, `EditorCore`, `CurioAutocomplete`).
+- **Keep it cherry-pickable:** the arrange panel is its own file (`GalleryBuilder.svelte`), as are `gallery-block.ts` and `serializeGallery`/`serializeImageLine` beside the parser in `grove-markdown`. `PhotoPicker` hosts the two steps, and `MarkdownEditor`, `EditorCore`, and `CurioAutocomplete` have small hooks.
 - **Known gap, not from this work:** at phone widths the arbor editor's floating Details/Vines rail covers the toolbar's photo button, so on a phone the builder is reached by typing `::gallery`.
 
 ---
@@ -102,7 +103,7 @@ Each step has its own check.
 3. Scroll-snap CSS; remove the old grid rules (`data-images` 3-col selectors, hover zoom) → Glimpse capture at desktop/mobile, light/dark; no shift between server HTML and hydrated state.
 4. `PostCarousel` + lightbox + hydration hook → component tests for index/dots/keys/reduced-motion; manual check with the dev stack on a real post.
 5. Ship 1–4 to main + beta.
-6. Builder: serializer (round-trips the block form), `GalleryBuilder.svelte`, picker second step, edit-in-place, `::gallery` menu hook → serializer, locator, and component tests; clicked through in a real browser at desktop and phone widths. **Done on `beta`, not yet pushed.**
+6. Builder: serializer (round-trips the block form), `GalleryBuilder.svelte` as the arrange panel, `PhotoPicker` as the one modal with the automatic swap, edit-in-place, `::gallery` menu hook → serializer, locator, and component tests (the picker had none before); clicked through in a real browser at desktop and phone widths. **Done on `beta`, not yet pushed.**
 7. Close #1590 once the builder has been used on beta; note in the issue what stays beta-only.
 
 ## Later (not v1)
