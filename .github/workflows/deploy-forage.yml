@@ -6,7 +6,7 @@ on:
     branches: [main]
     paths:
       - "services/forage/**"
-      - "libs/engine/src/lib/loom/**"
+      - "libs/loom/**"
   workflow_dispatch:
 
 permissions:
