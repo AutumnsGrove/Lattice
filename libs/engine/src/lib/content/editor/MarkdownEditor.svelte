@@ -1,11 +1,11 @@
 <script lang="ts">
 	import MarkdownIt from "markdown-it";
-	import { suppressHeadingPlugin, SUPPRESS_MARKER } from "$lib/content/markdown/suppress";
+	import { suppressHeadingPlugin, SUPPRESS_MARKER } from "@autumnsgrove/grove-markdown/suppress";
 	import { tick, untrack } from "svelte";
 
 	// Local instance for admin editor preview
 	const editorMd = new MarkdownIt({ html: false, linkify: true });
-	import { extractHeaders } from "$lib/content/markdown/markdown";
+	import { extractHeaders } from "@autumnsgrove/grove-markdown/markdown";
 	import {
 		groveDirectivePlugin,
 		serializeGallery,

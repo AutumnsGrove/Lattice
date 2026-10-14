@@ -17,6 +17,8 @@ export interface Header {
 	level: number;
 	text: string;
 	id: string;
+	/** Nesting relative to the nearest shallower heading; dividers reset it to 0 */
+	depth?: number;
 }
 
 /**
@@ -316,8 +318,17 @@ function isValidUrl(urlString: string): boolean {
 	}
 }
 
+const HEADER_LINE = /^(#{1,6})\s+(.+)$/;
+// Thematic break (---, ***, ___). Callers also require a blank line before it,
+// so a setext underline ("Title\n---") isn't mistaken for a divider.
+const DIVIDER_LINE = /^ {0,3}([-*_])( ?\1){2,}\s*$/;
+
 /**
  * Extract headers from markdown content for table of contents.
+ *
+ * `depth` is nesting relative to the nearest shallower heading, so skipped
+ * levels don't add indentation (h1 → h3 → h5 is depth 0, 1, 2). A divider
+ * resets the tree: the next heading starts back at depth 0.
  *
  * Headings tagged with the `::suppress::` marker (in any placement —
  * `### ::suppress:: text`, `### text ::suppress::`, or the prefix form
@@ -332,28 +343,34 @@ export function extractHeaders(markdown: string): Header[] {
 	// This prevents # comments inside code blocks from being treated as headers
 	const markdownWithoutCodeBlocks = markdown.replace(/```[\s\S]*?```/g, "");
 
-	const headerRegex = /^(#{1,6})\s+(.+)$/gm;
+	let ancestors: number[] = [];
+	let prevBlank = true;
 
-	let match;
-	while ((match = headerRegex.exec(markdownWithoutCodeBlocks)) !== null) {
-		const level = match[1].length;
-		const rawText = match[2].trim();
+	for (const line of markdownWithoutCodeBlocks.split("\n")) {
+		const isBlank = line.trim() === "";
 
-		// Skip headings the author opted out of the TOC. The prefix form
-		// `::suppress:: ### text` never reaches this branch because the
-		// line doesn't start with `#`, so we only need to guard the
-		// inline / suffix placements here.
-		if (rawText.includes(SUPPRESS_MARKER)) continue;
+		if (prevBlank && DIVIDER_LINE.test(line)) {
+			ancestors = [];
+		} else {
+			const match = HEADER_LINE.exec(line);
+			if (match) {
+				const level = match[1].length;
+				const text = match[2].trim();
 
-		const text = rawText;
-		// Use shared helper to generate ID - ensures consistency with heading renderers
-		const id = generateHeadingId(text);
+				// Skip headings the author opted out of the TOC. The prefix form
+				// `::suppress:: ### text` never reaches this branch because the
+				// line doesn't start with `#`, so we only need to guard the
+				// inline / suffix placements here.
+				if (!text.includes(SUPPRESS_MARKER)) {
+					while (ancestors.length && ancestors[ancestors.length - 1] >= level) ancestors.pop();
+					// Use shared helper to generate ID - ensures consistency with heading renderers
+					headers.push({ level, text, id: generateHeadingId(text), depth: ancestors.length });
+					ancestors.push(level);
+				}
+			}
+		}
 
-		headers.push({
-			level,
-			text,
-			id,
-		});
+		prevBlank = isBlank;
 	}
 
 	return headers;
