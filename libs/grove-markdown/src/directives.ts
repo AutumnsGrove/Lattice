@@ -34,7 +34,8 @@ export const MAX_GALLERY_IMAGES = 20;
 
 type DirectiveHandler = (content: string) => string | null;
 
-interface GalleryItem {
+/** One photo in a gallery: where it lives, what it shows, and an optional caption. */
+export interface GalleryItem {
 	url: string;
 	alt: string;
 	caption: string;
@@ -68,12 +69,15 @@ function renderGallery(items: GalleryItem[]): string | null {
  * written before the block form existed keep rendering.
  */
 function handleGallery(content: string): string | null {
-	const items = content
+	return renderGallery(parseGalleryUrls(content));
+}
+
+/** Parse the content of a single-line gallery: comma-separated URLs. */
+export function parseGalleryUrls(content: string): GalleryItem[] {
+	return content
 		.split(",")
 		.map((url) => ({ url: url.trim(), alt: "", caption: "" }))
 		.filter((item) => item.url.length > 0);
-
-	return renderGallery(items);
 }
 
 /** One block-form gallery line: ![alt](url) or ![alt](url "caption") */
@@ -83,7 +87,7 @@ const GALLERY_IMAGE_LINE_RE = /^!\[([^\]]*)\]\(\s*(\S+?)(?:\s+"(.*)")?\s*\)$/;
  * Parse the lines of a block-form gallery. Blank lines and lines that aren't
  * a markdown image are skipped rather than failing the whole gallery.
  */
-function parseGalleryLines(lines: string[]): GalleryItem[] {
+export function parseGalleryLines(lines: string[]): GalleryItem[] {
 	const items: GalleryItem[] = [];
 	for (const line of lines) {
 		const match = GALLERY_IMAGE_LINE_RE.exec(line.trim());
@@ -91,6 +95,26 @@ function parseGalleryLines(lines: string[]): GalleryItem[] {
 		items.push({ url: match[2], alt: match[1].trim(), caption: (match[3] ?? "").trim() });
 	}
 	return items;
+}
+
+/**
+ * Write gallery items as the block form that parseGalleryLines reads back.
+ * Keeps to what the syntax can carry: line breaks become spaces, brackets are
+ * dropped from alt text (they would end it early), and spaces or parentheses
+ * in a URL are percent-encoded. Captions may hold commas and quotes freely.
+ *
+ * The result has no trailing newline. Extra items past MAX_GALLERY_IMAGES are
+ * dropped, the same as when it renders.
+ */
+export function serializeGallery(items: GalleryItem[]): string {
+	const lines = items.slice(0, MAX_GALLERY_IMAGES).map(({ url, alt, caption }) => {
+		const flatten = (value: string) => value.replace(/[\r\n]+/g, " ").trim();
+		const safeAlt = flatten(alt).replace(/[[\]]/g, "");
+		const safeCaption = flatten(caption);
+		const safeUrl = url.trim().replace(/\s/g, "%20").replace(/\(/g, "%28").replace(/\)/g, "%29");
+		return `![${safeAlt}](${safeUrl}${safeCaption ? ` "${safeCaption}"` : ""})`;
+	});
+	return ["::gallery", ...lines, "::"].join("\n");
 }
 
 // ============================================================================

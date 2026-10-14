@@ -7,7 +7,14 @@
 
 import { describe, it, expect } from "vitest";
 import MarkdownIt from "markdown-it";
-import { groveDirectivePlugin, CURIO_DIRECTIVES, MAX_GALLERY_IMAGES } from "./directives";
+import {
+	groveDirectivePlugin,
+	CURIO_DIRECTIVES,
+	MAX_GALLERY_IMAGES,
+	parseGalleryLines,
+	parseGalleryUrls,
+	serializeGallery,
+} from "./directives";
 import { renderMarkdown } from "./markdown";
 import { sanitizeMarkdown } from "./utils/sanitize";
 
@@ -508,5 +515,98 @@ describe("groveDirectivePlugin - anchor", () => {
 	it("rejects an empty anchor name", () => {
 		const result = md.render("::anchor[]::");
 		expect(result).not.toContain("data-anchor");
+	});
+});
+
+// ============================================================================
+// Gallery serialization — what the editor's gallery builder writes
+// ============================================================================
+
+/** The inner lines of a serialized gallery, without the ::gallery / :: fence. */
+const innerLines = (block: string) => block.split("\n").slice(1, -1);
+
+describe("serializeGallery", () => {
+	it("writes the block form", () => {
+		const block = serializeGallery([
+			{ url: "https://cdn.grove.place/a.jpg", alt: "Dawn", caption: "First light" },
+			{ url: "https://cdn.grove.place/b.jpg", alt: "", caption: "" },
+		]);
+		expect(block).toBe(
+			[
+				"::gallery",
+				'![Dawn](https://cdn.grove.place/a.jpg "First light")',
+				"![](https://cdn.grove.place/b.jpg)",
+				"::",
+			].join("\n"),
+		);
+	});
+
+	it("round-trips through the parser, including awkward text", () => {
+		const items = [
+			{
+				url: "https://cdn.grove.place/a.jpg?w=1260&h=750",
+				alt: "Autumn, golden",
+				caption: "Paris, 2024",
+			},
+			{ url: "https://cdn.grove.place/b.jpg", alt: "", caption: 'Our "good" cups (finally)' },
+			{ url: "https://cdn.grove.place/c.jpg", alt: "日本の庭 🌿", caption: 'ends with a quote"' },
+			{ url: "https://cdn.grove.place/d.jpg", alt: "x", caption: 'a ") b' },
+		];
+		expect(parseGalleryLines(innerLines(serializeGallery(items)))).toEqual(items);
+	});
+
+	it("drops brackets from alt text and flattens line breaks", () => {
+		const [item] = parseGalleryLines(
+			innerLines(
+				serializeGallery([
+					{
+						url: "https://cdn.grove.place/a.jpg",
+						alt: "a [bracketed]\nnote",
+						caption: "one\r\ntwo",
+					},
+				]),
+			),
+		);
+		expect(item.alt).toBe("a bracketed note");
+		expect(item.caption).toBe("one two");
+	});
+
+	it("percent-encodes spaces and parentheses in URLs so the line still parses", () => {
+		const block = serializeGallery([
+			{ url: "https://x.test/My Photo (1).jpg", alt: "", caption: "" },
+		]);
+		expect(block).toContain("![](https://x.test/My%20Photo%20%281%29.jpg)");
+		expect(parseGalleryLines(innerLines(block))).toHaveLength(1);
+	});
+
+	it("caps at MAX_GALLERY_IMAGES, the same as rendering", () => {
+		const items = Array.from({ length: MAX_GALLERY_IMAGES + 3 }, (_, i) => ({
+			url: `https://cdn.grove.place/${i}.jpg`,
+			alt: "",
+			caption: "",
+		}));
+		expect(innerLines(serializeGallery(items))).toHaveLength(MAX_GALLERY_IMAGES);
+	});
+
+	it("renders as a gallery with the same photos and captions when written into a post", () => {
+		const html = createMd().render(
+			serializeGallery([
+				{ url: "https://cdn.grove.place/a.jpg", alt: "Dawn", caption: "First light" },
+				{ url: "https://cdn.grove.place/b.jpg", alt: "Fog", caption: "" },
+			]),
+		);
+		expect(html).toContain('data-images="2"');
+		expect(html).toContain('alt="Dawn"');
+		expect(html).toContain("<figcaption>First light</figcaption>");
+		expect(html.match(/<figcaption>/g)).toHaveLength(1);
+	});
+});
+
+describe("parseGalleryUrls (legacy single-line form)", () => {
+	it("splits comma-separated URLs into items with no alt or caption", () => {
+		expect(parseGalleryUrls(" https://a.test/1.jpg ,https://a.test/2.jpg,, ")).toEqual([
+			{ url: "https://a.test/1.jpg", alt: "", caption: "" },
+			{ url: "https://a.test/2.jpg", alt: "", caption: "" },
+		]);
 	});
 });
