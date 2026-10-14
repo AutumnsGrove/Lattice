@@ -107,14 +107,21 @@ export function parseGalleryLines(lines: string[]): GalleryItem[] {
  * dropped, the same as when it renders.
  */
 export function serializeGallery(items: GalleryItem[]): string {
-	const lines = items.slice(0, MAX_GALLERY_IMAGES).map(({ url, alt, caption }) => {
-		const flatten = (value: string) => value.replace(/[\r\n]+/g, " ").trim();
-		const safeAlt = flatten(alt).replace(/[[\]]/g, "");
-		const safeCaption = flatten(caption);
-		const safeUrl = url.trim().replace(/\s/g, "%20").replace(/\(/g, "%28").replace(/\)/g, "%29");
-		return `![${safeAlt}](${safeUrl}${safeCaption ? ` "${safeCaption}"` : ""})`;
-	});
+	const lines = items.slice(0, MAX_GALLERY_IMAGES).map(serializeImageLine);
 	return ["::gallery", ...lines, "::"].join("\n");
+}
+
+/**
+ * One photo as a markdown image line: `![alt](url)`, or `![alt](url "caption")`
+ * when it has a caption. Used for each line of a gallery block, and on its own
+ * for a single photo, so both get the same escaping.
+ */
+export function serializeImageLine({ url, alt, caption }: GalleryItem): string {
+	const flatten = (value: string) => value.replace(/[\r\n]+/g, " ").trim();
+	const safeAlt = flatten(alt).replace(/[[\]]/g, "");
+	const safeCaption = flatten(caption);
+	const safeUrl = url.trim().replace(/\s/g, "%20").replace(/\(/g, "%28").replace(/\)/g, "%29");
+	return `![${safeAlt}](${safeUrl}${safeCaption ? ` "${safeCaption}"` : ""})`;
 }
 
 // ============================================================================

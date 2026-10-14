@@ -14,6 +14,7 @@ import {
 	parseGalleryLines,
 	parseGalleryUrls,
 	serializeGallery,
+	serializeImageLine,
 } from "./directives";
 import { renderMarkdown } from "./markdown";
 import { sanitizeMarkdown } from "./utils/sanitize";
@@ -608,5 +609,33 @@ describe("parseGalleryUrls (legacy single-line form)", () => {
 			{ url: "https://a.test/1.jpg", alt: "", caption: "" },
 			{ url: "https://a.test/2.jpg", alt: "", caption: "" },
 		]);
+	});
+});
+
+describe("serializeImageLine (a single photo)", () => {
+	it("writes a plain markdown image, with a caption only when there is one", () => {
+		expect(
+			serializeImageLine({ url: "https://cdn.grove.place/a.jpg", alt: "Dawn", caption: "" }),
+		).toBe("![Dawn](https://cdn.grove.place/a.jpg)");
+		expect(
+			serializeImageLine({ url: "https://cdn.grove.place/a.jpg", alt: "Dawn", caption: "Early" }),
+		).toBe('![Dawn](https://cdn.grove.place/a.jpg "Early")');
+	});
+
+	it("gives alt text the same escaping a gallery line gets", () => {
+		const line = serializeImageLine({
+			url: "https://x.test/My Photo (1).jpg",
+			alt: "a [bracketed]\nnote",
+			caption: "",
+		});
+		expect(line).toBe("![a bracketed note](https://x.test/My%20Photo%20%281%29.jpg)");
+	});
+
+	it("is exactly what each line of a gallery block is", () => {
+		const items = [
+			{ url: "https://cdn.grove.place/a.jpg", alt: "A", caption: "one" },
+			{ url: "https://cdn.grove.place/b.jpg", alt: "B", caption: "" },
+		];
+		expect(innerLines(serializeGallery(items))).toEqual(items.map(serializeImageLine));
 	});
 });
