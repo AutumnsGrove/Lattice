@@ -9,6 +9,7 @@
 	import {
 		groveDirectivePlugin,
 		serializeGallery,
+		serializeImageLine,
 		type GalleryItem,
 	} from "@autumnsgrove/grove-markdown/directives";
 	editorMd.use(groveDirectivePlugin);
@@ -16,7 +17,7 @@
 	import "$lib/styles/content.css";
 	import { toast } from "$lib/ui/components/ui/toast";
 	import PhotoPicker from "../../components/admin/PhotoPicker.svelte";
-	import GalleryBuilder from "../../components/admin/GalleryBuilder.svelte";
+
 	import { findGalleryBlock } from "./gallery-block";
 	import { browser } from "$app/environment";
 	import { useEditorTheme, useDraftManager, type StoredDraft } from "./composables";
@@ -74,16 +75,13 @@
 	// Full preview mode
 	let showFullPreview = $state(false);
 
-	// Photo picker
-	let showPhotoPicker = $state(false);
-
-	// Gallery builder (null while closed). `range` is the existing gallery being
-	// edited; when it is null the finished gallery is inserted at `insertAt`.
-	let galleryBuilder = $state<{
-		items: GalleryItem[];
+	// The photo modal: one photo, or a gallery (null while closed). `range` is an
+	// existing gallery being edited; when it is null, whatever is inserted goes in
+	// at `insertAt`.
+	let photoModal = $state<{
 		range: { from: number; to: number } | null;
 		insertAt: number;
-		startWithPicker: boolean;
+		initialGallery: GalleryItem[];
 	} | null>(null);
 
 	// Curio autocomplete state
@@ -296,19 +294,14 @@
 
 		if (id === "gallery") {
 			// Galleries are built, not typed: drop the "::gallery" text that opened the
-			// menu and open the builder, which starts at the photo picker.
+			// menu and open the photo modal, where picking more than one photo makes one.
 			const pos = textareaRef.selectionStart;
 			content = content.substring(0, curioTriggerStart) + content.substring(pos);
 			showCurioAutocomplete = false;
 			await tick();
 			isProgrammaticUpdate = false;
 			isUpdating = false;
-			galleryBuilder = {
-				items: [],
-				range: null,
-				insertAt: curioTriggerStart,
-				startWithPicker: true,
-			};
+			photoModal = { range: null, insertAt: curioTriggerStart, initialGallery: [] };
 			return;
 		}
 
@@ -413,8 +406,8 @@
 				e.preventDefault();
 				return;
 			}
-			if (showPhotoPicker) {
-				showPhotoPicker = false;
+			if (photoModal) {
+				photoModal = null;
 				e.preventDefault();
 				return;
 			}
@@ -557,51 +550,50 @@
 		insertAtCursor,
 	});
 
-	function handlePhotoInsert(urls: string[]) {
-		showPhotoPicker = false;
-		if (urls.length === 0) return;
-		if (urls.length === 1) {
-			insertAtCursor(`![Photo](${urls[0]})\n`);
-		} else {
-			// Two or more become a gallery. The builder collects alt text and
-			// captions and writes the directive, so nobody types its syntax.
-			galleryBuilder = {
-				items: urls.map((url) => ({ url, alt: "", caption: "" })),
-				range: null,
-				insertAt: textareaRef?.selectionStart ?? content.length,
-				startWithPicker: false,
-			};
-		}
+	/** The toolbar photo button: open the modal at the cursor, or on the gallery the cursor is inside. */
+	function openPhotoModal() {
+		const found = textareaRef ? findGalleryBlock(content, textareaRef.selectionStart) : null;
+		photoModal = found
+			? {
+					range: { from: found.from, to: found.to },
+					insertAt: found.from,
+					initialGallery: found.items,
+				}
+			: {
+					range: null,
+					insertAt: textareaRef?.selectionStart ?? content.length,
+					initialGallery: [],
+				};
 	}
 
-	/** The toolbar photo button: reopen the gallery the cursor is in, otherwise pick photos. */
-	function handleShowPhotoPicker() {
-		const found = textareaRef ? findGalleryBlock(content, textareaRef.selectionStart) : null;
-		if (found) {
-			galleryBuilder = {
-				items: found.items,
-				range: { from: found.from, to: found.to },
-				insertAt: found.from,
-				startWithPicker: false,
-			};
+	/** One photo, with the alt text the modal collected (or "Photo" if it was left blank). */
+	async function insertPhoto(urls: string[], alt?: string) {
+		const modal = photoModal;
+		photoModal = null;
+		if (!modal || urls.length === 0) return;
+
+		const line = serializeImageLine({ url: urls[0], alt: alt || "Photo", caption: "" });
+		if (modal.range) {
+			// A gallery that was cut down to one photo becomes a plain image
+			await replaceRange(modal.range.from, modal.range.to, line);
 			return;
 		}
-		showPhotoPicker = true;
+		await replaceRange(modal.insertAt, modal.insertAt, `${line}\n`);
 	}
 
 	async function saveGallery(items: GalleryItem[]) {
-		const builder = galleryBuilder;
-		galleryBuilder = null;
-		if (!builder) return;
+		const modal = photoModal;
+		photoModal = null;
+		if (!modal) return;
 
 		const block = serializeGallery(items);
-		if (builder.range) {
-			await replaceRange(builder.range.from, builder.range.to, block);
+		if (modal.range) {
+			await replaceRange(modal.range.from, modal.range.to, block);
 			return;
 		}
 
 		// A new gallery starts on its own line
-		const at = Math.min(builder.insertAt, content.length);
+		const at = Math.min(modal.insertAt, content.length);
 		const lead = at > 0 && content[at - 1] !== "\n" ? "\n" : "";
 		await replaceRange(at, at, `${lead}${block}\n`);
 	}
@@ -751,7 +743,7 @@
 		onInsertLink={insertLink}
 		onInsertFootnote={insertFootnote}
 		onInsertHeading={insertHeading}
-		onShowPhotoPicker={handleShowPhotoPicker}
+		onShowPhotoPicker={openPhotoModal}
 		onSetEditorMode={setEditorMode}
 		onShowFullPreview={() => (showFullPreview = true)}
 		onToggleZenMode={toggleZenMode}
@@ -790,24 +782,14 @@
 	/>
 </div>
 
-<!-- Photo Picker -->
-{#if showPhotoPicker}
+<!-- Photo modal: one photo, or (pick more than one) a gallery -->
+{#if photoModal}
 	<PhotoPicker
-		onInsert={handlePhotoInsert}
-		onClose={() => (showPhotoPicker = false)}
+		onInsert={insertPhoto}
+		onInsertGallery={saveGallery}
+		onClose={() => (photoModal = null)}
 		galleryEnabled={uploadsEnabled}
-	/>
-{/if}
-
-<!-- Gallery Builder -->
-{#if galleryBuilder}
-	<GalleryBuilder
-		items={galleryBuilder.items}
-		mode={galleryBuilder.range ? "edit" : "new"}
-		photoLibraryEnabled={uploadsEnabled}
-		startWithPicker={galleryBuilder.startWithPicker}
-		onSave={saveGallery}
-		onClose={() => (galleryBuilder = null)}
+		initialGallery={photoModal.initialGallery}
 	/>
 {/if}
 

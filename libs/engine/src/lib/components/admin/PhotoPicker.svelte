@@ -1,8 +1,10 @@
 <script lang="ts">
 	import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 	import { apiRequest } from "$lib/utils/api";
-	import { tick } from "svelte";
+	import { tick, untrack } from "svelte";
 	import { stateIcons, navIcons, featureIcons, actionIcons } from "@autumnsgrove/prism/icons";
+	import { MAX_GALLERY_IMAGES, type GalleryItem } from "@autumnsgrove/grove-markdown/directives";
+	import GalleryBuilder, { type GalleryRow } from "./GalleryBuilder.svelte";
 
 	interface PickerImage {
 		key: string;
@@ -18,20 +20,60 @@
 		truncated: boolean;
 	}
 
+	/**
+	 * One modal, two steps. Pick photos first; picking a second photo turns it
+	 * into a gallery and "Arrange gallery" opens the second half (order, alt text,
+	 * captions, preview). Deselecting back to one photo turns it back. With no
+	 * onInsertGallery it only ever inserts photos, as it always did.
+	 *
+	 * @prop onInsert - one photo (with optional alt text), or several when galleries are off
+	 * @prop onInsertGallery - the finished gallery; its presence enables gallery mode
+	 * @prop initialGallery - open straight on the arrange step to edit an existing gallery
+	 */
 	interface Props {
-		onInsert: (urls: string[]) => void;
+		onInsert: (urls: string[], alt?: string) => void;
+		onInsertGallery?: (items: GalleryItem[]) => void;
 		onClose: () => void;
 		galleryEnabled?: boolean;
+		initialGallery?: GalleryItem[];
 	}
 
-	let { onInsert, onClose, galleryEnabled = false }: Props = $props();
+	let {
+		onInsert,
+		onInsertGallery,
+		onClose,
+		galleryEnabled = false,
+		initialGallery = [],
+	}: Props = $props();
+
+	type Step = "photos" | "arrange";
+
+	let nextRowId = 0;
+	function toRows(urls: string[]): GalleryRow[] {
+		return urls.map((url) => ({
+			id: nextRowId++,
+			url,
+			alt: details[url]?.alt ?? "",
+			caption: details[url]?.caption ?? "",
+		}));
+	}
+
+	// Alt text and captions typed so far, kept by URL so stepping back to pick more
+	// photos (or flipping between one photo and a gallery) never loses them.
+	const details: Record<string, { alt: string; caption: string }> = {};
+	const startItems = untrack(() => initialGallery);
+	for (const item of startItems) details[item.url] = { alt: item.alt, caption: item.caption };
+
+	let step: Step = $state(startItems.length > 0 ? "arrange" : "photos");
+	let rows: GalleryRow[] = $state(toRows(startItems.map((item) => item.url)));
+	let singleAlt = $state("");
 
 	let images: PickerImage[] = $state([]);
 	let loading = $state(true);
 	let error: string | null = $state(null);
 	let searchQuery = $state("");
 
-	let selected: Set<string> = $state(new Set());
+	let selected: Set<string> = $state(new Set(startItems.map((item) => item.url)));
 
 	let cursor: string | null = $state(null);
 	let hasMore = $state(false);
@@ -156,6 +198,10 @@
 			next.delete(url);
 			selectionAnnouncement = "Photo removed from selection";
 		} else {
+			if (next.size >= selectionLimit) {
+				announceLimit();
+				return;
+			}
 			next.add(url);
 			selectionAnnouncement = "Photo added to selection";
 		}
@@ -172,6 +218,10 @@
 			const parsed = new URL(url);
 			if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return;
 		} catch {
+			return;
+		}
+		if (!selected.has(url) && selected.size >= selectionLimit) {
+			announceLimit();
 			return;
 		}
 		const next = new Set(selected);
@@ -215,12 +265,52 @@
 		if (next !== idx) thumbs[next]?.focus();
 	}
 
+	function announceLimit() {
+		selectionAnnouncement = `A gallery holds up to ${MAX_GALLERY_IMAGES} photos`;
+		setTimeout(() => {
+			selectionAnnouncement = "";
+		}, 1500);
+	}
+
+	function rememberSingleAlt() {
+		if (singleUrl)
+			details[singleUrl] = { alt: singleAlt, caption: details[singleUrl]?.caption ?? "" };
+	}
+
+	/** The primary button on the photos step: insert one photo, or move on to arranging a gallery. */
 	function handleInsert() {
-		onInsert(Array.from(selected));
+		if (selectedCount === 0) return;
+		if (galleryMode) {
+			enterArrange();
+			return;
+		}
+		onInsert(Array.from(selected), singleUrl ? singleAlt.trim() || undefined : undefined);
+	}
+
+	async function enterArrange() {
+		rows = toRows(Array.from(selected));
+		step = "arrange";
+		await tick();
+		panelRef?.querySelector<HTMLElement>(".builder-alt")?.focus();
+	}
+
+	/** Back to the photos with the same ones still selected, in their arranged order. */
+	async function backToPhotos() {
+		for (const row of rows) details[row.url] = { alt: row.alt, caption: row.caption };
+		selected = new Set(rows.map((row) => row.url));
+		step = "photos";
+		await tick();
+		panelRef?.querySelector<HTMLElement>(".picker-insert")?.focus();
+	}
+
+	function insertGallery() {
+		if (rows.length === 0) return;
+		onInsertGallery?.(rows.map(({ url, alt, caption }) => ({ url, alt, caption })));
 	}
 
 	function handleBackdropClick(e: MouseEvent) {
-		if (e.target === e.currentTarget) {
+		// Not while arranging: that step holds typed-in descriptions a stray click would discard
+		if (e.target === e.currentTarget && step === "photos") {
 			onClose();
 		}
 	}
@@ -233,202 +323,281 @@
 	}
 
 	let selectedCount = $derived(selected.size);
+	// The swap is automatic: a second photo makes it a gallery, and deselecting back to one undoes it
+	let galleryMode = $derived(!!onInsertGallery && selectedCount >= 2);
+	let singleUrl = $derived(selectedCount === 1 ? Array.from(selected)[0] : null);
+	let selectionLimit = $derived(onInsertGallery ? MAX_GALLERY_IMAGES : Infinity);
+	let isFull = $derived(selectedCount >= selectionLimit);
+	let editing = $derived(initialGallery.length > 0);
+	let dialogTitle = $derived(
+		step === "arrange" ? (editing ? "Edit your gallery" : "Build your gallery") : "Insert photo",
+	);
+
+	// Show the description that belongs to whichever single photo is selected
+	$effect(() => {
+		const url = singleUrl;
+		untrack(() => {
+			singleAlt = url ? (details[url]?.alt ?? "") : "";
+		});
+	});
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="photo-picker-backdrop" onclick={handleBackdropClick} onkeydown={handleKeydown}>
 	<div
 		class="photo-picker-panel"
+		class:wide={step === "arrange"}
 		bind:this={panelRef}
 		role="dialog"
 		aria-modal="true"
-		aria-label="Insert photo"
+		aria-label={dialogTitle}
 	>
 		<GlassCard variant="frosted">
-			<!-- Screen reader live region for selection feedback -->
-			<div aria-live="assertive" aria-atomic="true" class="sr-only">{selectionAnnouncement}</div>
+			<div class="picker-card">
+				<!-- Screen reader live region for selection feedback -->
+				<div aria-live="assertive" aria-atomic="true" class="sr-only">{selectionAnnouncement}</div>
 
-			<!-- Header -->
-			<div class="picker-header">
-				<div class="picker-title">
-					<featureIcons.images class="w-[18px] h-[18px]" />
-					<span>Insert Photo</span>
-				</div>
-				<button
-					type="button"
-					class="picker-close"
-					onclick={onClose}
-					aria-label="Close photo picker"
-				>
-					<stateIcons.x class="w-[18px] h-[18px]" />
-				</button>
-			</div>
-
-			<!-- Manual URL input (always available) -->
-			<div class="manual-url-section">
-				{#if showManualInput}
-					<div class="manual-url-row">
-						<actionIcons.link class="w-3.5 h-3.5 manual-url-icon" />
-						<input
-							bind:this={manualInputRef}
-							type="url"
-							placeholder="https://example.com/image.jpg"
-							bind:value={manualUrl}
-							onkeydown={handleManualKeydown}
-							class="manual-url-input"
-							aria-label="Enter image URL to insert"
-						/>
-						<button
-							type="button"
-							class="manual-url-add"
-							onclick={addManualUrl}
-							disabled={!manualUrl.trim()}
-							aria-label="Add URL to selection"
-						>
-							<actionIcons.plus class="w-4 h-4" />
-						</button>
+				<!-- Header -->
+				<div class="picker-header">
+					<div class="picker-title">
+						<featureIcons.images class="w-[18px] h-[18px]" />
+						<span>{step === "arrange" ? dialogTitle : "Insert Photo"}</span>
 					</div>
-				{:else}
-					<button type="button" class="manual-url-toggle" onclick={() => (showManualInput = true)}>
-						<actionIcons.link class="w-3.5 h-3.5" />
-						<span>Paste an image URL</span>
-					</button>
-				{/if}
-			</div>
-
-			<!-- Gallery grid (only if graft enabled) -->
-			{#if galleryEnabled}
-				<!-- Search -->
-				<div class="picker-search">
-					<navIcons.search class="w-3.5 h-3.5 search-icon" />
-					<input
-						type="text"
-						placeholder="Search your photos..."
-						bind:value={searchQuery}
-						oninput={handleSearchInput}
-						class="search-input"
-						aria-label="Search photos"
-					/>
-				</div>
-
-				<div class="picker-grid-scroll">
-					{#if loading}
-						<div class="picker-skeleton-grid" role="status" aria-label="Loading photos">
-							<span class="sr-only">Loading photos...</span>
-							{#each Array(8) as _, i}
-								<div class="skeleton-thumb" aria-hidden="true"></div>
-							{/each}
-						</div>
-					{:else if error}
-						<div class="picker-empty" role="status">
-							<p class="picker-error">{error}</p>
-							<button type="button" class="retry-link" onclick={fetchImages}>Try again</button>
-						</div>
-					{:else if images.length === 0}
-						<div class="picker-empty">
-							<featureIcons.images class="w-8 h-8 empty-icon" />
-							<p>No photos uploaded yet</p>
-							<p class="picker-empty-hint">
-								Upload photos in the <a href="/arbor/images">image manager</a>, or paste a URL above
-							</p>
-						</div>
-					{:else}
-						<div
-							class="picker-grid"
-							role="listbox"
-							aria-label="Photo gallery — select photos to insert"
-							aria-multiselectable="true"
-							tabindex="0"
-							onkeydown={handleGridKeydown}
-						>
-							{#each images as image (image.key)}
-								<button
-									type="button"
-									class="picker-thumb"
-									class:selected={selected.has(image.url)}
-									onclick={() => toggleSelect(image.url)}
-									role="option"
-									aria-selected={selected.has(image.url)}
-									aria-label={image.custom_title || image.parsed_slug}
-								>
-									<img
-										src="{image.url}?w=200&h=150&fit=cover"
-										alt={image.custom_title || image.parsed_slug}
-										loading="lazy"
-									/>
-									{#if selected.has(image.url)}
-										<div class="thumb-check" aria-hidden="true">
-											<stateIcons.check class="w-4 h-4" />
-										</div>
-									{/if}
-								</button>
-							{/each}
-						</div>
-						{#if hasMore}
-							<div class="picker-load-more">
-								<button
-									type="button"
-									class="load-more-btn"
-									onclick={loadMore}
-									disabled={loadingMore}
-								>
-									{loadingMore ? "Loading..." : "Load more"}
-								</button>
-							</div>
-						{/if}
-					{/if}
-				</div>
-			{:else}
-				<!-- No gallery graft — show friendly message -->
-				<div class="picker-empty picker-no-gallery">
-					<featureIcons.images class="w-7 h-7 empty-icon" />
-					<p>Paste an image URL above to insert it into your post</p>
-					<p class="picker-empty-hint">Photo library browsing is available on upgraded plans</p>
-				</div>
-			{/if}
-
-			<!-- Selected URLs preview -->
-			{#if selectedCount > 0}
-				<div class="picker-selected-preview" role="status" aria-live="polite">
-					{#each Array.from(selected) as url}
-						<div class="selected-pill">
-							<span class="selected-pill-url" title={url}>{url.split("/").pop()}</span>
-							<button
-								type="button"
-								class="selected-pill-remove"
-								onclick={() => toggleSelect(url)}
-								aria-label="Remove {url.split('/').pop()} from selection"
-							>
-								<stateIcons.x class="w-3 h-3" />
-							</button>
-						</div>
-					{/each}
-				</div>
-			{/if}
-
-			<!-- Footer -->
-			<div class="picker-footer">
-				<span class="picker-count">
-					{#if selectedCount > 0}
-						{selectedCount} photo{selectedCount !== 1 ? "s" : ""} selected
-						{#if selectedCount > 1}
-							<span class="picker-hint">(will insert as gallery)</span>
-						{/if}
-					{:else}
-						Select or paste photos to insert
-					{/if}
-				</span>
-				<div class="picker-actions">
-					<button type="button" class="picker-cancel" onclick={onClose}>Cancel</button>
 					<button
 						type="button"
-						class="picker-insert"
-						onclick={handleInsert}
-						disabled={selectedCount === 0}
+						class="picker-close"
+						onclick={onClose}
+						aria-label="Close photo picker"
 					>
-						Insert{#if selectedCount > 0}
-							({selectedCount}){/if}
+						<stateIcons.x class="w-[18px] h-[18px]" />
 					</button>
+				</div>
+
+				{#if step === "photos"}
+					<!-- Manual URL input (always available) -->
+					<div class="manual-url-section">
+						{#if showManualInput}
+							<div class="manual-url-row">
+								<actionIcons.link class="w-3.5 h-3.5 manual-url-icon" />
+								<input
+									bind:this={manualInputRef}
+									type="url"
+									placeholder="https://example.com/image.jpg"
+									bind:value={manualUrl}
+									onkeydown={handleManualKeydown}
+									class="manual-url-input"
+									aria-label="Enter image URL to insert"
+								/>
+								<button
+									type="button"
+									class="manual-url-add"
+									onclick={addManualUrl}
+									disabled={!manualUrl.trim()}
+									aria-label="Add URL to selection"
+								>
+									<actionIcons.plus class="w-4 h-4" />
+								</button>
+							</div>
+						{:else}
+							<button
+								type="button"
+								class="manual-url-toggle"
+								onclick={() => (showManualInput = true)}
+							>
+								<actionIcons.link class="w-3.5 h-3.5" />
+								<span>Paste an image URL</span>
+							</button>
+						{/if}
+					</div>
+
+					<!-- Gallery grid (only if graft enabled) -->
+					{#if galleryEnabled}
+						<!-- Search -->
+						<div class="picker-search">
+							<navIcons.search class="w-3.5 h-3.5 search-icon" />
+							<input
+								type="text"
+								placeholder="Search your photos..."
+								bind:value={searchQuery}
+								oninput={handleSearchInput}
+								class="search-input"
+								aria-label="Search photos"
+							/>
+						</div>
+
+						<div class="picker-grid-scroll">
+							{#if loading}
+								<div class="picker-skeleton-grid" role="status" aria-label="Loading photos">
+									<span class="sr-only">Loading photos...</span>
+									{#each Array(8) as _, i}
+										<div class="skeleton-thumb" aria-hidden="true"></div>
+									{/each}
+								</div>
+							{:else if error}
+								<div class="picker-empty" role="status">
+									<p class="picker-error">{error}</p>
+									<button type="button" class="retry-link" onclick={fetchImages}>Try again</button>
+								</div>
+							{:else if images.length === 0}
+								<div class="picker-empty">
+									<featureIcons.images class="w-8 h-8 empty-icon" />
+									<p>No photos uploaded yet</p>
+									<p class="picker-empty-hint">
+										Upload photos in the <a href="/arbor/images">image manager</a>, or paste a URL
+										above
+									</p>
+								</div>
+							{:else}
+								<div
+									class="picker-grid"
+									role="listbox"
+									aria-label="Photo gallery — select photos to insert"
+									aria-multiselectable="true"
+									tabindex="0"
+									onkeydown={handleGridKeydown}
+								>
+									{#each images as image (image.key)}
+										<button
+											type="button"
+											class="picker-thumb"
+											class:selected={selected.has(image.url)}
+											onclick={() => toggleSelect(image.url)}
+											role="option"
+											aria-selected={selected.has(image.url)}
+											aria-label={image.custom_title || image.parsed_slug}
+										>
+											<img
+												src="{image.url}?w=200&h=150&fit=cover"
+												alt={image.custom_title || image.parsed_slug}
+												loading="lazy"
+											/>
+											{#if selected.has(image.url)}
+												<div class="thumb-check" aria-hidden="true">
+													<stateIcons.check class="w-4 h-4" />
+												</div>
+											{/if}
+										</button>
+									{/each}
+								</div>
+								{#if hasMore}
+									<div class="picker-load-more">
+										<button
+											type="button"
+											class="load-more-btn"
+											onclick={loadMore}
+											disabled={loadingMore}
+										>
+											{loadingMore ? "Loading..." : "Load more"}
+										</button>
+									</div>
+								{/if}
+							{/if}
+						</div>
+					{:else}
+						<!-- No gallery graft — show friendly message -->
+						<div class="picker-empty picker-no-gallery">
+							<featureIcons.images class="w-7 h-7 empty-icon" />
+							<p>Paste an image URL above to insert it into your post</p>
+							<p class="picker-empty-hint">Photo library browsing is available on upgraded plans</p>
+						</div>
+					{/if}
+
+					<!-- Selected URLs preview -->
+					{#if selectedCount > 0}
+						<div class="picker-selected-preview" role="status" aria-live="polite">
+							{#each Array.from(selected) as url}
+								<div class="selected-pill">
+									<span class="selected-pill-url" title={url}>{url.split("/").pop()}</span>
+									<button
+										type="button"
+										class="selected-pill-remove"
+										onclick={() => toggleSelect(url)}
+										aria-label="Remove {url.split('/').pop()} from selection"
+									>
+										<stateIcons.x class="w-3 h-3" />
+									</button>
+								</div>
+							{/each}
+						</div>
+					{/if}
+
+					<!-- Describe a single photo (the optional alt text that was missing) -->
+					{#if singleUrl}
+						<div class="picker-describe">
+							<label class="picker-describe-label" for="picker-describe"
+								>Describe this photo (optional)</label
+							>
+							<input
+								id="picker-describe"
+								class="picker-describe-input"
+								type="text"
+								placeholder="e.g. Sunlight on a mossy forest path"
+								bind:value={singleAlt}
+								oninput={rememberSingleAlt}
+								onkeydown={(e) => {
+									if (e.key === "Enter") {
+										e.preventDefault();
+										handleInsert();
+									}
+								}}
+							/>
+						</div>
+					{/if}
+				{:else}
+					<GalleryBuilder bind:rows />
+				{/if}
+
+				<!-- Footer -->
+				<div class="picker-footer">
+					<div class="picker-footer-left">
+						{#if step === "arrange"}
+							<button type="button" class="picker-back" onclick={backToPhotos}>
+								<navIcons.chevronLeft class="w-4 h-4" />
+								<span>Back to photos</span>
+							</button>
+							<span class="picker-count">{rows.length} of {MAX_GALLERY_IMAGES} photos</span>
+						{:else}
+							<span class="picker-count">
+								{#if selectedCount === 0}
+									Select or paste photos to insert
+								{:else}
+									{selectedCount} photo{selectedCount !== 1 ? "s" : ""} selected
+									{#if galleryMode}
+										<span class="picker-hint">(will insert as gallery)</span>
+									{:else if onInsertGallery && selectedCount === 1}
+										<span class="picker-hint">Pick more than one to make a gallery</span>
+									{/if}
+									{#if onInsertGallery && isFull}
+										<span class="picker-hint">· full, a gallery holds {MAX_GALLERY_IMAGES}</span>
+									{/if}
+								{/if}
+							</span>
+						{/if}
+					</div>
+					<div class="picker-actions">
+						<button type="button" class="picker-cancel" onclick={onClose}>Cancel</button>
+						{#if step === "arrange"}
+							<button
+								type="button"
+								class="picker-insert"
+								onclick={insertGallery}
+								disabled={rows.length === 0}
+							>
+								{editing ? "Save changes" : "Insert gallery"}
+							</button>
+						{:else}
+							<button
+								type="button"
+								class="picker-insert"
+								onclick={handleInsert}
+								disabled={selectedCount === 0}
+							>
+								{#if galleryMode}
+									Arrange gallery ({selectedCount})
+								{:else if selectedCount > 0}Insert ({selectedCount}){:else}Insert{/if}
+							</button>
+						{/if}
+					</div>
 				</div>
 			</div>
 		</GlassCard>
@@ -956,5 +1125,88 @@
 	.selected-pill-remove:focus-visible {
 		outline: 2px solid var(--grove-accent);
 		outline-offset: 2px;
+	}
+
+	/* A flex column inside the glass card, so the header and footer take the height
+	   they need and the middle scrolls. Matters most on the arrange step, where on a
+	   phone the intro wraps and the footer stacks. 3.5rem leaves room for the card's padding. */
+	.picker-card {
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+		max-height: calc(80vh - 3.5rem);
+		max-height: calc(80dvh - 3.5rem);
+	}
+
+	.photo-picker-panel.wide {
+		max-width: 720px;
+		max-height: 88vh;
+	}
+
+	.photo-picker-panel.wide .picker-card {
+		max-height: calc(88vh - 3.5rem);
+		max-height: calc(88dvh - 3.5rem);
+	}
+
+	@media (min-width: 900px) {
+		.photo-picker-panel.wide {
+			max-width: 980px;
+		}
+	}
+
+	.picker-describe {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		padding-bottom: 0.75rem;
+	}
+
+	.picker-describe-label {
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: var(--color-foreground-muted, #666);
+	}
+
+	.picker-describe-input {
+		width: 100%;
+		min-height: 44px;
+		padding: 0.5rem 0.65rem;
+		font-size: 0.85rem;
+		color: var(--color-text);
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-radius: 6px;
+	}
+
+	.picker-describe-input:focus-visible,
+	.picker-back:focus-visible {
+		outline: 2px solid var(--grove-accent);
+		outline-offset: 2px;
+	}
+
+	.picker-footer-left {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+	}
+
+	.picker-back {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		padding: 0.5rem 0.75rem;
+		min-height: 44px;
+		background: transparent;
+		border: 1px solid rgba(0, 0, 0, 0.15);
+		border-radius: 6px;
+		font-size: 0.8rem;
+		color: var(--color-foreground-muted, #666);
+		cursor: pointer;
+		transition: background 0.15s ease;
+	}
+
+	.picker-back:hover {
+		background: rgba(0, 0, 0, 0.05);
 	}
 </style>
