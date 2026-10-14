@@ -28,7 +28,12 @@ export function createMockStorage(): DurableObjectStorage {
 
 	const mockSql = {
 		exec: (_query: string, ..._bindings: unknown[]) => ({
-			one: () => null,
+			// Like Cloudflare's cursor: one() THROWS unless there is exactly one row.
+			// This used to return null, which hid a queryOne bug (see storage.test.ts).
+			one: () => {
+				throw new Error("Expected exactly one result from SQL query, but got no results.");
+			},
+			next: () => ({ done: true, value: undefined }),
 			toArray: () => [],
 			columnNames: [] as string[],
 			raw: () => [] as unknown[][],

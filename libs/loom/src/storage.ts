@@ -52,11 +52,17 @@ export class SqlHelper {
 		return this.sql.exec(query, ...bindings);
 	}
 
-	/** Query for a single row. Returns null if no rows match. */
+	/**
+	 * Query for a single row. Returns null if no rows match, and the first row if
+	 * several do.
+	 *
+	 * Deliberately not `cursor.one()`: that THROWS unless there is exactly one
+	 * row, so "no match" would surface as an exception (a 500 and a bug-level
+	 * error in every caller) instead of the null this method promises.
+	 */
 	queryOne<T = Record<string, unknown>>(query: string, ...bindings: unknown[]): T | null {
-		const cursor = this.sql.exec(query, ...bindings);
-		const row = cursor.one();
-		return (row as T) ?? null;
+		const result = this.sql.exec(query, ...bindings).next();
+		return result.done ? null : ((result.value as T | undefined) ?? null);
 	}
 
 	/** Query for all rows. Returns an empty array if no rows match. */
