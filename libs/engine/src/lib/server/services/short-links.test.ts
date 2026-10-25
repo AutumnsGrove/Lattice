@@ -3,14 +3,14 @@
  * Short Links Service Tests
  *
  * Runs the real queries against a real SQLite database built from the real
- * migration (node:sqlite behind a thin D1-shaped wrapper), so constraints,
+ * migration (sql.js, pure WebAssembly SQLite, behind a thin D1-shaped wrapper), so constraints,
  * joins, and the one-link-per-post guarantee are exercised for real instead of
  * being asserted against mocked SQL.
  */
 
 import { describe, it, expect, beforeEach } from "vitest";
 import { readFileSync } from "node:fs";
-import { DatabaseSync } from "node:sqlite";
+import initSqlJs, { type Database, type SqlValue } from "sql.js";
 import {
 	validateSlug,
 	validateTarget,
@@ -36,9 +36,12 @@ const MIGRATION = readFileSync(
 	"utf8",
 );
 
-function createDb() {
-	const sqlite = new DatabaseSync(":memory:");
-	sqlite.exec("PRAGMA foreign_keys = ON");
+// One WebAssembly module, shared by every test's fresh in-memory database.
+const sqlJs = initSqlJs();
+
+async function createDb() {
+	const sqlite = new (await sqlJs).Database();
+	sqlite.run("PRAGMA foreign_keys = ON");
 	sqlite.exec(`
 		CREATE TABLE tenants (
 			id TEXT PRIMARY KEY, subdomain TEXT UNIQUE NOT NULL, active INTEGER DEFAULT 1,
@@ -51,21 +54,34 @@ function createDb() {
 	`);
 	sqlite.exec(MIGRATION);
 
+	const rows = (sql: string, params: SqlValue[]) => {
+		const statement = sqlite.prepare(sql);
+		try {
+			statement.bind(params);
+			const found: Record<string, SqlValue>[] = [];
+			while (statement.step()) found.push(statement.getAsObject());
+			return found;
+		} finally {
+			statement.free();
+		}
+	};
+
 	const db = {
 		prepare(sql: string) {
 			return {
 				bind: (...params: unknown[]) => ({
-					first: async () => sqlite.prepare(sql).get(...(params as never[])) ?? null,
-					all: async () => ({ results: sqlite.prepare(sql).all(...(params as never[])) }),
-					run: async () => ({
-						meta: { changes: Number(sqlite.prepare(sql).run(...(params as never[])).changes) },
-					}),
+					first: async () => rows(sql, params as SqlValue[])[0] ?? null,
+					all: async () => ({ results: rows(sql, params as SqlValue[]) }),
+					run: async () => {
+						sqlite.run(sql, params as SqlValue[]);
+						return { meta: { changes: sqlite.getRowsModified() } };
+					},
 				}),
 			};
 		},
 	} as unknown as D1Database;
 
-	return { db, sqlite };
+	return { db, sqlite, one: (sql: string) => rows(sql, [])[0] };
 }
 
 const autumn: LinkOwner = { type: "grove", tenantId: "t-autumn", subdomain: "autumn" };
@@ -73,10 +89,11 @@ const river: LinkOwner = { type: "grove", tenantId: "t-river", subdomain: "river
 const wayfinder: LinkOwner = { type: "wayfinder" };
 
 let db: D1Database;
-let sqlite: DatabaseSync;
+let sqlite: Database;
+let one: (sql: string) => Record<string, unknown> | undefined;
 
-beforeEach(() => {
-	({ db, sqlite } = createDb());
+beforeEach(async () => {
+	({ db, sqlite, one } = await createDb());
 	sqlite.exec(`
 		INSERT INTO tenants (id, subdomain, active) VALUES ('t-autumn', 'autumn', 1), ('t-river', 'river', 1);
 		INSERT INTO posts VALUES
@@ -86,8 +103,7 @@ beforeEach(() => {
 	`);
 });
 
-const rowCount = () =>
-	Number((sqlite.prepare("SELECT COUNT(*) AS n FROM short_links").get() as { n: number }).n);
+const rowCount = () => Number(one("SELECT COUNT(*) AS n FROM short_links")?.n);
 
 // ============================================================================
 // Owners
@@ -415,9 +431,7 @@ describe("createCustomLink", () => {
 			targetUrl: "https://example.com/docs",
 		});
 		expect(result.ok).toBe(true);
-		expect(
-			sqlite.prepare("SELECT tenant_id FROM short_links WHERE slug = 'my-docs'").get(),
-		).toEqual({
+		expect(one("SELECT tenant_id FROM short_links WHERE slug = 'my-docs'")).toEqual({
 			tenant_id: null,
 		});
 	});
