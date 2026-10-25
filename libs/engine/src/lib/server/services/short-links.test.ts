@@ -460,6 +460,47 @@ describe("createCustomLink", () => {
 		).toEqual({ ok: false, error: LINK_ERRORS.SLUG_TAKEN });
 	});
 
+	it("tells you when you already have that name", async () => {
+		const target = "https://autumn.grove.place/";
+		await createCustomLink(db, autumn, { slug: "mine", targetUrl: target });
+		expect(await createCustomLink(db, autumn, { slug: "mine", targetUrl: target })).toEqual({
+			ok: false,
+			error: LINK_ERRORS.SLUG_YOURS,
+		});
+		expect(rowCount()).toBe(1);
+	});
+
+	it("tells the Wayfinder when a name is already theirs", async () => {
+		await createCustomLink(db, wayfinder, { slug: "docs", targetUrl: "https://example.com/a" });
+		expect(
+			await createCustomLink(db, wayfinder, { slug: "docs", targetUrl: "https://example.com/b" }),
+		).toEqual({ ok: false, error: LINK_ERRORS.SLUG_YOURS });
+	});
+
+	it("says a name is taken without revealing whose it is", async () => {
+		await createCustomLink(db, river, {
+			slug: "river-notes",
+			targetUrl: "https://river.grove.place/",
+		});
+		expect(
+			await createCustomLink(db, autumn, {
+				slug: "river-notes",
+				targetUrl: "https://autumn.grove.place/",
+			}),
+		).toEqual({ ok: false, error: LINK_ERRORS.SLUG_TAKEN });
+	});
+
+	it("treats a name that matches a bloom's generated link as taken", async () => {
+		const post = await getOrCreatePostLink(db, { tenantId: "t-river", postId: "p-river" });
+		if (!post.ok) throw new Error("setup failed");
+		expect(
+			await createCustomLink(db, autumn, {
+				slug: post.value.slug,
+				targetUrl: "https://autumn.grove.place/",
+			}),
+		).toEqual({ ok: false, error: LINK_ERRORS.SLUG_TAKEN });
+	});
+
 	it("rejects bad and reserved slugs", async () => {
 		const target = "https://autumn.grove.place/";
 		expect(await createCustomLink(db, autumn, { slug: "no", targetUrl: target })).toEqual({
@@ -493,8 +534,19 @@ describe("disableLink", () => {
 				slug: "mine",
 				targetUrl: "https://autumn.grove.place/x",
 			}),
-		).toEqual({ ok: false, error: LINK_ERRORS.SLUG_TAKEN });
+		).toEqual({ ok: false, error: LINK_ERRORS.SLUG_RETIRED });
 		expect(await resolveShortLink(db, "mine")).toEqual({ status: "gone" });
+	});
+
+	it("tells someone else only that a retired name is taken", async () => {
+		await setup();
+		await disableLink(db, autumn, "mine");
+		expect(
+			await createCustomLink(db, river, {
+				slug: "mine",
+				targetUrl: "https://river.grove.place/",
+			}),
+		).toEqual({ ok: false, error: LINK_ERRORS.SLUG_TAKEN });
 	});
 
 	it("won't touch someone else's link", async () => {

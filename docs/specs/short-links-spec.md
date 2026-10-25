@@ -163,6 +163,7 @@ Constants (host, slug rules, generator alphabet) live in `platform/config/short-
 - 3 to 32 characters: lowercase letters, digits, single hyphens, no leading or trailing hyphen.
 - Wanderers can't use reserved words: the domain blocklist (system names, impersonation) and the offensive blocklist apply. This also stops anyone making `link.grove.place/help` look official.
 - **The Wayfinder skips both blocklists** (the format rules still apply), since the reserved words are theirs.
+- **When a chosen name already exists**, creation is refused and the form keeps what was typed. The message depends on whose name it is: "You already have a short link with that name" for your own active link, "You retired that name…" for your own retired one, and a plain "Someone already has that short link" for anyone else's, so slugs can't be used to probe other groves. Generated slugs never hit this, because they retry on collision.
 - Generated slugs come from `23456789abcdefghjkmnpqrstuvwxyz`, are checked against the blocklists, and retry on collision.
 
 ### Targets

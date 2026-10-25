@@ -227,6 +227,24 @@ export async function getOrCreatePostLink(
 }
 
 /**
+ * Say why a chosen slug couldn't be used. Only the owner is told it's theirs;
+ * anyone else just hears it's taken, so slugs can't be used to probe other groves.
+ */
+async function explainTakenSlug(
+	db: D1Database,
+	slug: string,
+	tenantId: string | null,
+): Promise<LinkErrorKey> {
+	const existing = await db
+		.prepare(`SELECT tenant_id, disabled_at FROM short_links WHERE slug = ?`)
+		.bind(slug)
+		.first<{ tenant_id: string | null; disabled_at: number | null }>();
+
+	if (!existing || existing.tenant_id !== tenantId) return "SLUG_TAKEN";
+	return existing.disabled_at === null ? "SLUG_YOURS" : "SLUG_RETIRED";
+}
+
+/**
  * Create a link with an explicit target. Pass `slug` to choose it, or omit it
  * to have one generated.
  */
@@ -253,7 +271,7 @@ export async function createCustomLink(
 	if (input.slug) {
 		const slug = validateSlug(input.slug, owner);
 		if (!slug.ok) return slug;
-		if (!(await insert(slug.value))) return fail("SLUG_TAKEN");
+		if (!(await insert(slug.value))) return fail(await explainTakenSlug(db, slug.value, tenantId));
 		return ok({ slug: slug.value, shortUrl: buildShortUrl(slug.value) });
 	}
 

@@ -64,6 +64,21 @@ export const LINK_ERRORS = {
 		adminMessage: "Slug already exists in short_links (disabled links keep their slug).",
 	},
 
+	SLUG_YOURS: {
+		code: "GROVE-LINK-050",
+		category: "user" as const,
+		userMessage: "You already have a short link with that name.",
+		adminMessage: "Slug exists, active, and belongs to the same owner.",
+	},
+
+	SLUG_RETIRED: {
+		code: "GROVE-LINK-051",
+		category: "user" as const,
+		userMessage:
+			"You retired that name, and retired names stay retired so old links never point somewhere new. Try another?",
+		adminMessage: "Slug exists, disabled, and belonged to the same owner.",
+	},
+
 	TARGET_INVALID: {
 		code: "GROVE-LINK-043",
 		category: "user" as const,
