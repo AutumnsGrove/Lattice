@@ -6,9 +6,13 @@ on:
     branches: [main]
     paths:
       - "services/link-worker/**"
-      - "libs/engine/src/lib/server/services/short-links.ts"
-      - "libs/engine/src/lib/platform/config/short-links.ts"
-      - "libs/engine/src/lib/errors/link-errors.ts"
+      # The worker bundles the engine's short-links service (and the config,
+      # errors and URL helpers it imports), so rebuild on engine changes too —
+      # otherwise a fresh typecheck against a stale engine dist/ will fail.
+      - "libs/engine/**"
+      - "libs/gossamer/**"
+      - "libs/infra/**"
+      - "libs/prism/**"
   workflow_dispatch:
 
 permissions:
@@ -22,4 +26,5 @@ jobs:
     with:
       worker-dir: services/link-worker
       needs-engine: true
+      run-tests: true
     secrets: inherit
