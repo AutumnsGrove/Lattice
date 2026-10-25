@@ -45,6 +45,13 @@ export const actions: Actions = {
 		const access = await requireGroveLinkAccess(platform, locals);
 		if (!access.ok) return fail(access.status, { error: access.error.userMessage });
 
+		// Echo what was typed on failure so a refused slug doesn't cost anyone their URL.
+		const formData = await request.formData();
+		const values = {
+			target_url: String(formData.get("target_url") ?? ""),
+			slug: String(formData.get("slug") ?? ""),
+		};
+
 		const threshold = createThreshold(platform?.env, { identifier: access.userId });
 		if (threshold) {
 			const { limit, windowSeconds } = getEndpointLimitByKey("links/create");
@@ -54,20 +61,20 @@ export const actions: Actions = {
 				windowSeconds,
 				failMode: "open",
 			});
-			if (denied) return fail(429, { error: LINK_ERRORS.RATE_LIMITED.userMessage });
+			if (denied) return fail(429, { error: LINK_ERRORS.RATE_LIMITED.userMessage, values });
 		}
 
-		const parsed = parseFormData(await request.formData(), CreateLinkSchema);
+		const parsed = parseFormData(formData, CreateLinkSchema);
 		if (!parsed.success) {
 			const firstError = Object.values(parsed.errors).flat()[0];
-			return fail(400, { error: firstError || "Invalid form data" });
+			return fail(400, { error: firstError || "Invalid form data", values });
 		}
 
 		const created = await createCustomLink(access.db, access.owner, {
 			targetUrl: parsed.data.target_url,
 			slug: parsed.data.slug || null,
 		});
-		if (!created.ok) return fail(400, { error: created.error.userMessage });
+		if (!created.ok) return fail(400, { error: created.error.userMessage, values });
 
 		return {
 			success: true,

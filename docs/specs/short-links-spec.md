@@ -182,11 +182,11 @@ Constants (host, slug rules, generator alphabet) live in `platform/config/short-
 **Shared UI:** `ShortLinksManager` (`@autumnsgrove/lattice/ui/arbor`) renders the list, the create form and the copy button for both Arbors. Plain `<form method="POST">`, so it works without JavaScript.
 
 **Aspen Arbor (Wanderers)**
-- `/arbor/links`: list, create, retire. Form actions verify ownership themselves, because actions don't run the layout's load.
+- `/arbor/settings/links`, reached from a Short Links card in Settings (no sidebar item; short links are a small feature). List, create, retire. Form actions verify ownership themselves, because actions don't run the layout's load.
 - `POST /api/blooms/{slug}/short-link`: owner-only, returns `{ slug, shortUrl }`. The garden's "Short link" button calls it and copies the result.
 
 **Landing Arbor (Wayfinder)**
-- `/arbor/links`, in the Wayfinder Tools section. Gated by `isWayfinder`.
+- `/arbor/links`, a full panel in the Wayfinder Tools section. Gated by `isWayfinder`.
 
 ---
 

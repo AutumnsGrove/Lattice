@@ -42,17 +42,24 @@ export const actions: Actions = {
 		if (!isWayfinder(user.email)) return fail(403, { error: "Access denied" });
 		if (!platform?.env?.DB) return fail(500, { error: LINK_ERRORS.DB_NOT_AVAILABLE.userMessage });
 
-		const result = parseFormData(await request.formData(), CreateLinkSchema);
+		// Echo what was typed on failure so a refused slug doesn't cost anyone their URL.
+		const formData = await request.formData();
+		const values = {
+			target_url: String(formData.get("target_url") ?? ""),
+			slug: String(formData.get("slug") ?? ""),
+		};
+
+		const result = parseFormData(formData, CreateLinkSchema);
 		if (!result.success) {
 			const firstError = Object.values(result.errors).flat()[0];
-			return fail(400, { error: firstError || "Invalid form data" });
+			return fail(400, { error: firstError || "Invalid form data", values });
 		}
 
 		const created = await createCustomLink(platform.env.DB, OWNER, {
 			targetUrl: result.data.target_url,
 			slug: result.data.slug || null,
 		});
-		if (!created.ok) return fail(400, { error: created.error.userMessage });
+		if (!created.ok) return fail(400, { error: created.error.userMessage, values });
 
 		return {
 			success: true,

@@ -34,6 +34,8 @@
 		error?: string;
 		success?: boolean;
 		message?: string;
+		/** What was typed when a create failed, so the form can pick up where it left off. */
+		values?: { target_url?: string; slug?: string };
 	}
 
 	interface Props {
@@ -100,143 +102,138 @@
 		</div>
 	{/if}
 
-	<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-		<div class="lg:col-span-2">
-			<GlassCard>
-				{#if links.length === 0}
-					<div class="p-8 text-center text-foreground-muted">
-						<Link class="w-8 h-8 mx-auto mb-3 opacity-60" />
-						<p>No short links yet.</p>
-						<p class="text-sm mt-1">Make one and it will wait for you here.</p>
-					</div>
-				{:else}
-					<ul class="divide-y divide-border">
-						{#each links as link (link.slug)}
-							<li class="p-4 flex items-start justify-between gap-3">
-								<div class="min-w-0">
-									<div class="flex items-center gap-2 flex-wrap">
-										<a
-											href={link.shortUrl}
-											class="font-mono text-foreground hover:underline"
-											target="_blank"
-											rel="noopener"
-										>
-											{SHORT_LINK_HOST}/{link.slug}
-										</a>
-										{#if link.kind === "post"}
-											<span
-												class="px-2 py-0.5 text-xs rounded border bg-accent-subtle text-accent border-accent"
-											>
-												Bloom
-											</span>
-										{/if}
-									</div>
-									<div class="text-sm text-foreground-muted mt-0.5 truncate">
-										{#if link.title}
-											{link.title}
-										{:else if link.targetUrl}
-											{link.targetUrl}
-										{/if}
-										{#if link.kind === "post" && !link.targetUrl}
-											<span>This bloom isn't published right now</span>
-										{/if}
-									</div>
-									<div class="text-xs text-foreground-muted mt-0.5">
-										Made {formatDate(link.createdAt)} · {clicksLabel(link.clickCount)}
-									</div>
-								</div>
+	<GlassCard
+		class="p-6"
+		title="New short link"
+		icon={Plus}
+		iconClass="text-grove-600 dark:text-grove-400"
+	>
+		<form
+			method="POST"
+			action={createAction}
+			class="grid grid-cols-1 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_auto] gap-4 items-start"
+		>
+			<div>
+				<label for="short-link-target" class="block text-sm font-medium text-foreground mb-1">
+					Where should it go?
+				</label>
+				<input
+					type="url"
+					id="short-link-target"
+					name="target_url"
+					value={form?.values?.target_url ?? ""}
+					placeholder={targetPlaceholder}
+					required
+					class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-cream-100/50 border border-border text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
+				/>
+				<p class="text-xs text-foreground-muted mt-1">{targetHint}</p>
+			</div>
 
-								<div class="flex items-center gap-1 flex-shrink-0">
-									<button
-										type="button"
-										onclick={() => copy(link)}
-										class="p-2 rounded text-foreground-muted hover:text-foreground hover:bg-cream-200 dark:hover:bg-cream-300 transition-colors"
-										aria-label={copiedSlug === link.slug
-											? "Copied"
-											: `Copy ${SHORT_LINK_HOST}/${link.slug}`}
-									>
-										{#if copiedSlug === link.slug}
-											<Check class="w-4 h-4 text-success" />
-										{:else}
-											<Copy class="w-4 h-4" />
-										{/if}
-									</button>
+			<div>
+				<label for="short-link-slug" class="block text-sm font-medium text-foreground mb-1">
+					Short name <span class="text-foreground-muted">(optional)</span>
+				</label>
+				<input
+					type="text"
+					id="short-link-slug"
+					name="slug"
+					value={form?.values?.slug ?? ""}
+					placeholder="my-notes"
+					autocomplete="off"
+					autocapitalize="none"
+					spellcheck="false"
+					class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-cream-100/50 border border-border text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500 font-mono"
+				/>
+				<p class="text-xs text-foreground-muted mt-1">
+					{SHORT_LINK_HOST}/<span class="font-mono">name</span>. Leave blank and we'll pick one.
+				</p>
+			</div>
 
-									{#if link.kind === "custom"}
-										<form method="POST" action={disableAction}>
-											<input type="hidden" name="slug" value={link.slug} />
-											<button
-												type="submit"
-												class="p-2 rounded text-error hover:bg-error-bg transition-colors"
-												aria-label={`Retire ${SHORT_LINK_HOST}/${link.slug}`}
-											>
-												<Trash class="w-4 h-4" />
-											</button>
-										</form>
-									{/if}
-								</div>
-							</li>
-						{/each}
-					</ul>
-				{/if}
-			</GlassCard>
-		</div>
-
-		<div>
-			<GlassCard
-				class="p-6"
-				title="New short link"
-				icon={Plus}
-				iconClass="text-grove-600 dark:text-grove-400"
+			<button
+				type="submit"
+				class="md:mt-7 px-5 py-2 rounded-lg bg-grove-600 text-white hover:bg-grove-700 transition-colors whitespace-nowrap"
 			>
-				<form method="POST" action={createAction} class="space-y-4">
-					<div>
-						<label for="short-link-target" class="block text-sm font-medium text-foreground mb-1">
-							Where should it go?
-						</label>
-						<input
-							type="url"
-							id="short-link-target"
-							name="target_url"
-							placeholder={targetPlaceholder}
-							required
-							class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-cream-100/50 border border-border text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500"
-						/>
-						<p class="text-xs text-foreground-muted mt-1">{targetHint}</p>
-					</div>
+				Make short link
+			</button>
+		</form>
+	</GlassCard>
 
-					<div>
-						<label for="short-link-slug" class="block text-sm font-medium text-foreground mb-1">
-							Short name <span class="text-foreground-muted">(optional)</span>
-						</label>
-						<div class="flex items-center gap-1 text-sm">
-							<span class="text-foreground-muted font-mono whitespace-nowrap"
-								>{SHORT_LINK_HOST}/</span
-							>
-							<input
-								type="text"
-								id="short-link-slug"
-								name="slug"
-								placeholder="my-notes"
-								autocomplete="off"
-								autocapitalize="none"
-								spellcheck="false"
-								class="w-full px-3 py-2 rounded-lg bg-white/50 dark:bg-cream-100/50 border border-border text-foreground placeholder:text-foreground-muted focus:outline-none focus:border-grove-500 font-mono"
-							/>
+	<GlassCard>
+		{#if links.length === 0}
+			<div class="p-8 text-center text-foreground-muted">
+				<Link class="w-8 h-8 mx-auto mb-3 opacity-60" />
+				<p>No short links yet.</p>
+				<p class="text-sm mt-1">Make one and it will wait for you here.</p>
+			</div>
+		{:else}
+			<ul class="divide-y divide-border">
+				{#each links as link (link.slug)}
+					<li class="p-4 flex items-start justify-between gap-3">
+						<div class="min-w-0">
+							<div class="flex items-center gap-2 flex-wrap">
+								<a
+									href={link.shortUrl}
+									class="font-mono text-foreground hover:underline"
+									target="_blank"
+									rel="noopener"
+								>
+									{SHORT_LINK_HOST}/{link.slug}
+								</a>
+								{#if link.kind === "post"}
+									<span
+										class="px-2 py-0.5 text-xs rounded border border-border bg-cream-200 dark:bg-cream-300 text-foreground"
+									>
+										Bloom
+									</span>
+								{/if}
+							</div>
+							<div class="text-sm text-foreground-muted mt-0.5 truncate">
+								{#if link.title}
+									{link.title}
+								{:else if link.targetUrl}
+									{link.targetUrl}
+								{/if}
+								{#if link.kind === "post" && !link.targetUrl}
+									<span>This bloom isn't published right now</span>
+								{/if}
+							</div>
+							<div class="text-xs text-foreground-muted mt-0.5">
+								Made {formatDate(link.createdAt)} · {clicksLabel(link.clickCount)}
+							</div>
 						</div>
-						<p class="text-xs text-foreground-muted mt-1">
-							Leave it blank and we'll pick a short one for you.
-						</p>
-					</div>
 
-					<button
-						type="submit"
-						class="w-full px-4 py-2 rounded-lg bg-grove-600 text-white hover:bg-grove-700 transition-colors"
-					>
-						Make short link
-					</button>
-				</form>
-			</GlassCard>
-		</div>
-	</div>
+						<div class="flex items-center gap-1 flex-shrink-0">
+							<button
+								type="button"
+								onclick={() => copy(link)}
+								class="p-2 rounded text-foreground-muted hover:text-foreground hover:bg-cream-200 dark:hover:bg-cream-300 transition-colors"
+								aria-label={copiedSlug === link.slug
+									? "Copied"
+									: `Copy ${SHORT_LINK_HOST}/${link.slug}`}
+							>
+								{#if copiedSlug === link.slug}
+									<Check class="w-4 h-4 text-success" />
+								{:else}
+									<Copy class="w-4 h-4" />
+								{/if}
+							</button>
+
+							{#if link.kind === "custom"}
+								<form method="POST" action={disableAction}>
+									<input type="hidden" name="slug" value={link.slug} />
+									<button
+										type="submit"
+										class="p-2 rounded text-error hover:bg-error-bg transition-colors"
+										aria-label={`Retire ${SHORT_LINK_HOST}/${link.slug}`}
+									>
+										<Trash class="w-4 h-4" />
+									</button>
+								</form>
+							{/if}
+						</div>
+					</li>
+				{/each}
+			</ul>
+		{/if}
+	</GlassCard>
 </div>

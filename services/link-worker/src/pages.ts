@@ -57,10 +57,10 @@ export function renderPage(kind: PageKind): Response {
 <title>${escapeHtml(title)}</title>
 <style>
 	:root { color-scheme: light dark; }
-	body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 1.5rem; box-sizing: border-box; background: Canvas; color: CanvasText; font: 1.0625rem/1.6 system-ui, sans-serif; }
-	main { max-width: 28rem; }
-	h1 { font-size: 1.5rem; line-height: 1.3; margin: 0 0 0.75rem; }
-	p { margin: 0 0 1.25rem; }
+	body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 1.5rem; box-sizing: border-box; background: Canvas; color: CanvasText; font: 1.0625rem/1.65 system-ui, sans-serif; }
+	main { max-width: 30rem; padding: 2.25rem 2rem; border: 1px solid color-mix(in srgb, CanvasText 14%, transparent); border-radius: 1.25rem; background: color-mix(in srgb, CanvasText 3%, Canvas); }
+	h1 { font: 600 1.625rem/1.3 Georgia, "Times New Roman", serif; margin: 0 0 0.75rem; }
+	p { margin: 0 0 1.5rem; color: color-mix(in srgb, CanvasText 78%, transparent); }
 	a { color: LinkText; }
 </style>
 </head>

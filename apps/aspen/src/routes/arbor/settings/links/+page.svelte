@@ -6,13 +6,15 @@
 </script>
 
 <svelte:head>
-	<title>Short Links - Arbor</title>
+	<title>Short Links - Settings</title>
 </svelte:head>
 
 <ArborSection
 	title="Short Links"
 	description="Short, easy-to-share addresses for your grove at link.grove.place."
 	icon={actionIcons.link}
+	backHref="/arbor/settings"
+	backLabel="Back to Settings"
 >
 	<ShortLinksManager
 		links={data.links}
