@@ -199,7 +199,16 @@ Constants (host, slug rules, generator alphabet) live in `platform/config/short-
 4. Landing Arbor page. Done.
 5. Aspen Arbor page and the garden button. Done.
 
-**Deploy order matters.** `grove-router` binds to the `grove-link` service, so `grove-link` must exist before the router deploys. Apply migration `120` to `grove-engine-db`, deploy `grove-link`, then the router.
+**Deploy.** Merging to `main` starts three workflows at once:
+
+- *Build & Migrate Engine* applies migration `120` to `grove-engine-db` (it runs on any `libs/engine/**` change, so nothing is applied by hand).
+- *Deploy Link Worker* (`deploy-link-worker.yml`) deploys `grove-link`, and creates the `link.grove.place` custom domain on its first deploy, as it does for `og.grove.place`.
+- *Deploy Router* deploys `grove-router`, which now binds to `grove-link`.
+
+They aren't ordered against each other, so two things can happen on the first merge:
+
+- **The router deploy fails** if it runs before `grove-link` exists. It fails safe (the old router keeps serving). Re-run *Deploy Router* from the Actions tab once *Deploy Link Worker* has succeeded.
+- **For a few minutes the worker or Aspen may be live before the migration lands.** Short link visits show the "Something stumbled" page and the Settings page errors until `120` is applied. Nobody has a short link yet, so nothing real breaks, and it clears by itself.
 
 ## Possible later
 
