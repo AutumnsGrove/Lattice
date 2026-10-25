@@ -173,7 +173,7 @@
 							<div class="flex items-center gap-2 flex-wrap">
 								<a
 									href={link.shortUrl}
-									class="font-mono text-foreground hover:underline"
+									class="font-mono text-foreground hover:underline break-all"
 									target="_blank"
 									rel="noopener"
 								>
