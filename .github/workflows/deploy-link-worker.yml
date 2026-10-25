@@ -1,0 +1,25 @@
+---
+name: Deploy Link Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "services/link-worker/**"
+      - "libs/engine/src/lib/server/services/short-links.ts"
+      - "libs/engine/src/lib/platform/config/short-links.ts"
+      - "libs/engine/src/lib/errors/link-errors.ts"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+  issues: write
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/_deploy-worker.yml
+    with:
+      worker-dir: services/link-worker
+      needs-engine: true
+    secrets: inherit

@@ -57,6 +57,7 @@ export const ENDPOINT_RATE_LIMITS = {
 	"posts/create": { limit: 10, windowSeconds: 3600 },
 	"posts/update": { limit: 30, windowSeconds: 3600 },
 	"comments/create": { limit: 20, windowSeconds: 300 },
+	"links/create": { limit: 30, windowSeconds: 3600 },
 
 	// Upload endpoints
 	"upload/image": { limit: 200, windowSeconds: 3600 },

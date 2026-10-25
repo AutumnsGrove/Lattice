@@ -1305,6 +1305,24 @@ importers:
         specifier: ^4.126.0
         version: 4.126.0(@cloudflare/workers-types@4.20260414.1)
 
+  services/link-worker:
+    devDependencies:
+      '@autumnsgrove/lattice':
+        specifier: workspace:*
+        version: link:../../libs/engine
+      '@cloudflare/workers-types':
+        specifier: ^4.20260317.1
+        version: 4.20260414.1
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.0
+        version: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0))
+      wrangler:
+        specifier: ^4.126.0
+        version: 4.126.0(@cloudflare/workers-types@4.20260414.1)
+
   services/og-worker:
     dependencies:
       workers-og:

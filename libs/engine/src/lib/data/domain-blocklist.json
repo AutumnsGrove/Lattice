@@ -249,6 +249,7 @@
   { "username": "scout", "reason": "grove_service", "category": "aliases" },
   { "username": "search", "reason": "grove_service", "category": "aliases" },
   { "username": "og", "reason": "grove_service", "category": "aliases" },
+  { "username": "link", "reason": "grove_service", "category": "aliases" },
   { "username": "monitor", "reason": "grove_service", "category": "aliases" },
   { "username": "grovesocial", "reason": "grove_service", "category": "internal_codenames" },
   { "username": "grovedomaintool", "reason": "grove_service", "category": "internal_codenames" },

@@ -1,0 +1,20 @@
+{
+	"name": "grove-link",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Short link redirects for link.grove.place",
+	"scripts": {
+		"dev": "wrangler dev",
+		"deploy": "wrangler deploy",
+		"check": "tsc --noEmit",
+		"test": "vitest watch",
+		"test:run": "vitest run"
+	},
+	"devDependencies": {
+		"@autumnsgrove/lattice": "workspace:*",
+		"@cloudflare/workers-types": "^4.20260317.1",
+		"typescript": "^5.9.3",
+		"vitest": "^4.1.0",
+		"wrangler": "^4.126.0"
+	}
+}

@@ -1,0 +1,17 @@
+name = "grove-link"
+main = "src/index.ts"
+compatibility_date = "2025-12-01"
+
+# Enable workers.dev route for grove-router proxy
+workers_dev = true
+
+# Also route to link.grove.place directly (custom domain)
+routes = [
+  { pattern = "link.grove.place", custom_domain = true }
+]
+
+# Short links live in the main engine database (short_links table, migration 120)
+[[d1_databases]]
+binding = "DB"
+database_name = "grove-engine-db"
+database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
