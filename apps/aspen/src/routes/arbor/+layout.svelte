@@ -17,6 +17,7 @@
 		{ href: "/arbor/garden", label: "Garden", icon: gardenIcon, termSlug: "your-garden" },
 		{ href: "/arbor/pages", label: "Pages", icon: featureIcons.fileStack },
 		{ href: "/arbor/images", label: "Images", icon: featureIcons.image },
+		{ href: "/arbor/links", label: "Short Links", icon: actionIcons.link },
 		{
 			href: "/arbor/reeds",
 			label: "Comments",

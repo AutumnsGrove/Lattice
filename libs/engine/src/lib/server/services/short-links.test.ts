@@ -15,6 +15,7 @@ import {
 	validateSlug,
 	validateTarget,
 	generateSlug,
+	getGroveOwner,
 	getOrCreatePostLink,
 	createCustomLink,
 	listLinks,
@@ -39,7 +40,10 @@ function createDb() {
 	const sqlite = new DatabaseSync(":memory:");
 	sqlite.exec("PRAGMA foreign_keys = ON");
 	sqlite.exec(`
-		CREATE TABLE tenants (id TEXT PRIMARY KEY, subdomain TEXT UNIQUE NOT NULL, active INTEGER DEFAULT 1);
+		CREATE TABLE tenants (
+			id TEXT PRIMARY KEY, subdomain TEXT UNIQUE NOT NULL, active INTEGER DEFAULT 1,
+			custom_domain TEXT, plan TEXT DEFAULT 'seedling'
+		);
 		CREATE TABLE posts (
 			id TEXT PRIMARY KEY, tenant_id TEXT NOT NULL, slug TEXT NOT NULL,
 			title TEXT NOT NULL, status TEXT DEFAULT 'draft'
@@ -74,7 +78,7 @@ let sqlite: DatabaseSync;
 beforeEach(() => {
 	({ db, sqlite } = createDb());
 	sqlite.exec(`
-		INSERT INTO tenants VALUES ('t-autumn', 'autumn', 1), ('t-river', 'river', 1);
+		INSERT INTO tenants (id, subdomain, active) VALUES ('t-autumn', 'autumn', 1), ('t-river', 'river', 1);
 		INSERT INTO posts VALUES
 			('p-hello', 't-autumn', 'hello-world', 'Hello World', 'published'),
 			('p-draft', 't-autumn', 'wip', 'Work in progress', 'draft'),
@@ -84,6 +88,48 @@ beforeEach(() => {
 
 const rowCount = () =>
 	Number((sqlite.prepare("SELECT COUNT(*) AS n FROM short_links").get() as { n: number }).n);
+
+// ============================================================================
+// Owners
+// ============================================================================
+
+describe("getGroveOwner", () => {
+	it("loads a grove's subdomain", async () => {
+		expect(await getGroveOwner(db, "t-autumn")).toEqual({
+			type: "grove",
+			tenantId: "t-autumn",
+			subdomain: "autumn",
+			customDomain: null,
+		});
+	});
+
+	it.each([
+		["seedling", null],
+		["sapling", null],
+		["oak", "autumn.example.com"],
+		["evergreen", "autumn.example.com"],
+	])("on %s the custom domain counts as their grove: %j", async (plan, expected) => {
+		sqlite.exec(
+			`UPDATE tenants SET plan = '${plan}', custom_domain = 'autumn.example.com' WHERE id = 't-autumn'`,
+		);
+		const owner = await getGroveOwner(db, "t-autumn");
+		expect(owner && owner.type === "grove" && owner.customDomain).toBe(expected);
+	});
+
+	it("ignores a custom domain when the plan is unknown", async () => {
+		sqlite.exec(
+			"UPDATE tenants SET plan = 'mystery', custom_domain = 'x.example.com' WHERE id = 't-autumn'",
+		);
+		const owner = await getGroveOwner(db, "t-autumn");
+		expect(owner && owner.type === "grove" && owner.customDomain).toBeNull();
+	});
+
+	it("returns null for groves that are missing or inactive", async () => {
+		expect(await getGroveOwner(db, "nope")).toBeNull();
+		sqlite.exec("UPDATE tenants SET active = 0 WHERE id = 't-autumn'");
+		expect(await getGroveOwner(db, "t-autumn")).toBeNull();
+	});
+});
 
 // ============================================================================
 // Slugs

@@ -18,6 +18,7 @@
 import { GROVE_DOMAIN, buildGroveUrl } from "../../utils/grove-url.js";
 import { isUsernameBlocked } from "../../platform/config/domain-blocklist.js";
 import { containsOffensiveContent } from "../../platform/config/offensive-blocklist.js";
+import { getTierSafe } from "../../platform/config/tiers/helpers.js";
 import {
 	SHORT_LINK_BASE_URL,
 	SHORT_LINK_GENERATOR,
@@ -69,6 +70,26 @@ const fail = (key: LinkErrorKey): { ok: false; error: GroveErrorDef } => ({
 	ok: false,
 	error: LINK_ERRORS[key],
 });
+
+/**
+ * Load the grove a Wanderer is acting for. Their custom domain only counts as
+ * "their grove" on tiers that include one. Null when the grove doesn't exist
+ * or isn't active.
+ */
+export async function getGroveOwner(db: D1Database, tenantId: string): Promise<LinkOwner | null> {
+	const row = await db
+		.prepare(`SELECT id, subdomain, custom_domain, plan FROM tenants WHERE id = ? AND active = 1`)
+		.bind(tenantId)
+		.first<{ id: string; subdomain: string; custom_domain: string | null; plan: string }>();
+	if (!row) return null;
+
+	return {
+		type: "grove",
+		tenantId: row.id,
+		subdomain: row.subdomain,
+		customDomain: getTierSafe(row.plan)?.features.customDomain ? row.custom_domain : null,
+	};
+}
 
 // ============================================================================
 // Slugs
