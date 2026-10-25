@@ -16,11 +16,23 @@
 	import { GlassConfirmDialog } from "@autumnsgrove/lattice/ui";
 	import Header from "$lib/components/Header.svelte";
 	import Footer from "$lib/components/Footer.svelte";
-	import { navIcons, featureIcons, actionIcons, natureIcons, phaseIcons, metricIcons, authIcons, stateIcons, toolIcons, blazeIcons } from "@autumnsgrove/prism/icons";
+	import {
+		navIcons,
+		featureIcons,
+		actionIcons,
+		natureIcons,
+		phaseIcons,
+		metricIcons,
+		authIcons,
+		stateIcons,
+		toolIcons,
+		blazeIcons,
+	} from "@autumnsgrove/prism/icons";
 	const Home = navIcons.home;
 	const MessageCircle = featureIcons.messageCircle;
 	const AtSign = authIcons.atSign;
 	const Upload = actionIcons.upload;
+	const Link2 = actionIcons.link;
 	const MessageSquare = featureIcons.messageSquare;
 	const Sprout = natureIcons.sprout;
 	const Gift = blazeIcons.gift;
@@ -89,6 +101,7 @@
 		{ href: "/arbor/status", label: "Status", icon: Activity },
 		{ href: "/arbor/tenants", label: "Tenants", icon: Users },
 		{ href: "/arbor/uploads", label: "Uploads", icon: ImagePlus },
+		{ href: "/arbor/links", label: "Links", icon: Link2 },
 		{ href: "/arbor/zephyr", label: "Zephyr", icon: Wind },
 		{ href: "/arbor/lumen", label: "Lumen", icon: Sparkles },
 		{ href: "/arbor/vista", label: "Vista", icon: Eye },

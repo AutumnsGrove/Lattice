@@ -18,6 +18,7 @@ export interface Env {
 	MC_CONTROL?: Fetcher;
 	MYCELIUM?: Fetcher;
 	OG?: Fetcher;
+	LINK?: Fetcher;
 	WARDEN?: Fetcher;
 	BILLING?: Fetcher;
 	ASPEN?: Fetcher;
@@ -83,6 +84,7 @@ const SUBDOMAIN_ROUTES: Record<string, string | RouteTarget> = {
 	},
 	mycelium: { origin: "mycelium.m7jv4v7npb.workers.dev", binding: "MYCELIUM" },
 	og: { origin: "grove-og.m7jv4v7npb.workers.dev", binding: "OG" },
+	link: { origin: "grove-link.m7jv4v7npb.workers.dev", binding: "LINK" },
 	warden: { origin: "grove-warden.m7jv4v7npb.workers.dev", binding: "WARDEN" },
 
 	// Reserved subdomains - route to landing until services are built

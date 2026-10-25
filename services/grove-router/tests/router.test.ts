@@ -296,6 +296,17 @@ describe("Grove Router", () => {
 			expect(mockFetch).not.toHaveBeenCalled();
 		});
 
+		it("routes link subdomain via Service Binding when available", async () => {
+			const mockLinkFetcher = { fetch: vi.fn(async () => new Response("link-ok")) };
+			env.LINK = mockLinkFetcher as unknown as Fetcher;
+
+			const request = createRequest("link", "/abc123");
+			await router.fetch(request, env);
+
+			expect(mockLinkFetcher.fetch).toHaveBeenCalled();
+			expect(mockFetch).not.toHaveBeenCalled();
+		});
+
 		it("routes mc-control subdomain via Service Binding when available", async () => {
 			const mockMCFetcher = { fetch: vi.fn(async () => new Response("mc-ok")) };
 			env.MC_CONTROL = mockMCFetcher as unknown as Fetcher;
