@@ -4,7 +4,10 @@
 	 *
 	 * Normal flow: server redirects to Stripe before this renders.
 	 * Greenhouse mode: shows a mock portal summary instead.
+	 * Comped accounts: shows a notice — there is no portal to open (#1542).
 	 */
+
+	import CompedNotice from "$lib/components/CompedNotice.svelte";
 
 	let { data } = $props();
 	const isGreenhouse = $derived(data.greenhouse ?? false);
@@ -15,7 +18,16 @@
 </svelte:head>
 
 <div class="w-full max-w-md mx-auto animate-fade-in">
-	{#if isGreenhouse}
+	{#if data.comped}
+		<div class="glass-grove rounded-2xl border border-default p-8 shadow-lg">
+			<div class="text-center mb-6">
+				<h1 class="text-xl font-serif text-foreground mb-2 tracking-tight">Billing Portal</h1>
+				<p class="text-foreground-muted text-sm">There's nothing to manage — your plan is on us.</p>
+			</div>
+
+			<CompedNotice redirectUrl={data.redirectUrl} />
+		</div>
+	{:else if isGreenhouse}
 		<!-- Greenhouse: mock portal view -->
 		<div class="glass-grove rounded-2xl border border-default p-8 shadow-lg">
 			<div class="text-center mb-6">
@@ -42,13 +54,18 @@
 				<div class="flex justify-between items-center">
 					<span class="text-sm text-foreground-muted">Next billing</span>
 					<span class="text-sm font-medium text-foreground">
-						{new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+						{new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString("en-US", {
+							month: "long",
+							day: "numeric",
+							year: "numeric",
+						})}
 					</span>
 				</div>
 			</div>
 
 			<p class="text-xs text-foreground-subtle text-center mb-6">
-				Greenhouse mock — Stripe portal would show payment methods, invoices, and plan management here.
+				Greenhouse mock — Stripe portal would show payment methods, invoices, and plan management
+				here.
 			</p>
 
 			<div class="flex flex-col gap-3">
@@ -60,7 +77,9 @@
 		<!-- Real flow: brief loading state before Stripe redirect -->
 		<div class="glass-grove rounded-2xl border border-default p-8 text-center shadow-lg">
 			<div class="spinner mx-auto mb-4" role="status" aria-label="Loading"></div>
-			<h1 class="text-lg font-serif text-foreground mb-2 tracking-tight">Opening billing portal...</h1>
+			<h1 class="text-lg font-serif text-foreground mb-2 tracking-tight">
+				Opening billing portal...
+			</h1>
 			<p class="text-sm text-foreground-muted">
 				You'll be redirected to manage your subscription in a moment.
 			</p>

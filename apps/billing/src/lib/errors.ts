@@ -94,6 +94,13 @@ export const BILLING_ERRORS = {
 		adminMessage: "Billing API returned error for status request.",
 	},
 
+	COMPED_ACCOUNT: {
+		code: "BILLING-044",
+		category: "user" as const,
+		userMessage: "Your account is complimentary — there's no subscription to change here.",
+		adminMessage: "Compensated account has no Stripe customer or subscription.",
+	},
+
 	// ─────────────────────────────────────────────────────────────────────────
 	// Webhook Errors (060-079)
 	// ─────────────────────────────────────────────────────────────────────────
