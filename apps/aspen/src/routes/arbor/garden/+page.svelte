@@ -48,6 +48,21 @@
 		}
 	}
 
+	async function copyShortLink(bloom: { slug: string; title: string }) {
+		try {
+			const result = await api.post<{ shortUrl: string }>(
+				`/api/blooms/${bloom.slug}/short-link`,
+				{},
+			);
+			if (!result) throw new Error("No short link returned");
+			await navigator.clipboard.writeText(result.shortUrl);
+			toast.success("Short link copied", { description: result.shortUrl });
+		} catch (error) {
+			console.error("Failed to get short link:", error);
+			toast.error("Couldn't copy a short link", { description: "Please try again." });
+		}
+	}
+
 	function handleCancelDelete() {
 		showDeleteDialog = false;
 		bloomToDelete = null;
@@ -181,6 +196,14 @@
 									class="text-success no-underline text-sm mr-4 hover:underline transition-colors max-md:mr-2"
 									>View</a
 								>
+								<button
+									onclick={() => copyShortLink({ slug: post.slug, title: post.title })}
+									class="text-success text-sm mr-4 hover:underline transition-colors inline-flex items-center gap-1 max-md:mr-2"
+									aria-label="Copy short link for {post.title}"
+								>
+									<actionIcons.link class="w-3.5 h-3.5" />
+									<span class="max-md:hidden">Short link</span>
+								</button>
 							{:else}
 								<span
 									class="text-foreground-subtle text-sm mr-4 cursor-default"

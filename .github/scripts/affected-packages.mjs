@@ -44,6 +44,7 @@ const ENGINE_CONSUMERS = [
 	"services/durable-objects",
 	"services/forage",
 	"services/heartwood",
+	"services/link-worker",
 	"services/zephyr",
 	"workers/onboarding",
 	"workers/patina",
@@ -142,6 +143,11 @@ const PACKAGES = {
 		isSvelteKit: false,
 	},
 	"services/grove-router": {
+		typecheck: "pnpm exec tsc --noEmit",
+		hasTests: true,
+		isSvelteKit: false,
+	},
+	"services/link-worker": {
 		typecheck: "pnpm exec tsc --noEmit",
 		hasTests: true,
 		isSvelteKit: false,

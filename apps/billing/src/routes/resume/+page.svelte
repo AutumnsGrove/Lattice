@@ -4,7 +4,10 @@
 	 *
 	 * Shows confirmation to undo a scheduled cancellation.
 	 * Only meaningful if cancelAtPeriodEnd is true.
+	 * Comped accounts have no subscription to resume (#1542).
 	 */
+
+	import CompedNotice from "$lib/components/CompedNotice.svelte";
 
 	let { data } = $props();
 
@@ -31,13 +34,22 @@
 <div class="w-full max-w-md mx-auto animate-fade-in">
 	<div class="glass-grove rounded-2xl border border-default p-8 shadow-lg">
 		<div class="text-center mb-6">
-			<h1 class="text-xl font-serif text-foreground mb-2 tracking-tight">Resume your subscription?</h1>
+			<h1 class="text-xl font-serif text-foreground mb-2 tracking-tight">
+				{data.comped ? "Your account is complimentary" : "Resume your subscription?"}
+			</h1>
 			<p class="text-foreground-muted">
-				Your {planName} plan is still here, right where you left it.
+				{#if data.comped}
+					Nothing needs your attention here.
+				{:else}
+					Your {planName} plan is still here, right where you left it.
+				{/if}
 			</p>
 		</div>
 
-		{#if !data.status?.cancelAtPeriodEnd}
+		{#if data.comped}
+			<!-- Complimentary account — no subscription exists to resume -->
+			<CompedNotice redirectUrl={data.redirectUrl} />
+		{:else if !data.status?.cancelAtPeriodEnd}
 			<!-- Not actually cancelled — redirect back -->
 			<div class="banner-success mb-6">
 				<p class="text-sm text-foreground">
@@ -75,7 +87,11 @@
 
 			<div class="flex flex-col gap-3">
 				<form method="POST">
-					<button type="submit" class="btn-primary w-full" aria-label="Confirm resumption of your subscription">
+					<button
+						type="submit"
+						class="btn-primary w-full"
+						aria-label="Confirm resumption of your subscription"
+					>
 						Resume subscription
 					</button>
 				</form>

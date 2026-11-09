@@ -11,5 +11,6 @@ export * from "./emails.js";
 export * from "./links.js";
 export * from "./offensive-blocklist.js";
 export * from "./presets.js";
+export * from "./short-links.js";
 export * from "./tiers.js";
 export * from "./wayfinder.js";

@@ -69,6 +69,10 @@ describe("isUsernameBlocked - Exact Matches", () => {
 		expect(isUsernameBlocked("heartwood")).toBe("grove_service");
 	});
 
+	it("should reserve link for the short links host", () => {
+		expect(isUsernameBlocked("link")).toBe("grove_service");
+	});
+
 	it("should block Grove trademarks", () => {
 		expect(isUsernameBlocked("grove")).toBe("grove_service"); // Also in services
 		expect(isUsernameBlocked("groveplace")).toBe("trademark");

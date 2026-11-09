@@ -18,7 +18,7 @@ from playwright.async_api import async_playwright, Browser, BrowserContext, Rout
 
 from glimpse.capture.auth import build_auth_header
 from glimpse.capture.console import ConsoleCollector
-from glimpse.capture.injector import build_init_script
+from glimpse.capture.injector import SHADE_DISMISS_SCRIPT, build_init_script
 from glimpse.capture.screenshot import A11ySummary, CaptureRequest, CaptureResult, ConsoleMessage
 from glimpse.utils.browser import find_chromium_executable
 from glimpse.seed.discovery import find_grove_root
@@ -166,6 +166,14 @@ class CaptureEngine:
                     error=f"Navigation failed: {e}",
                     console_messages=collector.messages if collector else [],
                 )
+
+            # 4b. Dismiss the pre-hydration loading overlay. It covers the whole
+            # page until hydration finishes, which is slower than
+            # `domcontentloaded` and never happens at all when page JS errors.
+            try:
+                await page.evaluate(SHADE_DISMISS_SCRIPT)
+            except Exception:
+                pass  # Best-effort; page may have navigated away already
 
             # 5. Wait for render settle
             if request.wait_for:

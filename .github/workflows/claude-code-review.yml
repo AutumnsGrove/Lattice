@@ -89,6 +89,6 @@ jobs:
             review — do not manufacture feedback.
 
           claude_args: >-
-            --max-turns 10
+            --max-turns 30
             --allowedTools "Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh
             pr view:*)"

@@ -1,0 +1,30 @@
+---
+name: Deploy Link Worker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "services/link-worker/**"
+      # The worker bundles the engine's short-links service (and the config,
+      # errors and URL helpers it imports), so rebuild on engine changes too —
+      # otherwise a fresh typecheck against a stale engine dist/ will fail.
+      - "libs/engine/**"
+      - "libs/gossamer/**"
+      - "libs/infra/**"
+      - "libs/prism/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+  issues: write
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/_deploy-worker.yml
+    with:
+      worker-dir: services/link-worker
+      needs-engine: true
+      run-tests: true
+    secrets: inherit

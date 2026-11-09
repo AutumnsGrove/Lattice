@@ -49,6 +49,10 @@ binding = "OG"
 service = "grove-og"
 
 [[services]]
+binding = "LINK"
+service = "grove-link"
+
+[[services]]
 binding = "WARDEN"
 service = "grove-warden"
 
