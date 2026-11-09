@@ -35,7 +35,7 @@ function mockOpenRouterVisionResponse(content: string, model?: string) {
 			completion_tokens: 30,
 			total_tokens: 830,
 		},
-		model: model ?? MODELS.GEMINI_FLASH,
+		model: model ?? MODELS.CLAUDE_HAIKU_55,
 	};
 }
 
@@ -82,7 +82,7 @@ describe("Integration: Petal classifyWithLumen → LumenClient", () => {
 		expect(result.category).toBe("appropriate");
 		expect(result.confidence).toBe(0.92);
 		expect(result.decision).toBe("allow");
-		expect(result.model).toBe(MODELS.GEMINI_FLASH);
+		expect(result.model).toBe(MODELS.CLAUDE_HAIKU_55);
 		expect(result.provider).toBe("openrouter");
 	});
 
@@ -151,7 +151,7 @@ describe("Integration: Petal classifyWithLumen → LumenClient", () => {
 		const fetchCall = fetchMock.mock.calls[0];
 		const requestBody = JSON.parse(fetchCall[1].body);
 
-		expect(requestBody.model).toBe(MODELS.GEMINI_FLASH);
+		expect(requestBody.model).toBe(MODELS.CLAUDE_HAIKU_55);
 		expect(requestBody.max_tokens).toBe(100); // classifyWithLumen override
 		expect(requestBody.temperature).toBe(0.1); // classifyWithLumen override
 	});

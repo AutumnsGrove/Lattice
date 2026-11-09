@@ -42,7 +42,7 @@ function mockOpenRouterResponse(content: string, model?: string) {
 			completion_tokens: 50,
 			total_tokens: 200,
 		},
-		model: model ?? MODELS.DEEPSEEK_V3,
+		model: model ?? MODELS.DEEPSEEK_V4_1_FLASH,
 	};
 }
 
@@ -83,7 +83,7 @@ describe("Integration: Wisp Generation Path", () => {
 
 		// Verify response is normalized
 		expect(response.content).toContain("grammar");
-		expect(response.model).toBe(MODELS.DEEPSEEK_V3);
+		expect(response.model).toBe(MODELS.DEEPSEEK_V4_1_FLASH);
 		expect(response.provider).toBe("openrouter");
 		expect(response.usage.input).toBe(150);
 		expect(response.usage.output).toBe(50);
@@ -159,7 +159,7 @@ describe("Integration: Wisp Generation Path", () => {
 		const fetchCall = fetchMock.mock.calls[0];
 		const requestBody = JSON.parse(fetchCall[1].body);
 
-		expect(requestBody.model).toBe(MODELS.DEEPSEEK_V3);
+		expect(requestBody.model).toBe(MODELS.DEEPSEEK_V4_1_FLASH);
 		expect(requestBody.max_tokens).toBe(2048); // generation default
 		expect(requestBody.temperature).toBe(0.7); // generation default
 	});
@@ -186,9 +186,9 @@ describe("Integration: Wisp Generation Path", () => {
 			input: "Test",
 		});
 
-		// DeepSeek v3: $0.26/M input, $0.38/M output
-		// Cost = (1000/1M * 0.26) + (500/1M * 0.38) = 0.00026 + 0.00019 = 0.00045
-		expect(response.usage.cost).toBeCloseTo(0.00045, 5);
+		// DeepSeek V4.1 Flash: $0.30/M input, $1.20/M output
+		// Cost = (1000/1M * 0.30) + (500/1M * 1.20) = 0.0003 + 0.0006 = 0.0009
+		expect(response.usage.cost).toBeCloseTo(0.0009, 5);
 	});
 });
 
@@ -330,7 +330,7 @@ describe("Integration: Petal Image Classification Path", () => {
 			json: async () =>
 				mockOpenRouterResponse(
 					'{"category": "appropriate", "confidence": 0.95}',
-					MODELS.GEMINI_FLASH,
+					MODELS.CLAUDE_HAIKU_55,
 				),
 		});
 
@@ -361,7 +361,7 @@ describe("Integration: Petal Image Classification Path", () => {
 		});
 
 		expect(response.content).toContain("appropriate");
-		expect(response.model).toBe(MODELS.GEMINI_FLASH);
+		expect(response.model).toBe(MODELS.CLAUDE_HAIKU_55);
 		expect(response.provider).toBe("openrouter");
 	});
 
@@ -437,7 +437,7 @@ describe("Integration: Petal Image Classification Path", () => {
 		const fetchCall = fetchMock.mock.calls[0];
 		const requestBody = JSON.parse(fetchCall[1].body);
 
-		expect(requestBody.model).toBe(MODELS.GEMINI_FLASH);
+		expect(requestBody.model).toBe(MODELS.CLAUDE_HAIKU_55);
 		expect(requestBody.temperature).toBe(0.2); // image task default
 		expect(requestBody.max_tokens).toBe(1024); // image task default
 	});

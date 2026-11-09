@@ -161,7 +161,7 @@ export async function runSongbird(
 
 		try {
 			const canaryResponse = await openrouter.inference(
-				MODELS.DEEPSEEK_V3,
+				MODELS.DEEPSEEK_V4_1_FLASH,
 				buildCanaryPrompt(userContent),
 				{ maxTokens: 10, temperature: 0 },
 			);
@@ -193,7 +193,7 @@ export async function runSongbird(
 
 	try {
 		const kestrelResponse = await openrouter.inference(
-			MODELS.DEEPSEEK_V3,
+			MODELS.DEEPSEEK_V4_1_FLASH,
 			buildKestrelPrompt(userContent, context),
 			{ maxTokens: 200, temperature: 0.1 },
 		);

@@ -226,16 +226,14 @@ Here are the current task configurations:
 
 | Task | Primary Model | Primary Provider | Fallback Models |
 |------|--------------|-----------------|----------------|
-| `generation` | DeepSeek V3.2 | OpenRouter | Kimi K2, Llama 3.3 70B |
-| `summary` | DeepSeek V3.2 | OpenRouter | Kimi K2, Llama 3.3 70B |
-| `chat` | DeepSeek V3.2 | OpenRouter | Kimi K2, Llama 3.3 70B |
-| `code` | DeepSeek V3.2 | OpenRouter | Claude Haiku 4.5, Kimi K2 |
-| `image` | Gemini 2.5 Flash | OpenRouter | Claude Haiku 4.5, CF Llama 4 Scout |
-| `moderation` | GPT-oss Safeguard 20B | OpenRouter | LlamaGuard 4, DeepSeek V3.2 |
-| `embedding` | BGE-M3 | OpenRouter | Qwen3 Embed, CF BGE Base |
+| `generation` | DeepSeek V4.1 Flash | OpenRouter | Qwen3.8 Flash, Llama 3.1 8B |
+| `summary` | DeepSeek V4.1 Flash | OpenRouter | Qwen3.8 Flash, Llama 3.1 8B |
+| `chat` | DeepSeek V4.1 Flash | OpenRouter | Qwen3.8 Flash, Llama 3.1 8B |
+| `code` | DeepSeek V4.1 Flash | OpenRouter | Claude Haiku 5.5, Kimi K2.7 Code |
+| `image` | Claude Haiku 5.5 | OpenRouter | Gemma 4 26B, CF Llama 4 Scout |
+| `moderation` | GPT-oss Safeguard 20B | OpenRouter | LlamaGuard 4, DeepSeek V4.1 Flash |
+| `embedding` | Perplexity Embed V1 0.6B | OpenRouter | BGE-M3 |
 | `transcription` | CF Whisper Turbo | Cloudflare AI | CF Whisper, CF Whisper Tiny |
-| `reverie` | Liquid LFM-2 | OpenRouter | MiniMax M2.5 |
-| `reverie-compose` | Liquid LFM-2 | OpenRouter | MiniMax M2.5 |
 
 ### How Fallback Works
 

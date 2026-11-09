@@ -53,21 +53,22 @@ function m(key: ModelKey): string {
  */
 export const MODELS = {
 	// OpenRouter — Generation, Chat, Summary
-	DEEPSEEK_V3: m("DEEPSEEK_V3"),
-	KIMI_K2: m("KIMI_K2_5"),
-	LLAMA_70B: m("LLAMA_70B"),
+	DEEPSEEK_V4_1_FLASH: m("DEEPSEEK_V4_1_FLASH"),
+	QWEN3_8_FLASH: m("QWEN3_8_FLASH"),
+	LLAMA_3_1_8B: m("LLAMA_3_1_8B"),
+	KIMI_K2_7_CODE: m("KIMI_K2_7_CODE"),
 
-	// OpenRouter — Image & Code
-	CLAUDE_HAIKU: m("CLAUDE_HAIKU"),
-	GEMINI_FLASH: m("GEMINI_FLASH"),
+	// OpenRouter — Vision
+	CLAUDE_HAIKU_55: m("CLAUDE_HAIKU_55"),
+	GEMMA_4_26B: m("GEMMA_4_26B"),
 
 	// OpenRouter — Moderation
 	GPT_OSS_SAFEGUARD: m("GPT_OSS_SAFEGUARD"),
 	LLAMAGUARD_4: m("LLAMAGUARD_4"),
 
 	// OpenRouter — Embeddings
+	PPLX_EMBED_0_6B: m("PPLX_EMBED_0_6B"),
 	BGE_M3: m("BGE_M3"),
-	QWEN3_EMBED: m("QWEN3_EMBED"),
 
 	// Cloudflare Workers AI (last-resort fallbacks)
 	CF_SHIELDGEMMA: m("CF_SHIELDGEMMA"),
@@ -128,83 +129,81 @@ export interface TaskConfig {
  * │  FALLBACK STRATEGY                                                          │
  * │                                                                             │
  * │  Primary: OpenRouter (best quality, most options)                           │
- * │  Fallback: Cloudflare Workers AI (fast, local, free as last resort)        │
+ * │  Fallback: another OpenRouter model, then Cloudflare Workers AI last       │
  * │                                                                             │
  * │  Each task tries models in order until one succeeds.                        │
  * └─────────────────────────────────────────────────────────────────────────────┘
  */
 export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
-	// Content Moderation (GPT-oss Safeguard → LlamaGuard 4 → DeepSeek V3.2)
+	// Content Moderation (GPT-oss Safeguard → LlamaGuard 4 → DeepSeek V4.1 Flash)
 	moderation: {
 		primaryModel: MODELS.GPT_OSS_SAFEGUARD,
 		primaryProvider: "openrouter",
 		fallbackChain: [
 			{ provider: "openrouter", model: MODELS.LLAMAGUARD_4 },
-			{ provider: "openrouter", model: MODELS.DEEPSEEK_V3 },
+			{ provider: "openrouter", model: MODELS.DEEPSEEK_V4_1_FLASH },
 		],
 		defaultMaxTokens: 512,
 		defaultTemperature: 0,
 		description: "Content safety classification",
 	},
 
-	// Text Generation (DeepSeek → Kimi K2.5 → Llama 70B)
+	// Text Generation (DeepSeek V4.1 Flash → Qwen3.8 Flash → Llama 3.1 8B)
 	generation: {
-		primaryModel: MODELS.DEEPSEEK_V3,
+		primaryModel: MODELS.DEEPSEEK_V4_1_FLASH,
 		primaryProvider: "openrouter",
 		fallbackChain: [
-			{ provider: "openrouter", model: MODELS.KIMI_K2 },
-			{ provider: "openrouter", model: MODELS.LLAMA_70B },
+			{ provider: "openrouter", model: MODELS.QWEN3_8_FLASH },
+			{ provider: "openrouter", model: MODELS.LLAMA_3_1_8B },
 		],
 		defaultMaxTokens: 2048,
 		defaultTemperature: 0.7,
 		description: "General text generation",
 	},
 
-	// Summarization (DeepSeek → Kimi K2.5 → Llama 70B)
+	// Summarization (DeepSeek V4.1 Flash → Qwen3.8 Flash → Llama 3.1 8B)
 	summary: {
-		primaryModel: MODELS.DEEPSEEK_V3,
+		primaryModel: MODELS.DEEPSEEK_V4_1_FLASH,
 		primaryProvider: "openrouter",
 		fallbackChain: [
-			{ provider: "openrouter", model: MODELS.KIMI_K2 },
-			{ provider: "openrouter", model: MODELS.LLAMA_70B },
+			{ provider: "openrouter", model: MODELS.QWEN3_8_FLASH },
+			{ provider: "openrouter", model: MODELS.LLAMA_3_1_8B },
 		],
 		defaultMaxTokens: 1024,
 		defaultTemperature: 0.3,
 		description: "Content summarization",
 	},
 
-	// Embeddings (OpenRouter BGE-M3 → Qwen3 → CF BGE Base)
+	// Embeddings (Perplexity 0.6B → BGE-M3, both 1024-dim)
+	// Kept dimension-compatible so a fallback cannot change vector shape.
 	embedding: {
-		primaryModel: MODELS.BGE_M3,
+		primaryModel: MODELS.PPLX_EMBED_0_6B,
 		primaryProvider: "openrouter",
-		fallbackChain: [
-			{ provider: "openrouter", model: MODELS.QWEN3_EMBED },
-			{ provider: "cloudflare-ai", model: MODELS.CF_BGE_BASE },
-		],
+		fallbackChain: [{ provider: "openrouter", model: MODELS.BGE_M3 }],
 		defaultMaxTokens: 0,
 		defaultTemperature: 0,
 		description: "Text embeddings for semantic search",
 	},
 
-	// Chat/Conversational (DeepSeek → Kimi K2.5 → Llama 70B)
+	// Chat/Conversational (DeepSeek V4.1 Flash → Qwen3.8 Flash → Llama 3.1 8B)
 	chat: {
-		primaryModel: MODELS.DEEPSEEK_V3,
+		primaryModel: MODELS.DEEPSEEK_V4_1_FLASH,
 		primaryProvider: "openrouter",
 		fallbackChain: [
-			{ provider: "openrouter", model: MODELS.KIMI_K2 },
-			{ provider: "openrouter", model: MODELS.LLAMA_70B },
+			{ provider: "openrouter", model: MODELS.QWEN3_8_FLASH },
+			{ provider: "openrouter", model: MODELS.LLAMA_3_1_8B },
 		],
 		defaultMaxTokens: 4096,
 		defaultTemperature: 0.8,
 		description: "Conversational AI",
 	},
 
-	// Image Analysis (Gemini 3 Flash → Claude Haiku)
+	// Image Analysis (Claude Haiku 5.5 → Gemma 4 26B → CF Llama 4 Scout)
 	image: {
-		primaryModel: MODELS.GEMINI_FLASH,
+		primaryModel: MODELS.CLAUDE_HAIKU_55,
 		primaryProvider: "openrouter",
 		fallbackChain: [
-			{ provider: "openrouter", model: MODELS.CLAUDE_HAIKU },
+			{ provider: "openrouter", model: MODELS.GEMMA_4_26B },
 			{ provider: "cloudflare-ai", model: MODELS.CF_LLAMA4_SCOUT },
 		],
 		defaultMaxTokens: 1024,
@@ -212,13 +211,13 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
 		description: "Image analysis and description",
 	},
 
-	// Code Tasks (DeepSeek → Claude Haiku → Kimi K2.5)
+	// Code Tasks (DeepSeek V4.1 Flash → Claude Haiku 5.5 → Kimi K2.7 Code)
 	code: {
-		primaryModel: MODELS.DEEPSEEK_V3,
+		primaryModel: MODELS.DEEPSEEK_V4_1_FLASH,
 		primaryProvider: "openrouter",
 		fallbackChain: [
-			{ provider: "openrouter", model: MODELS.CLAUDE_HAIKU },
-			{ provider: "openrouter", model: MODELS.KIMI_K2 },
+			{ provider: "openrouter", model: MODELS.CLAUDE_HAIKU_55 },
+			{ provider: "openrouter", model: MODELS.KIMI_K2_7_CODE },
 		],
 		defaultMaxTokens: 4096,
 		defaultTemperature: 0.1,

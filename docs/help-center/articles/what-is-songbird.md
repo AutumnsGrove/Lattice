@@ -87,7 +87,7 @@ For more on how [[your-grove|Grove]] protects your data, see [[zdr|What is ZDR?]
 
 For developers and curious readers:
 
-Songbird uses DeepSeek V3.2 through OpenRouter for both the Canary and Kestrel checks. The model was chosen for its speed, cost, and accuracy on safety classification tasks.
+Songbird uses DeepSeek V4.1 Flash through OpenRouter for both the Canary and Kestrel checks. The model was chosen for its speed, cost, and accuracy on safety classification tasks.
 
 **Canary layer:** ~100-200 tokens, ~50ms, expects exactly "SAFE" or "UNSAFE"
 

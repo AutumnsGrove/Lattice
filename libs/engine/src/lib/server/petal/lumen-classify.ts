@@ -2,8 +2,8 @@
  * Petal Classification via Lumen
  *
  * Replaces the direct vision-client classification path with Lumen's unified
- * `image` task. Benefits: unified quota tracking, fallback chains (Gemini Flash
- * → Claude Haiku → CF Llama 4 Scout), PII scrubbing on prompts.
+ * `image` task. Benefits: unified quota tracking, fallback chains (Claude
+ * Haiku 5.5 → Gemma 4 26B → CF Llama 4 Scout), PII scrubbing on prompts.
  *
  * CSAM/Layer1 detection remains on the direct vision-client path — it's legally
  * mandated and must never depend on a disableable gateway.
@@ -42,7 +42,7 @@ const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
  * Classify an image using Lumen's image task.
  *
  * Converts the image to a base64 data URI and sends it through Lumen's
- * vision-capable model chain (Gemini Flash → Claude Haiku → CF Llama 4 Scout).
+ * vision-capable model chain (Claude Haiku 5.5 → Gemma 4 26B → CF Llama 4 Scout).
  *
  * @param image - Image data as base64 string or Uint8Array
  * @param mimeType - MIME type (e.g., "image/jpeg", "image/png")

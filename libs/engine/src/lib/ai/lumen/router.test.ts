@@ -72,7 +72,7 @@ describe("Task Routing", () => {
 			const result = routeTask("generation", providers);
 
 			expect(result.provider).toBe("openrouter");
-			expect(result.model).toBe(MODELS.DEEPSEEK_V3);
+			expect(result.model).toBe(MODELS.DEEPSEEK_V4_1_FLASH);
 		});
 
 		it("should use first available fallback when primary unavailable", () => {
@@ -81,8 +81,8 @@ describe("Task Routing", () => {
 				"cloudflare-ai": createMockProvider("cloudflare-ai"),
 			};
 
-			// Embedding has CF as fallback
-			const result = routeTask("embedding", providers);
+			// Transcription is CF-primary, so it resolves without OpenRouter
+			const result = routeTask("transcription", providers);
 
 			expect(result.provider).toBe("cloudflare-ai");
 		});
@@ -185,23 +185,21 @@ describe("Fallback Execution", () => {
 	});
 
 	describe("executeWithFallback - Fallback Behavior", () => {
-		it("should fallback to second model when primary fails", async () => {
-			// Embedding has cross-provider fallback (OpenRouter → CF)
-			const providers: ProviderRegistry = {
-				openrouter: createMockProvider("openrouter", {
-					shouldFail: true,
-					failMessage: "OpenRouter down",
-				}),
-				"cloudflare-ai": createMockProvider("cloudflare-ai"),
-			};
+		it("should try both embedding models when the provider fails", async () => {
+			// Embedding cascade is all-OpenRouter (Perplexity → BGE-M3)
+			const failingOpenRouter = createMockProvider("openrouter", {
+				shouldFail: true,
+				failMessage: "OpenRouter down",
+			});
 
-			const result = await executeWithFallback(
-				"embedding",
-				[{ role: "user", content: "Test" }],
-				providers,
-			);
+			const providers: ProviderRegistry = { openrouter: failingOpenRouter };
 
-			expect(result.provider).toBe("cloudflare-ai");
+			await expect(
+				executeWithFallback("embedding", [{ role: "user", content: "Test" }], providers),
+			).rejects.toThrow(AllProvidersFailedError);
+
+			// Primary + one fallback
+			expect(failingOpenRouter.inference).toHaveBeenCalledTimes(2);
 		});
 
 		it("should try all models in all-OpenRouter cascade", async () => {
@@ -279,33 +277,30 @@ describe("Specialized Execution", () => {
 			expect(result.embeddings).toBeDefined();
 		});
 
-		it("should fallback when primary fails", async () => {
+		it("should fall back from Perplexity to BGE-M3", async () => {
+			const embed = vi
+				.fn()
+				.mockRejectedValueOnce(new ProviderError("openrouter", "PPLX down"))
+				.mockResolvedValueOnce({ embeddings: [[0.1, 0.2, 0.3]], tokens: 10 });
+
 			const providers: ProviderRegistry = {
-				openrouter: createMockProvider("openrouter", {
-					hasEmbed: true,
-					shouldFail: true,
-				}),
-				"cloudflare-ai": createMockProvider("cloudflare-ai", {
-					hasEmbed: true,
-				}),
+				openrouter: { ...createMockProvider("openrouter"), embed },
 			};
 
 			const result = await executeEmbedding("test text", providers);
 
-			expect(result.provider).toBe("cloudflare-ai");
+			expect(result.model).toBe(MODELS.BGE_M3);
+			expect(embed).toHaveBeenCalledTimes(2);
 		});
 
-		it("should skip providers without embed method", async () => {
+		it("should throw when no provider has an embed method", async () => {
 			const providers: ProviderRegistry = {
 				openrouter: createMockProvider("openrouter", { hasEmbed: false }),
-				"cloudflare-ai": createMockProvider("cloudflare-ai", {
-					hasEmbed: true,
-				}),
 			};
 
-			const result = await executeEmbedding("test text", providers);
-
-			expect(result.provider).toBe("cloudflare-ai");
+			await expect(executeEmbedding("test text", providers)).rejects.toThrow(
+				AllProvidersFailedError,
+			);
 		});
 
 		it("should handle array input", async () => {

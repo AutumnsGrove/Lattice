@@ -85,20 +85,20 @@ You won't see "Lumen" in the Grove interface. It's infrastructure. But it powers
 
 ## The technical details
 
-Lumen is a Cloudflare Worker that sits in front of multiple AI providers. The primary provider is OpenRouter, which gives access to GPT-oss Safeguard, LlamaGuard, DeepSeek, Gemini, and other models through a unified API. Cloudflare Workers AI serves as a fallback layer for embeddings and transcription.
+Lumen is a Cloudflare Worker that sits in front of multiple AI providers. The primary provider is OpenRouter, which gives access to GPT-oss Safeguard, LlamaGuard, DeepSeek, Claude, and other models through a unified API. Cloudflare Workers AI handles transcription and serves as a last-resort vision fallback.
 
 Requests route based on task type:
 
 | Task | Primary Model | Use Case |
 |------|---------------|----------|
 | `moderation` | GPT-oss Safeguard 20B | Content safety checks |
-| `generation` | DeepSeek v3.2 | Long-form writing |
-| `chat` | DeepSeek v3.2 | Conversational AI |
-| `image` | Gemini 2.5 Flash | Image analysis |
-| `embedding` | BGE-M3 | Vector search |
+| `generation` | DeepSeek V4.1 Flash | Long-form writing |
+| `chat` | DeepSeek V4.1 Flash | Conversational AI |
+| `image` | Claude Haiku 5.5 | Image analysis |
+| `embedding` | Perplexity Embed V1 0.6B | Vector search |
 | `transcription` | Whisper Large v3 | Voice-to-text |
 
-If the primary model fails, Lumen automatically tries fallback options. GPT-oss Safeguard down? Fall back to LlamaGuard 4, then DeepSeek. All models route through OpenRouter for unified access.
+If the primary model fails, Lumen automatically tries fallback options. GPT-oss Safeguard down? Fall back to LlamaGuard 4, then DeepSeek V4.1 Flash. All models route through OpenRouter for unified access.
 
 Everything flows through Cloudflare AI Gateway for caching, logging, and analytics.
 

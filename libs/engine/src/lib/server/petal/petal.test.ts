@@ -21,7 +21,10 @@ import {
 	CONFIDENCE_THRESHOLDS,
 	getRejectionMessage,
 	GENERIC_REJECTION_MESSAGE,
+	PETAL_PROVIDERS,
+	PETAL_PROVIDER_CASCADE,
 } from "$lib/platform/config/petal.js";
+import { MODELS } from "$lib/ai/lumen/config.js";
 
 // ============================================================================
 // Test Fixtures
@@ -529,5 +532,23 @@ describe("Error Handling", () => {
 		// Decision is "block" because CSAM scanning is mandatory
 		expect(result.allowed).toBe(false);
 		expect(result.decision).toBe("block");
+	});
+});
+
+// ============================================================================
+// Provider Cascade
+// ============================================================================
+
+describe("vision provider cascade", () => {
+	it("every cascade entry has a provider config", () => {
+		for (const key of PETAL_PROVIDER_CASCADE) {
+			expect(PETAL_PROVIDERS[key], `missing config for ${key}`).toBeDefined();
+		}
+	});
+
+	it("resolves vision model IDs from the Lumen registry", () => {
+		expect(PETAL_PROVIDERS.openrouter_haiku.model).toBe(MODELS.CLAUDE_HAIKU_55);
+		expect(PETAL_PROVIDERS.openrouter_gemma.model).toBe(MODELS.GEMMA_4_26B);
+		expect(PETAL_PROVIDERS.workers_ai_llama4.model).toBe(MODELS.CF_LLAMA4_SCOUT);
 	});
 });
