@@ -2,6 +2,7 @@ import { error, redirect } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
 import { proxyToBillingApi } from "$lib/billing-proxy";
 import { getSafeRedirect } from "$lib/redirect";
+import { BILLING_ERRORS } from "$lib/errors";
 import {
 	isGreenhouseMode,
 	isGreenhouseCancelled,
@@ -60,6 +61,7 @@ export const load: PageServerLoad = async ({ locals, platform, cookies }) => {
 
 	return {
 		status,
+		comped: status.isComped === true,
 		redirectUrl: greenhouse ? "/" : getSafeRedirect(redirectUrl),
 		greenhouse,
 	};
@@ -88,6 +90,15 @@ export const actions: Actions = {
 
 		if (!response.ok) {
 			const errorData = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+
+			// Comped accounts have no subscription to resume (#1542).
+			if (errorData.error === "BILLING-004" || errorData.error === "BILLING-007") {
+				error(409, {
+					message: BILLING_ERRORS.COMPED_ACCOUNT.userMessage,
+					code: BILLING_ERRORS.COMPED_ACCOUNT.code,
+				});
+			}
+
 			console.error("[billing] Resume failed:", response.status, errorData);
 			error(502, {
 				message: "Could not resume subscription. Please try again.",

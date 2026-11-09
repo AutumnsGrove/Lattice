@@ -1,7 +1,7 @@
 import { redirect, error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { proxyToBillingApi } from "$lib/billing-proxy";
-import { isValidRedirect } from "$lib/redirect";
+import { getSafeRedirect, isValidRedirect } from "$lib/redirect";
 import { isGreenhouseMode } from "$lib/greenhouse";
 
 /**
@@ -50,6 +50,16 @@ export const load: PageServerLoad = async ({ url, locals, platform, cookies }) =
 
 	if (!response.ok) {
 		const errorData = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+
+		// Comped accounts (paid tier, no Stripe customer) have no portal to open.
+		// billing-api answers BILLING-004; show that plainly instead of a 502 (#1542).
+		if (errorData.error === "BILLING-004") {
+			return {
+				comped: true,
+				redirectUrl: getSafeRedirect(cookies.get("grove_billing_redirect")),
+			};
+		}
+
 		console.error("[billing] Portal session failed:", response.status, errorData);
 		error(502, {
 			message: "Could not open the billing portal. Please try again.",
