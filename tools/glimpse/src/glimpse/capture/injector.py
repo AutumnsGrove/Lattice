@@ -11,6 +11,13 @@ bypasses validation.
 _SAFE_SEASONS = {"spring", "summer", "autumn", "winter", "midnight"}
 _SAFE_THEMES = {"light", "dark", "system"}
 
+# Grove's pre-hydration loading overlay ("Entering the grove...") ships in the
+# server-rendered HTML and only fades once SvelteKit hydrates. If hydration is
+# slow, every screenshot captures the overlay instead of the page. Removing the
+# element after navigation is simpler than waiting for its `.ge-hidden` class,
+# which never arrives at all when page JS fails.
+SHADE_DISMISS_SCRIPT = "document.getElementById('grove-entrance')?.remove();"
+
 
 def build_init_script(
     season: str | None = None,

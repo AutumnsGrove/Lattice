@@ -2,7 +2,7 @@
 
 import pytest
 
-from glimpse.capture.injector import build_init_script
+from glimpse.capture.injector import SHADE_DISMISS_SCRIPT, build_init_script
 
 
 class TestBuildInitScript:
@@ -67,3 +67,15 @@ class TestBuildInitScript:
         for theme in ["light", "dark", "system"]:
             script = build_init_script(theme=theme)
             assert theme in script
+
+
+class TestShadeDismissScript:
+    """The pre-hydration overlay must be removed before capture (#1523)."""
+
+    def test_removes_grove_entrance(self):
+        assert "grove-entrance" in SHADE_DISMISS_SCRIPT
+        assert "remove()" in SHADE_DISMISS_SCRIPT
+
+    def test_is_idempotent_when_overlay_absent(self):
+        """Optional chaining keeps this a no-op on pages without the overlay."""
+        assert "?." in SHADE_DISMISS_SCRIPT
