@@ -142,7 +142,7 @@ Thorn operates in two layers: a deterministic **behavioral layer** (outer thorns
 │  - Zero Data Retention enabled                                  │
 │  - TLS 1.2+ encryption in transit                               │
 │  - Primary: GPT-oss Safeguard 20B (specialized safety model)   │
-│  - Fallback: LlamaGuard 4 12B → DeepSeek V3.2                  │
+│  - Fallback: LlamaGuard 4 12B → DeepSeek V4.1 Flash                │
 │  - No content logged by provider                                │
 └─────────────────────────────────────────────────────────────────┘
                               │

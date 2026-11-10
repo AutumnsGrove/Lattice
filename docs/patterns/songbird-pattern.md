@@ -12,7 +12,7 @@ lastUpdated: '2026-01-01'
 **Public Name:** Songbird
 **Internal Name:** GroveSongbird
 **Applies to:** All Grove AI input vectors (Wisp, Thorn, future features)
-**Model:** DeepSeek V3.2 via Fireworks AI
+**Model:** DeepSeek V4.1 Flash via OpenRouter
 **Last Updated:** December 2025
 
 In the forest, birds warn each other of danger. The canary alerts first. The kestrel watches and validates. The robin sings the safe response. Songbird is Grove's three-layer defense against prompt injection attacks.
@@ -407,11 +407,11 @@ async function songbirdPipeline<T>(
 
 ## Cost Analysis
 
-| Layer | Tokens (approx) | Cost (DeepSeek V3.2) |
+| Layer | Tokens (approx) | Cost (DeepSeek V4.1 Flash) |
 |-------|-----------------|----------------------|
 | Canary | ~150 | ~$0.0001 |
-| Kestrel | ~300 | ~$0.0003 |
-| **Protection overhead** | **~450** | **~$0.0004** |
+| Kestrel | ~300 | ~$0.0002 |
+| **Protection overhead** | **~450** | **~$0.0003** |
 
 For perspective:
 - 1,000 requests = $0.40 protection overhead
@@ -481,7 +481,7 @@ Content Moderation uses Songbird for:
 
 ## Future Considerations
 
-- **Model flexibility:** Currently hardcoded to DeepSeek V3.2. May allow configuration later.
+- **Model flexibility:** Currently hardcoded to DeepSeek V4.1 Flash. May allow configuration later.
 - **Caching:** Could cache Canary results for identical content hashes (with TTL).
 - **Adaptive thresholds:** Kestrel confidence threshold could adjust based on historical data.
 - **Layer 4?:** Post-Robin output validation could be added if needed, but adds latency.

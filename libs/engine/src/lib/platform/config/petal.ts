@@ -2,12 +2,14 @@
  * Petal - Image Content Moderation Configuration
  *
  * Model configuration, category definitions, and thresholds for Petal.
- * Uses Cloudflare Workers AI as primary with external API fallbacks.
+ * Vision models are resolved from Lumen's centralized registry so Petal never
+ * pins its own model IDs; the external providers are fallbacks around Lumen.
  *
  * @see docs/specs/petal-spec.md
  */
 
 import type { PetalCategory, PetalProviderConfig } from "$lib/types/petal";
+import { MODELS } from "$lib/ai/lumen/config.js";
 
 // ============================================================================
 // Provider Configuration
@@ -15,31 +17,41 @@ import type { PetalCategory, PetalProviderConfig } from "$lib/types/petal";
 
 /**
  * Vision providers with automatic fallback cascade
- * Primary: OpenRouter (external API, reliable)
- * Fallback: Cloudflare Workers AI (same infrastructure, ZDR inherent)
+ * Primary: OpenRouter (Claude Haiku 5.5, cheap and fast, no reasoning tokens)
+ * Fallback: OpenRouter (Gemma 4 26B, cheapest strong vision model)
+ * Fallback: Cloudflare Workers AI (Llama 4 Scout, same infrastructure, ZDR inherent)
  * Tertiary: Together.ai (external API, dead-last fallback)
  */
 export const PETAL_PROVIDERS: Record<string, PetalProviderConfig> = {
-	workers_ai_llama4: {
-		name: "Cloudflare Workers AI - Llama 4 Scout",
-		type: "workers_ai",
-		role: "primary",
-		zdr: true, // Data never leaves Cloudflare
-		csamScan: true, // Combined with Cloudflare CSAM Tool
-		model: "@cf/meta/llama-4-scout-17b-16e-instruct",
-		timeoutMs: 15000,
-	},
-	// Llama 3.2 Vision removed — CF requires model agreement acceptance
-	// which throws a 403 in the Worker runtime (AiError code 5016).
-	openrouter: {
-		name: "OpenRouter - Llama 4 Scout",
+	openrouter_haiku: {
+		name: "OpenRouter - Claude Haiku 5.5",
 		type: "external_api",
 		role: "primary",
 		zdr: false,
 		csamScan: false,
-		model: "meta-llama/llama-4-scout-17b-16e-instruct",
+		model: MODELS.CLAUDE_HAIKU_55,
 		timeoutMs: 20000,
 	},
+	openrouter_gemma: {
+		name: "OpenRouter - Gemma 4 26B",
+		type: "external_api",
+		role: "fallback",
+		zdr: false,
+		csamScan: false,
+		model: MODELS.GEMMA_4_26B,
+		timeoutMs: 20000,
+	},
+	workers_ai_llama4: {
+		name: "Cloudflare Workers AI - Llama 4 Scout",
+		type: "workers_ai",
+		role: "fallback",
+		zdr: true, // Data never leaves Cloudflare
+		csamScan: true, // Combined with Cloudflare CSAM Tool
+		model: MODELS.CF_LLAMA4_SCOUT,
+		timeoutMs: 15000,
+	},
+	// Llama 3.2 Vision removed — CF requires model agreement acceptance
+	// which throws a 403 in the Worker runtime (AiError code 5016).
 	together_ai: {
 		name: "Together.ai",
 		type: "external_api",
@@ -54,7 +66,12 @@ export const PETAL_PROVIDERS: Record<string, PetalProviderConfig> = {
 /**
  * Provider fallback cascade for content classification
  */
-export const PETAL_PROVIDER_CASCADE = ["openrouter", "workers_ai_llama4", "together_ai"] as const;
+export const PETAL_PROVIDER_CASCADE = [
+	"openrouter_haiku",
+	"openrouter_gemma",
+	"workers_ai_llama4",
+	"together_ai",
+] as const;
 
 // ============================================================================
 // Content Categories
@@ -270,13 +287,14 @@ export const PHOTODNA_CONFIG = {
 
 /**
  * Approximate cost per image (in USD)
- * Based on Workers AI pricing: $0.27/M input, $0.85/M output
+ * Based on OpenRouter Claude Haiku 5.5: $0.10/M input, $0.50/M output
+ * with roughly 1.5k input tokens (image + prompt) and 100 output tokens.
  */
 export const PETAL_PRICING = {
 	/** Cost per classification (approximate) */
-	perClassification: 0.0014,
+	perClassification: 0.0002,
 	/** Cost per sanity check (approximate) */
-	perSanityCheck: 0.0007,
+	perSanityCheck: 0.0002,
 	/** Free tier limit (neurons/day) */
 	freeTierLimit: 10_000,
 } as const;

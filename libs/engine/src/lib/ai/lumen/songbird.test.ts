@@ -31,7 +31,7 @@ function mockOpenRouterResponse(content: string, model?: string) {
 			completion_tokens: 10,
 			total_tokens: 110,
 		},
-		model: model ?? MODELS.DEEPSEEK_V3,
+		model: model ?? MODELS.DEEPSEEK_V4_1_FLASH,
 	};
 }
 
