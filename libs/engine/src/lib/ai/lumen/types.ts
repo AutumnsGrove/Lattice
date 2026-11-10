@@ -17,12 +17,12 @@
  */
 export type LumenTask =
 	| "moderation" // Content safety → GPT-oss Safeguard (OpenRouter)
-	| "generation" // Text generation → DeepSeek (OpenRouter)
-	| "summary" // Summarization → DeepSeek (OpenRouter)
-	| "embedding" // Vector embeddings → bge-base (CF Workers AI)
-	| "chat" // Conversational → DeepSeek (OpenRouter)
-	| "image" // Image analysis → Claude via OpenRouter
-	| "code" // Code tasks → Claude via OpenRouter
+	| "generation" // Text generation → DeepSeek V4.1 Flash (OpenRouter)
+	| "summary" // Summarization → DeepSeek V4.1 Flash (OpenRouter)
+	| "embedding" // Vector embeddings → Perplexity Embed (OpenRouter)
+	| "chat" // Conversational → DeepSeek V4.1 Flash (OpenRouter)
+	| "image" // Image analysis → Claude Haiku 5.5 via OpenRouter
+	| "code" // Code tasks → DeepSeek V4.1 Flash via OpenRouter
 	| "transcription"; // Voice-to-text → Whisper (CF Workers AI)
 
 // =============================================================================

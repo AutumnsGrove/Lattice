@@ -47,21 +47,22 @@ describe("Provider Configuration", () => {
 describe("Model Definitions", () => {
 	it("should have all required OpenRouter models", () => {
 		// Generation
-		expect(MODELS.DEEPSEEK_V3).toContain("deepseek");
-		expect(MODELS.KIMI_K2).toContain("kimi");
-		expect(MODELS.LLAMA_70B).toContain("llama");
+		expect(MODELS.DEEPSEEK_V4_1_FLASH).toContain("deepseek");
+		expect(MODELS.QWEN3_8_FLASH).toContain("qwen");
+		expect(MODELS.LLAMA_3_1_8B).toContain("llama");
+		expect(MODELS.KIMI_K2_7_CODE).toContain("kimi");
 
-		// Image/Code
-		expect(MODELS.CLAUDE_HAIKU).toContain("claude");
-		expect(MODELS.GEMINI_FLASH).toContain("gemini");
+		// Vision
+		expect(MODELS.CLAUDE_HAIKU_55).toContain("claude");
+		expect(MODELS.GEMMA_4_26B).toContain("gemma");
 
 		// Moderation
 		expect(MODELS.GPT_OSS_SAFEGUARD).toContain("gpt-oss-safeguard");
 		expect(MODELS.LLAMAGUARD_4).toContain("llama-guard");
 
 		// Embeddings
+		expect(MODELS.PPLX_EMBED_0_6B).toContain("pplx-embed");
 		expect(MODELS.BGE_M3).toContain("bge");
-		expect(MODELS.QWEN3_EMBED).toContain("qwen");
 	});
 
 	it("should have Cloudflare fallback models", () => {
@@ -72,8 +73,8 @@ describe("Model Definitions", () => {
 
 	it("should use proper model ID format", () => {
 		// OpenRouter models: provider/model-name
-		expect(MODELS.DEEPSEEK_V3).toMatch(/^[a-z-]+\/[a-z0-9.-]+$/i);
-		expect(MODELS.CLAUDE_HAIKU).toMatch(/^[a-z-]+\/[a-z0-9.-]+$/i);
+		expect(MODELS.DEEPSEEK_V4_1_FLASH).toMatch(/^[a-z-]+\/[a-z0-9.-]+$/i);
+		expect(MODELS.CLAUDE_HAIKU_55).toMatch(/^[a-z-]+\/[a-z0-9.-]+$/i);
 
 		// Cloudflare models: @cf/ or @hf/ prefix
 		expect(MODELS.CF_BGE_BASE).toMatch(/^@(cf|hf)\//);
@@ -144,10 +145,10 @@ describe("Task Registry", () => {
 
 describe("Task-Specific Configuration", () => {
 	describe("Generation Tasks", () => {
-		it("should use DeepSeek v3 as primary", () => {
-			expect(TASK_REGISTRY.generation.primaryModel).toBe(MODELS.DEEPSEEK_V3);
-			expect(TASK_REGISTRY.summary.primaryModel).toBe(MODELS.DEEPSEEK_V3);
-			expect(TASK_REGISTRY.chat.primaryModel).toBe(MODELS.DEEPSEEK_V3);
+		it("should use DeepSeek V4.1 Flash as primary", () => {
+			expect(TASK_REGISTRY.generation.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH);
+			expect(TASK_REGISTRY.summary.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH);
+			expect(TASK_REGISTRY.chat.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH);
 		});
 
 		it("should have consistent fallback chain", () => {
@@ -155,8 +156,8 @@ describe("Task-Specific Configuration", () => {
 			const sumFallbacks = TASK_REGISTRY.summary.fallbackChain;
 
 			// Generation and summary should have similar fallbacks
-			expect(genFallbacks.some((f) => f.model === MODELS.KIMI_K2)).toBe(true);
-			expect(sumFallbacks.some((f) => f.model === MODELS.KIMI_K2)).toBe(true);
+			expect(genFallbacks.some((f) => f.model === MODELS.QWEN3_8_FLASH)).toBe(true);
+			expect(sumFallbacks.some((f) => f.model === MODELS.QWEN3_8_FLASH)).toBe(true);
 		});
 	});
 
@@ -169,7 +170,7 @@ describe("Task-Specific Configuration", () => {
 			const fallbacks = TASK_REGISTRY.moderation.fallbackChain;
 
 			expect(fallbacks[0].model).toBe(MODELS.LLAMAGUARD_4);
-			expect(fallbacks[1].model).toBe(MODELS.DEEPSEEK_V3);
+			expect(fallbacks[1].model).toBe(MODELS.DEEPSEEK_V4_1_FLASH);
 		});
 
 		it("should use all-OpenRouter cascade", () => {
@@ -187,31 +188,32 @@ describe("Task-Specific Configuration", () => {
 	});
 
 	describe("Embedding Task", () => {
-		it("should use BGE-M3 as primary", () => {
-			expect(TASK_REGISTRY.embedding.primaryModel).toBe(MODELS.BGE_M3);
+		it("should use Perplexity Embed 0.6B as primary", () => {
+			expect(TASK_REGISTRY.embedding.primaryModel).toBe(MODELS.PPLX_EMBED_0_6B);
 		});
 
 		it("should have maxTokens of 0 (not applicable)", () => {
 			expect(TASK_REGISTRY.embedding.defaultMaxTokens).toBe(0);
 		});
 
-		it("should have Cloudflare BGE as last fallback", () => {
+		it("should keep the fallback dimension-compatible", () => {
 			const fallbacks = TASK_REGISTRY.embedding.fallbackChain;
 			const lastFallback = fallbacks[fallbacks.length - 1];
 
-			expect(lastFallback.provider).toBe("cloudflare-ai");
-			expect(lastFallback.model).toBe(MODELS.CF_BGE_BASE);
+			// BGE-M3 is also 1024-dim, so a fallback cannot change vector shape.
+			expect(lastFallback.provider).toBe("openrouter");
+			expect(lastFallback.model).toBe(MODELS.BGE_M3);
 		});
 	});
 
 	describe("Image Task", () => {
-		it("should use Gemini Flash as primary", () => {
-			expect(TASK_REGISTRY.image.primaryModel).toBe(MODELS.GEMINI_FLASH);
+		it("should use Claude Haiku 5.5 as primary", () => {
+			expect(TASK_REGISTRY.image.primaryModel).toBe(MODELS.CLAUDE_HAIKU_55);
 		});
 
-		it("should have Claude Haiku as fallback", () => {
+		it("should have Gemma 4 as fallback", () => {
 			const fallbacks = TASK_REGISTRY.image.fallbackChain;
-			expect(fallbacks.some((f) => f.model === MODELS.CLAUDE_HAIKU)).toBe(true);
+			expect(fallbacks.some((f) => f.model === MODELS.GEMMA_4_26B)).toBe(true);
 		});
 
 		it("should use low temperature for accurate descriptions", () => {
@@ -221,7 +223,7 @@ describe("Task-Specific Configuration", () => {
 
 	describe("Code Task", () => {
 		it("should use DeepSeek as primary", () => {
-			expect(TASK_REGISTRY.code.primaryModel).toBe(MODELS.DEEPSEEK_V3);
+			expect(TASK_REGISTRY.code.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH);
 		});
 
 		it("should use very low temperature for accuracy", () => {
@@ -250,20 +252,20 @@ describe("Model Costs", () => {
 	});
 
 	it("should have reasonable cost ratios", () => {
-		// DeepSeek should be cheaper than Claude
-		const deepseekCost = MODEL_COSTS[MODELS.DEEPSEEK_V3];
-		const claudeCost = MODEL_COSTS[MODELS.CLAUDE_HAIKU];
+		// The last-resort fallback should be the cheapest paid model
+		const deepseekCost = MODEL_COSTS[MODELS.DEEPSEEK_V4_1_FLASH];
+		const llamaCost = MODEL_COSTS[MODELS.LLAMA_3_1_8B];
 
-		expect(deepseekCost.input).toBeLessThan(claudeCost.input);
-		expect(deepseekCost.output).toBeLessThan(claudeCost.output);
+		expect(llamaCost.input).toBeLessThan(deepseekCost.input);
+		expect(llamaCost.output).toBeLessThan(deepseekCost.output);
 	});
 });
 
 describe("getModelCost", () => {
 	it("should return costs for known models", () => {
-		const cost = getModelCost(MODELS.DEEPSEEK_V3);
-		expect(cost.input).toBe(0.26);
-		expect(cost.output).toBe(0.38);
+		const cost = getModelCost(MODELS.DEEPSEEK_V4_1_FLASH);
+		expect(cost.input).toBe(0.3);
+		expect(cost.output).toBe(1.2);
 	});
 
 	it("should return default $1/M for unknown models", () => {
@@ -275,17 +277,17 @@ describe("getModelCost", () => {
 
 describe("calculateCost", () => {
 	it("should calculate cost correctly", () => {
-		// DeepSeek: $0.26/M input, $0.38/M output
-		const cost = calculateCost(MODELS.DEEPSEEK_V3, 1_000_000, 1_000_000);
+		// DeepSeek V4.1 Flash: $0.30/M input, $1.20/M output
+		const cost = calculateCost(MODELS.DEEPSEEK_V4_1_FLASH, 1_000_000, 1_000_000);
 
-		expect(cost).toBeCloseTo(0.26 + 0.38, 5);
+		expect(cost).toBeCloseTo(0.3 + 1.2, 5);
 	});
 
 	it("should handle small token counts", () => {
 		// 1000 tokens = 0.001M tokens
-		const cost = calculateCost(MODELS.DEEPSEEK_V3, 1000, 1000);
+		const cost = calculateCost(MODELS.DEEPSEEK_V4_1_FLASH, 1000, 1000);
 
-		expect(cost).toBeCloseTo((0.26 + 0.38) / 1000, 8);
+		expect(cost).toBeCloseTo((0.3 + 1.2) / 1000, 8);
 	});
 
 	it("should return 0 for Cloudflare models", () => {
@@ -302,7 +304,7 @@ describe("getTaskConfig", () => {
 	it("should return correct config for task", () => {
 		const config = getTaskConfig("generation");
 
-		expect(config.primaryModel).toBe(MODELS.DEEPSEEK_V3);
+		expect(config.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH);
 		expect(config.primaryProvider).toBe("openrouter");
 	});
 });
@@ -311,17 +313,18 @@ describe("getModelsForProvider", () => {
 	it("should return all OpenRouter models", () => {
 		const models = getModelsForProvider("openrouter");
 
-		expect(models).toContain(MODELS.DEEPSEEK_V3);
-		expect(models).toContain(MODELS.CLAUDE_HAIKU);
+		expect(models).toContain(MODELS.DEEPSEEK_V4_1_FLASH);
+		expect(models).toContain(MODELS.CLAUDE_HAIKU_55);
 		expect(models).toContain(MODELS.GPT_OSS_SAFEGUARD);
 		expect(models).toContain(MODELS.LLAMAGUARD_4);
-		expect(models).toContain(MODELS.BGE_M3);
+		expect(models).toContain(MODELS.PPLX_EMBED_0_6B);
 	});
 
 	it("should return Cloudflare models", () => {
 		const models = getModelsForProvider("cloudflare-ai");
 
-		expect(models).toContain(MODELS.CF_BGE_BASE);
+		expect(models).toContain(MODELS.CF_LLAMA4_SCOUT);
+		expect(models).toContain(MODELS.CF_WHISPER_TURBO);
 	});
 
 	it("should deduplicate models", () => {

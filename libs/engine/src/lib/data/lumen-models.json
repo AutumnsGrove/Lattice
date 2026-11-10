@@ -1,49 +1,58 @@
 {
   "models": {
-    "DEEPSEEK_V3": {
-      "id": "deepseek/deepseek-v3.2",
-      "name": "DeepSeek V3.2",
+    "DEEPSEEK_V4_1_FLASH": {
+      "id": "deepseek/deepseek-v4.1-flash",
+      "name": "DeepSeek V4.1 Flash",
       "category": "generation",
       "provider": "openrouter",
-      "cost": { "input": 0.26, "output": 0.38 },
+      "cost": { "input": 0.30, "output": 1.20 },
       "quality": "highest",
       "speed": "fast"
     },
-    "KIMI_K2_5": {
-      "id": "moonshotai/kimi-k2.5",
-      "name": "Kimi K2.5",
+    "QWEN3_8_FLASH": {
+      "id": "qwen/qwen3.8-flash",
+      "name": "Qwen3.8 Flash",
       "category": "generation",
       "provider": "openrouter",
-      "cost": { "input": 0.39, "output": 1.90 },
-      "quality": "highest",
-      "speed": "fast"
-    },
-    "LLAMA_70B": {
-      "id": "meta-llama/llama-3.3-70b-instruct",
-      "name": "Llama 3.3 70B",
-      "category": "generation",
-      "provider": "openrouter",
-      "cost": { "input": 0.10, "output": 0.32 },
+      "cost": { "input": 0.15, "output": 0.47 },
       "quality": "high",
-      "speed": "medium"
-    },
-    "CLAUDE_HAIKU": {
-      "id": "anthropic/claude-haiku-4.5",
-      "name": "Claude Haiku 4.5",
-      "category": "vision",
-      "provider": "openrouter",
-      "cost": { "input": 1.00, "output": 5.00 },
-      "quality": "highest",
       "speed": "fast"
     },
-    "GEMINI_FLASH": {
-      "id": "google/gemini-3-flash-preview",
-      "name": "Gemini 3 Flash",
-      "category": "vision",
+    "LLAMA_3_1_8B": {
+      "id": "meta-llama/llama-3.1-8b-instruct",
+      "name": "Llama 3.1 8B",
+      "category": "generation",
       "provider": "openrouter",
-      "cost": { "input": 0.15, "output": 0.60 },
-      "quality": "high",
+      "cost": { "input": 0.02, "output": 0.04 },
+      "quality": "good",
       "speed": "fastest"
+    },
+    "KIMI_K2_7_CODE": {
+      "id": "moonshotai/kimi-k2.7-code",
+      "name": "Kimi K2.7 Code",
+      "category": "generation",
+      "provider": "openrouter",
+      "cost": { "input": 0.60, "output": 3.50 },
+      "quality": "high",
+      "speed": "fast"
+    },
+    "CLAUDE_HAIKU_55": {
+      "id": "anthropic/claude-haiku-5.5",
+      "name": "Claude Haiku 5.5",
+      "category": "vision",
+      "provider": "openrouter",
+      "cost": { "input": 0.10, "output": 0.50 },
+      "quality": "highest",
+      "speed": "fast"
+    },
+    "GEMMA_4_26B": {
+      "id": "google/gemma-4-26b-a4b-it",
+      "name": "Gemma 4 26B A4B",
+      "category": "vision",
+      "provider": "openrouter",
+      "cost": { "input": 0.08, "output": 0.10 },
+      "quality": "high",
+      "speed": "fast"
     },
     "GPT_OSS_SAFEGUARD": {
       "id": "openai/gpt-oss-safeguard-20b",
@@ -63,77 +72,23 @@
       "quality": "high",
       "speed": "fast"
     },
+    "PPLX_EMBED_0_6B": {
+      "id": "perplexity/pplx-embed-v1-0.6b",
+      "name": "Perplexity Embed V1 0.6B",
+      "category": "embedding",
+      "provider": "openrouter",
+      "cost": { "input": 0.004, "output": 0 },
+      "quality": "high",
+      "speed": "fastest"
+    },
     "BGE_M3": {
       "id": "baai/bge-m3",
       "name": "BGE-M3",
       "category": "embedding",
       "provider": "openrouter",
-      "cost": { "input": 0.02, "output": 0 },
-      "quality": "highest",
-      "speed": "fast"
-    },
-    "QWEN3_EMBED": {
-      "id": "qwen/qwen3-embedding-8b",
-      "name": "Qwen3 Embedding 8B",
-      "category": "embedding",
-      "provider": "openrouter",
       "cost": { "input": 0.01, "output": 0 },
-      "quality": "high",
-      "speed": "fast"
-    },
-    "TRINITY": {
-      "id": "arcee-ai/trinity-large-thinking",
-      "name": "Arcee Trinity Large",
-      "category": "tool-calling",
-      "provider": "openrouter",
-      "cost": { "input": 0.22, "output": 0.85 },
       "quality": "highest",
       "speed": "fast"
-    },
-    "MINIMAX_M2_7": {
-      "id": "minimax/minimax-m2.7",
-      "name": "MiniMax M2.7",
-      "category": "tool-calling",
-      "provider": "openrouter",
-      "cost": { "input": 0.30, "output": 1.20 },
-      "quality": "high",
-      "speed": "fast"
-    },
-    "GPT_OSS_120B": {
-      "id": "openai/gpt-oss-120b",
-      "name": "GPT-OSS 120B",
-      "category": "generation",
-      "provider": "openrouter",
-      "cost": { "input": 0.04, "output": 0.19 },
-      "quality": "high",
-      "speed": "fast"
-    },
-    "QWEN3_235B": {
-      "id": "qwen/qwen3-235b-a22b-2507",
-      "name": "Qwen3 235B",
-      "category": "generation",
-      "provider": "openrouter",
-      "cost": { "input": 0.07, "output": 0.46 },
-      "quality": "high",
-      "speed": "medium"
-    },
-    "GLM_5_1": {
-      "id": "z-ai/glm-5.1",
-      "name": "GLM 5.1",
-      "category": "generation",
-      "provider": "openrouter",
-      "cost": { "input": 0.40, "output": 1.50 },
-      "quality": "high",
-      "speed": "fast"
-    },
-    "LLAMA_4_MAVERICK": {
-      "id": "meta-llama/llama-4-maverick",
-      "name": "Llama 4 Maverick",
-      "category": "generation",
-      "provider": "openrouter",
-      "cost": { "input": 0.15, "output": 0.60 },
-      "quality": "high",
-      "speed": "medium"
     },
     "CF_SHIELDGEMMA": {
       "id": "@hf/google/shieldgemma-2b",
@@ -198,11 +153,5 @@
       "quality": "good",
       "speed": "fastest"
     }
-  },
-  "defaults": {
-    "generation": "DEEPSEEK_V3",
-    "timeline": "DEEPSEEK_V3",
-    "forage": "DEEPSEEK_V3",
-    "reverie": "TRINITY"
   }
 }

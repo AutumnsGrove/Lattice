@@ -221,7 +221,7 @@ export async function executeWithFallback(
 
 /**
  * Execute an embedding request with fallback chain
- * Tries OpenRouter first (BGE-M3), falls back to Cloudflare AI
+ * Tries OpenRouter first (Perplexity Embed 0.6B), falls back to BGE-M3.
  */
 export async function executeEmbedding(
 	input: string | string[],

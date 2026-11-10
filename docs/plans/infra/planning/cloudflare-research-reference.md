@@ -143,7 +143,7 @@ created: 2026-02-21
 |--------|--------|
 | **Location** | `libs/engine/src/lib/thorn/` |
 | **Integration** | Library, called via `waitUntil()` on post publish/edit |
-| **AI cascade** | GPT-oss Safeguard 20B → LlamaGuard 4 12B → DeepSeek V3.2 |
+| **AI cascade** | GPT-oss Safeguard 20B → LlamaGuard 4 12B → DeepSeek V4.1 Flash |
 | **Enforcement** | Graduated: allow → warn → flag_review → block |
 | **Sensitivity** | Per content type: blog_post (permissive) → comment (strict) |
 | **Thresholds** | 0.4 (allow below), 0.95 (block above) |

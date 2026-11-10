@@ -1,9 +1,9 @@
 /**
  * Petal Vision Client - Image Analysis with Provider Fallback
  *
- * Vision inference client for content moderation. Uses Cloudflare Workers AI
- * as primary provider (same infrastructure, ZDR inherent) with external
- * API fallback for resilience.
+ * Vision inference client for content moderation. Primary path is OpenRouter
+ * (Claude Haiku 5.5 → Gemma 4 26B), with Cloudflare Workers AI and
+ * Together.ai as fallbacks.
  *
  * @see docs/specs/petal-spec.md
  */
@@ -445,7 +445,7 @@ export async function callVisionModel(
 					continue; // Workers AI not available
 				}
 				response = await callWorkersAI(options.ai, config.model, request, config.timeoutMs);
-			} else if (config.type === "external_api" && providerKey === "openrouter") {
+			} else if (config.type === "external_api" && providerKey.startsWith("openrouter")) {
 				if (!options.openRouterApiKey) {
 					continue; // API key not available
 				}
