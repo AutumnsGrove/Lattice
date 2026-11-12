@@ -35,7 +35,9 @@
 		"lint:strict": "oxlint --deny-warnings && eslint .",
 		"lint:fix": "eslint . --fix",
 		"format": "prettier --write .",
-		"format:check": "prettier --check ."
+		"format:check": "prettier --check .",
+		"labels:check": "tsx scripts/sync-labels.ts --quiet",
+		"labels:sync": "tsx scripts/sync-labels.ts"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.0.0",
@@ -55,7 +57,8 @@
 		"svelte-eslint-parser": "^0.43.0",
 		"tsx": "^4.21.0",
 		"typescript-eslint": "^8.0.0",
-		"wrangler": "^4.126.0"
+		"wrangler": "^4.126.0",
+		"yaml": "^2.9.1"
 	},
 	"main": "./libs/engine/dist/index.js",
 	"types": "./libs/engine/dist/index.d.ts",
