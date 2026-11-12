@@ -163,6 +163,24 @@ jobs:
             ./tools/check-accent-colors.sh
           fi
 
+  # The label manifest is load-bearing: sync-labels.ts, the labeler workflow,
+  # and the issue templates all read it. A malformed entry fails here rather
+  # than silently becoming a label nobody can explain.
+  labels:
+    name: Label Manifest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup workspace
+        uses: ./.github/actions/grove-setup
+        with:
+          build-engine: "false"
+
+      - name: Validate .github/labels.yml
+        run: pnpm labels:check
+
   # Lint (always runs, fast)
   lint:
     name: Lint
@@ -254,7 +272,7 @@ jobs:
   ci-pass:
     name: CI Pass
     if: always()
-    needs: [detect, test, typecheck, barrel-exports, accent-colors, lint]
+    needs: [detect, test, typecheck, barrel-exports, accent-colors, labels, lint]
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -263,13 +281,14 @@ jobs:
         id: check
         run: |
           FAILED=""
-          for job in detect test typecheck barrel-exports accent-colors lint; do
+          for job in detect test typecheck barrel-exports accent-colors labels lint; do
             case "$job" in
               detect)        RESULT="${{ needs.detect.result }}" ;;
               test)          RESULT="${{ needs.test.result }}" ;;
               typecheck)     RESULT="${{ needs.typecheck.result }}" ;;
               barrel-exports) RESULT="${{ needs.barrel-exports.result }}" ;;
               accent-colors) RESULT="${{ needs.accent-colors.result }}" ;;
+              labels)        RESULT="${{ needs.labels.result }}" ;;
               lint)          RESULT="${{ needs.lint.result }}" ;;
             esac
             echo "$job: $RESULT"
