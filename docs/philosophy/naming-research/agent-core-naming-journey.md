@@ -339,3 +339,69 @@ Plus: soft sounds (l, m, n, v, vowels), short, spelled the way it sounds, a bein
 - [ ] Say them aloud: *"Ask Vesper." "Ask Glim." "Ask Ember." "Ask Lar."* Which one feels like it lives in the room?
 - [ ] Is "churchy" a dealbreaker for Vesper, or does the evening-star reading carry it?
 - [ ] Does the astral family (Nova, Polaris, Vesper) matter, or is Grove-only the point?
+
+---
+
+# Fourth Walk: An Animal, Or An Entity
+
+*(2026-11-12. "Vesper doesn't do it for me. Vesper is a no. Ember is alright, maybe it's ok. What if it was something like an animal or an entity?")*
+
+**Struck:** Vesper. **Kept on the table:** Ember (alright, maybe).
+
+## What The Grove Already Holds
+
+Worth knowing before choosing a creature:
+
+- **The skill animals are dev-time workers, each with one niche** (Bloodhound explores, Raccoon audits, Beaver tests…). Taken: bloodhound, elephant, beaver, raccoon, bee, badger, owl, fox, deer, panther, eagle, spider, cat, chameleon, crane, crow, frog, goose, groundhog, hawk, hummingbird, lynx, mole, osprey, rabbit, raven, robin, squirrel, starling, swan, turtle, vulture, wren, firefly.
+- **Birds are reserved** for the prompt-injection defense (Songbird, Canary, Kestrel, Robin). An earlier journey ruled it outright.
+- **The Druid is "not an animal"**: the keeper who walks among them. A general-purpose runtime agent isn't a single-niche skill, so it may sit better as an *entity* than as one more animal in that forest. (A consideration, not a rule.)
+- **The Reverie Ghibli suite has already claimed `Kodama` and `SootSprites`** as planned components (`docs/plans/features/planning/reverie-components-suite.md`). Kodama was my strongest entity candidate and it's an in-Grove collision. Out.
+- **Hedgehog is already a Prism creature asset** (with Fox, Owl, Deer, Rabbit, Squirrel, Bear, Butterfly, Firefly, Dragonfly, Hummingbird), so art for it exists.
+
+## Candidates
+
+### Animals
+
+**Dormouse**
+- Asleep in the teapot at the Mad Tea Party. A tiny forest rodent that **hibernates**; nocturnal.
+- Fits the scene (tea shop, small, nocturnal) *and* the architecture: hibernation is park-and-wake. A run sleeps for free until an alarm or an answer rouses it, and Durable Objects literally hibernate.
+- Catches: a mouthful, and it names the resting more than the working. In Carroll the Dormouse is perpetually half asleep, which is funny and a slightly odd mascot for something you trust to work.
+- *"Ask Dormouse." "Dormouse sleeps in the teapot until you need it."*
+
+**Otter**
+- **Uses tools** (sea otters crack shells with a favorite stone, and hold hands asleep so they don't drift apart). An agent is a tool-using animal; this is the most exact functional metaphor in the whole list. Soft, short, spelled as said.
+- Catches: considered twice before (growth funnel, brand consistency) and set aside as "too playful", though both notes remarked that it uses tools. Not nocturnal, and not the tea shop.
+- *"Ask Otter." "Otter found the way and brought something back."*
+
+**Hedgehog**
+- Nocturnal, small, soft-bellied. Mrs. Tiggy-Winkle is Potter's hedgehog who **washes everyone's things overnight and returns them neatly**: *in the morning the cups are washed.* Already a Prism creature.
+- Catches: "Hedgehog" is a mouthful, with the d-g-h cluster. A nickname (Tiggy) is twee. Previously weighed (as the emoji) for security hardening and set aside as prickly.
+
+**Hare**
+- The moon hare; hares are a classic British witch's familiar. Crepuscular, soft, short.
+- Catches: sounds like *hair*; near-sibling of the Rabbit skill.
+
+### Entities
+
+**Hob** *(resurrected: I struck it only for outside crowding, which no longer applies)*
+- The household spirit who tends the hearth and does the chores at night. Short, soft vowel, spelled as said.
+- Catches: folklore rather than forest; three letters, easy to lose in prose; a little blunt.
+- *"Ask Hob." "Hob did the cups."*
+
+**Salamander**
+- The fire spirit that lives *in the hearth*; also a small amphibian. Ember with a body: Nova's fire-family, as a creature.
+- Catches: long. Soft consonants (l, m, n) but seven syllables of hearth-spirit for a name you type daily.
+
+### Still On The Table
+
+**Ember**, if the Amber rhyme doesn't bother. The banked coal is still the best image for durability.
+
+## Leaning (Fourth Walk)
+
+**Dormouse**, on fit: it is the only candidate that matches both line 216 *and* the architecture. **Otter** if function should win over scene. **Hob** if it should be an entity beside the Druid rather than another animal. Not decided.
+
+## Open (Fourth Walk)
+
+- [ ] Animal in the forest, or an entity beside the Druid?
+- [ ] Is *Dormouse* soft enough in the mouth, or does the "-mouse" tail trip it?
+- [ ] Say them: *"Ask Dormouse." "Ask Otter." "Ask Hob."*
