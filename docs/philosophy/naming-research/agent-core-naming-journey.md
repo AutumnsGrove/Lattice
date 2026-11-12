@@ -7,6 +7,8 @@ lastUpdated: '2026-11-12'
 
 > *Finding the name for the small thing that goes out into the grove, does the work, and comes back.*
 
+**Status: decided. The name is Lyra (2026-11-12).** See the Sixth Walk at the bottom for the decision, the entry, and what's left to do.
+
 Context: [#1605](https://github.com/AutumnsGrove/Lattice/issues/1605) — a portable TypeScript agent core, Workers-first, Node second. Lives in its own repo. Modeled on the shape of Nova (Go) and the ideas in Pi. Consumes Lumen for inference. Wire-compatible (a subset) with Nova's JSONL protocol.
 
 ---
@@ -489,3 +491,70 @@ Mapped from the repos, so the new name doesn't step on any of it:
 - [ ] Does *"Reverie, powered by Vega"* feel as right as *"powered by Nova"*?
 - [ ] Is Vega's double pronunciation a problem?
 - [ ] Is Lyra's softness worth more than Vega's story?
+
+---
+
+# Sixth Walk: Lyra
+
+*(2026-11-12. After the sentence test: "This one feels really right. All of these sentences feel really good… a small constellation that does the work while the grove sleeps… Lyra parked the run and is waiting on approval. It could even be used as the name of the agent. I feel like having that slight personhood honestly fits for something that is an execution layer.")*
+
+## Decision
+
+**The name is Lyra.** It is the name of the core and the name of the agent, the way Nova is both. The slight personhood is intentional: Lyra is an execution layer, and "Lyra parked the run and is waiting on approval" is the sentence it should be able to say.
+
+How it was reached, in short: a witch's familiar was the vibe, but Familiar was harsh in the mouth and hard to spell, and the creature names failed the real test, which is *"Reverie, powered by ___."* The astral family (Nova, Polaris) was the way back. Vega and Lyra were the last two, and Lyra won on sound and warmth.
+
+## Why It Fits
+
+- **Powered by.** "Reverie, powered by Lyra" has the cadence of "powered by Nova", with a softer landing.
+- **Soft and short.** Four letters, spelled the way it sounds. Standard pronunciation is LIE-ruh.
+- **Beside Moss, Lumen, Mycelium, Warden.** "Lyra asks Lumen for every thought." "Lyra reaches Grove's tools through Mycelium." "Lyra never holds a key. Warden does." And, when memory returns, "Lyra remembers through Moss."
+- **A sibling of Nova.** Nova runs in the terminal. Lyra runs in the grove.
+- **Unclaimed.** Nothing in Grove, Nova, Polaris (beyond a decorative constellation in its night-sky background), Meridian, Solarium, or the repo list uses it.
+
+**Known catches, accepted:** two ways to say it (LIE-ruh / LEER-uh), a y in the spelling, and Google's audio codec of the same name. A harp does not describe an agent loop, and a star never described a harness either.
+
+## The Entry
+
+*(Written for `docs/philosophy/grove-naming.md` when it earns a row. Draft; see "Left To Do".)*
+
+### Lyra
+
+**The Constellation That Does the Work** · _Agent core_
+**Package:** `@autumnsgrove/lyra` (proposed)
+**Standard:** Agent Core
+**Waystone:** The layer that does Grove's background work. It takes a job, calls tools and models, and brings back a result, even if you were asleep.
+
+Lyra is a small constellation, a harp in the summer sky. Its brightest star, Vega, was the north star once and will be again. It's easy to find if you look up and easy to miss if you don't.
+
+In Grove, Lyra is the layer that does the work. Give it a job, a set of tools, and limits on how far it may go, and it runs the loop: ask Lumen, call a tool, read what came back, ask again. It stops when the job is done or the budget runs out. When it needs a Wanderer's answer, it parks the run and waits without spending anything, then picks up where it left off. Memory will come from Moss.
+
+Lyra should feel like a small, steady presence. Something you can hand a task to and stop thinking about.
+
+_A small constellation that does the work while the grove sleeps._
+
+## Working Vocabulary (Draft)
+
+Terms that came up naturally in the sentence test. Not final, and not a spec.
+
+- **Run**: one job, from start to finish.
+- **Park**: stop a run while it waits for an approval, at no cost.
+- **Wake**: resume a parked run once the answer arrives.
+- **Budget**: the limits on steps, tokens, time, and cost.
+- **Transcript**: the record of a run.
+
+## Parked Idea
+
+**Vega in Lyra.** If the family grows, Vega could be a part of Lyra (a core inside a larger gateway family), since Vega is the brightest star in the constellation. Nothing to decide now.
+
+## Left To Do
+
+Decisions for Autumn, not yet done:
+
+- [ ] Add a row to `docs/philosophy/grove-naming.md` and the `Internal Names` table (suggested internal name: `GroveLyra`), then regenerate the GroveTerm manifest.
+- [ ] Reserve `lyra` so no Wanderer can claim `lyra.grove.place` (Loam's blocklist, plus the router and username check).
+- [ ] Create the repository and the `@autumnsgrove/lyra` package.
+- [ ] Update #1605 (new name, and the corrected protocol frames from the research).
+- [ ] Decide whether the entry above goes through `museum-documentation` for a fuller treatment later.
+
+The router, username, and manifest steps only matter if Lyra gets a Grove-facing surface. As a library in its own repository, only the naming doc row and the reservation are likely worth doing.
