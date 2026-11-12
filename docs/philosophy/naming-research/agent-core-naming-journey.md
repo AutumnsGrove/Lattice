@@ -405,3 +405,87 @@ Worth knowing before choosing a creature:
 - [ ] Animal in the forest, or an entity beside the Druid?
 - [ ] Is *Dormouse* soft enough in the mouth, or does the "-mouse" tail trip it?
 - [ ] Say them: *"Ask Dormouse." "Ask Otter." "Ask Hob."*
+
+---
+
+# Fifth Walk: Powered By
+
+*(2026-11-12. "Saying powered by Otter feels really silly. Maybe go a little outside our domain of comfort: lean into my other repos with astral names. It's going to be a sibling of Nova anyway. Powered by Nova just feels cool. I'm not going to be asking that agent directly. It's a thing powered by this.")*
+
+**The test changes again, and this one is better.** Not "Ask ___" but:
+
+> **"Reverie, powered by ___."** / **"Timeline, powered by ___."** (with a link to the repo, and it just works)
+
+That retires every creature and spirit name (Dormouse, Otter, Hob, Hedgehog, Hare, Salamander). They read as someone you talk to, not something you build on. The nature-spirit lane is closed; the astral lane is open.
+
+## The Astral Vocabulary Already In Use
+
+Mapped from the repos, so the new name doesn't step on any of it:
+
+| Where | Names in use |
+|---|---|
+| **Nova** | Nova. (D8 rejected for the harness: Aster, Canopy, Cirrus, Loom.) |
+| **Polaris** | Polaris, Atlas, Fields, **Constellation** (durable memory), Stars, Weaver, Shooting stars, **Pulsar** (scheduled routines), The Daily, **Oracle** (decision models), **Comet** (monthly retrospective), Trails, Prism, Ghost thread |
+| **Meridian** | Meridian |
+| **Solarium** | Solarium |
+| **her-go** | persona name **Mira** (the Telegram companion, in Meridian's homelab config) |
+| **Grove** | Aurora is already a sky asset; Moss is the agent-memory name that will return |
+
+**Struck on sight:** Pulsar, Comet, Atlas, Oracle, Weaver, Constellation, Stars (Polaris); Mira (her-go); Aurora (Grove sky asset).
+
+**Mira nearly won.** Nova is the "new star" (*stella nova*). Mira is the "wonderful star", the first variable star ever discovered, and **David Fabricius found it in 1596 and took it for a nova** before it faded. Same family, discovered by mistake as a nova, softest sound on the list. It's her-go's name, so it's gone.
+
+## Candidates
+
+### Vega
+
+- **Meaning:** the brightest star in Lyra, the harp. It was the **north pole star about 14,000 years ago and will be again in roughly 12,000–13,000** (Earth's axis wobbles). It is Polaris's once-and-future counterpart. NASA also notes that **Polaris and Vega are both variable stars**, and a nova is a sudden variable by definition: Nova, Polaris, Vega all brighten and dim. It helped define the zero point of the magnitude scale, the reference other stars are measured against. (Also Spanish for a fertile meadow.)
+- **Why it fits:** a sibling *of Polaris* as much as of Nova. Polaris is "the fixed point you triangulate against"; Vega held that job before and will again. Four letters like Nova, soft, spelled as said. *"Reverie, powered by Vega."* reads like *"powered by Nova."*
+- **Collisions:** none in Grove, Polaris, Meridian, Solarium, Nova, or your repo list.
+- **Catches:** two common pronunciations (VEE-guh / VAY-guh). Short names get lost in prose. Vega-Lite (the charting grammar) exists, though nothing in Grove uses it.
+
+### Lyra
+
+- **Meaning:** the constellation of the **harp**, the home of Vega. Softest sound on the list.
+- **Why it fits:** warm where Vega is crisp. *"Powered by Lyra."* Quiet nod to Lyra Belacqua, who has a daemon (a familiar) in *His Dark Materials*, since the familiar vibe was the starting point.
+- **Collisions:** appears once in Polaris, as one of the decorative constellations in the night-sky background (`nightSky/constellations.ts`). A decoration, not a feature name.
+- **Catches:** a very popular name generally. A harp says music, which fits audio and voice better than an agent loop.
+
+### Nebula
+
+- **Meaning:** a cloud of gas and dust where **stars are born**.
+- **Why it fits:** *"Powered by Nebula"* sounds great, and a core that agents (stars) form inside has a natural story. Soft, spelled as said.
+- **Collisions:** none as a name (Polaris uses the word only in test data: "Picture of the Day: A nebula").
+- **Catches:** diffuse. A cloud is the opposite of a bounded loop.
+
+### Orbit
+
+- **Meaning:** the loop *is* an orbit: model, tools, results, repeat, held in by gravity (budgets, permissions), always returning.
+- **Why it fits:** the most literal map of what the code does. *"Powered by Orbit."*
+- **Catches:** a plain, common word; Polaris has 15 mentions I did not open. Less of a *name* than a description.
+
+### Aster
+
+- **Meaning:** Greek for "star"; also a wildflower that blooms in autumn.
+- **Why it fits:** it was on **Nova's own D8 shortlist** (rejected for Nova), so it's a sibling from the same hat.
+- **Catches:** sounds like **Aspen**, the domain layer in the Grove stack. Choosing from a rejected list may feel second-best.
+
+### Set Down
+
+| Name | Why not |
+|---|---|
+| **Astra** | "To the stars", but generic, and a clone of every other name. |
+| **Altair** | Soft and in the same Summer Triangle as Vega, but nothing says *why*. |
+| **Quasar** | Literally "powered by" (an accretion-powered galactic core), but the hard Q and too intense. |
+| **Zenith / Equinox** | Hard z-th and x sounds. |
+| **Solstice** | Ten Grove mentions in the seasonal system. |
+
+## Leaning (Fifth Walk)
+
+**Vega.** The only candidate with a *relationship* to the existing family: Polaris's once-and-future counterpart, a variable star like Nova and Polaris, four soft letters, nothing colliding anywhere. **Lyra** is the warmer alternative. If it works out, a structure falls out naturally: **Vega in Lyra**, a core inside a larger family, which suits a core that is also a gateway.
+
+## Open (Fifth Walk)
+
+- [ ] Does *"Reverie, powered by Vega"* feel as right as *"powered by Nova"*?
+- [ ] Is Vega's double pronunciation a problem?
+- [ ] Is Lyra's softness worth more than Vega's story?
