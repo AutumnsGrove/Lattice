@@ -133,8 +133,8 @@ jobs:
         env:
           OPENCODE_GO_API_KEY: ${{ secrets.OPENCODE_GO_API_KEY }}
           LABEL_MODEL: ${{ vars.LABEL_MODEL || 'glm-5.3-flash' }}
-          ISSUE_TITLE: ${{ github.event.issue.title || '' }}
           ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
 
@@ -220,6 +220,7 @@ jobs:
       - name: Apply the labels it can justify
         env:
           ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
 
