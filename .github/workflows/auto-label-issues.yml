@@ -217,8 +217,6 @@ jobs:
                  cat "$RUNNER_TEMP/pi.err"
                  exit 1; }
 
-          echo "Reply: $(cat "$RUNNER_TEMP/reply.json")"
-
           # Models like to wrap JSON in a fence even when told not to.
           sed -e '/^```/d' "$RUNNER_TEMP/reply.txt" \
             | jq -c 'if type == "object" then . else error("not an object") end' \
@@ -226,6 +224,8 @@ jobs:
             || { echo "::error::pi did not return usable JSON:"
                  cat "$RUNNER_TEMP/reply.txt"
                  exit 1; }
+
+          echo "Reply: $(cat "$RUNNER_TEMP/reply.json")"
 
       # The model proposes; this decides. A prompt injection in an issue body
       # can at most propose a name that is not in the vocabulary, and that name
