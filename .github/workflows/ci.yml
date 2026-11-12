@@ -163,11 +163,12 @@ jobs:
             ./tools/check-accent-colors.sh
           fi
 
-  # The label manifest is load-bearing: sync-labels.ts, the labeler workflow,
-  # and the issue templates all read it. A malformed entry fails here rather
-  # than silently becoming a label nobody can explain.
+  # The label manifest is load-bearing: tools/labels/sync.ts, the labeler
+  # workflow and the issue templates all read it. A malformed entry fails here
+  # rather than silently becoming a label nobody can explain. The pure logic
+  # behind link-pr-to-issue.yml is tested here too.
   labels:
-    name: Label Manifest
+    name: Repo Tooling
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -180,6 +181,9 @@ jobs:
 
       - name: Validate .github/labels.yml
         run: pnpm labels:check
+
+      - name: Test the PR link parser
+        run: node --test .github/scripts/issue-refs.test.mjs
 
   # Lint (always runs, fast)
   lint:
