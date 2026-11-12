@@ -21,6 +21,7 @@ const MANIFEST = join(ROOT, ".github/labels.yml");
 
 const GROUPS = [
 	"type",
+	"concern",
 	"component",
 	"pattern",
 	"size",
@@ -139,7 +140,7 @@ function validate(m: Manifest): void {
 	const autoGroups = m.policy?.auto_groups ?? [];
 	for (const g of autoGroups) {
 		if (!GROUPS.includes(g)) errors.push(`policy.auto_groups: "${g}" is not a group`);
-		if (["priority", "readiness", "size", "machine"].includes(g)) {
+		if (["priority", "readiness", "size", "machine", "concern"].includes(g)) {
 			errors.push(`policy.auto_groups: "${g}" is a human judgement — a machine must not guess it`);
 		}
 		if (!declaredGroups.has(g)) errors.push(`policy.auto_groups: "${g}" has no labels`);

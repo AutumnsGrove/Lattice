@@ -67,12 +67,6 @@ labels:
     description: Docs, guides, help center, READMEs
     when: The deliverable is prose, not code. Code changes that also update docs are not this.
 
-  - name: security
-    group: type
-    color: "E11D48"
-    description: A security concern, hole, or hardening step
-    when: The issue names an attacker, a credential, or data that must not leak.
-
   - name: tech-debt
     group: type
     color: "6B7280"
@@ -105,6 +99,19 @@ labels:
       The issue ends with a choice being recorded ("should we…", "audit and
       decide…"). If you cannot ship anything until the question is answered,
       it is a decision. Use `tech-debt` for the work that follows it.
+
+  # ── Concern: a lens, not a kind of work (any number) ───────────────────────
+  # Security is a property an issue has, not a category of deliverable. Keeping
+  # it in `type` forced a false choice — six issues were "violating" the
+  # one-type rule by being both a security matter and an enhancement. It sits
+  # here because it composes with any type, and machines do not apply it.
+  - name: security
+    group: concern
+    color: "E11D48"
+    description: A security concern, hole, or hardening step
+    when: >-
+      The issue names an attacker, a credential, or data that must not leak.
+      Applies alongside any type — never instead of one.
 
   # ── Readiness: is this actionable now? (one, or none) ──────────────────────
   # These are the only three ways to say "not now". `status:backlog`,
