@@ -35,7 +35,9 @@
 		"lint:strict": "oxlint --deny-warnings && eslint .",
 		"lint:fix": "eslint . --fix",
 		"format": "prettier --write .",
-		"format:check": "prettier --check ."
+		"format:check": "prettier --check .",
+		"labels:check": "pnpm --filter @grove/labels run check",
+		"labels:sync": "pnpm --filter @grove/labels run sync"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.0.0",

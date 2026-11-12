@@ -1,0 +1,517 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Grove issue labels — the single source of truth.
+#
+# Everything else reads this file. Nothing defines a label name twice.
+#
+#   tools/labels/sync.ts         pushes this file to GitHub (create/update/prune)
+#   .github/workflows/auto-label-issues.yml  gives it to the labeler as vocabulary
+#   .github/ISSUE_TEMPLATE/*.md   mirrors the component list below
+#   tools/grove-wrap-go           `gw issue --label` passes these names to GitHub
+#
+# To add, retire, or reword a label: edit this file, then `pnpm labels:sync`.
+# To bring a dormant product back: move its entry up into `labels`, add a path.
+#
+# Labels are data. The runner is code. The runner never needs editing to add a
+# label, and a label can never exist on GitHub without an entry here.
+# ─────────────────────────────────────────────────────────────────────────────
+
+---
+version: 1
+
+# Read by the labeler before it picks anything.
+policy:
+  # At most one label per group. Fewer is fine — an unlabelled issue beats a
+  # wrong label, and "I don't know" is always an acceptable answer.
+  max_per_group:
+    type: 1
+    component: 1
+    pattern: 1
+    size: 1
+    readiness: 1
+    priority: 1
+
+  # Only these groups may be assigned by a machine. Priority, readiness, and
+  # size are deliberate human judgements — automation guesses at them badly.
+  auto_groups: [type, component, pattern]
+
+  # A component must be named in the title, or the change must land in its
+  # `path`. Body text alone is never enough — that is how #1626 got `ivy`.
+  component_needs_title_or_path: true
+
+  # Assign nothing rather than everything.
+  unlabelled_ok: true
+
+labels:
+  # ── Type: what kind of work is this? (exactly one) ─────────────────────────
+  - name: bug
+    group: type
+    color: "d73a4a"
+    description: Something is broken or behaves differently than documented
+    when: It worked before and now it does not, or it never worked and the docs say it should.
+
+  - name: feature
+    group: type
+    color: "1D76DB"
+    description: A capability that does not exist yet
+    when: New surface. Someone can do something afterwards that they could not do before.
+
+  - name: enhancement
+    group: type
+    color: "a2eeef"
+    description: Making something that exists better
+    when: The thing exists and works; this improves it. If it needs new code paths, it is a feature.
+
+  - name: documentation
+    group: type
+    color: "0075ca"
+    description: Docs, guides, help center, READMEs
+    when: The deliverable is prose, not code. Code changes that also update docs are not this.
+
+  - name: security
+    group: type
+    color: "E11D48"
+    description: A security concern, hole, or hardening step
+    when: The issue names an attacker, a credential, or data that must not leak.
+
+  - name: tech-debt
+    group: type
+    color: "6B7280"
+    description: Dead code, duplication, drift — reduction of something we owe
+    when: Nothing new ships. The value is that the codebase gets smaller or truer.
+
+  - name: compliance
+    group: type
+    color: "7C3AED"
+    description: An audit finding — code that does not follow our own conventions
+    when: A scan or review found a violation. Pair with the fix issue, do not use as the fix.
+
+  - name: engine-first
+    group: type
+    color: "4F46E5"
+    description: Consolidate duplicated logic into a shared engine utility
+    when: The same behaviour exists in two or more places and should exist once.
+
+  - name: developer-experience
+    group: type
+    color: "8B5CF6"
+    description: DX — CLI, local workflows, build and test ergonomics
+    when: The person affected is us, at a keyboard, before a deploy.
+
+  - name: decision
+    group: type
+    color: "C5DEF5"
+    description: The deliverable is a written decision, not code — options in, one out
+    when: >-
+      The issue ends with a choice being recorded ("should we…", "audit and
+      decide…"). If you cannot ship anything until the question is answered,
+      it is a decision. Use `tech-debt` for the work that follows it.
+
+  # ── Readiness: is this actionable now? (one, or none) ──────────────────────
+  # These are the only three ways to say "not now". `status:backlog`,
+  # `stale`, and `someday-but-icebox-really` are retired.
+  - name: someday
+    group: readiness
+    color: "D4C5F9"
+    description: Aspirational — we may never do this. Not blocked, just not yet.
+    when: Nobody asked for it urgently and nothing depends on it. Revisit at planning, not before.
+
+  - name: icebox
+    group: readiness
+    color: "9CA3AF"
+    description: Parked until a named dependency lands — say which, in the issue
+    when: You can finish the sentence "we cannot start until ___". If you cannot, it is `someday`.
+
+  - name: not-possible-yet
+    group: readiness
+    color: "A16207"
+    description: Blocked outside our control — revisit if circumstances change
+    when: The blocker is a platform limit, a provider, or a legal constraint. Not our backlog.
+
+  # ── Priority: how soon? (one, or none) ─────────────────────────────────────
+  # Never applied by a machine. An issue with no priority is not low priority;
+  # it is unscheduled.
+  - name: priority-critical
+    group: priority
+    color: "b60205"
+    description: Live product down, or a security hole that is being exploited
+    when: Stop the other thing you are doing.
+
+  - name: priority-high
+    group: priority
+    color: "d93f0b"
+    description: Do this cycle — it unblocks or it hurts
+    when: It is in the next handful of things you will actually pick up.
+
+  - name: priority-low
+    group: priority
+    color: "fef2c0"
+    description: Real, and deliberately deferred behind everything above it
+    when: Fine to leave open for months. Filling this is honesty, not insult.
+
+  # ── Size: how big is the change? (one, when you know) ──────────────────────
+  # Neutral colours on purpose — size should not compete for attention.
+  - name: size/XS
+    group: size
+    color: "ededed"
+    description: One file, one line, no review needed
+    when: Under an hour including tests.
+
+  - name: size/S
+    group: size
+    color: "ededed"
+    description: One file or a handful, one sitting
+    when: Half a day.
+
+  - name: size/M
+    group: size
+    color: "ededed"
+    description: Several files, one subsystem, needs a test pass
+    when: A day or two.
+
+  - name: size/L
+    group: size
+    color: "ededed"
+    description: A subsystem, touches callers, wants a plan
+    when: Most of a week.
+
+  - name: size/XL
+    group: size
+    color: "ededed"
+    description: Cross-cutting — or one sitting would be reckless
+    when: More than a week. Split it if you can.
+
+  - name: size/XXL
+    group: size
+    color: "ededed"
+    description: An umbrella. It should have sub-issues.
+    when: If it has no children yet, file them.
+
+  # ── Components: where does the change land? (max one from automation) ──────
+  # `path` is the evidence. A component label with no path is a guess.
+  - name: lattice
+    group: component
+    color: "6366F1"
+    description: Framework, monorepo, and the shared engine SDK
+    path: libs/, workers/, tsconfig.base.json
+    when: The change is in shared infrastructure every product imports.
+
+  - name: aspen
+    group: component
+    color: "F59E0B"
+    description: Tenant sites — the public-facing grove pages
+    path: apps/aspen/
+    when: A tenant can see or feel the difference.
+
+  - name: arbor
+    group: component
+    color: "795548"
+    description: Backend API and admin services
+    path: services/grove-router/, apps/login/, workers/onboarding/
+    when: The change is in an API surface, a route, or admin tooling.
+
+  - name: landing
+    group: component
+    color: "7DD3FC"
+    description: Landing site — marketing, knowledge base, Forest page
+    path: apps/landing/
+    when: The change is at grove.place, in the KB, or in the public copy.
+
+  - name: heartwood
+    group: component
+    color: "9A3412"
+    description: Authentication and identity — sessions, passkeys, 2FA
+    path: services/heartwood/, apps/login/
+    when: The change touches who you are, how you prove it, or how long you stay.
+
+  - name: lumen
+    group: component
+    color: "EAB308"
+    description: AI assistant layer — gateway, routing, model registry
+    path: workers/lumen/
+    when: The change is to model selection, inference, or AI feature plumbing.
+
+  - name: petal
+    group: component
+    color: "FFB7C5"
+    description: Content moderation and safety — PhotoDNA, CSAM detection
+    path: libs/, workers/
+    when: The change decides what content is allowed to stay.
+
+  - name: amber
+    group: component
+    color: "D97706"
+    description: Media pipeline and CDN — images, storage, R2
+    path: services/amber/, apps/amber/
+    when: The change is to how a file is uploaded, transformed, or served.
+
+  - name: plant
+    group: component
+    color: "16A34A"
+    description: Pricing, billing, signups, and the storefront
+    path: apps/plant/, apps/billing/, services/billing-api/
+    when: The change is to money, plans, or the path that leads to a paid account.
+
+  - name: curio
+    group: component
+    color: "B45309"
+    description: Museum exhibits and content display panels
+    path: apps/terrarium/, docs/museum/
+    when: The change is to an exhibit, a panel, or what a reader sees in one.
+
+  - name: patina
+    group: component
+    color: "0D9488"
+    description: Backups, cold storage, and restoration
+    path: workers/patina/
+    when: The change is to what we keep, or how we get it back.
+
+  - name: foliage
+    group: component
+    color: "4ADE80"
+    description: Theming engine and design tokens
+    path: libs/prism/
+    when: The change is to how a site looks, or to the tokens that decide it.
+
+  - name: mycelium
+    group: component
+    color: "7C3AED"
+    description: MCP servers and inter-service networking
+    path: tools/, libs/
+    when: The change is to how services or agents talk to each other.
+
+  - name: forests
+    group: component
+    color: "14532D"
+    description: Forest page and property showcase
+    path: apps/landing/
+    when: The change is specifically to the public Forest listing.
+
+  - name: vine
+    group: component
+    color: "4D7C0F"
+    description: Connections, links, and content relationships
+    path: libs/
+    when: The change is to how two pieces of content refer to each other.
+
+  - name: shade
+    group: component
+    color: "475569"
+    description: AI crawler and bot defense — the protection layer
+    path: services/grove-router/
+    when: The change is to what scrapers, bots, or crawlers are allowed to take.
+    # Note: this label used to claim "DevOps, CI/CD, and infrastructure" while
+    # the code used it for crawler defense. Infrastructure moved to `infra`.
+
+  - name: clearing
+    group: component
+    color: "0EA5E9"
+    description: Status page and platform health monitoring
+    path: apps/clearing/
+    when: The change is to what we tell people when something is down.
+
+  - name: vista
+    group: component
+    color: "6B8E23"
+    description: Infrastructure monitoring dashboard
+    path: workers/vista-collector/
+    when: The change is to what we see, not what users see.
+
+  - name: graft
+    group: component
+    color: "65A30D"
+    description: Feature flags and gradual rollout
+    path: libs/
+    when: The change is to how a feature is turned on, off, or grown.
+
+  - name: infra
+    group: component
+    color: "475569"
+    description: CI/CD, GitHub Actions, deploy runners, local tooling
+    path: .github/workflows/, tools/, scripts/
+    when: The change is to the machinery that ships code, not the code.
+
+  # ── Patterns: which reusable architecture does this touch? (one, or none) ──
+  # Each pattern has a document. If a label has no doc, it is a component, not
+  # a pattern.
+  - name: pattern:firefly
+    group: pattern
+    color: "FEF08A"
+    description: Ephemeral server infrastructure — ignite, illuminate, fade
+    doc: docs/patterns/firefly-pattern.md
+    when: The issue is about starting or stopping short-lived infrastructure.
+
+  - name: pattern:loom
+    group: pattern
+    color: "A78BFA"
+    description: Durable Object coordination layer
+    doc: docs/patterns/loom-durable-objects-pattern.md
+    when: The issue is about coordination, single-writer state, or DO design.
+
+  - name: pattern:prism
+    group: pattern
+    color: "DB2777"
+    description: Glassmorphism design system and seasonal theming
+    doc: docs/patterns/prism-pattern.md
+    when: The issue is about the look and its tokens — not about a specific page.
+
+  - name: pattern:sentinel
+    group: pattern
+    color: "3B82F6"
+    description: Load testing and scale validation
+    doc: docs/patterns/sentinel-pattern.md
+    when: The issue measures how much load something takes. Not ordinary E2E tests.
+
+  - name: pattern:songbird
+    group: pattern
+    color: "C2410C"
+    description: Prompt injection protection — canary, kestrel, robin
+    doc: docs/patterns/songbird-pattern.md
+    when: The issue is about untrusted input reaching a model or an agent.
+
+  - name: pattern:threshold
+    group: pattern
+    color: "581C87"
+    description: Rate limiting and abuse prevention
+    doc: docs/patterns/threshold-pattern.md
+    when: >-
+      The issue is about denying or shaping requests by rate, quota, or
+      reputation. Not every mention of a queue, limit, or count.
+
+  # ── Machine: applied by workflows. Never applied by hand. ──────────────────
+  # If you find yourself wanting one of these, the workflow is wrong, not you.
+  - name: deploy-failed
+    group: machine
+    color: "cd872e"
+    description: Applied by deploy workflows when a deploy fails
+    when: Machine only. See .github/workflows/_deploy-worker.yml
+
+  - name: in-progress
+    group: machine
+    color: "fbca04"
+    description: Applied when a linked PR opens
+    when: Machine only. See .github/workflows/link-pr-to-issue.yml
+
+  - name: completed
+    group: machine
+    color: "0E8A16"
+    description: "Applied when a linked PR merges — not trustworthy until #1623"
+    when: "Machine only. Ignores any bare #123 mention, which is the #1623 bug."
+
+  - name: ready
+    group: machine
+    color: "0E8A16"
+    description: Applied when a linked PR is ready for review
+    when: Machine only. See .github/workflows/link-pr-to-issue.yml
+
+  - name: maintenance
+    group: machine
+    color: "ededed"
+    description: Routine upkeep — dependencies, config, security headers
+    when: Machine only. See .github/workflows/security-txt-review.yml
+
+  - name: sast
+    group: machine
+    color: "0075ca"
+    description: Static analysis security finding
+    when: Machine only. See .github/workflows/semgrep.yml
+
+  - name: severity/critical
+    group: machine
+    color: "ff0000"
+    description: Critical severity security finding
+    when: Machine only, from the security scan.
+
+  - name: severity/high
+    group: machine
+    color: "ff7b00"
+    description: High severity security finding
+    when: Machine only, from the security scan.
+
+  - name: severity/medium
+    group: machine
+    color: "ffcc00"
+    description: Medium severity security finding
+    when: Machine only, from the security scan.
+
+  - name: severity/low
+    group: machine
+    color: "00cc00"
+    description: Low severity security finding
+    when: Machine only, from the security scan.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Dormant: kept here as prose, not as labels. Nothing above may be named here,
+# and nothing here exists on GitHub. To revive a product, move its entry into
+# `labels` above with a description, a `path`, and a `when`.
+# ─────────────────────────────────────────────────────────────────────────────
+dormant:
+  - name: meadow
+    state: removed
+    note: >-
+      Social features. Code junk-drawered, 15 KB articles still mention it
+      (see #1618). 30 historical issues carried this label; they read as
+      archaeology, not backlog.
+    was_used_on: 30
+
+  - name: ivy
+    state: shelved
+    note: >-
+      Email, notifications, and messaging. Code junk-drawered. 16 issues
+      carried it, one still open (#1626 — a Porch issue that got the label by
+      keyword accident, which is the whole reason this audit exists).
+    was_used_on: 16
+
+  - name: reverie
+    state: removed
+    note: >-
+      Timeline and dream-graph processing. Workers still in the tree
+      (workers/reverie, workers/reverie-exec) but unshipped.
+    was_used_on: 1
+
+  - name: waystones
+    state: removed
+    note: An old navigation/marker concept. Fully gone from the codebase.
+    was_used_on: 3
+
+  - name: components
+    state: retired
+    note: >-
+      Generic "this touches components" label with no meaning left. Every
+      component has its own label; this one says nothing.
+    was_used_on: 3
+
+  - name: grafts
+    state: retired
+    note: Duplicate of `graft` (feature flags), pluralised. Kept the singular.
+    was_used_on: 1
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Retired: decided against, deleted from GitHub. Listed so the next person does
+# not reinvent them.
+# ─────────────────────────────────────────────────────────────────────────────
+retired:
+  - name: stale
+    why: Abandoned in favour of `someday` / `icebox`. Never applied by anything.
+
+  - name: status:backlog
+    why: Meant the same as `icebox` but without saying why. Zero issues ever.
+
+  - name: question
+    why: GitHub default. Zero uses across 793 issues. Ask in the body instead.
+
+  - name: invalid
+    why: GitHub default. Zero uses. If it is invalid, close it with a reason.
+
+  - name: duplicate
+    why: GitHub default. Zero uses. Close as duplicate, do not label it.
+
+  - name: wontfix
+    why: >-
+      GitHub default. Zero uses. "Not doing this" is a close reason, and
+      `icebox` if it must stay open.
+
+  - name: good first issue
+    why: GitHub default. Zero uses — and there is no crowd of newcomers to signal to.
+
+  - name: help wanted
+    why: GitHub default. Zero uses. Every issue here is ours.
