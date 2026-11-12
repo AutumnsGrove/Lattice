@@ -89,10 +89,22 @@ jobs:
       - name: Install pi
         run: npm install --global @earendil-works/pi-coding-agent
 
-      # OpenCode Zen speaks the OpenAI chat-completions API, so pi reaches it
-      # through models.json rather than a login step. The key is interpolated
-      # from the environment at request time — it is never written to disk.
-      - name: Point pi at OpenCode Zen
+      # OpenCode Go (not Zen — Go is the subscription for open coding models;
+      # Zen is the pay-per-request catalog). The models below all live on Go's
+      # OpenAI-compatible chat-completions endpoint, so pi reaches them through
+      # models.json rather than a login step. Pi is on Go's validated-client
+      # list and sends the x-opencode-session header Go asks for, which is why
+      # this works without a custom-header wrapper.
+      #
+      # The key is interpolated from the environment at request time; it is
+      # never written to disk.
+      #
+      # Only models whose Go endpoint is chat/completions can live in this
+      # provider entry. Go also serves some models on /responses and /messages
+      # (MiniMax, Qwen) — those need their own provider entry, not a new id here.
+      # glm-5.3-flash is the default because labelling costs about $0.0002 an
+      # issue and it retains nothing for zero days.
+      - name: Point pi at OpenCode Go
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.pi/agent"
@@ -100,10 +112,10 @@ jobs:
           {
             "$schema": "https://pi.dev/schemas/models.schema.json",
             "providers": {
-              "opencode-zen": {
-                "baseUrl": "https://opencode.ai/zen/v1",
+              "opencode-go": {
+                "baseUrl": "https://opencode.ai/zen/go/v1",
                 "api": "openai-completions",
-                "apiKey": "${OPENCODE_API_KEY}",
+                "apiKey": "${OPENCODE_GO_API_KEY}",
                 "models": [
                   { "id": "glm-5.3-flash" },
                   { "id": "glm-5.3" },
@@ -118,7 +130,7 @@ jobs:
       - name: Ask pi for labels
         id: ask
         env:
-          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          OPENCODE_GO_API_KEY: ${{ secrets.OPENCODE_GO_API_KEY }}
           LABEL_MODEL: ${{ vars.LABEL_MODEL || 'glm-5.3-flash' }}
           ISSUE_TITLE: ${{ github.event.issue.title || '' }}
           ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number }}
@@ -150,7 +162,7 @@ jobs:
             --no-extensions \
             --no-skills \
             --no-mcp \
-            --provider opencode-zen \
+            --provider opencode-go \
             --model "$LABEL_MODEL" \
             --thinking low \
             "You label GitHub issues for the Grove codebase.
