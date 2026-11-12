@@ -159,8 +159,17 @@ jobs:
           gh issue view "$this_number" --json title,body \
             > "$RUNNER_TEMP/issue.json"
 
+          # Everything the model needs goes in the message. An @-reference is
+          # an argv form, not something to embed in a prompt string — the first
+          # version did that, and the model spent its turn trying to `cat` a
+          # filename it had not been given.
           {
-            echo "# Issue under review"
+            echo "## Vocabulary — .github/labels.yml"
+            echo
+            cat .github/labels.yml
+            echo
+            echo "## Issue under review"
+            echo
             jq -r '"Title: " + .title + "\n\n" + (.body // "(no body)")' "$RUNNER_TEMP/issue.json"
           } > "$RUNNER_TEMP/issue.md"
 
@@ -178,14 +187,16 @@ jobs:
             --thinking low \
             "You label GitHub issues for the Grove codebase.
 
-          ## Vocabulary
-          @.github/labels.yml
+          You have no tools and no filesystem. Do not attempt to read a file or
+          call one — everything you need is in this message, below.
 
-          Each label carries a \`when\` line. That line is the rule. The label's
-          name is not evidence of anything.
+          ## Vocabulary
+          The label manifest is included below. Each label carries a \`when\`
+          line; that line is the rule, and the label's name is not evidence of
+          anything.
 
           ## Your job
-          Read the issue in the prompt and choose the labels that apply.
+          Read the issue below and choose the labels that apply.
 
           Reply with JSON and nothing else — no prose, no code fence:
           {\"labels\": [\"...\"], \"why\": \"one sentence\"}
