@@ -209,7 +209,7 @@ Everyone reaches for the same helper-spirit folklore. What turned up in agent-sp
 
 ## Why That's Only A Data Point
 
-**Nova is one of the most crowded names in software.** Autumn picked it anyway, because it's *right*. This is personal tooling for her own platform, not a product competing for search results. If the vibe is the point, crowding is a cost to know about, not a veto. (If this ever ships as a public open-source library, revisit.)
+**Nova is one of the most crowded names in software.** Autumn picked it anyway, because it's *right*. This is personal tooling for Autumn's own platform, not a product competing for search results. If the vibe is the point, crowding is a cost to know about, not a veto. (If this ever ships as a public open-source library, revisit.)
 
 ## Walking Through, Again
 
@@ -260,3 +260,82 @@ Everything above is crowded or has a catch, and Familiar is still *the* word for
 - [ ] What's the thing about Familiar that isn't landing? (Too common? Too witchy? Too long? Too cute?) That tells us which direction to push.
 - [ ] Is the Moth/Moss proximity a feature or a bug?
 - [ ] How much does search-uniqueness matter, given Nova?
+
+*(Answered in the third walk below.)*
+
+---
+
+# Third Walk: Soft In The Mouth
+
+*(2026-11-12. Line 216, the tea shop scene, "really spoke." Answers to the open questions:)*
+
+1. **Familiar** is "a little harsh in the mouth" and not easy to spell. Rules out Fylgja, Famulus, and likely Dormouse too.
+2. **Moss** is a Grove feature that will likely come back **inside this agent product**, as its memory. So nothing Moss-adjacent: Moth is out, Mote is shaky (all M-o-?-?). And the name has to read well *beside* Moss.
+3. **Unique within the Grove ecosystem only.** Outside crowding is not a constraint. It's personal software, not a product to market.
+
+## What The Name Has To Be
+
+From line 216: *a small, soft, nocturnal presence that belongs to the room. It knows where everything is kept. It never knocks anything over. In the morning there's a note by the till.*
+
+Plus: soft sounds (l, m, n, v, vowels), short, spelled the way it sounds, a being you can say ("Ask ___"), and unclaimed in the Grove.
+
+**A thread worth keeping:** Nova's own decision record (D8) says *"A star that suddenly brightens. Short, astral, family of `polaris`."* The non-Grove projects already have an astral family: Nova, Polaris, Meridian, Solarium. A name in that family, that is *also* the tea shop at night, would sit in both worlds.
+
+## Candidates
+
+### Vesper
+
+- **Meaning:** the **evening star** (Venus at dusk), and the hour the lamps are lit. Also the common name of **vesper bats** (the largest bat family, nocturnal, a classic witch's familiar) and the **vesper sparrow** (named for its evening song).
+- **Why it fits:** evening star = Nova's astral family (Nova flares; Vesper is the star that comes out when the lamp goes on). Small, nocturnal creatures carry the name. Soft: v, s, p, r. Spelled as it's said. *"Ask Vesper." "Vesper left this on the porch."*
+- **Reads beside Moss?** Yes. *Vesper keeps a moss.* No clash.
+- **Issues:** **rejected once before** in the music-link journey as "too churchy ('vespers' = evening prayers). Doesn't feel warm enough." That was for a music name; here the meaning is the evening star, not the service. But the churchy echo is real. Also a famous cocktail and a Bond name, neither of which matters here.
+- **Tagline test:** *"Vesper is who keeps the lamp lit."* ✓
+
+### Ember
+
+- **Meaning:** a banked coal that survives the night and **relights the whole fire in the morning**. That is durability: park, evict, wake, resume.
+- **Why it fits:** Nova kin (the star flares, the ember keeps the glow). Warm, small, a hearth presence. Soft. *"Ask Ember."*
+- **Reads beside Moss?** Fine.
+- **Issues:** **Amber and Ember** share the same ending in the same stack, and "Ember writes to Amber" is a sentence you'd say daily. Passed over four times in earlier journeys ("embers are dying", "too close to Amber"). The first is answered by *banked*, but the second stands.
+- **Tagline test:** *"Ember keeps the fire till morning."* ✓
+
+### Glim
+
+- **Meaning:** an old word for a small light, a candle or lantern carried at night. Related to *glimmer*.
+- **Why it fits:** sounds like a creature already. Small, soft, lamplit. Cousin to Lumen and Lantern without being either. Nothing in the repo uses it. *"Ask Glim."*
+- **Reads beside Moss?** Yes.
+- **Issues:** archaic and a little obscure. It might read as a diminutive of *glimmer* rather than its own word. Short enough to get lost in prose.
+- **Tagline test:** *"Glim is the small light left on."* ✓
+
+### Lar
+
+- **Meaning:** the **Lar familiaris**, the Roman household guardian spirit. *Familiar* itself descends from Latin *familiaris*, "of the household." So this is the root of the word that already felt right, shorter and softer.
+- **Why it fits:** exactly the vibe, with a quiet etymology. Three letters, spelled as said.
+- **Issues:** obscure; most people will read it as a syllable. A bit flat to say. Easy to lose in a sentence.
+- **Tagline test:** *"Lar is the spirit of the household."* ✓
+
+### Hush
+
+- **Meaning:** the quiet. *It never knocks anything over.*
+- **Why it fits:** soft. Short. The mood of the whole scene.
+- **Issues:** a mood, not a being. *"Hush left a note"* works; *"ask Hush"* reads like being told to be quiet. Came up in four earlier journeys (editor, Meadow posts, feedback, voice) and was never claimed.
+
+### Set down
+
+| Name | Why not |
+|---|---|
+| **Dew** | Lovely (it's what the night leaves, there by morning), but too small a word, and the Prism prose already uses it. |
+| **Mallow / Linden** | Tea-shop herbs, soft and name-like. Not a presence in the room. |
+| **Brownie** | A household spirit that works at night, but sugary. |
+| **Fae / Pixie** | Too generic a category. |
+| **Mote** | Dust in lamplight: perfect image, but M-o-?-? beside Moss. |
+
+## Leaning (Third Walk)
+
+**Vesper.** Soft, spelled as said, nothing like Moss, unclaimed in the Grove, and the only candidate that is *both* in the Nova/Polaris astral family *and* the tea shop at dusk. The churchy echo is its one real cost. **Glim** is the most creature-like. **Ember** has the best meaning and the Amber rhyme.
+
+## Open (Third Walk)
+
+- [ ] Say them aloud: *"Ask Vesper." "Ask Glim." "Ask Ember." "Ask Lar."* Which one feels like it lives in the room?
+- [ ] Is "churchy" a dealbreaker for Vesper, or does the evening-star reading carry it?
+- [ ] Does the astral family (Nova, Polaris, Vesper) matter, or is Grove-only the point?
