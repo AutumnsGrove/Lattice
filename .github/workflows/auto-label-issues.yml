@@ -217,6 +217,8 @@ jobs:
                  cat "$RUNNER_TEMP/pi.err"
                  exit 1; }
 
+          echo "Reply: $(cat "$RUNNER_TEMP/reply.json")"
+
           # Models like to wrap JSON in a fence even when told not to.
           sed -e '/^```/d' "$RUNNER_TEMP/reply.txt" \
             | jq -c 'if type == "object" then . else error("not an object") end' \
@@ -286,10 +288,12 @@ jobs:
               echo ""
               echo "**Dropped (not in the manifest):** \`${dropped# }\`"
             fi
-          } >> "$GITHUB_STEP_SUMMARY"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
           if [ -z "$kept" ]; then
-            echo "::notice::No labels applied — the model found nothing it could justify."
+            echo "::notice::Nothing applied."
+            echo "::notice::proposed=[${proposed//$'\n'/ }]"
+            echo "::notice::skipped=[${taken# }] dropped=[${dropped# }]"
             exit 0
           fi
 
