@@ -117,6 +117,7 @@ jobs:
                 "api": "openai-completions",
                 "apiKey": "${OPENCODE_GO_API_KEY}",
                 "models": [
+                  { "id": "deepseek-v4.1-flash" },
                   { "id": "glm-5.3-flash" },
                   { "id": "glm-5.3" },
                   { "id": "kimi-k3" },
@@ -140,6 +141,16 @@ jobs:
           this_number="$ISSUE_NUMBER"
           if [ -z "${this_number:-}" ]; then
             echo "::error::No issue number. Pass one to the manual trigger."
+            exit 1
+          fi
+
+          # A repo variable that names a model this provider entry does not
+          # declare fails inside pi with something unreadable. Say it plainly.
+          if ! grep -q "\"id\": \"$LABEL_MODEL\"" "$HOME/.pi/agent/models.json"; then
+            echo "::error::LABEL_MODEL is '$LABEL_MODEL' — not declared by opencode-go."
+            declared=$(grep -o '\"id\": \"[^\"]*\"' "$HOME/.pi/agent/models.json" \
+              | cut -d'\"' -f4 | paste -sd' ' -)
+            echo "::error::Declared: $declared"
             exit 1
           fi
 
