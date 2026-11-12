@@ -173,3 +173,90 @@ All of these are fine as a **scoped** package under `@autumnsgrove/`, which matc
 - [ ] Decide whether it earns a row in `grove-naming.md`, or stays a standalone tool with its own repo
 - [ ] Internal name (`Grove[Thing]` convention) if it's adopted into the ecosystem
 - [ ] Step 10 (router, username reservation, GroveTerm manifest) is likely moot: it's a library, not a `*.grove.place` service
+
+---
+
+# Second Walk: The Familiar Direction
+
+*(2026-11-12. Autumn: "I like familiar but I'm not entirely sold on it. That vibe feels right. We don't have to talk specifically about the core. Nova is both the agent and the core. It can be both.")*
+
+That changes the question. Not "what do we call a library" but **"what do we call a being you can say out loud?"** Nova is a name you can say: *ask Nova.* So the new test sentence is:
+
+> **"Ask ___ to summarize the week."** / **"___ left this on the porch."**
+
+If it reads like a creature, it's working.
+
+## Correction To The First Walk
+
+Hob was cleared only against this repo and npm, not against the agent space. When I checked, it was **crowded**: `hob.dev` (agent workspace), `FrigadeHQ/hob` (local AI app), `SmartAppsCo/hob` (workspace for coding agents), and **Hobbots**, whose tagline is *"Little helpers that do your chores while you sleep."* That is my pitch for Hob, word for word. Struck from the shortlist.
+
+## The Lane Is Crowded
+
+Everyone reaches for the same helper-spirit folklore. What turned up in agent-space searches (not exhaustive, and absence of a hit is not proof of absence):
+
+| Name | What's already using it |
+|---|---|
+| **Familiar** | `qearlyao/familiar` (a companion agent daemon **built on Pi**), `familiar-software/familiar` (screen-watching context for agents), `familiar-md/familiar`, `familiar-agent` on PyPI, and `withfamiliar.ai` ("Not an assistant. A Familiar.") |
+| **Hob** | see above |
+| **Kodama** | a Kiro CLI agent pack, a background coding-agent daemon ("a forest spirit that quietly works in the background"), a Zettelkasten generator |
+| **Famulus** | a Claude/Codex plugin |
+| **Tomte** | a Rust coding-agent CLI, and a "safely delegate recurring work to an AI agent" project |
+| **Mote** | a browser-automation agent framework, an ESP32 voice companion |
+| **Puck** | Puck editor with an AI mode |
+| **Dormouse** | a VS Code terminal multiplexer with agent alerts (1.1.0, July 2026), a Haskell HTTP library |
+| **Moth** | a tiny MCP debugging plugin (2 stars) |
+| Cricket, Fylgja | nothing surfaced |
+
+## Why That's Only A Data Point
+
+**Nova is one of the most crowded names in software.** Autumn picked it anyway, because it's *right*. This is personal tooling for her own platform, not a product competing for search results. If the vibe is the point, crowding is a cost to know about, not a veto. (If this ever ships as a public open-source library, revisit.)
+
+## Walking Through, Again
+
+The tea shop at midnight. The lamp is on. Everyone's gone home. Something small is still moving in the warm light near the window: it's been here all evening, it knows where everything is kept, it never knocks anything over. In the morning the cups are washed and there's a note by the till.
+
+Not a servant. Not a robot. A **small, soft, nocturnal presence that belongs to the room.**
+
+## Candidates In This Lane
+
+### Moth
+
+- **Meaning:** a night flyer, drawn to light. Quiet, soft-winged, easily overlooked, the butterfly's underdog cousin. Moths are real nocturnal **pollinators**: they carry pollen between flowers in the dark.
+- **Why it fits:** it goes *toward the light*, and the light is **Lumen**: the agent asks Lumen for every thought. It carries pollen between flowers, which is what an agent does between tools. It works at night, small and unobtrusive. It sits at the midnight tea shop lamp. And it's a creature: *"Ask Moth." "Moth left this on the porch."*
+- **Vibe:** soft, nocturnal, lamplit, a little odd.
+- **Issues:** **Moth / Moss**, one letter apart, in the same stack (Moss is the AI memory inside Lumen). Likely to be confused in speech and to cause typos in config. It could also read as a feature: *Moss remembers, Moth works.* Moth is also the name of a tiny MCP debugging plugin.
+- **Tagline test:** *"Moth is who stays up with the lamp."* ✓ · *"Ask Moth."* ✓
+
+### Cricket
+
+- **Meaning:** the hearth cricket, a classic household luck-spirit ("the cricket on the hearth"). Sings at night. Small. Jiminy Cricket is a *conscience*: the one who says *wait, should we?*
+- **Why it fits:** hearth companion, warm, small; and "asks before it acts" is the approval model in one image.
+- **Issues:** it's also a sport, which makes search miserable. Chirp (DMs) is already a sound-of-small-creatures name, so the grove has a bird-sound slot taken.
+- **Tagline test:** *"Cricket keeps the hearth at night."* ✓
+
+### Dormouse
+
+- **Meaning:** a tiny forest rodent that **hibernates**, and the one asleep in the teapot at the Mad Tea Party.
+- **Why it fits:** *tea shop*, literally. Hibernation is park-and-wake: the run sleeps without costing anything until an alarm or an answer rouses it. Small, gentle, comic.
+- **Issues:** long to type. A VS Code terminal tool uses the name (agent-adjacent, so a search would mix them). It names the *resting* more than the *working*.
+- **Tagline test:** *"Dormouse sleeps in the teapot until you need it."* ✓
+
+### Fylgja
+
+- **Meaning:** Norse. A "follower": the spirit that accompanies a person through life, often in animal form, tied to their character and luck.
+- **Why it fits:** the most *exact* meaning of familiar, with no one else using it for agents.
+- **Issues:** spelling and pronunciation (FIL-gya) are a real tax. You'd be explaining it forever.
+
+### Familiar (keep it as a candidate)
+
+Everything above is crowded or has a catch, and Familiar is still *the* word for the vibe. It's the one that makes people understand in a second. The case for keeping it: Nova precedent, and personal tooling. The case against: it's the most saturated of all, including a Pi-based one and a same-pitch commercial product.
+
+## Leaning (Second Walk)
+
+**Moth**, with **Familiar** as the safe baseline. Moth gets you the vibe, a real creature, the Lumen connection, and a distinct name. The Moss near-collision is the one honest cost.
+
+## Open (Second Walk)
+
+- [ ] What's the thing about Familiar that isn't landing? (Too common? Too witchy? Too long? Too cute?) That tells us which direction to push.
+- [ ] Is the Moth/Moss proximity a feature or a bug?
+- [ ] How much does search-uniqueness matter, given Nova?
