@@ -3,7 +3,7 @@
 #
 # Everything else reads this file. Nothing defines a label name twice.
 #
-#   scripts/sync-labels.ts        pushes this file to GitHub (create/update/prune)
+#   tools/labels/sync.ts         pushes this file to GitHub (create/update/prune)
 #   .github/workflows/auto-label-issues.yml  gives it to the labeler as vocabulary
 #   .github/ISSUE_TEMPLATE/*.md   mirrors the component list below
 #   tools/grove-wrap-go           `gw issue --label` passes these names to GitHub

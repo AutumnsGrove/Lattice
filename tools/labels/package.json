@@ -1,0 +1,16 @@
+{
+	"name": "@grove/labels",
+	"private": true,
+	"type": "module",
+	"description": "Issue label manifest tooling — see .github/labels.yml",
+	"scripts": {
+		"check": "tsx sync.ts --quiet --offline",
+		"sync": "tsx sync.ts"
+	},
+	"dependencies": {
+		"yaml": "^2.9.1"
+	},
+	"devDependencies": {
+		"tsx": "^4.21.0"
+	}
+}

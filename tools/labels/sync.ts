@@ -57,6 +57,8 @@ const args = process.argv.slice(2);
 const apply = args.includes("--apply");
 const prune = args.includes("--prune");
 const quiet = args.includes("--quiet");
+// Validation only: no network, no auth, nothing a CI runner has to provide.
+const offline = args.includes("--offline");
 
 function fail(errors: string[]): never {
 	console.error(`\n✖ ${MANIFEST} has ${errors.length} problem${errors.length === 1 ? "" : "s"}:\n`);
@@ -192,6 +194,11 @@ function main(): void {
 		console.log(
 			`  automation may choose: ${(manifest.policy.auto_groups ?? []).join(", ") || "nothing"}`,
 		);
+	}
+
+	if (offline) {
+		if (!quiet) console.log("\n✔ Manifest is valid.\n");
+		return;
 	}
 
 	const remote = new Map(listRemote().map((r) => [r.name, r]));
