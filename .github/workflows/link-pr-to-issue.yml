@@ -1,9 +1,29 @@
 ---
 name: Link PR to Issue
 
-on:
+# A pull request may only move an issue's state if it says it closes it.
+#
+# GitHub already cross-links a bare `#123`, so a mention needs nothing from
+# this workflow. The previous version parsed `#(\d+)` as a completion, which
+# closed #1439 on merge of #1599 — a PR that merely said the vector index was
+# a dependency — and put `in-progress` on every issue a description happened
+# to name. See #1623.
+#
+# The parse lives in .github/scripts/issue-refs.mjs so it can be tested without
+# a pull request: `node --test .github/scripts/issue-refs.test.mjs`.
+
+"on":
   pull_request:
     types: [opened, reopened, closed]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Pull request number to process
+        required: true
+      dry_run:
+        description: Log what would change without touching anything
+        type: boolean
+        default: true
 
 jobs:
   link-issue:
@@ -14,123 +34,128 @@ jobs:
       contents: read
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
       - name: Extract issue number and update status
         uses: actions/github-script@v8
+        env:
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+          INPUT_PR: ${{ inputs.pr_number || '' }}
         with:
           script: |
-            const pr = context.payload.pull_request;
-            const prBody = pr.body || '';
-            const prTitle = pr.title || '';
+            const dryRun = process.env.DRY_RUN === 'true';
+            const { parseIssueRefs } = await import(
+              `${process.env.GITHUB_WORKSPACE}/.github/scripts/issue-refs.mjs`
+            );
 
-            // Extract issue numbers from PR body/title
-            // (supports #123, fixes #123, closes #123, etc.)
-            const issueRegex = /(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s*#(\d+)|#(\d+)/gi;
-            const matches = [
-              ...prBody.matchAll(issueRegex),
-              ...prTitle.matchAll(issueRegex)
-            ];
-            const issueNumbers = [...new Set(matches.map(m => m[1] || m[2]))];
+            const api = { owner: context.repo.owner, repo: context.repo.repo };
+            const addLabels = (n, labels) =>
+              github.rest.issues.addLabels({ ...api, issue_number: n, labels });
+            const comment = (n, body) =>
+              github.rest.issues.createComment({ ...api, issue_number: n, body });
 
-            console.log(`Found linked issues: ${issueNumbers.join(', ')}`);
+            // A manual run takes the same path as an event, so a dry run tests
+            // the real logic instead of a copy of it.
+            const pr = context.payload.pull_request ?? (
+              await github.rest.pulls.get({
+                ...api,
+                pull_number: Number(process.env.INPUT_PR),
+              })
+            ).data;
 
-            for (const issueNumber of issueNumbers) {
-              try {
-                // Get current issue to check labels
-                const issue = await github.rest.issues.get({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: parseInt(issueNumber)
-                });
+            const { closes, mentions } = parseIssueRefs(pr.body);
+            // Titles close issues on GitHub too, but a title is much likelier to
+            // name a number in passing, so it must carry the keyword as well.
+            const fromTitle = parseIssueRefs(pr.title).closes;
+            const targets = [...new Set([...closes, ...fromTitle])].sort(
+              (a, b) => a - b
+            );
 
-                if (pr.state === 'open') {
-                  // PR opened/reopened - add in-progress label
-                  await github.rest.issues.addLabels({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    issue_number: parseInt(issueNumber),
-                    labels: ['in-progress']
-                  });
+            const list = (ns) => (ns.length ? ns.map((n) => `#${n}`).join(', ') : 'none');
+            console.log(
+              `PR #${pr.number} ${pr.state}${pr.merged ? ' merged' : ''}` +
+                `${dryRun ? ' [DRY RUN]' : ''}`
+            );
+            console.log(`  closes:   ${list(targets)}`);
+            console.log(`  mentions: ${list(mentions)} — no action`);
 
-                  // Remove 'ready' label if present
-                  try {
-                    await github.rest.issues.removeLabel({
-                      owner: context.repo.owner,
-                      repo: context.repo.repo,
-                      issue_number: parseInt(issueNumber),
-                      name: 'ready'
-                    });
-                  } catch (e) {
-                    // Label might not exist, that's fine
-                  }
+            if (targets.length === 0) {
+              console.log('Nothing to do: no closing keyword in the title or body.');
+              return;
+            }
 
-                  // Comment on issue
-                  await github.rest.issues.createComment({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    issue_number: parseInt(issueNumber),
-                    body: `🚧 Work in progress: #${pr.number}`
-                  });
+            for (const n of targets) {
+              const { data: issue } = await github.rest.issues.get({
+                ...api,
+                issue_number: n,
+              });
+              const has = (name) =>
+                issue.labels.some((l) => (typeof l === 'string' ? l : l.name) === name);
 
-                } else if (pr.merged) {
-                  // PR merged - add completed label and comment
-                  await github.rest.issues.addLabels({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    issue_number: parseInt(issueNumber),
-                    labels: ['completed']
-                  });
+              // A closed issue does not need a work-in-progress marker.
+              if (issue.state === 'closed' && pr.state === 'open') {
+                console.log(`#${n} is already closed — skipping in-progress.`);
+                continue;
+              }
 
-                  // Remove in-progress label
-                  try {
-                    await github.rest.issues.removeLabel({
-                      owner: context.repo.owner,
-                      repo: context.repo.repo,
-                      issue_number: parseInt(issueNumber),
-                      name: 'in-progress'
-                    });
-                  } catch (e) {
-                    // Label might not exist
-                  }
+              const plan = pr.state === 'open'
+                ? 'add in-progress, remove ready, comment'
+                : pr.merged
+                  ? 'add completed, remove in-progress, comment'
+                  : 'remove in-progress, add ready, comment';
+              console.log(`#${n} "${issue.title}": ${plan}`);
 
-                  await github.rest.issues.createComment({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    issue_number: parseInt(issueNumber),
-                    body: `✅ Completed in #${pr.number}`
-                  });
+              if (dryRun) {
+                console.log(`  would touch #${n} — dry run, nothing changed.`);
+                continue;
+              }
 
-                } else if (pr.state === 'closed' && !pr.merged) {
-                  // PR closed without merging - remove in-progress, add back ready
-                  try {
-                    await github.rest.issues.removeLabel({
-                      owner: context.repo.owner,
-                      repo: context.repo.repo,
-                      issue_number: parseInt(issueNumber),
-                      name: 'in-progress'
-                    });
-                  } catch (e) {
-                    // Label might not exist
-                  }
-
-                  await github.rest.issues.addLabels({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    issue_number: parseInt(issueNumber),
-                    labels: ['ready']
-                  });
-
-                  await github.rest.issues.createComment({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    issue_number: parseInt(issueNumber),
-                    body: `⏸️ PR #${pr.number} was closed without merging. ` +
-                          `Issue returned to ready state.`
-                  });
+              let changed = false;
+              if (pr.state === 'open') {
+                if (!has('in-progress')) {
+                  await addLabels(n, ['in-progress']);
+                  changed = true;
                 }
+                await dropLabel(n, 'ready');
+              } else if (pr.merged) {
+                if (!has('completed')) {
+                  await addLabels(n, ['completed']);
+                  changed = true;
+                }
+                await dropLabel(n, 'in-progress');
+              } else {
+                await dropLabel(n, 'in-progress');
+                if (!has('ready')) {
+                  await addLabels(n, ['ready']);
+                  changed = true;
+                }
+              }
 
-              } catch (error) {
-                console.error(
-                  `Error processing issue #${issueNumber}: ${error.message}`
+              // One comment per transition. Re-running the workflow, or
+              // reopening a PR, should not restate what the issue already says.
+              if (changed) {
+                await comment(
+                  n,
+                  pr.state === 'open'
+                    ? `🚧 Work in progress: #${pr.number}`
+                    : pr.merged
+                      ? `✅ Completed in #${pr.number}`
+                      : `⏸️ PR #${pr.number} was closed without merging. ` +
+                          `Issue returned to ready state.`
                 );
+              } else {
+                console.log(`  #${n} already in that state — no comment.`);
+              }
+            }
+
+            async function dropLabel(n, name) {
+              try {
+                await github.rest.issues.removeLabel({ ...api, issue_number: n, name });
+              } catch (error) {
+                if (error.status !== 404) throw error;
               }
             }

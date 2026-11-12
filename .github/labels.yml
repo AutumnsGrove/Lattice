@@ -394,8 +394,10 @@ labels:
   - name: completed
     group: machine
     color: "0E8A16"
-    description: "Applied when a linked PR merges — not trustworthy until #1623"
-    when: "Machine only. Ignores any bare #123 mention, which is the #1623 bug."
+    description: Applied when a PR that says it closes this issue merges
+    when: >-
+      Machine only. Set by link-pr-to-issue.yml when a PR uses a closing
+      keyword; a bare mention changes nothing.
 
   - name: ready
     group: machine
