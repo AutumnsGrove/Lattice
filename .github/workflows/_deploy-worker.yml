@@ -215,18 +215,29 @@ jobs:
 
       # Rolling failure issue: open/comment on fail, close on recovery
       # Runs only on push-to-main. Maintains one GitHub Issue per service
-      # with label `deploy-failed` + title `Deploy failing: <service>`.
-      # New failure → reopen (if closed) + append comment. Next green run
-      # → auto-close with recovery note.
+      # with label `deploy-failed` + title `<Deploy|Build> failing: <service>`
+      # (the verb follows `run-deploy`, so a build-only service is not
+      # described as deploying). New failure → reopen (if closed) + append
+      # comment. Next green run → auto-close with recovery note.
+      #
+      # Closing is deliberately NOT gated on `run-deploy`. For a build-only
+      # service (libs/engine) a green build + typecheck + test + migration
+      # run IS recovery; there is no deploy step that could ever succeed, so
+      # gating on it left the issue open forever.
       - name: Open or update failure issue
         if: failure() && github.event_name == 'push'
         uses: actions/github-script@v8
+        env:
+          # Boolean input, passed as a string so the script picks the wording
+          # without expression-quoting traps.
+          RUN_DEPLOY: ${{ inputs.run-deploy }}
         with:
           script: |
             const workerDir = '${{ inputs.worker-dir }}';
             const serviceOverride = '${{ inputs.service-name-override }}';
             const service = serviceOverride || workerDir.split('/').pop();
-            const title = `Deploy failing: ${service}`;
+            const verb = process.env.RUN_DEPLOY === 'true' ? 'Deploy' : 'Build';
+            const title = `${verb} failing: ${service}`;
             const { owner, repo } = context.repo;
             const serverUrl = process.env.GITHUB_SERVER_URL;
             const runUrl = `${serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
@@ -238,14 +249,14 @@ jobs:
             // spans/quotes so odd markdown (backticks, HTML) doesn't
             // disrupt issue rendering.
             const body = [
-              `❌ Deploy to \`${service}\` failed at commit \`${sha}\`.`,
+              `❌ ${verb} failed for \`${service}\` at commit \`${sha}\`.`,
               '',
               `- **Run:** [${context.runId}](${runUrl})`,
               '- **Commit:** `' + sha + '` — `' + msg.replace(/`/g, "'") + '`',
               `- **Triggered by:** \`${context.actor}\``,
               '',
               '_This issue was auto-opened by `_deploy-worker.yml`. ' +
-              'It will close automatically on the next successful deploy._',
+              'It will close automatically on the next green run._',
             ].join('\n');
 
             // Paginate so we find matching issues even if the
@@ -273,14 +284,17 @@ jobs:
             }
 
       - name: Close failure issue on recovery
-        if: success() && inputs.run-deploy && github.event_name == 'push'
+        if: success() && github.event_name == 'push'
         uses: actions/github-script@v8
+        env:
+          RUN_DEPLOY: ${{ inputs.run-deploy }}
         with:
           script: |
             const workerDir = '${{ inputs.worker-dir }}';
             const serviceOverride = '${{ inputs.service-name-override }}';
             const service = serviceOverride || workerDir.split('/').pop();
-            const title = `Deploy failing: ${service}`;
+            const verb = process.env.RUN_DEPLOY === 'true' ? 'Deploy' : 'Build';
+            const title = `${verb} failing: ${service}`;
             const { owner, repo } = context.repo;
             const serverUrl = process.env.GITHUB_SERVER_URL;
             const runUrl = `${serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
@@ -293,9 +307,12 @@ jobs:
             const match = existing.find((i) => i.title === title);
             if (!match) return;
 
+            const recoveryMsg =
+              `✅ ${verb} recovered for \`${service}\`. ` +
+              `[Run ${context.runId}](${runUrl}).`;
             await github.rest.issues.createComment({
               owner, repo, issue_number: match.number,
-              body: `✅ Deploy to \`${service}\` recovered. [Run ${context.runId}](${runUrl}).`,
+              body: recoveryMsg,
             });
             await github.rest.issues.update({
               owner, repo, issue_number: match.number, state: 'closed',
