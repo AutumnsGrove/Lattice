@@ -85,6 +85,8 @@ export interface DocFrontmatter {
 	order?: number;
 	/** Set false to hide from listings (default: true) */
 	published?: boolean;
+	/** Document lifecycle status. Only "planned" changes how a doc renders today. */
+	status?: string;
 
 	// === LEGACY (preserved for Obsidian compatibility) ===
 	/** Obsidian aliases */
@@ -116,6 +118,12 @@ export interface Doc extends Record<string, unknown> {
 	keywords?: string[];
 	/** Sort order from frontmatter */
 	order?: number;
+	/**
+	 * "planned" marks a document that describes an unbuilt feature: it renders a
+	 * Planned badge and a "not built yet" note. Other status values are ignored
+	 * rather than surfaced, since nothing else changes the rendering yet.
+	 */
+	status?: "planned";
 }
 
 /** Header extracted from markdown for table of contents */

@@ -149,11 +149,26 @@
 							{#if doc.lastUpdated}
 								<span class="text-sm text-foreground-subtle">Updated {doc.lastUpdated}</span>
 							{/if}
+							{#if doc.status === "planned"}
+								<span
+									class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-surface-subtle text-foreground-muted"
+								>
+									Planned
+								</span>
+							{/if}
 							<span class="text-sm text-foreground-subtle">{doc.readingTime} min read</span>
 						</div>
 						<h1>{doc.title}</h1>
 						{#if doc.description}
 							<p class="text-xl text-foreground-muted mt-4">{doc.description}</p>
+						{/if}
+						{#if doc.status === "planned"}
+							<p
+								class="mt-4 rounded-lg border border-border bg-surface-subtle px-4 py-3 text-sm text-foreground-muted"
+							>
+								<strong class="text-foreground">Not built yet.</strong>
+								This describes something Grove intends to build, not something you can use today.
+							</p>
 						{/if}
 					</header>
 

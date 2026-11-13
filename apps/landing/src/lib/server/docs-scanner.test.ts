@@ -113,6 +113,36 @@ describe("docs-scanner.ts", () => {
 		});
 	});
 
+	describe("status", () => {
+		it("should mark a planned help article", () => {
+			const doc = findDocBySlug("what-is-rings", "help");
+
+			expect(doc?.status).toBe("planned");
+		});
+
+		it("should mark a planned spec", () => {
+			// Specs for unbuilt features carry the same flag (#1543)
+			const doc = findDocBySlug("trails-spec", "specs");
+
+			expect(doc?.status).toBe("planned");
+		});
+
+		it("should leave ordinary docs without a status", () => {
+			const doc = findDocBySlug("what-is-grove", "help");
+
+			expect(doc).not.toBeNull();
+			expect(doc?.status).toBeUndefined();
+		});
+
+		it("should ignore status values it does not render", () => {
+			// Only "planned" changes the rendering today; nothing else should leak
+			// through as a status the article page would try to badge.
+			for (const doc of scanAllDocs().allDocs) {
+				if (doc.status !== undefined) expect(doc.status).toBe("planned");
+			}
+		});
+	});
+
 	describe("findDocBySlug", () => {
 		describe("slug sanitization - security boundary", () => {
 			it("should return null for empty slug", () => {
