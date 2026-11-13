@@ -302,7 +302,7 @@ unless they're actively being built (tracked by an open issue/PR).
 - `apps/ivy`, `apps/meadow`, `apps/terrarium`
 - `workers/reverie`, `workers/reverie-exec`, `workers/timeline-sync`,
   `workers/post-migrator`, `workers/meadow-poller`
-- `libs/server-sdk`, `libs/vineyard`
+- `libs/server-sdk`
 
 ### The `_junkdrawer/` is fine
 

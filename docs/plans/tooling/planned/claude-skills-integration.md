@@ -202,10 +202,9 @@ Some exceptions (hummingbird-compose.md is a standalone file, not a directory).
 4. **Druid** — Meta-skill for creating new animals. They have no "skill creator" skill.
 5. **Safari (this skill!)** — Systematic review of collections. No external equivalent.
 6. **Emotional voice** — Warmth, queer identity, authenticity baked into documentation skills.
-7. **Vineyard** — Showcase/demo page builder.
-8. **Walking Through the Grove** — Naming philosophy skill.
-9. **Osprey** — Project estimation (unique in the wild).
-10. **Museum documentation** — Narrative-driven documentation style.
+7. **Walking Through the Grove** — Naming philosophy skill.
+8. **Osprey** — Project estimation (unique in the wild).
+9. **Museum documentation** — Narrative-driven documentation style.
 
 ---
 

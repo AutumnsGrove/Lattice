@@ -866,7 +866,7 @@ Two workers, 52 files total, 171 passing tests:
 ### Architectural Decisions
 
 - **Self-contained worker, no lattice dependency.** billing-api carries its own StripeClient (simplified from engine's payments SDK — no Connect methods). This avoids pulling engine as a dependency and keeps the worker lean on cold start.
-- **Inline Svelte components in apps/billing.** The billing UI uses self-contained components rather than importing from vineyard or engine barrels. This sidesteps the barrel cascade hydration issue documented in CLAUDE.md and keeps the billing app independently deployable.
+- **Inline Svelte components in apps/billing.** The billing UI uses self-contained components rather than importing from the engine barrel. This sidesteps the barrel cascade hydration issue documented in CLAUDE.md and keeps the billing app independently deployable.
 - **Upsert pattern for upgrades.** The checkout-completed handler uses `INSERT ... ON CONFLICT DO UPDATE` for platform_billing records, collapsing a SELECT + conditional INSERT/UPDATE into a single D1 round-trip.
 - **Parallel DB operations in invoice handlers.** The UPDATE (status change) and SELECT (tenant lookup for emails) run via `Promise.all` since the SELECT doesn't depend on the UPDATE completing.
 

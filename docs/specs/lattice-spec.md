@@ -149,7 +149,6 @@ Lattice uses ~47 named export paths for tree-shaking. Each subsystem has its own
 	"./ui/styles": "grove.css (Tailwind base styles)",
 	"./ui/tailwind": "Tailwind preset",
 	"./ui/terrarium": "Terrarium-specific UI",
-	"./vineyard": "Vineyard components",
 	"./utils": "Client-side utility functions",
 	"./utils/*": "Individual utility modules",
 	"./auth": "Session management utilities",

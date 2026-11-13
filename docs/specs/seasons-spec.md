@@ -183,7 +183,7 @@ Lattice has graduated past the `0.x.x` development phase. Version 1.0.0 signals 
 
 ### Secondary Packages (0.x.x Development)
 
-Packages still in `0.x.x` (server-sdk, foliage, gossamer, vineyard) follow relaxed semver: MINOR bumps may include breaking changes during initial development.
+Packages still in `0.x.x` (server-sdk, foliage, gossamer) follow relaxed semver: MINOR bumps may include breaking changes during initial development.
 
 ```
 Development Phase:

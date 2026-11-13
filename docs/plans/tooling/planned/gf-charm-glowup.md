@@ -281,7 +281,6 @@ No graph. No edges. Just a count. This is half an implementation.
 
   libs/engine      → apps/clearing, apps/domains, apps/ivy, apps/landing,
                      apps/login, apps/meadow, apps/plant, apps/terrarium
-  libs/vineyard    → libs/engine
   libs/foliage     → apps/plant, apps/landing
   libs/gossamer    → libs/engine
   libs/shutter     → services/heartwood

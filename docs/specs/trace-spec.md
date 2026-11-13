@@ -218,7 +218,7 @@ interface TraceProps {
 <!-- Path: "workshop:GlassCard" -->
 
 <!-- Minimal version (just thumbs, no comment) -->
-<Trace id="vineyard:Charts" showComment={false} size="sm" />
+<Trace id="forest:Charts" showComment={false} size="sm" />
 
 <!-- Custom prompt -->
 <Trace prompt="Did this answer your question?" />
@@ -260,7 +260,7 @@ function buildTracePath(route: string, suffix?: string): string {
 | ----------------------------- | ----------- | ---------------------------- |
 | `/workshop`                   | —           | `workshop`                   |
 | `/workshop`                   | `GlassCard` | `workshop:GlassCard`         |
-| `/vineyard/charts`            | —           | `vineyard-charts`            |
+| `/forest/charts`              | —           | `forest-charts`              |
 | `/admin/feedback`             | —           | `admin-feedback`             |
 | `/`                           | —           | `home`                       |
 | `/knowledge/specs/trace-spec` | —           | `knowledge-specs-trace-spec` |
@@ -442,7 +442,7 @@ A simple admin page to see incoming traces:
 │      "The code example doesn't work in Firefox"                 │
 │      [ Mark read ]                                              │
 │                                                                 │
-│  👍  vineyard:Charts                                 15 min ago │
+│  👍  forest:Charts                                   15 min ago │
 │      (no comment)                                               │
 │      [ Mark read ]                                              │
 │                                                                 │
@@ -455,7 +455,7 @@ A simple admin page to see incoming traces:
 │  By location:                                                   │
 │  ├── workshop              12 traces (10 👍, 2 👎)              │
 │  ├── workshop:GlassCard     8 traces (6 👍, 2 👎)               │
-│  ├── vineyard-charts        5 traces (5 👍, 0 👎)               │
+│  ├── forest-charts          5 traces (5 👍, 0 👎)               │
 │  └── knowledge-*           22 traces (17 👍, 5 👎)              │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘

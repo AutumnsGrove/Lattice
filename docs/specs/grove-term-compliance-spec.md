@@ -236,7 +236,7 @@ These words are rarely used in everyday English. Flag them regardless of capital
 
 ```
 Reverie, Arbor, Curios, Meadow, Heartwood, Terrarium, Canopy,
-Lantern, Waystone, Gossamer, Vineyard, Centennial, Fireside,
+Lantern, Waystone, Gossamer, Centennial, Fireside,
 Lumen, Zephyr, Patina, Mycelium, Warden, Loam, Burrow,
 Foliage (when not in a file path), Lattice (when not in a package name)
 ```
@@ -306,7 +306,6 @@ Three components maintain duplicate bare `stageNames` / `tierLabels` maps:
 
 - `libs/engine/src/lib/grafts/upgrades/components/CurrentStageBadge.svelte`
 - `libs/engine/src/lib/grafts/upgrades/components/GardenStatus.svelte`
-- `libs/vineyard/src/lib/components/vineyard/TierGate.svelte`
 
 These should all call `resolveTerm()`:
 
@@ -374,7 +373,7 @@ Current state as of March 2026:
 | apps/ (all 8 apps) | ~180 | ~70 | ~40 |
 | libs/engine/src/routes/ | ~150 | ~50 | ~30 |
 | libs/engine/src/lib/ | ~50 | ~20 | ~15 |
-| libs/ (foliage, vineyard, gossamer) | ~35 | ~10 | 0 |
+| libs/ (foliage, gossamer) | ~35 | ~10 | 0 |
 | **Total** | **~415** | **~150** | **~85** |
 
 ### Heaviest Offenders
@@ -420,9 +419,8 @@ Priority order within this phase:
 3. `arbor/reverie/` — headings, error strings, title
 4. `arbor/garden/` — "Share to Meadow", "Delete Bloom" attributes
 5. `+layout.svelte` — RSS title, footer text, Grove Mode toggle labels
-6. `vineyard/` — layout heading, page attributes
-7. `faq/` — title tag
-8. Remaining routes: garden/, verify/, arbor/analytics, arbor/timeline, arbor/reeds, arbor/images, arbor/export, arbor/account, terrarium/, +error.svelte, (apps)/monitor, (apps)/domains
+6. `faq/` — title tag
+7. Remaining routes: garden/, verify/, arbor/analytics, arbor/timeline, arbor/reeds, arbor/images, arbor/export, arbor/account, terrarium/, +error.svelte, (apps)/monitor, (apps)/domains
 
 ### Phase 3: Engine Components (lib/)
 
@@ -443,10 +441,9 @@ Priority order within this phase:
 3. Porch pages — titles, "Back to Porch" links
 4. Vista admin pages — Warden, Thorn, Petal, Meadow, Lumen headings
 5. Pricing page — tier names
-6. Vineyard page — layout nav, attributes
-7. Knowledge/Museum — heading
-8. Vision page — feature references
-9. Remaining: contact, manifesto, feedback, compare, arbor pages, beyond
+6. Knowledge/Museum — heading
+7. Vision page — feature references
+8. Remaining: contact, manifesto, feedback, compare, arbor pages, beyond
 
 ### Phase 5: Standalone Apps
 
@@ -462,8 +459,7 @@ Priority order within this phase:
 ### Phase 6: Non-Engine Libs
 
 1. **libs/foliage/** — tier badges, CommunityThemeBrowser, CommunityThemeSubmit descriptions
-2. **libs/vineyard/** — VineyardLayout philosophy strings, TierGate label map
-3. **libs/gossamer/** — preset names (lowest priority, evaluate if user-visible)
+2. **libs/gossamer/** — preset names (lowest priority, evaluate if user-visible)
 
 ---
 

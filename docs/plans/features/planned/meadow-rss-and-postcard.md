@@ -528,7 +528,7 @@ Recommendation: Import from engine. It handles today/yesterday/weeks/months/year
 - [ ] Test dark mode rendering (use cream-\* tokens)
 - [ ] Test with `prefers-reduced-motion`
 - [ ] Test touch targets on mobile viewport
-- [ ] Create a story/demo page at `/vineyard` or similar for visual iteration
+- [ ] Create a story/demo page for visual iteration
 
 **Estimated time:** 1.5-2 hours for the component itself. Interaction wiring (API calls for vote/react/bookmark) is separate work.
 

@@ -220,7 +220,6 @@ Core  Tools  Docs
 ### Phase 2: Security & Scale (Current)
 - [x] Threshold rate limiting
 - [x] Sentinel load testing
-- [x] Vineyard integration
 - [x] Mycelium MCP server
 - [-] Heartwood authentication hardening
 - [-] Patina backup automation

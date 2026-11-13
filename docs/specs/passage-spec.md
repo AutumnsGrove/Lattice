@@ -147,7 +147,6 @@ Passage maintains a route map of special subdomains. Anything not in this map ro
 | `amber` | amber-4x2.pages.dev | Storage management |
 | `ivy` | ivy-3uv.pages.dev | Email client |
 | `plant` | grove-plant.pages.dev | Onboarding |
-| `vineyard` | vineyard-grove-place.pages.dev | Tool showcases |
 | `meadow` | grove-meadow.pages.dev | Social feed |
 | `aria`, `music` | grovemusic.pages.dev | Music curation |
 | `forage`, `domains` | grove-domains.pages.dev | Domain discovery |

@@ -402,7 +402,7 @@ Categorized sidebar with 60+ nature components.
 - **Delete** - Delete key or button
 - **Duplicate** - Cmd/Ctrl+D
 
-### 4. Props Panel (Vineyard-Style) _(planned — Phase 2)_
+### 4. Props Panel _(planned — Phase 2)_
 
 When asset selected, show configurable props:
 
@@ -1504,7 +1504,7 @@ libs/engine/src/routes/terrarium/
 - Full asset registry (60+ via build script)
 - **Search & filter** in asset palette
 - Grid overlay + snap-to-grid toggle
-- Props panel (Vineyard-style)
+- Props panel
 - Scale/rotation handles
 - Layer ordering
 - Animation toggle (global + per-asset)

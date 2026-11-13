@@ -207,13 +207,12 @@ Target performance is 17-28ms per frame for a typical 400x200px card at 30fps wi
 
 ## The GossamerPreset Duplication Problem
 
-The `GossamerPreset` type is a string union listing all valid preset names. It is duplicated in three files:
+The `GossamerPreset` type is a string union listing all valid preset names. It is duplicated in two files:
 
 1. `libs/engine/src/lib/ui/components/ui/Glass.svelte` (line 55)
 2. `libs/engine/src/lib/ui/components/ui/GlassCard.svelte` (line 91)
-3. `apps/landing/src/routes/vineyard/+page.svelte` (line 119)
 
-When you add a preset to `presets.ts`, these three files must also be updated or the new preset won't be selectable through Glass components. This is a known maintenance burden. The canonical source is the `PRESETS` record in `libs/gossamer/src/svelte/presets.ts`.
+When you add a preset to `presets.ts`, these two files must also be updated or the new preset won't be selectable through Glass components. This is a known maintenance burden. The canonical source is the `PRESETS` record in `libs/gossamer/src/svelte/presets.ts`.
 
 ## Color System
 
@@ -256,7 +255,7 @@ CSS `pointer-events: none` on all overlay/cloud canvases ensures the effects nev
 
 When adding a new preset:
 - [ ] Add the entry to the correct category in `presets.ts`
-- [ ] Update the `GossamerPreset` type in `Glass.svelte`, `GlassCard.svelte`, and the vineyard page
+- [ ] Update the `GossamerPreset` type in `Glass.svelte` and `GlassCard.svelte`
 - [ ] Test with both light and dark backgrounds
 - [ ] Check that `sparsity=1.0` and `sparsity=0.0` both render without errors
 

@@ -35,14 +35,13 @@ semantic names to icon components. Swapping packs = changing one file.
 |---------|----------------------------------------|
 | libs/engine | 283 |
 | apps/landing | 61 |
-| libs/vineyard | 21 |
 | apps/clearing | 8 |
 | apps/meadow | 4 |
 | apps/terrarium | 2 |
 | apps/domains | 2 |
 | apps/plant | 1 |
 | _archived/code | 2 |
-| **Total** | **384** |
+| **Total** | **363** |
 
 ### Existing Registries to Consolidate
 
@@ -444,7 +443,6 @@ Quick wins to validate the pattern before the bulk migration.
 
 | Package | Files | Approach |
 |---------|-------|----------|
-| libs/vineyard | 21 | Library — sets the standard for other consumers |
 | apps/clearing | 8 | Small app, straightforward |
 | apps/meadow | 4 | Small app, RSS-focused |
 | apps/terrarium | 2 | Canvas app |

@@ -228,7 +228,6 @@ Some standard Tailwind colors are used intentionally for external brand alignmen
 | `text-purple-500` | Mastodon social icon | Official Mastodon brand color |
 | `text-blue-500` | Bluesky social icon | Official Bluesky brand color |
 | `bg-gray-100 dark:bg-gray-800` | dev.to social icon | dev.to brand is neutral |
-| Purple gradients in Vineyard | Showcase page | Intentional visual distinctiveness |
 | CategoryNav multi-color palette | Category color coding | Intentional — needs dedicated data-viz palette later |
 
 These should be marked with a `/* brand-color: intentional */` comment to prevent future migration attempts.
@@ -274,7 +273,7 @@ Priority order (by violation density):
 
 Verification after each batch: `gw dev ci --affected --fail-fast --diagnose`
 
-### Phase 3: Engine Routes (Arbor Admin + Vineyard)
+### Phase 3: Engine Routes (Arbor Admin)
 
 **Migrate admin page routes in the engine.**
 
@@ -285,7 +284,6 @@ Verification after each batch: `gw dev ci --affected --fail-fast --diagnose`
 | 3 | `libs/engine/src/routes/arbor/pages/new/+page.svelte` | slate | ~8 |
 | 4 | `libs/engine/src/routes/arbor/pages/[slug]/+page.svelte` | slate | ~8 |
 | 5 | `libs/engine/src/routes/arbor/account/PasskeyCard.svelte` | `--color-surface-subtle` (invalid CSS var) | ~2 |
-| 6 | `libs/engine/src/routes/vineyard/+page.svelte` | purple, pink (INTENTIONAL — mark with comment) | ~0 |
 
 ### Phase 4: Landing App
 
@@ -363,7 +361,6 @@ Each phase can be executed as an independent task. For each phase:
 ### Key Decision Points for Agents
 
 - **CategoryNav.svelte**: Uses a rainbow of colors for category coding — mark as intentional, don't migrate. This needs a dedicated data-viz palette later.
-- **Vineyard showcase**: Purple/pink gradients are intentional design choices — mark with comment.
 - **Mastodon/Bluesky/dev.to icons**: Brand colors, never migrate.
 - **Status banners in clearing**: Clear semantic pattern (green=operational, yellow=degraded, orange=partial, red=critical, blue=maintenance) — perfect candidates for `success`/`warning`/`error`/`info` tokens.
 - **manifesto + roadmap pages**: Heavy color usage for visual storytelling — requires careful visual review with Glimpse after migration.
