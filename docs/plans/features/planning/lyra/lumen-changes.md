@@ -60,7 +60,7 @@ Lumen adds an `agent` task. The task controls the default model, the quota line,
 ## Small and worth doing
 
 ### 7. A tool-support flag per model
-`lumen-models.json` has no field saying whether a model can call tools. A model that cannot returns no calls, and nothing says why. Add a `supportsTools` field per model (model facts live in that file), have agent calls pick from models that have it, and check the timeline's default model.
+`lumen-models.json` has no field saying whether a model can call tools. A model that cannot returns no calls, and nothing says why. Add a `supportsTools` field per model (model facts live in that file), have agent calls pick from models that have it, and check the timeline's default model. Also record which `tool_choice` values each model accepts. Nova's OpenCode Go catalog shows this varies: some models accept only `auto`, so a task that forces a tool call must pick a model that allows it.
 
 ### 8. The message cap
 Lumen caps a request at 100 messages. That is fine for the timeline. Lyra's step limit should stay under it, or the cap should be raised.

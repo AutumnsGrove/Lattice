@@ -45,10 +45,21 @@ The timeline skips Lumen's request quota for now (Lumen has a `skipQuota` option
 ### 11. Lumen gets its own `agent` task
 Agent calls use a new task type in Lumen, with its own default model, its own quota line, and its own settings. It does not reuse `summary` or `chat`.
 
+### 12. Lyra runs anywhere, with Grove's pieces as adapters
+Lyra's core defines small slots (model, storage, secrets, waking) and imports nothing from Lumen, Warden, Cloudflare, or Node. Grove supplies adapters (Lumen, Warden, Durable Objects). Other projects supply simpler ones. The list of slots is expected to grow as more places Lyra runs are discussed. Confirmed 2026-11-13. Full description in `adapters.md`.
+
+The first adapters: Lumen, Durable Object storage and alarm, in-memory storage, and a plain OpenAI-style model adapter for other projects. Also expected to grow.
+
+### 13. Cloudflare is the main development target, and Lyra also runs without it
+Cloudflare Workers is the hardest environment (no filesystem, no subprocesses, limits on time and memory), so it is the one to develop against. The core must also run on Node with the same code. Developing against the stricter environment is what keeps the core portable.
+
 ## Proposed, waiting for a yes
 
-### 12. Lyra runs anywhere, with Grove's pieces as adapters
-Lyra's core defines four small slots (model, storage, secrets, waking) and imports nothing from Lumen, Warden, Cloudflare, or Node. Grove supplies adapters (Lumen, Warden, Durable Objects). Other projects supply simpler ones. Full description in `adapters.md`.
+### 14. Model connections: OpenRouter first, OpenCode Go second, chat-completions only at first
+Autumn's two model providers are OpenRouter (primary) and OpenCode Go (an OpenAI-style endpoint with a shared subscription quota, used for example for a GitHub Action runner). Nova found that OpenCode Go is not one dialect: it needed three (chat completions, OpenAI Responses, and Anthropic Messages), because different models on that gateway speak different ones. Proposal: the first model adapter speaks chat completions only, which serves OpenRouter and OpenCode Go with different settings, and only models that speak it are used. Other dialects can come later. See `adapters.md`.
+
+### 15. Usage always carries tokens, and cost carries its source
+OpenCode Go bills against a shared subscription allowance, not per-call dollars, and some models cost more at certain hours. So the model slot reports tokens every time, and reports cost only when the adapter knows it, labeled with where it came from (provider, allowance, or catalog estimate). Limits on tokens, steps, and time always work. A limit on cost works only when the adapter reports real cost. Nova already does this. See `adapters.md`.
 
 ## Not discussed yet
 
