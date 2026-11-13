@@ -25,7 +25,9 @@ export default createGroveViteConfig({
 		},
 	},
 	ssr: {
-		// These packages ship .svelte files that need processing during SSR
-		noExternal: ["lucide-svelte", "@autumnsgrove/gossamer"],
+		// Gossamer ships .svelte files that need processing during SSR.
+		// Icons arrive through @autumnsgrove/prism, which resolves @lucide/svelte
+		// via its `svelte` export condition, so no bare icon entry is needed.
+		noExternal: ["@autumnsgrove/gossamer"],
 	},
 });
