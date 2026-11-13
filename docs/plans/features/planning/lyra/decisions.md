@@ -18,8 +18,8 @@ Lyra names both the core and the agent, the way Nova does. A slight personhood i
 ### 2. What Lyra is, and is not
 Lyra is a tool-calling loop. It is not a coding agent, now or later. It has no subagents, because a single loop with the right tools covers what Forage's pseudo-subagents do (to be confirmed when Forage is ported). It has no skills system. MCP can arrive later as an adapter and stays out of the core. A bash-like scratchpad can arrive later as one more tool (just-bash is the candidate; its core runs in browsers, and it has not been tested on Workers).
 
-### 3. Models are reached through Lumen, as a plain transport
-Lyra never calls a model provider directly. In Grove, every model call goes through Lumen. Lyra itself only needs "something that answers a model request", so Lumen is Grove's setting, not part of Lyra's identity. Lumen has to be upgraded first (see `lumen-changes.md`). Lumen stays a transport: it carries messages and results faithfully and keeps routing, scrubbing, quota, and logging. It never runs the loop or the tools.
+### 3. In Grove, models are reached through Lumen, as a plain transport
+Inside Grove, every model call goes through Lumen. Lyra itself only needs "something that answers a model request", so Lumen is Grove's adapter, not part of Lyra's core (see decision 12 and `adapters.md`). Lumen has to be upgraded first (see `lumen-changes.md`). Lumen stays a transport: it carries messages and results faithfully and keeps routing, scrubbing, quota, and logging. It never runs the loop or the tools.
 
 ### 4. The first job is the timeline summary
 The model writes the words. Tools own anything that has to be exact: repo names, links, and where each vine attaches. A `finish` tool refuses to end the job until everything that happened that day is covered. Full scope in `timeline-first-job.md`.
@@ -31,7 +31,24 @@ A task defines four things: its instructions, its tools, its limits, and what co
 The day's repos, commits, pull requests, issue activity, and line counts all go to the model at the start. Tools are for digging deeper (a diff, an issue thread, earlier days) and for building the page. A very large day (hundreds of commits and PRs) is a known limit. It is accepted for now, because the timeline has one user. A step limit and a clear "too big" failure are enough.
 
 ### 7. Scope first, build later
-Everything is written down before anything is built. The work moves to a new repository once the scope is complete and understood.
+Everything is written down before anything is built. Open questions are settled now, before implementation starts. The work moves to a new repository once the scope is complete and understood.
+
+### 8. Tool results are scrubbed like everything else
+Lumen's privacy scrubber (emails, phone numbers, IP addresses, card and SSN patterns) applies to tool results as well. The data is private, and scrubbing it is the point of that system. Consequence: the scrubber can change text the model needs, so tools should hand the model short handles (for example `c1`, `pr12`, `i34`) that Lyra maps back to real commit hashes, links, and numbers, and the model should never have to copy a long exact string. See the design note in `timeline-first-job.md`.
+
+### 9. Songbird stays as it is
+Songbird checks only what a Wanderer types, for prompt injection. It does not inspect tool results or judge tool calls. That would be extra overhead for something not needed, and it is not what Songbird is for. The defense for tool results is that each task only has the tools it needs, so a poisoned issue comment can at worst mislead a summary.
+
+### 10. Quota and step limits
+The timeline skips Lumen's request quota for now (Lumen has a `skipQuota` option). Lyra's maximum number of steps is an option, and the default in the core is no limit. A task can set its own limit in its recipe. (Suggested, not decided: the timeline recipe sets one, because a confused loop on a Wanderer's own provider key spends their money. Cloudflare's own limits still apply either way.)
+
+### 11. Lumen gets its own `agent` task
+Agent calls use a new task type in Lumen, with its own default model, its own quota line, and its own settings. It does not reuse `summary` or `chat`.
+
+## Proposed, waiting for a yes
+
+### 12. Lyra runs anywhere, with Grove's pieces as adapters
+Lyra's core defines four small slots (model, storage, secrets, waking) and imports nothing from Lumen, Warden, Cloudflare, or Node. Grove supplies adapters (Lumen, Warden, Durable Objects). Other projects supply simpler ones. Full description in `adapters.md`.
 
 ## Not discussed yet
 
@@ -40,7 +57,6 @@ These came out of the research and are waiting for their turn, one at a time:
 - **Limits and interruptions.** What stops a run (steps, tokens, time, cost), and what happens when a run is cut off partway.
 - **The record of a run.** How Autumn sees what Lyra did and why.
 - **Approvals.** How a background run asks for a yes and waits at no cost.
-- **Where Lyra runs.** On Cloudflare's own agent tooling, or on plain Durable Objects behind a small interface. The research leans toward plain and portable, with an optional Grove host.
-- **Billing.** How agent runs count against Lumen's quota (see `lumen-changes.md`).
+- **The Cloudflare adapter's foundation.** Whether it builds on Cloudflare's agent tooling or on plain Durable Objects. A smaller question once decision 12 is settled.
 - **The wire protocol.** Which subset of Nova's frames Lyra speaks.
 - **The new repository.** Name, layout, release process, and test setup.

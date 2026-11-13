@@ -53,6 +53,10 @@ Pull request and issue data needs new GitHub calls in the day's fetch. GitHub ac
 
 Shared with other tasks: `finish`, `search_past_days`, and (later) asking a human. The rest belong to the timeline.
 
+## Design note: handles, not raw ids (proposed)
+
+Lumen's privacy scrubber runs over tool results (decision 8). It can rewrite text that looks like an email, phone number, or IP address, and long hashes and numbers are exactly what it might touch. So tools should give the model short handles, such as `c1` for a commit, `pr12` for a pull request, and `i34` for an issue. Lyra keeps the map back to the real hash, number, and link. The model cites handles and never copies a long exact string, which also stops it mistyping one. This matches the rule that tools own anything exact.
+
 ## Things to check before building
 
 - **Can a bullet carry its own anchor?** The page supports three anchor kinds (`libs/engine/src/lib/utils/gutter.ts`, `parseAnchor`): a header (`## Text`), a numbered paragraph (`paragraph:N`), and a named tag (`anchor:name`). The timeline only uses headers. Whether a single bullet inside a list can carry a tag on the rendered page is not checked. If it cannot, vines need a small page change.

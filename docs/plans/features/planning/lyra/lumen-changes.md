@@ -30,6 +30,7 @@ Today a message role is `system`, `user`, or `assistant` (`types.ts`, line 32; t
 Needed:
 - A `tool` role with a `tool_call_id`.
 - Assistant messages that carry their own `tool_calls`.
+- The scrubber (item 3) must treat tool messages like any other.
 
 This touches the engine types, the worker's input schema, the OpenRouter adapter (`providers/openrouter.ts`, `formatMessages`, line 672, which today only maps role and content), and `RemoteLumenClient`. Without it, step two cannot be sent.
 
@@ -40,27 +41,21 @@ The timeline has already hit this. Its own comment (`workers/timeline-sync/src/g
 
 Needed: `finishReason` on `LumenResponse` and `finish_reason` in the worker's response.
 
-## Decisions needed (small, but they should be made on purpose)
+## Decided (2026-11-13)
 
-### 3. The privacy scrubber and tool results
-`scrubPii` runs over every message and replaces emails, phone numbers, IP addresses, and card and SSN patterns (`pipeline/preprocessor.ts`, called at `client.ts` step 1). Applied to tool results, it could change facts the model needs, or it could be wanted. A per-request `skipPiiScrub` option already exists.
+### 3. The privacy scrubber applies to tool results
+`scrubPii` runs over every message and replaces emails, phone numbers, IP addresses, and card and SSN patterns (`pipeline/preprocessor.ts`, called at `client.ts` step 1). Tool results are scrubbed like everything else, because the data is private and that is the point of the system. The new `tool` messages from item 1 must go through the scrubber.
 
-Options: skip scrubbing for Lyra runs; scrub only text a Wanderer wrote; or scrub tool results too.
+Consequence: scrubbing can alter text the model needs. Tools should give the model short handles, not long exact strings. See `timeline-first-job.md`.
 
-### 4. Songbird and tool results
-Songbird, the injection check, inspects only the user's content (`extractUserContent`, `client.ts`, around line 118). Tool results carry text written by other people (issue comments and PR descriptions on public repos), which is the usual way an injection arrives.
-
-Options: leave it alone for now (the timeline has one user), or check tool results later.
+### 4. Songbird is unchanged
+Songbird checks only what a Wanderer types (`extractUserContent`, `client.ts`, around line 118). It does not inspect tool results or judge tool calls. A background job like the timeline has no typed input, so Songbird is simply not switched on for it.
 
 ### 5. Quota
-Quota counts requests per day, per tier, per task (`quota/limits.ts`). A ten-step run costs ten requests. A `skipQuota` option exists.
+The timeline skips Lumen's request quota for now (`skipQuota`). Quota counts requests per day, per tier, per task (`quota/limits.ts`), so a ten-step run would cost ten requests. Lyra's own step limit is separate: optional, with no default in the core. A quota rule for other users is a later question, and nobody else uses this yet.
 
-For the timeline, skipping is fine. The real rule (count a run as one request, or count steps, or budget by cost) should be settled before anyone else uses Lyra.
-
-### 6. Which task Lyra's calls use
-Lumen's tasks today are moderation, generation, summary, embedding, chat, image, code, and transcription. The task controls the default model, the quota line, and the Songbird context.
-
-Options: reuse `summary` or `chat`, or add an `agent` task.
+### 6. Agent calls get their own task
+Lumen adds an `agent` task. The task controls the default model, the quota line, and the Songbird context, so the new one needs: an entry in the task registry, a line in `quota/limits.ts`, and a default model that supports tools (item 7).
 
 ## Small and worth doing
 
@@ -76,6 +71,10 @@ Lumen caps a request at 100 messages. That is fine for the timeline. Lyra's step
 - A decision-model task or text-to-speech.
 - Idempotency keys. A resend after an interruption costs one duplicate call, which is harmless here.
 - `mcp.ts`. It is a stub, dead since #471 was closed as not planned. Leave it until Autumn says to remove it.
+
+## Not specific to Lumen
+
+Items 1 and 2 are exactly what Lyra's "model" slot needs from any provider: tool turns in the conversation, and a reason the model stopped (see `adapters.md`). They are written as Lumen changes because Lumen is the first adapter, not because they are Lumen's idea.
 
 ## Notes for the design
 
