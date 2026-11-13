@@ -57,7 +57,6 @@
 		csrfToken?: string;
 		showTimeline: boolean;
 		showGallery: boolean;
-		humanJsonEnabled: boolean;
 		preferredSeason: string | null;
 		dbAccessError: boolean;
 		lanternData: {
@@ -213,9 +212,6 @@
 	{#if context?.type === "tenant"}
 		<title>{siteName}</title>
 		<link rel="alternate" type="application/rss+xml" title="{siteName} RSS Feed" href="/api/feed" />
-		{#if data.humanJsonEnabled}
-			<link rel="human-json" href="/human.json" />
-		{/if}
 		<!-- Favicons + theme-color: always rendered here to avoid duplicates with app.html (#1304) -->
 		<link rel="icon" type="image/svg+xml" href={favicons.svg} />
 		<link rel="icon" type="image/png" sizes="32x32" href={favicons.png32} />

@@ -47,9 +47,6 @@ export const load: LayoutServerLoad = async ({ locals, platform, url, cookies })
 	// Track database access failures for admin-only error banners
 	let dbAccessError = false;
 
-	// human.json enabled state (for <link rel="human-json"> in head)
-	let humanJsonEnabled = false;
-
 	// Preferred season for favicons/PWA icons (#1304)
 	let preferredSeason: string | null = null;
 
@@ -152,8 +149,6 @@ export const load: LayoutServerLoad = async ({ locals, platform, url, cookies })
 						for (const row of settingsResult.results) {
 							siteSettings[row.setting_key] = row.setting_value;
 						}
-						// Check human.json enabled flag from site_settings
-						humanJsonEnabled = siteSettings.human_json_enabled === "true";
 						// Extract preferred season for seasonal favicons (#1304)
 						preferredSeason = resolveSeasonPreference(siteSettings.preferred_season);
 					}
@@ -260,7 +255,6 @@ export const load: LayoutServerLoad = async ({ locals, platform, url, cookies })
 		// Uses hoisted booleans since Promise.all results are block-scoped
 		showTimeline: timelineEnabled,
 		showGallery: galleryEnabled,
-		humanJsonEnabled,
 		preferredSeason,
 		dbAccessError,
 		lanternData: locals.user
