@@ -40,8 +40,6 @@ interface PostRecord {
 	updated_at?: number;
 	font?: string;
 	featured_image?: string;
-	storage_location?: string;
-	r2_key?: string;
 	blaze?: string;
 	spark_prompt?: string | null;
 }
@@ -264,23 +262,6 @@ async function fetchAndProcessPost(
 
 	if (!post) {
 		return null;
-	}
-
-	// Detect posts whose content was migrated to cold storage (R2).
-	// The storage tier migration system has been disabled, but posts that were
-	// already migrated will have empty content in D1. Log a clear warning so
-	// this is diagnosable, and show a fallback message instead of a blank page.
-	if (
-		post.storage_location &&
-		post.storage_location !== "hot" &&
-		!post.markdown_content &&
-		!post.html_content
-	) {
-		console.error(
-			`[garden] Post "${post.slug}" has storage_location="${post.storage_location}" ` +
-				`with empty content in D1. Content may be in R2 at key: ${post.r2_key || "unknown"}. ` +
-				`Run the recovery migration to restore content from R2 back to D1.`,
-		);
 	}
 
 	// Extract headers from markdown for TOC (this generates IDs)
