@@ -3,7 +3,7 @@ title: What is Passage?
 description: The routing layer that makes Grove's subdomains work like magic
 category: help
 section: how-it-works
-lastUpdated: '2026-01-25'
+lastUpdated: '2026-11-13'
 keywords:
   - passage
   - routing
@@ -31,7 +31,7 @@ Think of it like a river with many channels. You push off from the shore, and th
 
 Most websites work like street addresses. One address, one building. If you want ten buildings, you need ten addresses.
 
-Grove wanted something different. We wanted `autumn.grove.place` and `meadow.grove.place` and `heartwood.grove.place` to all exist under one umbrella, each leading somewhere distinct. The technology we use doesn't support this out of the box. It expects one address per destination.
+Grove wanted something different. We wanted `autumn.grove.place` and `porch.grove.place` and `heartwood.grove.place` to all exist under one umbrella, each leading somewhere distinct. The technology we use doesn't support this out of the box. It expects one address per destination.
 
 Passage makes the impossible work anyway.
 
@@ -49,7 +49,7 @@ It sits at the entrance to Grove, catches every incoming request, and figures ou
 
 Passage is a Cloudflare Worker that handles all `*.grove.place` wildcard traffic. When a request arrives, it extracts the subdomain, checks a routing table, and proxies the request to the correct backend service. An `X-Forwarded-Host` header tells the destination which subdomain was originally requested.
 
-Known subdomains (like `heartwood`, `meadow`, or `arbor`) route to specific services. Unknown subdomains route to [[lattice|Lattice]], which looks up whether that name belongs to a tenant's blog.
+Known subdomains (like `heartwood`, `porch`, or `arbor`) route to specific services. Unknown subdomains route to [[lattice|Lattice]], which looks up whether that name belongs to a tenant's blog.
 
 The CDN subdomain (`cdn.grove.place`) serves files directly from R2 storage instead of proxying. Special handling prevents certain file types from executing in browsers.
 

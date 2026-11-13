@@ -3,7 +3,7 @@ title: Refreshing Your Live Posts
 description: How to make your edits visible immediately after updating a published post
 category: help
 section: writing-publishing
-lastUpdated: '2026-05-03'
+lastUpdated: '2026-11-13'
 keywords:
   - refresh
   - cache
@@ -68,7 +68,7 @@ The More menu has two similar-sounding options:
 
 **Refresh live version** - Clears caches so visitors see your latest edits. Doesn't change the post's published date or feed position.
 
-**Re-publish (bump in feeds)** - Updates the published timestamp so the post appears fresh in RSS feeds and Meadow. Doesn't clear caches.
+**Re-publish (bump in feeds)** - Updates the published timestamp so the post appears fresh in RSS feeds. Doesn't clear caches.
 
 Use "Refresh" when you want edits to show up. Use "Re-publish" when you want the post to climb back to the top of feeds.
 

@@ -3,7 +3,7 @@ title: Upgrading or Downgrading Your Plan
 description: How to change your Grove subscription plan
 category: help
 section: account-billing
-lastUpdated: "2025-12-24"
+lastUpdated: '2026-11-13'
 keywords:
   - upgrade
   - downgrade
@@ -40,7 +40,7 @@ That's it. No hoops, no retention flows, no "are you sure?" five times.
 
 | Upgrade to          | You gain                                                                                                         |
 | ------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Wanderer → Seedling | 75 more posts, ~900 MB more storage, Meadow sharing, unlimited comments, no ads guarantee                        |
+| Wanderer → Seedling | 75 more posts, ~900 MB more storage, unlimited comments, no ads guarantee                                |
 | Seedling → Sapling  | Unlimited posts, 4 GB storage, 7 more curated themes (coming soon), email forwarding, Centennial eligibility     |
 | Sapling → Oak       | 15 GB more storage, theme customizer (coming soon), custom domain, Analytics                                     |
 | Oak → Evergreen     | 80 GB more storage, custom font uploads (coming soon), domain included (we register it), dedicated support hours |

@@ -71,7 +71,7 @@ Vague reassurances feel empty. Specifics feel real:
 | Article Type | Tone | Example |
 |--------------|------|---------|
 | Getting Started | Encouraging, low-pressure | "Doesn't have to be perfect. First posts rarely are." |
-| How-To | Clear, practical | "Click **Settings → Meadow** to enable." |
+| How-To | Clear, practical | "Click **Settings → Themes** to choose one." |
 | Troubleshooting | Calm, empathetic | "If it's not working, let's figure out why." |
 | Privacy/Legal | Transparent, specific | "We don't track your visitors. No analytics scripts." |
 | Billing | Honest, no-pressure | "Seedling is a real plan, not a trial." |
@@ -85,7 +85,7 @@ Vague reassurances feel empty. Specifics feel real:
 
 **UI elements**
 - Bold for clickable things: **Settings**, **Publish**, **New Post**
-- Use `→` for navigation paths: **Settings → Meadow → Enable**
+- Use `→` for navigation paths: **Settings → Themes → Choose**
 
 **Lists**
 - Bullet points for features, options, non-sequential items
@@ -155,7 +155,6 @@ Avoid:
 | Customization | `customization` | Themes, colors, fonts |
 | Blog Settings | `settings` | Configuration, SEO, domains |
 | Comments & Interaction | `comments` | Moderation, blocking, notifications |
-| Meadow (Social) | `meadow` | Community feed features |
 | Billing & Plans | `billing` | Plans, payments, upgrades |
 | Your Data | `data` | Export, deletion, privacy rights |
 | Troubleshooting | `troubleshooting` | Common issues, fixes |
@@ -202,8 +201,13 @@ Avoid:
 26. `blocking-users` — How to block problematic users
 27. `notifications` — Notification preferences and management
 
-### Meadow / Social (5 articles)
-28. `what-is-meadow` — ✅ **Partially covered** in what-is-grove.md
+### Meadow / Social (5 articles) — deferred
+
+Meadow is parked, not built. These stay unwritten until the junk-drawer review in #1637
+settles what comes back; the slugs below are kept so nobody re-invents near-duplicates
+in the meantime.
+
+28. `what-is-meadow` — covered negatively in what-is-grove.md ("what Grove isn't")
 29. `opting-into-the-feed` — How to share posts to Meadow
 30. `reactions-and-voting` — Community engagement features
 31. `your-meadow-profile` — Profile settings for Meadow

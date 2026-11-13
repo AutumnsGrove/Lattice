@@ -4,7 +4,7 @@ description: How Grove inverts every manipulation pattern used by algorithmic pl
 category: help
 section: philosophy-vision
 icon: shield
-lastUpdated: '2026-01-14'
+lastUpdated: '2026-11-13'
 keywords:
   - algorithm
   - twitter
@@ -68,7 +68,7 @@ No machine learning. No engagement prediction. No controversy amplification.
 
 ### No algorithmic injection
 
-You see posts from accounts you follow. Period. No "recommended for you." No viral content from strangers injected into your timeline. If you want to discover new writers, you do that intentionally through Meadow's community feed (coming in [[flow|Full Bloom]]) or search, not through algorithmic force-feeding.
+You see posts from accounts you follow. Period. No "recommended for you." No viral content from strangers injected into your timeline. If you want to discover new writers, you do that intentionally—through search, through a link someone chose to share, through a friend of a friend's grove. Never through algorithmic force-feeding.
 
 ### No filter bubbles
 
@@ -76,7 +76,7 @@ There are no clusters, no communities assigned by algorithm, no invisible boxes.
 
 ### No addiction mechanics
 
-When Meadow launches in [[flow|Full Bloom]], reactions and comments will be private by default. Only the author will see them. This breaks the dopamine loop entirely. You won't be able to obsessively refresh for likes.
+If Grove builds a community feed, reactions there will be private by default. Only the author will see them. This breaks the dopamine loop entirely. You won't be able to obsessively refresh for likes.
 
 No public follower counts. No leaderboards. No trending metrics. The anxiety of performance is architecturally impossible.
 

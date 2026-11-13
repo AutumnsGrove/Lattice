@@ -3,7 +3,7 @@ title: Drafts and Scheduling
 description: How to save drafts and schedule posts for later
 category: help
 section: writing-publishing
-lastUpdated: '2026-03-11'
+lastUpdated: '2026-11-13'
 keywords:
   - draft
   - drafts
@@ -77,7 +77,6 @@ When you're ready to go live:
 Published posts:
 - Appear on your blog's homepage
 - Show up in your RSS feed
-- Can appear in Meadow (if you've enabled sharing)
 
 **Editing published posts:** Changes are saved immediately, but might take up to an hour to appear on your live site due to caching. If you need edits to show up right away, use the **Refresh live version** button in the More menu. See [[refreshing-live-posts|Refreshing Your Live Posts]] for details.
 

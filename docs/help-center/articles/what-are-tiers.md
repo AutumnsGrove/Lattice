@@ -3,7 +3,7 @@ title: What are Tiers?
 description: Understanding Grove's subscription tiers from Seedling to Evergreen
 category: help
 section: how-it-works
-lastUpdated: "2026-01-28"
+lastUpdated: '2026-11-13'
 keywords:
   - tiers
   - pricing
@@ -40,7 +40,6 @@ Wanderer gives you:
 - 100 MB storage
 - Your own grove.place address
 - RSS feed
-- Meadow access for browsing and reacting
 
 It's enough to find out if this is home.
 

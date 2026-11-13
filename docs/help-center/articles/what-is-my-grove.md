@@ -3,7 +3,7 @@ title: What is my Grove?
 description: Your personal space in the Grove ecosystem—your corner of the forest
 category: help
 section: getting-started
-lastUpdated: '2026-02-02'
+lastUpdated: '2026-11-13'
 keywords:
   - grove
   - personal space
@@ -40,6 +40,8 @@ Your grove contains:
 - **Your [[curios]]** — guestbooks, shrines, the delightful oddities that make a space feel lived-in
 
 Everything at `yourname.grove.place` is part of your grove.
+
+![An About page on a Grove blog — a quiet room off the main path](https://cdn.grove.place/docs/help/blog-about.png)
 
 ## The metaphor chain
 
