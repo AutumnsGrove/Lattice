@@ -181,6 +181,7 @@ interface ScannedArticle {
 	exhibitWing: string | null;
 	icon: string | null;
 	sortOrder: number;
+	status: string | null;
 }
 
 function extractHeaders(markdown: string): Array<{ level: number; text: string; id: string }> {
@@ -266,6 +267,7 @@ function scanDirectory(dirPath: string, category: string): ScannedArticle[] {
 						exhibitWing: data.exhibitWing || null,
 						icon: data.icon || null,
 						sortOrder: data.order ?? 0,
+						status: data.status === "planned" ? "planned" : null,
 					});
 				} catch (err) {
 					console.error(`  ✗ Error processing ${fullPath}:`, (err as Error).message);
@@ -343,8 +345,8 @@ async function upsertArticle(article: ScannedArticle): Promise<void> {
 			(slug, category, title, description, html, headers_json, excerpt,
 			 reading_time, last_updated, content_hash, related_json,
 			 spec_category, help_section, exhibit_wing, icon, sort_order,
-			 published, updated_at)
-		VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, 1, datetime('now'))`,
+			 published, status, updated_at)
+		VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, 1, ?17, datetime('now'))`,
 		[
 			article.slug,
 			article.category,
@@ -362,6 +364,7 @@ async function upsertArticle(article: ScannedArticle): Promise<void> {
 			article.exhibitWing,
 			article.icon,
 			article.sortOrder,
+			article.status,
 		],
 	);
 }

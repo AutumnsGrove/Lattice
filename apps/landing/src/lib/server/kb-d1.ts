@@ -26,6 +26,7 @@ interface KBArticleRow {
 	exhibit_wing: string | null;
 	icon: string | null;
 	sort_order: number;
+	status: string | null;
 }
 
 /** Convert a D1 row to a Doc (listing metadata, no HTML) */
@@ -45,6 +46,8 @@ function rowToDoc(row: KBArticleRow): Doc {
 	if (row.spec_category) doc.specCategory = row.spec_category as Doc["specCategory"];
 	if (row.help_section) doc.section = row.help_section as Doc["section"];
 	if (row.exhibit_wing) doc.exhibitWing = row.exhibit_wing as Doc["exhibitWing"];
+	// Only "planned" changes the rendering; anything else is treated as ordinary docs
+	if (row.status === "planned") doc.status = "planned";
 
 	return doc;
 }
@@ -75,7 +78,7 @@ function safeParseJson<T>(json: string | null | undefined): T | null {
 
 const LISTING_COLUMNS = `slug, category, title, description, excerpt,
 	reading_time, last_updated, related_json, spec_category, help_section,
-	exhibit_wing, icon, sort_order`;
+	exhibit_wing, icon, sort_order, status`;
 
 /**
  * Get a single article by category and slug.
@@ -90,7 +93,7 @@ export async function getArticle(
 		.prepare(
 			`SELECT slug, category, title, description, html, headers_json,
 				excerpt, reading_time, last_updated, content_hash, related_json,
-				spec_category, help_section, exhibit_wing, icon, sort_order
+				spec_category, help_section, exhibit_wing, icon, sort_order, status
 			FROM kb_articles
 			WHERE category = ?1 AND slug = ?2 AND published = 1`,
 		)
