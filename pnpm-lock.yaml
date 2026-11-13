@@ -154,9 +154,6 @@ importers:
       '@autumnsgrove/curios':
         specifier: workspace:*
         version: link:../../libs/curios
-      '@autumnsgrove/foliage':
-        specifier: workspace:*
-        version: link:../../libs/foliage
       '@autumnsgrove/grove-markdown':
         specifier: workspace:*
         version: link:../../libs/grove-markdown

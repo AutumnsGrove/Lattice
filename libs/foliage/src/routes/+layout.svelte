@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { themeStore } from "../lib/stores/theme.js";
-
 	let { children } = $props();
 
-	// Extract the actual store from themeStore object
-	const { resolvedTheme, toggle } = themeStore;
+	// Local toggle for the preview harness only. The package no longer ships a
+	// theme store — real apps use engine's `theme.svelte.ts` (runes).
+	let dark = $state(false);
 </script>
 
 <svelte:head>
@@ -20,14 +19,14 @@
 	/>
 </svelte:head>
 
-<div class="app" class:dark={$resolvedTheme === "dark"}>
+<div class="app" class:dark>
 	<header>
 		<h1>🌿 Foliage Theme Preview</h1>
 		<nav>
 			<a href="/">Gallery</a>
 			<a href="/components">Components</a>
-			<button onclick={() => toggle()}>
-				{$resolvedTheme === "dark" ? "☀️ Light" : "🌙 Dark"}
+			<button onclick={() => (dark = !dark)}>
+				{dark ? "☀️ Light" : "🌙 Dark"}
 			</button>
 		</nav>
 	</header>

@@ -7,9 +7,6 @@ export type * from "./types.js";
 // Themes
 export * from "./themes/index.js";
 
-// Stores
-export * from "./stores/index.js";
-
 // Components
 export * from "./components/index.js";
 
