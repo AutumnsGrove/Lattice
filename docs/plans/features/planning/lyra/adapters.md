@@ -6,7 +6,7 @@ category: features
 
 # Lyra adapters
 
-Last updated: 2026-11-13. Status: slots confirmed (decision 12). The model details (decisions 14 and 15) are proposed.
+Last updated: 2026-11-13. Status: slots confirmed (decision 12). Model details confirmed (decisions 14 and 15). A shell slot is proposed (decision 17).
 
 ## The goal
 
@@ -31,14 +31,14 @@ The list is expected to grow as more places Lyra runs are discussed.
 
 Cloudflare Workers is the main development target, because it is the hardest environment: no filesystem, no subprocesses, and limits on time and memory. The same core also runs on Node. Developing against the stricter environment keeps the core portable.
 
-One example of the second case is a GitHub Action runner doing a review job with OpenCode Go, which Autumn already pays for. A runner has a real filesystem, so tools that read files make sense there and not on Workers. Tools belong to tasks (decision 5), so a task can use host-specific tools without the core knowing. Nova already has a pull request review action (`nova action review`), so the runner case is mainly a useful test of the Node side.
+One example of the second case is a GitHub Action runner doing a review job with OpenCode Go, which Autumn already pays for. A runner has a real filesystem and a real shell, so file tools and a bash tool make sense there and not on Workers (decision 16). Tools belong to tasks (decision 5), so a task can use host-specific tools without the core knowing. Nova already has a pull request review action (`nova action review`), so the runner case is mainly a useful test of the Node side.
 
-## Model connections (proposed, decisions 14 and 15)
+## Model connections (decisions 14 and 15)
 
 Autumn's two providers are OpenRouter (primary) and OpenCode Go. Nova has already worked through both, and three lessons carry over. The code does not (Nova is Go), only the shape.
 
-- **OpenCode Go is not one dialect.** Nova needed three streaming dialects for it (chat completions, OpenAI Responses, Anthropic Messages), because different models on the gateway speak different ones. Proposal: Lyra's first model adapter speaks chat completions only. That serves OpenRouter and OpenCode Go with different settings (address, key, model ids), and only models that speak chat completions are used at first.
-- **Cost is not always dollars per call.** OpenCode Go draws on a shared subscription allowance, has a monthly limit per model, and some models cost more at certain hours. Nova's usage record carries tokens, a cost, and the cost's source (`provider`, `allowance`, or `catalog`). Proposal: the same shape. Tokens are always reported. Cost is reported only when known, with its source. Limits on tokens, steps, and time always work, and a cost limit works only when real cost is reported.
+- **OpenCode Go is not one dialect.** Nova needed three streaming dialects for it (chat completions, OpenAI Responses, Anthropic Messages), because different models on the gateway speak different ones. Decided: Lyra's first model adapter speaks chat completions only. That serves OpenRouter and OpenCode Go with different settings (address, key, model ids), and only models that speak chat completions are used at first.
+- **Cost is not always dollars per call.** OpenCode Go draws on a shared subscription allowance, has a monthly limit per model, and some models cost more at certain hours. Nova's usage record carries tokens, a cost, and the cost's source (`provider`, `allowance`, or `catalog`). Decided: the same shape. Tokens are always reported. Cost is reported only when known, with its source. Limits on tokens, steps, and time always work, and a cost limit works only when real cost is reported.
 - **Models differ in small ways the adapter must know.** Which `tool_choice` values a model accepts varies (some accept only `auto`). Whether a repeated prompt prefix is cached automatically or needs a marker varies. The adapter holds this per model. The core never sends options a model might reject.
 
 ## Where Warden sits
@@ -74,6 +74,6 @@ Four small interfaces, and one real risk: Lumen-shaped ideas leaking into the co
 
 ## Open
 
-- Whether file-reading tools are allowed on the Node side, as task-specific tools that never enter the core.
+- Whether to add a fifth, optional shell slot (decision 17): run a command, return its output. The tool is `bash` on every host, a real shell on Node, and absent on Workers at first.
 - Packaging inside the new repository (one package with separate entry points, or several). Decided with the repository layout.
 - Whether the Cloudflare adapter builds on Cloudflare's agent tooling or on plain Durable Objects. A smaller question, decided later.

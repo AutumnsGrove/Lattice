@@ -53,13 +53,23 @@ The first adapters: Lumen, Durable Object storage and alarm, in-memory storage, 
 ### 13. Cloudflare is the main development target, and Lyra also runs without it
 Cloudflare Workers is the hardest environment (no filesystem, no subprocesses, limits on time and memory), so it is the one to develop against. The core must also run on Node with the same code. Developing against the stricter environment is what keeps the core portable.
 
-## Proposed, waiting for a yes
-
 ### 14. Model connections: OpenRouter first, OpenCode Go second, chat-completions only at first
-Autumn's two model providers are OpenRouter (primary) and OpenCode Go (an OpenAI-style endpoint with a shared subscription quota, used for example for a GitHub Action runner). Nova found that OpenCode Go is not one dialect: it needed three (chat completions, OpenAI Responses, and Anthropic Messages), because different models on that gateway speak different ones. Proposal: the first model adapter speaks chat completions only, which serves OpenRouter and OpenCode Go with different settings, and only models that speak it are used. Other dialects can come later. See `adapters.md`.
+Autumn's two model providers are OpenRouter (primary) and OpenCode Go (an OpenAI-style endpoint with a shared subscription quota, used for example on a GitHub Action runner). Nova found that OpenCode Go is not one dialect: it needed three (chat completions, OpenAI Responses, and Anthropic Messages), because different models on that gateway speak different ones. The first model adapter speaks chat completions only, which serves OpenRouter and OpenCode Go with different settings, and only models that speak it are used. Other dialects are added when a model that needs one is tested. Confirmed 2026-11-13. See `adapters.md`.
 
 ### 15. Usage always carries tokens, and cost carries its source
-OpenCode Go bills against a shared subscription allowance, not per-call dollars, and some models cost more at certain hours. So the model slot reports tokens every time, and reports cost only when the adapter knows it, labeled with where it came from (provider, allowance, or catalog estimate). Limits on tokens, steps, and time always work. A limit on cost works only when the adapter reports real cost. Nova already does this. See `adapters.md`.
+OpenCode Go bills against a shared subscription allowance, not per-call dollars, and some models cost more at certain hours. So the model slot reports tokens every time, and reports cost only when the adapter knows it, labeled with where it came from (provider, allowance, or catalog estimate). Limits on tokens, steps, and time always work. A limit on cost works only when the adapter reports real cost. Nova already does this. Confirmed 2026-11-13.
+
+### 16. File and shell tools are allowed, as task-level tools that depend on the host
+Tools belong to tasks, and some tools only make sense on some hosts. A task running on a Node host, such as a GitHub Action runner doing a review, can have file and shell tools. A Cloudflare Worker has no filesystem and no subprocesses, so it does not. None of this enters the core. No dedicated write tool is planned, because tools are shaped to what each task needs.
+
+For a runner task, Autumn wants a real bash tool. It needs to run tests, and models are trained on `grep`, `find`, and `glob`, so they use those more readily than custom search tools when the shell is allowed. Confirmed 2026-11-13.
+
+Two consequences to carry forward. First, bash is free-form, so it is the one tool that cannot be validated the way the timeline's tools are. The working rule: validated tools for tasks where exactness matters (the timeline), a shell for exploratory tasks (a review). Second, a shell can write and run anything the host allows, so it needs a permission policy. That belongs to the approvals discussion, and Nova's permission model is the reference.
+
+## Proposed, waiting for a yes
+
+### 17. An optional "shell" slot
+Add a fifth slot, optional: run a command and return its output. A task that needs a shell says so, and fails clearly on a host that has none. The tool is called `bash` everywhere, so a task's recipe does not change between hosts. On Node the slot runs a real shell. On Workers there is none at first (a virtual shell such as just-bash could fill it later, untested). This keeps subprocess code out of the core.
 
 ## Not discussed yet
 
