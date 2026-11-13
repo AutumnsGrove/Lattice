@@ -104,7 +104,7 @@ if [ -f "package.json" ]; then
     echo ""
 
     # Core packages to type check (most critical, frequently changed)
-    # Other packages (domains, vineyard, og-worker, durable-objects, post-migrator)
+    # Other packages (domains, og-worker, durable-objects, post-migrator)
     # are checked in CI — they're more stable and rarely break in isolation
     # Map package names to their directories in the new monorepo structure
     declare -A PKG_DIRS=(

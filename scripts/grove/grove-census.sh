@@ -271,7 +271,6 @@ remap_package() {
         ui)               echo "libs/engine" ;;  # UI was merged into engine
         foliage)          echo "libs/foliage" ;;
         gossamer)         echo "libs/gossamer" ;;
-        vineyard)         echo "libs/vineyard" ;;
         infra)            echo "libs/infra" ;;
         shutter)          echo "libs/shutter" ;;
         # Apps

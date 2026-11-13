@@ -50,7 +50,6 @@ while IFS= read -r f; do
         libs/foliage/src/lib/components/ColorPanel*) continue ;;
         libs/foliage/src/lib/components/CommunityThemeBrowser*) continue ;;
         libs/foliage/src/routes/*) continue ;;
-        libs/vineyard/*) continue ;;
         libs/gossamer/*) continue ;;
         libs/engine/src/lib/config/presets.ts) continue ;;
         libs/engine/src/lib/heartwood/colors.ts) continue ;;
@@ -100,7 +99,7 @@ if [ -n "$hits" ]; then
     echo ""
     echo -e "$hits"
     echo ""
-    echo -e "${YELLOW}Remaining violations are in internal tooling (foliage, vineyard)."
+    echo -e "${YELLOW}Remaining violations are in internal tooling (foliage)."
     echo -e "Add // accent-ok or <!-- accent-ok --> to suppress.${NC}"
     exit 1
 else

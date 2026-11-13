@@ -70,7 +70,6 @@ flowchart TB
     end
 
     subgraph libs["Libraries & Tools"]
-        VINEYARD["Vineyard<br/>Component docs"]
         TERRARIUM["Terrarium<br/>Showcase"]
         MIGRATOR["post-migrator<br/>Data migration"]
     end

@@ -319,18 +319,6 @@ When you've been part of Grove long enough to put down real roots (12 months of 
 
 _A hundred years of home._
 
-### Vineyard
-
-**Component Showcase** · `grove.place/vineyard`
-**Standard:** Showcase
-**Waystone:** Grove's component showcase — a live gallery of every UI piece, nature asset, and design tool available in the platform.
-
-A vineyard is where vines are cultivated and their fruit displayed. Row upon row, each variety labeled, visitors invited to taste and admire.
-
-Vineyard is Grove's component showcase—where you see what's growing in the Lattice, what's ready for use, and what's coming into season. Every UI component, every nature asset, documented and demonstrated. It's where developers come to understand what's available.
-
-_See what's ready to harvest._
-
 ---
 
 ## Content & Community
@@ -935,7 +923,6 @@ _In a forest full of harvesters, this grove stays shaded._
 | **Trails**     | Platform     | Personal roadmaps              | username.grove.place/trail      |
 | **Trace**      | Platform     | Inline feedback                | _(integrated)_                  |
 | **Centennial** | Platform     | 100-year preservation          | _(earned status)_               |
-| **Vineyard**   | Platform     | Component showcase             | grove.place/vineyard            |
 | **Flow**       | Content      | Writing sanctuary              | _(Arbor editor)_                |
 | **Terrarium**  | Content      | Creative canvas                | grove.place/terrarium           |
 | **Weave**      | Content      | Visual composition             | _(part of Terrarium)_           |
@@ -1033,7 +1020,6 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Zephyr          | GroveZephyr     |
 | Shade           | GroveShade      |
 | Etch            | GroveEtch       |
-| Vineyard        | GroveShowcase   |
 | Flow            | GroveFlow       |
 | Centennial      | GroveCentennial |
 | Petal           | GrovePetal      |

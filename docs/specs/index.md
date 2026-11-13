@@ -66,7 +66,6 @@ Core  Tools  Docs
 | **[Vista Observability](vista-observability.md)** | Observability dashboard implementation details | Active |
 | **[Vista LoadTest](vista-loadtest-spec.md)** | Load testing integration | Active |
 | **[Rings](rings-spec.md)** | Privacy-first analytics system | Active |
-| **[Vineyard](vineyard-spec.md)** | Component showcase and load test integration | Active |
 | **[Glimpse](glimpse-spec.md)** | Automated screenshot capture via Playwright | Active |
 
 ### Customization & Theming

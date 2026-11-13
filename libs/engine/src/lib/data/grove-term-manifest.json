@@ -223,18 +223,6 @@
     ],
     "standardTerm": "100-Year Preservation"
   },
-  "vineyard": {
-    "slug": "vineyard",
-    "term": "Vineyard",
-    "category": "platform",
-    "tagline": "Component Showcase",
-    "definition": "Grove's component showcase — a live gallery of every UI piece, nature asset, and design tool available in the platform.",
-    "seeAlso": [
-      "lattice",
-      "vines"
-    ],
-    "standardTerm": "Showcase"
-  },
   "flow": {
     "slug": "flow",
     "term": "Flow",

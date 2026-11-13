@@ -300,7 +300,6 @@ Use glow metaphors:
 
 **Natural Pairings:**
 - `chameleon-adapt` — If the post needs visual assets (screenshots, before/after)
-- `grove-vineyard` — If a feature deserves a showcase page
 
 ---
 

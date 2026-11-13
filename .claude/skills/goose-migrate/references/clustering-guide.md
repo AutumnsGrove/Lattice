@@ -52,7 +52,6 @@ help the goose think in terms of user-facing outcomes:
 - **Porch** — support system
 - **Wisp** / **Fireside** — writing assistant / conversational drafting
 - **Trails** — personal roadmaps
-- **Vineyard** — component showcase
 
 **Content & Community** (writing, talking, sharing):
 - **Flow** — the writing editor

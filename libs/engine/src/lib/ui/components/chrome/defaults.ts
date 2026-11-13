@@ -86,7 +86,6 @@ export const DEFAULT_MOBILE_NAV_ITEMS: NavItem[] = [
 // Resources section (desktop footer, landing only)
 export const LANDING_RESOURCE_LINKS: FooterLink[] = [
 	{ href: "/workshop", label: "Workshop", icon: blazeIcons.hammer, termSlug: "workshop" },
-	{ href: "/vineyard", label: "Vineyard", icon: chromeIcons.grape, termSlug: "vineyard" },
 	{ href: "/forest", label: "Forest", icon: forestsIcon, termSlug: "forests" },
 	{ href: "/journey", label: "Journey", icon: natureIcons.footprints },
 	{ href: "/grove", label: "Grove", icon: natureIcons.treePine },
@@ -126,7 +125,6 @@ export const LANDING_CONNECT_LINKS: FooterLink[] = [
 // Resources section (mobile menu, landing only)
 export const LANDING_MOBILE_RESOURCE_LINKS: FooterLink[] = [
 	{ href: "/workshop", label: "Workshop", icon: blazeIcons.hammer, termSlug: "workshop" },
-	{ href: "/vineyard", label: "Vineyard", icon: chromeIcons.grape, termSlug: "vineyard" },
 	{ href: "/forest", label: "Forest", icon: forestsIcon, termSlug: "forests" },
 	{ href: "/journey", label: "Journey", icon: natureIcons.footprints },
 	{ href: "/grove", label: "Grove", icon: natureIcons.treePine },

@@ -14,7 +14,6 @@
     "jsx": "react-jsx"
   },
   "exclude": [
-    "src/routes/vineyard/**/*",
     "**/*.test.ts",
     "**/__mocks__/**",
     "src/lib/ui/components/ui/Button.svelte",

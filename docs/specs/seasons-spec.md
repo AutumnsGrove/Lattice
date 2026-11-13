@@ -168,7 +168,6 @@ Grove's monorepo contains five publishable packages at different maturity stages
 | `@autumnsgrove/server-sdk` | 0.1.0 | `libs/server-sdk` | Workspace only | Infra SDK — GroveDatabase, GroveStorage, GroveKV |
 | `@autumnsgrove/foliage` | 0.1.0 | `libs/foliage` | Workspace only | Theme system and visual customization |
 | `@autumnsgrove/gossamer` | 0.2.0 | `libs/gossamer` | Workspace only | ASCII visual effects for Glass UI |
-| `@autumnsgrove/vineyard` | 0.0.1 | `libs/vineyard` | Workspace only | Component showcase library |
 
 Only `@autumnsgrove/lattice` currently publishes to GitHub Packages. The remaining packages use `workspace:*` references and are consumed within the monorepo. They may be published independently as they mature.
 

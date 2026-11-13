@@ -221,7 +221,6 @@ Lattice/
 │   ├── foliage/           # Theme system
 │   ├── gossamer/          # Shared utilities
 │   ├── shutter/           # Image processing
-│   ├── vineyard/          # Component showcase library
 ├── services/
 │   ├── amber/             # Storage API worker
 │   ├── durable-objects/   # Cloudflare Durable Objects

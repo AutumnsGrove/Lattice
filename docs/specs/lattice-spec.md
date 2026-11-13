@@ -82,7 +82,6 @@ libs/
 ├── engine/          ← @autumnsgrove/lattice (this package)
 ├── gossamer/        ← imports from @autumnsgrove/lattice
 ├── foliage/         ← imports from @autumnsgrove/lattice
-├── vineyard/        ← imports from @autumnsgrove/lattice
 
 apps/
 ├── landing/         ← imports from @autumnsgrove/lattice
