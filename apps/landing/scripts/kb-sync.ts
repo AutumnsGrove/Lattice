@@ -324,16 +324,17 @@ async function d1Query(
 	return { success: true, results: json.result?.[0]?.results };
 }
 
-/** Get existing content hashes from D1 */
-async function getExistingHashes(): Promise<Map<string, string>> {
-	const result = await d1Query("SELECT category, slug, content_hash FROM kb_articles");
-	const map = new Map<string, string>();
+/** Get existing content hashes and statuses from D1 */
+async function getExistingHashes(): Promise<Map<string, { hash: string; status: string | null }>> {
+	const result = await d1Query("SELECT category, slug, content_hash, status FROM kb_articles");
+	const map = new Map<string, { hash: string; status: string | null }>();
 	for (const row of (result.results || []) as Array<{
 		category: string;
 		slug: string;
 		content_hash: string;
+		status: string | null;
 	}>) {
-		map.set(`${row.category}:${row.slug}`, row.content_hash);
+		map.set(`${row.category}:${row.slug}`, { hash: row.content_hash, status: row.status });
 	}
 	return map;
 }
@@ -415,7 +416,7 @@ async function main() {
 	}
 
 	// Get existing hashes to skip unchanged articles
-	let existingHashes: Map<string, string>;
+	let existingHashes: Map<string, { hash: string; status: string | null }>;
 	try {
 		existingHashes = await getExistingHashes();
 		console.log(`  ${existingHashes.size} existing articles in D1\n`);
@@ -432,14 +433,17 @@ async function main() {
 
 	for (const article of allArticles) {
 		const key = `${article.category}:${article.slug}`;
-		const existingHash = existingHashes.get(key);
+		const existing = existingHashes.get(key);
 
-		if (existingHash === article.contentHash) {
+		// Status is derived from frontmatter but stored in its own column, so an
+		// unchanged file can still need a write — for instance when the column is
+		// added after the article was first synced and the row is still NULL.
+		if (existing?.hash === article.contentHash && existing.status === article.status) {
 			skipped++;
 			continue;
 		}
 
-		const action = existingHash ? "update" : "insert";
+		const action = existing ? "update" : "insert";
 		try {
 			await upsertArticle(article);
 			console.log(`  ✓ ${action}: ${article.category}/${article.slug}`);
