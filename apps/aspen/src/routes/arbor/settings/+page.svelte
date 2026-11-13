@@ -204,7 +204,7 @@
 						<h2 class="card-title">Features</h2>
 					</div>
 					<div class="card-status">
-						<span class="status-line">Rings &middot; Reeds</span>
+						<span class="status-line">Reeds</span>
 						<span class="status-line">Curios</span>
 						{#if curiosCount > 0}
 							<span class="status-line subtle"
