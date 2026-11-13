@@ -26,6 +26,6 @@ export default createGroveViteConfig({
 	},
 	ssr: {
 		// These packages ship .svelte files that need processing during SSR
-		noExternal: ["lucide-svelte", "@tabler/icons-svelte", "@autumnsgrove/gossamer"],
+		noExternal: ["lucide-svelte", "@autumnsgrove/gossamer"],
 	},
 });
