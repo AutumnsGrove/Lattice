@@ -158,10 +158,13 @@ const PALETTES = {
 		vineColors: ["#ec4899", "#f9a8d4", "#a78bfa", "#7c3aed", "#fce7f3"],
 		leafColors: ["#f9a8d4", "#a78bfa", "#ec4899", "#c4b5fd"],
 		noiseColors: ["#a78bfa", "#ec4899", "#f9a8d4", "#7c3aed"],
-		tier1: { dark: "#4c1d95", light: "#fce7f3" },
-		tier2: { dark: "#3b0764", light: "#f9a8d4" },
-		tier3: { dark: "#1e1b4b", light: "#ec4899" },
-		trunk: { dark: "#1a1a2e", light: "#2d1b4e" },
+		// Dark halves lifted from the logo's own midnight shades (#4c1d95 / #3b0764 /
+		// #1e1b4b, trunk #1a1a2e / #2d1b4e): those sit on the violet glow and the
+		// tree dissolves into it. Same hues, enough lightness to hold the edge.
+		tier1: { dark: "#6d28d9", light: "#fce7f3" },
+		tier2: { dark: "#5b21b6", light: "#f9a8d4" },
+		tier3: { dark: "#4c1d95", light: "#ec4899" },
+		trunk: { dark: "#3f3475", light: "#6a58a8" },
 	},
 	autumn: {
 		bg: "#0f1419",
