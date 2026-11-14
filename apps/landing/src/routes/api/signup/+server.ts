@@ -1,5 +1,6 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import { sanitizeRef } from "$lib/server/ref-tracking";
 
 /**
  * Start the onboarding sequence via the OnboardingAgent service binding.
@@ -22,7 +23,7 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 		return json({ error: "Service temporarily unavailable" }, { status: 503 });
 	}
 
-	let body: { email?: string };
+	let body: { email?: string; ref?: unknown };
 	try {
 		body = await request.json();
 	} catch {
@@ -30,6 +31,10 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 	}
 
 	const { email } = body;
+
+	// Acquisition ref from the business card QR (#1426). Optional — an absent or
+	// malformed value just means the signup came from somewhere untracked.
+	const ref = sanitizeRef(typeof body.ref === "string" ? body.ref : null);
 
 	if (!email || typeof email !== "string") {
 		return json({ error: "Email is required" }, { status: 400 });
@@ -72,11 +77,13 @@ export const POST: RequestHandler = async ({ request, platform }) => {
 			return json({ error: "This email is already on our list!" }, { status: 409 });
 		}
 
-		// Insert new signup with welcome_email_sent flag
+		// Insert new signup with welcome_email_sent flag. `source` records where the
+		// signup came from: the card's ref when we have one, otherwise the page
+		// that has always been the default.
 		await platform.env.DB.prepare(
-			"INSERT INTO email_signups (email, welcome_email_sent) VALUES (?, 1)",
+			"INSERT INTO email_signups (email, welcome_email_sent, source) VALUES (?, 1, ?)",
 		)
-			.bind(normalizedEmail)
+			.bind(normalizedEmail, ref ?? "landing")
 			.run();
 
 		// Start onboarding sequence via agent

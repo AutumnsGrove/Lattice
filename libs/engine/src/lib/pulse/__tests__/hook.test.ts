@@ -162,6 +162,47 @@ describe("pulseHandle — emitPulseEvent", () => {
 		expect(opts.metadata).toEqual({ ua: "TestAgent/1.0" });
 	});
 
+	it("carries an acquisition ref in metadata when the URL has one", async () => {
+		const handle = pulseHandle({ app: "landing" });
+		const event = makeEvent("/hello?ref=card");
+		const resolve = makeResolve(200);
+
+		await handle({ event: event as never, resolve });
+
+		const opts = lastEmitOptions();
+		expect(opts.route).toBe("/hello");
+		expect(opts.metadata).toEqual({ ua: "TestAgent/1.0", ref: "card" });
+	});
+
+	it("normalizes the ref before it reaches metadata", async () => {
+		const handle = pulseHandle({ app: "landing" });
+		const event = makeEvent("/hello?ref=CARD");
+
+		await handle({ event: event as never, resolve: makeResolve(200) });
+
+		expect(lastEmitOptions().metadata).toEqual({ ua: "TestAgent/1.0", ref: "card" });
+	});
+
+	it("omits a ref that is not a valid slug", async () => {
+		const handle = pulseHandle({ app: "landing" });
+		const event = makeEvent("/hello?ref=card%20back");
+
+		await handle({ event: event as never, resolve: makeResolve(200) });
+
+		// Metadata must look exactly as it did before refs existed — never carry
+		// the raw visitor-supplied string.
+		expect(lastEmitOptions().metadata).toEqual({ ua: "TestAgent/1.0" });
+	});
+
+	it("drops an over-long ref", async () => {
+		const handle = pulseHandle({ app: "landing" });
+		const event = makeEvent(`/hello?ref=${"a".repeat(33)}`);
+
+		await handle({ event: event as never, resolve: makeResolve(200) });
+
+		expect(lastEmitOptions().metadata).toEqual({ ua: "TestAgent/1.0" });
+	});
+
 	it("falls back to pathname when route.id is null", async () => {
 		const handle = pulseHandle({ app: "plant" });
 		const event = makeEvent("/some/path", { routeId: null });
