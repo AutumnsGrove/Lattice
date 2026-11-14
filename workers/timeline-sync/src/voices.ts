@@ -2,30 +2,15 @@
  * Voice Presets System
  *
  * Simplified version of the engine's voice system for the cron worker.
- * All 5 voice presets are inlined here to avoid cross-package dependencies.
+ * All 5 voice presets are inlined here, but the output budget is not: the
+ * ceiling for the detailed breakdown is owned by libs/curios, so importing it
+ * keeps the inlined presets in step instead of relying on a test to catch drift.
+ * Subpath, not the package root — `@autumnsgrove/curios/timeline` pulls Svelte
+ * components in with it, and this runs in a Worker.
  */
 
+import { DETAILED_BUDGET } from "@autumnsgrove/curios/timeline/voices";
 import type { Commit, VoicePreset, CustomVoiceConfig } from "./config";
-
-// =============================================================================
-// Output budget
-// =============================================================================
-
-/**
- * Spend cap for the detailed breakdown, shared by every preset so the ceiling
- * lives in one place.
- *
- * The model writes until it runs out of tokens, and the whole brief+detailed+
- * gutter response has to fit inside the request's maxTokens (8192) as valid
- * JSON. A 53-commit day across 5 repos blew straight through that on
- * 2026-11-13, the JSON was cut off mid-object, and the run silently stored the
- * "got a bit tangled" fallback. Naming the budget explicitly keeps heavy days
- * inside the envelope instead of relying on the model to self-limit.
- */
-const DETAILED_BUDGET = `   - Cover at most 6 projects. If the day touched more, fold the extras into a
-     final "### Also" section with one bullet each.
-   - At most 5 bullets per project, one line each.
-   - The whole detailed breakdown must stay under ~350 words.`;
 
 // =============================================================================
 // Voice Presets (Inlined from engine/src/lib/curios/timeline/voices/presets)

@@ -13,6 +13,7 @@
 		"check": "tsc --noEmit"
 	},
 	"dependencies": {
+		"@autumnsgrove/curios": "workspace:*",
 		"@autumnsgrove/infra": "workspace:*",
 		"@autumnsgrove/lattice": "workspace:*"
 	},

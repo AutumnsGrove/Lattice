@@ -35,6 +35,12 @@ export const VOICE_PRESETS: Record<string, VoicePreset> = {
  */
 export const DEFAULT_VOICE = "professional";
 
+/**
+ * Re-exported so consumers that build prompts themselves (the timeline-sync
+ * worker inlines these presets) share the same ceiling instead of copying it.
+ */
+export { DETAILED_BUDGET };
+
 // =============================================================================
 // Voice Selection
 // =============================================================================

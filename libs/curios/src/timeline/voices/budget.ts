@@ -11,8 +11,8 @@
  * "got a bit tangled" fallback. Naming the budget explicitly keeps heavy days
  * inside the envelope instead of relying on the model to self-limit.
  *
- * Workers that inline these presets keep their own copy of this string
- * (workers/timeline-sync/src/voices.ts); keep the two in step.
+ * Consumed through `@autumnsgrove/curios/timeline/voices`, including by
+ * workers/timeline-sync, which inlines the presets but not this constant.
  */
 export const DETAILED_BUDGET = `   - Cover at most 6 projects. If the day touched more, fold the extras into a
      final "### Also" section with one bullet each.
