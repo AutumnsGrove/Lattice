@@ -11,7 +11,6 @@ function guessContentType(key: string): string {
 		gif: "image/gif",
 		webp: "image/webp",
 		avif: "image/avif",
-		jxl: "image/jxl",
 		pdf: "application/pdf",
 		mp4: "video/mp4",
 		webm: "video/webm",

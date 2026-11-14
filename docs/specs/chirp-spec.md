@@ -350,7 +350,7 @@ Returns `{ unread: number }`.
 
 Upload an image to R2 for use in image messages.
 
-Accepts `multipart/form-data` with a `file` field. Validates file type (JPEG, PNG, GIF, WebP, AVIF, JXL) via both MIME type and magic byte signature. Maximum 5MB.
+Accepts `multipart/form-data` with a `file` field. Validates file type (JPEG, PNG, GIF, WebP, AVIF) via both MIME type and magic byte signature. Maximum 5MB.
 
 Returns `{ success: true, url, key, width: null, height: null }`. Width and height are null because dimensions come from the client.
 

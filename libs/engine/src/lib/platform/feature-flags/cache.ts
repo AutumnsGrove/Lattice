@@ -24,7 +24,7 @@ const DEFAULT_TTL = 60; // seconds
  * Flags that should never be cached (instant effect).
  * Kill switches and maintenance mode flags should bypass cache.
  */
-const INSTANT_FLAGS = new Set(["jxl_kill_switch", "maintenance_mode"]);
+const INSTANT_FLAGS = new Set(["maintenance_mode"]);
 
 // =============================================================================
 // CACHE KEY BUILDING
@@ -46,8 +46,8 @@ function sanitizeForCacheKey(value: string): string {
  * Key format: flag:{flagId}:{context_parts}
  *
  * Examples:
- *   flag:jxl_encoding:global
- *   flag:jxl_encoding:tenant:abc123
+ *   flag:image_uploads:global
+ *   flag:image_uploads:tenant:abc123
  *   flag:meadow_access:tier:oak
  *   flag:meadow_access:tenant:xyz:tier:oak
  *

@@ -82,7 +82,7 @@
     - Auth routes (/auth/*), API routes (/api/*) never receive unsafe-eval
 
 [x] File uploads validated: magic bytes, MIME, extension, size, dimensions
-    - Magic byte validation: JPEG (5 signatures), PNG (8-byte), GIF87a/89a, WebP (RIFF+WEBP), JPEG XL
+    - Magic byte validation: JPEG (5 signatures), PNG (8-byte), GIF87a/89a, WebP (RIFF+WEBP)
     - SVG uploads completely blocked (not in allowlist)
     - Client-side EXIF stripping via canvas re-encode
     - Size limits enforced (per-file)
@@ -184,7 +184,7 @@
 
 4. **SVG attack surface eliminated** — Blocking SVG uploads entirely is the safest approach. Combined with SVG sanitization for any programmatic SVG rendering, this closes the most dangerous image-based XSS vector.
 
-5. **Upload security is thorough** — Five-way magic byte validation (JPEG/PNG/GIF/WebP/JPEG XL), EXIF stripping, content moderation, tenant-scoped R2 keys, and Content-Disposition headers form a complete defense chain.
+5. **Upload security is thorough** — Four-way magic byte validation (JPEG/PNG/GIF/WebP), EXIF stripping, content moderation, tenant-scoped R2 keys, and Content-Disposition headers form a complete defense chain.
 
 6. **Prototype pollution prevention is proactive** — `sanitizeObject()` blocking `__proto__`, `constructor`, and `prototype` with `Object.freeze()` on the result is defense-in-depth against a class of attack that many codebases ignore entirely.
 

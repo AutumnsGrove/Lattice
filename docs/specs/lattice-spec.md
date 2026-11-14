@@ -65,7 +65,7 @@ You don't admire a lattice. You build on it, and watch what grows.
 | **Rich Text Editor** | Tiptap 3 (ProseMirror-based)                            |
 | **Content**          | Markdown via markdown-it + remark/rehype pipeline       |
 | **Email**            | React Email + Resend                                    |
-| **Media**            | Cloudflare R2 + JXL/WebP encoding (`@jsquash/jxl`)      |
+| **Media**            | Cloudflare R2 + WebP encoding (canvas)                  |
 | **Database**         | Cloudflare D1 (SQLite at the edge)                      |
 | **Cache/Sessions**   | Cloudflare KV                                           |
 | **Realtime**         | Cloudflare Durable Objects (via Loom)                   |
@@ -109,8 +109,8 @@ Consumer packages each have their own Cloudflare resources (D1, KV, R2) and depl
 Every package that imports from `@autumnsgrove/lattice` must add this to its `vite.config.ts`:
 
 ```ts
-optimizeDeps: { exclude: ['@jsquash/jxl'] },
-build: { rollupOptions: { external: ['@jsquash/jxl'] } }
+optimizeDeps: { exclude: ['workers-og'] },
+build: { rollupOptions: { external: ['workers-og'] } }
 ```
 
 Without it, Rollup fails with "IIFE output formats are not supported for code-splitting builds."
@@ -687,7 +687,7 @@ import {
 } from "@autumnsgrove/lattice/platform/feature-flags";
 
 // Boolean check
-const enabled = await isFeatureEnabled("jxl_encoding", { tenantId }, env);
+const enabled = await isFeatureEnabled("photo_gallery", { tenantId }, env);
 
 // Typed value with default
 const maxUploads = await getFeatureValue("max_uploads", { tier }, env, 10);
@@ -789,7 +789,7 @@ await setTenantFlagOverride(db, tenantId, "dark_mode_default", true);
 import { getFeatureFlags, setFlagEnabled } from "@autumnsgrove/lattice/platform/feature-flags";
 
 const flags = await getFeatureFlags(db);
-await setFlagEnabled(db, kv, "jxl_encoding", true);
+await setFlagEnabled(db, kv, "photo_gallery", true);
 ```
 
 ---
@@ -1112,8 +1112,8 @@ import { renderMarkdown, parseMarkdown } from "@autumnsgrove/lattice/utils";
 #### Image Processing
 
 ```typescript
-import { encodeAsJxl, convertToWebP, processHeic } from "@autumnsgrove/lattice/utils";
-// JXL encoding via @jsquash/jxl, WebP conversion, HEIC support
+import { processImage, generateThumbnail, convertHeicToJpeg } from "@autumnsgrove/lattice/utils";
+// WebP conversion (canvas), HEIC/HEIF decode, EXIF stripping
 ```
 
 #### Other Utilities

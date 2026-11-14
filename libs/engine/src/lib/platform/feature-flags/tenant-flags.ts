@@ -15,8 +15,8 @@
  * // Get flags a tenant can control
  * const grafts = await getTenantControllableFlags(tenantId, env);
  *
- * // Tenant disables JXL encoding for themselves
- * await setTenantFlagOverride('jxl_encoding', tenantId, false, env);
+ * // Tenant disables photo_gallery for themselves
+ * await setTenantFlagOverride('photo_gallery', tenantId, false, env);
  * ```
  */
 

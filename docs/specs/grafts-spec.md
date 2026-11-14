@@ -47,7 +47,7 @@ There are three layers:
 - **Domain components** provide _how_ those capabilities render (reusable components at domain paths) — _user-facing language: "UI Grafts"_
 - **Greenhouse mode** determines _who_ gets early access (tenant classification for internal testing)
 
-Want JXL encoding? Enable the flag. Need a pricing page? Use the pricing domain components. Testing a feature before rollout? Put the tenant in the greenhouse.
+Want a photo gallery? Enable the flag. Need a pricing page? Use the pricing domain components. Testing a feature before rollout? Put the tenant in the greenhouse.
 
 **Public Name:** Grafts _(user-facing horticulture metaphor)_
 **Code Term:** Feature Flags
@@ -232,7 +232,7 @@ Gradual propagation across the grove:
 ```typescript
 {
   ruleType: 'percentage',
-  ruleValue: { percentage: 25, salt: 'jxl_rollout_2026' },
+  ruleValue: { percentage: 25, salt: 'photo_gallery_rollout_2026' },
   resultValue: true
 }
 ```
@@ -261,7 +261,7 @@ Seasonal or scheduled features:
 ```sql
 -- Core feature flags table
 CREATE TABLE feature_flags (
-  id TEXT PRIMARY KEY,               -- e.g., 'jxl_encoding', 'meadow_access'
+  id TEXT PRIMARY KEY,               -- e.g., 'photo_gallery', 'meadow_access'
   name TEXT NOT NULL,                -- Human-readable name
   description TEXT,                  -- What this flag controls
   flag_type TEXT NOT NULL,           -- 'boolean', 'percentage', 'variant', 'tier', 'json'
@@ -316,10 +316,10 @@ _(User-facing: "Check if a Graft Took")_
 ```typescript
 import { isFeatureEnabled } from "@autumnsgrove/lattice/platform/feature-flags";
 
-// Is the JXL flag enabled? (user-facing: "did the graft take?")
+// Is the gallery flag enabled? (user-facing: "did the graft take?")
 
-const useJxl = await isFeatureEnabled(
-	"jxl_encoding",
+const galleryEnabled = await isFeatureEnabled(
+	"photo_gallery",
 	{
 		tenantId: locals.tenantId,
 		userId: locals.user?.id,
@@ -327,8 +327,8 @@ const useJxl = await isFeatureEnabled(
 	platform.env,
 );
 
-if (useJxl) {
-	return encodeAsJxl(file);
+if (galleryEnabled) {
+	return renderGallery();
 }
 ```
 
@@ -447,8 +447,8 @@ flag:{flag_id}:user:{user_id}            → User-specific
 import { invalidateFlag } from "@autumnsgrove/lattice/platform/feature-flags";
 
 // When admin updates a flag
-await invalidateFlag("jxl_encoding", env);
-// Clears all KV keys with prefix flag:jxl_encoding:
+await invalidateFlag("photo_gallery", env);
+// Clears all KV keys with prefix flag:photo_gallery:
 ```
 
 ---
@@ -1291,7 +1291,7 @@ Building on the established Graft vocabulary:
 | **Nursery**     | Group           | Collection of greenhouse tenants for coordinated testing |
 
 _"Dave's tree is in the greenhouse—they'll see the new editor first."_
-_"We're hardening off the JXL encoder this week—25% propagation."_
+_"We're hardening off the photo gallery this week—25% propagation."_
 
 ---
 
@@ -1427,8 +1427,7 @@ _(User-facing: "Feature Grafts")_
 
 | Flag ID           | Type       | Purpose                     | Example Use                 |
 | ----------------- | ---------- | --------------------------- | --------------------------- |
-| `jxl_encoding`    | percentage | JPEG XL image encoding      | Propagate to 25% of grove   |
-| `jxl_kill_switch` | boolean    | Emergency disable for JXL   | Blight switch (instant off) |
+| `photo_gallery`   | percentage | Photo galleries per grove   | Propagate to 25% of grove   |
 | `meadow_access`   | tier       | Gate Meadow social features | Oak and Evergreen only      |
 | `pricing_flag`    | boolean    | Gate PricingGraft rollout   | Gradual UI rollout          |
 
@@ -1500,7 +1499,7 @@ libs/engine/src/lib/
 
 ### Phase 2: Feature Flag Integration (Complete)
 
-- [x] JXL encoding flag
+- [x] Photo gallery flag
 - [x] Kill switch support
 - [x] SvelteKit hooks integration
 
@@ -1579,7 +1578,6 @@ _(User-facing: "Self-Serve Graft Controls")_
 ## Related Documents
 
 - [Feature Flags Planning Spec](../plans/planning/feature-flags-spec.md) — Original technical spec
-- [JXL Migration Spec](../plans/planning/jxl-migration-spec.md) — First use case for feature flags
 - [Loom Pattern](../patterns/loom-durable-objects-pattern.md) — DO coordination
 - [Threshold Pattern](../patterns/threshold-pattern.md) — Rate limiting (uses feature flags for configuration)
 

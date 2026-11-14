@@ -79,8 +79,8 @@ describe("buildCacheKey", () => {
 		});
 
 		it("returns flag:flagId:global when context is undefined attributes", () => {
-			const key = buildCacheKey("jxl_encoding", { attributes: {} });
-			expect(key).toBe("flag:jxl_encoding:global");
+			const key = buildCacheKey("image_uploads", { attributes: {} });
+			expect(key).toBe("flag:image_uploads:global");
 		});
 	});
 
@@ -459,15 +459,6 @@ describe("cacheResult", () => {
 	});
 
 	describe("instant flags (bypass cache)", () => {
-		it("skips caching for jxl_kill_switch", async () => {
-			const result = createResult(true, "jxl_kill_switch");
-			const mockKV = env.FLAGS_KV as any;
-
-			await cacheResult("key", result, env);
-
-			expect(mockKV.put).not.toHaveBeenCalled();
-		});
-
 		it("skips caching for maintenance_mode", async () => {
 			const result = createResult(true, "maintenance_mode");
 			const mockKV = env.FLAGS_KV as any;
@@ -1144,10 +1135,6 @@ describe("invalidateAllFlags", () => {
 // =============================================================================
 
 describe("shouldBypassCache", () => {
-	it("returns true for jxl_kill_switch", () => {
-		expect(shouldBypassCache("jxl_kill_switch")).toBe(true);
-	});
-
 	it("returns true for maintenance_mode", () => {
 		expect(shouldBypassCache("maintenance_mode")).toBe(true);
 	});
@@ -1165,20 +1152,18 @@ describe("shouldBypassCache", () => {
 	});
 
 	it("returns false for similar but different names", () => {
-		expect(shouldBypassCache("jxl_kill_switch_v2")).toBe(false);
 		expect(shouldBypassCache("maintenance_mode_2")).toBe(false);
 		expect(shouldBypassCache("kill_switch")).toBe(false);
 	});
 
 	it("is case sensitive", () => {
-		expect(shouldBypassCache("JXL_KILL_SWITCH")).toBe(false);
 		expect(shouldBypassCache("MAINTENANCE_MODE")).toBe(false);
 	});
 
 	it("returns true only for exact matches", () => {
-		expect(shouldBypassCache("jxl_kill_switch")).toBe(true);
-		expect(shouldBypassCache("jxl_kill_switch ")).toBe(false);
-		expect(shouldBypassCache(" jxl_kill_switch")).toBe(false);
+		expect(shouldBypassCache("maintenance_mode")).toBe(true);
+		expect(shouldBypassCache("maintenance_mode ")).toBe(false);
+		expect(shouldBypassCache(" maintenance_mode")).toBe(false);
 	});
 });
 

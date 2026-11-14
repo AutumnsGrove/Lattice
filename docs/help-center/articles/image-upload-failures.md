@@ -36,7 +36,6 @@ Grove accepts these image formats:
 - **GIF** (.gif) — Animated images work
 - **WebP** (.webp) — Modern format, smaller file sizes
 - **AVIF** (.avif) — Next-gen format, even smaller
-- **JPEG XL** (.jxl) — Newer format with excellent quality
 - **HEIC/HEIF** (.heic, .heif) — Common on iPhones
 
 If you see **"Unsupported file type"**, the file isn't one of these formats. Some things that look like images but aren't supported: SVG files, BMP files, TIFF files, and raw camera files (.CR2, .NEF, .ARW). Convert them to JPEG or PNG first—most image editors and online tools can do this.
