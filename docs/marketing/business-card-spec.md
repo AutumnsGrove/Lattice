@@ -1,286 +1,192 @@
 ---
 title: Business Card Specification
-description: Print-ready design spec for Grove business cards
+description: Print-ready design spec for the Grove business card deck
 category: marketing
-lastUpdated: "2026-01-02"
+lastUpdated: "2026-11-14"
 ---
 
 # Grove Business Card Specification
 
-_Created: January 2026_
+_Created: January 2026 · Redesigned: November 2026 (the midnight deck, #1622)_
 
 ---
 
 ## Overview
 
-Two-sided business card for Grove. Minimal, warm, and functional. Two QR codes — one to explore, one to act.
+One two-sided card, in five seasonal colourways. The layout never changes; only the colours do, so the deck can be handed out in stages and people can end up with different ones.
+
+It is a dark card, and it is quiet on purpose. The Grove tree is the only light source: it glows like a lantern on a ground tinted toward the season. Each side says three things, no more.
+
+- **Front:** design only. No QR code.
+- **Back:** the one QR code, in a clearing where the vines thin out.
+
+Midnight (the queer fifth season) is the lead card.
 
 ---
 
 ## Card Dimensions
 
-| Spec            | Value                                  |
-| --------------- | -------------------------------------- |
-| **Size**        | 3.5" × 2" (standard US business card)  |
-| **Orientation** | Horizontal (landscape)                 |
-| **Paper**       | Matte or soft-touch finish recommended |
-| **Corners**     | Rounded (2mm radius) optional          |
+| Spec              | Value                                                 |
+| ----------------- | ----------------------------------------------------- |
+| **Trim size**     | 3.5" × 2" (standard US business card), landscape      |
+| **Canvas**        | 3.75" × 2.25" with 0.125" bleed on every side         |
+| **Pixels**        | 1125 × 675 at 300ppi                                  |
+| **Safe zone**     | Keep content 0.125" inside the trim (0.25" from the canvas edge) |
+| **Paper**         | Matte or soft-touch finish recommended                |
+| **Corners**       | Square cut. The QR tile is the only rounded shape     |
+
+Backgrounds (vines, glow) run into the bleed on purpose. Everything deliberate (text, the tree, the QR tile) stays inside the safe zone, and the generator refuses to render a card if any of it doesn't.
 
 ---
 
-## Color Palette
+## The Deck
 
-| Color             | Hex       | Usage                                                      |
-| ----------------- | --------- | ---------------------------------------------------------- |
-| **Grove Green**   | `#16a34a` | Accents, summer theme                                      |
-| **Autumn Orange** | `#EA580C` | Accents, autumn theme                                      |
-| **Bark Brown**    | `#5C3317` | Logo trunk, autumn dark (see Logo Assets for full palette) |
-| **Cream**         | `#fefdfb` | Background (light version)                                 |
-| **Charcoal**      | `#1e293b` | Background (dark version)                                  |
-| **Text Dark**     | `#374151` | Body text on light bg                                      |
-| **Text Light**    | `#f8fafc` | Body text on dark bg                                       |
+| Season       | Ground          | Glow             | Accent    | Files                     |
+| ------------ | --------------- | ---------------- | --------- | ------------------------- |
+| **midnight** | violet-black    | violet and pink  | pink      | `card-*-midnight-dark`    |
+| **autumn**   | warm brown-black | ember, orange   | amber     | `card-*-autumn-dark`      |
+| **summer**   | deep forest     | green            | mint      | `card-*-summer-dark`      |
+| **spring**   | plum-black      | rose             | blush     | `card-*-spring-dark`      |
+| **winter**   | ink blue        | ice blue         | pale blue | `card-*-winter-dark`      |
 
-> **Note:** The logo uses multi-tone colors for 3D depth. See the Logo Assets section for the full seasonal color palettes.
+Every season follows one recipe: a ground tinted toward the season's hue (never pure black), a glow in its brightest tones, and tree shades lifted off the logo's own dark halves so the tree keeps its edge against the glow. The logo's own dark shades were made for lighter backgrounds; on these cards they dissolve into the glow.
+
+The exact values live in one place, `PALETTES` in `scripts/generate/generate-business-cards.mjs`. This document describes them but does not copy them, so there is only one set of numbers to keep right.
+
+---
+
+## Copy
+
+Short on purpose. Every line earns its place.
+
+**Front**
+
+| Line                          | Voice                       |
+| ----------------------------- | --------------------------- |
+| Grove                         | Wordmark                    |
+| A place to Be.                | Tagline, accent colour      |
+| A blogging home for writers.  | Says what Grove is, muted   |
+| Autumn Brown · Wayfinder      | Bottom right, muted         |
+
+**Back**
+
+| Line                    | Voice                                              |
+| ----------------------- | -------------------------------------------------- |
+| Your words are yours.   | Headline                                           |
+| Start a blog at         | Small lead-in, muted                               |
+| _you_.grove.place       | An italic "you" sits on a line: your own domain    |
+| grove.place/hello       | Under the QR, for anyone who can't scan            |
+
+The blank in the domain holds "you" rather than being left empty, so the card reads as yours, not as a template field.
+
+---
+
+## Layout
+
+```
+FRONT                                         BACK
+┌────────────────────────────────────┐        ┌────────────────────────────────────┐
+│                          ◢◣        │        │                                    │
+│                         ◢◤◣  glow  │        │  Your words           ┌────────┐   │
+│                        ◢◤◢◣        │        │  are yours.           │  ▓▓░▓  │   │
+│                          ▌         │        │                       │  ░▓▓░  │   │
+│  Grove                             │        │  Start a blog at      │  ▓░▓▓  │   │
+│  A place to Be.                    │        │  ___you___.grove.place└────────┘   │
+│  A blogging home for writers.      │        │                       grove.place/ │
+│                  Autumn Brown ·... │        │                       hello        │
+└────────────────────────────────────┘        └────────────────────────────────────┘
+```
+
+The tree sits up and to the right, the wordmark bottom left, the name bottom right under the tree. On the back the headline and domain sit on the left and the QR on the right.
 
 ---
 
 ## Typography
 
-| Element       | Font                     | Weight          | Size |
-| ------------- | ------------------------ | --------------- | ---- |
-| **"Grove"**   | Lexend or serif fallback | Medium          | 18pt |
-| **Tagline**   | Lexend                   | Regular, italic | 10pt |
-| **Body text** | Lexend                   | Regular         | 8pt  |
-| **URL**       | Lexend                   | Medium          | 9pt  |
-| **Signature** | Lexend                   | Regular, italic | 7pt  |
+Two families, both Grove's own, both read from `libs/engine/static/fonts/`.
+
+| Element                | Font      | Size  |
+| ---------------------- | --------- | ----- |
+| **"Grove"** wordmark   | Calistoga | 44pt  |
+| **Back headline**      | Calistoga | 26pt  |
+| **Tagline**            | Lexend    | 11pt  |
+| **Domain line**        | Lexend    | 12pt  |
+| **Descriptor**         | Lexend    | 7.5pt |
+| **Name, URL, lead-in** | Lexend    | 6.5 to 7pt |
+
+- **All text is converted to vector outlines** from the font files, never left as live text. The renderer cannot load project fonts on macOS and used to silently fall back to default serif and sans; outlines make that impossible and are the safest form for print.
+- **Lexend and Calistoga ship no italic.** The "you" is the regular glyphs leaned 12° about the baseline.
+- There is no kerning pass: the shaper this generator uses can't read these fonts' kerning tables. The spacing is the fonts' own advances.
+- Cormorant and IBM Plex Mono, used by the earlier cards, are gone. Those renders were never actually using them.
 
 ---
 
-## Front Side (Discovery)
+## QR Code (back only)
 
-**Purpose:** Introduce Grove. QR leads to main site.
+| Spec                | Value                                                           |
+| ------------------- | --------------------------------------------------------------- |
+| **URL**             | `https://grove.place/hello?ref=card-back`                       |
+| **Printed URL**     | grove.place/hello (no tracking parameter shown)                 |
+| **Tile**            | 0.95" square, rounded, cream (`#fefdfb`)                        |
+| **Modules**         | About 0.75" across, above the 0.7" scanning minimum             |
+| **Ink**             | Dark violet (`#1a1030`) on cream, never inverted                |
+| **Quiet zone**      | 4 modules, built into the tile                                  |
+| **Error correction**| Level M                                                         |
+| **The clearing**    | Vines are masked out around the tile so nothing touches the code |
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                                                                  │
-│   [LOGO]              Grove                              [QR]   │
-│    32px                                                  0.7"    │
-│                                                                  │
-│                    A place to Be.                                │
-│                                                                  │
-│                     grove.place                                  │
-│                                                                  │
-│                                              — Autumn Brown      │
-│                                                                  │
-└──────────────────────────────────────────────────────────────────┘
-```
+Dark-on-light matters. A cream-on-dark code looks better on a dark card, but some phone scanners reject inverted codes, so the tile stays light.
 
-### Front Elements
+> **Analytics:** `?ref=card-back` lets Vista count visits that came from the card (see `docs/specs/vista-spec.md`). An earlier plan put a second QR on the front (`?ref=card-front`) to compare the two sides. It was dropped to keep the front purely design. #1426 only needs to log `card-back`.
 
-| Element       | Position                   | Details                                              |
-| ------------- | -------------------------- | ---------------------------------------------------- |
-| **Logo**      | Left, vertically centered  | Grove tree logo, 32px, seasonal (autumn recommended) |
-| **"Grove"**   | Center-left of logo        | Serif, 18pt, main text color                         |
-| **Tagline**   | Center                     | "A place to Be." — italic, 10pt                      |
-| **URL**       | Center, below tagline      | grove.place — 9pt, medium weight                     |
-| **Signature** | Bottom right               | "— Autumn Brown" — 7pt, italic, subtle               |
-| **QR Code**   | Right, vertically centered | ~0.7" square, links to `https://grove.place`         |
+### Scan testing
 
-### QR Code (Front)
-
-- **URL:** `https://grove.place?ref=card-front` (includes tracking param)
-- **Display URL:** grove.place (printed on card, no tracking param visible)
-- **Size:** 0.7" × 0.7" (minimum for reliable scanning)
-- **Style:** Standard black on white, or grove green on cream
-- **Error correction:** Level M or higher
-
-> **Analytics Note:** The `?ref=card-front` parameter enables Vista to track which side of the card drives traffic. See `docs/specs/vista-spec.md` for acquisition analytics.
+The rendered back of every season was decoded in testing and returned the exact URL, down to about 2.3 pixels per module with mild blur, which is far smaller than a phone sees at arm's length. That is a software check, not a replacement for scanning a printed proof on real phones.
 
 ---
 
-## Back Side (Action)
+## Accessibility
 
-**Purpose:** The pitch. QR leads to /hello page (then to plant.grove.place).
+All text clears WCAG AAA (7:1) against the base ground on every season. The lowest ratio across the deck is 8.3:1.
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                                                                  │
-│   [LOGO]       Your words are yours.                     [QR]   │
-│    24px                                                  0.7"    │
-│                                                                  │
-│              No ads. No algorithms.                              │
-│                  No AI training.                                 │
-│                                                                  │
-│                 grove.place/hello                                │
-│                                                                  │
-└──────────────────────────────────────────────────────────────────┘
-```
+| Text                     | Lowest contrast |
+| ------------------------ | --------------- |
+| Cream (wordmark, headline, domain) | 18.6:1 |
+| Muted (descriptor, name, URLs)     | 8.3:1  |
+| Accent (tagline, "you")            | 9.0:1  |
 
-### Back Elements
-
-| Element      | Position                   | Details                                             |
-| ------------ | -------------------------- | --------------------------------------------------- |
-| **Logo**     | Left, vertically centered  | Grove tree logo, 24px (slightly smaller than front) |
-| **Headline** | Center                     | "Your words are yours." — 11pt, medium weight       |
-| **Subtext**  | Center, below headline     | "No ads. No algorithms. / No AI training." — 8pt    |
-| **URL**      | Center, below subtext      | grove.place/hello — 9pt                             |
-| **QR Code**  | Right, vertically centered | ~0.7" square, links to `https://grove.place/hello`  |
-
-### QR Code (Back)
-
-- **URL:** `https://grove.place/hello?ref=card-back` (includes tracking param)
-- **Display URL:** grove.place/hello (printed on card, no tracking param visible)
-- **Size:** 0.7" × 0.7"
-- **Style:** Match front side
-- **Error correction:** Level M or higher
-
-> **Analytics Note:** The `?ref=card-back` parameter tracks this specific call-to-action. Combined with front tracking, you can measure which card side converts better.
+The printed URL under the QR is there for anyone who can't scan.
 
 ---
 
-## Design Variants
+## Print
 
-### Light Version (Recommended)
+### Files
 
-- Background: Cream (`#fefdfb`)
-- Text: Charcoal (`#374151`)
-- Logo: Grove Green + Bark Brown
-- QR: Black or Grove Green
+`node scripts/generate/generate-business-cards.mjs all` renders the PNGs, and `node scripts/generate/generate-business-card-pdfs.mjs all` builds one PDF per season.
 
-### Dark Version
+| Output                                              | What it is                                              |
+| --------------------------------------------------- | ------------------------------------------------------- |
+| `docs/internal/print-assets/business-cards/*.png`   | sRGB renders, 1125 × 675, for review                    |
+| `…/business-cards/print/grove-card-<season>-dark-cmyk.pdf` | Page 1 front, page 2 back. CMYK, 300ppi, TrimBox set |
 
-- Background: Charcoal (`#1e293b`)
-- Text: Off-white (`#f8fafc`)
-- Logo: Grove Green + lighter bark
-- QR: White
+Each PDF page is the full 3.75" × 2.25" canvas (BleedBox), with the TrimBox at the 3.5" × 2" cut line. It is a CMYK PDF with trim and bleed boxes. It is **not** a certified PDF/X-1a; if a printer insists on X-1a, they or a preflight tool will need to produce it.
 
----
+### Colour: expect a shift
 
-## Logo Assets
+Glowing violets and blues are outside what CMYK ink can reproduce, so the printed card will be duller than the screen. In a soft proof, midnight's near-black ground drifts toward charcoal and its bright violet tree tiers toward dusty lavender; the pink holds up best.
 
-The Grove logo is a stylized tree SVG with 3D depth:
+- The PDF builder converts through an ICC profile. By default that is macOS's **Generic CMYK**, a stand-in. It is conservative and will look duller than a real press profile.
+- The printer converts again with their own profile. Ask them for it, then rebuild with `--icc=/path/to/their-profile.icc`.
+- Some printers prefer RGB and convert on their side. Ask which they want before choosing.
+- Order a single proof of midnight first. It is the card most affected.
 
-- **Branches:** Three tiers of paired triangular branches (six total), each pair split into dark/light halves for depth
-- **Trunk:** Two-tone tapered trunk (dark left, light right)
+### Finish
 
-### Seasonal Variants
+Soft-touch matte is the recommendation. Spot gloss or foil on the tree is worth asking about, since the glow is what the card is about. It only shows in print, so check what the printer offers.
 
-| Season       | Vibe                            | Recommended For           |
-| ------------ | ------------------------------- | ------------------------- |
-| **summer**   | Sunlit greens, lush vitality    | Default, most versatile   |
-| **autumn**   | Warm reds/golds, harvest warmth | Cozy, inviting feel       |
-| **spring**   | Rose gold, cherry blossoms      | Fresh, hopeful            |
-| **winter**   | Cool blues, crystalline         | Clean, minimal            |
-| **midnight** | Purple/pink twilight 🌙         | Queer fifth season, magic |
+### Quantity
 
-For business cards, **autumn** or **summer** are recommended for warmth and approachability.
-
-### Color Reference (Autumn)
-
-| Element         | Dark      | Light     |
-| --------------- | --------- | --------- |
-| Tier 1 (top)    | `#DC2626` | `#FCD34D` |
-| Tier 2 (middle) | `#991B1B` | `#F59E0B` |
-| Tier 3 (bottom) | `#7C2D12` | `#EA580C` |
-| Trunk           | `#5C3317` | `#8B4520` |
-
-### Color Reference (Summer)
-
-| Element         | Dark      | Light     |
-| --------------- | --------- | --------- |
-| Tier 1 (top)    | `#15803d` | `#86efac` |
-| Tier 2 (middle) | `#166534` | `#4ade80` |
-| Tier 3 (bottom) | `#14532d` | `#22c55e` |
-| Trunk           | `#3d2914` | `#5a3f30` |
-
-### Color Reference (Spring)
-
-| Element         | Dark      | Light     |
-| --------------- | --------- | --------- |
-| Tier 1 (top)    | `#be185d` | `#fecdd3` |
-| Tier 2 (middle) | `#9d174d` | `#fda4af` |
-| Tier 3 (bottom) | `#831843` | `#fb7185` |
-| Trunk           | `#5a3f30` | `#6f4d39` |
-
-### Color Reference (Winter)
-
-| Element         | Dark      | Light     |
-| --------------- | --------- | --------- |
-| Tier 1 (top)    | `#1e3a5f` | `#bfdbfe` |
-| Tier 2 (middle) | `#1e3a5f` | `#93c5fd` |
-| Tier 3 (bottom) | `#0f172a` | `#60a5fa` |
-| Trunk           | `#1e293b` | `#334155` |
-
-### Color Reference (Midnight)
-
-| Element         | Dark      | Light     |
-| --------------- | --------- | --------- |
-| Tier 1 (top)    | `#4c1d95` | `#fce7f3` |
-| Tier 2 (middle) | `#3b0764` | `#f9a8d4` |
-| Tier 3 (bottom) | `#1e1b4b` | `#ec4899` |
-| Trunk           | `#1a1a2e` | `#2d1b4e` |
-
-Logo source: `libs/engine/src/lib/ui/components/ui/Logo.svelte`
-
-Export as:
-
-- SVG (vector, preferred)
-- PNG at 300dpi (for print)
-- Sizes needed: 32px, 24px height (scaled proportionally)
-
----
-
-## QR Code Generation
-
-Generate QR codes with:
-
-- **Format:** SVG or high-res PNG (300dpi minimum)
-- **Error correction:** Level M (15% damage tolerance)
-- **Quiet zone:** Maintain standard white border
-- **Color:** Can be customized to grove green, but ensure contrast
-
-### Recommended Tools
-
-- qr-code-generator.com
-- goqr.me
-- Any tool that exports SVG
-
-### Test Before Print
-
-Always test QR codes on multiple phones before finalizing print files.
-
----
-
-## Print Specifications
-
-### For Print Shop
-
-```
-Bleed: 0.125" on all sides
-Safe zone: Keep text 0.125" from trim edge
-Resolution: 300dpi minimum for all raster elements
-Color mode: CMYK
-File format: PDF/X-1a or high-res PDF
-```
-
-### Recommended Printers
-
-- Moo.com (premium quality)
-- Vistaprint (budget-friendly)
-- Local print shop (support local!)
-
-### Quantity Suggestion
-
-Start with 250-500 cards. They're cheap and you'll want to iterate.
-
----
-
-## Accessibility Notes
-
-- QR codes should be large enough to scan easily (0.7" minimum)
-- Text should have sufficient contrast (WCAG AA minimum)
-- Include the URL text below QR codes for those who can't scan
-- Avoid putting critical info only in small text
+Start small. The deck is five designs; check whether the printer offers mixed-design packs before ordering a run of one.
 
 ---
 
@@ -288,13 +194,17 @@ Start with 250-500 cards. They're cheap and you'll want to iterate.
 
 Before sending to print:
 
-- [ ] Both QR codes tested and working
-- [ ] grove.place/hello page is live
-- [ ] Logo exports at correct sizes
-- [ ] Text proofread
-- [ ] Colors converted to CMYK
-- [ ] Bleed area included
-- [ ] PDF generated at 300dpi
+- [x] Layout, copy and palettes settled for all five seasons
+- [x] QR decodes on every back (software check)
+- [x] QR URL carries `?ref=card-back`
+- [x] Text outlined from Calistoga and Lexend, no font fallbacks
+- [x] Safe zone enforced by the generator for every card
+- [x] PDFs built: CMYK, 300ppi, bleed and trim boxes
+- [ ] `grove.place/hello` is live and logs `ref` (#1426)
+- [ ] Printer's ICC profile obtained and PDFs rebuilt with it
+- [ ] Proof of midnight reviewed in person, colours accepted
+- [ ] QR scanned from the printed proof on at least two phones
+- [ ] Final design approved for a print run
 
 ---
 
@@ -302,12 +212,11 @@ Before sending to print:
 
 This card should feel like Grove itself:
 
-- **Quiet, not loud** — minimal text, lots of breathing room
-- **Warm, not corporate** — the signature makes it personal
-- **Functional** — two clear paths: explore or act
-- **Honest** — no buzzwords, just what Grove actually is
+- **Quiet, not loud:** three things per side, lots of dark to breathe in
+- **Warm, not corporate:** a lantern in the dark, and a name that is yours
+- **Honest:** it says what Grove is, a blogging home for writers, and stops
 
-When someone receives this card, it should feel like an invitation to a calm corner of the internet, not a sales pitch.
+When someone is handed this card, it should feel like an invitation to a calm corner of the internet, not a sales pitch.
 
 ---
 
