@@ -104,16 +104,27 @@ function commandsToPathData(commands) {
 
 /**
  * Text as an SVG outline. `y` is the baseline, `tracking` is in pixels, and
- * anchor "middle" centres the line on `x`.
+ * anchor "middle" centres the line on `x`. `slant` leans the outlines by that
+ * many degrees about the baseline: our families ship no italic, so a short
+ * word gets a synthetic oblique.
  */
-function textPath(family, text, x, y, size, fill, { tracking = 0, anchor = "start" } = {}) {
+function textPath(
+	family,
+	text,
+	x,
+	y,
+	size,
+	fill,
+	{ tracking = 0, anchor = "start", slant = 0 } = {},
+) {
 	const font = FONTS[family];
 	const { glyphs, positions, width } = layoutGlyphs(font, text, size, tracking);
 	const startX = anchor === "middle" ? x - width / 2 : x;
 	const d = glyphs
 		.map((glyph, i) => commandsToPathData(glyph.getPath(startX + positions[i], y, size).commands))
 		.join("");
-	return `<path d="${d}" fill="${fill}" />`;
+	const lean = slant ? ` transform="translate(0 ${y}) skewX(${-slant}) translate(0 ${-y})"` : "";
+	return `<path d="${d}" fill="${fill}"${lean} />`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -529,9 +540,10 @@ function backSvg(palette) {
   ${textPath("Calistoga", "Your words", textX - 4, headlineBase, fontPx(26), palette.text, { tracking: -1 })}
   ${textPath("Calistoga", "are yours.", textX - 4, headlineBase + fontPx(26) + 6, fontPx(26), palette.text, { tracking: -1 })}
 
-  <!-- ____.grove.place — the blank is the point: your name goes here -->
+  <!-- you.grove.place — "you" rests on the line like a name written in the blank -->
   <line x1="${textX}" y1="${lineY}" x2="${textX + blankW}" y2="${lineY}"
         stroke="${palette.textAccent}" stroke-width="3" stroke-linecap="round" />
+  ${textPath("Lexend", "you", textX + blankW / 2, lineY - 12, fontPx(12), palette.textAccent, { anchor: "middle", slant: 12 })}
   ${textPath("Lexend", ".grove.place", domainX, lineY, fontPx(12), palette.text)}
 
   ${textPath("Lexend", "grove.place/hello", tileCx, CONTENT.bottom, fontPx(6.5), palette.textSubtle, { tracking: 0.6, anchor: "middle" })}
