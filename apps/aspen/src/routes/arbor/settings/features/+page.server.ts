@@ -6,7 +6,7 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 	let curiosCount = 0;
 
 	if (env?.DB && locals.tenantId) {
-		const [timelineCurio, galleryCurio, journeyCurio] = await Promise.all([
+		const [timelineCurio, galleryCurio] = await Promise.all([
 			env.DB.prepare("SELECT enabled FROM timeline_curio_config WHERE tenant_id = ?")
 				.bind(locals.tenantId)
 				.first<{ enabled: number }>()
@@ -15,16 +15,9 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 				.bind(locals.tenantId)
 				.first<{ enabled: number }>()
 				.catch(() => null),
-			env.DB.prepare("SELECT enabled FROM journey_curio_config WHERE tenant_id = ?")
-				.bind(locals.tenantId)
-				.first<{ enabled: number }>()
-				.catch(() => null),
 		]);
 
-		curiosCount =
-			(timelineCurio?.enabled === 1 ? 1 : 0) +
-			(galleryCurio?.enabled === 1 ? 1 : 0) +
-			(journeyCurio?.enabled === 1 ? 1 : 0);
+		curiosCount = (timelineCurio?.enabled === 1 ? 1 : 0) + (galleryCurio?.enabled === 1 ? 1 : 0);
 	}
 
 	return { curiosCount };

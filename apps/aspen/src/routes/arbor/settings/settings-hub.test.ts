@@ -43,8 +43,7 @@ function createMockDB(
 			// curio config tables — return null (not enabled) by default
 			if (
 				this._sql.includes("timeline_curio_config") ||
-				this._sql.includes("gallery_curio_config") ||
-				this._sql.includes("journey_curio_config")
+				this._sql.includes("gallery_curio_config")
 			) {
 				return null;
 			}
@@ -162,7 +161,7 @@ describe("Settings Hub — load()", () => {
 	it("should count enabled curios", async () => {
 		const { load } = await import("./+page.server.js");
 
-		// Mock DB that returns enabled for timeline and gallery, null for journey
+		// Mock DB that returns enabled for timeline and gallery
 		const db = {
 			prepare(sql: string) {
 				return {
@@ -174,7 +173,6 @@ describe("Settings Hub — load()", () => {
 						if (sql.includes("COUNT(*)")) return { count: 0 } as T;
 						if (sql.includes("timeline_curio_config")) return { enabled: 1 } as T;
 						if (sql.includes("gallery_curio_config")) return { enabled: 1 } as T;
-						if (sql.includes("journey_curio_config")) return null;
 						return null;
 					},
 					async all<T>(): Promise<{ results: T[] }> {

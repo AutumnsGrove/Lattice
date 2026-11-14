@@ -15,7 +15,7 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 
 	if (env?.DB && locals.tenantId) {
 		// Per-query error handling — one failing doesn't break the other
-		const [blazeResult, timelineCurio, galleryCurio, journeyCurio] = await Promise.all([
+		const [blazeResult, timelineCurio, galleryCurio] = await Promise.all([
 			env.DB.prepare("SELECT COUNT(*) as count FROM blaze_definitions WHERE tenant_id = ?")
 				.bind(locals.tenantId)
 				.first<{ count: number }>()
@@ -32,17 +32,10 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 				.bind(locals.tenantId)
 				.first<{ enabled: number }>()
 				.catch(() => null),
-			env.DB.prepare("SELECT enabled FROM journey_curio_config WHERE tenant_id = ?")
-				.bind(locals.tenantId)
-				.first<{ enabled: number }>()
-				.catch(() => null),
 		]);
 
 		customBlazeCount = blazeResult?.count ?? 0;
-		curiosCount =
-			(timelineCurio?.enabled === 1 ? 1 : 0) +
-			(galleryCurio?.enabled === 1 ? 1 : 0) +
-			(journeyCurio?.enabled === 1 ? 1 : 0);
+		curiosCount = (timelineCurio?.enabled === 1 ? 1 : 0) + (galleryCurio?.enabled === 1 ? 1 : 0);
 	}
 
 	return {

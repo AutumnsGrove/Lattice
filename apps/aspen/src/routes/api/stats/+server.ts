@@ -51,7 +51,7 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 
 	// PERFORMANCE: Run all stats queries in parallel (~400ms savings)
 	// Each query has individual error handling to prevent cascading failures
-	const [postStatsResult, tagsResult, tenantResult, timelineCurio, galleryCurio, journeyCurio] =
+	const [postStatsResult, tagsResult, tenantResult, timelineCurio, galleryCurio] =
 		await Promise.all([
 			// Query 1: Get post count and approximate word count
 			// NOTE: Word count is an APPROXIMATION using space counting
@@ -89,7 +89,7 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 				.first<UserRow>()
 				.catch(() => null),
 
-			// Query 4-6: Check which curios are enabled
+			// Query 4-5: Check which curios are enabled
 			db
 				.prepare(`SELECT enabled FROM timeline_curio_config WHERE tenant_id = ?`)
 				.bind(tenantId)
@@ -98,12 +98,6 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 
 			db
 				.prepare(`SELECT enabled FROM gallery_curio_config WHERE tenant_id = ?`)
-				.bind(tenantId)
-				.first<{ enabled: number }>()
-				.catch(() => null),
-
-			db
-				.prepare(`SELECT enabled FROM journey_curio_config WHERE tenant_id = ?`)
 				.bind(tenantId)
 				.first<{ enabled: number }>()
 				.catch(() => null),
@@ -140,9 +134,7 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 
 	// Count enabled curios
 	const curiosCount =
-		(timelineCurio?.enabled === 1 ? 1 : 0) +
-		(galleryCurio?.enabled === 1 ? 1 : 0) +
-		(journeyCurio?.enabled === 1 ? 1 : 0);
+		(timelineCurio?.enabled === 1 ? 1 : 0) + (galleryCurio?.enabled === 1 ? 1 : 0);
 
 	// Detect if any sub-query failed (returned null from .catch)
 	const _partialFailure = !postStatsResult || !tagsResult.results || !tenantResult;
