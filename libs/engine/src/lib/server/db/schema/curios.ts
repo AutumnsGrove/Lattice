@@ -1,7 +1,7 @@
 /**
  * Drizzle Schema — grove-curios-db (CURIO_DB binding)
  *
- * 45 tables powering Grove's curio widget system: timeline, journey,
+ * 41 tables powering Grove's curio widget system: timeline,
  * gallery, guestbook, hit counters, polls, link gardens,
  * now playing, mood ring, badges, bookmarks, shrines, and more.
  *
@@ -96,89 +96,6 @@ export const timelineAiUsage = sqliteTable("timeline_ai_usage", {
 	outputTokens: integer("output_tokens").default(0),
 	costUsd: real("cost_usd").default(0),
 	requestCount: integer("request_count").default(1),
-	createdAt: integer("created_at").default(sql`(strftime('%s', 'now'))`),
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-// JOURNEY
-// ─────────────────────────────────────────────────────────────────────────────
-
-export const journeyCurioConfig = sqliteTable("journey_curio_config", {
-	tenantId: text("tenant_id").primaryKey(),
-	enabled: integer("enabled").default(0),
-	githubRepoUrl: text("github_repo_url"),
-	githubToken: text("github_token"),
-	openrouterKey: text("openrouter_key"),
-	openrouterModel: text("openrouter_model").default("deepseek/deepseek-v3.2"),
-	snapshotFrequency: text("snapshot_frequency").default("release"),
-	showLanguageChart: integer("show_language_chart").default(1),
-	showGrowthChart: integer("show_growth_chart").default(1),
-	showMilestones: integer("show_milestones").default(1),
-	timezone: text("timezone").default("America/New_York"),
-	createdAt: integer("created_at").default(sql`(strftime('%s', 'now'))`),
-	updatedAt: integer("updated_at").default(sql`(strftime('%s', 'now'))`),
-});
-
-export const journeySnapshots = sqliteTable(
-	"journey_snapshots",
-	{
-		id: text("id").primaryKey(),
-		tenantId: text("tenant_id").notNull(),
-		snapshotDate: text("snapshot_date").notNull(),
-		label: text("label"),
-		gitHash: text("git_hash"),
-		totalLines: integer("total_lines"),
-		languageBreakdown: text("language_breakdown"),
-		docLines: integer("doc_lines"),
-		totalFiles: integer("total_files"),
-		directories: integer("directories"),
-		totalCommits: integer("total_commits"),
-		commitsSinceLast: integer("commits_since_last"),
-		testFiles: integer("test_files"),
-		testLines: integer("test_lines"),
-		estimatedTokens: integer("estimated_tokens"),
-		bundleSizeKb: integer("bundle_size_kb"),
-		ingestionSource: text("ingestion_source").default("manual"),
-		createdAt: integer("created_at").default(sql`(strftime('%s', 'now'))`),
-	},
-	(table) => [
-		uniqueIndex("idx_journey_snapshots_unique").on(table.tenantId, table.snapshotDate, table.label),
-	],
-);
-
-export const journeySummaries = sqliteTable("journey_summaries", {
-	id: text("id").primaryKey(),
-	tenantId: text("tenant_id").notNull(),
-	snapshotId: text("snapshot_id")
-		.notNull()
-		.references(() => journeySnapshots.id, { onDelete: "cascade" }),
-	version: text("version"),
-	summaryDate: text("summary_date"),
-	summary: text("summary"),
-	highlightsFeatures: text("highlights_features"),
-	highlightsFixes: text("highlights_fixes"),
-	statsCommits: integer("stats_commits"),
-	statsFeatures: integer("stats_features"),
-	statsFixes: integer("stats_fixes"),
-	statsRefactoring: integer("stats_refactoring"),
-	statsDocs: integer("stats_docs"),
-	statsTests: integer("stats_tests"),
-	statsPerformance: integer("stats_performance"),
-	aiModel: text("ai_model"),
-	aiCostUsd: real("ai_cost_usd").default(0),
-	createdAt: integer("created_at").default(sql`(strftime('%s', 'now'))`),
-});
-
-export const journeyJobs = sqliteTable("journey_jobs", {
-	id: text("id").primaryKey(),
-	tenantId: text("tenant_id").notNull(),
-	jobType: text("job_type"),
-	status: text("status").default("pending"),
-	progress: integer("progress").default(0),
-	resultSnapshotId: text("result_snapshot_id"),
-	errorMessage: text("error_message"),
-	startedAt: integer("started_at"),
-	completedAt: integer("completed_at"),
 	createdAt: integer("created_at").default(sql`(strftime('%s', 'now'))`),
 });
 

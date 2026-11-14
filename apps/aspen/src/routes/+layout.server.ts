@@ -72,7 +72,6 @@ export const load: LayoutServerLoad = async ({ locals, platform, url, cookies })
 						navResult,
 						timelineResult,
 						uploadGateResult,
-						journeyResult,
 						greenhouseResult,
 						groveResult,
 					] = await Promise.all([
@@ -120,15 +119,6 @@ export const load: LayoutServerLoad = async ({ locals, platform, url, cookies })
 								.first<{ enabled: number }>()
 								.catch(() => null),
 						]).then(([gateAllowed, curioConfig]) => gateAllowed && !!curioConfig?.enabled),
-
-						// Journey curio config query (table lives in CURIO_DB since Phase 3)
-						(platform?.env?.CURIO_DB ?? db)
-							.prepare(
-								`SELECT enabled FROM journey_curio_config WHERE tenant_id = ? AND enabled = 1`,
-							)
-							.bind(tenantId)
-							.first<{ enabled: number }>()
-							.catch(() => null), // Journey table might not exist - that's OK
 
 						// Greenhouse check — only for logged-in users (guests never need this)
 						locals.user && flagsEnv
@@ -192,10 +182,7 @@ export const load: LayoutServerLoad = async ({ locals, platform, url, cookies })
 
 					// Calculate enabled curios count for the pages admin UI
 					// This count is used to show accurate "slots used" (nav pages + curios share the same limit)
-					enabledCuriosCount =
-						(timelineResult?.enabled ? 1 : 0) +
-						(galleryEnabled ? 1 : 0) +
-						(journeyResult?.enabled ? 1 : 0);
+					enabledCuriosCount = (timelineResult?.enabled ? 1 : 0) + (galleryEnabled ? 1 : 0);
 				}
 				// No tenant context = use hardcoded defaults only (line 19)
 				// Don't query DB without tenant filter — would leak other tenants' settings

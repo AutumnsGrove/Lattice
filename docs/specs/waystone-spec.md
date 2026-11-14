@@ -286,7 +286,7 @@ Current categories of supported slugs:
 
 | Category | Slugs |
 |----------|-------|
-| Features | `what-is-rings`, `what-are-trails`, `what-is-journey`, `what-is-gallery`, `what-are-curios`, `what-is-pulse`, `what-is-hum`, `what-are-blazes` |
+| Features | `what-is-rings`, `what-are-trails`, `what-is-gallery`, `what-are-curios`, `what-is-pulse`, `what-is-hum`, `what-are-blazes` |
 | Platform | `what-is-arbor`, `what-is-flow`, `what-is-sentinel`, `what-is-scribe`, `what-is-prism`, `what-is-heartwood`, `what-is-plant`, `what-is-greenhouse`, `what-is-amber`, `what-are-grafts`, `what-are-vines` |
 | Content | `formatting-your-posts`, `using-curios-in-content` |
 | Customization | `choosing-a-theme`, `custom-fonts` |

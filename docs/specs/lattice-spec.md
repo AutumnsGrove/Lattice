@@ -867,13 +867,12 @@ Curio UI components live separately in `@autumnsgrove/lattice/ui/content/curios`
 libs/engine/src/lib/
 ├── curios/
 │   ├── timeline/       ← logic, AI integration, voice presets
-│   ├── journey/        ← logic, GitHub repo analysis
 │   ├── gallery/        ← logic
 │   ├── guestbook/      ← types, validation
 │   ├── hitcounter/     ← types, display styles
 │   ├── moodring/       ← types, mood palettes
 │   ├── nowplaying/     ← types, media integration
-│   └── ...22 total
+│   └── ...21 total
 ├── ui/components/content/curios/  ← Svelte display components
 └── curios/sanitize.ts             ← shared content sanitization
 ```
@@ -909,10 +908,6 @@ import {
 // Build a voiced prompt for the AI
 const prompt = buildVoicedPrompt(activity, getVoice("poetic"));
 ```
-
-**Journey**
-
-Repo growth visualization — language breakdowns and milestone snapshots over time.
 
 **Gallery** (`./curios/gallery`)
 
@@ -1286,7 +1281,7 @@ A snapshot of where each subsystem stands.
 | **Feature Flags**    | Live          | 6 rule types, Greenhouse management               |
 | **Grafts (Platform UI)** | Live      | Named grafts (feature flags), `KnownFlagId` union |
 | **Zephyr**           | In progress   | Email sending live; social broadcast building     |
-| **Curios (dev)**     | Live          | Timeline, Journey, Gallery                        |
+| **Curios (dev)**     | Live          | Timeline, Gallery                                 |
 | **Curios (visitor)** | In progress   | Types/logic ready; UI components in progress      |
 | **UI System**        | Live          | Full component library, 7 categories              |
 | **Email**            | Live          | React Email, sequences, render pipeline, Resend   |
