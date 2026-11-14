@@ -162,6 +162,18 @@ describe("pulseHandle — emitPulseEvent", () => {
 		expect(opts.metadata).toEqual({ ua: "TestAgent/1.0" });
 	});
 
+	it("carries an acquisition ref in metadata when the URL has one", async () => {
+		const handle = pulseHandle({ app: "landing" });
+		const event = makeEvent("/hello?ref=card");
+		const resolve = makeResolve(200);
+
+		await handle({ event: event as never, resolve });
+
+		const opts = lastEmitOptions();
+		expect(opts.route).toBe("/hello");
+		expect(opts.metadata).toEqual({ ua: "TestAgent/1.0", ref: "card" });
+	});
+
 	it("falls back to pathname when route.id is null", async () => {
 		const handle = pulseHandle({ app: "plant" });
 		const event = makeEvent("/some/path", { routeId: null });

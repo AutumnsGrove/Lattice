@@ -1,9 +1,11 @@
 <script lang="ts">
 	interface Props {
 		variant?: 'default' | 'dark';
+		/** Acquisition ref forwarded from the page (e.g. the business card QR). */
+		ref?: string | null;
 	}
 
-	let { variant = 'default' }: Props = $props();
+	let { variant = 'default', ref = null }: Props = $props();
 
 	let email = $state('');
 	let status = $state<'idle' | 'loading' | 'success' | 'already_signed_up' | 'error'>('idle');
@@ -27,7 +29,7 @@
 			const response = await fetch('/api/signup', { // csrf-ok — landing has no auth sessions
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ email })
+				body: JSON.stringify(ref ? { email, ref } : { email })
 			});
 
 			const data = (await response.json()) as { error?: string };

@@ -90,7 +90,7 @@
 	<!-- Primary CTA -->
 	<section class="w-full max-w-md mb-8 text-center">
 		<a
-			href="https://plant.grove.place"
+			href={data.plantSignupUrl}
 			rel="noopener noreferrer"
 			class="btn-primary inline-flex items-center gap-2 text-base mb-3"
 		>
@@ -114,7 +114,7 @@
 		<p class="text-foreground-muted font-sans mb-4">
 			Not ready yet? Leave your email and we'll let you know when things are growing.
 		</p>
-		<EmailSignup />
+		<EmailSignup ref={data.ref} />
 	</section>
 
 	<!-- Explore links -->

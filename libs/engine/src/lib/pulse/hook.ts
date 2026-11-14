@@ -74,6 +74,11 @@ export function pulseHandle(options: PulseHandleOptions): Handle {
 
 			const tenant_id = extractTenantId(event);
 
+			// Acquisition refs (?ref=card from a business card QR, #1426) ride along
+			// in metadata so scans are countable without a separate endpoint. The
+			// collector already stores metadata as JSON; truncate to keep events small.
+			const ref = event.url.searchParams.get("ref")?.slice(0, 64);
+
 			emitPulseEvent("page.viewed", {
 				route: event.route?.id ?? pathname,
 				method: event.request.method,
@@ -82,7 +87,7 @@ export function pulseHandle(options: PulseHandleOptions): Handle {
 				tenant_id,
 				visitor_hash,
 				app,
-				metadata: { ua: ua.slice(0, 200) },
+				metadata: ref ? { ua: ua.slice(0, 200), ref } : { ua: ua.slice(0, 200) },
 			});
 		}
 
