@@ -99,11 +99,34 @@ Up to 3 retries, with increasing delays between attempts. The exact delays are c
 ### 27. A follow-up message is supported
 A message can be queued during a run and is read after the work would otherwise end, in the same conversation. It sits next to stop and steer (decision 19). Nova and Pi both have it. Decided 2026-11-14. Open detail: what a follow-up does when nothing is running.
 
+### 28. The core only produces the record
+The core makes a clean, readable record of every run. A viewer (an Arbor page, a file, or anything else) is built separately later, on top of it. Decided 2026-11-14. See `run-record.md`.
+
+### 29. The record holds the real data
+Scrubbing happens only on the way to the model. The saved record is private to the tenant, is never published, and never contains a provider key. Decided 2026-11-14.
+
+### 30. A straight line now, with branches possible later
+Nothing branches today. Every entry carries its own id and the id of the entry before it, so branches can be added later without changing the format. Decided 2026-11-14.
+
+## Proposed, waiting for a yes
+
+These are from `run-record.md`, where each is explained.
+
+### 31. The record is shaped like Nova's session file
+A header line, then one entry per line. Each entry has `type`, `id`, `parent`, and `ts`. Entries: header, message from the user, message from the assistant (with model, usage, finish reason), message from a tool, and status. Unknown kinds are skipped by readers.
+
+### 32. The record is the only place progress lives
+Working state that tools build (the half-built timeline page, the handle map) is rebuilt on resume by replaying the saved tool results. No second copy.
+
+### 33. The model's reasoning text is stored when the adapter provides it
+Marked as reasoning, so a viewer can show or hide it.
+
 ## Not discussed yet
 
 These came out of the research and are waiting for their turn, one at a time:
 
-- **The record of a run.** How Autumn sees what Lyra did and why.
+- **Context size.** What is sent to the model when a long run no longer fits in its memory (trimming or summarizing).
+- **Record retention.** How long a record is kept, and who can delete one.
 - **Follow-up when nothing is running.** Whether it starts the next turn of the same conversation or is refused.
 - **Approvals.** How a background run asks for a yes and waits at no cost.
 - **The Cloudflare adapter's foundation.** Whether it builds on Cloudflare's agent tooling or on plain Durable Objects. A smaller question once decision 12 is settled.
