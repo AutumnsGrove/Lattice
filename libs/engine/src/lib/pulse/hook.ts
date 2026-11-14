@@ -15,6 +15,7 @@
 import type { Handle } from "@sveltejs/kit";
 import { initPulse, emitPulseEvent, flushPulse } from "./emitter.js";
 import { hashVisitor } from "./visitor.js";
+import { sanitizeRef } from "../utils/acquisition-ref.js";
 import type { PulseCollector } from "./types.js";
 
 export interface PulseHandleOptions {
@@ -75,9 +76,10 @@ export function pulseHandle(options: PulseHandleOptions): Handle {
 			const tenant_id = extractTenantId(event);
 
 			// Acquisition refs (?ref=card from a business card QR, #1426) ride along
-			// in metadata so scans are countable without a separate endpoint. The
-			// collector already stores metadata as JSON; truncate to keep events small.
-			const ref = event.url.searchParams.get("ref")?.slice(0, 64);
+			// in metadata so scans are countable without a separate endpoint. The value
+			// is visitor-controlled, so it goes through the shared slug validator — an
+			// invalid ref is simply left out rather than stored.
+			const ref = sanitizeRef(event.url.searchParams.get("ref"));
 
 			emitPulseEvent("page.viewed", {
 				route: event.route?.id ?? pathname,
