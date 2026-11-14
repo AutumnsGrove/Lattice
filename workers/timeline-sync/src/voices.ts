@@ -2,9 +2,14 @@
  * Voice Presets System
  *
  * Simplified version of the engine's voice system for the cron worker.
- * All 5 voice presets are inlined here to avoid cross-package dependencies.
+ * All 5 voice presets are inlined here, but the output budget is not: the
+ * ceiling for the detailed breakdown is owned by libs/curios, so importing it
+ * keeps the inlined presets in step instead of relying on a test to catch drift.
+ * Subpath, not the package root — `@autumnsgrove/curios/timeline` pulls Svelte
+ * components in with it, and this runs in a Worker.
  */
 
+import { DETAILED_BUDGET } from "@autumnsgrove/curios/timeline/voices";
 import type { Commit, VoicePreset, CustomVoiceConfig } from "./config";
 
 // =============================================================================
@@ -86,6 +91,7 @@ GENERATE THREE OUTPUTS:
    - Header: "## Projects"
    - Each project: "### ProjectName"
    - Bullet points for key changes
+${DETAILED_BUDGET}
 
 3. GUTTER COMMENTS (${gutterCount} margin notes):
    Short observations (10 words max).
@@ -169,6 +175,7 @@ GENERATE THREE OUTPUTS:
    - Each project: "### [ProjectName] Expedition"
    - Bullet points as quest achievements/challenges faced
    - Use RPG language: "vanquished the null pointer beast", "forged new API endpoints"
+${DETAILED_BUDGET}
 
 3. GUTTER COMMENTS (${gutterCount} margin notes):
    Short RPG-flavored observations (10 words max).
@@ -296,6 +303,7 @@ GENERATE THREE OUTPUTS:
    - Bullet points starting with "- " in casual language
    - Show personality: "finally fixed that annoying thing", "this is still janky but whatever"
    - Group related changes, don't just list every commit
+${DETAILED_BUDGET}
 
 3. GUTTER COMMENTS (${gutterCount} margin notes):
    Casual asides that feel like margin scribbles (10 words max).
@@ -384,6 +392,7 @@ GENERATE THREE OUTPUTS:
    - Bullet points with poetic sensibility
    - Find the story in each change
    - Brief but evocative descriptions
+${DETAILED_BUDGET}
 
 3. GUTTER COMMENTS (${gutterCount} margin notes):
    Contemplative asides (10 words max).
@@ -473,6 +482,7 @@ GENERATE THREE OUTPUTS:
    - Terse bullet points
    - Skip minor changes, group related ones
    - Use shorthand: impl, fix, add, rm, refactor
+${DETAILED_BUDGET}
 
 3. GUTTER COMMENTS (${gutterCount} margin notes):
    Single words or very short phrases.
@@ -593,6 +603,7 @@ ${summaryInstructions}
    - Header: "## Projects"
    - Each project: "### ProjectName"
    - Bullet points for key changes
+${DETAILED_BUDGET}
 
 3. GUTTER COMMENTS (${gutterCount} margin notes):
    Short observations (10 words max).`;

@@ -15,12 +15,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Env, TenantConfig } from "./config";
 
-const { runMock, emitPulseEventMock, flushPulseMock, initPulseMock } = vi.hoisted(() => ({
-	runMock: vi.fn(),
-	emitPulseEventMock: vi.fn(),
-	flushPulseMock: vi.fn().mockResolvedValue(undefined),
-	initPulseMock: vi.fn(),
-}));
+const { runMock, emitPulseEventMock, flushPulseMock, initPulseMock, parseMock } = vi.hoisted(
+	() => ({
+		runMock: vi.fn(),
+		emitPulseEventMock: vi.fn(),
+		flushPulseMock: vi.fn().mockResolvedValue(undefined),
+		initPulseMock: vi.fn(),
+		parseMock: vi.fn(),
+	}),
+);
 
 vi.mock("@autumnsgrove/lattice/ai/lumen", () => ({
 	// mockImplementation needs a real (constructible) function, not an arrow
@@ -62,12 +65,7 @@ vi.mock("./github", () => ({
 }));
 
 vi.mock("./response-parser", () => ({
-	parseAIResponse: vi.fn().mockReturnValue({
-		success: true,
-		brief: "Brief summary",
-		detailed: "Detailed timeline",
-		gutter: [],
-	}),
+	parseAIResponse: parseMock,
 }));
 
 vi.mock("./voices", () => ({
@@ -139,8 +137,30 @@ function createMockCtx() {
 	return { db: { prepare: vi.fn().mockReturnValue(stmt) } } as any;
 }
 
+/**
+ * True if any prepared statement wrote a summary row. A written row carries a
+ * real commit_count, so the date reads as generated and every later run skips
+ * it — the exact shape of the 2026-11-13 bug.
+ */
+function writtenSummaryRows(ctx: any): boolean {
+	return ctx.db.prepare.mock.calls.some((call: unknown[]) =>
+		String(call[0]).includes("INSERT INTO timeline_summaries"),
+	);
+}
+
+const successfulParseResult = {
+	success: true,
+	brief: "Brief summary",
+	detailed: "Detailed timeline",
+	gutter: [],
+};
+
 const successfulLumenResult = {
-	content: "ai response",
+	content: JSON.stringify({
+		brief: "A day of small fixes and one stubborn parser.",
+		detailed: "## Projects\n\n### Lattice\n- Tightened the response parser",
+		gutter: [{ anchor: "### Lattice", type: "comment", content: "about time" }],
+	}),
 	model: "anthropic/claude-3.5-haiku",
 	usage: { input: 100, output: 50, cost: 0.001 },
 };
@@ -148,6 +168,7 @@ const successfulLumenResult = {
 describe("processTenantTimeline resilience", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		parseMock.mockReturnValue(successfulParseResult);
 	});
 
 	describe("retry", () => {
@@ -197,6 +218,59 @@ describe("processTenantTimeline resilience", () => {
 			expect(result.error).toContain("timed out");
 			// 3 total attempts: 1 initial + 2 retries
 			expect(runMock).toHaveBeenCalledTimes(3);
+		}, 15000);
+	});
+
+	describe("unusable AI responses", () => {
+		it("fails instead of storing the generic fallback on truncated output", async () => {
+			// 2026-11-13: the response pinned exactly maxTokens and got cut off
+			// mid-JSON. It used to be stored as a real summary with the real
+			// commit count, which then blocked every future run for that date.
+			runMock.mockResolvedValue({
+				...successfulLumenResult,
+				content: '{"brief": "Some work happened today. The summary got a bit',
+				usage: { input: 7753, output: 8192, cost: 0.015945 },
+			});
+			parseMock.mockReturnValue({ ...successfulParseResult, success: false });
+
+			const ctx = createMockCtx();
+			const result = await processTenantTimeline(
+				createMockConfig(),
+				"2026-11-13",
+				createMockEnv(),
+				ctx,
+			);
+
+			expect(result.success).toBe(false);
+			expect(result.error).toContain("ceiling");
+			expect(emitPulseEventMock).toHaveBeenCalledWith(
+				"error.server",
+				expect.objectContaining({
+					metadata: expect.objectContaining({ date: "2026-11-13" }),
+				}),
+			);
+			// Nothing may be written — a written row would freeze the date.
+			expect(writtenSummaryRows(ctx)).toBe(false);
+		}, 15000);
+
+		it("fails when the response parses to non-JSON under the token ceiling", async () => {
+			runMock.mockResolvedValueOnce({
+				...successfulLumenResult,
+				content: "Sure! Here is your summary",
+			});
+			parseMock.mockReturnValue({ ...successfulParseResult, success: false });
+
+			const ctx = createMockCtx();
+			const result = await processTenantTimeline(
+				createMockConfig(),
+				"2026-11-13",
+				createMockEnv(),
+				ctx,
+			);
+
+			expect(result.success).toBe(false);
+			expect(result.error).toContain("not valid JSON");
+			expect(writtenSummaryRows(ctx)).toBe(false);
 		}, 15000);
 	});
 

@@ -129,6 +129,7 @@ export async function generateSummary(
 	);
 
 	// Call AI via Lumen
+	const maxTokens = 8192;
 	const aiResponse = await lumen.run({
 		task: "summary",
 		input: [
@@ -140,14 +141,30 @@ export async function generateSummary(
 			model: config.openrouter_model,
 			tenantApiKey: undefined, // Set by caller
 			// See same fix + rationale in workers/timeline-sync/src/generator.ts.
-			maxTokens: 8192,
+			maxTokens,
 			temperature: 0.7,
 			skipQuota: true,
 		},
 	});
 
+	// A truncated response is not a summary. parseAIResponse() hands back a
+	// generic fallback object on JSON.parse failure, and storing that used to
+	// happen silently — the row was written with the real commit_count, so the
+	// date looked generated and every later run skipped it. Fail loudly instead.
+	if (aiResponse.usage.output >= maxTokens) {
+		throw new Error(
+			`AI response hit the ${maxTokens}-token ceiling (model=${aiResponse.model}, output=${aiResponse.usage.output}) and was truncated mid-JSON`,
+		);
+	}
+
 	// Parse AI response
 	const parsed = parseAIResponse(aiResponse.content);
+
+	if (!parsed.success) {
+		throw new Error(
+			`AI response was not valid JSON (model=${aiResponse.model}, output=${aiResponse.usage.output} tokens, ${aiResponse.content.length} chars)`,
+		);
+	}
 
 	// Build context data for storage
 	const contextData = buildSummaryContextData(

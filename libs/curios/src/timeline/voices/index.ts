@@ -6,6 +6,7 @@
  */
 
 import { professional, quest, casual, poetic, minimal } from "./presets";
+import { DETAILED_BUDGET } from "./budget";
 import type {
   VoicePreset,
   VoicePromptResult,
@@ -33,6 +34,12 @@ export const VOICE_PRESETS: Record<string, VoicePreset> = {
  * Default voice preset ID
  */
 export const DEFAULT_VOICE = "professional";
+
+/**
+ * Re-exported so consumers that build prompts themselves (the timeline-sync
+ * worker inlines these presets) share the same ceiling instead of copying it.
+ */
+export { DETAILED_BUDGET };
 
 // =============================================================================
 // Voice Selection
@@ -126,6 +133,7 @@ ${summaryInstructions}
    - Header: "## Projects"
    - Each project: "### ProjectName"
    - Bullet points for key changes
+${DETAILED_BUDGET}
 
 3. GUTTER COMMENTS (${gutterCount} margin notes):
    Short observations (10 words max).`;

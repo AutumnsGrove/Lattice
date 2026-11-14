@@ -6,6 +6,7 @@
  */
 
 import type { VoicePreset, Commit } from "../types";
+import { DETAILED_BUDGET } from "../budget";
 
 export const professional: VoicePreset = {
   id: "professional",
@@ -82,6 +83,7 @@ GENERATE THREE OUTPUTS:
    - Header: "## Projects"
    - Each project: "### ProjectName"
    - Bullet points for key changes
+${DETAILED_BUDGET}
 
 3. GUTTER COMMENTS (${gutterCount} margin notes):
    Short observations (10 words max).

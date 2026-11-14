@@ -215,6 +215,7 @@ export async function processTenantTimeline(
 		// A cron run only gets one shot — there's no user sitting there to hit
 		// "retry" if Lumen's whole fallback chain trips on a transient network
 		// blip. Retrying the entire chain (not just one model) absorbs that.
+		const maxTokens = 8192;
 		const aiResult = await withRetry(
 			() =>
 				lumen.run({
@@ -227,13 +228,13 @@ export async function processTenantTimeline(
 					options: {
 						model: config.openrouterModel || DEFAULT_OPENROUTER_MODEL,
 						tenantApiKey: openrouterKey,
-						// 2048 was too tight for the full brief+detailed+gutter JSON envelope
-						// on busier days — the model gets cut off mid-object, JSON.parse()
-						// throws, and parseAIResponse() silently swaps in the generic
-						// "got a bit tangled" fallback text instead of surfacing an error.
-						// Doubled again to 8192 as headroom for tenants with heavier days
-						// than we've tested against.
-						maxTokens: 8192,
+						// The full brief+detailed+gutter JSON envelope has to land inside
+						// this ceiling, or the model gets cut off mid-object. 2048 and 4096
+						// were both too tight; 8192 plus the DETAILED_BUDGET in voices.ts
+						// (a named word/project ceiling for the detailed section) is the
+						// current pairing. Raising this alone is not a fix — 2026-11-13
+						// pinned exactly 8192 output tokens and still truncated.
+						maxTokens,
 						temperature: 0.7,
 					},
 				}),
@@ -241,7 +242,25 @@ export async function processTenantTimeline(
 		);
 
 		// 7. Parse AI response
+		//
+		// A truncated response is not a summary. parseAIResponse() hands back a
+		// generic fallback object on JSON.parse failure, and storing that used to
+		// happen silently: the row was written with the real commit_count, so the
+		// date looked generated and every later run skipped it. Fail loudly
+		// instead — Pulse records it, no row is written, and the retry can happen.
+		if (aiResult.usage.output >= maxTokens) {
+			throw new Error(
+				`AI response hit the ${maxTokens}-token ceiling (model=${aiResult.model}, output=${aiResult.usage.output}) and was truncated mid-JSON`,
+			);
+		}
+
 		const parsed = parseAIResponse(aiResult.content);
+
+		if (!parsed.success) {
+			throw new Error(
+				`AI response was not valid JSON (model=${aiResult.model}, output=${aiResult.usage.output} tokens, ${aiResult.content.length} chars)`,
+			);
+		}
 
 		// 8. Build context data for storage
 		const contextData = buildSummaryContextData(

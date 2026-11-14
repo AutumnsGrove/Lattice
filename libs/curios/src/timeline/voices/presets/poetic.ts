@@ -6,6 +6,7 @@
  */
 
 import type { VoicePreset, Commit } from "../types";
+import { DETAILED_BUDGET } from "../budget";
 
 export const poetic: VoicePreset = {
   id: "poetic",
@@ -71,6 +72,7 @@ GENERATE THREE OUTPUTS:
    - Bullet points with poetic sensibility
    - Find the story in each change
    - Brief but evocative descriptions
+${DETAILED_BUDGET}
 
 3. GUTTER COMMENTS (${gutterCount} margin notes):
    Contemplative asides (10 words max).

@@ -6,6 +6,7 @@
  */
 
 import type { VoicePreset, Commit } from "../types";
+import { DETAILED_BUDGET } from "../budget";
 
 export const minimal: VoicePreset = {
   id: "minimal",
@@ -71,6 +72,7 @@ GENERATE THREE OUTPUTS:
    - Terse bullet points
    - Skip minor changes, group related ones
    - Use shorthand: impl, fix, add, rm, refactor
+${DETAILED_BUDGET}
 
 3. GUTTER COMMENTS (${gutterCount} margin notes):
    Single words or very short phrases.

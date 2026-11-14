@@ -1583,6 +1583,9 @@ importers:
 
   workers/timeline-sync:
     dependencies:
+      '@autumnsgrove/curios':
+        specifier: workspace:*
+        version: link:../../libs/curios
       '@autumnsgrove/infra':
         specifier: workspace:*
         version: link:../../libs/infra
