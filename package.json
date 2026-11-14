@@ -50,6 +50,7 @@
 		"globals": "^16.0.0",
 		"opentype.js": "^2.0.0",
 		"oxlint": "^1.0.0",
+		"pdf-lib": "^1.17.1",
 		"prettier": "^3.5.0",
 		"prettier-plugin-svelte": "^3.4.0",
 		"qrcode": "^1.5.4",
