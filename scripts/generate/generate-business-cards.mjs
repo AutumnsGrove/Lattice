@@ -104,7 +104,7 @@ function commandsToPathData(commands) {
 
 /**
  * Text as an SVG outline. `y` is the baseline, `tracking` is in pixels, and
- * anchor "middle" centres the line on `x`. `slant` leans the outlines by that
+ * anchor "middle" centres the line on `x`, "end" right-aligns it to `x`. `slant` leans the outlines by that
  * many degrees about the baseline: our families ship no italic, so a short
  * word gets a synthetic oblique.
  */
@@ -119,7 +119,7 @@ function textPath(
 ) {
 	const font = FONTS[family];
 	const { glyphs, positions, width } = layoutGlyphs(font, text, size, tracking);
-	const startX = anchor === "middle" ? x - width / 2 : x;
+	const startX = anchor === "middle" ? x - width / 2 : anchor === "end" ? x - width : x;
 	const d = glyphs
 		.map((glyph, i) => commandsToPathData(glyph.getPath(startX + positions[i], y, size).commands))
 		.join("");
@@ -496,7 +496,8 @@ function frontSvg(palette) {
 
   ${textPath("Calistoga", "Grove", textX - 6, wordmarkBase, fontPx(44), palette.text, { tracking: -2 })}
   ${textPath("Lexend", "A place to Be.", textX, taglineBase, fontPx(11), palette.textAccent)}
-  ${textPath("Lexend", "Autumn Brown · Wayfinder", textX, nameBase, fontPx(6.5), palette.textSubtle, { tracking: 0.6 })}
+  ${textPath("Lexend", "A blogging home for writers.", textX, taglineBase + 50, fontPx(7.5), palette.textSubtle)}
+  ${textPath("Lexend", "Autumn Brown · Wayfinder", CONTENT.right, nameBase, fontPx(6.5), palette.textSubtle, { tracking: 0.6, anchor: "end" })}
 </svg>`;
 }
 
@@ -543,6 +544,7 @@ function backSvg(palette) {
   <!-- you.grove.place — "you" rests on the line like a name written in the blank -->
   <line x1="${textX}" y1="${lineY}" x2="${textX + blankW}" y2="${lineY}"
         stroke="${palette.textAccent}" stroke-width="3" stroke-linecap="round" />
+  ${textPath("Lexend", "Start a blog at", textX, lineY - 76, fontPx(7), palette.textSubtle, { tracking: 0.6 })}
   ${textPath("Lexend", "you", textX + blankW / 2, lineY - 12, fontPx(12), palette.textAccent, { anchor: "middle", slant: 12 })}
   ${textPath("Lexend", ".grove.place", domainX, lineY, fontPx(12), palette.text)}
 
