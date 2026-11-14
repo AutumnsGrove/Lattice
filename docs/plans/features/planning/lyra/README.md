@@ -23,7 +23,8 @@ Slowly, and scoped before anything is built. Every decision gets written down he
 | File | What it holds |
 |---|---|
 | [`decisions.md`](decisions.md) | Every decision so far, with the reason, plus what has not been discussed yet. Start here. |
-| [`adapters.md`](adapters.md) | How Lyra runs without Lumen or Warden: four small slots, with Grove's pieces as adapters. |
+| [`adapters.md`](adapters.md) | How Lyra runs without Lumen or Warden: four small slots and an optional shell, with Grove's pieces as adapters. |
+| [`limits-and-interruptions.md`](limits-and-interruptions.md) | What stops a run, how it is stopped and steered, how it resumes, and what happens when something fails. |
 | [`timeline-first-job.md`](timeline-first-job.md) | The first job Lyra will do: the development timeline summary. What is wrong today and the tools that fix it. |
 | [`lumen-changes.md`](lumen-changes.md) | What Lumen has to change before Lyra can run a loop through it. |
 | [`research/`](research/) | Raw research notes from 2026-11-11 (Nova, Pi, Cloudflare's agent tools, the Lattice codebase, the wider landscape). Written fast by research passes, and some claims are marked unverified inside. Useful as source material, not as settled fact. |

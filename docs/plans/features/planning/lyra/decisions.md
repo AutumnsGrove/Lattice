@@ -66,17 +66,37 @@ For a runner task, Autumn wants a real bash tool. It needs to run tests, and mod
 
 Two consequences to carry forward. First, bash is free-form, so it is the one tool that cannot be validated the way the timeline's tools are. The working rule: validated tools for tasks where exactness matters (the timeline), a shell for exploratory tasks (a review). Second, a shell can write and run anything the host allows, so it needs a permission policy. That belongs to the approvals discussion, and Nova's permission model is the reference.
 
+### 17. A shell slot, optional
+A fifth slot: run a command and return its output. A task that needs a shell says so, and fails clearly on a host that has none. The tool is called `bash` everywhere, so a task's recipe does not change between hosts. On Node the slot runs a real shell. On Workers there is none at first (a virtual shell such as just-bash could fill it later, untested). This keeps subprocess code out of the core. Confirmed 2026-11-14.
+
+### 18. Limits are optional, and there are none by default
+A run can be limited by steps, tokens, time, or cost. Each is optional, and the core's default is no limit on any of them. A task can set any in its recipe. A cost limit works only when the adapter reports real cost (decision 15). Extends decision 10. Decided 2026-11-14. See `limits-and-interruptions.md`.
+
+### 19. A run can always be stopped and steered
+Any run can be stopped partway by a person, and steered with a new message that redirects it. A stop cancels the model request in flight. A steer message is read by the model at the next gap between steps. Always available, whatever the task. Decided 2026-11-14.
+
+### 20. Interrupted runs resume where they stopped
+After every model reply and tool result, the record is saved before the loop goes on. Resuming reloads the record and continues. A run does not start over. Decided 2026-11-14.
+
+### 21. Tool failures go back to the model
+A failed tool call, or one with invalid arguments, returns an error as the tool's result, and the model corrects it in the next call. Bad model output is a fact of working with AI, and Lyra does not try to design it away. Decided 2026-11-14.
+
 ## Proposed, waiting for a yes
 
-### 17. An optional "shell" slot
-Add a fifth slot, optional: run a command and return its output. A task that needs a shell says so, and fails clearly on a host that has none. The tool is called `bash` everywhere, so a task's recipe does not change between hosts. On Node the slot runs a real shell. On Workers there is none at first (a virtual shell such as just-bash could fill it later, untested). This keeps subprocess code out of the core.
+These are from `limits-and-interruptions.md`, where each is explained.
+
+### 22. Hitting a limit parks the run, and it can be resumed with a larger limit
+### 23. Accidents resume on their own, and a stop waits for a person
+### 24. Each tool declares whether it is safe to repeat, defaulting to no
+### 25. Done is decided by the task's done-check, with one default-on safeguard against a run that is stuck
+### 26. A failing model call is retried a few times, then the run parks as "model unavailable"
 
 ## Not discussed yet
 
 These came out of the research and are waiting for their turn, one at a time:
 
-- **Limits and interruptions.** What stops a run (steps, tokens, time, cost), and what happens when a run is cut off partway.
 - **The record of a run.** How Autumn sees what Lyra did and why.
+- **A follow-up message** queued for after a run would otherwise end (see `limits-and-interruptions.md`).
 - **Approvals.** How a background run asks for a yes and waits at no cost.
 - **The Cloudflare adapter's foundation.** Whether it builds on Cloudflare's agent tooling or on plain Durable Objects. A smaller question once decision 12 is settled.
 - **The wire protocol.** Which subset of Nova's frames Lyra speaks.

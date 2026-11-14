@@ -6,7 +6,7 @@ category: features
 
 # Lyra adapters
 
-Last updated: 2026-11-13. Status: slots confirmed (decision 12). Model details confirmed (decisions 14 and 15). A shell slot is proposed (decision 17).
+Last updated: 2026-11-13. Status: slots confirmed (decision 12). Model details confirmed (decisions 14 and 15). The shell slot is confirmed (decision 17).
 
 ## The goal
 
@@ -24,6 +24,7 @@ Lyra's core defines four small slots. Each is a short interface, a few functions
 | **Storage** | Save and load a run's record and its progress. Append-only. | Durable Object storage | Memory (for tests), SQLite or a file (Node) |
 | **Secrets** | Let a tool ask for a key or token by name. | Warden, or the tenant's encrypted secrets | Environment variables |
 | **Waking** | Wake a run later, after a wait or an interruption. | A Durable Object alarm | A timer (Node), or nothing for a simple script |
+| **Shell** (optional) | Run a command, return its output. The tool is `bash` on every host. | None at first | A real shell (Node). A virtual shell such as just-bash could fill it on Workers later (untested). |
 
 The list is expected to grow as more places Lyra runs are discussed.
 
@@ -65,7 +66,7 @@ Lumen's concepts live in the Lumen adapter and nowhere else: task types (includi
 
 ## What it costs
 
-Four small interfaces, and one real risk: Lumen-shaped ideas leaking into the core (a `task` field, a quota concept). The rules above are the guard. The two blocking Lumen changes in `lumen-changes.md` (tool turns in the conversation, and a finish reason) are exactly what the model slot needs from any provider, so they are not Lumen-specific.
+Four small interfaces plus an optional shell, and one real risk: Lumen-shaped ideas leaking into the core (a `task` field, a quota concept). The rules above are the guard. The two blocking Lumen changes in `lumen-changes.md` (tool turns in the conversation, and a finish reason) are exactly what the model slot needs from any provider, so they are not Lumen-specific.
 
 ## Left out on purpose
 
@@ -74,6 +75,5 @@ Four small interfaces, and one real risk: Lumen-shaped ideas leaking into the co
 
 ## Open
 
-- Whether to add a fifth, optional shell slot (decision 17): run a command, return its output. The tool is `bash` on every host, a real shell on Node, and absent on Workers at first.
 - Packaging inside the new repository (one package with separate entry points, or several). Decided with the repository layout.
 - Whether the Cloudflare adapter builds on Cloudflare's agent tooling or on plain Durable Objects. A smaller question, decided later.
