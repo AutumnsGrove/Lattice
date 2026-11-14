@@ -11,10 +11,6 @@ function guessContentType(key: string): string {
 		gif: "image/gif",
 		webp: "image/webp",
 		avif: "image/avif",
-		// JXL is no longer produced or accepted (#1603), but four `.jxl` uploads
-		// from 2026-01-21 are still in R2 and cdn_files. Keep the mapping so a
-		// backfill can't relabel them as application/octet-stream.
-		jxl: "image/jxl",
 		pdf: "application/pdf",
 		mp4: "video/mp4",
 		webm: "video/webm",

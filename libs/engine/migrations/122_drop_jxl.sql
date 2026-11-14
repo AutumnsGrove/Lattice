@@ -7,10 +7,9 @@
 -- table goes with the encoder, the flags, and the UI. WebP remains the default
 -- output format.
 --
--- Note: four `.jxl` files uploaded to `cdn_files` on 2026-01-21 are unrelated to
--- this table — they are direct uploads, still served by their stored content
--- type. The sync/repair helpers keep an `image/jxl` fallback so those rows can't
--- be relabelled if a backfill runs.
+-- Note: four `.jxl` files from 2026-01-21 once sat in `cdn_files`; they were
+-- orphaned (nothing referenced them) and have been deleted from R2 and from
+-- `cdn_files`, so nothing served by the CDN is left in the format.
 --
 -- 020_feature_flags.sql and 023_jxl_format_tracking.sql are already applied —
 -- do not edit them. This migration is the removal, and it is safe to run on a
