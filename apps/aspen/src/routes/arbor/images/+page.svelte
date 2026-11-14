@@ -8,17 +8,12 @@
 		data,
 	}: {
 		data: {
-			jxl: { jxlEnabled: boolean; jxlRolloutPercentage: number; jxlKillSwitchActive: boolean };
 			grafts?: Record<string, boolean>;
 		};
 	} = $props();
 
 	// Feature flag for image uploads (cascaded from Arbor layout flags)
 	const uploadsEnabled = $derived(data.grafts?.image_uploads ?? true);
-
-	// Feature flags from server (reactive to data changes)
-	const jxlFeatureEnabled = $derived(data.jxl?.jxlEnabled ?? false);
-	const jxlKillSwitchActive = $derived(data.jxl?.jxlKillSwitchActive ?? false);
 
 	// Copy format preference - load from localStorage or default to 'url'
 	const COPY_FORMAT_STORAGE_KEY = "grove-copy-format";
@@ -66,8 +61,6 @@
 
 	<ImageUploadForm
 		{uploadsEnabled}
-		{jxlFeatureEnabled}
-		{jxlKillSwitchActive}
 		{copyFormat}
 		{copiedItem}
 		onCopyFormatChange={(format) => (copyFormat = format)}

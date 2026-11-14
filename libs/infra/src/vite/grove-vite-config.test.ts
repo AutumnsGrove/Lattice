@@ -30,22 +30,6 @@ describe("default config (no overrides)", () => {
 		expect((config.plugins as Array<{ name: string }>)[0].name).toBe("sveltekit-mock");
 	});
 
-	it("should exclude @jsquash/jxl from optimizeDeps", () => {
-		const config = createGroveViteConfig();
-
-		expect(config.optimizeDeps?.exclude).toContain("@jsquash/jxl");
-	});
-
-	it("should externalize the @jsquash/ package family in rollupOptions", () => {
-		const config = createGroveViteConfig();
-		const external = config.build?.rollupOptions?.external;
-
-		// The base config sets a RegExp — verify it matches the pattern
-		expect(Array.isArray(external)).toBe(true);
-		const externalArray = external as RegExp[];
-		expect(externalArray.some((e) => e instanceof RegExp && e.test("@jsquash/jxl"))).toBe(true);
-	});
-
 	it("should include @lucide/svelte in ssr.noExternal", () => {
 		const config = createGroveViteConfig();
 
@@ -58,16 +42,6 @@ describe("default config (no overrides)", () => {
 // =============================================================================
 
 describe("array merge: arrays are concatenated, not replaced", () => {
-	it("should append extra optimizeDeps.exclude entries after the base entry", () => {
-		const config = createGroveViteConfig({
-			optimizeDeps: {
-				exclude: ["my-heavy-lib"],
-			},
-		});
-
-		expect(config.optimizeDeps?.exclude).toEqual(["@jsquash/jxl", "my-heavy-lib"]);
-	});
-
 	it("should append extra ssr.noExternal entries after the base entry", () => {
 		const config = createGroveViteConfig({
 			ssr: {
@@ -75,17 +49,22 @@ describe("array merge: arrays are concatenated, not replaced", () => {
 			},
 		});
 
-		expect(config.ssr?.noExternal).toEqual(["@lucide/svelte", "some-esm-pkg"]);
+		expect(config.ssr?.noExternal).toEqual(["@lucide/svelte", /^@autumnsgrove\//, "some-esm-pkg"]);
 	});
 
 	it("should concatenate multiple extra entries in order", () => {
 		const config = createGroveViteConfig({
-			optimizeDeps: {
-				exclude: ["pkg-a", "pkg-b"],
+			ssr: {
+				noExternal: ["pkg-a", "pkg-b"],
 			},
 		});
 
-		expect(config.optimizeDeps?.exclude).toEqual(["@jsquash/jxl", "pkg-a", "pkg-b"]);
+		expect(config.ssr?.noExternal).toEqual([
+			"@lucide/svelte",
+			/^@autumnsgrove\//,
+			"pkg-a",
+			"pkg-b",
+		]);
 	});
 });
 
@@ -105,7 +84,7 @@ describe("new keys: overrides add keys absent from base", () => {
 	it("should not disturb existing base keys when adding a new key", () => {
 		const config = createGroveViteConfig({ server: { port: 3000 } });
 
-		expect(config.optimizeDeps?.exclude).toContain("@jsquash/jxl");
+		expect(config.plugins).toHaveLength(1);
 		expect(config.ssr?.noExternal).toContain("@lucide/svelte");
 	});
 });
@@ -115,7 +94,7 @@ describe("new keys: overrides add keys absent from base", () => {
 // =============================================================================
 
 describe("deep object merge: nested objects merge recursively", () => {
-	it("should merge nested build.rollupOptions without losing the base external array", () => {
+	it("should keep base keys intact when adding a new nested key", () => {
 		const config = createGroveViteConfig({
 			build: {
 				rollupOptions: {
@@ -124,10 +103,9 @@ describe("deep object merge: nested objects merge recursively", () => {
 			},
 		});
 
-		// Base external array must still be present after the nested merge
-		const external = config.build?.rollupOptions?.external as RegExp[];
-		expect(Array.isArray(external)).toBe(true);
-		expect(external.some((e) => e instanceof RegExp)).toBe(true);
+		// Override lands, and the base ssr array is untouched by the build merge
+		expect(config.build?.rollupOptions?.output).toEqual({ dir: "dist/custom" });
+		expect(config.ssr?.noExternal).toContain("@lucide/svelte");
 	});
 
 	it("should add new keys inside an existing nested object", () => {
@@ -138,9 +116,8 @@ describe("deep object merge: nested objects merge recursively", () => {
 		});
 
 		expect(config.build?.minify).toBe(false);
-		// Base rollupOptions.external must survive
-		const external = config.build?.rollupOptions?.external;
-		expect(external).toBeDefined();
+		// Base ssr config must survive an unrelated nested merge
+		expect(config.ssr?.noExternal).toBeDefined();
 	});
 });
 
@@ -164,12 +141,12 @@ describe("primitive replacement: scalar overrides replace base values", () => {
 	});
 
 	it("should replace an array with a non-array override of the same key (when base value is missing)", () => {
-		// optimizeDeps.include does not exist in base — override adds it as a scalar
+		// optimizeDeps is not in base — override adds it wholesale
 		const config = createGroveViteConfig({
 			optimizeDeps: { include: ["dep-a"] },
 		});
 
-		// base optimizeDeps has only "exclude" — include is new, should be set directly
+		// base has no optimizeDeps — include is new, should be set directly
 		expect((config.optimizeDeps as { include?: string[] })?.include).toEqual(["dep-a"]);
 	});
 });

@@ -507,7 +507,7 @@ describe("image_uploads_enabled graft", () => {
 		expect(uploadsEnabled).toBe(true);
 
 		// Assert: Gallery page pattern — reads from data.grafts
-		const pageData = { ...layoutData, jxl: { jxlEnabled: false } };
+		const pageData = { ...layoutData };
 		const galleryUploadsEnabled = pageData.grafts?.image_uploads_enabled ?? false;
 		expect(galleryUploadsEnabled).toBe(true);
 	});

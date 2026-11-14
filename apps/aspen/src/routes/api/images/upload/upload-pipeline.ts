@@ -61,8 +61,8 @@ export async function validateImageDimensions(file: File, buffer: Uint8Array): P
 		height = buffer[8] | (buffer[9] << 8);
 	}
 
-	// For JPEG, WebP, and JPEG XL, file size already validated
-	if (file.type === "image/jpeg" || file.type === "image/webp" || file.type === "image/jxl") {
+	// For JPEG and WebP, file size already validated
+	if (file.type === "image/jpeg" || file.type === "image/webp") {
 		return;
 	}
 
@@ -249,7 +249,6 @@ export async function uploadAndStore(opts: {
 			"image/webp": "webp",
 			"image/png": "png",
 			"image/jpeg": "jpg",
-			"image/jxl": "jxl",
 			"image/avif": "avif",
 		};
 		const ext = extMap[file.type] || "webp";

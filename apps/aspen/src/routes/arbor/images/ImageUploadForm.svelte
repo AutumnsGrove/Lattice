@@ -10,7 +10,6 @@
 		processImage,
 		generateThumbnail,
 		extractDominantColor,
-		supportsJxlEncoding,
 		calculateFileHash,
 		formatBytes,
 		compressionRatio,
@@ -48,8 +47,6 @@
 
 	interface Props {
 		uploadsEnabled: boolean;
-		jxlFeatureEnabled: boolean;
-		jxlKillSwitchActive: boolean;
 		copyFormat: string;
 		copiedItem: string | number | null;
 		onCopyFormatChange?: (format: string) => void;
@@ -59,8 +56,6 @@
 
 	let {
 		uploadsEnabled,
-		jxlFeatureEnabled,
-		jxlKillSwitchActive,
 		copyFormat,
 		copiedItem,
 		onCopyFormatChange = () => {},
@@ -70,32 +65,15 @@
 
 	// Upload options
 	let quality = $state(80);
-	let imageFormat = $state<"auto" | "jxl" | "webp" | "original">("webp");
+	let imageFormat = $state<"webp" | "original">("webp");
 	let fullResolution = $state(false);
-	let jxlSupported = $state(false);
 	let useAiAnalysis = $state(false);
 	let showAdvanced = $state(false);
-
-	// Set initial format based on feature flag
-	let formatInitialized = false;
-	$effect(() => {
-		if (!formatInitialized && jxlFeatureEnabled) {
-			imageFormat = "auto";
-			formatInitialized = true;
-		}
-	});
 
 	// Upload state
 	let isDragging = $state(false);
 	let uploads = $state<UploadItem[]>([]);
 	let uploading = $state(false);
-
-	// Check JXL support on mount
-	$effect(() => {
-		(async () => {
-			jxlSupported = await supportsJxlEncoding();
-		})();
-	});
 
 	function handleDragOver(e: DragEvent) {
 		e.preventDefault();
@@ -287,7 +265,6 @@
 			if (processedBlob.type && processedBlob.type !== file.type) {
 				const extForMime: Record<string, string> = {
 					"image/webp": ".webp",
-					"image/jxl": ".jxl",
 					"image/gif": ".gif",
 					"image/jpeg": ".jpg",
 					"image/png": ".png",
@@ -535,22 +512,9 @@
 					<div class="format-control">
 						<label for="imageFormat">Output Format:</label>
 						<select id="imageFormat" bind:value={imageFormat}>
-							{#if jxlFeatureEnabled && !jxlKillSwitchActive}
-								<option value="auto">Auto (JXL → WebP fallback)</option>
-								<option value="jxl">JPEG XL only</option>
-							{/if}
 							<option value="webp">WebP only</option>
 							<option value="original">Keep original</option>
 						</select>
-						{#if jxlFeatureEnabled && !jxlKillSwitchActive}
-							{#if jxlSupported}
-								<span class="format-badge supported">JXL supported</span>
-							{:else}
-								<span class="format-badge unsupported">JXL unavailable</span>
-							{/if}
-						{:else if jxlKillSwitchActive}
-							<span class="format-badge unsupported">JXL disabled (emergency)</span>
-						{/if}
 					</div>
 
 					<label class="toggle-option">
@@ -970,23 +934,6 @@
 	:global(.dark) .format-control select {
 		background: rgba(255, 255, 255, 0.05);
 		border-color: rgba(255, 255, 255, 0.1);
-	}
-
-	.format-badge {
-		font-size: 0.7rem;
-		padding: 0.2rem 0.5rem;
-		border-radius: var(--border-radius-small);
-		font-weight: 500;
-	}
-
-	.format-badge.supported {
-		background: var(--status-success-bg);
-		color: var(--accent-success);
-	}
-
-	.format-badge.unsupported {
-		background: var(--status-warning-bg);
-		color: var(--color-text-muted);
 	}
 
 	.options-info {

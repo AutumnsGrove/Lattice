@@ -39,7 +39,7 @@ Grove doesn't have an automated import tool yet. Moving your content means copyi
 
 **Your text.** This is the good news. Grove's editor uses Markdown, which is the closest thing the internet has to a universal writing format. If your old platform stored content in Markdown (Ghost, Hugo, Jekyll, many static site generators), you can paste it directly into Grove's editor and it should look right immediately.
 
-**Your images.** Download them from your old platform, then upload them to Grove through the editor. Drag-and-drop works. The supported formats are JPEG, PNG, GIF, WebP, AVIF, JPEG XL, and HEIC—so most image files will work as-is.
+**Your images.** Download them from your old platform, then upload them to Grove through the editor. Drag-and-drop works. The supported formats are JPEG, PNG, GIF, WebP, AVIF, and HEIC—so most image files will work as-is.
 
 ## What needs manual adjustment
 

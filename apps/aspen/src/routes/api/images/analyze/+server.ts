@@ -83,14 +83,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		}
 
 		// Validate file type
-		const allowedTypes = [
-			"image/jpeg",
-			"image/png",
-			"image/gif",
-			"image/webp",
-			"image/jxl",
-			"image/avif",
-		];
+		const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp", "image/avif"];
 		if (!allowedTypes.includes(file.type)) {
 			throwGroveError(400, API_ERRORS.INVALID_FILE, "API", {
 				detail: "unsupported file type for analysis",

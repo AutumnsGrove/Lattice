@@ -522,7 +522,7 @@ _Independent tools that integrate with Grove_
 
 A graft is a branch joined onto rootstock—a deliberate act that makes one tree bear fruit no other can. Orchardists use grafts to create unique varieties: the cutting grows, becomes one with the tree, yet retains what makes it special.
 
-Grafts are per-tenant features that operators enable for specific trees. Not plugins users upload—trusted customizations the Wayfinder configures for particular groves. Want JXL encoding? Graft it on. Need a custom dashboard? Graft it on. Your tree, your grafts, your fruit.
+Grafts are per-tenant features that operators enable for specific trees. Not plugins users upload—trusted customizations the Wayfinder configures for particular groves. Want a photo gallery? Graft it on. Need a custom dashboard? Graft it on. Your tree, your grafts, your fruit.
 
 **The Three Layers:**
 

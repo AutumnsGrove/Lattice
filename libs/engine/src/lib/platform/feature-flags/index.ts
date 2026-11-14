@@ -9,7 +9,7 @@
  * import { isFeatureEnabled, getFeatureValue, getVariant } from '$lib/platform/feature-flags';
  *
  * // Simple boolean check
- * const useJxl = await isFeatureEnabled('jxl_encoding', { tenantId }, env);
+ * const uploadsEnabled = await isFeatureEnabled('image_uploads', { tenantId }, env);
  *
  * // Get typed value with default
  * const maxUploads = await getFeatureValue('max_uploads', { tier }, env, 10);
@@ -40,13 +40,13 @@ import type { EvaluationContext, EvaluationResult, FeatureFlagsEnv } from "./typ
  *
  * @example
  * ```typescript
- * const useJxl = await isFeatureEnabled('jxl_encoding', {
+ * const uploadsEnabled = await isFeatureEnabled('image_uploads', {
  *   tenantId: locals.tenantId,
  *   userId: locals.user?.id
  * }, platform.env);
  *
- * if (useJxl) {
- *   return encodeAsJxl(file);
+ * if (uploadsEnabled) {
+ *   return handleUpload(file);
  * }
  * ```
  */

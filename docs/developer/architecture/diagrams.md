@@ -757,7 +757,7 @@ flowchart TD
 
     subgraph process["Processing"]
         OPT["Auto-optimize"]
-        FMT["Format conversion<br/>JPEG → WebP / JXL"]
+        FMT["Format conversion<br/>JPEG → WebP / AVIF"]
         HASH["IPFS content hash"]
         RESIZE["Responsive sizes"]
     end

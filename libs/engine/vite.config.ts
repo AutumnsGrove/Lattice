@@ -7,7 +7,7 @@ export default defineConfig({
 			// Disable source maps in production to prevent source code exposure
 			sourcemap: false,
 			rollupOptions: {
-				// workers-og requires special Web Worker handling; @jsquash/jxl covered by base regex
+				// workers-og requires special Web Worker handling
 				external: ["workers-og"],
 			},
 		},

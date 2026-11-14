@@ -147,7 +147,6 @@ export {
 
 // --- Image Processing (cross-module, backward compat) ---
 export {
-	supportsJxlEncoding,
 	isHeicFile,
 	isHeifByMagicBytes,
 	convertHeicToJpeg,

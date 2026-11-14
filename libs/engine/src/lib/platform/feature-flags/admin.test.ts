@@ -62,7 +62,7 @@ describe("getFeatureFlags", () => {
 		// Arrange
 		const env = createMockEnv();
 		const mockFlags = [
-			createMockFlagRow("jxl_encoding", { name: "JXL Encoding" }),
+			createMockFlagRow("image_uploads", { name: "Image Uploads" }),
 			createMockFlagRow("meadow_access", {
 				name: "Meadow Access",
 				greenhouse_only: 1,
@@ -78,8 +78,8 @@ describe("getFeatureFlags", () => {
 
 		// Assert
 		expect(result).toHaveLength(2);
-		expect(result[0].id).toBe("jxl_encoding");
-		expect(result[0].name).toBe("JXL Encoding");
+		expect(result[0].id).toBe("image_uploads");
+		expect(result[0].name).toBe("Image Uploads");
 		expect(result[0].enabled).toBe(true);
 		expect(result[0].greenhouseOnly).toBe(false);
 
@@ -152,7 +152,7 @@ describe("setFlagEnabled", () => {
 		});
 
 		// Act
-		const result = await setFlagEnabled("jxl_encoding", true, env);
+		const result = await setFlagEnabled("image_uploads", true, env);
 
 		// Assert
 		expect(result).toBe(true);
@@ -170,12 +170,12 @@ describe("setFlagEnabled", () => {
 		});
 
 		// Act
-		const result = await setFlagEnabled("jxl_encoding", false, env);
+		const result = await setFlagEnabled("image_uploads", false, env);
 
 		// Assert
 		expect(result).toBe(true);
 		// First arg is enabled (0 for false), second is flagId
-		expect(bindMock).toHaveBeenCalledWith(0, "jxl_encoding");
+		expect(bindMock).toHaveBeenCalledWith(0, "image_uploads");
 	});
 
 	it("should return false when flag does not exist", async () => {
@@ -204,7 +204,7 @@ describe("setFlagEnabled", () => {
 		});
 
 		// Act
-		const result = await setFlagEnabled("jxl_encoding", true, env);
+		const result = await setFlagEnabled("image_uploads", true, env);
 
 		// Assert
 		expect(result).toBe(false);
@@ -220,11 +220,11 @@ describe("setFlagEnabled", () => {
 		});
 
 		// Act
-		await setFlagEnabled("jxl_encoding", true, env);
+		await setFlagEnabled("image_uploads", true, env);
 
 		// Assert - cache invalidation should list keys with flag prefix
 		expect(env.FLAGS_KV.list).toHaveBeenCalledWith({
-			prefix: "flag:jxl_encoding:",
+			prefix: "flag:image_uploads:",
 			cursor: undefined,
 		});
 	});
@@ -238,9 +238,9 @@ describe("getFeatureFlag", () => {
 	it("should return a single flag by ID", async () => {
 		// Arrange
 		const env = createMockEnv();
-		const mockFlag = createMockFlagRow("jxl_encoding", {
-			name: "JXL Encoding",
-			description: "Enable JXL image format",
+		const mockFlag = createMockFlagRow("image_uploads", {
+			name: "Image Uploads",
+			description: "Enable image uploads",
 		});
 
 		(env.DB.prepare as ReturnType<typeof vi.fn>).mockReturnValue({
@@ -250,13 +250,13 @@ describe("getFeatureFlag", () => {
 		});
 
 		// Act
-		const result = await getFeatureFlag("jxl_encoding", env);
+		const result = await getFeatureFlag("image_uploads", env);
 
 		// Assert
 		expect(result).not.toBeNull();
-		expect(result?.id).toBe("jxl_encoding");
-		expect(result?.name).toBe("JXL Encoding");
-		expect(result?.description).toBe("Enable JXL image format");
+		expect(result?.id).toBe("image_uploads");
+		expect(result?.name).toBe("Image Uploads");
+		expect(result?.description).toBe("Enable image uploads");
 	});
 
 	it("should return null when flag not found", async () => {
@@ -287,7 +287,7 @@ describe("getFeatureFlag", () => {
 		});
 
 		// Act
-		const result = await getFeatureFlag("jxl_encoding", env);
+		const result = await getFeatureFlag("image_uploads", env);
 
 		// Assert
 		expect(result).toBeNull();
@@ -309,13 +309,13 @@ describe("setFlagMaturity", () => {
 		});
 
 		// Act
-		const result = await setFlagMaturity("jxl_encoding", "stable", env);
+		const result = await setFlagMaturity("image_uploads", "stable", env);
 
 		// Assert
 		expect(result).toBe(true);
 		expect(env.DB.prepare).toHaveBeenCalledWith(expect.stringContaining("UPDATE feature_flags"));
 		expect(env.FLAGS_KV.list).toHaveBeenCalledWith({
-			prefix: "flag:jxl_encoding:",
+			prefix: "flag:image_uploads:",
 			cursor: undefined,
 		});
 	});
@@ -325,7 +325,7 @@ describe("setFlagMaturity", () => {
 		const env = createMockEnv();
 
 		// Act
-		const result = await setFlagMaturity("jxl_encoding", "invalid" as any, env);
+		const result = await setFlagMaturity("image_uploads", "invalid" as any, env);
 
 		// Assert
 		expect(result).toBe(false);
@@ -358,7 +358,7 @@ describe("setFlagMaturity", () => {
 		});
 
 		// Act
-		const result = await setFlagMaturity("jxl_encoding", "stable", env);
+		const result = await setFlagMaturity("image_uploads", "stable", env);
 
 		// Assert
 		expect(result).toBe(false);

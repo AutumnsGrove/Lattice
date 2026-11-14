@@ -37,8 +37,6 @@ import type { EvaluationContext, FeatureFlagsEnv } from "./types.js";
  * Unknown IDs still work — this is just for DX.
  */
 export type KnownFlagId =
-	| "jxl_encoding"
-	| "jxl_kill_switch"
 	| "image_uploads_enabled"
 	| "image_uploads"
 	| "uploads_suspended"

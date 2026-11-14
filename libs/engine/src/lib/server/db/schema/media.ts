@@ -47,25 +47,6 @@ export const imageHashes = sqliteTable("image_hashes", {
 	storedSizeBytes: integer("stored_size_bytes"),
 });
 
-export const jxlEncodingMetrics = sqliteTable("jxl_encoding_metrics", {
-	id: integer("id").primaryKey({ autoIncrement: true }),
-	tenantId: text("tenant_id").notNull(),
-	success: integer("success").notNull().default(1),
-	fallbackReason: text("fallback_reason"),
-	encodingTimeMs: integer("encoding_time_ms"),
-	originalSizeBytes: integer("original_size_bytes").notNull(),
-	encodedSizeBytes: integer("encoded_size_bytes").notNull(),
-	width: integer("width"),
-	height: integer("height"),
-	quality: integer("quality"),
-	effort: integer("effort"),
-	userAgent: text("user_agent"),
-	deviceType: text("device_type"),
-	createdAt: text("created_at")
-		.notNull()
-		.default(sql`(datetime('now'))`),
-});
-
 // ─────────────────────────────────────────────────────────────────────────────
 // INFRASTRUCTURE: Storage Tier Migration
 // ─────────────────────────────────────────────────────────────────────────────
