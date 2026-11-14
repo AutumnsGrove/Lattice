@@ -217,6 +217,36 @@ describe("pulseHandle — emitPulseEvent", () => {
 });
 
 // ---------------------------------------------------------------------------
+// pulseHandle — prerendering
+// ---------------------------------------------------------------------------
+
+describe("pulseHandle — prerendering", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("treats an unreadable url.searchParams as no ref", async () => {
+		// Reproduce SvelteKit's prerender URL: `search`/`searchParams` are throwing
+		// getters while prerendering, which used to 500 every prerendered page.
+		const url = new URL("https://example.com/");
+		for (const property of ["search", "searchParams"]) {
+			Object.defineProperty(url, property, {
+				get() {
+					throw new Error(`Cannot access url.${property} on a page with prerendering enabled`);
+				},
+			});
+		}
+
+		const handle = pulseHandle({ app: "landing" });
+		const event = { ...makeEvent("/"), url };
+		const resolve = makeResolve(200);
+
+		await expect(handle({ event: event as never, resolve })).resolves.toBeDefined();
+		expect(lastEmitOptions().metadata).toEqual({ ua: "TestAgent/1.0" });
+	});
+});
+
+// ---------------------------------------------------------------------------
 // pulseHandle — extractTenantId (indirect)
 // ---------------------------------------------------------------------------
 
