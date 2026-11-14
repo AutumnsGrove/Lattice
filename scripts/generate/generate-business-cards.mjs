@@ -8,8 +8,8 @@
  *
  * Vine paths are the exact ones from vine-pattern.css (the live site).
  *
- * Usage: node scripts/generate/generate-business-cards.mjs [season ...]
- *        (default: midnight; seasons: midnight, autumn, summer)
+ * Usage: node scripts/generate/generate-business-cards.mjs [season ... | all]
+ *        (default: midnight; seasons: midnight, autumn, summer, spring, winter)
  */
 
 import sharp from "sharp";
@@ -166,10 +166,13 @@ const PALETTES = {
 		tier3: { dark: "#4c1d95", light: "#ec4899" },
 		trunk: { dark: "#3f3475", light: "#6a58a8" },
 	},
+	// Every season below follows the same recipe as midnight: a ground tinted
+	// toward the season's hue, a glow in its brightest tones, and dark halves
+	// lifted off the logo's own shades so the tree holds its edge on the glow.
 	autumn: {
-		bg: "#0f1419",
+		bg: "#140c09",
 		text: "#fefdfb",
-		textSubtle: "#b69575",
+		textSubtle: "#c4a484",
 		textAccent: "#f59e0b",
 		glow: "#EA580C",
 		glowInner: "#DC2626",
@@ -177,24 +180,54 @@ const PALETTES = {
 		leafColors: ["#EA580C", "#F59E0B", "#DC2626", "#FCD34D"],
 		noiseColors: ["#DC2626", "#F59E0B", "#EA580C", "#FCD34D"],
 		tier1: { dark: "#DC2626", light: "#FCD34D" },
-		tier2: { dark: "#991B1B", light: "#F59E0B" },
-		tier3: { dark: "#7C2D12", light: "#EA580C" },
-		trunk: { dark: "#5C3317", light: "#8B4520" },
+		tier2: { dark: "#B91C1C", light: "#F59E0B" },
+		tier3: { dark: "#9A3412", light: "#EA580C" },
+		trunk: { dark: "#7a4524", light: "#a8652f" },
 	},
 	summer: {
-		bg: "#0f1419",
+		bg: "#08130d",
 		text: "#fefdfb",
-		textSubtle: "#b69575",
+		textSubtle: "#a6bfae",
 		textAccent: "#86efac",
 		glow: "#22c55e",
 		glowInner: "#15803d",
 		vineColors: ["#16a34a", "#22c55e", "#86efac", "#15803d", "#4ade80"],
 		leafColors: ["#22c55e", "#4ade80", "#86efac", "#16a34a"],
 		noiseColors: ["#16a34a", "#22c55e", "#86efac", "#4ade80"],
-		tier1: { dark: "#15803d", light: "#86efac" },
-		tier2: { dark: "#166534", light: "#4ade80" },
-		tier3: { dark: "#14532d", light: "#22c55e" },
-		trunk: { dark: "#3d2914", light: "#5a3f30" },
+		tier1: { dark: "#16a34a", light: "#86efac" },
+		tier2: { dark: "#15803d", light: "#4ade80" },
+		tier3: { dark: "#166534", light: "#22c55e" },
+		trunk: { dark: "#5a4026", light: "#7f5c3a" },
+	},
+	spring: {
+		bg: "#150a10",
+		text: "#fefdfb",
+		textSubtle: "#d4aab8",
+		textAccent: "#fda4af",
+		glow: "#fb7185",
+		glowInner: "#be185d",
+		vineColors: ["#fb7185", "#fda4af", "#fecdd3", "#be185d", "#f9a8d4"],
+		leafColors: ["#fda4af", "#fecdd3", "#fb7185", "#f9a8d4"],
+		noiseColors: ["#fb7185", "#fda4af", "#fecdd3", "#f9a8d4"],
+		tier1: { dark: "#db2777", light: "#fecdd3" },
+		tier2: { dark: "#be185d", light: "#fda4af" },
+		tier3: { dark: "#9d174d", light: "#fb7185" },
+		trunk: { dark: "#7a5640", light: "#99705a" },
+	},
+	winter: {
+		bg: "#090f1a",
+		text: "#fefdfb",
+		textSubtle: "#9fb4cf",
+		textAccent: "#93c5fd",
+		glow: "#60a5fa",
+		glowInner: "#1d4ed8",
+		vineColors: ["#60a5fa", "#93c5fd", "#bfdbfe", "#3b82f6", "#7dd3fc"],
+		leafColors: ["#93c5fd", "#bfdbfe", "#60a5fa", "#7dd3fc"],
+		noiseColors: ["#60a5fa", "#93c5fd", "#bfdbfe", "#7dd3fc"],
+		tier1: { dark: "#3b6ea8", light: "#bfdbfe" },
+		tier2: { dark: "#2f5f9e", light: "#93c5fd" },
+		tier3: { dark: "#264f86", light: "#60a5fa" },
+		trunk: { dark: "#475a75", light: "#64789a" },
 	},
 };
 
@@ -531,7 +564,11 @@ async function generateCard(side, season) {
 
 async function main() {
 	const requested = process.argv.slice(2);
-	const seasons = requested.length ? requested : ["midnight"];
+	const seasons = requested.includes("all")
+		? Object.keys(PALETTES)
+		: requested.length
+			? requested
+			: ["midnight"];
 	const unknown = seasons.filter((s) => !PALETTES[s]);
 	if (unknown.length) {
 		throw new Error(
