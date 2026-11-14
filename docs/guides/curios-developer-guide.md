@@ -17,7 +17,7 @@ tags:
 
 Curios are standalone feature modules that bring personality to a Grove site. Hit counters, guestbooks, mood rings, polls, badges, ambient sounds. Each one is self-contained: its own types, constants, sanitization, utility functions, and tests, all living in a single directory under `libs/engine/src/lib/curios/`.
 
-There are 22 curio modules today. Some are visitor-facing (guestbook, polls), some are developer-focused (timeline, pulse, journey), and some are purely decorative (clipart, cursors, ambient). They all follow the same structural pattern.
+There are 21 curio modules today. Some are visitor-facing (guestbook, polls), some are developer-focused (timeline, pulse), and some are purely decorative (clipart, cursors, ambient). They all follow the same structural pattern.
 
 ## How Curios Work
 
@@ -349,7 +349,7 @@ export {
 } from "./yourname";
 ```
 
-The barrel already demonstrates this approach for journey and pulse, which share a `CLEAR_TOKEN_VALUE` constant with timeline.
+The barrel already demonstrates this approach for timeline, which exports a `CLEAR_TOKEN_VALUE` constant for the 3-state token pattern.
 
 ### 3. Create the Database Migration
 
