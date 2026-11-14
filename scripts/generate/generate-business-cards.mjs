@@ -120,11 +120,55 @@ function textPath(
 	const font = FONTS[family];
 	const { glyphs, positions, width } = layoutGlyphs(font, text, size, tracking);
 	const startX = anchor === "middle" ? x - width / 2 : anchor === "end" ? x - width : x;
-	const d = glyphs
-		.map((glyph, i) => commandsToPathData(glyph.getPath(startX + positions[i], y, size).commands))
-		.join("");
+	const paths = glyphs.map((glyph, i) => glyph.getPath(startX + positions[i], y, size));
+	const d = paths.map((p) => commandsToPathData(p.commands)).join("");
 	const lean = slant ? ` transform="translate(0 ${y}) skewX(${-slant}) translate(0 ${-y})"` : "";
+
+	// Record where the ink lands (after any lean) for the safe-zone check.
+	const boxes = paths.map((p) => p.getBoundingBox()).filter((b) => b.x2 > b.x1);
+	const shift = (py) => -Math.tan((slant * Math.PI) / 180) * (py - y);
+	const xs = boxes.flatMap((b) => [
+		b.x1 + shift(b.y1),
+		b.x1 + shift(b.y2),
+		b.x2 + shift(b.y1),
+		b.x2 + shift(b.y2),
+	]);
+	recordInk(`"${text}"`, {
+		x1: Math.min(...xs),
+		x2: Math.max(...xs),
+		y1: Math.min(...boxes.map((b) => b.y1)),
+		y2: Math.max(...boxes.map((b) => b.y2)),
+	});
+
 	return `<path d="${d}" fill="${fill}"${lean} />`;
+}
+
+// Everything that must stay inside the print safe zone on the card being built.
+// Backgrounds (vines, glow) are meant to run into the bleed, so only deliberate
+// content is recorded: text, the tree and the QR tile.
+const inkBoxes = [];
+const recordInk = (label, box) => inkBoxes.push({ label, ...box });
+
+function assertInsideSafeZone(side, season) {
+	const tolerance = 1;
+	const offenders = inkBoxes.filter(
+		(b) =>
+			b.x1 < CONTENT.left - tolerance ||
+			b.y1 < CONTENT.top - tolerance ||
+			b.x2 > CONTENT.right + tolerance ||
+			b.y2 > CONTENT.bottom + tolerance,
+	);
+	if (offenders.length) {
+		const list = offenders
+			.map(
+				(b) =>
+					`${b.label} [${b.x1.toFixed(0)},${b.y1.toFixed(0)} to ${b.x2.toFixed(0)},${b.y2.toFixed(0)}]`,
+			)
+			.join("; ");
+		throw new Error(
+			`${season} ${side}: outside the safe zone (${CONTENT.left},${CONTENT.top} to ${CONTENT.right},${CONTENT.bottom}): ${list}`,
+		);
+	}
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -479,7 +523,17 @@ function frontSvg(palette) {
 	const textX = CONTENT.left;
 	const wordmarkBase = Math.round(H * 0.664);
 	const taglineBase = wordmarkBase + 74;
-	const nameBase = CONTENT.bottom;
+	// Baselines sit above the safe edge so descenders (y, p) stay inside it.
+	const nameBase = CONTENT.bottom - 8;
+
+	// The tree's square (a safe over-estimate of its rotated ink).
+	const treeSize = 330;
+	recordInk("tree", {
+		x1: logoX - treeSize / 2,
+		y1: logoY - treeSize / 2,
+		x2: logoX + treeSize / 2,
+		y2: logoY + treeSize / 2,
+	});
 
 	return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">
   <defs>
@@ -494,7 +548,7 @@ function frontSvg(palette) {
 
   ${treeLogo(palette, logoX, logoY, 330)}
 
-  ${textPath("Calistoga", "Grove", textX - 6, wordmarkBase, fontPx(44), palette.text, { tracking: -2 })}
+  ${textPath("Calistoga", "Grove", textX - 4, wordmarkBase, fontPx(44), palette.text, { tracking: -2 })}
   ${textPath("Lexend", "A place to Be.", textX, taglineBase, fontPx(11), palette.textAccent)}
   ${textPath("Lexend", "A blogging home for writers.", textX, taglineBase + 50, fontPx(7.5), palette.textSubtle)}
   ${textPath("Lexend", "Autumn Brown · Wayfinder", CONTENT.right, nameBase, fontPx(6.5), palette.textSubtle, { tracking: 0.6, anchor: "end" })}
@@ -524,6 +578,9 @@ function backSvg(palette) {
 	const blankW = 240;
 	const domainX = textX + blankW + 12;
 
+	recordInk("QR tile", { x1: tileX, y1: tileY, x2: tileX + QR_TILE, y2: tileY + QR_TILE });
+	recordInk("blank line", { x1: textX, y1: lineY - 2, x2: textX + blankW, y2: lineY + 2 });
+
 	return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">
   <defs>
     <clipPath id="clip-b"><rect width="${W}" height="${H}" /></clipPath>
@@ -538,8 +595,8 @@ function backSvg(palette) {
     ${glow.shape}
   </g>
 
-  ${textPath("Calistoga", "Your words", textX - 4, headlineBase, fontPx(26), palette.text, { tracking: -1 })}
-  ${textPath("Calistoga", "are yours.", textX - 4, headlineBase + fontPx(26) + 6, fontPx(26), palette.text, { tracking: -1 })}
+  ${textPath("Calistoga", "Your words", textX + 2, headlineBase, fontPx(26), palette.text, { tracking: -1 })}
+  ${textPath("Calistoga", "are yours.", textX + 2, headlineBase + fontPx(26) + 6, fontPx(26), palette.text, { tracking: -1 })}
 
   <!-- you.grove.place — "you" rests on the line like a name written in the blank -->
   <line x1="${textX}" y1="${lineY}" x2="${textX + blankW}" y2="${lineY}"
@@ -548,7 +605,7 @@ function backSvg(palette) {
   ${textPath("Lexend", "you", textX + blankW / 2, lineY - 12, fontPx(12), palette.textAccent, { anchor: "middle", slant: 12 })}
   ${textPath("Lexend", ".grove.place", domainX, lineY, fontPx(12), palette.text)}
 
-  ${textPath("Lexend", "grove.place/hello", tileCx, CONTENT.bottom, fontPx(6.5), palette.textSubtle, { tracking: 0.6, anchor: "middle" })}
+  ${textPath("Lexend", "grove.place/hello", tileCx, CONTENT.bottom - 8, fontPx(6.5), palette.textSubtle, { tracking: 0.6, anchor: "middle" })}
 </svg>`;
 }
 
@@ -558,7 +615,9 @@ function backSvg(palette) {
 
 async function generateCard(side, season) {
 	const palette = PALETTES[season];
+	inkBoxes.length = 0;
 	const svg = side === "front" ? frontSvg(palette) : backSvg(palette);
+	assertInsideSafeZone(side, season);
 	const base = await sharp(Buffer.from(svg)).resize(W, H).png().toBuffer();
 
 	if (side === "front") return base;
