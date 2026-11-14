@@ -1,10 +1,16 @@
 -- 122_drop_jxl.sql
 -- Remove JPEG XL support (#1603). AVIF is the next-gen format instead.
 --
--- JXL never reached production: `jxl_encoding` shipped at 0% rollout and its
--- kill switch was on standby, so `jxl_encoding_metrics` should be empty. The
+-- JXL never reached production. Checked against the live database on
+-- 2026-11-14: `jxl_encoding_metrics` held 0 rows and none of the 66
+-- `image_hashes` rows were JXL, so the encoder never produced anything. The
 -- table goes with the encoder, the flags, and the UI. WebP remains the default
 -- output format.
+--
+-- Note: four `.jxl` files uploaded to `cdn_files` on 2026-01-21 are unrelated to
+-- this table — they are direct uploads, still served by their stored content
+-- type. The sync/repair helpers keep an `image/jxl` fallback so those rows can't
+-- be relabelled if a backfill runs.
 --
 -- 020_feature_flags.sql and 023_jxl_format_tracking.sql are already applied —
 -- do not edit them. This migration is the removal, and it is safe to run on a
