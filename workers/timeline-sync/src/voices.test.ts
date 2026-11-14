@@ -83,6 +83,20 @@ describe("getVoice", () => {
 			expect(typeof voice.buildPrompt).toBe("function");
 		}
 	});
+
+	// The detailed section is the part that runs long, and the whole JSON
+	// envelope has to fit in maxTokens. Every preset — including custom — has to
+	// carry the budget, or its heavy days truncate (2026-11-13).
+	it("every voice prompt names the output budget", () => {
+		const voiceIds = ["professional", "quest", "casual", "poetic", "minimal"];
+		for (const id of voiceIds) {
+			const prompt = getVoice(id).buildPrompt([makeCommit()], "2026-03-12");
+			expect(prompt, `${id} is missing the detailed-section budget`).toContain(
+				"Cover at most 6 projects",
+			);
+			expect(prompt, `${id} is missing the word ceiling`).toContain("under ~350 words");
+		}
+	});
 });
 
 // =============================================================================

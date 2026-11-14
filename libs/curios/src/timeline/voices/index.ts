@@ -6,6 +6,7 @@
  */
 
 import { professional, quest, casual, poetic, minimal } from "./presets";
+import { DETAILED_BUDGET } from "./budget";
 import type {
   VoicePreset,
   VoicePromptResult,
@@ -126,6 +127,7 @@ ${summaryInstructions}
    - Header: "## Projects"
    - Each project: "### ProjectName"
    - Bullet points for key changes
+${DETAILED_BUDGET}
 
 3. GUTTER COMMENTS (${gutterCount} margin notes):
    Short observations (10 words max).`;

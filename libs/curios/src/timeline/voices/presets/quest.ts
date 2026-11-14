@@ -6,6 +6,7 @@
  */
 
 import type { VoicePreset, Commit } from "../types";
+import { DETAILED_BUDGET } from "../budget";
 
 export const quest: VoicePreset = {
   id: "quest",
@@ -70,6 +71,7 @@ GENERATE THREE OUTPUTS:
    - Each project: "### [ProjectName] Expedition"
    - Bullet points as quest achievements/challenges faced
    - Use RPG language: "vanquished the null pointer beast", "forged new API endpoints"
+${DETAILED_BUDGET}
 
 3. GUTTER COMMENTS (${gutterCount} margin notes):
    Short RPG-flavored observations (10 words max).

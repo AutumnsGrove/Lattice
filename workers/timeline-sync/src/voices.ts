@@ -8,6 +8,26 @@
 import type { Commit, VoicePreset, CustomVoiceConfig } from "./config";
 
 // =============================================================================
+// Output budget
+// =============================================================================
+
+/**
+ * Spend cap for the detailed breakdown, shared by every preset so the ceiling
+ * lives in one place.
+ *
+ * The model writes until it runs out of tokens, and the whole brief+detailed+
+ * gutter response has to fit inside the request's maxTokens (8192) as valid
+ * JSON. A 53-commit day across 5 repos blew straight through that on
+ * 2026-11-13, the JSON was cut off mid-object, and the run silently stored the
+ * "got a bit tangled" fallback. Naming the budget explicitly keeps heavy days
+ * inside the envelope instead of relying on the model to self-limit.
+ */
+const DETAILED_BUDGET = `   - Cover at most 6 projects. If the day touched more, fold the extras into a
+     final "### Also" section with one bullet each.
+   - At most 5 bullets per project, one line each.
+   - The whole detailed breakdown must stay under ~350 words.`;
+
+// =============================================================================
 // Voice Presets (Inlined from engine/src/lib/curios/timeline/voices/presets)
 // =============================================================================
 
@@ -86,6 +106,7 @@ GENERATE THREE OUTPUTS:
    - Header: "## Projects"
    - Each project: "### ProjectName"
    - Bullet points for key changes
+${DETAILED_BUDGET}
 
 3. GUTTER COMMENTS (${gutterCount} margin notes):
    Short observations (10 words max).
@@ -169,6 +190,7 @@ GENERATE THREE OUTPUTS:
    - Each project: "### [ProjectName] Expedition"
    - Bullet points as quest achievements/challenges faced
    - Use RPG language: "vanquished the null pointer beast", "forged new API endpoints"
+${DETAILED_BUDGET}
 
 3. GUTTER COMMENTS (${gutterCount} margin notes):
    Short RPG-flavored observations (10 words max).
@@ -296,6 +318,7 @@ GENERATE THREE OUTPUTS:
    - Bullet points starting with "- " in casual language
    - Show personality: "finally fixed that annoying thing", "this is still janky but whatever"
    - Group related changes, don't just list every commit
+${DETAILED_BUDGET}
 
 3. GUTTER COMMENTS (${gutterCount} margin notes):
    Casual asides that feel like margin scribbles (10 words max).
@@ -384,6 +407,7 @@ GENERATE THREE OUTPUTS:
    - Bullet points with poetic sensibility
    - Find the story in each change
    - Brief but evocative descriptions
+${DETAILED_BUDGET}
 
 3. GUTTER COMMENTS (${gutterCount} margin notes):
    Contemplative asides (10 words max).
@@ -473,6 +497,7 @@ GENERATE THREE OUTPUTS:
    - Terse bullet points
    - Skip minor changes, group related ones
    - Use shorthand: impl, fix, add, rm, refactor
+${DETAILED_BUDGET}
 
 3. GUTTER COMMENTS (${gutterCount} margin notes):
    Single words or very short phrases.
@@ -593,6 +618,7 @@ ${summaryInstructions}
    - Header: "## Projects"
    - Each project: "### ProjectName"
    - Bullet points for key changes
+${DETAILED_BUDGET}
 
 3. GUTTER COMMENTS (${gutterCount} margin notes):
    Short observations (10 words max).`;

@@ -6,6 +6,7 @@
  */
 
 import type { VoicePreset, Commit } from "../types";
+import { DETAILED_BUDGET } from "../budget";
 
 export const casual: VoicePreset = {
   id: "casual",
@@ -110,6 +111,7 @@ GENERATE THREE OUTPUTS:
    - Bullet points starting with "- " in casual language
    - Show personality: "finally fixed that annoying thing", "this is still janky but whatever"
    - Group related changes, don't just list every commit
+${DETAILED_BUDGET}
 
 3. GUTTER COMMENTS (${gutterCount} margin notes):
    Casual asides that feel like margin scribbles (10 words max).
