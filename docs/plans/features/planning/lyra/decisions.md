@@ -108,18 +108,30 @@ Scrubbing happens only on the way to the model. The saved record is private to t
 ### 30. A straight line now, with branches possible later
 Nothing branches today. Every entry carries its own id and the id of the entry before it, so branches can be added later without changing the format. Decided 2026-11-14.
 
-## Proposed, waiting for a yes
-
-These are from `run-record.md`, where each is explained.
-
 ### 31. The record is shaped like Nova's session file
-A header line, then one entry per line. Each entry has `type`, `id`, `parent`, and `ts`. Entries: header, message from the user, message from the assistant (with model, usage, finish reason), message from a tool, and status. Unknown kinds are skipped by readers.
+A header line, then one entry per line. Each entry has `type`, `id`, `parent`, and `ts`. Entries: header, message from the user, message from the assistant (with model, usage, finish reason), message from a tool, and status. Unknown kinds are skipped by readers. Confirmed 2026-11-14.
 
 ### 32. The record is the only place progress lives
-Working state that tools build (the half-built timeline page, the handle map) is rebuilt on resume by replaying the saved tool results. No second copy.
+Working state that tools build (the half-built timeline page, the handle map) is rebuilt on resume by replaying the saved tool results. No second copy. Tools are written so that replaying their saved results rebuilds their state. Confirmed 2026-11-14, with the aim of full observability.
 
 ### 33. The model's reasoning text is stored when the adapter provides it
-Marked as reasoning, so a viewer can show or hide it.
+Marked as reasoning, so a viewer can show or hide it. Confirmed 2026-11-14.
+
+## Proposed, waiting for a yes
+
+These are from `approvals.md`, where each is explained.
+
+### 34. One mechanism for approvals and questions
+A pending request is saved in the record and the run parks as "waiting for a person". The answer is approve, deny (with a note the model reads), or the answer to a question. The shared "ask a human" tool and the approval check on risky tools are the same thing.
+
+### 35. A policy per tool, set in the task's recipe
+Each tool is allow, ask, or deny. A risk label (reads, changes things, dangerous) sets the default. If a call needs an answer and nothing can deliver the question, it is denied.
+
+### 36. A notify slot
+How a person is told a run is waiting. Grove: email or an Arbor inbox. Node: terminal or a pull request comment.
+
+### 37. An optional timeout per task, with no timeout by default
+After the timeout, an unanswered request is denied.
 
 ## Not discussed yet
 

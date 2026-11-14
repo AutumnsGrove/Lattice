@@ -6,7 +6,7 @@ category: features
 
 # The record of a run
 
-Last updated: 2026-11-14. Decided items are marked. Proposed items wait for a yes.
+Last updated: 2026-11-14. Everything here is decided.
 
 ## What the record is
 
@@ -20,7 +20,7 @@ After every step, Lyra saves what happened to the Storage slot. That saved list 
 
 **A straight line now, with branches possible later (decision 30).** Nothing branches today, because stop, steer, resume, and follow-up are all linear. Every entry still carries its own id and the id of the entry before it. That is a straight line in practice and a tree in shape, so branches can be added later without changing the format.
 
-## Proposed: the shape (decision 31)
+## Decided: the shape (decision 31)
 
 The record follows the shape of Nova's session file, so a Lyra record and a Nova session can be read by similar tools where they overlap. It is a header line, then one entry per line.
 
@@ -42,15 +42,15 @@ The model's tool request is saved before the tool runs, and the result after. Th
 
 On Cloudflare, one row per entry in the Durable Object's SQLite. On Node, a JSONL file, or memory for tests. It is the Storage slot's job. In every case the same record can be exported as plain JSONL lines.
 
-## Proposed: where progress lives (decision 32)
+## Decided: where progress lives (decision 32)
 
 Some tools build something as the run goes. The timeline's tools build a page, and they hand out short handles (`c1`, `pr12`) that map back to real hashes. If the host loses the run partway, that half-built page and that handle map have to come back.
 
-Proposal: the record is the only place progress lives. On resume, Lyra replays the saved tool results to rebuild the half-built page and the handle map. There is no second copy to get out of step. Tools are written so that replaying their saved results rebuilds their state.
+The record is the only place progress lives. On resume, Lyra replays the saved tool results to rebuild the half-built page and the handle map. There is no second copy to get out of step. Tools are written so that replaying their saved results rebuilds their state.
 
-## Proposed: the model's own reasoning (decision 33)
+## Decided: the model's own reasoning (decision 33)
 
-Some models return their reasoning text along with the answer. Proposal: store it when the adapter provides it, marked as reasoning, so a viewer can show or hide it. It is the closest thing to "why". It can be large, and it is only kept when the model offers it.
+Some models return their reasoning text along with the answer. It is stored when the adapter provides it, marked as reasoning, so a viewer can show or hide it. It is the closest thing to "why". It can be large, and it is only kept when the model offers it.
 
 ## Not discussed yet
 
