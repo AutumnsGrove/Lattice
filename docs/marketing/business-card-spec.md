@@ -162,23 +162,35 @@ The printed URL under the QR is there for anyone who can't scan.
 
 ### Files
 
-`node scripts/generate/generate-business-cards.mjs all` renders the PNGs, and `node scripts/generate/generate-business-card-pdfs.mjs all` builds one PDF per season.
+`node scripts/generate/generate-business-cards.mjs all` renders the PNGs, and `node scripts/generate/generate-business-card-pdfs.mjs all` builds the PDFs.
 
-| Output                                              | What it is                                              |
-| --------------------------------------------------- | ------------------------------------------------------- |
-| `docs/internal/print-assets/business-cards/*.png`   | sRGB renders, 1125 × 675, for review                    |
-| `…/business-cards/print/grove-card-<season>-dark-cmyk.pdf` | Page 1 front, page 2 back. CMYK, 300ppi, TrimBox set |
+| Output                                                     | What it is                                                                     |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `docs/internal/print-assets/business-cards/*.png`          | sRGB renders, 1125 × 675, for review                                           |
+| `…/business-cards/print/grove-card-<season>-dark-cmyk.pdf` | Front then back. Converted to CMYK here, 300ppi, TrimBox set                   |
+| `…/business-cards/print/grove-card-<season>-dark-rgb.pdf`  | Same artwork, untouched sRGB, for printers who convert it themselves           |
 
-Each PDF page is the full 3.75" × 2.25" canvas (BleedBox), with the TrimBox at the 3.5" × 2" cut line. It is a CMYK PDF with trim and bleed boxes. It is **not** a certified PDF/X-1a; if a printer insists on X-1a, they or a preflight tool will need to produce it.
+Each PDF page is the full 3.75" × 2.25" canvas (BleedBox), with the TrimBox at the 3.5" × 2" cut line. Neither flavour is a certified PDF/X-1a; if a printer insists on X-1a, they or a preflight tool will need to produce it.
 
-### Colour: expect a shift
+### Colour: CMYK will look duller, so ask which file to send
 
-Glowing violets and blues are outside what CMYK ink can reproduce, so the printed card will be duller than the screen. In a soft proof, midnight's near-black ground drifts toward charcoal and its bright violet tree tiers toward dusty lavender; the pink holds up best.
+Glowing violets and blues are outside what CMYK ink can reproduce, so a CMYK card will be duller than the screen. This is the cost of the design, not a bug. In a soft proof of midnight the bright violet tree tiers go dusty and the glow loses its vividness; the pink holds up best.
 
-- The PDF builder converts through an ICC profile. By default that is macOS's **Generic CMYK**, a stand-in. It is conservative and will look duller than a real press profile.
-- The printer converts again with their own profile. Ask them for it, then rebuild with `--icc=/path/to/their-profile.icc`.
-- Some printers prefer RGB and convert on their side. Ask which they want before choosing.
+How much depends on the profile. Midnight's ground (`#0d0a1a` on screen) comes out as:
+
+| Profile                                    | Ground    | Pink tier (`#ec4899`) |
+| ------------------------------------------ | --------- | --------------------- |
+| macOS Generic CMYK (the script's default)  | `#25242d` | `#d74e88`             |
+| Artifex SWOP (a US press standard)         | `#1c1a20` | `#e53b8a`             |
+
+The committed CMYK PDFs were built with the SWOP profile: `--icc=/path/to/default_cmyk.icc`, from Artifex's ghostpdl repo (`iccprofiles/default_cmyk.icc`). The Generic one is much flatter. Neither is your printer's.
+
+What to do:
+
+- **Ask the printer which they want**, CMYK or RGB. Many digital printers convert RGB themselves with a wider-gamut workflow, and that keeps the violets alive. If they take RGB, send the `-rgb.pdf`.
+- If they want CMYK, ask for their ICC profile and rebuild with `--icc=`.
 - Order a single proof of midnight first. It is the card most affected.
+- Foil or spot colour on the tree is the one way to get a vivid violet in ink. Ask if it's offered.
 
 ### Finish
 
@@ -199,9 +211,9 @@ Before sending to print:
 - [x] QR URL carries `?ref=card-back`
 - [x] Text outlined from Calistoga and Lexend, no font fallbacks
 - [x] Safe zone enforced by the generator for every card
-- [x] PDFs built: CMYK, 300ppi, bleed and trim boxes
+- [x] PDFs built: CMYK and RGB, 300ppi, bleed and trim boxes
 - [ ] `grove.place/hello` is live and logs `ref` (#1426)
-- [ ] Printer's ICC profile obtained and PDFs rebuilt with it
+- [ ] Printer asked whether they want CMYK or RGB; their ICC profile obtained if CMYK
 - [ ] Proof of midnight reviewed in person, colours accepted
 - [ ] QR scanned from the printed proof on at least two phones
 - [ ] Final design approved for a print run

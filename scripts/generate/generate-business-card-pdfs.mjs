@@ -11,7 +11,10 @@
  * printer will convert again with its own press profile, so treat the soft proof
  * as a guide to how far the glowing violets and blues will shift, not a promise.
  *
- * This is a CMYK PDF with trim and bleed boxes. It is not a certified PDF/X-1a.
+ * Each season gets two PDFs, same artwork: a CMYK one (converted here) and an RGB one
+ * (the untouched sRGB render). CMYK cannot hold the glowing violets and blues, so the
+ * RGB twin exists for printers who would rather convert it themselves. Ask which they
+ * want. Neither is a certified PDF/X-1a; both carry trim and bleed boxes.
  *
  * Usage: node scripts/generate/generate-business-card-pdfs.mjs [season ... | all]
  *          [--icc=/path/to/cmyk.icc] [--proof-dir=/some/dir]
@@ -29,7 +32,7 @@ import {
 } from "pdf-lib";
 import { deflateSync } from "zlib";
 import { access, mkdir, writeFile } from "fs/promises";
-import { dirname, join } from "path";
+import { basename, dirname, join } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -108,9 +111,30 @@ function addCmykPage(pdf, { data, info }) {
 		drawObject(name),
 		popGraphicsState(),
 	);
+	setPrintBoxes(page);
+	return page;
+}
+
+/** The full canvas is the bleed; the trim box marks the 3.5" x 2" cut line. */
+function setPrintBoxes(page) {
 	page.setMediaBox(0, 0, PAGE_W, PAGE_H);
 	page.setBleedBox(0, 0, PAGE_W, PAGE_H);
 	page.setTrimBox(BLEED, BLEED, TRIM_W, TRIM_H);
+}
+
+/** The sRGB render as it is, flattened (no alpha), for printers who convert it themselves. */
+async function addRgbPage(pdf, pngPath) {
+	const flat = await sharp(pngPath).removeAlpha().png().toBuffer();
+	const { width, height } = await sharp(flat).metadata();
+	if (width !== EXPECTED_PX.width || height !== EXPECTED_PX.height) {
+		throw new Error(
+			`${pngPath}: expected ${EXPECTED_PX.width}x${EXPECTED_PX.height}px, got ${width}x${height}`,
+		);
+	}
+	const image = await pdf.embedPng(flat);
+	const page = pdf.addPage([PAGE_W, PAGE_H]);
+	page.drawImage(image, { x: 0, y: 0, width: PAGE_W, height: PAGE_H });
+	setPrintBoxes(page);
 	return page;
 }
 
@@ -125,25 +149,45 @@ async function writeSoftProof(pngPath, icc, outPath) {
 	await sharp(tiff).toColourspace("srgb").png().toFile(outPath);
 }
 
-async function buildSeason(season, { icc, proofDir }) {
+async function newPdf(season, mode, icc) {
 	const pdf = await PDFDocument.create();
-	pdf.setTitle(`Grove business card, ${season} (front, back)`);
+	pdf.setTitle(`Grove business card, ${season} (front, back), ${mode.toUpperCase()}`);
 	pdf.setAuthor("Autumn Brown");
 	pdf.setProducer("Grove business card generator");
 	pdf.setCreator("scripts/generate/generate-business-card-pdfs.mjs");
+	pdf.setKeywords(mode === "cmyk" ? ["CMYK", `icc:${basename(icc)}`] : ["RGB", "sRGB, untagged"]);
+	return pdf;
+}
 
+async function buildSeason(season, { icc, proofDir }) {
+	const pngs = {};
 	for (const side of ["front", "back"]) {
-		const png = join(CARDS_DIR, `card-${side}-${season}-dark.png`);
-		await access(png).catch(() => {
-			throw new Error(`Missing ${png}. Run scripts/generate/generate-business-cards.mjs first.`);
+		pngs[side] = join(CARDS_DIR, `card-${side}-${season}-dark.png`);
+		await access(pngs[side]).catch(() => {
+			throw new Error(
+				`Missing ${pngs[side]}. Run scripts/generate/generate-business-cards.mjs first.`,
+			);
 		});
-		addCmykPage(pdf, await toCmyk(png, icc));
-		if (proofDir) await writeSoftProof(png, icc, join(proofDir, `proof-${side}-${season}.png`));
 	}
 
-	const out = join(PDF_DIR, `grove-card-${season}-dark-cmyk.pdf`);
-	await writeFile(out, await pdf.save());
-	return out;
+	const outputs = [];
+	for (const mode of ["cmyk", "rgb"]) {
+		const pdf = await newPdf(season, mode, icc);
+		for (const side of ["front", "back"]) {
+			if (mode === "cmyk") addCmykPage(pdf, await toCmyk(pngs[side], icc));
+			else await addRgbPage(pdf, pngs[side]);
+		}
+		const out = join(PDF_DIR, `grove-card-${season}-dark-${mode}.pdf`);
+		await writeFile(out, await pdf.save());
+		outputs.push(out);
+	}
+
+	if (proofDir) {
+		for (const side of ["front", "back"]) {
+			await writeSoftProof(pngs[side], icc, join(proofDir, `proof-${side}-${season}.png`));
+		}
+	}
+	return outputs;
 }
 
 async function main() {
@@ -156,15 +200,18 @@ async function main() {
 	await mkdir(PDF_DIR, { recursive: true });
 	if (args.proofDir) await mkdir(args.proofDir, { recursive: true });
 
-	console.log("📄 Building Grove business card PDFs (CMYK, 300ppi, with bleed + trim boxes)\n");
+	console.log("📄 Building Grove business card PDFs (CMYK + RGB, 300ppi, bleed + trim boxes)\n");
 	console.log(`   ICC:   ${args.icc}`);
 	console.log(`   Page:  3.75" x 2.25" (trim 3.5" x 2", 0.125" bleed)\n`);
 
+	let count = 0;
 	for (const season of args.seasons) {
-		const out = await buildSeason(season, args);
-		console.log(`    ✓ ${out.replace(`${ROOT_DIR}/`, "")}`);
+		for (const out of await buildSeason(season, args)) {
+			console.log(`    ✓ ${out.replace(`${ROOT_DIR}/`, "")}`);
+			count++;
+		}
 	}
-	console.log(`\n✅ Built ${args.seasons.length} PDF${args.seasons.length === 1 ? "" : "s"}`);
+	console.log(`\n✅ Built ${count} PDFs`);
 }
 
 main().catch((err) => {
