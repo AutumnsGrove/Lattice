@@ -81,22 +81,30 @@ After every model reply and tool result, the record is saved before the loop goe
 ### 21. Tool failures go back to the model
 A failed tool call, or one with invalid arguments, returns an error as the tool's result, and the model corrects it in the next call. Bad model output is a fact of working with AI, and Lyra does not try to design it away. Decided 2026-11-14.
 
-## Proposed, waiting for a yes
+### 22. Hitting a limit parks the run
+A run that reaches a limit is parked, not killed. Everything done so far is kept, and the run can be resumed with a larger limit or left alone. Decided 2026-11-14.
 
-These are from `limits-and-interruptions.md`, where each is explained.
-
-### 22. Hitting a limit parks the run, and it can be resumed with a larger limit
 ### 23. Accidents resume on their own, and a stop waits for a person
-### 24. Each tool declares whether it is safe to repeat, defaulting to no
-### 25. Done is decided by the task's done-check, with one default-on safeguard against a run that is stuck
-### 26. A failing model call is retried a few times, then the run parks as "model unavailable"
+If the host crashes or evicts a run, the Waking slot resumes it with nobody asking. A run a person stopped stays stopped until told to resume. Decided 2026-11-14.
+
+### 24. Each tool declares whether it is safe to repeat
+The default is no. A tool that was cut off partway and is not safe to repeat is reported to the model as "outcome unknown, check before repeating", not run again. Tools that change things can be made safe with a call id built from the run and the step. Decided 2026-11-14.
+
+### 25. Done is decided by the task's done-check, with a configurable stuck safeguard
+A run is done when the task's done-check passes (for the timeline, `finish` was accepted), not when the model says so. If the model stops without finishing, Lyra reminds it a small number of times, then parks the run as stuck. If a tool fails the same way several times in a row, the run also parks as stuck. This is the one default-on safeguard, and it is configurable per task (whether it is on, and the counts). A reply cut off by the token limit never runs its half-written tool arguments. Decided 2026-11-14.
+
+### 26. A failing model call is retried 3 times, with staggered backoff
+Up to 3 retries, with increasing delays between attempts. The exact delays are configuration, chosen when building. After the third failure the run parks with the reason "model unavailable". Lumen already falls back between models inside its router, so the core only retries and parks. Decided 2026-11-14.
+
+### 27. A follow-up message is supported
+A message can be queued during a run and is read after the work would otherwise end, in the same conversation. It sits next to stop and steer (decision 19). Nova and Pi both have it. Decided 2026-11-14. Open detail: what a follow-up does when nothing is running.
 
 ## Not discussed yet
 
 These came out of the research and are waiting for their turn, one at a time:
 
 - **The record of a run.** How Autumn sees what Lyra did and why.
-- **A follow-up message** queued for after a run would otherwise end (see `limits-and-interruptions.md`).
+- **Follow-up when nothing is running.** Whether it starts the next turn of the same conversation or is refused.
 - **Approvals.** How a background run asks for a yes and waits at no cost.
 - **The Cloudflare adapter's foundation.** Whether it builds on Cloudflare's agent tooling or on plain Durable Objects. A smaller question once decision 12 is settled.
 - **The wire protocol.** Which subset of Nova's frames Lyra speaks.
