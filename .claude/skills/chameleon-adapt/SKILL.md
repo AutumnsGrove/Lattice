@@ -5,31 +5,11 @@ description: Adapt UI to its environment with glassmorphism, seasonal themes, an
 
 # Chameleon Adapt
 
-The chameleon doesn't force its environment to change. It reads the light, understanding where it lives. It sketches its form, creating structure. It shifts its hues, matching the forest around it. It adds texture—rough bark, smooth leaves, shifting light. Finally, it adapts completely, becoming one with its surroundings. The result feels organic, like it was always meant to be there.
-
-## When to Activate
-
-- User asks to "design this page" or "make it look Grove"
-- User says "add some visual polish" or "theme this"
-- User calls `/chameleon-adapt` or mentions chameleon/adapting
-- Creating or enhancing pages for Grove sites
-- Implementing seasonal decorations or weather effects
-- Building glassmorphism containers for readability
-- Adding nature components (trees, birds, particles)
-- Working with the color palette system
-
----
-
-## The Adaptation
-
 ```
 READ → SKETCH → COLOR → TEXTURE → ADAPT
-  ↓       ↲        ↓         ↲         ↓
-Understand Create   Apply    Add      Final
-Light    Structure Palette  Effects  Form
 ```
 
----
+Each phase loads one reference. Don't read them all up front — load the one the phase calls for.
 
 ## Reference Routing Table
 
@@ -44,21 +24,9 @@ Light    Structure Palette  Effects  Form
 
 ---
 
-### Phase 1: READ
+## Phase 1: READ
 
-_The chameleon reads the light, understanding where it lives..._
-
-Before choosing a single color, understand the environment. Assess three things:
-
-**What season is it?**
-
-```svelte
-import {season} from '$lib/stores/season'; const isSpring = $derived($season === 'spring'); const isAutumn
-= $derived($season === 'autumn'); const isWinter = $derived($season === 'winter'); // Summer is the default
-(no flag needed)
-```
-
-**What's the emotional tone?**
+Pick a season from the emotional tone, and a decoration level (`minimal` / `moderate` / `full`).
 
 | Tone                | Season   | Mood                        |
 | ------------------- | -------- | --------------------------- |
@@ -68,249 +36,165 @@ import {season} from '$lib/stores/season'; const isSpring = $derived($season ===
 | Rest, stillness     | Winter   | Snow, frost, evergreens     |
 | Dreams, far-future  | Midnight | Purple glow, fireflies      |
 
-**Season Mood Summary:**
+Decoration level follows the page's purpose: story pages get full atmosphere, data-dense admin screens get clean glass and no forest.
 
-| Season     | Primary Colors                                       | Mood                |
-| ---------- | ---------------------------------------------------- | ------------------- |
-| **Spring** | `springFoliage`, `cherryBlossomsPeak`, `wildflowers` | Renewal, hope       |
-| **Summer** | `greens`, `cherryBlossoms`                           | Growth, warmth      |
-| **Autumn** | `autumn`, `autumnReds`                               | Harvest, reflection |
-| **Winter** | `winter` (frost, snow, frosted pines)                | Rest, stillness     |
+```svelte
+import { season } from "$lib/stores/season";
+const isAutumn = $derived($season === "autumn");
+// Summer is the default — no flag needed.
+```
 
-**What's the page's purpose?**
-
-- Story/narrative pages — Full seasonal atmosphere
-- Data-dense interfaces — Minimal decoration, focus on readability
-- Landing/hero sections — Weather effects, randomized forests
-- Forms/admin — Clean glass surfaces, no distractions
-
-**Output:** Season selection and decoration level decision (minimal / moderate / full)
+**Output:** season + decoration level.
 
 ---
 
-### Phase 2: SKETCH
+## Phase 2: SKETCH
 
-_The chameleon outlines its form, creating structure..._
-
-Build the page skeleton with glassmorphism layers. Establish the layering formula, place glass containers, and wire up the sticky navigation pattern.
-
-Key decisions: Which glass variant fits each container? Where does content live in the z-index stack? What's the responsive breakdown?
-
-**Reference:** Load `references/layout-patterns.md` for the layering formula, sticky nav pattern, page section templates, responsive grid patterns, spacing system, and accessibility layout rules.
-
-**Quick glass starter:**
+`references/layout-patterns.md` — layering formula, sticky nav, page sections, responsive grid, spacing, layout accessibility.
 
 ```svelte
-import {(Glass, GlassCard, GlassButton)} from '@lattice/ui/ui';
+import { Glass, GlassCard, GlassButton } from "@lattice/ui/ui";
 
 <Glass variant="tint" class="p-6 rounded-xl">
 	<p>Readable text over busy backgrounds</p>
 </Glass>
 ```
 
-**Reference:** Load `references/glass-components.md` for all glass variants, props, CSS utility classes, and composition patterns.
+`references/glass-components.md` has the variants, props and CSS utilities.
 
-**Output:** Page structure with glass containers and z-index layers in place
-
----
-
-### Phase 3: COLOR
-
-_The chameleon shifts its hues, matching the forest around it..._
-
-Apply the seasonal color palette from `@autumnsgrove/lattice/ui/nature`. Match palette choice to the emotional tone identified in READ. Use seasonal helper functions (`getSeasonalGreens`, `getCherryColors`) for consistent depth across the scene.
-
-**Accent colors:** For any accent-colored surfaces (buttons, links, highlights, focus rings), use `var(--grove-accent-*)` tokens — NOT hardcoded green hex values. The user's accent color may not be green. Use `var(--grove-accent)` for solid, `var(--grove-accent-dark)` for hover, and `var(--grove-accent-N)` for opacity tints. The pre-commit hook enforces this. Brand greens (nature SVGs, logo) are fine with `// accent-ok`.
-
-Also apply Grove terminology through GroveTerm components — never hardcode Grove-specific words in user-facing text.
-
-**Reference:** Load `references/color-palette.md` for all color tokens with hex values, seasonal palettes (Spring/Summer/Autumn/Winter/Midnight), accent palettes, helper functions, and background gradient patterns.
-
-**Reference:** Load `references/groveterm-system.md` for the GroveTerm component suite, the `[[term|standard]]` syntax, common term vocabulary, and accessibility rules.
-
-**Output:** Color scheme applied with proper imports and seasonal variants; user-facing text uses GroveTerm components
+**Output:** page structure with glass containers and z-index layers.
 
 ---
 
-### Phase 4: TEXTURE
+## Phase 3: COLOR
 
-_The chameleon adds depth—rough bark, smooth leaves, shifting light..._
+`references/color-palette.md` — every token with hex values, the seasonal palettes, helper functions (`getSeasonalGreens`, `getCherryColors`) and background gradients.
 
-Layer nature components for atmosphere. Generate the randomized forest (trees never overlap — 8% minimum gap). Add weather effects appropriate to the season. Place seasonal birds for life. Wire up Lucide icons (never emojis). Respect the responsive density table.
+**Accent surfaces** (buttons, links, highlights, focus rings) use `var(--grove-accent-*)`, never hardcoded green. `var(--grove-accent)` solid, `-dark` for hover, `-N` for opacity tints. The user's accent may not be green. Pre-commit enforces it; brand greens in nature SVGs and the logo are fine with `// accent-ok`.
 
-**Reference:** Load `references/nature-components.md` for the full component catalog, randomized forest generation algorithm, weather effect snippets, seasonal bird placement, icon registry pattern, and mobile particle count adjustments.
+**Grove terminology** goes through GroveTerm components — `references/groveterm-system.md` for the suite, the `[[term|standard]]` syntax and the vocabulary.
 
-**Output:** Nature components layered with proper z-index and responsive density
+**Output:** seasonal colours applied, terminology wrapped.
 
 ---
 
-### Phase 5: ADAPT
+## Phase 4: TEXTURE
 
-_The chameleon becomes one with its surroundings—complete adaptation..._
+`references/nature-components.md` — component catalog, randomized forest algorithm, weather effects, seasonal birds, icon registry, mobile particle counts.
 
-Final polish and accessibility. Reduce particle counts for mobile. Add the mobile overflow sheet menu for navigation. Verify `prefers-reduced-motion` wraps all particle layers. Confirm all touch targets are 44x44px minimum. Check dark mode glass variants. Run CI.
+- Trees never overlap — 8% minimum gap.
+- Lucide icons, never emojis.
+- Respect the responsive density table.
 
-**Verification (mandatory):**
+**Output:** nature layered with correct z-index and density.
+
+---
+
+## Phase 5: ADAPT
+
+Polish and accessibility:
+
+- Particle counts down for mobile; every particle layer wrapped in `prefers-reduced-motion`
+- Mobile overflow sheet for navigation
+- Touch targets 44×44px minimum
+- Dark-mode glass variants checked
+
+**Verification is mandatory:**
 
 ```bash
 pnpm install
 gw ci --affected --fail-fast --diagnose
 ```
 
-If CI fails: read diagnostics, fix, re-run. The chameleon does not leave broken code behind its color shift.
-
-**Component Audit Gate (mandatory when building/modifying components):**
-
-**Component check.** There is no isolated component harness any more (Showroom was removed in #1654). Capture the page or element where the component renders, then check it against `DESIGN.md`: colour tokens not hardcoded values, spacing on the 4px grid, type from the scale, a visible focus ring, no skipped heading levels, alt text on images. The pre-commit hooks enforce the mechanical subset (accent colours, Prism icons, barrels).
+**Component check.** There is no isolated component harness (Showroom was removed in #1654). Capture the element where it renders and check it against `DESIGN.md`: colour tokens not hardcoded values, spacing on the 4px grid, type from the scale, visible focus ring, no skipped headings, alt text.
 
 ```bash
-# There is no isolated component harness any more (Showroom was removed in #1654).
-# Capture the component where it actually renders, then check it by hand.
-bun run glimpse capture "http://localhost:5173/[page]" \
-  -S "[component selector]" --season autumn --theme dark
+bun run glimpse capture "http://localhost:5173/[page]" -S "[selector]" -s autumn -t dark
 ```
 
-**Check the component before the page.** Hardcoded hex, off-grid spacing and missing focus rings are much easier to spot on a single element than in a full-page shot.
-
-**Visual Verification (mandatory for UI work):**
-
-The chameleon doesn't just build — it _looks_ at what it built. Use Glimpse to capture the result and iterate until the design matches the vision:
+**Visual verification.** Don't ship UI you haven't looked at.
 
 ```bash
-# Prerequisite: seed the database if not already done
-./scripts/dev-stack.sh seed blog
+./scripts/dev-stack.sh seed blog                       # if not seeded yet
 
-# Capture the page you just built ( starts the dev server)
-# Local routing uses ?subdomain= for tenant isolation
-bun run glimpse capture \
-  "http://localhost:5173/[your-page]?subdomain=midnight-bloom" \
-  --season autumn --theme dark --logs
+bun run glimpse capture "http://localhost:5173/[page]?subdomain=midnight-bloom" -s autumn -t dark --logs
 
-# Verify all season × theme combos render correctly
-bun run glimpse matrix \
-  "http://localhost:5173/[your-page]?subdomain=midnight-bloom" \
+bun run glimpse matrix "http://localhost:5173/[page]?subdomain=midnight-bloom" \
   --seasons spring,summer,autumn,winter --themes light,dark
-
-# Interactive flows (clicks, tab order, focus traps) aren't what glimpse does.
-# Write a throwaway Playwright script against @playwright/test and screenshot
-# at each step; copy the browser setup from tools/glimpse/src/browser.ts.
-
-# Optional: verify with random data too (proves UI handles any content)
-./scripts/dev-stack.sh seed fake 5
-# Then capture with the randomly generated subdomain from seed output
 ```
 
-**The iterate loop:** Capture → review screenshot → spot issues → fix → capture again. Repeat until the adaptation is complete. Don't ship UI you haven't seen.
+Interactive flows (clicks, tab order, focus traps) aren't what glimpse does — write a throwaway Playwright script against `@playwright/test`, copying the browser setup from `tools/glimpse/src/browser.ts`.
 
-**Final Checklist (after CI passes AND visual verification):**
+Iterate: capture → look → fix → capture. `dev-stack.sh seed fake 5` proves it survives arbitrary content.
 
-- [ ] CI: `gw ci --affected` passes clean
-- [ ] Glimpse: Captured page looks correct in all target seasons
-- [ ] Glimpse: Dark mode and light mode both verified visually
-- [ ] Glimpse: No console errors in `--logs` output
-- [ ] Glass effects used for text readability over busy backgrounds?
-- [ ] Lucide icons, no emojis?
-- [ ] Mobile overflow menu for navigation items?
-- [ ] Decorative elements respect `prefers-reduced-motion`?
-- [ ] Touch targets at least 44x44px?
-- [ ] Seasonal colors match the page's emotional tone?
-- [ ] Trees randomized with proper spacing (8% minimum gap)?
-- [ ] Dark mode supported with appropriate glass variants?
-- [ ] User-facing text follows Grove voice?
-- [ ] Grove terminology uses GroveTerm components (not hardcoded)?
-- [ ] `[[term]]` syntax used in data-driven content strings?
+**Final checklist:**
 
-**Output:** Fully adapted, accessible, responsive UI ready for production — visually verified
+- [ ] CI: `gw ci --affected` clean
+- [ ] Captured in every target season, light and dark, no console errors
+- [ ] Glass used for readability over busy backgrounds
+- [ ] Lucide icons, no emojis
+- [ ] Mobile overflow menu present
+- [ ] Decoration respects `prefers-reduced-motion`
+- [ ] Touch targets ≥ 44×44px
+- [ ] Trees randomized, 8% minimum gap
+- [ ] Grove voice, GroveTerm components, `[[term]]` in data-driven strings
+
+**Output:** adapted, accessible, responsive UI, visually verified.
 
 ---
 
 ## Chameleon Rules
 
-### Intention
+**Intention.** Every colour choice serves the content. Decoration enhances readability; it never obstructs it.
 
-Every color choice serves the content. Decoration enhances readability—it never obstructs it.
+**Restraint.** Not every page needs a forest. Data-dense interfaces deserve clean glass without distraction.
 
-### Restraint
-
-Not every page needs a forest. Data-dense interfaces deserve clean glass surfaces without distraction.
-
-### Authenticity
-
-Use the seasonal system as intended. Spring isn't just "light colors"—it's renewal and hope.
-
-### Communication
-
-Use adaptation metaphors:
-
-- "Reading the light..." (understanding context)
-- "Sketching the form..." (building structure)
-- "Shifting hues..." (applying colors)
-- "Adding texture..." (layering components)
-- "Full adaptation..." (final polish)
+**Authenticity.** Use the seasonal system as intended. Spring isn't just "light colours" — it's renewal.
 
 ---
 
 ## When to Use
 
-| Pattern                | Good For                                          |
-| ---------------------- | ------------------------------------------------- |
-| **Glassmorphism**      | Text over backgrounds, navbars, cards, modals     |
-| **Randomized forests** | Story pages, about pages, visual sections         |
-| **Seasonal themes**    | Roadmaps, timelines, emotional storytelling       |
-| **Midnight Bloom**     | Future features, dreams, mystical content         |
-| **Weather particles**  | Hero sections, transitions between seasons        |
-| **Birds**              | Adding life to forest scenes, seasonal indicators |
+| Pattern            | Good for                                       |
+| ------------------ | ---------------------------------------------- |
+| Glassmorphism      | Text over backgrounds, navbars, cards, modals  |
+| Randomized forests | Story pages, about pages, visual sections      |
+| Seasonal themes    | Roadmaps, timelines, emotional storytelling    |
+| Midnight Bloom     | Future features, dreams, mystical content      |
+| Weather particles  | Hero sections, season transitions              |
+| Birds              | Life in forest scenes, seasonal indicators     |
 
 ## When NOT to Use
 
-| Pattern                   | Avoid When                                         |
-| ------------------------- | -------------------------------------------------- |
-| **Heavy decoration**      | Data-dense pages, admin interfaces, forms          |
-| **Particle effects**      | Performance-critical pages, accessibility concerns |
-| **Seasonal colors**       | Brand-critical contexts needing consistent colors  |
-| **Multiple glass layers** | Can cause blur performance issues                  |
-| **Randomization**         | Content that needs to match between sessions       |
-| **Complex forests**       | Mobile-first pages, simple informational content   |
+| Pattern               | Avoid when                                        |
+| --------------------- | ------------------------------------------------- |
+| Heavy decoration      | Data-dense pages, admin interfaces, forms         |
+| Particle effects      | Performance-critical pages, a11y concerns         |
+| Seasonal colours      | Brand-critical contexts needing consistency       |
+| Multiple glass layers | Blur cost                                          |
+| Randomization         | Content that must match between sessions          |
+| Complex forests       | Mobile-first pages, simple informational content  |
 
 ---
 
 ## Example Adaptation
 
-**User:** "Make this about page feel like Grove"
+> "Make this about page feel like Grove"
 
-**Chameleon flow:**
-
-1. **READ** — "Page is about the team's journey. Emotional tone: reflection. Season: Autumn (harvest). Decoration level: full."
-
-2. **SKETCH** — "Load `references/layout-patterns.md`. Create glass card containers, sticky nav with `glass-surface`, layering formula in place."
-
-3. **COLOR** — "Load `references/color-palette.md`. Import autumn palette (rust, ember, amber, gold), warm gradients, `autumnReds` for accent. Load `references/groveterm-system.md` for user-facing text."
-
-4. **TEXTURE** — "Load `references/nature-components.md` and `references/glass-components.md`. Add randomized aspen/birch trees, `FallingLeavesLayer`, autumn birds (cardinals), Lucide icons."
-
-5. **ADAPT** — "Responsive density, reduced-motion support, `GroveTerm` for 'Welcome, Wanderer' greeting, 44px touch targets, dark mode verified. Run `gw ci --affected`."
-
----
-
-## Quick Decision Guide
-
-| Situation             | Action                                                     |
-| --------------------- | ---------------------------------------------------------- |
-| Story/narrative page  | Full seasonal atmosphere, weather effects                  |
-| Data-dense interface  | Minimal decoration, focus on glass readability             |
-| Landing/hero section  | Randomized forest, particles, seasonal birds               |
-| Form/admin interface  | Clean glass surfaces, no nature distractions               |
-| Mobile-first page     | Reduce tree count, simpler effects                         |
-| Accessibility concern | Respect prefers-reduced-motion, keep glass for readability |
+1. **READ** — team's journey, reflective → autumn, full decoration.
+2. **SKETCH** — `layout-patterns.md`; glass cards, sticky nav.
+3. **COLOR** — `color-palette.md` autumn palette; `groveterm-system.md` for copy.
+4. **TEXTURE** — `nature-components.md` + `glass-components.md`; aspen/birch, falling leaves, cardinals.
+5. **ADAPT** — responsive density, reduced motion, GroveTerm greeting, 44px targets, dark mode, CI.
 
 ---
 
 ## Integration with Other Skills
 
-- **`/gathering-ui`** — Pairs chameleon with deer-sense for accessible UI in one pass
-- **`/deer-sense`** — Accessibility audit after adaptation
-- **`/grove-ui-design`** — Broader UI design patterns and component selection
-- **`/beaver-build`** — Write tests covering interactive UI after adaptation
+- **`/gathering-ui`** — pairs chameleon with deer-sense for accessible UI in one pass
+- **`/deer-sense`** — accessibility audit after adaptation
+- **`/grove-ui-design`** — broader UI patterns and component selection
+- **`/beaver-build`** — tests covering interactive UI after adaptation
 
 ---
 
