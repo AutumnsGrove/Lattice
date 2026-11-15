@@ -14,8 +14,7 @@
 import { betterAuth } from "better-auth";
 import { withCloudflare } from "better-auth-cloudflare";
 import type { CloudflareGeolocation } from "better-auth-cloudflare";
-import { APIError } from "better-auth/api";
-import { createAuthMiddleware } from "better-auth/api";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { twoFactor, emailOTP } from "better-auth/plugins";
 import { drizzle } from "drizzle-orm/d1";
 import { logGroveError } from "@autumnsgrove/lattice/errors";
@@ -23,8 +22,11 @@ import { HW_SVC_ERRORS } from "../errors.js";
 import type { Env } from "../types.js";
 import { schema } from "../db/auth.schema.js";
 import { getRequestContext, bridgeSessionToSessionDO } from "../lib/sessionBridge.js";
-import { checkSignupIdentity } from "../lib/signup-blocks.js";
-import { SIGNUP_BLOCKED_PATHS, emailFromAuthContext } from "../lib/signup-blocks.js";
+import {
+	SIGNUP_BLOCKED_PATHS,
+	checkSignupIdentity,
+	emailFromAuthContext,
+} from "../lib/signup-blocks.js";
 import { sendLoginCodeEmail } from "../services/email.js";
 import {
 	EMAIL_OTP_LENGTH,
