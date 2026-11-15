@@ -159,7 +159,6 @@ Related docs that live elsewhere:
 | `customer-setup.md` | `docs/setup/` | Customer onboarding |
 | `tenant-setup-guide.md` | `docs/setup/` | New tenant provisioning |
 | `local-auth-testing.md` | `docs/setup/` | Local Heartwood auth setup |
-| `agent-guide-new-grove-sites.md` | `AgentUsage/` | Agent workflow for new sites |
 | `woodpecker-codeberg-setup.md` | `docs/plans/infra/` | Codeberg CI (future work) |
 | `zephyr-migration-guide.md` | `docs/archive/` | Zephyr email migration (done) |
 

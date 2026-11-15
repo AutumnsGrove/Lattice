@@ -378,7 +378,7 @@ redirect(302, `/login?${buildErrorParams(authError)}`);
 
 **Number ranges:** 001-019 infrastructure, 020-039 session/token, 040+ reserved.
 
-See `AgentUsage/error_handling.md` for the full Signpost reference.
+See `CODE-STANDARDS.md` for the full Signpost reference.
 
 ## Related Resources
 

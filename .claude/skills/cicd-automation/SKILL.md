@@ -232,11 +232,3 @@ Add to README:
 1. Deployment automation
 2. Docker builds
 3. Documentation generation
-
-## Related Resources
-
-See `AgentUsage/ci_cd_patterns.md` for complete documentation including:
-- Complex workflow examples
-- Environment-specific configs
-- Advanced caching strategies
-- Deployment patterns

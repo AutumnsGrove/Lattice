@@ -17,15 +17,14 @@ Activate this skill when:
 ## Quick Installation
 
 ```bash
-# Use interactive installer (recommended)
-./AgentUsage/pre_commit_hooks/install_hooks.sh
+# Hooks live in .githooks/ and are installed by pointing git at them
+git config core.hooksPath .githooks
 
-# Or manual installation for Python project
-cp AgentUsage/pre_commit_hooks/commit-msg .git/hooks/
-cp AgentUsage/pre_commit_hooks/pre-commit-python .git/hooks/pre-commit
-cp AgentUsage/pre_commit_hooks/pre-commit-secrets-scanner .git/hooks/pre-commit-secrets
-cp AgentUsage/pre_commit_hooks/pre-push .git/hooks/
-chmod +x .git/hooks/*
+# Individual hooks
+#   .githooks/pre-commit          formatting, lint, secrets scan
+#   .githooks/commit-msg          conventional commits
+#   .githooks/pre-push            typecheck, svelte-check
+#   .githooks/post-checkout       dependency refresh
 ```
 
 ## Available Hooks
@@ -219,11 +218,3 @@ exit 0
 - Disable secrets scanning
 - Ignore hook failures
 - Commit without testing hooks first
-
-## Related Resources
-
-See `AgentUsage/pre_commit_hooks/` for:
-- `setup_guide.md` - Complete installation guide
-- `examples.md` - Custom hook examples
-- `TROUBLESHOOTING.md` - Common issues
-- Individual hook scripts for reference

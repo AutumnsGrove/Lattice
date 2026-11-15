@@ -107,7 +107,7 @@ Each sub-elephant reads `elephant-build/SKILL.md` and works on its domain only.
 
 - Signpost error codes for all error paths (`buildErrorJson`, `throwGroveError`)
 - Rootwork type safety at boundaries (`parseFormData`, `safeJsonParse`)
-- Reference: `AgentUsage/error_handling.md`, `AgentUsage/rootwork_type_safety.md`
+- Reference: `CODE-STANDARDS.md` (Signpost errors, Rootwork type safety)
 
 **Handoff to conductor:** File list (every file created/modified), implementation summary (what was built, key decisions), any open questions.
 

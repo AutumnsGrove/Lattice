@@ -1,6 +1,6 @@
 #!/bin/bash
 # Commit message validation hook
-# Validates against conventional commits format from AgentUsage/git_guide.md
+# Validates against the conventional commits format (see CONTRIBUTING.md)
 
 # Read commit message from file
 commit_msg_file="$1"
@@ -60,7 +60,7 @@ if [ "$is_valid" = false ]; then
     echo "   Valid types: feat, fix, docs, style, refactor, test, chore, perf, ci, build, revert"
     echo "   Example: feat: add user authentication"
     echo ""
-    echo "See AgentUsage/git_guide.md for detailed guidelines"
+    echo "See CONTRIBUTING.md for detailed guidelines"
     echo ""
     echo "To bypass this check, use: git commit --no-verify"
     exit 1

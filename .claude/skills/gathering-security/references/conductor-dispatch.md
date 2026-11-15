@@ -62,7 +62,7 @@ Implement authentication for this security scope:
 - Auth errors NEVER reveal user existence
 - Sessions: HttpOnly, Secure, SameSite=Lax minimum
 - CSRF: tokens + SameSite cookies
-- Reference: AgentUsage/error_handling.md, AgentUsage/rootwork_type_safety.md
+- Reference: `CODE-STANDARDS.md` (Signpost errors, Rootwork type safety)
 
 ## Constraints
 - You MUST read your skill file first

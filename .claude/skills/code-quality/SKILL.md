@@ -208,11 +208,3 @@ def process(amount, user):
         return "No payment method"
     return charge(user, amount)
 ```
-
-## Related Resources
-
-See `AgentUsage/code_quality.md` and `AgentUsage/code_style_guide.md` for:
-- IDE integration
-- Pre-commit hook setup
-- Comprehensive style guidelines
-- Error handling patterns

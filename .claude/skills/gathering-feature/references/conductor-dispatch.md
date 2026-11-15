@@ -102,7 +102,7 @@ Build this feature:
 - ALL catch blocks use isRedirect()/isHttpError() type guards
 - NO `as any` or unsafe casts at trust boundaries
 - Client feedback uses toast from @autumnsgrove/lattice/ui
-- Reference: AgentUsage/error_handling.md, AgentUsage/rootwork_type_safety.md
+- Reference: `CODE-STANDARDS.md` (Signpost errors, Rootwork type safety)
 
 ## Constraints
 - Build ONLY what the spec demands — no drive-by improvements

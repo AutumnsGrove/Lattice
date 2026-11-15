@@ -5,7 +5,6 @@ set -euo pipefail
 # Usage: ./scripts/publish-all.sh [--dry-run]
 #
 # Requires: npm auth token configured for registry.npmjs.org
-# See: AgentUsage/npm_publish.md
 
 DRY_RUN=""
 if [[ "${1:-}" == "--dry-run" ]]; then

@@ -1,6 +1,6 @@
 # Project Instructions - Agent Workflows
 
-> **Note**: This is the main orchestrator file. For detailed guides, see `AgentUsage/README.md`
+> **Note**: This is the main orchestrator file. `CODE-STANDARDS.md`, `DESIGN.md` and `VERIFICATION.md` hold the detail.
 
 ---
 
@@ -374,8 +374,6 @@ git push                                      # Push
 gh pr create --title "feat: ..." --body "..." # Create PR
 ```
 
-See `AgentUsage/git_guide.md` for complete reference.
-
 ### Git Hooks
 
 Local git enforcement lives in `.githooks/` (pre-commit, pre-push, commit-msg). Install with `git config core.hooksPath .githooks`.
@@ -440,8 +438,6 @@ Grove uses specialized subagents. **Prefer Grove agents** (`.claude/agents/`) ov
 | Search code          | **grove-scout**    |
 | Verify before commit | **grove-verifier** |
 
-Full reference: `AgentUsage/house_agents.md`
-
 ---
 
 ## Additional Resources
@@ -451,8 +447,6 @@ Full reference: `AgentUsage/house_agents.md`
 - **Verification:** `VERIFICATION.md` — CI checks, visual verification
 - **Code standards:** `CODE-STANDARDS.md` — engine-first, errors, types, queries
 - **Skills:** `.claude/skills/` — primary mechanism for specialized workflows
-- **Extended docs:** `AgentUsage/README.md` — master index of detailed documentation
-- **Design context:** `AgentUsage/design_context.md` — brand, aesthetic, principles
 
 ---
 

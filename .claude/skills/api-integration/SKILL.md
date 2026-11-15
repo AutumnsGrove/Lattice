@@ -287,13 +287,4 @@ try {
 }
 ```
 
-See `AgentUsage/error_handling.md` for the complete Signpost error code reference.
-
-## Related Resources
-
-See `AgentUsage/api_usage.md` for complete documentation including:
-
-- Bash request patterns
-- Conditional requests (ETags)
-- Advanced caching strategies
-- Specific API examples (GitHub, OpenWeather)
+See `CODE-STANDARDS.md` for the complete Signpost error code reference.

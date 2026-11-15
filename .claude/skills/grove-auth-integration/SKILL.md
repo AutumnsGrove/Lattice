@@ -53,7 +53,7 @@ if (errorParam) {
 }
 ```
 
-See `AgentUsage/error_handling.md` for the full Signpost reference.
+See `CODE-STANDARDS.md` for the full Signpost reference.
 
 **Type-Safe Error Handling in Catch Blocks:**
 Always use Rootwork type guards in catch blocks instead of manual property checks. Import `isRedirect()` and `isHttpError()` from `@autumnsgrove/lattice/server`:

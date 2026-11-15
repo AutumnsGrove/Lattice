@@ -22,7 +22,6 @@ For codebase search, use semantic search for discovery and `rg`/`find`/`glob` fo
 ---
 
 - **`AGENT.md`** — Main project instructions
-- **`AgentUsage/`** — Detailed workflow guides and best practices
 - Special Reminder from the user:
   > This site is my authentic voice—warm, introspective, queer, unapologetically building something meaningful; write like you're helping me speak, not perform.
 - Reminder from the User for when we Work:
@@ -60,4 +59,4 @@ Lumen is running as an MCP server with a voyage-4-nano index of this codebase. *
 
 Grove serves queer creators, independent writers, and indie web enthusiasts seeking their own space online. **Warm, introspective, queer** — like a trusted friend who runs a midnight tea shop. Nature-themed glassmorphism with seasonal depth. Studio Ghibli warmth meets indie bookshop.
 
-**Full design guide:** `AgentUsage/design_context.md`
+**Full design guide:** `DESIGN.md`
