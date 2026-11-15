@@ -384,7 +384,7 @@ Before finalizing any Grove documentation:
 
 ## Integration with Other Skills
 
-When **grove-ui-design** or **walking-through-the-grove** need written content, invoke this skill first. The visual design and naming should match the voice.
+When **chameleon-adapt** or **walking-through-the-grove** need written content, invoke this skill first. The visual design and naming should match the voice.
 
 **Typical flow:**
 

@@ -66,7 +66,6 @@ Ecosystem Journey  Phases    SKILL.md  & Guide
 | Vulture | 🦅 | Issue cleanup | `vulture-sweep` |
 | Safari | 🚙 | Collection review | `safari-explore` |
 | Hawk | 🦅 | Security survey | `hawk-survey` |
-| Raven | 🐦‍⬛ | Security detection | `raven-investigate` |
 | Turtle | 🐢 | Code hardening | `turtle-harden` |
 | Crow | 🐦‍⬛ | Critical reasoning | `crow-reason` |
 | Mole | ⛏️ | Systematic debugging | `mole-debug` |

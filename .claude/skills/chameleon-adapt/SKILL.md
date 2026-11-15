@@ -15,12 +15,13 @@ Each phase loads one reference. Don't read them all up front — load the one th
 
 | Phase   | Reference                         | Load When                                |
 | ------- | --------------------------------- | ---------------------------------------- |
-| READ    | —                                 | No reference needed (context assessment) |
+| READ    | `references/aesthetic.md`         | Choosing the feel — Grove aesthetic, Midnight Bloom, mobile, OG images |
 | SKETCH  | `references/layout-patterns.md`   | When designing page structure            |
 | COLOR   | `references/color-palette.md`     | When applying seasonal colors            |
 | COLOR   | `references/groveterm-system.md`  | When writing user-facing text            |
 | TEXTURE | `references/glass-components.md`  | When adding glassmorphism                |
 | TEXTURE | `references/nature-components.md` | When adding nature decorations           |
+| TEXTURE | `references/icons.md`             | Choosing or composing Lucide icons       |
 
 ---
 
@@ -36,7 +37,7 @@ Pick a season from the emotional tone, and a decoration level (`minimal` / `mode
 | Rest, stillness     | Winter   | Snow, frost, evergreens     |
 | Dreams, far-future  | Midnight | Purple glow, fireflies      |
 
-Decoration level follows the page's purpose: story pages get full atmosphere, data-dense admin screens get clean glass and no forest.
+Decoration level follows the page's purpose: story pages get full atmosphere, data-dense admin screens get clean glass and no forest. `references/aesthetic.md` has the full aesthetic, the Midnight Bloom palette, mobile considerations and OG image guidance.
 
 ```svelte
 import { season } from "$lib/stores/season";
@@ -83,7 +84,7 @@ import { Glass, GlassCard, GlassButton } from "@lattice/ui/ui";
 `references/nature-components.md` — component catalog, randomized forest algorithm, weather effects, seasonal birds, icon registry, mobile particle counts.
 
 - Trees never overlap — 8% minimum gap.
-- Lucide icons, never emojis.
+- Lucide icons, never emojis. `references/icons.md` for the rules and composition patterns.
 - Respect the responsive density table.
 
 **Output:** nature layered with correct z-index and density.
@@ -193,7 +194,6 @@ Iterate: capture → look → fix → capture. `dev-stack.sh seed fake 5` proves
 
 - **`/gathering-ui`** — pairs chameleon with deer-sense for accessible UI in one pass
 - **`/deer-sense`** — accessibility audit after adaptation
-- **`/grove-ui-design`** — broader UI patterns and component selection
 - **`/beaver-build`** — tests covering interactive UI after adaptation
 
 ---

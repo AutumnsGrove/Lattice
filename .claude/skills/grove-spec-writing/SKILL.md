@@ -409,7 +409,7 @@ A porch is where you sit and talk. You come up the steps, have a seat, and the g
 ### Before Writing a Spec
 
 1. **walking-through-the-grove** — If naming a new feature, complete the naming journey first
-2. **grove-ui-design** — If the spec involves UI, understand design patterns
+2. **chameleon-adapt** — If the spec involves UI, understand the design patterns
 
 ### While Writing
 

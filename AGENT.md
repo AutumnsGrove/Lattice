@@ -405,8 +405,7 @@ Grove has layered security animals — use the right one for the scope of work:
 | `spider-weave`       | Auth integration           | Implementing OAuth, sessions, RBAC, route protection |
 | `raccoon-audit`      | Secrets & vulnerability    | Finding exposed secrets, dead code, dependency vulns |
 | `turtle-harden`      | Defense-in-depth           | Layered hardening: validation, sanitization, CSP     |
-| `raven-investigate`  | Quick posture assessment   | Rapid audit of any codebase (parallel sub-agents)    |
-| `hawk-survey`        | Formal audit + remediation | Full STRIDE threat model across 14 domains           |
+| `hawk-survey`        | Formal audit + remediation | Full STRIDE threat model across 15 domains           |
 | `gathering-security` | End-to-end pipeline        | Spider → Raccoon → Turtle in coordinated sequence    |
 
 **Credential security:** All API keys route through Warden (see `ARCHITECTURE.md`). Use `gw warden agent enroll` to register workers, `gw secret` to manage the vault.

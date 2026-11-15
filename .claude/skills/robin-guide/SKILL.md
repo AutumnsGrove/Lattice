@@ -458,10 +458,6 @@ Use guiding metaphors:
 │     Review PR feedback with discerning judgment                    │
 │     Use: Responding to code review comments                        │
 │                                                                    │
-│  🐦‍⬛ raven-investigate                                             │
-│     Cross-codebase security detective with parallel sub-agents     │
-│     Use: Auditing unfamiliar codebases, security posture reports   │
-│                                                                    │
 │  🚙 safari-explore                                                 │
 │     Drive across the savanna, reviewing each stop systematically   │
 │     Use: Reviewing collections, systematic polishing               │
