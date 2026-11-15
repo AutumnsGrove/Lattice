@@ -34,7 +34,7 @@ Flags
       --device <name>   Device profile, e.g. "iPhone 13"
       --viewport <WxH>  e.g. 1440x900
       --windowed        Viewport shot instead of full page
-      --logs            Console output on screen (always written to .json)
+      --logs            Print console errors (always captured into .json)
       --wait <ms>       Settle time (default 500)
       --timeout <ms>    Navigation timeout (default 30000)
       --no-inject       Skip theme injection
@@ -168,7 +168,7 @@ function problems(result: CaptureResult): string[] {
 	return lines;
 }
 
-function report(result: CaptureResult, asJson: boolean): void {
+function report(result: CaptureResult, asJson: boolean, showLogs: boolean): void {
 	if (asJson) {
 		console.log(JSON.stringify(result, null, 2));
 		return;
@@ -178,7 +178,9 @@ function report(result: CaptureResult, asJson: boolean): void {
 		return;
 	}
 	console.log(`  ✓ ${result.path}  (${result.httpStatus}, ${result.durationMs}ms)`);
-	for (const line of problems(result)) console.log(`      ${line}`);
+	if (showLogs) {
+		for (const line of problems(result)) console.log(`      ${line}`);
+	}
 }
 
 async function main(): Promise<void> {
@@ -208,7 +210,7 @@ async function main(): Promise<void> {
 	try {
 		if (command === "capture") {
 			const result = await capture(browser, url, options);
-			report(result, asJson);
+			report(result, asJson, Boolean(options.logs));
 			if (result.error) process.exitCode = 1;
 			return;
 		}
@@ -222,7 +224,7 @@ async function main(): Promise<void> {
 		if (asJson) {
 			console.log(JSON.stringify({ url, results, failed }, null, 2));
 		} else {
-			for (const result of results) report(result, false);
+			for (const result of results) report(result, false, Boolean(options.logs));
 			console.log(`\n  ${results.length - failed}/${results.length} captured → ${options.outDir}`);
 		}
 		if (failed > 0) process.exitCode = 1;

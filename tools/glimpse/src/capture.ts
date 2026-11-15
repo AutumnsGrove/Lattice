@@ -76,7 +76,6 @@ export async function capture(
 		groveMode: opts.noInject ? null : opts.groveMode,
 		device: opts.device,
 		viewport: opts.viewport,
-		logs: opts.logs,
 	});
 
 	const result: CaptureResult = {

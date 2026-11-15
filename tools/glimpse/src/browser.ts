@@ -21,7 +21,6 @@ export interface ConsoleEntry {
 export interface OpenOptions extends InjectOptions {
 	device?: string | null;
 	viewport?: { width: number; height: number } | null;
-	logs?: boolean;
 }
 
 export interface OpenedPage {
@@ -135,7 +134,9 @@ export async function openPage(browser: Browser, opts: OpenOptions = {}): Promis
 	const page = await context.newPage();
 	await interceptFonts(page);
 
-	const consoleEntries = opts.logs === false ? [] : attachConsole(page);
+	// Always collected: the sidecar .json should never claim a page was silent
+	// just because --logs wasn't passed. The flag only decides what gets printed.
+	const consoleEntries = attachConsole(page);
 
 	return { context, page, console: consoleEntries };
 }
