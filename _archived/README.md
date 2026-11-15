@@ -12,12 +12,11 @@ Historical materials, deprecated code, and reference documents. Everything here 
 
 ## Code Archives
 
-| Project                  | Deprecated | Notes                                                           |
-| ------------------------ | ---------- | --------------------------------------------------------------- |
-| `example-site`           | 2025-12-31 | Example site code                                               |
-| `GroveDomainTool-python` | 2026-02-19 | Python LLM domain discovery tool, replaced by `services/forage` |
-| `logo-concepts`          | 2026-01-13 | Old logo iterations                                             |
-| `vineyard-standalone`    | 2026-01-04 | Standalone vineyard app, merged into `libs/vineyard`            |
+| Project               | Deprecated | Notes                                                        |
+| --------------------- | ---------- | ------------------------------------------------------------ |
+| `example-site`        | 2025-12-31 | Example site code                                            |
+| `logo-concepts`       | 2026-01-13 | Old logo iterations                                          |
+| `vineyard-standalone` | 2026-01-04 | Standalone vineyard app, merged into `libs/vineyard`          |
 
 ## Cleanup Policy
 
