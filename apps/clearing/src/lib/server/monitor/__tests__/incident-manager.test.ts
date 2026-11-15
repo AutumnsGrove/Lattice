@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
-import { processHealthCheckResult, type IncidentEnv } from "../incident-manager";
+import {
+	closeStaleIncidents,
+	processHealthCheckResult,
+	type IncidentEnv,
+} from "../incident-manager";
 import type { HealthCheckResult } from "../health-checks";
 
 // Mock utils
@@ -23,13 +27,13 @@ function createMockKV(): KVNamespace {
 	} as unknown as KVNamespace;
 }
 
-function createMockDB(): D1Database {
+function createMockDB(openIncidents: Array<{ id: string; title: string }> = []): D1Database {
 	const runResult = { success: true, meta: { changes: 1 } };
 	const mockStmt = {
 		bind: vi.fn().mockReturnThis(),
 		run: vi.fn().mockResolvedValue(runResult),
 		first: vi.fn().mockResolvedValue(null),
-		all: vi.fn().mockResolvedValue({ results: [] }),
+		all: vi.fn().mockResolvedValue({ results: openIncidents }),
 	};
 
 	return {
@@ -154,37 +158,34 @@ describe("processHealthCheckResult - State Machine", () => {
 		expect(savedState.consecutiveSuccesses).toBe(1);
 	});
 
-	it("should resolve incident after 2 consecutive successes", async () => {
-		// Prime with active incident and 1 success already
+	it("should resolve open incidents from D1 even when KV has forgotten them", async () => {
+		// The incident is open in D1 but KV has no activeIncidentId (expired,
+		// evicted, or corrupt). This is the case that used to leave incidents
+		// open for weeks: resolution was keyed entirely off the KV pointer.
+		env = {
+			DB: createMockDB([{ id: "incident-orphan", title: "Payments - Partial Outage" }]),
+			MONITOR_KV: createMockKV(),
+		};
+
 		(env.MONITOR_KV.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			consecutiveFailures: 0,
 			consecutiveSuccesses: 1,
-			activeIncidentId: "incident-123",
+			activeIncidentId: null,
 			lastStatus: "major_outage",
 			lastCheckAt: "2025-01-01T00:00:00.000Z",
 		});
 
-		// Mock the incident existence check (resolveIncident does a SELECT first).
-		// The first .first() call now belongs to recordCheckResult's daily-average
-		// lookup (defaults to null via the shared mock), so this is the second.
+		// The incident existence check inside resolveIncident must find it.
 		const mockStmt = (env.DB.prepare as Mock)();
-		mockStmt.first.mockResolvedValueOnce(null);
-		mockStmt.first.mockResolvedValueOnce({ id: "incident-123" });
+		mockStmt.first.mockResolvedValueOnce(null).mockResolvedValue({ id: "incident-orphan" });
 
 		await processHealthCheckResult(env, createHealthyResult());
 
 		// Should have called db.batch for resolution
 		expect(env.DB.batch).toHaveBeenCalled();
-
-		// Should have cleared activeIncidentId
-		const savedState = JSON.parse(
-			(env.MONITOR_KV.put as ReturnType<typeof vi.fn>).mock.calls[0][1],
-		);
-		expect(savedState.activeIncidentId).toBeNull();
 	});
 
-	it("should clear activeIncidentId even if incident was already deleted", async () => {
-		// Prime with active incident that no longer exists in D1
+	it("should not resolve anything when D1 has no open incident", async () => {
 		(env.MONITOR_KV.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
 			consecutiveFailures: 0,
 			consecutiveSuccesses: 1,
@@ -193,16 +194,12 @@ describe("processHealthCheckResult - State Machine", () => {
 			lastCheckAt: "2025-01-01T00:00:00.000Z",
 		});
 
-		// Mock: incident doesn't exist (first() returns null)
-		const mockStmt = (env.DB.prepare as Mock)();
-		mockStmt.first.mockResolvedValueOnce(null);
-
 		await processHealthCheckResult(env, createHealthyResult());
 
-		// Should NOT have called batch (incident doesn't exist)
+		// No open incident in D1 — nothing to resolve, and no phantom resolution.
 		expect(env.DB.batch).not.toHaveBeenCalled();
 
-		// But should still clear activeIncidentId from state
+		// The stale pointer is still cleared from local state.
 		const savedState = JSON.parse(
 			(env.MONITOR_KV.put as ReturnType<typeof vi.fn>).mock.calls[0][1],
 		);
@@ -224,15 +221,109 @@ describe("processHealthCheckResult - State Machine", () => {
 		expect(env.DB.batch).not.toHaveBeenCalled();
 	});
 
-	it("should NOT update component status on first unhealthy check (debounce)", async () => {
+	it("should NOT update current_status on first unhealthy check (debounce)", async () => {
 		await processHealthCheckResult(env, createUnhealthyResult());
 
-		// First failure should NOT update component status (needs 2 consecutive)
+		// First failure should NOT update current_status (needs 2 consecutive).
+		// The last_check_at stamp is written on every check, so filter it out.
 		const prepareCalls = (env.DB.prepare as ReturnType<typeof vi.fn>).mock.calls;
-		const statusUpdateCalls = prepareCalls.filter((call: string[]) =>
-			call[0].includes("UPDATE status_components"),
+		const statusUpdateCalls = prepareCalls.filter(
+			(call: string[]) =>
+				call[0].includes("UPDATE status_components") && call[0].includes("current_status"),
 		);
 		expect(statusUpdateCalls.length).toBe(0);
+	});
+
+	it("should stamp last_check_at on every check", async () => {
+		await processHealthCheckResult(env, createHealthyResult());
+
+		expect(env.DB.prepare).toHaveBeenCalledWith(expect.stringContaining("SET last_check_at"));
+	});
+
+	it("should still update status when recording history throws", async () => {
+		env = {
+			DB: createMockDB(),
+			MONITOR_KV: createMockKV(),
+		};
+
+		// Simulate a D1 writer hiccup on the daily-history insert only.
+		const db = env.DB as unknown as { prepare: Mock };
+		db.prepare.mockImplementation((sql: string) => {
+			const fails = sql.includes("INSERT INTO status_daily_history");
+			const stmt = {
+				bind: vi.fn().mockReturnThis(),
+				run: fails
+					? vi.fn().mockRejectedValue(new Error("D1_ERROR: write failed"))
+					: vi.fn().mockResolvedValue({ success: true, meta: { changes: 1 } }),
+				first: vi.fn().mockResolvedValue(null),
+				all: vi.fn().mockResolvedValue({ results: [] }),
+			};
+			return { ...stmt, bind: vi.fn().mockReturnValue(stmt) };
+		});
+
+		(env.MONITOR_KV.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+			consecutiveFailures: 1,
+			consecutiveSuccesses: 0,
+			activeIncidentId: null,
+			lastStatus: "operational",
+			lastCheckAt: "2025-01-01T00:00:00.000Z",
+		});
+
+		await expect(processHealthCheckResult(env, createUnhealthyResult())).resolves.not.toThrow();
+
+		// Status still moves: the history write must not gate the state machine.
+		expect(env.DB.prepare).toHaveBeenCalledWith(expect.stringContaining("current_status"));
+	});
+
+	it("should not open an incident for latency-only degradation", async () => {
+		(env.MONITOR_KV.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+			consecutiveFailures: 2,
+			consecutiveSuccesses: 0,
+			activeIncidentId: null,
+			lastStatus: "degraded",
+			lastCheckAt: "2025-01-01T00:00:00.000Z",
+		});
+
+		const slowButHealthy: HealthCheckResult = {
+			componentId: "comp_test",
+			componentName: "Test Service",
+			status: "degraded",
+			latencyMs: 6200,
+			httpStatus: 200,
+			error: null,
+			latencyDegraded: true,
+			timestamp: "2025-01-01T00:00:00.000Z",
+		};
+
+		await processHealthCheckResult(env, slowButHealthy);
+
+		// Degraded is recorded against the component, but no public incident.
+		expect(env.DB.batch).not.toHaveBeenCalled();
+		expect(env.DB.prepare).toHaveBeenCalledWith(expect.stringContaining("current_status"));
+	});
+
+	it("should not duplicate an incident that is already open in D1", async () => {
+		env = {
+			DB: createMockDB([{ id: "incident-existing", title: "Payments - Partial Outage" }]),
+			MONITOR_KV: createMockKV(),
+		};
+
+		(env.MONITOR_KV.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+			consecutiveFailures: 2,
+			consecutiveSuccesses: 0,
+			activeIncidentId: null,
+			lastStatus: "partial_outage",
+			lastCheckAt: "2025-01-01T00:00:00.000Z",
+		});
+
+		await processHealthCheckResult(env, createUnhealthyResult("comp_test", "partial_outage"));
+
+		expect(env.DB.batch).not.toHaveBeenCalled();
+
+		const savedState = JSON.parse(
+			(env.MONITOR_KV.put as ReturnType<typeof vi.fn>).mock.calls[0][1],
+		);
+		expect(savedState.activeIncidentId).toBe("incident-existing");
 	});
 
 	it("should update component status after 2 consecutive unhealthy checks", async () => {
@@ -376,5 +467,33 @@ describe("sendEmailAlert (via Zephyr)", () => {
 
 		// Should not throw even if email fails
 		await expect(processHealthCheckResult(env, createUnhealthyResult())).resolves.not.toThrow();
+	});
+});
+
+describe("closeStaleIncidents", () => {
+	it("closes incidents left open against a healthy component", async () => {
+		const env: IncidentEnv = {
+			DB: createMockDB([{ id: "incident-old", title: "Payments - Partial Outage" }]),
+			MONITOR_KV: createMockKV(),
+		};
+
+		// resolveIncident re-checks that the incident still exists before closing it.
+		const mockStmt = (env.DB.prepare as Mock)();
+		mockStmt.first.mockResolvedValue({ id: "incident-old" });
+
+		const closed = await closeStaleIncidents(env);
+
+		expect(closed).toBe(1);
+		expect(env.DB.batch).toHaveBeenCalled();
+	});
+
+	it("closes nothing when no incident is stale", async () => {
+		const env: IncidentEnv = {
+			DB: createMockDB([]),
+			MONITOR_KV: createMockKV(),
+		};
+
+		expect(await closeStaleIncidents(env)).toBe(0);
+		expect(env.DB.batch).not.toHaveBeenCalled();
 	});
 });

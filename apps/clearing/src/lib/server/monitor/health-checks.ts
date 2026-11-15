@@ -18,6 +18,15 @@ export interface HealthCheckResult {
 	latencyMs: number;
 	httpStatus: number | null;
 	error: string | null;
+	/**
+	 * True when the only thing wrong was response time.
+	 *
+	 * A slow CF-to-CF round trip is a performance note, not an incident: the
+	 * service answered 200 with a valid body. Latency-only results may colour a
+	 * day and show the component as degraded, but they must never open a public
+	 * incident or page anyone.
+	 */
+	latencyDegraded?: boolean;
 	timestamp: string;
 }
 
@@ -229,6 +238,7 @@ function classifyByLatency(
 		latencyMs,
 		httpStatus,
 		error: null,
+		latencyDegraded: status !== ComponentStatus.OPERATIONAL,
 		timestamp,
 	};
 }

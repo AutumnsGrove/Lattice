@@ -97,6 +97,12 @@ export const INCIDENT_THRESHOLDS = {
 export const REQUEST_TIMEOUT = 10000;
 
 /**
+ * How old the newest check may be before the page treats the monitor itself
+ * as down. Crons run every 5 minutes; three missed runs is more than jitter.
+ */
+export const STALE_AFTER_MINUTES = 15;
+
+/**
  * Email sender for alert notifications
  */
 export const EMAIL_FROM_ADDRESS = "status@grove.place";

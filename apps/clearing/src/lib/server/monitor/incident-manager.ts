@@ -187,7 +187,11 @@ async function createIncident(
  * Resolve an existing incident in D1.
  * Returns false if the incident no longer exists (e.g., manually deleted).
  */
-async function resolveIncident(db: D1Database, incidentId: string): Promise<boolean> {
+async function resolveIncident(
+	db: D1Database,
+	incidentId: string,
+	message = "Service has recovered and is operating normally.",
+): Promise<boolean> {
 	// Verify incident exists before resolving
 	const existing = await db
 		.prepare(`SELECT id FROM status_incidents WHERE id = ? AND status != 'resolved'`)
@@ -215,9 +219,9 @@ async function resolveIncident(db: D1Database, incidentId: string): Promise<bool
 		db
 			.prepare(
 				`INSERT INTO status_updates (id, incident_id, status, message, created_at)
-         VALUES (?, ?, 'resolved', 'Service has recovered and is operating normally.', ?)`,
+         VALUES (?, ?, 'resolved', ?, ?)`,
 			)
-			.bind(updateId, incidentId, now),
+			.bind(updateId, incidentId, message, now),
 	]);
 
 	return true;
@@ -243,6 +247,48 @@ async function updateComponentStatus(
 }
 
 /**
+ * Stamp the time of this check. Written on every check, changed or not, so the
+ * page can tell "operational as of two minutes ago" apart from "last seen
+ * operational three days ago".
+ */
+async function touchComponentCheck(
+	db: D1Database,
+	componentId: string,
+	checkedAt: string,
+): Promise<void> {
+	await db
+		.prepare(`UPDATE status_components SET last_check_at = ? WHERE id = ?`)
+		.bind(checkedAt, componentId)
+		.run();
+}
+
+/**
+ * Every incident still open for a component, straight from D1.
+ *
+ * The old code trusted a single `activeIncidentId` in KV, with a 7-day TTL.
+ * Lose that key — expiry, eviction, a corrupt write — and the incident became
+ * unreachable and unclosable forever, which is how a single flaky check in
+ * November was still "ongoing" weeks later. D1 is the record of truth.
+ */
+async function findOpenIncidents(
+	db: D1Database,
+	componentId: string,
+): Promise<Array<{ id: string; title: string }>> {
+	const result = await db
+		.prepare(
+			`SELECT i.id, i.title
+			 FROM status_incidents i
+			 INNER JOIN status_incident_components ic ON i.id = ic.incident_id
+			 WHERE ic.component_id = ? AND i.resolved_at IS NULL
+			 ORDER BY i.started_at ASC`,
+		)
+		.bind(componentId)
+		.all<{ id: string; title: string }>();
+
+	return result.results ?? [];
+}
+
+/**
  * Process a health check result and manage incidents accordingly
  */
 export async function processHealthCheckResult(
@@ -252,11 +298,34 @@ export async function processHealthCheckResult(
 	// Record this check's raw outcome toward today's average, independent of
 	// the debounced incident/current-status logic below — a single blip should
 	// barely move the day's status, not freeze it at "worst status seen".
-	await recordCheckResult(env, result.componentId, result.status);
+	//
+	// History is a record, not a gate: if this write fails, the component must
+	// still get its status and incident handling. Before, a D1 hiccup here threw
+	// out of the whole function and silently froze a component's status forever.
+	try {
+		await recordCheckResult(env, result.componentId, result.status);
+	} catch (err) {
+		console.error(
+			`[Clearing Monitor] Failed to record check history for ${result.componentName}:`,
+			err instanceof Error ? err.message : String(err),
+		);
+	}
 
 	const state = await getComponentState(env.MONITOR_KV, result.componentId);
 	const isHealthy = result.status === "operational";
 	const isMaintenance = result.status === "maintenance";
+
+	// The timestamp is bookkeeping, not a gate: if the column isn't there yet
+	// (migration 0012 lands separately from this deploy), a missing stamp must
+	// not stop the component's status and incidents from being handled.
+	try {
+		await touchComponentCheck(env.DB, result.componentId, result.timestamp);
+	} catch (err) {
+		console.error(
+			`[Clearing Monitor] Failed to stamp last_check_at for ${result.componentName}:`,
+			err instanceof Error ? err.message : String(err),
+		);
+	}
 
 	// Maintenance is intentional — just update status, no incidents
 	if (isMaintenance) {
@@ -277,34 +346,39 @@ export async function processHealthCheckResult(
 		if (state.consecutiveSuccesses >= INCIDENT_THRESHOLDS.SUCCESSES_TO_RESOLVE) {
 			await updateComponentStatus(env.DB, result.componentId, "operational");
 
-			// Also resolve any active incident
-			if (state.activeIncidentId) {
+			// Resolve whatever is open for this component, not just the one
+			// incident KV happens to remember.
+			const openIncidents = await findOpenIncidents(env.DB, result.componentId);
+			let resolvedCount = 0;
+
+			for (const incident of openIncidents) {
 				console.log(
-					`[Clearing Monitor] Resolving incident ${state.activeIncidentId} for ${result.componentName}`,
+					`[Clearing Monitor] Resolving incident ${incident.id} (${incident.title}) for ${result.componentName}`,
 				);
 
-				const resolved = await resolveIncident(env.DB, state.activeIncidentId);
-
-				// Only send email if the incident was actually resolved
-				if (resolved) {
-					void sendEmailAlert(
-						env,
-						`[Grove] Resolved: ${result.componentName} back to operational`,
-						`Service: ${result.componentName}\n` +
-							`Status: Operational\n` +
-							`Time: ${result.timestamp}\n` +
-							`Latency: ${result.latencyMs}ms\n\n` +
-							`The service has recovered and is operating normally.`,
-					).catch((err) =>
-						console.error("[Clearing Monitor] Recovery email failed:", err, {
-							component: result.componentName,
-							status: "operational",
-						}),
-					);
-				}
-
-				state.activeIncidentId = null;
+				const resolved = await resolveIncident(env.DB, incident.id);
+				if (resolved) resolvedCount++;
 			}
+
+			if (resolvedCount > 0) {
+				void sendEmailAlert(
+					env,
+					`[Grove] Resolved: ${result.componentName} back to operational`,
+					`Service: ${result.componentName}\n` +
+						`Status: Operational\n` +
+						`Time: ${result.timestamp}\n` +
+						`Latency: ${result.latencyMs}ms\n` +
+						`Incidents resolved: ${resolvedCount}\n\n` +
+						`The service has recovered and is operating normally.`,
+				).catch((err) =>
+					console.error("[Clearing Monitor] Recovery email failed:", err, {
+						component: result.componentName,
+						status: "operational",
+					}),
+				);
+			}
+
+			state.activeIncidentId = null;
 		}
 	} else {
 		// Reset success counter, increment failure counter
@@ -318,39 +392,50 @@ export async function processHealthCheckResult(
 		}
 
 		// Check if we should create a new incident
-		if (
-			!state.activeIncidentId &&
-			state.consecutiveFailures >= INCIDENT_THRESHOLDS.FAILURES_TO_CREATE
-		) {
-			console.log(
-				`[Clearing Monitor] Creating incident for ${result.componentName} after ${state.consecutiveFailures} failures`,
-			);
+		if (state.consecutiveFailures >= INCIDENT_THRESHOLDS.FAILURES_TO_CREATE) {
+			const openIncidents = await findOpenIncidents(env.DB, result.componentId);
 
-			const incidentId = await createIncident(
-				env.DB,
-				result.componentId,
-				result.componentName,
-				result,
-			);
+			if (openIncidents.length > 0) {
+				// Already tracked. Re-adopt it in KV so local state stops drifting.
+				state.activeIncidentId = openIncidents[0].id;
+			} else if (result.latencyDegraded) {
+				// Slow but answering 200 with a valid body. That colours the day and
+				// shows the component as degraded; it is not a public incident and it
+				// is not worth waking anyone for.
+				console.log(
+					`[Clearing Monitor] ${result.componentName} slow (${result.latencyMs}ms) — recorded as degraded, no incident`,
+				);
+			} else {
+				console.log(
+					`[Clearing Monitor] Creating incident for ${result.componentName} after ${state.consecutiveFailures} failures`,
+				);
 
-			// Fire-and-forget incident email
-			void sendEmailAlert(
-				env,
-				`[Grove] Incident: ${result.componentName} - ${result.status.replace("_", " ")}`,
-				`Service: ${result.componentName}\n` +
-					`Status: ${result.status.replace("_", " ")}\n` +
-					`Time: ${result.timestamp}\n` +
-					`Latency: ${result.latencyMs}ms\n` +
-					`Error: ${result.error || "N/A"}\n\n` +
-					`Automated monitoring has detected an issue and created an incident.`,
-			).catch((err) =>
-				console.error("[Clearing Monitor] Incident email failed:", err, {
-					component: result.componentName,
-					status: result.status,
-				}),
-			);
+				const incidentId = await createIncident(
+					env.DB,
+					result.componentId,
+					result.componentName,
+					result,
+				);
 
-			state.activeIncidentId = incidentId;
+				// Fire-and-forget incident email
+				void sendEmailAlert(
+					env,
+					`[Grove] Incident: ${result.componentName} - ${result.status.replace("_", " ")}`,
+					`Service: ${result.componentName}\n` +
+						`Status: ${result.status.replace("_", " ")}\n` +
+						`Time: ${result.timestamp}\n` +
+						`Latency: ${result.latencyMs}ms\n` +
+						`Error: ${result.error || "N/A"}\n\n` +
+						`Automated monitoring has detected an issue and created an incident.`,
+				).catch((err) =>
+					console.error("[Clearing Monitor] Incident email failed:", err, {
+						component: result.componentName,
+						status: result.status,
+					}),
+				);
+
+				state.activeIncidentId = incidentId;
+			}
 		}
 	}
 
@@ -358,6 +443,50 @@ export async function processHealthCheckResult(
 	state.lastStatus = result.status;
 	state.lastCheckAt = result.timestamp;
 	await saveComponentState(env.MONITOR_KV, result.componentId, state);
+}
+
+/**
+ * Close incidents that have outlived their component's trouble.
+ *
+ * A backstop, not the main path — recovery closes incidents within a couple of
+ * checks. This catches the residue: an incident left open for a component that
+ * has been operational for longer than `maxAgeHours`, usually because the
+ * monitor or its KV state was lost mid-incident.
+ */
+export async function closeStaleIncidents(env: IncidentEnv, maxAgeHours = 24): Promise<number> {
+	const cutoff = new Date(Date.now() - maxAgeHours * 60 * 60 * 1000).toISOString();
+
+	const result = await env.DB.prepare(
+		`SELECT i.id, i.title, c.name AS component_name, i.started_at
+		 FROM status_incidents i
+		 INNER JOIN status_incident_components ic ON i.id = ic.incident_id
+		 INNER JOIN status_components c ON c.id = ic.component_id
+		 WHERE i.resolved_at IS NULL
+		   AND i.started_at < ?
+		   AND c.current_status = 'operational'`,
+	)
+		.bind(cutoff)
+		.all<{ id: string; title: string; component_name: string; started_at: string }>();
+
+	const stale = result.results ?? [];
+	let closed = 0;
+
+	for (const incident of stale) {
+		const message =
+			`${incident.component_name} has been reporting operational since this incident began, ` +
+			`so automated monitoring is closing it. If that doesn't match what you saw, ` +
+			`reopen it with what actually broke.`;
+
+		const resolved = await resolveIncident(env.DB, incident.id, message);
+		if (resolved) {
+			closed++;
+			console.log(
+				`[Clearing Monitor] Closed stale incident ${incident.id} (${incident.title}), open since ${incident.started_at}`,
+			);
+		}
+	}
+
+	return closed;
 }
 
 /**
