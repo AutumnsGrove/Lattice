@@ -26,7 +26,7 @@ export type GraftId = "pricing" | "upgrades" | "nav" | "footer" | "hero" | (stri
  * Product identifiers in the Grove ecosystem.
  * Used to configure grafts for different Grove properties.
  */
-export type ProductId = "grove" | "scout" | "daily-clearing" | (string & {});
+export type ProductId = "grove" | "scout" | (string & {});
 
 // =============================================================================
 // REGISTRY TYPES

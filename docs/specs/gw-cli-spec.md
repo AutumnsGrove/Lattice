@@ -1542,10 +1542,6 @@ id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 name = "groveauth"
 id = "45eae4c7-8ae7-4078-9218-8e1677a4360f"
 
-[databases.clearing]
-name = "daily-clearing-db"
-id = "1fb94ac6-53c6-49d6-9388-a6f585f86196"
-
 [databases.amber]
 name = "amber"
 id = "f688021b-a986-495a-94bb-352354768a22"
