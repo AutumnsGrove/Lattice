@@ -104,6 +104,9 @@ class MockAnalyserNode {
 	}
 }
 
+// rAF ids queued by the level meter, drained in afterEach
+const pendingFrames = new Set<number>();
+
 // Install mocks
 beforeEach(() => {
 	vi.stubGlobal("MediaRecorder", MockMediaRecorder);
@@ -117,20 +120,32 @@ beforeEach(() => {
 		},
 	});
 
-	// Mock requestAnimationFrame for audio level monitoring
+	// Mock requestAnimationFrame for audio level monitoring. The ids are tracked so
+	// afterEach can drain them: the level meter re-schedules itself forever, and a
+	// frame left queued past teardown runs against an unstubbed global, which is
+	// what made this suite flake in CI.
 	vi.stubGlobal(
 		"requestAnimationFrame",
 		vi.fn((cb) => {
-			return setTimeout(cb, 16) as unknown as number;
+			const id = setTimeout(cb, 16) as unknown as number;
+			pendingFrames.add(id);
+			return id;
 		}),
 	);
 	vi.stubGlobal(
 		"cancelAnimationFrame",
-		vi.fn((id) => clearTimeout(id)),
+		vi.fn((id) => {
+			clearTimeout(id);
+			pendingFrames.delete(id);
+		}),
 	);
 });
 
 afterEach(() => {
+	// Drain before unstubbing, or the pending frame fires against a global that no
+	// longer exists.
+	for (const id of pendingFrames) clearTimeout(id);
+	pendingFrames.clear();
 	vi.unstubAllGlobals();
 });
 
