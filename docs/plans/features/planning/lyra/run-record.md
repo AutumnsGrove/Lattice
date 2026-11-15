@@ -55,5 +55,6 @@ Some models return their reasoning text along with the answer. It is stored when
 ## Not discussed yet
 
 - **How much of a long run's record is sent to the model** when the record gets too large for the model's memory (trimming or summarizing). Separate topic.
-- **How long a record is kept**, and who can delete one.
+- **How long a record is kept.** Settled in decision 51: records belong to the tenant.
+- **A proposal entry** and a decision entry (decision 50). The record already allows new entry kinds.
 - **The viewer.** Built later, on top.

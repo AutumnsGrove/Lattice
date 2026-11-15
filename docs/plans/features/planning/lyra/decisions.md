@@ -162,17 +162,25 @@ Other Grove workers reach Lyra through a service binding. Anything from outside 
 ### 48. The stateless calls stay out of Lyra
 Decision models, embeddings, speech, and transcription are single calls, not runs. They stay in Lumen, where they live or are planned, and Lyra does not expose them. This keeps the core small, and they can be added later without changing anything else. Decided 2026-11-15.
 
+### 49. The timeline is the first job, and HawkAgent is second
+Keeps decision 4. HawkAgent (#1684) layer 2 follows once the core works. Its needs shape the design now: a session that lives for days (decision 44 covers it, with the host doing the scheduling), results that a person dispositions later, and records that go with the tenant. Decided 2026-11-15. See `consumers.md`.
+
+### 50. The core has a proposal type
+A run can end with a proposal: a typed result with its evidence and a review state (open, accepted, or rejected). This is for work where a person decides later whether to act, which is how HawkAgent and several other planned consumers work. It is different from an approval, which pauses a run before an action (decisions 34 to 37). This was chosen over keeping proposals in the app and having the core know only a structured final result. Decided 2026-11-15. Open details (fields, how a decision is made, and how it reaches the app) are in `consumers.md`.
+
+### 51. Records belong to the tenant
+A run's record is deleted when its tenant is removed, and otherwise kept until the app prunes it. The core does not prune on its own. Anything that must outlive the tenant is written by the app into its own table, like HawkAgent's verdict. Decided 2026-11-15. This answers record retention.
+
 ## Not discussed yet
 
 These came out of the research and are waiting for their turn, one at a time:
 
-- **Record retention.** How long a record is kept, and who can delete one.
-- **The Cloudflare adapter's foundation.** Whether it builds on Cloudflare's agent tooling or on plain Durable Objects. A smaller question once decision 12 is settled.
+- **The Cloudflare adapter's foundation.** Whether it builds on `GroveAgent` (which wraps the Cloudflare Agents SDK and gives storage, scheduling, queueing, and live state) or on plain Durable Objects. Left open on purpose, to be decided when the repository is scoped. See `consumers.md`.
 - **Protocol details.** The exact shape of frames and codes, written when the core is built. See `protocol.md`.
 - **The shell tool.** Its command policy (which commands are allowed), the default deadline before a command moves to the background, and what happens to a running command if the host is lost (see decisions 16 and 38 and `approvals.md`).
 - **Who may approve** once more than one person uses Lyra, and approving with edited arguments (see `approvals.md`).
 - **Lumen changes to scope in detail:** the message shape, the finish reason, the `agent` task, and the model flags (see `lumen-changes.md`).
 - **How vines attach to a line.** The timeline page only supports vines under a heading, so it needs a change. Two approaches are written up in `timeline-first-job.md`.
-- **HawkAgent (#1684) and the other possible consumers** (see `consumers.md`).
+- **Proposal details.** What fields a proposal has, how a person accepts or rejects it, and how that decision reaches the app (see decision 50).
 - **The first slice.** What the smallest useful version contains, and the build order.
 - **The new repository.** Name, layout, release process, and test setup.

@@ -72,4 +72,5 @@ To keep a Nova client working, a parked run emits `run_end` with the reason `par
 ## Open questions
 
 - The exact fields of `start`, and how a task declares its inputs.
+- A command for deciding a proposal (accept or reject, with an optional note), and an event when one is decided (decision 50).
 - The one-time codes on approval requests.
