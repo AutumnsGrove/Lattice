@@ -201,6 +201,25 @@ The Lyra repo holds the core, the in-memory and Cloudflare adapters, the OpenAI-
 ### 61. The timeline runs on Lyra from both entry points together
 The nightly worker and the Arbor generate and backfill routes both call one shared function, which runs the Lyra task. They switch over together, not one first. Decided 2026-11-15. This also means the GitHub fetching, which is duplicated between the two today, is written once.
 
+## Proposed, waiting for a yes
+
+These are from `engineering-practices.md`, where each is explained.
+
+### 62. Test-first, with happy, sad, and bad paths and the matrix rule
+Every behavior gets a test for the expected flow, for expected failures, and for malformed or hostile input. A failure-mode catalog is worked through before code is written, and a script fails the build if a spec row has no test.
+
+### 63. The scenario files run in-process first and over the real protocol later
+So end-to-end tests exist from the first commit. The layers are unit, component, scenario, cassette, workerd, and live.
+
+### 64. Property tests, coverage-guided fuzzing, and a randomly misbehaving fake model
+Property tests wherever a rule can be stated. Fuzzing for the code that takes untrusted bytes (the stream parser, frame reader, tool arguments, record loader). The tooling is partly unconfirmed (see the doc).
+
+### 65. Local testing, with OpenCode Go as the default live provider
+The real runtime locally, a small dev client, a live suite that defaults to OpenCode Go for bulk testing and uses OpenRouter for production fidelity, a budget cap on every live run, and cassettes recorded from live runs and replayed free in CI.
+
+### 66. The coding practices and one gate
+Strict TypeScript, validated boundaries, errors as data, web-standard APIs only in the core, import and size checks, and `pnpm ci` as the definition of done.
+
 ## Not discussed yet
 
 These came out of the research and are waiting for their turn, one at a time:

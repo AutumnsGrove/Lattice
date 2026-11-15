@@ -30,6 +30,7 @@ Slowly, and scoped before anything is built. Every decision gets written down he
 | [`context-size.md`](context-size.md) | What happens when a run no longer fits in the model's memory, and how Lyra's compactor differs from a coding agent's. |
 | [`protocol.md`](protocol.md) | How anything outside talks to Lyra: Nova's frames, what Lyra keeps and adds, and how durable approvals fit. |
 | [`consumers.md`](consumers.md) | Who would use Lyra, from the live issues, and what HawkAgent (#1684) adds to the design. Corrects an earlier reliance on the out-of-date GroveAgent plan. |
+| [`engineering-practices.md`](engineering-practices.md) | How Lyra is built and tested: test-first, happy, sad and bad paths, fuzzing, end-to-end from the start, local testing with OpenRouter and OpenCode Go, and the definition of done. |
 | [`first-slice.md`](first-slice.md) | The smallest version that runs the timeline end to end, the build order, and two checkpoints. |
 | [`timeline-first-job.md`](timeline-first-job.md) | The first job Lyra will do: the development timeline summary. What is wrong today and the tools that fix it. |
 | [`lumen-changes.md`](lumen-changes.md) | What Lumen has to change before Lyra can run a loop through it. |
