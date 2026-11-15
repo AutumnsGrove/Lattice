@@ -219,24 +219,39 @@ Strict TypeScript, validated boundaries, errors as data, web-standard APIs only 
 ### 67. Two mock Lumens, kept honest by contract tests
 Both options are built. **The real Lumen over a fake model:** the actual Lumen worker routes run in-process and only the network call underneath is faked, with the scripted fake model speaking OpenRouter's shape. **A standalone fake Lumen:** a small server that imitates Lumen's HTTP shape, fast and independent. One shared set of contract tests runs against both, and any difference between them fails the build, so the standalone fake cannot drift unnoticed. Both live in Lattice, next to the Lumen adapter (decision 60). The scenario files run through them as a third level. Decided 2026-11-15, with the extra work accepted. See `engineering-practices.md`.
 
+### 69. One package with subpath exports
+The core, `memory`, `cloudflare`, `openai`, and `testkit` are entry points of one package, each with its own allowed imports, enforced by a check. The testkit is public so Lattice and other projects can use it. A part can become its own package later if it needs a heavy dependency. Decided 2026-11-15. See `repository.md`.
+
+### 71. Releases publish to npm from the start
+Semver at 0.x with breaking changes allowed in minors, one CI workflow running `pnpm ci`, and a tag that gates and publishes to npm as public with built output. Publishing starts early, so the release process is exercised early. Decided 2026-11-15. The changelog and the release notes are covered by proposals 74 and 75.
+
+### 72. The Cloudflare adapter is built on plain Durable Objects
+Behind Lyra's slots, using SQLite storage, an alarm, and hibernation, which are stable core features. Cloudflare's agent tooling can be used by a consumer, and a separate adapter for it can come later. Decided 2026-11-15. This settles the question left open in decision 12.
+
+### 73. Lyra is MIT licensed
+Like Nova and Pi. Decided 2026-11-15. Lattice's own packages stay AGPL-3.0.
+
 ## Proposed, waiting for a yes
 
 These are from `repository.md`, where each is explained.
 
 ### 68. Name and home
-`AutumnsGrove/lyra`, public, with the package `@autumnsgrove/lyra` (free on npm).
-
-### 69. One package with subpath exports
-The core, `memory`, `cloudflare`, `openai`, and `testkit` as entry points of one package, each with its own allowed imports, enforced by a check. The testkit is public so Lattice and other projects can use it.
+`AutumnsGrove/lyra`, public, with the package `@autumnsgrove/lyra` (free on npm). No objection has been raised, but it has not been confirmed.
 
 ### 70. The repository layout
 A pnpm workspace with `packages/lyra`, `scenarios`, `examples/workers-minimal`, `scripts`, `docs`, and the CI workflows.
 
-### 71. The release process
-Semver at 0.x with breaking changes allowed in minors, one CI workflow running `pnpm ci`, a tag that gates and publishes to npm as public with built output, and a hand-written changelog.
+### 74. Release notes are written by an agent in CI, adapted from Nova
+On a tag push, after the gate, a script runs the Pi agent and writes the GitHub release body from the changelog section and the commit log, as equal evidence. It never blocks a release: any failure falls back to the changelog section, and then to no body. A manual dry run shows the body in the job summary without publishing. It is a TypeScript script, since Lyra has no Go, tested first with a fake agent. This writes the release body only. The changelog file itself is still edited in a release PR.
 
-### 72. The Cloudflare foundation is plain Durable Objects
-Behind Lyra's slots, using SQLite storage, an alarm, and hibernation, which are stable core features. Cloudflare's agent tooling can be used by a consumer, and a separate adapter for it can come later.
+### 75. The release procedure follows Nova's
+A version is a git tag on `main`. A release is a changelog edit, a PR titled `release: vX.Y.Z`, and a tag, in that order, with upgrade notes for anything that changes behavior for an existing caller. The tag runs the gate, builds, publishes to npm, and writes the release body.
+
+### 76. The release-notes agent is read-only
+It gets `read`, `grep`, `find`, and `ls`, and no `bash`, unlike Nova's. The agent reads commit text and a changelog as evidence, and with a key in its environment, a shell is more access than summarizing needs.
+
+### 77. Pull requests are reviewed by the same Pi agent
+Install `pi-review` (your extension, which provisions the credential and identity and commits the workflow) so PRs to Lyra get an agent review on OpenCode Go. Optional, and not needed for the first slice.
 
 ## Not discussed yet
 

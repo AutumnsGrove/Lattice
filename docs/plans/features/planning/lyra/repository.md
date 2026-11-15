@@ -6,7 +6,7 @@ category: features
 
 # The new repository
 
-Last updated: 2026-11-15. Facts are from reading and from a few registry checks. The choices are proposed and wait for a yes, except where marked.
+Last updated: 2026-11-15. Facts are from reading and from a few registry checks. Decisions 69, 71, 72, and 73 are decided. Decisions 68 and 70 and the release-notes proposals (74 to 77) wait for a yes.
 
 ## Facts
 
@@ -21,7 +21,7 @@ Last updated: 2026-11-15. Facts are from reading and from a few registry checks.
 ### 68. Name and home
 The repository is `AutumnsGrove/lyra`, public, and the package is `@autumnsgrove/lyra`. This follows decision 1. The Lattice repository is already public, so the references to Lattice in these docs are not a new exposure.
 
-### 69. One package with subpath exports
+### 69. One package with subpath exports (decided)
 A pnpm workspace, with one published package and several entry points:
 
 | Entry point | What it holds | May import |
@@ -55,19 +55,49 @@ lyra/
   .github/workflows/   ci.yml, release.yml
 ```
 
-### 71. Release process
+### 71. Release process (decided: publish to npm from the start)
 - **Versioning:** semver, 0.x until version one is complete and used, with breaking changes allowed in minor versions and written in the changelog.
 - **CI:** one workflow runs `pnpm ci` (decision 66) on every push and pull request, with limited parallelism so it does not saturate a small runner.
 - **Release:** a version tag runs the same gate, builds, and publishes to npm as public. The changelog is written by hand. Whether to publish with npm provenance is to confirm.
 - **The package ships built output,** not source files, unlike the packages in Lattice.
 - **Node and tools:** pnpm for dependencies, Vitest for tests. Pi requires Node 22.19 or newer, which is a reasonable floor to confirm. I would not bring in bun, since the tests that matter run in workerd through Node.
 
-### 72. The Cloudflare foundation
+### 72. The Cloudflare foundation (decided: plain Durable Objects)
 The question left open since decision 12: build the Cloudflare adapter on Cloudflare's agent tooling, or on plain Durable Objects behind Lyra's slots?
 
 The research (notes in `research/cloudflare-notes.md`) found that Cloudflare's `agents` package now ships a harness and a durable-execution layer. It also found them marked beta or experimental, with fast-changing versions, and that Cloudflare's own guidance points to starting with a hand-rolled Durable Object, an alarm, and SQLite checkpoints. Lyra's Cloudflare adapter needs only three stable pieces: SQLite storage, an alarm, and hibernation. Those are core Durable Object features, and they are what the `evictDurableObject` test helpers exercise.
 
 **Proposal: plain Durable Objects.** It keeps Lyra's slots as the only contract, avoids depending on a fast-moving beta, and the test tooling for it is documented. Cloudflare's tooling can still be used by a consumer, and a separate adapter for it can be added later if it proves worth it. The cost is writing the small amount of scheduling and storage code ourselves.
+
+### 73. License (decided: MIT)
+Like Nova and Pi. Lattice's own packages stay AGPL-3.0-only.
+
+## Release notes and review by an agent in CI (proposed)
+
+### What Nova does
+
+Read from `.github/workflows/release.yml`, `scripts/release-notes/`, and `AGENTS.md` in the Nova repository.
+
+- **A release is a changelog edit, a PR, and a tag.** A person or coding agent renames `[Unreleased]` to the new version in `CHANGELOG.md`, adds upgrade notes for anything that changes behavior for an existing caller, opens a PR titled `release: vX.Y.Z`, and after it merges tags the merge commit.
+- **The agent writes the release body, not the changelog.** On the tag push, the release job installs the Pi CLI at a pinned version, builds a small script, and runs it over the range between the previous tag and this one. The agent gets the changelog section and the commit log as equal evidence, because the changelog has the upgrade notes and issue numbers, and the commits have the why. It writes a short, user-facing summary: upgrade notes first, then added, changed, and fixed.
+- **It is pinned and bounded.** A fixed provider (OpenCode Go), a fixed model, high thinking, read-only inspection tools plus `bash`, a 12 minute limit inside a 15 minute step limit, and a 16 KiB cap on the body.
+- **It can never block a release.** Every step before publishing is allowed to fail. If the agent fails, times out, or returns something unusable, the changelog section becomes the body, and if there is no section either, the release publishes with no body. The exit status says which body you got.
+- **There is a dry run.** A manual workflow run does everything except publishing, and shows the body in the job summary and as an artifact, so the path is exercised before a tag exists.
+- **The prompt has hard rules:** never invent a number, version, file, or change; omit anything the evidence does not ground; keep every upgrade note; at most 20 bullets; no mention of the model or the process.
+- **PR review is separate.** `pi-review` is an extension in your `pi-extensions` repo. It provisions a credential and an identity, commits a workflow generated from `.github/pi-review.json`, and runs the same agent on pull requests.
+
+### How it would be adapted for Lyra
+
+- **A TypeScript script** in `scripts/release-notes`, since Lyra has no Go. Same behavior: the range, the two kinds of evidence, the fallback chain, the exit codes, the size cap, the dry run. Nova's prompt is reused with its wording changed for a library that people install from npm.
+- **Written test-first** like everything else (decision 62): a fake agent executable stands in for Pi, so the fallback paths (agent crashes, times out, returns an empty or oversized body, no changelog section) are all tested without a model.
+- **Same provider and key** as Nova's, OpenCode Go, so it draws on the allowance you already have. The key lives in the repository's secrets.
+- **The release procedure carries over** (decision 75), with npm publishing added to the tag job, after the gate and before the release is created.
+- **Read-only tools (proposal 76).** Nova's agent also gets `bash`. The workflow gives the step a key in its environment, and the agent reads commit messages and changelog text that are evidence, not instructions. A shell is more reach than summarizing needs. Dropping it costs the agent the ability to run commands to check a claim, which for release notes is rarely needed.
+- **PR review (proposal 77)** is one command with your existing extension, optional, and not needed until there is code to review.
+
+### What this does not do
+
+It does not write `CHANGELOG.md`. In Nova the changelog is edited by hand, or by a coding agent following the written procedure. If you want the agent to draft that too (for example, proposing the changelog entry on each merged PR), that is a different and larger piece, and it is not in Nova to copy.
 
 ## Moving the plan over
 
@@ -79,6 +109,5 @@ The research (notes in `research/cloudflare-notes.md`) found that Cloudflare's `
 
 ## Open
 
-- The decisions above (68 to 72).
-- Whether to publish to npm from the start, or consume the package by link until version one is complete.
-- Who reviews changes. Nova has a review workflow that uses Pi. Whether Lyra gets one is not decided.
+- Decisions 68 and 70, and the release-notes proposals 74 to 77.
+- Whether the agent should also draft changelog entries (see above).
