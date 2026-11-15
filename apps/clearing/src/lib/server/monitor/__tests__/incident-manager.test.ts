@@ -247,6 +247,33 @@ describe("processHealthCheckResult - State Machine", () => {
 		expect(statusUpdateCalls.length).toBe(0);
 	});
 
+	it("should keep updating status when incident bookkeeping fails", async () => {
+		// Simulates a worker deployed before migration 0012: the incident queries
+		// reference a column that doesn't exist yet. Status and counters must
+		// still move, or the monitor looks dead until the migration runs.
+		const db = env.DB as unknown as { prepare: Mock };
+		const realPrepare = db.prepare.getMockImplementation()!;
+		db.prepare.mockImplementation((sql: string) => {
+			if (sql.includes("auto_resolve")) {
+				throw new Error("D1_ERROR: no such column: auto_resolve");
+			}
+			return realPrepare(sql);
+		});
+
+		(env.MONITOR_KV.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+			consecutiveFailures: 2,
+			consecutiveSuccesses: 0,
+			activeIncidentId: null,
+			lastStatus: "operational",
+			lastCheckAt: "2025-01-01T00:00:00.000Z",
+		});
+
+		await expect(processHealthCheckResult(env, createUnhealthyResult())).resolves.not.toThrow();
+
+		expect(env.DB.prepare).toHaveBeenCalledWith(expect.stringContaining("current_status"));
+		expect(env.MONITOR_KV.put).toHaveBeenCalled();
+	});
+
 	it("should stamp last_check_at on every check", async () => {
 		await processHealthCheckResult(env, createHealthyResult());
 

@@ -350,39 +350,49 @@ export async function processHealthCheckResult(
 		if (state.consecutiveSuccesses >= INCIDENT_THRESHOLDS.SUCCESSES_TO_RESOLVE) {
 			await updateComponentStatus(env.DB, result.componentId, "operational");
 
-			// Resolve whatever is open for this component, not just the one
-			// incident KV happens to remember.
-			const openIncidents = await findOpenIncidents(env.DB, result.componentId);
-			let resolvedCount = 0;
+			try {
+				// Resolve whatever is open for this component, not just the one
+				// incident KV happens to remember.
+				const openIncidents = await findOpenIncidents(env.DB, result.componentId);
+				let resolvedCount = 0;
 
-			for (const incident of openIncidents) {
-				console.log(
-					`[Clearing Monitor] Resolving incident ${incident.id} (${incident.title}) for ${result.componentName}`,
+				for (const incident of openIncidents) {
+					console.log(
+						`[Clearing Monitor] Resolving incident ${incident.id} (${incident.title}) for ${result.componentName}`,
+					);
+
+					const resolved = await resolveIncident(env.DB, incident.id);
+					if (resolved) resolvedCount++;
+				}
+
+				if (resolvedCount > 0) {
+					void sendEmailAlert(
+						env,
+						`[Grove] Resolved: ${result.componentName} back to operational`,
+						`Service: ${result.componentName}\n` +
+							`Status: Operational\n` +
+							`Time: ${result.timestamp}\n` +
+							`Latency: ${result.latencyMs}ms\n` +
+							`Incidents resolved: ${resolvedCount}\n\n` +
+							`The service has recovered and is operating normally.`,
+					).catch((err) =>
+						console.error("[Clearing Monitor] Recovery email failed:", err, {
+							component: result.componentName,
+							status: "operational",
+						}),
+					);
+				}
+
+				state.activeIncidentId = null;
+			} catch (err) {
+				// The status is already written; do not let incident bookkeeping
+				// (or a schema that hasn't caught up) take the debounce counters
+				// down with it.
+				console.error(
+					`[Clearing Monitor] Incident resolution failed for ${result.componentName}:`,
+					err instanceof Error ? err.message : String(err),
 				);
-
-				const resolved = await resolveIncident(env.DB, incident.id);
-				if (resolved) resolvedCount++;
 			}
-
-			if (resolvedCount > 0) {
-				void sendEmailAlert(
-					env,
-					`[Grove] Resolved: ${result.componentName} back to operational`,
-					`Service: ${result.componentName}\n` +
-						`Status: Operational\n` +
-						`Time: ${result.timestamp}\n` +
-						`Latency: ${result.latencyMs}ms\n` +
-						`Incidents resolved: ${resolvedCount}\n\n` +
-						`The service has recovered and is operating normally.`,
-				).catch((err) =>
-					console.error("[Clearing Monitor] Recovery email failed:", err, {
-						component: result.componentName,
-						status: "operational",
-					}),
-				);
-			}
-
-			state.activeIncidentId = null;
 		}
 	} else {
 		// Reset success counter, increment failure counter
@@ -397,48 +407,58 @@ export async function processHealthCheckResult(
 
 		// Check if we should create a new incident
 		if (state.consecutiveFailures >= INCIDENT_THRESHOLDS.FAILURES_TO_CREATE) {
-			const openIncidents = await findOpenIncidents(env.DB, result.componentId);
+			try {
+				const openIncidents = await findOpenIncidents(env.DB, result.componentId);
 
-			if (openIncidents.length > 0) {
-				// Already tracked. Re-adopt it in KV so local state stops drifting.
-				state.activeIncidentId = openIncidents[0].id;
-			} else if (result.latencyDegraded) {
-				// Slow but answering 200 with a valid body. That colours the day and
-				// shows the component as degraded; it is not a public incident and it
-				// is not worth waking anyone for.
-				console.log(
-					`[Clearing Monitor] ${result.componentName} slow (${result.latencyMs}ms) — recorded as degraded, no incident`,
-				);
-			} else {
-				console.log(
-					`[Clearing Monitor] Creating incident for ${result.componentName} after ${state.consecutiveFailures} failures`,
-				);
+				if (openIncidents.length > 0) {
+					// Already tracked. Re-adopt it in KV so local state stops drifting.
+					state.activeIncidentId = openIncidents[0].id;
+				} else if (result.latencyDegraded) {
+					// Slow but answering 200 with a valid body. That colours the day and
+					// shows the component as degraded; it is not a public incident and it
+					// is not worth waking anyone for.
+					console.log(
+						`[Clearing Monitor] ${result.componentName} slow (${result.latencyMs}ms) — recorded as degraded, no incident`,
+					);
+				} else {
+					console.log(
+						`[Clearing Monitor] Creating incident for ${result.componentName} after ${state.consecutiveFailures} failures`,
+					);
 
-				const incidentId = await createIncident(
-					env.DB,
-					result.componentId,
-					result.componentName,
-					result,
-				);
+					const incidentId = await createIncident(
+						env.DB,
+						result.componentId,
+						result.componentName,
+						result,
+					);
 
-				// Fire-and-forget incident email
-				void sendEmailAlert(
-					env,
-					`[Grove] Incident: ${result.componentName} - ${result.status.replace("_", " ")}`,
-					`Service: ${result.componentName}\n` +
-						`Status: ${result.status.replace("_", " ")}\n` +
-						`Time: ${result.timestamp}\n` +
-						`Latency: ${result.latencyMs}ms\n` +
-						`Error: ${result.error || "N/A"}\n\n` +
-						`Automated monitoring has detected an issue and created an incident.`,
-				).catch((err) =>
-					console.error("[Clearing Monitor] Incident email failed:", err, {
-						component: result.componentName,
-						status: result.status,
-					}),
-				);
+					// Fire-and-forget incident email
+					void sendEmailAlert(
+						env,
+						`[Grove] Incident: ${result.componentName} - ${result.status.replace("_", " ")}`,
+						`Service: ${result.componentName}\n` +
+							`Status: ${result.status.replace("_", " ")}\n` +
+							`Time: ${result.timestamp}\n` +
+							`Latency: ${result.latencyMs}ms\n` +
+							`Error: ${result.error || "N/A"}\n\n` +
+							`Automated monitoring has detected an issue and created an incident.`,
+					).catch((err) =>
+						console.error("[Clearing Monitor] Incident email failed:", err, {
+							component: result.componentName,
+							status: result.status,
+						}),
+					);
 
-				state.activeIncidentId = incidentId;
+					state.activeIncidentId = incidentId;
+				}
+			} catch (err) {
+				// Same reasoning as recovery: the status is written, and a failed
+				// incident insert (or a schema that hasn't caught up) must not stop
+				// the counters from advancing.
+				console.error(
+					`[Clearing Monitor] Incident handling failed for ${result.componentName}:`,
+					err instanceof Error ? err.message : String(err),
+				);
 			}
 		}
 	}
