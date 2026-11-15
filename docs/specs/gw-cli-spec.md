@@ -459,51 +459,58 @@ gw health --json
 
 ### Tenant Commands (`gw tenant`)
 
-These commands wrap the logic from the `grove-account-deletion` skill and make it CLI-accessible.
+Inspection and the suspension lever. Built for abuse response: when a spam tenant
+is publishing, you need to see what it is and take it offline in seconds, without
+writing SQL from memory.
 
 ```bash
-# Look up tenant info
-gw tenant autumn                      # By subdomain
-gw tenant --email user@example.com    # By email
-gw tenant --id abc-123                # By ID
+# List tenants, newest first. Active only by default.
+gw tenant list
+# > SUBDOMAIN    EMAIL                    PLAN      POSTS  SIGNED UP  LAST PUBLISH
+# > ────────────────────────────────────────────────────────────────────────────
+# > tianjidu     saliowawa@gmail.com      wanderer  1      20d ago    20d ago
+# > autumn       autumnbrown23@pm.me      evergreen 13     10mo ago   4mo ago
 
-# Get tenant stats
-gw tenant stats autumn
-# > Tenant: autumn (autumn.grove.place)
-# > Plan: oak
-# > Created: 2025-11-24
-# > ───────────────────────
-# > Posts: 47
-# > Pages: 12
-# > Media: 234 files (1.2 GB)
-# > Sessions: 3 active
-# > ───────────────────────
-# > Storage used: 1.45 GB of 20 GB
+gw tenant list --inactive     # suspended tenants only
+gw tenant list --all          # everyone, including suspended
+gw tenant list --free         # wanderer tier only
+gw tenant list --limit 100
 
-# Create a new tenant (interactive wizard)
-gw tenant create
-# > Subdomain: newblog
-# > Display name: My New Blog
-# > Email: user@example.com
-# > Plan [seedling/sapling/oak/evergreen]: sapling
-# > ✓ Created tenant newblog (id: xxx-xxx)
+# One tenant, everything we know
+gw tenant show autumn
+gw tenant show --email user@example.com
 
-# Delete a tenant (DANGEROUS - requires --write --force)
-gw tenant delete --write --force autumn
-# > ⚠️  This will DELETE all data for tenant 'autumn':
-# >    - 47 posts
-# >    - 12 pages
-# >    - 234 media files
-# >    - 3 sessions
-# >    - All settings, products, orders, subscriptions
-# >
-# > Type 'DELETE autumn' to confirm: DELETE autumn
-# > ✓ Tenant deleted
+# Take a site down (reversible — content is untouched)
+gw tenant suspend tianjidu --write --reason "link farm"
 
-# Preview deletion (no --write, shows what would be deleted)
-gw tenant delete autumn
-# > Would delete: 47 posts, 12 pages, 234 media files...
+# Put it back
+gw tenant resume tianjidu --write
 ```
+
+`show` reports the D1 row, post counts and publish dates, and the Better Auth
+identity behind the tenant — including `banned` and `ban_reason`, which is the
+flag nothing else in the codebase currently writes.
+
+`suspend` and `resume` set `tenants.active`, which every tenant lookup already
+filters on (`WHERE subdomain = ? AND active = 1`). **Both probe the site
+afterwards and print the status code they got**, because a suspended tenant can
+keep serving from the `TenantDO` cache until it is flushed (see #1677). A 200
+after a suspend means: flush the DO, don't assume it worked.
+
+`--reason` is recorded in `audit_log` (category `admin`, action `tenant_suspend`
+or `tenant_resume`, actor `gw`). An empty reason is recorded as
+`(no reason given)` rather than omitted.
+
+Safety: `list` and `show` are READ. `suspend` and `resume` are WRITE.
+
+**Not implemented, deliberately:**
+
+- `gw tenant delete` — permanent removal needs one registry of tenant-carrying
+  tables and a reversible pre-deletion snapshot. That is `removeTenant()` in
+  #1596 §B, and the CLI becomes a thin wrapper over it rather than a second
+  implementation of the sweep.
+- `gw tenant create` — signup goes through Plant, which owns onboarding,
+  payment and email verification. There is no reason for a second path in.
 
 ### Email Test Commands (`gw email`)
 
