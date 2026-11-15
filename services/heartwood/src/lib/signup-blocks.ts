@@ -29,6 +29,43 @@ export interface SignupIdentityCheck {
 }
 
 /**
+ * Paths where a blocked identity must be refused before Better Auth runs.
+ *
+ * Only the code-send path is here: OAuth has no email at request time (the
+ * `user.create.before` hook covers it), and blocking sign-in would also lock
+ * out accounts that existed before the block landed.
+ */
+export const SIGNUP_BLOCKED_PATHS: ReadonlySet<string> = new Set([
+	"/email-otp/send-verification-otp",
+]);
+
+/**
+ * Pull the email out of a Better Auth hook context.
+ *
+ * `ctx.body` is usually already parsed by the time before-hooks run; the request
+ * fallback covers paths where it is not. The body is cloned so a caller further
+ * down the chain can still read it.
+ */
+export async function emailFromAuthContext(ctx: {
+	body?: unknown;
+	request?: Request;
+}): Promise<string | null> {
+	const body = ctx.body as { email?: unknown } | undefined;
+	if (body && typeof body.email === "string") return body.email;
+
+	if (ctx.request) {
+		try {
+			const parsed = (await ctx.request.clone().json()) as { email?: unknown };
+			if (typeof parsed?.email === "string") return parsed.email;
+		} catch {
+			return null;
+		}
+	}
+
+	return null;
+}
+
+/**
  * Is this address on the deny list?
  *
  * Checks the normalized identity (lowercased, `+alias` removed) so one rule on
