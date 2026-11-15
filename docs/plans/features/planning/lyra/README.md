@@ -31,6 +31,7 @@ Slowly, and scoped before anything is built. Every decision gets written down he
 | [`protocol.md`](protocol.md) | How anything outside talks to Lyra: Nova's frames, what Lyra keeps and adds, and how durable approvals fit. |
 | [`consumers.md`](consumers.md) | Who would use Lyra, from the live issues, and what HawkAgent (#1684) adds to the design. Corrects an earlier reliance on the out-of-date GroveAgent plan. |
 | [`engineering-practices.md`](engineering-practices.md) | How Lyra is built and tested: test-first, happy, sad and bad paths, fuzzing, end-to-end from the start, local testing with OpenRouter and OpenCode Go, and the definition of done. |
+| [`shell-tool.md`](shell-tool.md) | The optional shell: the `bash` tool, background commands, losing the host, command policy, and the credential scrub. A later slice. |
 | [`first-slice.md`](first-slice.md) | The smallest version that runs the timeline end to end, the build order, and two checkpoints. |
 | [`repository.md`](repository.md) | The new repository: name, layout, license, release process, the Cloudflare foundation question, and how the plan moves over. |
 | [`timeline-first-job.md`](timeline-first-job.md) | The first job Lyra will do: the development timeline summary. What is wrong today and the tools that fix it. |

@@ -249,11 +249,30 @@ I had recommended read-only tools (`read`, `grep`, `find`, `ls`), because the st
 ### 77. Pull requests are reviewed by the same Pi agent, set up as PR #1
 Autumn will install `pi-review` from the Pi harness at the very start of development, and it will be PR #1 in the repository. It provisions the credential and identity and commits a workflow generated from `.github/pi-review.json`. Decided 2026-11-15. Note for the first steps: the repository needs an initial commit (license, README, docs) so PR #1 has something to branch from. In Nova, the review workflow and the release step share one secret (`PI_REVIEW_API_KEY`, mapped to `OPENCODE_API_KEY`), so the credential the extension provisions is also what the release step needs.
 
+## Proposed, waiting for a yes
+
+These are from `shell-tool.md`, where each is explained.
+
+### 78. The `bash` tool and its defaults
+One tool with `command`, an optional `timeout`, and an optional `run_in_background`. A 120 second deadline at which the command moves to the background, a 600 second ceiling for waiting, an output tail capped at 51,200 bytes, null stdin, a fixed working directory, and the whole process group killed when a foreground call ends. All configuration, with these as defaults.
+
+### 79. Background jobs
+A `jobs` tool to list, read, wait for, and kill. Each job notifies once on exit. Finished jobs are remembered for the life of the run, with a capped log tail of 4 MiB.
+
+### 80. If the host is lost, a running command is not reattached in version one
+On resume the tool call has no result and `bash` is not safe to repeat, so the model is told the outcome is unknown. A background job from before the loss is reported as lost.
+
+### 81. Command policy: strict by default, open by recipe
+Strict is Nova's rules. Open is for a host declared disposable, and allows commands with a deny list for the destructive ones. A recipe picks one.
+
+### 82. The credential scrub
+Lyra's own secrets are always removed from the command's environment. A recipe can hide more names, and cannot turn off the scrub of Lyra's own secrets.
+
 ## Not discussed yet
 
 These came out of the research and are waiting for their turn, one at a time:
 
 - **Protocol details.** The exact shape of frames and codes, written when the core is built. See `protocol.md`.
-- **The shell tool.** Its command policy (which commands are allowed), the default deadline before a command moves to the background, and what happens to a running command if the host is lost (see decisions 16 and 38 and `approvals.md`).
+- **The shell tool's remaining details.** The exact deny list for open mode, whether a recipe names allow patterns or a named set, and the interactive 'allow for this session' answer. See `shell-tool.md`.
 - **Who may approve** once more than one person uses Lyra, and approving with edited arguments (see `approvals.md`).
 - **Proposal wire details.** The exact command and event names for deciding a proposal (see `protocol.md`).
