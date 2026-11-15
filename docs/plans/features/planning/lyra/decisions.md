@@ -231,27 +231,23 @@ Behind Lyra's slots, using SQLite storage, an alarm, and hibernation, which are 
 ### 73. Lyra is MIT licensed
 Like Nova and Pi. Decided 2026-11-15. Lattice's own packages stay AGPL-3.0.
 
-## Proposed, waiting for a yes
-
-These are from `repository.md`, where each is explained.
-
 ### 68. Name and home
-`AutumnsGrove/lyra`, public, with the package `@autumnsgrove/lyra` (free on npm). No objection has been raised, but it has not been confirmed.
+`AutumnsGrove/lyra`, public, with the package `@autumnsgrove/lyra` (free on npm). Decided 2026-11-15. See `repository.md`.
 
 ### 70. The repository layout
-A pnpm workspace with `packages/lyra`, `scenarios`, `examples/workers-minimal`, `scripts`, `docs`, and the CI workflows.
+A pnpm workspace with `packages/lyra`, `scenarios`, `examples/workers-minimal`, `scripts`, `docs`, and the CI workflows. Decided 2026-11-15.
 
 ### 74. Release notes are written by an agent in CI, adapted from Nova
-On a tag push, after the gate, a script runs the Pi agent and writes the GitHub release body from the changelog section and the commit log, as equal evidence. It never blocks a release: any failure falls back to the changelog section, and then to no body. A manual dry run shows the body in the job summary without publishing. It is a TypeScript script, since Lyra has no Go, tested first with a fake agent. This writes the release body only. The changelog file itself is still edited in a release PR.
+On a tag push, after the gate, a script runs the Pi agent and writes the GitHub release body from the changelog section and the commit log, as equal evidence. It never blocks a release: any failure falls back to the changelog section, and then to no body. A manual dry run shows the body in the job summary without publishing. It is a TypeScript script, since Lyra has no Go, written test-first with a fake agent. It writes the release body only. `CHANGELOG.md` is still edited by hand, or by a coding agent, in a release PR, as in Nova. Decided 2026-11-15.
 
 ### 75. The release procedure follows Nova's
-A version is a git tag on `main`. A release is a changelog edit, a PR titled `release: vX.Y.Z`, and a tag, in that order, with upgrade notes for anything that changes behavior for an existing caller. The tag runs the gate, builds, publishes to npm, and writes the release body.
+A version is a git tag on `main`. A release is a changelog edit, a PR titled `release: vX.Y.Z`, and a tag, in that order, with upgrade notes for anything that changes behavior for an existing caller. The tag runs the gate, builds, publishes to npm, and writes the release body. Decided 2026-11-15.
 
-### 76. The release-notes agent is read-only
-It gets `read`, `grep`, `find`, and `ls`, and no `bash`, unlike Nova's. The agent reads commit text and a changelog as evidence, and with a key in its environment, a shell is more access than summarizing needs.
+### 76. The release-notes agent keeps `bash`, like Nova's
+I had recommended read-only tools (`read`, `grep`, `find`, `ls`), because the step has an API key in its environment and reads commit messages as evidence. Autumn chose to keep `bash`, as Nova does, so the agent can check a claim against the tree. Decided 2026-11-15. Cheap mitigations that keep the choice: only the owner can push tags; the key is given to the notes step and no other; the runner is thrown away after the job; and the key is one with a spend limit, which OpenCode Go's allowance already provides. This risk is accepted, not removed.
 
-### 77. Pull requests are reviewed by the same Pi agent
-Install `pi-review` (your extension, which provisions the credential and identity and commits the workflow) so PRs to Lyra get an agent review on OpenCode Go. Optional, and not needed for the first slice.
+### 77. Pull requests are reviewed by the same Pi agent, set up as PR #1
+Autumn will install `pi-review` from the Pi harness at the very start of development, and it will be PR #1 in the repository. It provisions the credential and identity and commits a workflow generated from `.github/pi-review.json`. Decided 2026-11-15. Note for the first steps: the repository needs an initial commit (license, README, docs) so PR #1 has something to branch from. In Nova, the review workflow and the release step share one secret (`PI_REVIEW_API_KEY`, mapped to `OPENCODE_API_KEY`), so the credential the extension provisions is also what the release step needs.
 
 ## Not discussed yet
 

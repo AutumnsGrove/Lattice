@@ -6,7 +6,7 @@ category: features
 
 # The new repository
 
-Last updated: 2026-11-15. Facts are from reading and from a few registry checks. Decisions 69, 71, 72, and 73 are decided. Decisions 68 and 70 and the release-notes proposals (74 to 77) wait for a yes.
+Last updated: 2026-11-15. Facts are from reading and from a few registry checks. Everything here is decided (decisions 68 to 77).
 
 ## Facts
 
@@ -16,9 +16,9 @@ Last updated: 2026-11-15. Facts are from reading and from a few registry checks.
 - **Releases today.** Lattice has deploy workflows per service, a `release-tools.yml` for the `gw` and `gf` binaries, and `gw` handles npm publishing (`AGENT.md`). Nova has `ci.yml`, `release.yml`, and a review workflow. I found no npm publish workflow in Lattice to copy.
 - **Pi's and Nova's rule.** Both keep the core free of the front end and check it with a script. Nova also enforces size budgets and has an `examples/` consumer built in CI so the library cannot rot as embeddable.
 
-## Proposed
+## Decisions
 
-### 68. Name and home
+### 68. Name and home (decided)
 The repository is `AutumnsGrove/lyra`, public, and the package is `@autumnsgrove/lyra`. This follows decision 1. The Lattice repository is already public, so the references to Lattice in these docs are not a new exposure.
 
 ### 69. One package with subpath exports (decided)
@@ -36,7 +36,7 @@ Each entry point has its own allowed imports, enforced by the import check, so t
 
 The testkit is public on purpose. Lattice uses it for the mock Lumens (decision 67), and your other TypeScript projects can use it for their own tests.
 
-### 70. Layout
+### 70. Layout (decided)
 
 ```
 lyra/
@@ -72,7 +72,7 @@ The research (notes in `research/cloudflare-notes.md`) found that Cloudflare's `
 ### 73. License (decided: MIT)
 Like Nova and Pi. Lattice's own packages stay AGPL-3.0-only.
 
-## Release notes and review by an agent in CI (proposed)
+## Release notes and review by an agent in CI (decided: 74 to 77)
 
 ### What Nova does
 
@@ -92,8 +92,8 @@ Read from `.github/workflows/release.yml`, `scripts/release-notes/`, and `AGENTS
 - **Written test-first** like everything else (decision 62): a fake agent executable stands in for Pi, so the fallback paths (agent crashes, times out, returns an empty or oversized body, no changelog section) are all tested without a model.
 - **Same provider and key** as Nova's, OpenCode Go, so it draws on the allowance you already have. The key lives in the repository's secrets.
 - **The release procedure carries over** (decision 75), with npm publishing added to the tag job, after the gate and before the release is created.
-- **Read-only tools (proposal 76).** Nova's agent also gets `bash`. The workflow gives the step a key in its environment, and the agent reads commit messages and changelog text that are evidence, not instructions. A shell is more reach than summarizing needs. Dropping it costs the agent the ability to run commands to check a claim, which for release notes is rarely needed.
-- **PR review (proposal 77)** is one command with your existing extension, optional, and not needed until there is code to review.
+- **Tools (decision 76): `bash` stays,** as in Nova. I had recommended read-only, because the step has a key in its environment and reads commit and changelog text as evidence. The choice was to keep the shell. The cheap mitigations: only the owner pushes tags, the key goes to the notes step and no other, the runner is discarded after the job, and the key is subject to the allowance. The risk is accepted, not removed.
+- **PR review (decision 77)** is installed by you from the Pi harness, as PR #1. It needs an initial commit to branch from, and it provisions the same credential the release step uses.
 
 ### What this does not do
 
@@ -105,9 +105,8 @@ It does not write `CHANGELOG.md`. In Nova the changelog is edited by hand, or by
 2. Keep #1605 open in Lattice as the tracking issue. Update it with the new name, a link to the repository, and the corrections found in the research (the protocol frame families, and that Nova has no budgets).
 3. File the Lumen changes (L1 to L6, decision 57) as issues in Lattice. They block the first job, and they belong in the repository that owns Lumen.
 4. The vine placement issue (#1687) already exists.
-5. Set up the CI gate and the check scripts before any feature code, so step 1 begins with `pnpm ci` already passing on an empty core.
+5. The repository starts with an initial commit (license, README, the docs). PR #1 is the `pi-review` install, done by you from the Pi harness (decision 77). The CI gate and the check scripts follow as the next changes, before any feature code, so step 1 begins with `pnpm ci` already passing on an empty core.
 
 ## Open
 
-- Decisions 68 and 70, and the release-notes proposals 74 to 77.
-- Whether the agent should also draft changelog entries (see above).
+- Whether the agent should ever also draft changelog entries. Decided no for now (decision 74).
