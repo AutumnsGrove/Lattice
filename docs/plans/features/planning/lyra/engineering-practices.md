@@ -6,7 +6,7 @@ category: features
 
 # Engineering practices and testing
 
-Last updated: 2026-11-15. Everything here is proposed and waits for a yes. It is built from Nova's `docs/TESTING.md` (read in full), a few web searches (sources at the end), and your instructions: test-driven, happy, sad and bad paths, good fuzzing, end-to-end tests from the start, good practices from the first commit, and a way to test locally before shipping, with OpenRouter and OpenCode Go.
+Last updated: 2026-11-15. Decided (decisions 62 to 66). It is built from Nova's `docs/TESTING.md` (read in full), a few web searches (sources at the end), and your instructions: test-driven, happy, sad and bad paths, good fuzzing, end-to-end tests from the start, good practices from the first commit, and a way to test locally before shipping, with OpenRouter and OpenCode Go.
 
 Nothing here has been run. Tool claims marked "to confirm" must be checked when the repository is set up.
 
@@ -230,6 +230,7 @@ pnpm ci
   importcheck  # the import rules above, and no node:* in the core
   matrixcheck  # every spec row has a test, every cited ID exists
   budget       # package size and bundle size within budget
+  coverage     # 85% floor on the core (decision 66), a smoke alarm
 ```
 
 The tests for the change were written first and watched failing. A fast loop (`pnpm test`) runs while working. It is not the gate.
@@ -250,13 +251,13 @@ Every step in `first-slice.md` already ends with a "done when" test. This docume
 | 8 WebSocket | The same scenarios again, over WebSocket |
 | 9 Timeline | A live comparison against the current output, and a scenario per catalog case that applies |
 
-## Proposed decisions
+## Decisions
 
 - **62.** Test-first, with a happy, sad, and bad test for every behavior, a failure-mode catalog, and the matrix rule from the first commit.
 - **63.** The test layers above, with the same scenario files run in-process first and over the real protocol later, so end-to-end tests exist from the first commit.
 - **64.** Property tests everywhere a rule can be stated, coverage-guided fuzzing for code that takes untrusted bytes, and a randomly misbehaving fake model.
 - **65.** Local testing: the real runtime locally, a small dev client, a live suite that defaults to OpenCode Go for bulk testing with OpenRouter for production fidelity, a budget cap on every live run, and cassettes recorded from live runs and replayed free in CI.
-- **66.** The coding practices and the `pnpm ci` gate above as the definition of done.
+- **66.** The coding practices and the `pnpm ci` gate above as the definition of done, with an 85% coverage floor on the core.
 
 ## Sources
 
