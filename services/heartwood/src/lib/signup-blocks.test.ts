@@ -25,7 +25,8 @@ vi.mock("@autumnsgrove/lattice/errors", async () => {
 	return { ...actual, logGroveError: (...args: unknown[]) => logGroveError(...args) };
 });
 
-const { checkSignupIdentity } = await import("./signup-blocks");
+const { checkSignupIdentity, emailFromAuthContext, SIGNUP_BLOCKED_PATHS } =
+	await import("./signup-blocks");
 
 // Heartwood binds groveauth as DB and grove-engine-db as ENGINE_DB. The deny
 // list lives in the engine database, so the two bindings are deliberately made
@@ -115,5 +116,42 @@ describe("checkSignupIdentity", () => {
 
 		// The caller decides what a user sees; the block is for the server log.
 		expect(Object.keys(result).sort()).toEqual(["block", "blocked"]);
+	});
+});
+
+describe("emailFromAuthContext", () => {
+	it("reads the email from an already-parsed body", async () => {
+		const email = await emailFromAuthContext({ body: { email: "a@example.com" } });
+		expect(email).toBe("a@example.com");
+	});
+
+	it("falls back to cloning the request body", async () => {
+		const request = new Request("https://x/y", {
+			method: "POST",
+			body: JSON.stringify({ email: "b@example.com" }),
+			headers: { "Content-Type": "application/json" },
+		});
+
+		const email = await emailFromAuthContext({ request });
+
+		expect(email).toBe("b@example.com");
+		// The original body must still be readable by Better Auth afterwards.
+		expect(await request.json()).toEqual({ email: "b@example.com" });
+	});
+
+	it("returns null when there is no email to be found", async () => {
+		expect(await emailFromAuthContext({})).toBeNull();
+		expect(await emailFromAuthContext({ body: {} })).toBeNull();
+		expect(await emailFromAuthContext({ body: { email: 42 } })).toBeNull();
+	});
+});
+
+describe("SIGNUP_BLOCKED_PATHS", () => {
+	it("guards the code-send path", () => {
+		expect(SIGNUP_BLOCKED_PATHS.has("/email-otp/send-verification-otp")).toBe(true);
+	});
+
+	it("does not guard sign-in, so an existing account is not locked out", () => {
+		expect(SIGNUP_BLOCKED_PATHS.has("/sign-in/email-otp")).toBe(false);
 	});
 });

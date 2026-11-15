@@ -15,6 +15,7 @@ import { betterAuth } from "better-auth";
 import { withCloudflare } from "better-auth-cloudflare";
 import type { CloudflareGeolocation } from "better-auth-cloudflare";
 import { APIError } from "better-auth/api";
+import { createAuthMiddleware } from "better-auth/api";
 import { twoFactor, emailOTP } from "better-auth/plugins";
 import { drizzle } from "drizzle-orm/d1";
 import { logGroveError } from "@autumnsgrove/lattice/errors";
@@ -23,6 +24,7 @@ import type { Env } from "../types.js";
 import { schema } from "../db/auth.schema.js";
 import { getRequestContext, bridgeSessionToSessionDO } from "../lib/sessionBridge.js";
 import { checkSignupIdentity } from "../lib/signup-blocks.js";
+import { SIGNUP_BLOCKED_PATHS, emailFromAuthContext } from "../lib/signup-blocks.js";
 import { sendLoginCodeEmail } from "../services/email.js";
 import {
 	EMAIL_OTP_LENGTH,
@@ -312,16 +314,11 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 				allowedAttempts: EMAIL_OTP_ALLOWED_ATTEMPTS,
 				storeOTP: "hashed",
 				sendVerificationOTP: async ({ email, otp, type }) => {
-					// Deny list first: a blocked identity should cost no email send, no
-					// ba_verification row, and no Zephyr quota. The check runs before the
-					// local-dev log below so a blocked address never leaks a code into the
-					// terminal either.
-					const denied = await checkSignupIdentity(env, email);
-					if (denied.blocked) {
-						throw new APIError("FORBIDDEN", {
-							message: HW_SVC_ERRORS.SIGNUP_IDENTITY_BLOCKED.userMessage,
-						});
-					}
+					// NOTE: a throw in here does NOT reach the client. Better Auth wraps this
+					// call in runInBackgroundOrAwait(), which swallows the error and still
+					// answers {"success":true} — so the deny list is enforced in the
+					// `hooks.before` block below, where a thrown APIError propagates as 403.
+					// The `user.create.before` hook is the second gate, for OAuth.
 
 					// Local dev: Zephyr may have no Resend key, so surface the code
 					// in the Heartwood terminal. Never reachable in production —
@@ -346,6 +343,26 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 				},
 			}),
 		],
+
+		hooks: {
+			before: createAuthMiddleware(async (ctx) => {
+				// Refuse a blocked identity before any code is generated or sent, with a
+				// 403 the caller can actually see. Errors thrown from the plugin's own
+				// sendVerificationOTP are swallowed by Better Auth, so this is the only
+				// place a rejection reaches the client.
+				if (!SIGNUP_BLOCKED_PATHS.has(ctx.path)) return;
+
+				const email = await emailFromAuthContext(ctx);
+				if (!email) return;
+
+				const denied = await checkSignupIdentity(env, email);
+				if (denied.blocked) {
+					throw new APIError("FORBIDDEN", {
+						message: HW_SVC_ERRORS.SIGNUP_IDENTITY_BLOCKED.userMessage,
+					});
+				}
+			}),
+		},
 
 		databaseHooks: {
 			user: {
