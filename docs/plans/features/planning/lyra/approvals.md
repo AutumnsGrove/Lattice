@@ -32,7 +32,6 @@ This builds on what is already decided: a run can be parked with a reason (decis
 
 ## Not discussed yet
 
-- **Who may approve** once more than one person uses Lyra. For now, the owner of the run.
-- **Approve with edits** (changing the arguments before approving). Skipped for now.
+- **Who may approve** and **approve with edits.** Proposed in decision 88: the session's owner, and no edited approvals in version one.
 - **How the indicator works in the viewer.** Built later, on top of the list of pending requests.
-- **The shell tool's exact command policy.**
+- **The shell tool's command policy.** Decided in decision 81, with details in `shell-tool.md`.

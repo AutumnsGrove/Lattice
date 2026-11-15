@@ -281,9 +281,12 @@ Events that come from a record entry carry its position as `seq`, so a reconnect
 ### 87. Access: a trusted caller names the tenant, a token carries it, and another tenant's session is `not_found`
 Extends decision 47. Every session stores its tenant id and every command is checked against it.
 
+### 88. Who may approve: the session's owner, with no edited approvals in version one
+A request can be answered by a caller whose tenant owns the session. Approving with edited arguments is not in version one: a deny with a note lets the model try again with the change you wanted. Token scopes (who may approve what) arrive when someone other than the owner uses Lyra.
+
+### 89. The shell's remaining details
+A recipe names allow patterns directly in version one, and named sets (for example `tests`, `git-read`) can come later. There is no "allow for this session" answer in version one, because it only matters in interactive use and Reverie's flow is preview then confirm. The deny list for open mode is written when the shell is built.
+
 ## Not discussed yet
 
-These came out of the research and are waiting for their turn, one at a time:
-
-- **The shell tool's remaining details.** The exact deny list for open mode, whether a recipe names allow patterns or a named set, and the interactive 'allow for this session' answer. See `shell-tool.md`.
-- **Who may approve** once more than one person uses Lyra, and approving with edited arguments (see `approvals.md`).
+Nothing is open as a topic. What remains is writing: the spec rows for each area (a row table with IDs, written as each is built, decision 62), and the exact fields of each task's input, which each task defines when it is written.
