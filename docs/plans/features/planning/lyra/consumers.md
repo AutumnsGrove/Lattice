@@ -65,9 +65,14 @@ The consumers plan makes `GroveAgent` the home of every consumer, so a Grove Clo
 - **Proposals (decision 50).** The core has a proposal type. This goes further than the point above about a structured final result: the core itself knows a run can end with a proposal that has a review state. I had suggested keeping that in the app. The reasoning for the core is that several planned consumers work this way, so it is shared.
 - **Cloudflare host.** Left open on purpose, until the repository is scoped.
 
-## Open details for the proposal type
+## The proposal type (decisions 50 to 53)
 
-1. **What a proposal holds.** A typed payload (for HawkAgent, a score and a verdict) and its evidence (references to what supports it). Free text alone would not be enough to review quickly.
-2. **How a person decides.** A command in the protocol (accept or reject, with an optional note), which is saved as a new entry in the record, since the record is append-only.
-3. **How the decision reaches the app.** This is the tension with decision 51. HawkAgent wants the reviewer's decision to outlive the tenant, as a label that grows its answer key. But the decision is saved in a record that is deleted with the tenant. So the core has to tell the app when a decision is made (an event or a hook), and the app copies it into its own table. The core cannot make the decision outlive the record itself.
+1. **What a proposal holds (decision 52).** A typed payload whose shape the task defines (for HawkAgent, a score and a verdict), a list of evidence references, and a state: open, accepted, or rejected. A viewer can show any proposal without knowing the task.
+2. **How a person decides.** A command in the protocol (accept or reject, with an optional note). The decision is saved as a new entry in the record, since the record is append-only.
+3. **How the decision reaches the app (decision 53).** The core emits a decision event, and the app copies out whatever must last, such as HawkAgent's reviewer label, into its own table. This is how decision 51 (records belong to the tenant) and HawkAgent's need (a label that outlives the tenant) fit together: the core never keeps anything past the tenant, and the app does.
 4. **What it is not.** It is not an approval. An approval pauses a run before an action. A proposal is a finished run's result.
+
+## Still open
+
+- The exact command and event names (see `protocol.md`).
+- Whether the Cloudflare host is built on `GroveAgent`, left for when the repository is scoped.

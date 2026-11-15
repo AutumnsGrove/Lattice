@@ -171,6 +171,12 @@ A run can end with a proposal: a typed result with its evidence and a review sta
 ### 51. Records belong to the tenant
 A run's record is deleted when its tenant is removed, and otherwise kept until the app prunes it. The core does not prune on its own. Anything that must outlive the tenant is written by the app into its own table, like HawkAgent's verdict. Decided 2026-11-15. This answers record retention.
 
+### 52. A proposal has a typed payload, evidence references, and a state
+The task defines the shape of the payload (for HawkAgent, a score and a verdict). Evidence is a list of references to what supports it. The state is open, accepted, or rejected. A viewer can show any proposal without knowing the task. Decided 2026-11-15. Completes decision 50.
+
+### 53. A decision is saved in the record and emitted as an event the app copies out
+When a person accepts or rejects a proposal (with an optional note), the core saves the decision as a new entry in the record and emits a decision event. The app listens and writes whatever must last, such as HawkAgent's label, into its own table. The core never keeps anything past the tenant (decision 51). Decided 2026-11-15.
+
 ## Not discussed yet
 
 These came out of the research and are waiting for their turn, one at a time:
@@ -181,6 +187,6 @@ These came out of the research and are waiting for their turn, one at a time:
 - **Who may approve** once more than one person uses Lyra, and approving with edited arguments (see `approvals.md`).
 - **Lumen changes to scope in detail:** the message shape, the finish reason, the `agent` task, and the model flags (see `lumen-changes.md`).
 - **How vines attach to a line.** The timeline page only supports vines under a heading, so it needs a change. Two approaches are written up in `timeline-first-job.md`.
-- **Proposal details.** What fields a proposal has, how a person accepts or rejects it, and how that decision reaches the app (see decision 50).
+- **Proposal wire details.** The exact command and event names for deciding a proposal (see `protocol.md`).
 - **The first slice.** What the smallest useful version contains, and the build order.
 - **The new repository.** Name, layout, release process, and test setup.

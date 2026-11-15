@@ -54,6 +54,7 @@ A run always ends with exactly one `run_end`, even on error or abort. A client t
 - **`resume`** for a parked run.
 - A way to **list pending requests**, so a viewer can show the glow (decision 36).
 - A **parked** and **resumed** event.
+- **Proposals** (decisions 50 to 53): a command to accept or reject one, and an event when one is decided.
 - **Who is asking**: a tenant id and a credential in `hello` (decision 47). Nova assumes one trusted agent per server.
 
 ## The main difference: approvals are durable
@@ -72,5 +73,5 @@ To keep a Nova client working, a parked run emits `run_end` with the reason `par
 ## Open questions
 
 - The exact fields of `start`, and how a task declares its inputs.
-- A command for deciding a proposal (accept or reject, with an optional note), and an event when one is decided (decision 50).
+- The exact names of the command that decides a proposal (accept or reject, with an optional note) and of the event emitted when one is decided (decisions 50 to 53).
 - The one-time codes on approval requests.
