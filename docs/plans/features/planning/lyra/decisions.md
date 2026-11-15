@@ -132,18 +132,19 @@ After the timeout, an unanswered request is denied. Useful for tasks that run in
 ### 38. The shell tool moves long commands to the background
 A command still running at a deadline keeps running instead of being killed. The model gets an id and carries on, and is told when the command exits. It can look at the output so far, wait for it, or stop it. This follows Autumn's `pi-background` extension. While a request is pending, the exit notice queues (see the design note in `approvals.md`). Decided 2026-11-15. Open details: the default deadline, how long finished jobs are remembered, and what happens to a running command when the host process is lost.
 
-## Proposed, waiting for a yes
-
-These are from `context-size.md`, where each is explained.
-
 ### 39. The record keeps everything, and the model sees a built view
-Compaction adds a `compaction` entry with a summary and a pointer to the first entry kept. It never deletes from the record. The cut never falls between a tool call and its result, and recent steps stay verbatim.
+Compaction adds a `compaction` entry with a summary and a pointer to the first entry kept. It never deletes from the record. The cut never falls between a tool call and its result, and recent steps stay verbatim. Confirmed 2026-11-15. See `context-size.md`.
 
 ### 40. What survives compaction is decided by the task
-The task's instructions are pinned. Tools can supply a "current state" shown after a compaction (for the timeline, the page so far). The task supplies the summarizer's instructions, with a generic default. Bulky tool results are capped when they arrive.
+The task's instructions are pinned and never summarized. Tools can supply a "current state" shown after a compaction (for the timeline, the page so far), which is exact and replaces prose wherever a tool can provide it. The task supplies the summarizer's instructions, with a generic default. Bulky tool results are capped when they arrive. Confirmed 2026-11-15.
 
 ### 41. Compaction triggers from the tokens Lumen reports
-When the last request's input tokens pass the model's context window minus a reserve. Reserve and amount kept are configurable per task. Needs a `contextWindow` field per model in `lumen-models.json`. If the first message alone is too large, the run fails clearly with "input too large".
+When the last request's input tokens pass the model's context window minus a reserve. Reserve and amount kept are configurable per task. Needs a `contextWindow` field per model in `lumen-models.json`. If the first message alone is too large, the run fails clearly with "input too large". Confirmed 2026-11-15.
+
+## Proposed, waiting for a yes
+
+### 42. Compaction is built last, and the first version leaves it out
+Most tasks are small and most models have very large windows, so compaction is a rarely used safety net. The first version builds the view from the record, caps big tool results, and stops with a clear "context too large" reason on overflow. The summarizer is added when a real task needs it. The format does not change when it is. See `context-size.md`.
 
 ## Not discussed yet
 

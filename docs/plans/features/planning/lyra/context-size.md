@@ -6,7 +6,7 @@ category: features
 
 # Context size and compaction
 
-Last updated: 2026-11-15. Everything here is proposed and waits for a yes.
+Last updated: 2026-11-15. Proposals 39 to 41 are decided. The build order (42) waits for a yes.
 
 ## The problem
 
@@ -32,7 +32,7 @@ Lyra's runs are different in four ways:
 3. **Runs are short.** Most will never compact. It is a safety net, so it should stay small.
 4. **The task knows what matters.** A task can say what must survive. A coding agent cannot.
 
-## Proposed
+## Decided (2026-11-15)
 
 **39. The record keeps everything, and the model sees a built view.** Compaction never deletes from the record (decisions 28 to 33 stay intact, and replay still works). It adds a `compaction` entry holding the summary and a pointer to the first entry kept. The model's view is built from the record: the pinned instructions, the summary, then the entries from the pointer on. The cut never falls between a tool call and its result, and the most recent steps stay verbatim.
 
@@ -45,7 +45,16 @@ Lyra's runs are different in four ways:
 
 **41. When it triggers.** When the last request's input tokens, which Lumen already reports, pass the model's context window minus a reserve. The reserve and the amount of recent history kept are configurable per task, with defaults chosen when building. The model's context window is new data: a `contextWindow` field per model in `lumen-models.json` (see `lumen-changes.md`, item 7). If the very first message already exceeds the window, compaction cannot help, and the run fails clearly with "input too large" (the known limit in decision 6).
 
+## How likely is this to fire?
+
+Rarely. Most tasks are small and narrow, and most current models have context windows around a million tokens. A normal timeline day fits easily.
+
+Two honest caveats. Nova's OpenCode Go catalog assumes a conservative 200,000-token window for its models until it can read the real one, so a runner using OpenCode Go with a lot of shell output could still reach it. And with a big window, the practical limit is usually money, not memory: every step re-sends the whole conversation. The optional cost and step limits (decision 18) matter more than the compactor.
+
+## Proposed
+
+**42. Build order: compaction comes last, and the first version does not include it.** The first version has the parts that are needed anyway: the model's view is built from the record, big tool results are capped on arrival, and a run that overflows the window stops with a clear "context too large" reason. The summarizer is added when a real task needs it. Nothing in the format changes when it is, because the `compaction` entry kind and the built view are already part of the design (decision 39).
+
 ## Not discussed yet
 
-- **Whether the timeline needs any of this.** A normal day fits easily. The first model to hit the limit is probably a runner doing a review with shell output.
-- **Trimming by clearing old tool results without summarizing.** Skipped, because it changes earlier history and breaks the prompt cache for little gain. Compaction is the one deliberate rewrite.
+- **The summarizer's default instructions.** Decided when it is built.
