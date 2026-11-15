@@ -180,11 +180,14 @@ When a person accepts or rejects a proposal (with an optional note), the core sa
 ### 54. The vine placement fix is a separate GitHub issue, not Lyra's work
 Letting the timeline page attach a vine to a specific line is a change to the page (`libs/curios/src/timeline/Timeline.svelte` and its parser), and it improves the timeline whether or not Lyra exists. It is tracked in its own issue. Lyra's timeline task does not wait for it: until it lands, the task attaches vines to headings, as the page does today. The two approaches and the recommendation are written up in `timeline-first-job.md` and go into the issue. Decided 2026-11-15.
 
+### 55. GroveAgent is out of date and is not a basis for Lyra
+`libs/grove-agent` and the consumers plan (`docs/plans/infra/planned/grove-agent-consumers.md`) are stale: the library pins `agents ^0.6.0` and was last touched in early September, and Cloudflare's own package has moved on. Lyra is built from scratch. The old plan is not a source of truth for what will use Lyra, and the Cloudflare adapter does not assume `GroveAgent`. Decided 2026-11-15. This removes `GroveAgent` as an option for the adapter's foundation.
+
 ## Not discussed yet
 
 These came out of the research and are waiting for their turn, one at a time:
 
-- **The Cloudflare adapter's foundation.** Whether it builds on `GroveAgent` (which wraps the Cloudflare Agents SDK and gives storage, scheduling, queueing, and live state) or on plain Durable Objects. Left open on purpose, to be decided when the repository is scoped. See `consumers.md`.
+- **The Cloudflare adapter's foundation.** Whether it builds on Cloudflare's current agent tooling (research notes say its `agents` package now ships a harness and a durable-execution layer, which has not been tried) or on plain Durable Objects behind Lyra's slots. Left open on purpose, to be decided when the repository is scoped.
 - **Protocol details.** The exact shape of frames and codes, written when the core is built. See `protocol.md`.
 - **The shell tool.** Its command policy (which commands are allowed), the default deadline before a command moves to the background, and what happens to a running command if the host is lost (see decisions 16 and 38 and `approvals.md`).
 - **Who may approve** once more than one person uses Lyra, and approving with edited arguments (see `approvals.md`).
