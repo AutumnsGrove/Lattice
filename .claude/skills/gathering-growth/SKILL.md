@@ -5,7 +5,7 @@ description: The drum sounds. Hummingbird, Squirrel, Firefly, and Wren gather fo
 
 # Gathering Growth 🌲🌺🐿️✨🐦
 
-The drum echoes across the meadow and into the wider world. Four creatures answer — each one a fresh subagent with its own context and focus. The Hummingbird darts out to find where your people are. The Squirrel takes what's found and builds a calendar. The Firefly drafts the posts in your voice. The Wren checks that everything is findable. The conductor orchestrates, pauses for human checkpoints between each animal, and ensures nothing gets lost in handoff. One session, one complete growth cycle.
+_The conductor dispatches one subagent per animal, each with isolated context and an intentional model. It manages handoffs and gate checks — it never does the work itself._
 
 ## When to Summon
 
@@ -244,24 +244,13 @@ Suggested: [date] — run `/gathering-growth` again to check what bloomed
 
 ## Conductor Rules
 
-### Human Checkpoints Are Sacred
-NEVER skip a checkpoint. NEVER proceed without user input. The whole point is collaborative growth, not automated marketing. If in doubt, ask.
+**Human Checkpoints Are Sacred.** NEVER skip a checkpoint. NEVER proceed without user input. The whole point is collaborative growth, not automated marketing. If in doubt, ask.
 
-### Fresh Eyes Per Animal
-Each animal runs as an isolated subagent. The Hummingbird doesn't see the Wren's work. The Squirrel doesn't see the Firefly's drafts until they're ready. Isolation produces better results.
+**Fresh Eyes Per Animal.** Each animal runs as an isolated subagent. The Hummingbird doesn't see the Wren's work. The Squirrel doesn't see the Firefly's drafts until they're ready. Isolation produces better results.
 
-### Carry Context Through Handoffs
-The conductor is the memory. It carries user decisions, approved items, and corrections from checkpoint to checkpoint. Each subagent gets ONLY what it needs — not the full history.
+**Carry Context Through Handoffs.** The conductor is the memory. It carries user decisions, approved items, and corrections from checkpoint to checkpoint. Each subagent gets ONLY what it needs — not the full history.
 
-### Respect Energy
-If the user says "this is enough for today" at any checkpoint, stop the gathering gracefully. Save what's done. The Squirrel can stash the remaining items for next time.
-
-### Communication
-- "The drum sounds..." (summoning)
-- "Dispatching the Hummingbird..." (launching scout)
-- "Pausing for your input..." (human checkpoint)
-- "The clearing fills with light..." (drafting phase)
-- "The chorus rises..." (completion)
+**Respect Energy.** If the user says "this is enough for today" at any checkpoint, stop the gathering gracefully. Save what's done. The Squirrel can stash the remaining items for next time.
 
 ---
 
