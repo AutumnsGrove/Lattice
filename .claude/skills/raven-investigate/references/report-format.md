@@ -137,7 +137,7 @@ Based on findings, recommend the appropriate next steps. Match finding types to 
 | Deep assessment needed | `hawk-survey` for formal 14-domain audit             |
 | Input validation gaps  | `turtle-harden` Phase 2 (LAYER) specifically         |
 | Missing tests          | `beaver-build` for security regression tests         |
-| Missing CI/CD security | `cicd-automation` skill or manual setup              |
+| Missing CI/CD security | `.github/workflows/` or manual setup                  |
 | Dependency issues      | Update and pin dependencies, add Dependabot/Renovate |
 
 **The Raven dispatches, it does not remediate.** Investigation and fixing are separate. Always.

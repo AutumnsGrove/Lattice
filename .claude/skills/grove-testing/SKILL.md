@@ -1,6 +1,6 @@
 ---
 name: grove-testing
-description: Write effective, maintainable tests that catch real bugs and enable confident refactoring. Use when deciding what to test, reviewing test quality, or writing tests for Grove features. Focuses on philosophy and strategy—pair with javascript-testing for implementation details.
+description: Write effective, maintainable tests that catch real bugs and enable confident refactoring. Use when deciding what to test, reviewing test quality, or writing tests for Grove features. Focuses on philosophy and strategy.
 ---
 
 # Grove Testing Skill
@@ -16,7 +16,7 @@ Activate this skill when:
 - Evaluating whether tests are providing real value
 - Refactoring causes many tests to break (symptom of bad tests)
 
-**For technical implementation** (Vitest syntax, mocking patterns, assertions), use the `javascript-testing` skill alongside this one.
+**For Vitest syntax** (mocking patterns, assertions), check `libs/engine/vitest.config.ts` and the tests beside the code you're changing.
 
 ---
 
@@ -423,15 +423,6 @@ npx vitest run          # CI verification
 
 ## Integration with Other Skills
 
-### javascript-testing
-
-Use `javascript-testing` for:
-
-- Vitest configuration syntax
-- Mocking patterns and APIs
-- Assertion reference
-- SvelteKit-specific test patterns
-
 ### grove-documentation
 
 When writing test descriptions, follow Grove voice:
@@ -440,9 +431,9 @@ When writing test descriptions, follow Grove voice:
 - No jargon
 - Say what the user experiences
 
-### code-quality
+### Linting and type checking
 
-Run linting and type checking before/after writing tests. Static analysis catches different bugs than tests do.
+Run both before and after writing tests. Static analysis catches different bugs than tests do.
 
 ---
 

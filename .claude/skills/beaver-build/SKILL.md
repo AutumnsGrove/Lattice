@@ -19,7 +19,7 @@ The beaver doesn't build blindly. First, it surveys the stream, understanding th
 - Evaluating whether tests are providing real value
 - Refactoring causes many tests to break (symptom of bad tests)
 
-**Pair with:** `javascript-testing` for Vitest syntax, `python-testing` for pytest patterns
+**Pair with:** `grove-testing` for where to spend the effort
 
 ---
 
