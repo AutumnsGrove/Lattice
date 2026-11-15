@@ -6,7 +6,7 @@ category: features
 
 # Context size and compaction
 
-Last updated: 2026-11-15. Proposals 39 to 41 are decided. The build order (42) waits for a yes.
+Last updated: 2026-11-15. Everything here is decided.
 
 ## The problem
 
@@ -51,10 +51,10 @@ Rarely. Most tasks are small and narrow, and most current models have context wi
 
 Two honest caveats. Nova's OpenCode Go catalog assumes a conservative 200,000-token window for its models until it can read the real one, so a runner using OpenCode Go with a lot of shell output could still reach it. And with a big window, the practical limit is usually money, not memory: every step re-sends the whole conversation. The optional cost and step limits (decision 18) matter more than the compactor.
 
-## Proposed
+## Also decided
 
-**42. Build order: compaction comes last, and the first version does not include it.** The first version has the parts that are needed anyway: the model's view is built from the record, big tool results are capped on arrival, and a run that overflows the window stops with a clear "context too large" reason. The summarizer is added when a real task needs it. Nothing in the format changes when it is, because the `compaction` entry kind and the built view are already part of the design (decision 39).
+**42. Compaction is part of the first version.** It will rarely fire, but Autumn wants it from the start. The first version includes the summarizer, so a long run never has to stop at the limit. I had proposed leaving it out and building it when a task first needed it. The answer was to include it.
 
 ## Not discussed yet
 
-- **The summarizer's default instructions.** Decided when it is built.
+- **The summarizer's default instructions.** Written when it is built.

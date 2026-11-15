@@ -141,10 +141,11 @@ The task's instructions are pinned and never summarized. Tools can supply a "cur
 ### 41. Compaction triggers from the tokens Lumen reports
 When the last request's input tokens pass the model's context window minus a reserve. Reserve and amount kept are configurable per task. Needs a `contextWindow` field per model in `lumen-models.json`. If the first message alone is too large, the run fails clearly with "input too large". Confirmed 2026-11-15.
 
-## Proposed, waiting for a yes
+### 42. Compaction is part of the first version
+It will rarely fire, because tasks are small and most models have very large windows. Autumn wants it from the start anyway, so a long run never has to stop at the limit. This overrides a proposal to build it last. Decided 2026-11-15. See `context-size.md`.
 
-### 42. Compaction is built last, and the first version leaves it out
-Most tasks are small and most models have very large windows, so compaction is a rarely used safety net. The first version builds the view from the record, caps big tool results, and stops with a clear "context too large" reason on overflow. The summarizer is added when a real task needs it. The format does not change when it is. See `context-size.md`.
+### 43. Lyra speaks Nova's frames
+A subset of Nova's frames (`hello`, commands, `response`, `event`, `ui_request`, `ui_response`), plus a few new ones for starting a task, resuming a parked run, and listing pending requests. One client could drive either Nova or Lyra. Decided 2026-11-15. See `protocol.md`.
 
 ## Not discussed yet
 
@@ -154,5 +155,5 @@ These came out of the research and are waiting for their turn, one at a time:
 - **Follow-up when nothing is running.** Whether it starts the next turn of the same conversation or is refused.
 - **Approvals.** How a background run asks for a yes and waits at no cost.
 - **The Cloudflare adapter's foundation.** Whether it builds on Cloudflare's agent tooling or on plain Durable Objects. A smaller question once decision 12 is settled.
-- **The wire protocol.** Which subset of Nova's frames Lyra speaks.
+- **Protocol details.** Sessions, transport, the start command, and authentication. See `protocol.md`.
 - **The new repository.** Name, layout, release process, and test setup.
