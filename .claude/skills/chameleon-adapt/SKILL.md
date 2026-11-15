@@ -53,12 +53,9 @@ Before choosing a single color, understand the environment. Assess three things:
 **What season is it?**
 
 ```svelte
-import { season } from '$lib/stores/season';
-
-const isSpring = $derived($season === 'spring');
-const isAutumn = $derived($season === 'autumn');
-const isWinter = $derived($season === 'winter');
-// Summer is the default (no flag needed)
+import {season} from '$lib/stores/season'; const isSpring = $derived($season === 'spring'); const isAutumn
+= $derived($season === 'autumn'); const isWinter = $derived($season === 'winter'); // Summer is the default
+(no flag needed)
 ```
 
 **What's the emotional tone?**
@@ -104,7 +101,7 @@ Key decisions: Which glass variant fits each container? Where does content live 
 **Quick glass starter:**
 
 ```svelte
-import { Glass, GlassCard, GlassButton } from '@lattice/ui/ui';
+import {(Glass, GlassCard, GlassButton)} from '@lattice/ui/ui';
 
 <Glass variant="tint" class="p-6 rounded-xl">
 	<p>Readable text over busy backgrounds</p>
@@ -164,19 +161,16 @@ If CI fails: read diagnostics, fix, re-run. The chameleon does not leave broken 
 
 **Component Audit Gate (mandatory when building/modifying components):**
 
-Before page-level verification, the chameleon audits every component it built or modified in isolation using Showroom. This catches design token violations, off-grid spacing, missing focus styles, and hardcoded colors that full-page captures miss.
+**Component check.** There is no isolated component harness any more (Showroom was removed in #1654). Capture the page or element where the component renders, then check it against `DESIGN.md`: colour tokens not hardcoded values, spacing on the 4px grid, type from the scale, a visible focus ring, no skipped heading levels, alt text on images. The pre-commit hooks enforce the mechanical subset (accent colours, Prism icons, barrels).
 
 ```bash
-# For each component built or modified, run a Showroom audit
-uv run --project tools/glimpse glimpse showroom \
-  libs/engine/src/lib/ui/components/[path-to-component].svelte
-
-# Scaffold a fixture for new components (generates .showroom.ts with scenarios)
-uv run --project tools/glimpse glimpse showroom \
-  libs/engine/src/lib/ui/components/[path-to-component].svelte --scaffold
+# There is no isolated component harness any more (Showroom was removed in #1654).
+# Capture the component where it actually renders, then check it by hand.
+bun run glimpse capture "http://localhost:5173/[page]" \
+  -S "[component selector]" --season autumn --theme dark
 ```
 
-**This is a required gate.** Every component the chameleon touches must pass Showroom before moving to page-level Glimpse. Fix all compliance violations before proceeding.
+**Check the component before the page.** Hardcoded hex, off-grid spacing and missing focus rings are much easier to spot on a single element than in a full-page shot.
 
 **Visual Verification (mandatory for UI work):**
 
@@ -184,26 +178,25 @@ The chameleon doesn't just build — it _looks_ at what it built. Use Glimpse to
 
 ```bash
 # Prerequisite: seed the database if not already done
-uv run --project tools/glimpse glimpse seed --yes
+./scripts/dev-stack.sh seed blog
 
-# Capture the page you just built (--auto starts the dev server)
+# Capture the page you just built ( starts the dev server)
 # Local routing uses ?subdomain= for tenant isolation
-uv run --project tools/glimpse glimpse capture \
+bun run glimpse capture \
   "http://localhost:5173/[your-page]?subdomain=midnight-bloom" \
-  --season autumn --theme dark --logs --auto
+  --season autumn --theme dark --logs
 
 # Verify all season × theme combos render correctly
-uv run --project tools/glimpse glimpse matrix \
+bun run glimpse matrix \
   "http://localhost:5173/[your-page]?subdomain=midnight-bloom" \
-  --seasons spring,summer,autumn,winter --themes light,dark --auto
+  --seasons spring,summer,autumn,winter --themes light,dark
 
-# Interactive check: click around, verify flows work visually
-uv run --project tools/glimpse glimpse browse \
-  "http://localhost:5173/[your-page]?subdomain=midnight-bloom" \
-  --do "click navigation links, scroll down" --screenshot-each --logs --auto
+# Interactive flows (clicks, tab order, focus traps) aren't what glimpse does.
+# Write a throwaway Playwright script against @playwright/test and screenshot
+# at each step; copy the browser setup from tools/glimpse/src/browser.ts.
 
 # Optional: verify with random data too (proves UI handles any content)
-uv run --project tools/glimpse glimpse seed --profile fake --fake-posts 5 --yes
+./scripts/dev-stack.sh seed fake 5
 # Then capture with the randomly generated subdomain from seed output
 ```
 

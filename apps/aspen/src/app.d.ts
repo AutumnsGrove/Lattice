@@ -168,7 +168,7 @@ declare global {
 				/** Internal service key for worker-to-worker auth */
 				INTERNAL_SERVICE_KEY?: string;
 
-				/** Dev-only: enables simulated auth for Glimpse visual testing (never set in prod) */
+				/** Dev-only: enables simulated auth for local visual testing (never set in prod) */
 				DEV_AUTH_ENABLED?: string;
 			};
 			context: {

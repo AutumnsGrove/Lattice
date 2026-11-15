@@ -79,7 +79,7 @@ scripts/journey/output/
 .worktrees/
 .claude/worktrees/
 
-# Glimpse runtime artifacts
+# Visual verification screenshots (tools/glimpse)
 .glimpse/
 screenshots/
 .superset/config.json

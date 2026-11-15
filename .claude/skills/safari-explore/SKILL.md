@@ -187,16 +187,13 @@ rg -n "(function|const|fn) CurioHitcounter"  # Function definitions
 
 ```bash
 # Capture the page where this item lives
-uv run --project tools/glimpse glimpse capture http://localhost:5173/[item-page] \
+bun run glimpse capture http://localhost:5173/[item-page] \
   --season autumn --theme dark --logs
 
 # Browse to the item and capture what it looks like in context
-uv run --project tools/glimpse glimpse browse http://localhost:5173/[item-page] \
-  --do "scroll to [item], click [item]" --screenshot-each
-
-# Check dark mode rendering
-uv run --project tools/glimpse glimpse matrix http://localhost:5173/[item-page] \
-  --themes light,dark
+# Interactive flows aren't what glimpse does — write a throwaway Playwright
+# script against @playwright/test, copying the browser setup from
+# tools/glimpse/src/browser.ts, and screenshot at each step.
 ```
 
 Screenshots are observation data — include visual findings alongside code findings in the journal.

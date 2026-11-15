@@ -110,19 +110,13 @@ Once CI passes, verify manually:
 
 **Component audit gate (for UI features):**
 
-If the elephant built or modified UI components, it audits each one in isolation using Showroom BEFORE page-level Glimpse. Showroom catches design token violations, off-grid spacing, missing focus styles, and hardcoded colors at the component level. Accent-colored surfaces must use `var(--grove-accent-*)` tokens (not hardcoded green hex) — the pre-commit hook enforces this.
+**Component check.** There is no isolated component harness any more (Showroom was removed in #1654). Capture the page or element where the component renders, then check it against `DESIGN.md`: colour tokens not hardcoded values, spacing on the 4px grid, type from the scale, a visible focus ring, no skipped heading levels, alt text on images. The pre-commit hooks enforce the mechanical subset (accent colours, Prism icons, barrels). Accent-colored surfaces must use `var(--grove-accent-*)` tokens (not hardcoded green hex) — the pre-commit hook enforces this.
 
 ```bash
-# For each component built or modified:
-uv run --project tools/glimpse glimpse showroom \
-  libs/engine/src/lib/ui/components/[path-to-component].svelte
-
-# For brand new components, scaffold a fixture first:
-uv run --project tools/glimpse glimpse showroom \
-  libs/engine/src/lib/ui/components/[path-to-component].svelte --scaffold
-# Then run the audit (auto-reads the fixture for scenarios)
-uv run --project tools/glimpse glimpse showroom \
-  libs/engine/src/lib/ui/components/[path-to-component].svelte
+# There is no isolated component harness any more (Showroom was removed in #1654).
+# Capture the component where it actually renders, then check it by hand.
+bun run glimpse capture "http://localhost:5173/[page]" \
+  -S "[component selector]" --season autumn --theme dark
 ```
 
 **This is a required gate.** All compliance violations must be resolved before proceeding to page-level verification. The elephant does not ship components it hasn't audited.
@@ -133,18 +127,17 @@ If the elephant built UI, it looks at the result before declaring the structure 
 
 ```bash
 # Prerequisite: seed the database if not already done
-uv run --project tools/glimpse glimpse seed --yes
+./scripts/dev-stack.sh seed blog
 
 # Capture the page to see what was actually built
-# Local routing uses ?subdomain= for tenant isolation; --auto starts the dev server
-uv run --project tools/glimpse glimpse capture \
+# Local routing uses ?subdomain= for tenant isolation; starts the dev server
+bun run glimpse capture \
   "http://localhost:5173/[page]?subdomain=midnight-bloom" \
-  --season autumn --theme dark --logs --auto
+  --season autumn --theme dark --logs
 
-# Walk through the feature visually
-uv run --project tools/glimpse glimpse browse \
-  "http://localhost:5173/[page]?subdomain=midnight-bloom" \
-  --do "interact with the new feature" --screenshot-each --logs --auto
+# Interactive flows (clicks, tab order, focus traps) aren't what glimpse does.
+# Write a throwaway Playwright script against @playwright/test and screenshot
+# at each step; copy the browser setup from tools/glimpse/src/browser.ts.
 ```
 
 Review the screenshots. If something doesn't look right, fix it and capture again. The elephant doesn't ship structures it hasn't inspected.

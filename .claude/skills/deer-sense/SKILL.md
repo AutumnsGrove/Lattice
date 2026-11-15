@@ -57,17 +57,15 @@ Run automated scanning to surface mechanical violations quickly. Automated tools
 - Check the common issues checklist: images, forms, navigation, color contrast, page structure, language attribute
 - Note violations and group by severity: blockers (missing labels, keyboard traps) vs. warnings (suboptimal alt text)
 
-**Component isolation audit with Showroom:**
+**Component-level a11y check:**
 
-Before scanning full pages, audit individual components in isolation using Showroom. Showroom checks focus styles, heading hierarchy, and interactive element compliance at the component level — catching a11y issues that get masked by page context.
+Before scanning full pages, capture the individual component (`-S <selector>`) and check focus styles, heading hierarchy and interactive element semantics. Page context hides these — a button with no focus ring looks fine in a full-page shot.
 
 ```bash
-# Audit each component the deer is reviewing
-uv run --project tools/glimpse glimpse showroom \
-  libs/engine/src/lib/ui/components/[path-to-component].svelte
-
-# The audit checks: focus styles on interactive elements, heading hierarchy,
-# image alt text, color contrast via computed styles, spacing grid compliance
+# There is no isolated component harness any more (Showroom was removed in #1654).
+# Capture the component where it actually renders, then check it by hand.
+bun run glimpse capture "http://localhost:5173/[page]" \
+  -S "[component selector]" --season autumn --theme dark
 ```
 
 **This is a required gate for component-level a11y work.** A component that lacks focus indicators or has broken heading hierarchy must be caught here, not deferred to page-level scanning.
@@ -78,24 +76,23 @@ Capture the page to see what the rendered result actually looks like. Console lo
 
 ```bash
 # Prerequisite: seed the database if not already done
-uv run --project tools/glimpse glimpse seed --yes
+./scripts/dev-stack.sh seed blog
 
 # Capture with console logs — errors often reveal missing ARIA, broken refs
-# Local routing uses ?subdomain= for tenant isolation; --auto starts the dev server
-uv run --project tools/glimpse glimpse capture \
+# Local routing uses ?subdomain= for tenant isolation; starts the dev server
+bun run glimpse capture \
   "http://localhost:5173/[page]?subdomain=midnight-bloom" \
-  --season autumn --theme dark --logs --auto
+  --season autumn --theme dark --logs
 
 # Check dark mode contrast — capture both themes side by side
-uv run --project tools/glimpse glimpse matrix \
+bun run glimpse matrix \
   "http://localhost:5173/[page]?subdomain=midnight-bloom" \
-  --themes light,dark --logs --auto
+  --themes light,dark --logs
 
 # Browse interactively — does tab order make visual sense?
-uv run --project tools/glimpse glimpse browse \
-  "http://localhost:5173/[page]?subdomain=midnight-bloom" \
-  --do "click first interactive element, press Tab, press Tab, press Tab" \
-  --screenshot-each --auto
+# Interactive flows (clicks, tab order, focus traps) aren't what glimpse does.
+# Write a throwaway Playwright script against @playwright/test and screenshot
+# at each step; copy the browser setup from tools/glimpse/src/browser.ts.
 ```
 
 Review the screenshots: Are focus indicators visible? Do glass surfaces maintain contrast? Are touch targets visually large enough?

@@ -15,6 +15,7 @@ Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-s
 **Don't assume. Don't hide confusion. Surface tradeoffs.**
 
 Before implementing:
+
 - State your assumptions explicitly. If uncertain, ask.
 - If multiple interpretations exist, present them - don't pick silently.
 - If a simpler approach exists, say so. Push back when warranted.
@@ -37,12 +38,14 @@ Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, sim
 **Touch only what you must. Clean up only your own mess.**
 
 When editing existing code:
+
 - Don't "improve" adjacent code, comments, or formatting.
 - Don't refactor things that aren't broken.
 - Match existing style, even if you'd do it differently.
 - If you notice unrelated dead code, mention it - don't delete it.
 
 When your changes create orphans:
+
 - Remove imports/variables/functions that YOUR changes made unused.
 - Don't remove pre-existing dead code unless asked.
 
@@ -53,11 +56,13 @@ The test: Every changed line should trace directly to the user's request.
 **Define success criteria. Loop until verified.**
 
 Transform tasks into verifiable goals:
+
 - "Add validation" → "Write tests for invalid inputs, then make them pass"
 - "Fix the bug" → "Write a test that reproduces it, then make it pass"
 - "Refactor X" → "Ensure tests pass before and after"
 
 For multi-step tasks, state a brief plan:
+
 ```
 1. [Step] → verify: [check]
 2. [Step] → verify: [check]
@@ -100,7 +105,7 @@ TypeScript-as-config is valid — compile-time validation is an advantage over r
 
 > **Every capability is accessed through its owning SDK. If no SDK exists, build the shared function so the next consumer doesn't reinvent it.**
 
-This is the behavioral sibling of Data Primacy. Where Data Primacy says *values live in config, not code*, this principle says *behavior lives in owning packages, not consumers*. Together: **code translates data through SDK boundaries. It never defines data, and it never reimplements behavior.**
+This is the behavioral sibling of Data Primacy. Where Data Primacy says _values live in config, not code_, this principle says _behavior lives in owning packages, not consumers_. Together: **code translates data through SDK boundaries. It never defines data, and it never reimplements behavior.**
 
 **The resolution order — always try from the top:**
 
@@ -111,25 +116,25 @@ This is the behavioral sibling of Data Primacy. Where Data Primacy says *values 
 4. Truly app-specific → Local code is fine, but be honest about whether it's really unique.
 ```
 
-**The test:** *"If I needed to change how this works, how many files would I touch?"* 1 package = correct. >1 = the capability has leaked.
+**The test:** _"If I needed to change how this works, how many files would I touch?"_ 1 package = correct. >1 = the capability has leaked.
 
 **Capability ownership map:**
 
-| Capability | Owner | Consumers call | They do NOT |
-|---|---|---|---|
-| Database queries | `@autumnsgrove/infra` | `GroveDatabase`, `createDb()`, `scopedDb()` | Use raw `env.DB.prepare()` or `platform.env.DB` directly |
-| File storage | `@autumnsgrove/lattice/amber` | `FileManager`, `ExportManager`, `QuotaManager` | Use raw `env.BUCKET.put()` or `R2Bucket` operations |
-| KV storage | `@autumnsgrove/infra` | `GroveKV` via `GroveContext` | Use raw `env.KV.get()` / `env.KV.put()` |
-| AI inference | `@autumnsgrove/lattice/ai/lumen` | `createLumenClient()`, `RemoteLumenClient` | Construct `new OpenAI()` or raw fetch to model APIs |
-| Rate limiting | `@autumnsgrove/lattice/platform/threshold` | `createThreshold()`, `thresholdMiddleware()` | Write ad-hoc KV read-modify-write rate limiters |
-| Content moderation | `@autumnsgrove/lattice/thorn` | `moderatePublishedContent()` | Build custom profanity/spam filters |
-| Error handling | `@autumnsgrove/lattice/errors` | `throwGroveError()`, `logGroveError()`, `buildErrorJson()` | Use bare `throw new Error()` or `console.error()` |
-| Email | `@autumnsgrove/lattice/zephyr` | `createZephyrClient()`, `zephyr.send()` | Use raw `new Resend()` or direct email API calls |
-| Credentials | Warden (service binding) | `createWardenClient()` | Store raw API keys in worker env or code |
-| Icons | `@autumnsgrove/prism/icons` | Semantic groups (`stateIcons`, `navIcons`, etc.) | Import from `@lucide/svelte` directly |
-| Design tokens | `@autumnsgrove/prism` | CSS vars (`var(--grove-*)`) + Tailwind preset | Hardcode hex values or duplicate token definitions |
-| Type-safe boundaries | `@autumnsgrove/lattice/server` | `parseFormData()`, `safeJsonParse()`, `isRedirect()` | Cast with `as any` or `as SomeType` on external data |
-| Client-side fetch | `$lib/utils/api` | `apiRequest()` (auto-injects CSRF) | Use raw `fetch()` for internal API calls |
+| Capability           | Owner                                      | Consumers call                                             | They do NOT                                              |
+| -------------------- | ------------------------------------------ | ---------------------------------------------------------- | -------------------------------------------------------- |
+| Database queries     | `@autumnsgrove/infra`                      | `GroveDatabase`, `createDb()`, `scopedDb()`                | Use raw `env.DB.prepare()` or `platform.env.DB` directly |
+| File storage         | `@autumnsgrove/lattice/amber`              | `FileManager`, `ExportManager`, `QuotaManager`             | Use raw `env.BUCKET.put()` or `R2Bucket` operations      |
+| KV storage           | `@autumnsgrove/infra`                      | `GroveKV` via `GroveContext`                               | Use raw `env.KV.get()` / `env.KV.put()`                  |
+| AI inference         | `@autumnsgrove/lattice/ai/lumen`           | `createLumenClient()`, `RemoteLumenClient`                 | Construct `new OpenAI()` or raw fetch to model APIs      |
+| Rate limiting        | `@autumnsgrove/lattice/platform/threshold` | `createThreshold()`, `thresholdMiddleware()`               | Write ad-hoc KV read-modify-write rate limiters          |
+| Content moderation   | `@autumnsgrove/lattice/thorn`              | `moderatePublishedContent()`                               | Build custom profanity/spam filters                      |
+| Error handling       | `@autumnsgrove/lattice/errors`             | `throwGroveError()`, `logGroveError()`, `buildErrorJson()` | Use bare `throw new Error()` or `console.error()`        |
+| Email                | `@autumnsgrove/lattice/zephyr`             | `createZephyrClient()`, `zephyr.send()`                    | Use raw `new Resend()` or direct email API calls         |
+| Credentials          | Warden (service binding)                   | `createWardenClient()`                                     | Store raw API keys in worker env or code                 |
+| Icons                | `@autumnsgrove/prism/icons`                | Semantic groups (`stateIcons`, `navIcons`, etc.)           | Import from `@lucide/svelte` directly                    |
+| Design tokens        | `@autumnsgrove/prism`                      | CSS vars (`var(--grove-*)`) + Tailwind preset              | Hardcode hex values or duplicate token definitions       |
+| Type-safe boundaries | `@autumnsgrove/lattice/server`             | `parseFormData()`, `safeJsonParse()`, `isRedirect()`       | Cast with `as any` or `as SomeType` on external data     |
+| Client-side fetch    | `$lib/utils/api`                           | `apiRequest()` (auto-injects CSRF)                         | Use raw `fetch()` for internal API calls                 |
 
 **Acceptable escape hatches:**
 
@@ -303,6 +308,7 @@ gw git worktree finish --write          # Commit, push, merge, cleanup
 ```
 
 **For git/GitHub/Cloudflare — use raw CLIs:**
+
 ```bash
 git status && git diff                  # Check changes
 git add . && git commit -m "feat: msg"  # Commit
@@ -322,7 +328,7 @@ Run `gw --help` for the full (small) command list. Write operations require `--w
 
 ### Verification
 
-**See `VERIFICATION.md`** for the complete verification reference: self-verification protocol, Glimpse visual testing, Showroom component auditing, and data profiles.
+**See `VERIFICATION.md`** for the complete verification reference: self-verification protocol, visual verification with `glimpse`, and data profiles.
 
 **Quick reference:**
 
@@ -331,8 +337,8 @@ Run `gw --help` for the full (small) command list. Write operations require `--w
 pnpm install && pnpm -r run build && pnpm -r run check
 
 # Verify UI changes visually
-uv run --project tools/glimpse glimpse capture http://localhost:5173/?subdomain=midnight-bloom \
-  --season autumn --theme dark --logs --auto
+bun run glimpse capture "http://localhost:5173/?subdomain=midnight-bloom" \
+  -s autumn -t dark --logs
 ```
 
 ### Naming Conventions
@@ -442,7 +448,7 @@ Full reference: `AgentUsage/house_agents.md`
 
 - **Design standards:** `DESIGN.md` — colors, tokens, Prism, accent scale
 - **Architecture:** `ARCHITECTURE.md` — D1 databases, Warden, infrastructure
-- **Verification:** `VERIFICATION.md` — CI checks, Glimpse, Showroom
+- **Verification:** `VERIFICATION.md` — CI checks, visual verification
 - **Code standards:** `CODE-STANDARDS.md` — engine-first, errors, types, queries
 - **Skills:** `.claude/skills/` — primary mechanism for specialized workflows
 - **Extended docs:** `AgentUsage/README.md` — master index of detailed documentation

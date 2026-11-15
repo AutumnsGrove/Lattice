@@ -22,8 +22,6 @@ export default tseslint.config(
 			"**/.wrangler/**",
 			// Test coverage output
 			"**/coverage/**",
-			// Python virtualenv in tools
-			"tools/glimpse/.venv/**",
 			// eslint-plugin-svelte doesn't support <svelte:boundary> yet (parser crash)
 			"**/PassageTransition.svelte",
 			// Generated Cloudflare adapter worker entry — minified, not hand-written
