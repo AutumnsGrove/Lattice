@@ -598,7 +598,7 @@ export async function isFlagEnabled(flagId: FlagId, context: FlagContext): Promi
 
 export type FlagId = "pricing" | "nav" | "footer" | "hero" | (string & {});
 
-export type ProductId = "grove" | "scout" | "daily-clearing" | "meadow" | (string & {});
+export type ProductId = "grove" | "scout" | "meadow" | (string & {});
 
 export interface FlagRegistryEntry {
 	/** Unique flag identifier */
