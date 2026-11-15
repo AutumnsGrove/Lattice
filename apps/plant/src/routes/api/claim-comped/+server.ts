@@ -9,7 +9,7 @@
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { createTenant, getTenantForOnboarding } from "$lib/server/tenant";
+import { createTenant, getTenantForOnboarding, SignupBlockedError } from "$lib/server/tenant";
 import { PLANT_ERRORS, logPlantError } from "$lib/errors";
 import { CloudflareDatabase } from "@autumnsgrove/infra/cloudflare";
 
@@ -160,6 +160,11 @@ export const POST: RequestHandler = async ({ cookies, platform }) => {
 			subdomain,
 		});
 	} catch (err) {
+		// A blocked identity is a decision, not a failure — see /api/select-plan.
+		if (err instanceof SignupBlockedError) {
+			return json({ error: PLANT_ERRORS.SIGNUP_IDENTITY_BLOCKED.userMessage }, { status: 403 });
+		}
+
 		logPlantError(PLANT_ERRORS.ONBOARDING_UPDATE_FAILED, {
 			path: "/api/claim-comped",
 			detail: "Tenant creation or invite claim failed",

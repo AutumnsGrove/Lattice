@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/charmbracelet/lipgloss"
 
@@ -50,7 +51,6 @@ func validateCFName(name, label string) error {
 	}
 	return nil
 }
-
 
 // generateToken generates a URL-safe random token of the given byte length.
 func generateToken(n int) (string, error) {
@@ -125,4 +125,10 @@ func viewportSlice(content string, offset, height int) string {
 	}
 
 	return visible + "\n" + indicator
+}
+
+// displayWidth counts runes, not bytes, so em dashes and other multi-byte
+// placeholders don't skew the column widths in a rendered table.
+func displayWidth(s string) int {
+	return utf8.RuneCountInString(s)
 }

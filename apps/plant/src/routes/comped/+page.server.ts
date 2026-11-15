@@ -7,7 +7,8 @@
 
 import { redirect, error } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
-import { createTenant, getTenantForOnboarding } from "$lib/server/tenant";
+import { createTenant, getTenantForOnboarding, SignupBlockedError } from "$lib/server/tenant";
+import { PLANT_ERRORS } from "$lib/errors";
 import { CloudflareDatabase } from "@autumnsgrove/infra/cloudflare";
 
 interface CompedInvite {
@@ -194,6 +195,11 @@ export const actions: Actions = {
 				subdomain,
 			};
 		} catch (err) {
+			// A blocked identity is a decision, not a failure — see /api/select-plan.
+			if (err instanceof SignupBlockedError) {
+				throw error(403, PLANT_ERRORS.SIGNUP_IDENTITY_BLOCKED.userMessage);
+			}
+
 			console.error("[Comped] Error creating tenant:", err);
 			throw error(500, "Failed to create your blog. Please try again.");
 		}

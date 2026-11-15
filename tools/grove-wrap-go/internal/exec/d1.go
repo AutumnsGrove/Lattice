@@ -20,7 +20,7 @@ type d1Envelope struct {
 func D1Query(database, sql string) ([]map[string]any, error) {
 	out, err := WranglerOutput("d1", "execute", database, "--remote", "--yes", "--json", "--command", sql)
 	if err != nil {
-		return nil, err
+		return nil, D1ErrorText(err)
 	}
 	return ParseD1Rows(out)
 }
@@ -50,4 +50,39 @@ func ParseD1Rows(raw string) ([]map[string]any, error) {
 		rows = append(rows, env.Results...)
 	}
 	return rows, nil
+}
+
+// D1ErrorText turns wrangler's failure output into one readable line.
+//
+// `wrangler d1 execute` reports errors as a JSON envelope on stderr, so a plain
+// `wrangler: {...}` is what a caller would otherwise see — useless in a terminal
+// at 2am. Pull out the message and drop the rest.
+func D1ErrorText(err error) error {
+	if err == nil {
+		return nil
+	}
+	msg := err.Error()
+
+	// Wrangler buries the useful part ("no such table: signup_blocks") in a
+	// `notes` entry. Prefer it over the generic API-failure line above it.
+	if idx := strings.Index(msg, "no such table"); idx >= 0 {
+		rest := msg[idx:]
+		if end := strings.IndexAny(rest, "\"\n"); end > 0 {
+			rest = rest[:end]
+		}
+		return fmt.Errorf("d1: %s", strings.TrimSpace(rest))
+	}
+
+	if idx := strings.Index(msg, `"text": "`); idx >= 0 {
+		rest := msg[idx+len(`"text": "`):]
+		if end := strings.Index(rest, `"`); end > 0 {
+			return fmt.Errorf("d1: %s", strings.TrimSpace(rest[:end]))
+		}
+	}
+
+	// Wrangler also prefixes its own failures with "wrangler: " and then dumps
+	// both stdout and stderr. First line is the part that matters.
+	firstLine := strings.TrimSpace(strings.SplitN(msg, "\n", 2)[0])
+	firstLine = strings.TrimPrefix(firstLine, "wrangler: ")
+	return fmt.Errorf("d1: %s", firstLine)
 }

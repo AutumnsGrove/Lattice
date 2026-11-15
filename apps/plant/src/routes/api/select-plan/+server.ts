@@ -13,7 +13,7 @@ import { transformAllTiers, type PricingTier } from "@autumnsgrove/lattice/platf
 import { type TierKey, isValidTier } from "@autumnsgrove/lattice/platform/config";
 import { PLANT_ERRORS, logPlantError } from "$lib/errors";
 import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
-import { createTenant, getTenantForOnboarding } from "$lib/server/tenant";
+import { createTenant, getTenantForOnboarding, SignupBlockedError } from "$lib/server/tenant";
 import { shouldSkipCheckout } from "$lib/server/onboarding-helper";
 import { CloudflareDatabase } from "@autumnsgrove/infra/cloudflare";
 
@@ -220,6 +220,12 @@ export const POST: RequestHandler = async ({ request, cookies, platform }) => {
 				console.log(`[Select Plan API] Created wanderer tier tenant for ${onboarding.username}`);
 			}
 		} catch (err) {
+			// A blocked identity is a decision, not a failure — answer 403 with the
+			// real copy instead of collapsing into the generic "try again" 500.
+			if (err instanceof SignupBlockedError) {
+				return json({ error: PLANT_ERRORS.SIGNUP_IDENTITY_BLOCKED.userMessage }, { status: 403 });
+			}
+
 			logPlantError(PLANT_ERRORS.ONBOARDING_UPDATE_FAILED, {
 				path: "/api/select-plan",
 				detail: `Free plan tenant creation for id=${onboardingId}`,
