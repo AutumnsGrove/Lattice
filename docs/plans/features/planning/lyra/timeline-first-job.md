@@ -86,6 +86,29 @@ The page turns every `### RepoName` into a link to `github.com/<username>/<RepoN
 
 So `search_past_days` can search the real text and repo lists of earlier days. It should not treat the stored `detected_focus` or `focus_streak` as evidence, because those are the keyword guesses that are wrong today. It also should not rely on a list of commits, pull requests, or issues from earlier days: the table keeps prose and repo names, not those identifiers. If each day's run record is kept (see record retention in `decisions.md`), the record holds the exact data the model was given, and would make a much better source.
 
+### There are two places that generate a day
+
+The nightly worker (`workers/timeline-sync`) is one. The other is the Arbor routes under `apps/aspen/src/routes/api/curios/timeline/` (`generate` and `backfill`), which have their own `builder.ts` and `github-fetcher.ts` and call Lumen on their own. Both use the shared prompts and parsing in `@autumnsgrove/curios/timeline`, and both write to the same table. The GitHub fetcher in the app appears to duplicate the worker's `github.ts`, which I have not compared line by line.
+
+For Lyra this means the timeline task should be one function that both entry points call, and the new pull request and issue fetching should be written once.
+
+### Vines: the two approaches, compared
+
+The stored markdown (`detailed_timeline`) is read by seven files: the public page's server load, the timeline API route, the Arbor generate builder, `Timeline.svelte`, the curios package index, the schema, and the worker's generator.
+
+**A. Markers in the text.**
+- The page learns to place a vine next to a marked line. A bullet carries a marker in the existing engine format, for example `<!-- anchor:l3 -->`, which the engine already turns into a `data-anchor` span (`processAnchorTags`), and the sanitizer already allows that attribute on a span.
+- The timeline's parser (`timelineMd`) must be allowed to pass that one marker through. The page then places the vine before the marked element, as the engine's gutter does today.
+- `add_line` writes the marker and the real links into the markdown itself. `add_vine` stores the vine with `anchor:l3` in the same `gutter_content` shape as now.
+- Stored rows keep working unchanged, since heading anchors still work. No database change.
+
+**B. Structured lines.**
+- Each day is stored as projects, each with lines (an id, the text, and references to real commits, pull requests, and issues), and vines that point at a line id. The page renders from that.
+- It matches the tools one to one, and links can be built from the references at display time.
+- It touches all seven readers, needs a database change, and old days are markdown, so the page must render both forms for as long as old rows exist.
+
+**Recommendation: A first.** It fixes the vine problem with the smallest change, it keeps every stored day working, and it reuses a format the engine already has. Tools write valid links into the markdown, which also fixes the invented-link problem. B stays possible later, since A does not block it.
+
 ### Still open
 
 - Which of the two vine approaches to take.
