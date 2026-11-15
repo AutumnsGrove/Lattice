@@ -11,7 +11,7 @@ A naming ritual for the Grove ecosystem. Use this when you need to find a name t
 
 - Naming a new service, feature, or concept for Grove
 - Renaming something that doesn't feel right
-- Called from the `grove-ui-design` skill when new UI needs a name
+- Called from the `chameleon-adapt` skill when new UI needs a name
 - Any time you're adding something to the Grove ecosystem
 
 ## The Process
@@ -224,9 +224,9 @@ _"Have a seat on the porch. We'll figure it out together."_
 
 ## Integration with Other Skills
 
-### grove-ui-design
+### chameleon-adapt
 
-When the `grove-ui-design` skill encounters something that needs naming:
+When the `chameleon-adapt` skill encounters something that needs naming:
 
 1. Pause the UI work
 2. Invoke this skill
@@ -235,15 +235,15 @@ When the `grove-ui-design` skill encounters something that needs naming:
 
 This keeps the naming intentional rather than rushed.
 
-### grove-documentation
+### owl-archive
 
-After finding the right name, you'll need to write its description. Invoke the **grove-documentation** skill when:
+After finding the right name, you'll need to write its description. Invoke the **owl-archive** skill when:
 
 1. Writing the entry for `docs/grove-naming.md`
 2. Crafting the tagline
 3. Writing the poetic one-liner
 
-The naming document entries should follow Grove's voice: warm, direct, avoiding AI patterns. The `grove-documentation` skill has the full guidelines.
+The naming document entries should follow Grove's voice: warm, direct, avoiding AI patterns. The `owl-archive` skill has the full guidelines.
 
 ---
 

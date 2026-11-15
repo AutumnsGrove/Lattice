@@ -5,7 +5,7 @@ description: The drum sounds. Spider, Raccoon, and Turtle gather for complete se
 
 # Gathering Security 🌲🕷️🦝🐢
 
-The drum echoes in the shadows. But this time, the conductor stands at the clearing's edge — not doing the work, but orchestrating it. Each animal arrives with fresh eyes, reads its own instructions, and works with full adversarial attention. The Spider weaves auth with precision. The Raccoon rummages with suspicion. The Turtle hardens with patience. Three isolated minds, zero shared sympathy, one fortress built right.
+_The conductor dispatches one subagent per animal, each with isolated context and an intentional model. It manages handoffs and gate checks — it never does the work itself._
 
 ## When to Summon
 
@@ -44,8 +44,6 @@ Spec     Spider    Check   Raccoon   Check    Turtle   Check   Final
 ---
 
 ### Phase 1: SUMMON
-
-_The drum sounds. The shadows shift..._
 
 The conductor receives the security request and prepares the dispatch plan:
 
@@ -88,8 +86,6 @@ All errors MUST use Signpost codes — this is a security requirement, not just 
 
 ### Phase 2: WEAVE (Spider)
 
-_The conductor signals. The Spider descends from the canopy..._
-
 ```
 Agent(spider, model: opus)
   Input:  security specification only
@@ -115,8 +111,6 @@ Dispatch an **opus subagent** to implement authentication. The Spider receives O
 
 ### Phase 3: AUDIT (Raccoon)
 
-_The Raccoon emerges from the undergrowth, nose twitching..._
-
 ```
 Agent(raccoon, model: sonnet)
   Input:  file list from Spider + security scope summary
@@ -141,8 +135,6 @@ Dispatch a **sonnet subagent** to audit the codebase. The Raccoon receives the f
 ---
 
 ### Phase 4: HARDEN (Turtle)
-
-_The Turtle approaches. It sees only what was built — not why..._
 
 ```
 Agent(turtle, model: opus)
@@ -172,8 +164,6 @@ Dispatch an **opus subagent** for adversarial security hardening. The Turtle rec
 ---
 
 ### Phase 5: ITERATION (When Turtle Finds Deep Issues)
-
-_The cycle turns. Some vulnerabilities run deeper than one animal can fix..._
 
 ```
 ┌──────────────────────────────────────────────────┐
@@ -217,8 +207,6 @@ _The cycle turns. Some vulnerabilities run deeper than one animal can fix..._
 ---
 
 ### Phase 6: FORTIFY
-
-_The web holds. The audit confirms. The shell endures..._
 
 The conductor runs final verification:
 
@@ -287,25 +275,15 @@ Woven tight, audited clean, hardened deep — the forest endures.
 
 ## Conductor Rules
 
-### Never Do Animal Work
+**Never Do Animal Work.** The conductor dispatches. It does not implement auth, audit secrets, or harden code. If you catch yourself writing security code, stop — dispatch a subagent.
 
-The conductor dispatches. It does not implement auth, audit secrets, or harden code. If you catch yourself writing security code, stop — dispatch a subagent.
+**Fresh Eyes Are a Feature.** Turtle intentionally receives LESS context than the full history. It doesn't see Spider's reasoning or Raccoon's audit logic. Adversarial fresh eyes produce better security review.
 
-### Fresh Eyes Are a Feature
+**Gate Every Transition.** Run CI between every animal. Don't let bad state cascade.
 
-Turtle intentionally receives LESS context than the full history. It doesn't see Spider's reasoning or Raccoon's audit logic. Adversarial fresh eyes produce better security review.
+**Resume, Don't Restart.** If a gate check fails or iteration is needed, **resume** the failing agent with the error context. Don't spawn a new one — the resumed agent has its prior work in context.
 
-### Gate Every Transition
-
-Run CI between every animal. Don't let bad state cascade.
-
-### Resume, Don't Restart
-
-If a gate check fails or iteration is needed, **resume** the failing agent with the error context. Don't spawn a new one — the resumed agent has its prior work in context.
-
-### Selective Mobilization
-
-Not every security gathering needs all three animals. Auth-only work skips Turtle. Hardening-only work skips Spider. The conductor decides based on the request.
+**Selective Mobilization.** Not every security gathering needs all three animals. Auth-only work skips Turtle. Hardening-only work skips Spider. The conductor decides based on the request.
 
 ---
 

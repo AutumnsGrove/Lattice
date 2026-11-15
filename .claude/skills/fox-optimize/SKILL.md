@@ -34,8 +34,6 @@ Slowness   Bottleneck  Hot Paths  Gains     Win
 
 ### Phase 1: STALK
 
-_The fox pads silently, watching for what moves too slowly..._
-
 Establish baseline metrics before touching anything.
 
 - Identify what feels slow: initial load, interactions, scrolling, data loading, transitions?
@@ -53,8 +51,6 @@ Establish baseline metrics before touching anything.
 ---
 
 ### Phase 2: PINPOINT
-
-_Ears perk. The fox isolates exactly where the prey hides..._
 
 Find the specific bottleneck with evidence.
 
@@ -74,8 +70,6 @@ The 80/20 rule: In SSR apps, check TTFB first — if the server is slow, no clie
 
 ### Phase 3: STREAMLINE
 
-_The fox finds the fastest path through the thicket..._
-
 Apply targeted optimizations — fix the bottleneck, not everything else.
 
 - Images: convert to WebP/AVIF, add lazy loading, add srcset for responsive sizes
@@ -92,8 +86,6 @@ Apply targeted optimizations — fix the bottleneck, not everything else.
 ---
 
 ### Phase 4: CATCH
-
-_The fox snaps its jaws — speed captured..._
 
 **MANDATORY: Verify the optimization didn't break anything:**
 
@@ -118,8 +110,6 @@ Document before/after for the report.
 ---
 
 ### Phase 5: CELEBRATE
-
-_The fox yips with joy, the hunt complete..._
 
 Report the win and prevent regression.
 
@@ -147,26 +137,11 @@ Report the win and prevent regression.
 
 ## Fox Rules
 
-### Speed
+**Speed.** The fox moves fast. Don't spend weeks on micro-optimizations. Find the big wins first.
 
-The fox moves fast. Don't spend weeks on micro-optimizations. Find the big wins first.
+**Precision.** Target the actual bottleneck. Profile first, optimize second. Don't guess.
 
-### Precision
-
-Target the actual bottleneck. Profile first, optimize second. Don't guess.
-
-### Balance
-
-Fast but broken is worthless. Verify functionality after each optimization.
-
-### Communication
-
-Use hunting metaphors:
-
-- "Stalking the slow paths..." (identifying issues)
-- "Pinpointing the prey..." (finding bottlenecks)
-- "Streamlining the route..." (optimizing)
-- "Catch secured..." (improvement verified)
+**Balance.** Fast but broken is worthless. Verify functionality after each optimization.
 
 ---
 
@@ -179,24 +154,6 @@ Use hunting metaphors:
 - Add complexity for marginal improvements
 - Forget to test after changes
 - Prematurely optimize everything
-
----
-
-## Example Hunt
-
-**User:** "The dashboard is slow to load"
-
-**Fox flow:**
-
-1. 🦊 **STALK** — "Measure: FCP 3.2s, LCP 5.1s. Target: FCP < 1.8s"
-
-2. 🦊 **PINPOINT** — "Lighthouse: render-blocking JS, unoptimized images, no caching. Database: N+1 queries for widget data."
-
-3. 🦊 **STREAMLINE** — "Defer non-critical JS, convert images to WebP, add DB indexes, implement KV caching"
-
-4. 🦊 **CATCH** — "FCP: 3.2s → 1.4s. LCP: 5.1s → 2.2s. Tests pass."
-
-5. 🦊 **CELEBRATE** — "Performance budget added to CI, RUM monitoring enabled"
 
 ---
 

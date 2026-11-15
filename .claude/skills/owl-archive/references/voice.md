@@ -1,9 +1,37 @@
----
-name: grove-documentation
-description: Write documentation, help articles, specs, and user-facing text in the authentic Grove voice. Use when writing any text that users will read, updating help center content, or drafting specs. Ensures warmth, clarity, and avoidance of AI patterns.
----
+# Owl Archive: The Grove Voice
 
-# Grove Documentation Skill
+> Loaded by owl-archive when writing or reviewing prose. See SKILL.md for the full workflow.
+
+## The Grove Voice
+
+From the project's guiding principles:
+
+> This site is my authentic voice — warm, introspective, queer, unapologetically building something meaningful; write like you're helping me speak, not perform.
+
+> Write with the warmth of a midnight tea shop and the clarity of good documentation — this is my space, make it feel like home.
+
+## What Grove Sounds Like
+
+**Warm but not cutesy.** We're friendly, not performative. "Let's get started" feels right. "Let's gooo! 🚀" does not.
+
+**Direct and honest.** Say what you mean. Acknowledge limitations. Don't oversell. If something doesn't work yet, say so.
+
+**Conversational but not sloppy.** Contractions are fine (you're, it's, we're). Short paragraphs. Questions that invite readers in. But still clear, still structured.
+
+**Introspective.** Grove makes space for reflection. We don't rush. We ask "why" alongside "how."
+
+**Poetic in small doses.** Italicized one-liners at the end of sections can land beautifully. Use them sparingly, earn them.
+
+## Sentence Rhythm
+
+Mix short sentences with longer ones. Vary your rhythm. Read it aloud — if it sounds monotonous, it is.
+
+**Good:**
+> Every new visitor asks the same question. "Is the music broken?" No. There is no music. There never has been.
+
+**Not good:**
+> Every new visitor asks a common question. The question is usually about whether the music system is functioning. The answer is that there is no music system. There has never been one.
+
 
 ## When to Activate
 
@@ -384,22 +412,22 @@ Before finalizing any Grove documentation:
 
 ## Integration with Other Skills
 
-When **grove-ui-design** or **walking-through-the-grove** need written content, invoke this skill first. The visual design and naming should match the voice.
+When **chameleon-adapt** or **walking-through-the-grove** need written content, invoke this skill first. The visual design and naming should match the voice.
 
 **Typical flow:**
 
 1. Design calls for new component/page text
-2. Activate `grove-documentation` for voice guidance
+2. Load `references/voice.md` for voice guidance
 3. Write the content following these principles
 4. Return to design/naming work
 
 ### When to Use museum-documentation Instead
 
-This skill (grove-documentation) is for **quick, functional text**: help articles, error messages, tooltips, onboarding copy. Content that's read in passing.
+This guide is for **quick, functional text**: help articles, error messages, tooltips, onboarding copy. Content that's read in passing.
 
 Use **museum-documentation** when you need **narrative, explorable documentation**:
 
-| Use grove-documentation | Use museum-documentation                   |
+| Use this guide | Use museum-documentation                   |
 | ----------------------- | ------------------------------------------ |
 | Help center articles    | Knowledge base "how it works"              |
 | Tooltips and labels     | Codebase guided tours                      |

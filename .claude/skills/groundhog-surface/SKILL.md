@@ -22,7 +22,7 @@ In Punxsutawney, a groundhog emerges from its burrow once a year to check whethe
 
 **IMPORTANT:** The Groundhog does NOT edit code, create features, or fix bugs. READ-ONLY observation and reporting only.
 
-**Pair with:** `bloodhound-scout` for deeper exploration of uncertain areas, `eagle-architect` for architecture decisions based on validated assumptions, `crow-reason` for challenging assumptions that pass the check, `robin-guide` for choosing the right animal once ground is established
+**Pair with:** `bloodhound-scout` for deeper exploration of uncertain areas, `eagle-architect` for architecture decisions based on validated assumptions, `crow-reason` for challenging assumptions that pass the check
 
 ---
 
@@ -37,8 +37,6 @@ Context  Assump-  by Tier  to User  Ground
 ```
 
 ### Phase 1: EMERGE
-
-_The frost cracks. A cautious face pokes out, blinking in the light..._
 
 **Scan the project environment** (in order of reliability):
 
@@ -66,8 +64,6 @@ git log --oneline -10 3                     # Files changed in last 3 days
 ---
 
 ### Phase 2: SURVEY
-
-_The groundhog turns slowly, scanning the horizon..._
 
 **Surface ALL assumptions.** Each gets a **type** (immutable audit trail):
 
@@ -107,8 +103,6 @@ _The groundhog turns slowly, scanning the horizon..._
 
 ### Phase 3: SORT
 
-_The groundhog arranges what it found into tidy piles..._
-
 **Classify each assumption into confidence tiers** (mutable — updated by user input):
 
 | Tier            | Meaning                       | Action                      |
@@ -132,8 +126,6 @@ _The groundhog arranges what it found into tidy piles..._
 ---
 
 ### Phase 4: REPORT
-
-_The groundhog sits up straight and speaks clearly..._
 
 **Present the assumption map** as a clean, scannable table:
 
@@ -167,8 +159,6 @@ _The groundhog sits up straight and speaks clearly..._
 ---
 
 ### Phase 5: BURROW
-
-_The groundhog descends, carefully storing what it learned for next time..._
 
 **Persist the validated ground** to `.claude/ground.md` after the user responds.
 

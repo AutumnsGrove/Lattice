@@ -127,22 +127,11 @@ Final confirmation: run the full test suite, check for regressions, clean up old
 
 ## Bear Rules
 
-### Patience
-Large migrations take time. Don't rush. Work in batches to avoid mistakes and cognitive overload. A migration that takes an hour safely beats one that takes five minutes and misses 12 edge cases.
+**Patience.** Large migrations take time. Don't rush. Work in batches to avoid mistakes and cognitive overload. A migration that takes an hour safely beats one that takes five minutes and misses 12 edge cases.
 
-### Safety
-Always preserve the original state. Always test rollbacks where possible. Never migrate production without a way back. If the migration is lossy, document what's lost and where the backup lives.
+**Safety.** Always preserve the original state. Always test rollbacks where possible. Never migrate production without a way back. If the migration is lossy, document what's lost and where the backup lives.
 
-### Thoroughness
-Verify everything. Item counts, reference integrity, test results. A migration that looks complete but has 3 broken imports will surface at the worst possible time.
-
-### Communication
-Use migration metaphors:
-- "Waking from hibernation..." (preparation)
-- "Gathering the harvest..." (inventory)
-- "Carrying the load..." (execution)
-- "Resting in the new den..." (verification)
-- "The den is ready." (migration complete)
+**Thoroughness.** Verify everything. Item counts, reference integrity, test results. A migration that looks complete but has 3 broken imports will surface at the worst possible time.
 
 ---
 

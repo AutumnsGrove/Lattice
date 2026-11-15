@@ -33,8 +33,6 @@ Vision   Materials  Power    Strength   Triumph
 
 ### Phase 1: TRUMPET
 
-_The elephant lifts its trunk and sounds the beginning..._
-
 Declare what we're building with full scope clarity.
 
 - Write one sentence: what does this feature DO for users?
@@ -50,8 +48,6 @@ Declare what we're building with full scope clarity.
 
 ### Phase 2: GATHER
 
-_The elephant collects stones and branches, preparing the foundation..._
-
 Collect everything needed before building begins.
 
 - Check dependencies — verify required packages exist, install what's missing
@@ -64,8 +60,6 @@ Collect everything needed before building begins.
 ---
 
 ### Phase 3: BUILD
-
-_The elephant places each stone with precision, building what will last..._
 
 Construct the feature file by file, in order.
 
@@ -88,8 +82,6 @@ Construct the feature file by file, in order.
 ---
 
 ### Phase 4: TEST
-
-_The elephant tests each stone, ensuring the structure holds..._
 
 **MANDATORY: Verify the build before committing. The elephant does not ship broken structures.**
 
@@ -148,8 +140,6 @@ Review the screenshots. If something doesn't look right, fix it and capture agai
 
 ### Phase 5: CELEBRATE
 
-_The elephant raises its trunk in triumph, the build complete..._
-
 Ship and document.
 
 ```bash
@@ -174,27 +164,11 @@ Write the completion summary: files created, files modified, config changes, tes
 
 ## Elephant Rules
 
-### Momentum
+**Momentum.** Keep moving forward. Don't get stuck on one file for hours. If blocked, make a TODO and move on. The elephant doesn't stop.
 
-Keep moving forward. Don't get stuck on one file for hours. If blocked, make a TODO and move on. The elephant doesn't stop.
+**Completeness.** Build the whole feature. Half-built features don't help users. If the scope is too big, scope down — but finish what you start.
 
-### Completeness
-
-Build the whole feature. Half-built features don't help users. If the scope is too big, scope down — but finish what you start.
-
-### Quality
-
-Build it right the first time. Tests, error handling, types — these aren't extras, they're part of the build.
-
-### Communication
-
-Use building metaphors:
-
-- "Sounding the trumpet..." (declaring the vision)
-- "Gathering materials..." (preparation)
-- "Placing each stone..." (construction)
-- "Testing the structure..." (validation)
-- "Build complete!" (celebration)
+**Quality.** Build it right the first time. Tests, error handling, types — these aren't extras, they're part of the build.
 
 ---
 
@@ -208,24 +182,6 @@ Use building metaphors:
 - Break existing functionality
 - Ignore error cases for the happy path
 - Copy-paste without understanding
-
----
-
-## Example Build
-
-**User:** "Add a comments system to blog posts"
-
-**Elephant flow:**
-
-1. 🐘 **TRUMPET** — "Users can leave threaded comments on blog posts. Scope: basic CRUD, threaded replies, moderation. Out: real-time updates, reactions."
-
-2. 🐘 **GATHER** — "Need: comments table schema, comment service, API endpoints, Comment component, recursive display logic. Check: existing auth patterns, how posts work."
-
-3. 🐘 **BUILD** — "Schema → Service (CRUD + threading) → API endpoints → CommentList/CommentForm components → Wire into post page → Add moderation UI"
-
-4. 🐘 **TEST** — "Unit tests for service, integration tests for API, component tests for UI, manual test of threading depth limit"
-
-5. 🐘 **CELEBRATE** — "8 files created, 3 modified, 45 tests passing, documented moderation workflow"
 
 ---
 

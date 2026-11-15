@@ -26,14 +26,10 @@ The raccoon is curious. It lifts every rock, peers into every crevice, washes ev
 
 ```
 RUMMAGE → INSPECT → SANITIZE → PURGE → VERIFY
-    ↓         ↓          ↓         ↓         ↓
-Search   Examine   Cleanse   Remove   Confirm
-Everything  Closely   Contaminated Dead     Clean
 ```
 
 ### Phase 1: RUMMAGE
 
-_Little paws lift the rocks, curious eyes peer underneath..._
 
 Systematic search for things that don't belong:
 
@@ -88,7 +84,6 @@ grep -r "alert(" --include="*.svelte" --include="*.ts" | grep -v "node_modules"
 ```bash
 # Check for known vulnerabilities
 npm audit
-pip audit  # if using Python
 ```
 
 **Output:** Inventory of potential secrets, vulnerabilities, and suspicious patterns found
@@ -97,7 +92,6 @@ pip audit  # if using Python
 
 ### Phase 2: INSPECT
 
-_The raccoon washes the object, turning it over in careful paws..._
 
 Examine findings to separate real risks from false positives:
 
@@ -147,7 +141,6 @@ For each potential secret found:
 
 ### Phase 3: SANITIZE
 
-_Contaminated objects get scrubbed until they gleam..._
 
 Clean up the mess without breaking functionality:
 
@@ -212,8 +205,6 @@ npm audit  # Should show 0 vulnerabilities
 
 ### Phase 4: PURGE
 
-_What doesn't belong gets carried away, never to return..._
-
 Remove the harmful remnants:
 
 **Git History Cleaning (if secrets were committed):**
@@ -264,7 +255,6 @@ npm uninstall unused-package
 
 ### Phase 5: VERIFY
 
-_The raccoon washes its paws, inspecting them one last time..._
 
 Confirm everything is clean and stays clean:
 
@@ -337,26 +327,11 @@ npx husky add .husky/pre-commit "npm run lint && npm run security-check"
 
 ## Raccoon Rules
 
-### Curiosity
+**Curiosity.** Inspect everything; verify rather than assume. That "harmless" test file may hold production credentials.
 
-Inspect everything. The raccoon doesn't assume— it verifies. That "harmless" test file might contain production credentials.
+**Thoroughness.** Half-cleaned secrets are still exposed secrets.
 
-### Thoroughness
-
-Wash every object. Half-cleaned secrets are still exposed secrets. Don't stop at the surface.
-
-### Safety
-
-Handle contaminated items carefully. When rotating secrets, ensure zero-downtime transitions. Don't break production while fixing security.
-
-### Communication
-
-Use investigative metaphors:
-
-- "Lifting the rocks..." (searching thoroughly)
-- "Washing the object..." (examining closely)
-- "Scrubbing clean..." (sanitizing)
-- "Carrying away..." (purging)
+**Safety.** Rotate without downtime. Don't break production while fixing security.
 
 ---
 
@@ -373,21 +348,15 @@ Use investigative metaphors:
 
 ---
 
-## Example Audit
+## Example audit
 
-**User:** "Audit the codebase before open sourcing"
+> "Audit the codebase before open sourcing"
 
-**Raccoon flow:**
-
-1. 🦝 **RUMMAGE** — "Found 3 API keys in config files, internal URLs in README, employee emails in test data, 12 TODO comments with internal ticket numbers"
-
-2. 🦝 **INSPECT** — "One API key is active production key (CRITICAL). Others are test keys but still shouldn't be public. Internal URLs expose infrastructure."
-
-3. 🦝 **SANITIZE** — "Move keys to env vars, replace URLs with example.com, scrub employee data, rewrite TODOs generically"
-
-4. 🦝 **PURGE** — "Use BFG to clean git history of secrets, remove 2 unused dependencies, delete old deployment scripts"
-
-5. 🦝 **VERIFY** — "Re-scan shows no secrets, all tests pass, pre-commit hooks installed to prevent future secrets"
+1. **RUMMAGE** — 3 API keys in config, internal URLs in the README, employee emails in fixtures, TODOs leaking ticket numbers.
+2. **INSPECT** — one key is live production (CRITICAL); the others are test keys but still public.
+3. **SANITIZE** — keys to env vars, URLs to example.com, employee data scrubbed.
+4. **PURGE** — BFG the history, drop 2 unused dependencies, delete old deploy scripts.
+5. **VERIFY** — re-scan clean, tests pass, pre-commit hook installed.
 
 ---
 
@@ -418,7 +387,7 @@ Use investigative metaphors:
 **After Audit:**
 
 - `panther-strike` — If fixing specific security issues rapidly
-- `grove-documentation` — Update security runbooks
+- `owl-archive` — Update security runbooks
 
 ---
 

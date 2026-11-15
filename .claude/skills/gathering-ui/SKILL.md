@@ -5,7 +5,7 @@ description: The drum sounds. Chameleon and Deer gather for complete UI work. Us
 
 # Gathering UI 🌲🦎🦌
 
-The drum echoes through the glade. The conductor stands at the clearing's center, orchestrating two very different kinds of attention. The Chameleon arrives with fresh eyes — no preconceptions about what the page should look like, just the spec and the forest's palette. The Deer arrives later, also with fresh eyes — it hasn't watched the CSS being written, so it tests accessibility without unconscious trust. Beautiful and accessible, built by isolated minds.
+_The conductor dispatches one subagent per animal, each with isolated context and an intentional model. It manages handoffs and gate checks — it never does the work itself._
 
 ## When to Summon
 
@@ -41,8 +41,6 @@ Spec    Chameleon  Check     Deer    Check    Visual
 
 ### Phase 1: SUMMON
 
-_The drum sounds. The glade awaits..._
-
 The conductor receives the UI request and prepares the dispatch plan:
 
 **Clarify the UI Work:**
@@ -59,8 +57,6 @@ The conductor receives the UI request and prepares the dispatch plan:
 ---
 
 ### Phase 2: ADAPT (Chameleon)
-
-_The conductor signals. The Chameleon shifts its colors..._
 
 ```
 Agent(chameleon, model: sonnet)
@@ -87,8 +83,6 @@ Dispatch a **sonnet subagent** to design and build the UI. The Chameleon receive
 ---
 
 ### Phase 3: SENSE (Deer)
-
-_The Deer steps into the glade. It hasn't watched the colors change..._
 
 ```
 Agent(deer, model: sonnet)
@@ -127,8 +121,6 @@ If the Deer's report includes issues it couldn't fix directly (e.g., structural 
 ---
 
 ### Phase 5: VERIFY
-
-_The glade is complete. But the conductor looks with its own eyes..._
 
 **Component Audit Gate (MANDATORY before page-level verification):**
 
@@ -210,25 +202,15 @@ The glade welcomes all wanderers.
 
 ## Conductor Rules
 
-### Never Do Animal Work
+**Never Do Animal Work.** The conductor dispatches. It does not write CSS, build components, or audit accessibility.
 
-The conductor dispatches. It does not write CSS, build components, or audit accessibility.
+**Fresh Eyes Are a Feature.** The Deer hasn't watched the Chameleon work. It sees only the rendered result, not the design intent. This isolation catches contrast issues, missing labels, and navigation gaps that a sympathetic observer would miss.
 
-### Fresh Eyes Are a Feature
+**Gate Every Transition.** CI between Chameleon and Deer. Component checks after the Chameleon. CI after Deer's fixes. Screenshots after everything.
 
-The Deer hasn't watched the Chameleon work. It sees only the rendered result, not the design intent. This isolation catches contrast issues, missing labels, and navigation gaps that a sympathetic observer would miss.
+**Visual Proof Required.** The conductor MUST capture and review Glimpse screenshots before declaring complete. CI passing is not the same as looking correct.
 
-### Gate Every Transition
-
-CI between Chameleon and Deer. Component checks after the Chameleon. CI after Deer's fixes. Screenshots after everything.
-
-### Visual Proof Required
-
-The conductor MUST capture and review Glimpse screenshots before declaring complete. CI passing is not the same as looking correct.
-
-### Resume, Don't Restart
-
-If iteration is needed, resume existing agents. They have context from their prior work.
+**Resume, Don't Restart.** If iteration is needed, resume existing agents. They have context from their prior work.
 
 ---
 

@@ -4,7 +4,7 @@
  * Tests the secrets CRUD endpoints for auth, validation, and error handling.
  * Core encryption logic is tested in secrets-manager.test.ts.
  *
- * @see /grove-testing for testing philosophy
+ * @see beaver-build (skill) for testing philosophy
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";

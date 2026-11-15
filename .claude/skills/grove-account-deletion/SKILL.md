@@ -242,4 +242,3 @@ The media bucket is: `grove-media` (R2)
 
 ---
 
-_A clean deletion is a kind goodbye. Leave no orphans behind._

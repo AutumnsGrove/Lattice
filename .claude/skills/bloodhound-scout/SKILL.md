@@ -33,8 +33,6 @@ Scent    Trail   Dive     Territory Knowledge
 
 ### Phase 1: SCENT
 
-_The nose twitches. Something's been here..._
-
 Establish what we're tracking:
 
 **The Starting Point:**
@@ -78,8 +76,6 @@ glob "**/api/**/*.ts"  # Just API routes
 ---
 
 ### Phase 2: TRACK
-
-_Paws pad softly, following the trail as it winds through the underbrush..._
 
 Follow connections systematically:
 
@@ -136,8 +132,6 @@ As you track, notice patterns:
 ---
 
 ### Phase 3: HUNT
-
-_The trail goes cold, but the bloodhound circles, finding it again in unexpected places..._
 
 Deep dive into the most important findings:
 
@@ -216,8 +210,6 @@ Look for:
 
 ### Phase 4: REPORT
 
-_The bloodhound returns, dropping a map at the hunter's feet..._
-
 Document findings for others (and your future self):
 
 **The Territory Map:**
@@ -285,8 +277,6 @@ password.utils.ts
 
 ### Phase 5: RETURN
 
-_The hunt is complete. The knowledge stays, ready for the next tracker..._
-
 Prepare for handoff:
 
 **Knowledge Transfer:**
@@ -347,26 +337,11 @@ Create quick access points:
 
 ## Bloodhound Rules
 
-### Persistence
+**Persistence.** Never lose the scent. If the trail goes cold, circle back. Check imports, exports, configuration files. The code is there—keep hunting.
 
-Never lose the scent. If the trail goes cold, circle back. Check imports, exports, configuration files. The code is there—keep hunting.
+**Method.** Track systematically. Don't jump around randomly. Follow the call graph, document as you go, build the map piece by piece.
 
-### Method
-
-Track systematically. Don't jump around randomly. Follow the call graph, document as you go, build the map piece by piece.
-
-### Detail
-
-Notice the small things. That inconsistent error message, the commented-out code, the TODO from six months ago. These are signposts.
-
-### Communication
-
-Use tracking metaphors:
-
-- "Picking up the scent..." (starting the search)
-- "Following the trail..." (tracing connections)
-- "The hunt goes deep..." (deep dive analysis)
-- "Dropping the map..." (documenting findings)
+**Detail.** Notice the small things. That inconsistent error message, the commented-out code, the TODO from six months ago. These are signposts.
 
 ---
 
@@ -379,24 +354,6 @@ Use tracking metaphors:
 - Assume code does what comments say (trust the code, not comments)
 - Forget to document (the hunt is wasted if knowledge dies)
 - Get distracted by side trails (stay focused on the target scent)
-
----
-
-## Example Scout
-
-**User:** "How does the payment system work?"
-
-**Bloodhound flow:**
-
-1. 🐕 **SCENT** — "Starting with 'payment' keyword, searching for components, services, API routes"
-
-2. 🐕 **TRACK** — "Found PaymentForm component → calls paymentService → uses Stripe SDK → webhooks in +server.ts"
-
-3. 🐕 **HUNT** — "Deep dive: error handling, idempotency keys, webhook signature verification, retry logic"
-
-4. 🐕 **REPORT** — "Complete flow map, 7 files involved, 2 inconsistent patterns found, 1 security recommendation"
-
-5. 🐕 **RETURN** — "Documentation in docs/payments/, bookmarked key files, suggested 3 improvements"
 
 ---
 
