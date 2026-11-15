@@ -5,224 +5,185 @@ description: Build robust test dams that catch bugs before they flood production
 
 # Beaver Build 🦫
 
-The beaver doesn't build blindly. First, it surveys the stream, understanding the flow. Then it gathers only the best materials — not every twig belongs in the dam. It builds with purpose, each piece placed carefully. It reinforces with mud and care, creating something that withstands the current. When the dam holds, the forest is safe.
-
-## When to Activate
-
-- User asks to "write tests" or "add tests"
-- User says "test this" or "make sure this works"
-- User calls `/beaver-build` or mentions beaver/building dams
-- Deciding what deserves testing (not everything does)
-- Reviewing existing tests for effectiveness
-- A bug needs to become a regression test
-- Asked to "add tests" without specific guidance
-- Evaluating whether tests are providing real value
-- Refactoring causes many tests to break (symptom of bad tests)
-
-**Pair with:** `grove-testing` for where to spend the effort
-
----
-
-## The Dam
-
 ```
 SURVEY → GATHER → BUILD → REINFORCE → FORTIFY
-   ↓        ↲        ↓          ↲          ↓
-Understand Collect  Construct   Harden    Ship with
-Flow     Materials  Tests       Coverage  Confidence
 ```
 
-### Phase 1: SURVEY
+Each phase loads one reference. Load it when the phase calls for it, not all at once.
 
-_The beaver surveys the stream, understanding the flow before placing a single twig..._
+## Reference Routing Table
 
-Before gathering materials, understand what you're building for.
-
-- What does this feature DO for users? (Not how it works — what value it provides)
-- What would break if this failed? (Critical paths)
-- What confidence level is needed? (Prototype vs. production)
-- The Testing Trophy: mostly integration, some unit, few E2E, static analysis always on
-
-**Reference:** Load `references/testing-patterns.md` for the full Testing Trophy explanation, what to test vs. skip, the guiding questions, and what makes a test valuable
-
-**Reference:** Load `references/grove-test-infrastructure.md` to see what test utilities, factories, and mocks already exist in the codebase — don't reinvent what's already built
-
-**Output:** Brief summary of what needs testing and at what layer
+| Phase     | Reference                            | Load when                                     |
+| --------- | ------------------------------------ | --------------------------------------------- |
+| SURVEY    | `references/testing-patterns.md`      | Always — the trophy, what to test, what to skip |
+| SURVEY    | `references/grove-test-infrastructure.md` | Always — what utilities already exist     |
+| GATHER    | `references/testing-patterns.md`      | Deciding skip vs. test thoroughly              |
+| BUILD     | `scripts/scaffold-test.sh`            | Generating test boilerplate                    |
+| BUILD     | `references/test-templates.md`        | Writing the actual tests                       |
+| BUILD     | `references/grove-test-infrastructure.md` | Factory, mock and helper import paths     |
+| REINFORCE | `references/testing-patterns.md`      | Mocking strategy, bug-to-test pipeline         |
+| FORTIFY   | `references/test-templates.md`        | Self-review checklist                          |
 
 ---
 
-### Phase 2: GATHER
+## What makes a test worth writing
 
-_Paws select only the best branches. Not everything belongs in the dam..._
+> _"Write tests. Not too many. Mostly integration."_ — Guillermo Rauch
 
-Decide what to test using the Confidence Test.
+> _"The more your tests resemble the way your software is used, the more confidence they can give you."_ — Kent C. Dodds
 
-- Skip: trivial getters/setters, framework behavior, implementation details, one-off scripts, volatile prototypes
-- Test lightly: configuration (smoke test), third-party integrations (mock at boundary), visual design (snapshots)
-- Test thoroughly: business logic, user-facing flows, edge cases, bug fixes
+Ask: **does this test fail when the feature breaks?** If it only fails during refactors, it's testing implementation details.
 
-Ask: "Would I notice if this broke in production?" If yes, test it.
+| Property               | Means                                      |
+| ---------------------- | ------------------------------------------ |
+| **Behaviour-sensitive** | Fails when real functionality breaks       |
+| **Structure-immune**    | Survives safe refactors                    |
+| **Deterministic**       | Same result every run, no flakes           |
+| **Fast**                | Seconds of feedback, not minutes           |
+| **Clear diagnosis**     | A failure says exactly what broke          |
+| **Cheap to write**      | Effort proportional to complexity          |
 
-**Reference:** Load `references/testing-patterns.md` for the full skip/test-lightly/test-thoroughly tables and the guiding questions
+The confidence test, before writing anything:
 
-**Output:** List of test cases to write, organized by layer (unit/integration/E2E)
-
----
-
-### Phase 3: BUILD
-
-_Twig by twig, the dam takes shape. Each piece has purpose..._
-
-Write tests following Arrange-Act-Assert.
-
-- The Act section should be one line — if it's not, the test does too much
-- Test user behavior, not implementation details
-- Use accessible queries: `getByRole`, `getByLabelText`, `getByText` — never `getByTestId` first
-- Name tests so they explain what breaks: "should reject registration with invalid email"
-- One test, one reason to fail
-
-**Script:** Run `scripts/scaffold-test.sh <type> <source-file>` to generate test boilerplate. Types: `service`, `api`, `component`, `worker`. The scaffolded file uses the right imports, factories, and patterns for each test type.
-
-**Reference:** Load `references/test-templates.md` for complete SvelteKit test templates: service unit tests, API route tests, component tests with Testing Library, and integration tests for full flows
-
-**Reference:** Load `references/grove-test-infrastructure.md` for the exact factory functions, mock utilities, and import paths to use — includes `createMockRequestEvent`, `createAuthenticatedTenantEvent`, `createMockD1`, `createMockKV`, `createMockR2`, and more
-
-**Output:** Working tests that follow AAA pattern and test behavior, not implementation
+1. Would I notice if this broke in production? If no, skip it.
+2. Would the test fail if the feature broke? If no, don't write it.
+3. Does it resemble how users touch the feature? If no, reconsider.
 
 ---
 
-### Phase 4: REINFORCE
+## Phase 1: SURVEY
 
-_The beaver packs mud between twigs, hardening the structure..._
+Understand the flow before placing a twig.
 
-Strengthen tests.
+- What does the feature DO for users — not how it works
+- What breaks if it fails (critical paths)
+- What confidence level is needed — prototype or production
+- The trophy: mostly integration, some unit, few E2E, static analysis always on
 
-- Mock only at external boundaries — if you're mocking something you wrote, reconsider
-- Turn every bug into a regression test: reproduce → write failing test → fix → test passes → bug can't return
-- Keep tests co-located with the code they test (`login.test.ts` next to `login.ts`)
-- Verify Signpost error format in API tests: `error_code`, `error`, `error_description`
+`references/grove-test-infrastructure.md` first — factories, mocks and helpers probably already exist. Don't reinvent them.
 
-**Reference:** Load `references/testing-patterns.md` for the minimal mocking guide, bug-to-test pipeline, and Signpost error code coverage patterns
-
-**Output:** Hardened tests with proper mocking boundaries and clear failure messages
+**Output:** what needs testing, at which layer.
 
 ---
 
-### Phase 5: FORTIFY
+## Phase 2: GATHER
 
-_The dam holds. Water flows as intended. The beaver rests..._
+Not every twig belongs in the dam. Sort candidates:
 
-**MANDATORY: Verify the dam holds before shipping:**
+- **Skip:** trivial getters, framework behaviour, implementation details, one-off scripts, volatile prototypes
+- **Test lightly:** configuration (smoke test), third-party integrations (mock the boundary), visual design (snapshots)
+- **Test thoroughly:** business logic, user-facing flows, edge cases, bug fixes
+
+`references/testing-patterns.md` has the full tables and guiding questions.
+
+**Output:** test cases organised by layer.
+
+---
+
+## Phase 3: BUILD
+
+Arrange–Act–Assert, and:
+
+- The Act is one line. If it isn't, the test does too much.
+- Test behaviour, not implementation.
+- Accessible queries — `getByRole`, `getByLabelText`, `getByText` — never `getByTestId` first.
+- Name the test so it says what breaks: "should reject registration with invalid email".
+- One test, one reason to fail.
+
+`scripts/scaffold-test.sh <type> <source-file>` generates boilerplate for `service`, `api`, `component` and `worker`, using the right imports and factories. `references/test-templates.md` has the SvelteKit templates; `references/grove-test-infrastructure.md` has the exact factory and mock import paths (`createMockRequestEvent`, `createAuthenticatedTenantEvent`, `createMockD1`, `createMockKV`, `createMockR2`).
+
+**Output:** working tests following AAA.
+
+---
+
+## Phase 4: REINFORCE
+
+- Mock only at external boundaries. If you're mocking your own code, reconsider.
+- Every bug becomes a regression test: reproduce → failing test → fix → green → it can't come back.
+- Tests live beside the code they test (`login.test.ts` next to `login.ts`).
+- API tests verify the Signpost shape: `error_code`, `error`, `error_description`.
+
+### Trust boundaries
+
+Every boundary needs a valid and an invalid case:
+
+| Boundary             | Test                                                    |
+| -------------------- | ------------------------------------------------------- |
+| Form actions         | Missing fields, wrong types, edge values → `parseFormData()` returns structured errors, never crashes |
+| KV reads             | Corrupted or stale JSON → `safeJsonParse()` falls back   |
+| Cache reads          | Unexpected shapes → `createTypedCacheReader()` falls back |
+| Catch blocks         | Redirects and HTTP errors → `isRedirect()` / `isHttpError()` route correctly |
+
+All from `@autumnsgrove/lattice/server`. `references/testing-patterns.md` has the mocking guide and bug-to-test pipeline.
+
+**Output:** hardened tests with correct boundaries.
+
+---
+
+## Phase 5: FORTIFY
+
+**MANDATORY before shipping:**
 
 ```bash
 pnpm install
 gw ci --affected --fail-fast --diagnose
 ```
 
-If verification fails: the dam has a leak. Read the diagnostics, patch the weakness, re-run verification.
+A failure means a leak: read the diagnostics, patch it, re-run. Coverage (optional, after CI): `npx vitest run --coverage`.
 
-Additional coverage check (optional, after CI passes):
+Run the self-review checklist in `references/test-templates.md` before calling the tests done.
 
-```bash
-npx vitest run --coverage
-```
-
-Run the self-review checklist before considering tests "done".
-
-**Reference:** Load `references/test-templates.md` for the test self-review checklist
-
-**Output:** Clean test suite ready for CI
+**Output:** clean suite ready for CI.
 
 ---
 
-## Reference Routing Table
+## When tests break
 
-| Phase | Reference | Load When |
-|-------|-----------|-----------|
-| SURVEY | `references/testing-patterns.md` | Always (understand the Trophy and what to test) |
-| SURVEY | `references/grove-test-infrastructure.md` | Always (know what utilities already exist) |
-| GATHER | `references/testing-patterns.md` | Deciding what to skip vs. test thoroughly |
-| BUILD | `scripts/scaffold-test.sh` | Run to generate test file boilerplate |
-| BUILD | `references/test-templates.md` | Writing actual tests (service, API, component) |
-| BUILD | `references/grove-test-infrastructure.md` | Import paths for factories, mocks, and helpers |
-| REINFORCE | `references/testing-patterns.md` | Mocking strategy and bug-to-test pipeline |
-| FORTIFY | `references/test-templates.md` | Running the self-review checklist |
+**Good breaks:** the feature changed, a bug was fixed, a requirement moved. Update the test.
+
+**Bad breaks:** you refactored internals, renamed a CSS class, reordered code. The test was coupled to structure. Rewrite it with accessible queries and no ordering assumptions.
+
+If refactoring regularly breaks your tests, they're testing the wrong thing.
 
 ---
 
-## Beaver Rules
+## Anti-patterns
 
-### Energy
+The beaver does NOT:
 
-Build with purpose. The beaver doesn't add twigs just to add them. Each test must earn its place by providing confidence.
-
-### Precision
-
-Test behavior, not structure. If refactoring breaks your tests, they were testing the wrong things.
-
-### Wisdom
-
-Remember the trophy: mostly integration, some unit, few E2E. Static analysis is your first line of defense.
-
-### Patience
-
-Good tests let you ship with confidence. That's the whole point.
-
-### Communication
-
-Use building metaphors:
-
-- "Surveying the stream..." (understanding what to test)
-- "Gathering materials..." (deciding what to test)
-- "The dam takes shape..." (writing tests)
-- "Packing the mud..." (adding coverage)
-- "The structure holds..." (tests passing)
+- chase 100% coverage theatre — coverage with bad tests is worse than moderate coverage with good ones
+- test implementation details (internal state, private methods, CSS classes)
+- mock everything, which removes the confidence you were buying
+- write tests that break on safe refactors
+- use snapshots for volatile UI
+- build the ice cream cone (many E2E, few integration, few unit)
 
 ---
 
-## Anti-Patterns
+## Quick decision guide
 
-**The beaver does NOT:**
-
-- Chase 100% coverage theater (high coverage with bad tests is worse than moderate coverage with good tests)
-- Test implementation details (internal state, private methods)
-- Mock everything (removes confidence)
-- Write tests that break on safe refactors
-- Use snapshots for volatile UI
-- Build the Ice Cream Cone (many E2E, few integration, few unit)
-
----
-
-## Example Build
-
-**User:** "Add tests for the login form"
-
-**Beaver flow:**
-
-1. 🦫 **SURVEY** — "Login form handles user authentication. Critical path: registration → dashboard flow. Integration tests where confidence lives."
-
-2. 🦫 **GATHER** — "Test: invalid email rejection, API error handling, successful redirect, loading states. Skip: internal state changes."
-
-3. 🦫 **BUILD** — Write integration tests using AAA pattern: `should reject registration with invalid email`, `should show loading indicator while logging in`, `should redirect to dashboard after successful login`
-
-4. 🦫 **REINFORCE** — Add regression test for previous password reset bug. Mock only external API, not internal validation.
-
-5. 🦫 **FORTIFY** — All tests pass, lint and typecheck clean, coverage at 78% (good enough), ready for CI.
+| Situation           | Action                                                       |
+| ------------------- | ------------------------------------------------------------ |
+| New feature         | Integration tests for user-facing behaviour                  |
+| Bug fix             | Test that reproduces it first, then fix                      |
+| Refactoring         | Run existing tests; breaking on safe changes means bad tests |
+| "Need more coverage"| Cover behaviour, not lines                                   |
+| Pure function       | Unit test                                                    |
+| API endpoint        | Integration test, external services mocked                   |
+| UI component        | Component test with Testing Library                          |
+| Critical user flow  | E2E                                                          |
 
 ---
 
-## Quick Decision Guide
+## Example build
 
-| Situation | Action |
-|-----------|--------|
-| New feature | Write integration tests for user-facing behavior |
-| Bug fix | Write test that reproduces bug first, then fix |
-| Refactoring | Run existing tests; if they break on safe changes, they're bad tests |
-| "Need more coverage" | Add tests for uncovered **behavior**, not uncovered lines |
-| Pure function/algorithm | Unit test it |
-| API endpoint | Integration test with mocked external services |
-| UI component | Component test with Testing Library |
-| Critical user flow | E2E test with Playwright |
+> "Add tests for the login form"
+
+1. **SURVEY** — auth is a critical path; integration is where the confidence is.
+2. **GATHER** — invalid email, API error, success redirect, loading state. Skip internal state.
+3. **BUILD** — `should reject registration with invalid email`, `should show loading indicator while logging in`, `should redirect to dashboard after successful login`.
+4. **REINFORCE** — regression test for the previous password-reset bug; mock only the external API.
+5. **FORTIFY** — CI green, 78% coverage is plenty, ship.
 
 ---
 
