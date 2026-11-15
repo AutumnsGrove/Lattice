@@ -466,14 +466,6 @@ Use guiding metaphors:
 │     Circle high, spot what's dead or decaying, clean it up         │
 │     Use: Closing stale issues, consolidating duplicates            │
 │                                                                    │
-│  🐸 frog-cycle                                                     │
-│     Orchestrate TDD with isolated red-green-refactor subagents     │
-│     Use: Test-driven development, writing tests first              │
-│                                                                    │
-│  🌿 druid                                                          │
-│     The keeper who summons new animals into the forest             │
-│     Use: Creating new skills, growing the ecosystem                │
-│                                                                    │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
