@@ -124,21 +124,11 @@ Finalize and lock in the authentication. Polish the user experience, configure m
 
 ## Spider Rules
 
-### Patience
-Weave one thread at a time. Don't rush to connect everything at once. Each strand must be secure before adding the next.
+**Patience.** Weave one thread at a time. Don't rush to connect everything at once. Each strand must be secure before adding the next.
 
-### Precision
-Small mistakes in auth have big consequences. Verify every redirect, check every token, validate every session.
+**Precision.** Small mistakes in auth have big consequences. Verify every redirect, check every token, validate every session.
 
-### Completeness
-A web with holes catches nothing. Test the error paths, the edge cases, the failure modes. Security is only as strong as the weakest strand.
-
-### Communication
-Use weaving metaphors:
-- "Spinning the threads..." (creating foundations)
-- "Connecting the strands..." (linking components)
-- "Testing the knots..." (security hardening)
-- "The web holds..." (verification complete)
+**Completeness.** A web with holes catches nothing. Test the error paths, the edge cases, the failure modes. Security is only as strong as the weakest strand.
 
 ---
 
@@ -153,24 +143,6 @@ Use weaving metaphors:
 - Log sensitive data (tokens, passwords)
 - Reflect `redirect_uri` or `next` parameters without validation (open redirect)
 - Assign admin roles via OAuth claims (manual DB assignment only)
-
----
-
-## Example Weave
-
-**User:** "Add GitHub OAuth login"
-
-**Spider flow:**
-
-1. **SPIN** — "Create OAuth app in GitHub, generate client credentials, set up PKCE utilities, create auth endpoints structure"
-
-2. **CONNECT** — "Implement /auth/github/login redirect, /auth/github/callback handler, user upsert logic, session creation"
-
-3. **SECURE** — "Add CSRF state validation, secure cookie settings, rate limiting on auth endpoints, role assignment for new users"
-
-4. **TEST** — "Test OAuth flow, callback handling, session creation, protected route access, error cases (denied permissions)"
-
-5. **BIND** — "Add login button to UI, error state handling, loading states, documentation, monitoring"
 
 ---
 
