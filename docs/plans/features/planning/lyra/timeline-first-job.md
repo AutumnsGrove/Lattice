@@ -94,7 +94,7 @@ For Lyra this means the timeline task should be one function that both entry poi
 
 ### Vines: the two approaches, compared
 
-This page change is tracked in its own GitHub issue and is not part of Lyra (decision 54). Lyra's timeline task attaches vines to headings until it lands, and `add_vine` can take a line id as soon as the page supports one.
+This page change is tracked in its own GitHub issue, #1687, and is not part of Lyra (decision 54). Lyra's timeline task attaches vines to headings until it lands, and `add_vine` can take a line id as soon as the page supports one.
 
 The stored markdown (`detailed_timeline`) is read by seven files: the public page's server load, the timeline API route, the Arbor generate builder, `Timeline.svelte`, the curios package index, the schema, and the worker's generator.
 
