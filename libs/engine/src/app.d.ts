@@ -148,7 +148,7 @@ declare global {
 				/** Internal service key for worker-to-worker auth (reverie-exec → grove-lattice) */
 				INTERNAL_SERVICE_KEY?: string;
 
-				/** Enable Glimpse dev auth bypass (localhost only, never set in production) */
+				/** Enable local dev-auth bypass for visual testing (localhost only, never set in production) */
 				DEV_AUTH_ENABLED?: string;
 
 				/** Reverie Worker service binding (AI configuration pipeline) */

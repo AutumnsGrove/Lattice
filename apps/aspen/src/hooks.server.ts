@@ -715,10 +715,10 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 	}
 
 	// =========================================================================
-	// DEV-ONLY: Simulated auth for Glimpse visual testing
+	// DEV-ONLY: Simulated auth for local visual testing
 	// =========================================================================
-	// Allows Glimpse to test authenticated pages without Heartwood running.
-	// Only works when ALL THREE conditions are met:
+	// Lets Playwright (tools/glimpse) screenshot authenticated pages without
+	// Heartwood running. Only works when ALL THREE conditions are met:
 	//   1. DEV_AUTH_ENABLED env var is truthy (never set in production wrangler.toml)
 	//   2. Host header is localhost/127.0.0.1 (defense-in-depth)
 	//   3. x-grove-dev-auth header carries a valid JSON user object

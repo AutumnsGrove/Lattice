@@ -5,4 +5,3 @@ packages:
   - "libs/*"
   - "libs/shutter/cloudflare"
   - "tools/labels"
-  - "tools/showroom"

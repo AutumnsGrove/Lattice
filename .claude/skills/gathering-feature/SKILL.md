@@ -243,26 +243,23 @@ gw ci --affected --fail-fast --diagnose
 
 **Component Audit Gate (for features with UI components):**
 
-Before page-level verification, audit every UI component built or modified by the Elephant in isolation using Showroom:
+Before page-level verification, check every UI component built or modified by the Elephant:
 
 ```bash
-# For each component built or modified:
-uv run --project tools/glimpse glimpse showroom \
-  libs/engine/src/lib/ui/components/[path-to-component].svelte
-
-# For new components, scaffold fixtures first:
-uv run --project tools/glimpse glimpse showroom \
-  libs/engine/src/lib/ui/components/[path-to-component].svelte --scaffold
+# There is no isolated component harness any more (Showroom was removed in #1654).
+# Capture the component where it actually renders, then check it by hand.
+bun run glimpse capture "http://localhost:5173/[page]" \
+  -S "[component selector]" --season autumn --theme dark
 ```
 
-All Showroom compliance violations must be resolved before proceeding. If violations are found, resume the Elephant with specific findings.
+Fix component-level problems before proceeding. If you find violations, resume the Elephant with specific findings.
 
 **Visual Verification (for features with UI):**
 
 ```bash
-uv run --project tools/glimpse glimpse matrix \
+bun run glimpse matrix \
   "http://localhost:5173/[feature-page]?subdomain=midnight-bloom" \
-  --seasons autumn,winter --themes light,dark --logs --auto
+  --seasons autumn,winter --themes light,dark --logs
 ```
 
 **Completion Report:**
@@ -289,7 +286,7 @@ GATE LOG
   After Test:     ✅ all tests pass
   After Audit:    ✅ findings resolved
   After Document: ✅ docs written (not stubs)
-  Showroom:       ✅ all components pass compliance audit
+  Components:     ✅ all checked against DESIGN.md
   Final CI:       ✅ gw ci --affected passes
 
 The forest grows. The feature lives.

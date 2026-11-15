@@ -16,6 +16,7 @@
 	"scripts": {
 		"prepare": "git config core.hooksPath .githooks",
 		"census": "bun run tools/census/server.ts",
+		"glimpse": "bun run tools/glimpse/src/cli.ts",
 		"dev:aspen": "pnpm --filter grove-aspen dev",
 		"dev:landing": "pnpm --filter grove-landing dev",
 		"dev:plant": "pnpm --filter grove-plant dev",
