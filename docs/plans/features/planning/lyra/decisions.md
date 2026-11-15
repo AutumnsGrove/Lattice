@@ -216,18 +216,33 @@ The real runtime locally, a small dev client, a live suite that uses OpenCode Go
 ### 66. The coding practices and one gate, with an 85% coverage floor on the core
 Strict TypeScript, validated boundaries, errors as data, web-standard APIs only in the core, import and size checks, and `pnpm ci` as the definition of done. CI enforces an 85% coverage floor on the core, as a smoke alarm. The matrix rule is the real check. Decided 2026-11-15.
 
+### 67. Two mock Lumens, kept honest by contract tests
+Both options are built. **The real Lumen over a fake model:** the actual Lumen worker routes run in-process and only the network call underneath is faked, with the scripted fake model speaking OpenRouter's shape. **A standalone fake Lumen:** a small server that imitates Lumen's HTTP shape, fast and independent. One shared set of contract tests runs against both, and any difference between them fails the build, so the standalone fake cannot drift unnoticed. Both live in Lattice, next to the Lumen adapter (decision 60). The scenario files run through them as a third level. Decided 2026-11-15, with the extra work accepted. See `engineering-practices.md`.
+
 ## Proposed, waiting for a yes
 
-### 67. A mock Lumen: the real Lumen routes over a fake model
-Run the actual Lumen worker routes in-process and fake only the network call underneath, with the scripted fake model speaking OpenRouter's shape. Everything of Lumen's runs for real, so there is no second copy of its behavior to drift. It lives in Lattice next to the Lumen adapter, and the scenario files run through it as a third level. A standalone fake Lumen is added only if this proves too slow or hard to use, and guarded by contract tests. See `engineering-practices.md`.
+These are from `repository.md`, where each is explained.
+
+### 68. Name and home
+`AutumnsGrove/lyra`, public, with the package `@autumnsgrove/lyra` (free on npm).
+
+### 69. One package with subpath exports
+The core, `memory`, `cloudflare`, `openai`, and `testkit` as entry points of one package, each with its own allowed imports, enforced by a check. The testkit is public so Lattice and other projects can use it.
+
+### 70. The repository layout
+A pnpm workspace with `packages/lyra`, `scenarios`, `examples/workers-minimal`, `scripts`, `docs`, and the CI workflows.
+
+### 71. The release process
+Semver at 0.x with breaking changes allowed in minors, one CI workflow running `pnpm ci`, a tag that gates and publishes to npm as public with built output, and a hand-written changelog.
+
+### 72. The Cloudflare foundation is plain Durable Objects
+Behind Lyra's slots, using SQLite storage, an alarm, and hibernation, which are stable core features. Cloudflare's agent tooling can be used by a consumer, and a separate adapter for it can come later.
 
 ## Not discussed yet
 
 These came out of the research and are waiting for their turn, one at a time:
 
-- **The Cloudflare adapter's foundation.** Whether it builds on Cloudflare's current agent tooling (research notes say its `agents` package now ships a harness and a durable-execution layer, which has not been tried) or on plain Durable Objects behind Lyra's slots. Left open on purpose, to be decided when the repository is scoped.
 - **Protocol details.** The exact shape of frames and codes, written when the core is built. See `protocol.md`.
 - **The shell tool.** Its command policy (which commands are allowed), the default deadline before a command moves to the background, and what happens to a running command if the host is lost (see decisions 16 and 38 and `approvals.md`).
 - **Who may approve** once more than one person uses Lyra, and approving with edited arguments (see `approvals.md`).
 - **Proposal wire details.** The exact command and event names for deciding a proposal (see `protocol.md`).
-- **The new repository.** Name, layout, release process, and test setup.

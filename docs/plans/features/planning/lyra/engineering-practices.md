@@ -188,7 +188,7 @@ You want to test locally with OpenRouter, and also with OpenCode Go, so testing 
 3. **A real model, locally** (L5): a small live suite against OpenCode Go for bulk testing, and against OpenRouter for production fidelity.
 4. **Through a mock Lumen, then the real one:** the real Lumen routes over the fake model (above), free and offline. Then Lattice already has `./scripts/dev-stack.sh`, which runs the real workers locally on one Miniflare instance (`AGENT.md`). The Lumen adapter and the timeline task can be tried against the real Lumen worker there. How Lumen gets its provider key in that stack was not checked. One option is the per-request key option (`tenant_api_key`) that the timeline already uses.
 
-### A mock Lumen (proposed, decision 67)
+### Mock Lumens (decision 67)
 
 Since there is a scripted fake model, there can also be a fake Lumen to test the Lumen adapter against. There are two ways to build one, and the code says which is better.
 
@@ -203,11 +203,11 @@ Practical notes, from reading the code:
 - Lumen's inference call is a plain JSON request and response, not a stream, so the fake model must be able to answer in that form as well as in streaming form. The scripts are the same either way.
 - Quota needs a database. Tests either skip quota (`skipQuota`, which the agent task requires for now) or use a local test database from the Workers pool. The error cases for quota can be exercised with the second.
 
-**Where it lives.** In Lattice, next to the Lumen adapter (decision 60), because it uses Lumen's own code. The Lyra repo never needs it: its tests use the fake model server directly.
+**Where they live.** In Lattice, next to the Lumen adapter (decision 60), because option B uses Lumen's own code. The Lyra repo never needs either: its tests use the fake model server directly.
 
 **What it adds.** The Lumen build steps L1 to L5 each get tests through this harness, so the Lumen changes are tested the way they will be used. And the same scenario files run a third time, through the Lumen adapter into real Lumen routes into the fake model (step 5).
 
-**If B turns out to be slow or hard to provoke a case,** a small standalone fake (option A) can be added for those cases, guarded by contract tests that run against both, so it cannot drift unnoticed.
+**Decided: both, with contract tests.** The real Lumen over a fake model (option B) and a standalone fake Lumen (option A) are both built. One shared set of contract tests runs against both, and any difference between them fails the build. That guards the standalone fake against drifting, and keeps its speed and independence. It is more work than either option alone, and that cost was accepted.
 
 ### A small local client
 
