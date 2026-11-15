@@ -181,7 +181,7 @@ Hey there, fellow builder! If you're an AI agent (Claude, GPT, Copilot, or other
 4. **Self-identify in commits** — Use the Co-Authored-By line to identify yourself:
 
    ```
-   Co-Authored-By: <Agent Name> <Model> <noreply@provider.com>
+   Co-Authored-By: <Harness> (<Model>) <noreply@provider.com>
    ```
 
    Examples:
@@ -190,9 +190,18 @@ Hey there, fellow builder! If you're an AI agent (Claude, GPT, Copilot, or other
    Co-Authored-By: Claude Code (Opus 4.5) <noreply@anthropic.com>
    Co-Authored-By: Kilo (DeepSeek V3) <noreply@deepseek.com>
    Co-Authored-By: Kilo (MiniMax M2.1) <noreply@minimax.io>
+   Co-Authored-By: pi (DeepSeek V4.1 1017) <noreply@deepseek.com>
    ```
 
+   Harness and model is enough — it doesn't have to be a brand name. If the harness
+   doesn't know which model it's running, leave the model out rather than guessing.
+
    This helps with auditing—we want to know _which_ agent wrote _what_.
+
+   Keep attribution in this trailer. Don't append "🤖 Generated with …" footers to
+   PR or issue bodies: several harnesses add one automatically, it repeats what the
+   trailer already says, and the harness it names is often not the one that did the
+   work.
 
 5. **Don't over-engineer.** Do what's asked, nothing more. Resist the urge to refactor adjacent code or add "improvements" that weren't requested.
 6. **Ask for clarification** if requirements are ambiguous rather than guessing.
