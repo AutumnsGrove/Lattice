@@ -20,9 +20,22 @@ What is left here is what the live issues actually say, and what each one asks o
 |---|---|---|
 | **Timeline** | The daily development summary, built from tools (see `timeline-first-job.md`) | Decisions 4 and 49. The first job. |
 | **HawkAgent** | Judge a new tenant's content at +24h and +7d, and propose a verdict with evidence | #1684. Second. |
-| **Others** | Not known. A chat-style writing mode and the domain search have both come up over time, but nothing current says so. | Not decided. |
+| **Wisp** | A writing assistant (grammar, tone, readability). It is parked in `_junkdrawer/features/wisp-routes/`, and its spec is `docs/specs/wisp-spec.md`. | Named by Autumn, 2026-11-15 |
+| **Fireside** | A conversational writing mode of Wisp, where questions and answers become a draft | Named by Autumn |
+| **Reverie** | A chatbot-style theme engine that tweaks a grove from what the Wanderer asks for (`docs/specs/reverie-spec.md`) | Named by Autumn |
+| **Others** | Autumn said these are "just a few". The domain search has come up over time, but nothing current says so. | Not decided |
 
 The old plan listed about 25 workers. Most of them (email sequences, metric collection, retries) never talk to a model in a loop, so they were never Lyra's. The list of real consumers will come from current issues, not from that plan.
+
+## The interactive consumers, and what they ask of the design
+
+Timeline and HawkAgent are background jobs with nobody watching. Wisp, Fireside, and Reverie are the opposite: a Wanderer is in the conversation. Lyra serves both kinds (decision 56), and the interactive kind asks for different things:
+
+- **Sessions with many runs, follow-ups, and steering.** A conversation is a session, and each message is a run (decisions 19, 27, 44). The timeline barely uses this.
+- **Streaming.** A chat needs words as they are written. The Lumen worker has no streaming route today, and the first job does not need one. These consumers do (see `lumen-changes.md`).
+- **Approvals with a preview.** Reverie's spec says a preview is always shown and nothing applies without the Wanderer's confirmation, with no "just do it" mode. That is the approval mechanism (decisions 34 to 37), used live while the Wanderer is present, with the preview as the content of the request. It is an approval and not a proposal, because it pauses before an action, with a person waiting. The old multi-step case maps to one request that shows the whole set of changes, not one request per tool call.
+- **Strict boundaries on what a task may do.** Wisp's spec is clear that it never writes the Wanderer's words for them. In Lyra that is a task-level rule: the recipe simply has no tool that produces prose for the page. This is a use of decision 5 (each task is a recipe), nothing new.
+- **Reverie is the case Lumen's tool-calling spec was written for.** That spec stops at single-turn calls and says "the caller handles follow-up calls". Lyra is that caller.
 
 ## HawkAgent, and what it adds to the design
 
@@ -50,6 +63,7 @@ The issue is written in the vocabulary of the old plan: a `GroveAgent` class, `s
 - **Retention (decision 51).** A run's record belongs to the tenant and is deleted with it. Anything that must outlive the tenant is written by the app into its own table.
 - **Proposals (decisions 50, 52, 53).** The core has a proposal type: a typed payload, evidence references, and a state of open, accepted, or rejected. A person decides through a protocol command. The decision is saved as a new entry in the record and emitted as an event, and the app copies out whatever must last, such as HawkAgent's reviewer label. A proposal is not an approval: an approval pauses a run before an action, and a proposal is a finished run's result.
 - **GroveAgent (decision 55).** Out of date, and not a basis for Lyra.
+- **Named consumers (decision 56).** Wisp, Fireside, and Reverie, all interactive. Lyra serves interactive uses as well as background jobs.
 
 ## Still open
 

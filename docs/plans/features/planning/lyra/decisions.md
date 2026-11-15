@@ -183,6 +183,9 @@ Letting the timeline page attach a vine to a specific line is a change to the pa
 ### 55. GroveAgent is out of date and is not a basis for Lyra
 `libs/grove-agent` and the consumers plan (`docs/plans/infra/planned/grove-agent-consumers.md`) are stale: the library pins `agents ^0.6.0` and was last touched in early September, and Cloudflare's own package has moved on. Lyra is built from scratch. The old plan is not a source of truth for what will use Lyra, and the Cloudflare adapter does not assume `GroveAgent`. Decided 2026-11-15. This removes `GroveAgent` as an option for the adapter's foundation.
 
+### 56. Lyra serves interactive uses as well as background jobs
+Autumn named further consumers: Wisp (a writing assistant, currently parked in the junk drawer), Fireside (a conversational writing mode of Wisp), and Reverie (a chatbot-style theme engine that tweaks a grove). All three are interactive, with a Wanderer in the conversation, unlike the timeline and HawkAgent. Nothing in the existing decisions has to change, because sessions with many runs, steering, follow-ups, live approvals, and WebSocket were already decided. It does affect Lumen: streaming is not needed for the first job but is needed for these. Decided 2026-11-15. See `consumers.md`.
+
 ## Not discussed yet
 
 These came out of the research and are waiting for their turn, one at a time:

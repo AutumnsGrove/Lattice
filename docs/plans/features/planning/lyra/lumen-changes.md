@@ -67,7 +67,7 @@ Lumen caps a request at 100 messages. That is fine for the timeline. Lyra's step
 
 ## Not needed for the timeline
 
-- Streaming from the worker (`stream` exists only in the in-process client). The timeline is a background job.
+- Streaming from the worker (`stream` exists only in the in-process client). The timeline is a background job. Wisp, Fireside, and Reverie are interactive and will need it (decision 56), so it is a later change and not a never.
 - A decision-model task or text-to-speech.
 - Idempotency keys. A resend after an interruption costs one duplicate call, which is harmless here.
 - `mcp.ts`. It is a stub, dead since #471 was closed as not planned. Leave it until Autumn says to remove it.
