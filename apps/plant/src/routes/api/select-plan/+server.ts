@@ -14,7 +14,6 @@ import { type TierKey, isValidTier } from "@autumnsgrove/lattice/platform/config
 import { PLANT_ERRORS, logPlantError } from "$lib/errors";
 import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
 import { createTenant, getTenantForOnboarding } from "$lib/server/tenant";
-import { checkFreeAccountIPLimit, logFreeAccountCreation } from "$lib/server/free-account-limits";
 import { shouldSkipCheckout } from "$lib/server/onboarding-helper";
 import { CloudflareDatabase } from "@autumnsgrove/infra/cloudflare";
 
@@ -38,7 +37,7 @@ function getTierByKey(id: string): PricingTier | undefined {
 	return tiers.find((t: PricingTier) => t.key === id);
 }
 
-export const POST: RequestHandler = async ({ request, cookies, platform, getClientAddress }) => {
+export const POST: RequestHandler = async ({ request, cookies, platform }) => {
 	let body: {
 		plan?: string;
 		billingCycle?: string;
@@ -168,37 +167,6 @@ export const POST: RequestHandler = async ({ request, cookies, platform, getClie
 
 	// Wanderer plan skips checkout — create tenant directly
 	if (shouldSkipCheckout(plan)) {
-		// Resolve client IP once for both rate-check and logging
-		let clientIP: string | undefined;
-		try {
-			clientIP =
-				request.headers.get("CF-Connecting-IP") ||
-				request.headers.get("X-Forwarded-For")?.split(",")[0]?.trim() ||
-				getClientAddress();
-		} catch {
-			// Best-effort — IP resolution is non-critical
-		}
-
-		// IP-based abuse prevention: max 3 free accounts per IP per 30 days
-		// Check BEFORE updating payment status to prevent write-then-reject
-		if (clientIP) {
-			const ipAllowed = await checkFreeAccountIPLimit(db, clientIP).catch(() => true);
-			if (!ipAllowed) {
-				return json(
-					{
-						error:
-							"Too many free accounts have been created from this location recently. Please try again later.",
-					},
-					{ status: 429 },
-				);
-			}
-
-			// Log IP immediately after check passes to close the TOCTOU window.
-			// Must happen before any other async work so concurrent requests
-			// see the updated count.
-			await logFreeAccountCreation(db, clientIP).catch(() => {});
-		}
-
 		try {
 			await db
 				.prepare(

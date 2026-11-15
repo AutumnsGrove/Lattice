@@ -7,14 +7,12 @@
  * Scenarios covered:
  *   1. Happy path: free (wanderer) plan creates tenant end-to-end
  *   2. Idempotent tenant creation — second call skips duplicate
- *   3. IP rate limiting blocks excessive signups
- *   4. Missing prerequisites block plan selection
- *   5. Paid plan (seedling) does not create a tenant
- *   6. DB failure is surfaced, not silently swallowed
+ *   3. Missing prerequisites block plan selection
+ *   4. Paid plan (seedling) does not create a tenant
+ *   5. DB failure is surfaced, not silently swallowed
  *
  * Functions under test (imported from their canonical locations):
  *   createTenant, getTenantForOnboarding  — $lib/server/tenant
- *   checkFreeAccountIPLimit, logFreeAccountCreation — $lib/server/free-account-limits
  *   shouldSkipCheckout                    — $lib/server/onboarding-helper
  */
 
@@ -22,7 +20,6 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { GroveDatabase } from "@autumnsgrove/infra";
 import { createTenant, getTenantForOnboarding } from "$lib/server/tenant";
 import type { CreateTenantInput } from "$lib/server/tenant";
-import { checkFreeAccountIPLimit, logFreeAccountCreation } from "$lib/server/free-account-limits";
 import { shouldSkipCheckout } from "$lib/server/onboarding-helper";
 
 // ============================================================================
@@ -114,12 +111,6 @@ describe("Happy path: free (wanderer) plan signup", () => {
 		expect(shouldSkipCheckout("wanderer")).toBe(true);
 	});
 
-	it("checkFreeAccountIPLimit allows a new IP with zero prior accounts", async () => {
-		const db = createMockDb({ defaultFirst: { count: 0 } });
-		const allowed = await checkFreeAccountIPLimit(db as unknown as GroveDatabase, "10.0.0.1");
-		expect(allowed).toBe(true);
-	});
-
 	it("getTenantForOnboarding returns null before tenant is created", async () => {
 		const db = createMockDb({ defaultFirst: null });
 		const existing = await getTenantForOnboarding(
@@ -139,42 +130,21 @@ describe("Happy path: free (wanderer) plan signup", () => {
 		expect(result.subdomain).toBe("forest-wanderer");
 	});
 
-	it("logFreeAccountCreation inserts a log row after tenant creation", async () => {
-		const db = createMockDb();
-		await logFreeAccountCreation(db as unknown as GroveDatabase, "10.0.0.1");
-		const logCall = db._calls.find((c) => c.sql.includes("INSERT INTO free_account_creation_log"));
-		expect(logCall).toBeDefined();
-		expect(logCall!.bindings).toContain("10.0.0.1");
-	});
-
-	it("full happy-path sequence: check limit → no existing tenant → create → log", async () => {
+	it("full happy-path sequence: no existing tenant → create", async () => {
 		// Each DB call gets its own mock so state doesn't cross-contaminate
-		const limitDb = createMockDb({ defaultFirst: { count: 0 } });
 		const tenantCheckDb = createMockDb({ defaultFirst: null });
 		const createDb = createMockDb({ defaultFirst: null });
-		const logDb = createMockDb();
 
-		// Step 1: IP limit allows
-		const allowed = await checkFreeAccountIPLimit(limitDb as unknown as GroveDatabase, "192.0.2.1");
-		expect(allowed).toBe(true);
-
-		// Step 2: No existing tenant
+		// Step 1: No existing tenant
 		const existing = await getTenantForOnboarding(
 			tenantCheckDb as unknown as GroveDatabase,
 			"onb-integration-001",
 		);
 		expect(existing).toBeNull();
 
-		// Step 3: Create tenant
+		// Step 2: Create tenant
 		const result = await createTenant(createDb as unknown as GroveDatabase, makeInput());
 		expect(result.subdomain).toBe("forest-wanderer");
-
-		// Step 4: Log creation
-		await logFreeAccountCreation(logDb as unknown as GroveDatabase, "192.0.2.1");
-		const logCall = logDb._calls.find((c) =>
-			c.sql.includes("INSERT INTO free_account_creation_log"),
-		);
-		expect(logCall).toBeDefined();
 	});
 });
 
@@ -241,51 +211,7 @@ describe("Idempotent tenant creation", () => {
 });
 
 // ============================================================================
-// Scenario 3: IP rate limiting
-// ============================================================================
-
-describe("IP rate limiting blocks excessive free signups", () => {
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
-
-	it("blocks when IP has reached the 3-account limit", async () => {
-		const db = createMockDb({ defaultFirst: { count: 3 } });
-		const allowed = await checkFreeAccountIPLimit(db as unknown as GroveDatabase, "203.0.113.5");
-		expect(allowed).toBe(false);
-	});
-
-	it("blocks when IP has exceeded the limit (count > 3)", async () => {
-		const db = createMockDb({ defaultFirst: { count: 10 } });
-		const allowed = await checkFreeAccountIPLimit(db as unknown as GroveDatabase, "203.0.113.5");
-		expect(allowed).toBe(false);
-	});
-
-	it("allows at count=2 (one slot remaining)", async () => {
-		const db = createMockDb({ defaultFirst: { count: 2 } });
-		const allowed = await checkFreeAccountIPLimit(db as unknown as GroveDatabase, "203.0.113.5");
-		expect(allowed).toBe(true);
-	});
-
-	it("rate limit check queries free_account_creation_log with the IP", async () => {
-		const db = createMockDb({ defaultFirst: { count: 0 } });
-		await checkFreeAccountIPLimit(db as unknown as GroveDatabase, "198.51.100.7");
-
-		const limitCall = db._calls.find((c) => c.sql.includes("free_account_creation_log"));
-		expect(limitCall).toBeDefined();
-		expect(limitCall!.bindings).toContain("198.51.100.7");
-	});
-
-	it("allows invalid IP without querying DB (fail-open)", async () => {
-		const db = createMockDb();
-		const allowed = await checkFreeAccountIPLimit(db as unknown as GroveDatabase, "not-an-ip!");
-		expect(allowed).toBe(true);
-		expect(db.prepare).not.toHaveBeenCalled();
-	});
-});
-
-// ============================================================================
-// Scenario 4: Missing prerequisites block plan selection
+// Scenario 3: Missing prerequisites block plan selection
 // ============================================================================
 
 describe("Missing prerequisites block plan selection", () => {
@@ -357,7 +283,7 @@ describe("Missing prerequisites block plan selection", () => {
 });
 
 // ============================================================================
-// Scenario 5: Paid plan redirects to checkout (no tenant created)
+// Scenario 4: Paid plan redirects to checkout (no tenant created)
 // ============================================================================
 
 describe("Paid plan skips tenant creation", () => {
@@ -414,7 +340,7 @@ describe("Paid plan skips tenant creation", () => {
 });
 
 // ============================================================================
-// Scenario 6: DB failure handling
+// Scenario 5: DB failure handling
 // ============================================================================
 
 describe("DB failure handling", () => {
@@ -453,36 +379,6 @@ describe("DB failure handling", () => {
 		await expect(createTenant(db as unknown as GroveDatabase, makeInput())).rejects.toThrow(
 			"platform_billing insert error",
 		);
-	});
-
-	it("checkFreeAccountIPLimit propagates D1 errors to the caller", async () => {
-		const db = {
-			prepare: vi.fn().mockReturnValue({
-				bind: vi.fn().mockReturnValue({
-					first: vi.fn().mockRejectedValue(new Error("D1 connection refused")),
-				}),
-			}),
-			execute: vi.fn(),
-			transaction: vi.fn(),
-			info: vi.fn(),
-		} as unknown as GroveDatabase;
-
-		await expect(checkFreeAccountIPLimit(db, "10.0.0.1")).rejects.toThrow("D1 connection refused");
-	});
-
-	it("logFreeAccountCreation propagates D1 write errors", async () => {
-		const db = {
-			prepare: vi.fn().mockReturnValue({
-				bind: vi.fn().mockReturnValue({
-					run: vi.fn().mockRejectedValue(new Error("D1 write failed")),
-				}),
-			}),
-			execute: vi.fn(),
-			transaction: vi.fn(),
-			info: vi.fn(),
-		} as unknown as GroveDatabase;
-
-		await expect(logFreeAccountCreation(db, "10.0.0.1")).rejects.toThrow("D1 write failed");
 	});
 
 	it("getTenantForOnboarding propagates D1 errors", async () => {
