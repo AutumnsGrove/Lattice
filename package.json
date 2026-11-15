@@ -15,7 +15,6 @@
 	"type": "module",
 	"scripts": {
 		"prepare": "git config core.hooksPath .githooks",
-		"cairn": "bun run personal/cairn/server.ts",
 		"census": "bun run tools/census/server.ts",
 		"dev:aspen": "pnpm --filter grove-aspen dev",
 		"dev:landing": "pnpm --filter grove-landing dev",

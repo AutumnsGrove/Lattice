@@ -251,7 +251,7 @@ Trails, Moss, Oak, Amber, Ivy, Hum, Reeds, Porch, Nook, Wisp,
 Vines, Garden, Grove, Wanderer, Rooted, Seedling, Sapling,
 Evergreen, Wander, Etch, Forage, Clearing, Vista, Forests,
 Prism, Grafts, Workshop, Trove, Verge, Shutter, Aria, Outpost,
-Passage, Pantry, Petal, Weave, Cairn
+Passage, Pantry, Petal, Weave
 ```
 
 ### What Gets Checked
