@@ -4,7 +4,7 @@
  * Tests the transcribe() method behavior, not implementation details.
  * Focus: Does transcription work for users? Do errors surface correctly?
  *
- * @see /grove-testing for testing philosophy
+ * @see beaver-build (skill) for testing philosophy
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
