@@ -71,7 +71,7 @@ Four small interfaces plus an optional shell, and one real risk: Lumen-shaped id
 ## Left out on purpose
 
 - **The wire protocol and transport** (HTTP, JSONL frames) is a thin layer on top of Lyra. Discussed later.
-- **How a human is told that an approval is waiting.** That is a fifth slot in the making, discussed with approvals.
+- **How a person is told that an approval is waiting.** Settled in decision 36: a simple indicator in the viewer reads the list of pending requests, so no notify slot is needed for now.
 
 ## Open
 

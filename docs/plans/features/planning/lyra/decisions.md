@@ -117,26 +117,23 @@ Working state that tools build (the half-built timeline page, the handle map) is
 ### 33. The model's reasoning text is stored when the adapter provides it
 Marked as reasoning, so a viewer can show or hide it. Confirmed 2026-11-14.
 
-## Proposed, waiting for a yes
-
-These are from `approvals.md`, where each is explained.
-
 ### 34. One mechanism for approvals and questions
-A pending request is saved in the record and the run parks as "waiting for a person". The answer is approve, deny (with a note the model reads), or the answer to a question. The shared "ask a human" tool and the approval check on risky tools are the same thing.
+A pending request is saved in the record and the run parks as "waiting for a person". The answer is approve, deny (with a note the model reads), or the answer to a question. The shared "ask a human" tool and the approval check on risky tools are the same thing. Confirmed 2026-11-14. See `approvals.md`.
 
 ### 35. A policy per tool, set in the task's recipe
-Each tool is allow, ask, or deny. A risk label (reads, changes things, dangerous) sets the default. If a call needs an answer and nothing can deliver the question, it is denied.
+Each tool is allow, ask, or deny. A risk label (reads, changes things, dangerous) sets the default. If a call needs an answer and nothing can deliver the question, it is denied. Confirmed 2026-11-14.
 
-### 36. A notify slot
-How a person is told a run is waiting. Grove: email or an Arbor inbox. Node: terminal or a pull request comment.
+### 36. A waiting run shows as a simple indicator, not a message
+No email and no push. A waiting run is shown as a soft glow, a quiet indicator. The core only makes waiting runs easy to see (a list of pending requests and what each asks). The glow itself is part of the viewer, built later (decision 28). Because of that, no separate notify slot is needed for now. Replaces the notify slot first proposed. Decided 2026-11-14.
 
 ### 37. An optional timeout per task, with no timeout by default
-After the timeout, an unanswered request is denied.
+After the timeout, an unanswered request is denied. Useful for tasks that run in the background. Confirmed 2026-11-14.
 
 ## Not discussed yet
 
 These came out of the research and are waiting for their turn, one at a time:
 
+- **Long-running tools.** A command that outlives its call (the `pi-background` pattern: moved to the background at a deadline, with a notification when it exits). To confirm whether this is wanted.
 - **Context size.** What is sent to the model when a long run no longer fits in its memory (trimming or summarizing).
 - **Record retention.** How long a record is kept, and who can delete one.
 - **Follow-up when nothing is running.** Whether it starts the next turn of the same conversation or is refused.
