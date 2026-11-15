@@ -1,3 +1,46 @@
+# Handoff — Signup abuse hardening (2026-11-17)
+
+Start here next time. This slice is the cluster of issues about bot signups
+coming through the email path (#1677, #1678, #1679, #1680, #1681, #1682, #1683,
+#1684) plus two findings filed along the way (#1691, #1692).
+
+## Shipped and merged
+
+| PR | what it closed |
+|---|---|
+| #1694 | **#1683** — deleted the per-IP free-account limiter. It never ran (`free_account_creation_log` does not exist in prod) and would not have caught the incident anyway: one operator, two accounts two hours apart, plus aliases in one inbox. Identity counting is #1681's job now. |
+| #1696 | **#1677 part 1+3** — `TenantDO.refreshConfig()` clears on a D1 miss, so a deleted or suspended tenant stops serving. Plus `POST /tenant/flush/:subdomain` behind `OPS_ADMIN_KEY`, and a "Spam Tenant / Link Farm" section in `docs/security/incident-response-runbook.md`. |
+| #1698 | **#1680** — `gw tenant list / show / suspend / resume`. `delete` was split out to #1596 §B. Suspend flips `tenants.active`, writes `audit_log`, then probes the site and prints the status code. |
+| #1699 | **#1681** — `signup_blocks` deny list keyed on normalized identity (lowercased, `+alias` dropped). Enforced at OTP send, at user creation (covers OAuth), and at `createTenant`. Managed with `gw block add|list|rm`. |
+| #1700 | **#1681 follow-up** — the block now actually reaches the client. Better Auth wraps `sendVerificationOTP` in `runInBackgroundOrAwait()`, which swallows throws and still answers `{"success":true}`; enforcement moved to a `hooks.before` middleware where it returns a real 403. |
+
+**Applied to production:** migration `123_signup_blocks.sql` on `grove-engine-db`, and two live blocks — `mail.grokbot.com` (`incident:2026-11-14`) and `upsampler.com` (`incident:2026-11-07`).
+
+## Open, in flight
+
+- **#1701** — `feat(plant): gate signup behind the Turnstile that was already configured` (#1678). Open PR, CI running at handoff time. Wires the configured-but-unused `TURNSTILE_SITE_KEY` into a `/verify` step, sets the same `grove_verified` cookie Aspen uses, and gates `/profile`, `/api/save-profile` and `/api/select-plan`. Known gaps are in the PR body: not tested against a real challenge, and `user_onboarding` rows are still created in `/auth/callback` before the gate.
+
+## Next, in the order agreed
+
+1. **#1682** — strip the SEO value: `rel="nofollow ugc"` (and maybe `noindex`) for young or free-tier tenants. The highest-leverage remaining item — it costs a spammer their payoff and survives email rotation. Needs `created_at`/age available to the renderer, which means adding a field to the cached `TenantDO` config (same cache as #1677). Two sanitizers exist: `libs/grove-markdown/src/utils/sanitize.ts` and `libs/engine/src/lib/utils/sanitize.ts` — one helper, not three templates.
+2. **#1596 §B** — the tenant-table registry + `removeTenant()`. Blocking #1677's last criterion (evict the DO as part of removal) and `gw tenant delete`.
+3. **#1684** — HawkAgent layer 1 only (deterministic signals + verdict table), after #1681's table exists and #1606's review queue.
+4. **#1679** — the client IP never reaches Heartwood. Not on the abuse critical path any more (nothing counts by IP after #1683), but every `ba_session.ip_address` is still one of two constants and every per-IP limiter is a global bucket.
+
+## Decisions made, so nobody re-litigates them
+
+- **Per-IP limiting is the wrong axis** — deleted, not fixed. Identity (email/domain) is what an operator cannot cheaply rotate.
+- **One narrow `signup_blocks` table**, not a polymorphic identity table. #1684 gets its own verdict table later, sharing `normalizeIdentity()`.
+- **Blocks are managed by CLI now**, Arbor UI arrives with #1684's review queue.
+- **Fail open, loudly** on a deny-list read error — a broken list must not lock every writer out, but it logs an admin error rather than hiding (the #1683 lesson).
+- **Migrations are applied by hand** with `wrangler d1 execute --file`, never `migrations apply` — see #1692.
+
+## Two findings that need their own issues
+
+- **#1692** — `d1_migrations` claims `053` and `116` are applied; production's schema says otherwise. 116 is the migration written to repair exactly that gap, and it is logged applied with the table unchanged. The ledger is not evidence.
+- **#1691** — 053's other half: `last_activity_at`, `reclamation_status`, `reclaimed_accounts` and the reclamation cron do not exist, while `updateLastActivity()` writes that column on every post save and image upload and swallows the error. Filed for later, per Autumn's call.
+- **Not filed yet:** the same Better Auth swallowing that #1700 fixed means `LOGIN_CODE_SEND_FAILED` and `LOGIN_CODE_RATE_LIMITED` never reach users either — the comment claiming "a delivery failure should reach the user" has been false. Worth an issue.
+
 # Handoff — Code review sweep, next slice (2026-09-08)
 
 Start here next time. The Plant local-dev/signup handoff from 2026-08-24 is
