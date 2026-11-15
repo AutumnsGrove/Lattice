@@ -159,6 +159,9 @@ A new command, `start`, names a task and passes its inputs, for example the time
 ### 47. Access: service bindings plus a token, one owner for now
 Other Grove workers reach Lyra through a service binding. Anything from outside needs a bearer token. Every session is owned by a tenant id, stored on its record, so per-tenant checks can be added later without changing the format. No Heartwood sign-in per call for now, because the only task is Autumn's. Decided 2026-11-15.
 
+### 48. The stateless calls stay out of Lyra
+Decision models, embeddings, speech, and transcription are single calls, not runs. They stay in Lumen, where they live or are planned, and Lyra does not expose them. This keeps the core small, and they can be added later without changing anything else. Decided 2026-11-15.
+
 ## Not discussed yet
 
 These came out of the research and are waiting for their turn, one at a time:
@@ -166,5 +169,5 @@ These came out of the research and are waiting for their turn, one at a time:
 - **Record retention.** How long a record is kept, and who can delete one.
 - **Approvals.** How a background run asks for a yes and waits at no cost.
 - **The Cloudflare adapter's foundation.** Whether it builds on Cloudflare's agent tooling or on plain Durable Objects. A smaller question once decision 12 is settled.
-- **Protocol details.** Whether Lyra also exposes the four stateless calls (embeddings, decision models, speech, transcription), and the exact shape of frames and codes. See `protocol.md`.
+- **Protocol details.** The exact shape of frames and codes, written when the core is built. See `protocol.md`.
 - **The new repository.** Name, layout, release process, and test setup.

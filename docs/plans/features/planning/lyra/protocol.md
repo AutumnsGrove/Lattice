@@ -6,7 +6,7 @@ category: features
 
 # The protocol
 
-Last updated: 2026-11-15. Decisions 43 to 47 are decided. Everything else is a draft for discussion, marked proposed.
+Last updated: 2026-11-15. Decisions 43 to 48 are decided. Everything else is a draft for discussion, marked proposed.
 
 ## What it is
 
@@ -23,6 +23,8 @@ The protocol is how anything outside Lyra talks to it: an Arbor page, a script, 
 **46. A `start` command begins a task.** It names the task and passes its inputs. `prompt` stays for chat-style use.
 
 **47. Access.** Service bindings for other Grove workers, a bearer token for anything outside, and a tenant id stored on every session. Per-tenant sign-in is added later if someone else uses Lyra.
+
+**48. The stateless calls stay out of Lyra.** Decision models, embeddings, speech, and transcription are single calls, not runs. They stay in Lumen.
 
 ## What Nova's protocol looks like
 
@@ -69,6 +71,5 @@ To keep a Nova client working, a parked run emits `run_end` with the reason `par
 
 ## Open questions
 
-- Whether Lyra also exposes Nova's four stateless calls (embeddings, decision models, speech, transcription).
 - The exact fields of `start`, and how a task declares its inputs.
 - The one-time codes on approval requests.
