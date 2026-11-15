@@ -1,9 +1,8 @@
----
-name: heartwood-auth
-description: Integrate Heartwood (GroveAuth) authentication into Grove applications. Use when adding sign-in, protecting routes, or validating sessions in any Grove property.
----
+# Grove Auth Integration: Heartwood Reference
 
-# Heartwood Auth Integration Skill
+> Loaded by grove-auth-integration when wiring Heartwood specifically. See SKILL.md first.
+
+# Grove Auth Integration: Heartwood Integration Skill
 
 ## When to Activate
 

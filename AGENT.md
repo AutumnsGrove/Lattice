@@ -392,7 +392,7 @@ Use conventional commits format for PR titles. Write a brief description of what
 
 ## Skills
 
-Skills are invoked via the Skill tool. Each skill's description explains when to use it. For help choosing a skill, invoke skill: `robin-guide`.
+Skills are invoked via the Skill tool. Each skill's description explains when to use it; the tables below group them by concern.
 
 Skills live in `.claude/skills/` — lean instruction files with deep references loaded on demand.
 

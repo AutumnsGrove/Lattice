@@ -633,3 +633,9 @@ Add your domain to `allowed_origins` in the Heartwood `clients` table.
 ---
 
 _Authentication should be invisible until it's needed. Let Heartwood handle the complexity._
+
+---
+
+## References
+
+- `references/heartwood.md` — Heartwood (GroveAuth) specifics: endpoints, token handling, cookie domains, and the failure modes that bite.

@@ -22,7 +22,7 @@ In Punxsutawney, a groundhog emerges from its burrow once a year to check whethe
 
 **IMPORTANT:** The Groundhog does NOT edit code, create features, or fix bugs. READ-ONLY observation and reporting only.
 
-**Pair with:** `bloodhound-scout` for deeper exploration of uncertain areas, `eagle-architect` for architecture decisions based on validated assumptions, `crow-reason` for challenging assumptions that pass the check, `robin-guide` for choosing the right animal once ground is established
+**Pair with:** `bloodhound-scout` for deeper exploration of uncertain areas, `eagle-architect` for architecture decisions based on validated assumptions, `crow-reason` for challenging assumptions that pass the check
 
 ---
 
