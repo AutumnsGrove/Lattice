@@ -1,6 +1,8 @@
 # Built binary
 gw
 gw.exe
+grove-wrap-go
+grove-wrap-go.exe
 
 # Pre-built binaries (now distributed via GitHub Releases)
 dist/
