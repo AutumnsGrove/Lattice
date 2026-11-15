@@ -1,6 +1,6 @@
 # Clearing — Grove Status Page
 
-> *A clearing in the forest where you can see what's happening.*
+> _A clearing in the forest where you can see what's happening._
 
 Clearing is Grove's public status page, providing transparent, real-time communication about platform health. When something goes wrong or maintenance is planned, users can check `status.grove.place` to understand what's happening.
 
@@ -19,7 +19,7 @@ Clearing is Grove's public status page, providing transparent, real-time communi
 - **Framework**: SvelteKit 2.0+
 - **Styling**: Tailwind CSS with glassmorphism components
 - **Database**: Cloudflare D1 (shared with Grove)
-- **Hosting**: Cloudflare Pages
+- **Hosting**: Cloudflare Workers (Pages until Feb 2026 — the router still pointed at the retired Pages project, so deploys landed nowhere visible; fixed in `fix/router-status-to-clearing-worker`)
 - **Icons**: Lucide
 
 ## Project Structure
@@ -107,13 +107,13 @@ Clearing uses glassmorphism styling consistent with Grove's design language:
 
 ### Status Colors
 
-| Status | Color | Meaning |
-|--------|-------|---------|
-| Operational | Green | Everything working normally |
-| Degraded | Yellow | Slower than usual, but functional |
-| Partial Outage | Orange | Some functionality unavailable |
-| Major Outage | Red | Service is down |
-| Maintenance | Blue | Planned maintenance in progress |
+| Status         | Color  | Meaning                           |
+| -------------- | ------ | --------------------------------- |
+| Operational    | Green  | Everything working normally       |
+| Degraded       | Yellow | Slower than usual, but functional |
+| Partial Outage | Orange | Some functionality unavailable    |
+| Major Outage   | Red    | Service is down                   |
+| Maintenance    | Blue   | Planned maintenance in progress   |
 
 ## Database Schema
 
@@ -143,6 +143,7 @@ Investigating → Identified → Monitoring → Resolved
 ### RSS Feed
 
 Subscribe to `/feed` for automatic updates about:
+
 - New incidents
 - Status changes
 - Incident resolutions
@@ -171,4 +172,4 @@ pnpm run deploy
 
 ---
 
-*Part of the Grove ecosystem — helping friends have their own space online.*
+_Part of the Grove ecosystem — helping friends have their own space online._
