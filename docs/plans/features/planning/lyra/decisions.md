@@ -177,6 +177,9 @@ The task defines the shape of the payload (for HawkAgent, a score and a verdict)
 ### 53. A decision is saved in the record and emitted as an event the app copies out
 When a person accepts or rejects a proposal (with an optional note), the core saves the decision as a new entry in the record and emits a decision event. The app listens and writes whatever must last, such as HawkAgent's label, into its own table. The core never keeps anything past the tenant (decision 51). Decided 2026-11-15.
 
+### 54. The vine placement fix is a separate GitHub issue, not Lyra's work
+Letting the timeline page attach a vine to a specific line is a change to the page (`libs/curios/src/timeline/Timeline.svelte` and its parser), and it improves the timeline whether or not Lyra exists. It is tracked in its own issue. Lyra's timeline task does not wait for it: until it lands, the task attaches vines to headings, as the page does today. The two approaches and the recommendation are written up in `timeline-first-job.md` and go into the issue. Decided 2026-11-15.
+
 ## Not discussed yet
 
 These came out of the research and are waiting for their turn, one at a time:
@@ -186,7 +189,6 @@ These came out of the research and are waiting for their turn, one at a time:
 - **The shell tool.** Its command policy (which commands are allowed), the default deadline before a command moves to the background, and what happens to a running command if the host is lost (see decisions 16 and 38 and `approvals.md`).
 - **Who may approve** once more than one person uses Lyra, and approving with edited arguments (see `approvals.md`).
 - **Lumen changes to scope in detail:** the message shape, the finish reason, the `agent` task, and the model flags (see `lumen-changes.md`).
-- **How vines attach to a line.** The timeline page only supports vines under a heading, so it needs a change. Two approaches are written up in `timeline-first-job.md`.
 - **Proposal wire details.** The exact command and event names for deciding a proposal (see `protocol.md`).
 - **The first slice.** What the smallest useful version contains, and the build order.
 - **The new repository.** Name, layout, release process, and test setup.
