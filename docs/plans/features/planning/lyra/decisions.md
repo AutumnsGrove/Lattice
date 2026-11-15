@@ -216,6 +216,11 @@ The real runtime locally, a small dev client, a live suite that uses OpenCode Go
 ### 66. The coding practices and one gate, with an 85% coverage floor on the core
 Strict TypeScript, validated boundaries, errors as data, web-standard APIs only in the core, import and size checks, and `pnpm ci` as the definition of done. CI enforces an 85% coverage floor on the core, as a smoke alarm. The matrix rule is the real check. Decided 2026-11-15.
 
+## Proposed, waiting for a yes
+
+### 67. A mock Lumen: the real Lumen routes over a fake model
+Run the actual Lumen worker routes in-process and fake only the network call underneath, with the scripted fake model speaking OpenRouter's shape. Everything of Lumen's runs for real, so there is no second copy of its behavior to drift. It lives in Lattice next to the Lumen adapter, and the scenario files run through it as a third level. A standalone fake Lumen is added only if this proves too slow or hard to use, and guarded by contract tests. See `engineering-practices.md`.
+
 ## Not discussed yet
 
 These came out of the research and are waiting for their turn, one at a time:

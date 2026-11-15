@@ -186,7 +186,28 @@ You want to test locally with OpenRouter, and also with OpenCode Go, so testing 
 1. **Fakes** (L0 to L3): free, instant, run constantly. Most tests live here.
 2. **The real runtime locally** (L4): workerd through the Vitest pool, and `wrangler dev` for a hand-driven server with real Durable Objects, alarms, and SQLite on your machine.
 3. **A real model, locally** (L5): a small live suite against OpenCode Go for bulk testing, and against OpenRouter for production fidelity.
-4. **Through Lumen, locally:** Lattice already has `./scripts/dev-stack.sh`, which runs the real workers locally on one Miniflare instance (`AGENT.md`). The Lumen adapter and the timeline task can be tried against the real Lumen worker there. How Lumen gets its provider key in that stack was not checked. One option is the per-request key option (`tenant_api_key`) that the timeline already uses.
+4. **Through a mock Lumen, then the real one:** the real Lumen routes over the fake model (above), free and offline. Then Lattice already has `./scripts/dev-stack.sh`, which runs the real workers locally on one Miniflare instance (`AGENT.md`). The Lumen adapter and the timeline task can be tried against the real Lumen worker there. How Lumen gets its provider key in that stack was not checked. One option is the per-request key option (`tenant_api_key`) that the timeline already uses.
+
+### A mock Lumen (proposed, decision 67)
+
+Since there is a scripted fake model, there can also be a fake Lumen to test the Lumen adapter against. There are two ways to build one, and the code says which is better.
+
+**What the code shows.** Lumen's own tests already come in two kinds. `workers/lumen/src/routes/inference.test.ts` replaces the whole client with canned answers, so it never runs validation, scrubbing, routing, or response parsing. `libs/engine/src/lib/ai/lumen/lumen-integration.test.ts` runs the real client pipeline (preprocessor, router, provider, postprocessor) and fakes only the network call, an OpenRouter-shaped response.
+
+**Option A: a standalone fake Lumen.** A small server that imitates Lumen's HTTP shape (`POST /inference` and its success and error envelopes). Fast and independent. The risk is drift: it is a second copy of Lumen's behavior, and it will quietly stop matching the real one.
+
+**Option B: the real Lumen over a fake model (recommended).** Run the actual Lumen worker routes in-process, and replace only the network call underneath with the scripted fake model, speaking OpenRouter's response shape. Everything of Lumen's runs for real: request validation, the privacy scrubber, quota, routing (including the rule that skips fallbacks when tools are present), response parsing, finish reason, and cost. There is nothing to drift, because it is the real code. It still needs no network and costs nothing.
+
+Practical notes, from reading the code:
+- Credentials: the worker resolves keys through Warden unless the request carries its own key (`tenant_api_key`). Tests pass one, as the timeline does today, so Warden is not involved.
+- Lumen's inference call is a plain JSON request and response, not a stream, so the fake model must be able to answer in that form as well as in streaming form. The scripts are the same either way.
+- Quota needs a database. Tests either skip quota (`skipQuota`, which the agent task requires for now) or use a local test database from the Workers pool. The error cases for quota can be exercised with the second.
+
+**Where it lives.** In Lattice, next to the Lumen adapter (decision 60), because it uses Lumen's own code. The Lyra repo never needs it: its tests use the fake model server directly.
+
+**What it adds.** The Lumen build steps L1 to L5 each get tests through this harness, so the Lumen changes are tested the way they will be used. And the same scenario files run a third time, through the Lumen adapter into real Lumen routes into the fake model (step 5).
+
+**If B turns out to be slow or hard to provoke a case,** a small standalone fake (option A) can be added for those cases, guarded by contract tests that run against both, so it cannot drift unnoticed.
 
 ### A small local client
 
@@ -245,7 +266,7 @@ Every step in `first-slice.md` already ends with a "done when" test. This docume
 | 2 Limits, retries, resume | Property tests for resume at every kill point, the crashing storage wrapper |
 | 3 Recipes and tools | Fuzzing the tool-argument validator |
 | 4 Cloudflare adapter | The Workers pool, the eviction helpers, the alarm tests |
-| 5 Models | The fake model server, the live suite, and cassette recording against OpenCode Go and OpenRouter |
+| 5 Models | The fake model server, the mock Lumen (decision 67, in Lattice), the live suite, and cassette recording against OpenCode Go and OpenRouter |
 | 6 Protocol | The same scenario files, now over the real protocol, and the fuzz targets for frames and the command validator |
 | 7 Compaction | The cut-point property test |
 | 8 WebSocket | The same scenarios again, over WebSocket |
