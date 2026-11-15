@@ -83,7 +83,6 @@ scripts/journey/output/
 .glimpse/
 screenshots/
 .superset/config.json
-tools/index-viz/uv.lock
 
 # gf ask vector index (machine-specific, ~55MB binary)
 .grove/
