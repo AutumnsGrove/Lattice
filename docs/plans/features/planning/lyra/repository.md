@@ -105,7 +105,7 @@ It does not write `CHANGELOG.md`. In Nova the changelog is edited by hand, or by
 2. Keep #1605 open in Lattice as the tracking issue. A comment on it (2026-11-15) gives the new name, the settled design, and the corrections found in the research (the protocol frame families, and that Nova has no budgets). Add the repository link once the repository exists.
 3. The Lumen changes (L1 to L6, decision 57) are filed as one issue in Lattice, #1693. They block the first job, and they belong in the repository that owns Lumen. It is deliberately one issue for now, and gets split when scoping starts.
 4. The vine placement issue (#1687) already exists.
-5. The repository starts with an initial commit (license, README, the docs). PR #1 is the `pi-review` install, done by you from the Pi harness (decision 77). The CI gate and the check scripts follow as the next changes, before any feature code, so step 1 begins with `pnpm ci` already passing on an empty core.
+5. The repository starts with an initial commit (license, README, the docs, and `AGENTS.md` from `agents-guide-draft.md`, decision 93). PR #1 is the `pi-review` install, done by you from the Pi harness (decision 77). The CI gate and the check scripts follow as the next changes, before any feature code, so step 1 begins with `pnpm ci` already passing on an empty core.
 
 ## Open
 

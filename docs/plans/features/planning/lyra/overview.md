@@ -6,7 +6,7 @@ category: features
 
 # Lyra, in one place
 
-Last updated: 2026-11-15. This is the front door. It says what Lyra is and how the pieces fit, in plain words, and points to the document that holds each detail. It adds no decisions. The 89 decisions are in [`decisions.md`](decisions.md), and every number below refers to one.
+Last updated: 2026-11-15. This is the front door. It says what Lyra is and how the pieces fit, in plain words, and points to the document that holds each detail. It adds no decisions. The 94 decisions are in [`decisions.md`](decisions.md), and every number below refers to one.
 
 ## What Lyra is
 
@@ -16,7 +16,7 @@ It is a tool-calling agent and nothing more. It is not a coding agent and never 
 
 > A small constellation that does the work while the grove sleeps.
 
-Lyra lives in its own repository, `AutumnsGrove/lyra`, under the MIT license, published to npm as `@autumnsgrove/lyra` (decisions 68, 71, 73).
+Lyra lives in its own repository, `AutumnsGrove/lyra`, under the MIT license, published to npm as `@autumnsgrove/lyra` (decisions 68, 71, 73). The name is claimed in Grove: it has an entry in the naming doc, `GroveLyra` as its internal name, and `lyra` is reserved as a username (decision 94).
 
 ## How a run works
 
@@ -31,7 +31,7 @@ A **run** is one job from start to finish.
 Three things make this safe to leave running:
 
 - **A leash.** A run can have limits on steps, tokens, time, and cost. All are optional, and none is set by default. Hitting one parks the run, and it can be resumed (decisions 18, 22).
-- **A record.** After every step, Lyra saves what happened to an append-only record. The record is both the history of what Lyra did and why, and the progress, so an interrupted run resumes where it stopped and does not start over (decisions 20, 28 to 33, 51).
+- **A record.** After every step, Lyra saves what happened to an append-only record. The record is both the history of what Lyra did and why, and the progress, so an interrupted run resumes where it stopped and does not start over (decisions 20, 28 to 33, 51). Each entry is capped at 1 MiB, below Cloudflare's 2 MB row limit, and oversized content is truncated with a marker, so a save never fails midway (decision 90).
 - **A way to be stopped.** A person can stop any run, steer it with a new message, or add a follow-up (decisions 19, 27).
 
 ## The words
@@ -70,6 +70,7 @@ Cloudflare Workers is the main target and the hardest place to run, so the core 
 - **A model call fails:** up to 3 retries with growing delays, then, if the recipe names one, a fallback model, then the run parks as "model unavailable" (decisions 26, 58). Lumen does no model fallback when tools are present, so this is the only protection.
 - **A run gets stuck:** if a tool fails the same way several times, or the model stops without finishing, the run parks as stuck. This is the one default-on safeguard, and it is configurable (decision 25).
 - **The host is evicted mid-run:** the record is saved before each step, so the run resumes. A tool declares whether it is safe to repeat. One that is not, and was cut off, is never run twice, and the model is told the outcome is unknown (decisions 23, 24).
+- **A deploy changes the tools mid-run:** a run pins its recipe. The same tools mean it continues. A tool added, removed, or changed parks it as stuck until a person resumes it (decision 91).
 
 Details are in [`limits-and-interruptions.md`](limits-and-interruptions.md).
 
@@ -145,7 +146,7 @@ Everything here comes from reading code and docs. Nothing has been run. These we
 
 - The Workers testing package name and config (one page copy says `@cloudflare/vitest-plugin`, the official guide says `@cloudflare/vitest-pool-workers`).
 - Whether fast-check runs inside Workers, and how mature Vitiate is for coverage-guided fuzzing.
-- Durable Object hibernation details and the SQLite row-size limit.
+- Durable Object hibernation details. The 2 MB row limit (decision 90) comes from Cloudflare's limits page and secondary sources, and should be checked against the live page.
 - Whether GitHub access for pull requests and issues goes through Warden.
 - How Lumen gets its provider key in the local dev stack.
 - Whether the HawkAgent answer key is large enough, because the evidence for three of its six cases was deleted.
@@ -156,7 +157,7 @@ Everything here comes from reading code and docs. Nothing has been run. These we
 
 | Document | What it holds |
 |---|---|
-| [`decisions.md`](decisions.md) | All 89 decisions with their reasons. The source of truth. |
+| [`decisions.md`](decisions.md) | All 94 decisions with their reasons. The source of truth. |
 | [`adapters.md`](adapters.md) | The slots and adapters. |
 | [`limits-and-interruptions.md`](limits-and-interruptions.md) | Limits, stop and steer, resume, failures. |
 | [`run-record.md`](run-record.md) | The saved record. |
@@ -170,4 +171,5 @@ Everything here comes from reading code and docs. Nothing has been run. These we
 | [`engineering-practices.md`](engineering-practices.md) | How it is built and tested. |
 | [`first-slice.md`](first-slice.md) | The build order. |
 | [`repository.md`](repository.md) | The repository, releases, and moving over. |
+| [`agents-guide-draft.md`](agents-guide-draft.md) | A draft of the new repository's `AGENTS.md` (decision 93). |
 | [`research/`](research/) | Raw research notes, written fast. Useful as source material, not as settled fact. |

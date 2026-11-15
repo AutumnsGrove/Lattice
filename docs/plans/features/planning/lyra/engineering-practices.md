@@ -117,6 +117,8 @@ The checklist to work through when writing a change's test cases, before the cod
 - **Killed at every point**: before the model request, after the model reply but before the tool, during the tool, after the tool but before its result is saved, during compaction. Resume must continue correctly each time.
 - A tool that is not safe to repeat, interrupted mid-call: never run twice, and the model is told the outcome is unknown (decision 24).
 - Replay rebuilds tool state exactly (the handle map, the half-built page).
+- **An entry over the cap** (decision 90): a tool result, reasoning text, proposal evidence, and a user message each over 1 MiB. The save must never fail, and truncation must leave a marker. An input of exactly the cap, and one byte over.
+- **Resume after a deploy** (decision 91): the same tool set, a reworded prompt only, a tool added, a tool removed that the record already used, a tool's arguments changed, and a `resume` after a `recipe_changed` park.
 - Compaction: the cut never falls between a tool call and its result. An empty history. A summary call that fails, or returns nothing. A second compaction over the first. Replay still works from the full record.
 
 ### Approvals and proposals

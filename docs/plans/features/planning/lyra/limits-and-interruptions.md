@@ -43,6 +43,10 @@ So each tool declares whether it is safe to repeat. The default is no. When an u
 
 A model request that was in flight when the interruption landed is simply asked again. It costs one extra call. Avoiding that would need request ids in Lumen, which is not worth it yet.
 
+## Resuming after a deploy
+
+Deploys evict Durable Objects once or twice a day, so a long run often resumes on new code. The run's header pins the recipe it started with, and a resume checks the tool set against it. The same tools mean it continues. A changed tool set parks the run as stuck with the detail `recipe_changed` until a person resumes it (decision 91). A reworded prompt alone does not stop a run. See `run-record.md`.
+
 ## A run's life
 
 | State | Meaning |

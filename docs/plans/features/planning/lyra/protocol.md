@@ -77,7 +77,7 @@ This is the concrete shape, written so spec rows can have IDs (decision 62). It 
 ### Framing and hello
 
 - UTF-8, one JSON object per line, split on `\n` only, `\r\n` accepted, empty lines skipped, unknown fields ignored. A bad line gets a failed `response` with `bad_request`, an unknown frame type or command gets `unsupported`, and neither is fatal.
-- The line cap is **8 MiB**, configurable. Nova's 64 MiB exists because a speech response carries audio, and Lyra carries none (decision 48).
+- The line cap is **2 MiB**, configurable (decision 90). Nova's 64 MiB exists because a speech response carries audio, and Lyra carries none (decision 48). A record entry is capped at 1 MiB, below Cloudflare's 2 MB row limit.
 - Client `hello`: `{type, version: 1, client, capabilities, tenant?}`. `capabilities` lists the request kinds the client can answer: `ui.confirm`, `ui.select`, `ui.input`, `ui.form`. `tenant` is only for trusted callers (see Access below).
 - Server `hello`: `{type, version: 1, server, capabilities}`, with `capabilities` drawn from `steer`, `follow_up`, `compact`, `resume`, `proposals`.
 - Over HTTP, the version travels in a header and there is no hello frame.
@@ -93,7 +93,7 @@ This is the concrete shape, written so spec rows can have IDs (decision 62). It 
 | `abort` | `session` | Stops the active run. The run is **parked** with the reason `stopped`, and can be resumed (decision 23). |
 | `resume` | `session` | Resumes a parked run. `busy`, naming the pending request ids, if the run is waiting for a person. |
 | `get_state` | `session?` | Run state, parked reason, pending request count, usage so far, queue sizes. |
-| `get_messages` | `session`, `entry?` | The record's entries, or the branch ending at `entry`. |
+| `get_messages` | `session`, `entry?`, `limit?`, `cursor?` | The record's entries, or the branch ending at `entry`, one page at a time, so a long record never makes a reply larger than the line cap. |
 | `compact` | `session`, `instructions?` | Compacts now (decision 42). |
 | `list_sessions` | `task?`, `state?`, `limit?`, `cursor?` | Sessions for the caller's tenant. |
 | `list_pending` | `session?` | Pending approvals and questions, and open proposals, so a viewer can show the glow (decision 36). |
@@ -108,7 +108,7 @@ Responses are Nova's: `{type: "response", id, command, ok, data}` or `{..., ok: 
 Every event carries `seq`, `ts`, `session`, and `run`. Kept from Nova unchanged: `run_start`, `turn_start`, `turn_end`, `message_start`, `text_delta`, `message_end`, `thinking_*` (optional), `tool_call`, `tool_start`, `tool_update`, `tool_end`, `permission`, `usage`, `retry`, `compaction`, `queue_update`, `error`, and the `ui_expired` notice.
 
 New:
-- **`parked`** `{run, reason, detail?}`, with `reason` one of `waiting_for_person`, `limit`, `stopped`, `stuck`, `model_unavailable`.
+- **`parked`** `{run, reason, detail?}`, with `reason` one of `waiting_for_person`, `limit`, `stopped`, `stuck`, `model_unavailable`. For `stuck`, `detail` can be `recipe_changed`, with the tools that differ (decision 91).
 - **`resumed`** `{run}`.
 - **`fallback`** `{run, from, to, reason}`, when the recipe's fallback model takes over (decision 58).
 - **`ui_resolved`** `{id, by}`, so other clients close a dialog that was answered elsewhere.
@@ -162,10 +162,14 @@ IDs use these prefixes: `FRM` framing and hello, `CMD` commands, `EVT` events, `
 | CMD09 | `list_pending` with an approval and an open proposal | Both listed with enough content to answer |
 | CMD10 | `decide_proposal` twice | Second is `conflict` |
 | CMD11 | `get_messages` with an `entry` | The branch ending at that entry |
+| CMD12 | `get_messages` on a record longer than one page | A page and a cursor, never a reply over the line cap |
+| CMD13 | A command whose text is over the entry cap | `bad_request` |
+| FRM01 | A line over the 2 MiB cap | Protocol error that closes the connection, as in Nova |
 | EVT01 | Any run | Exactly one `run_end` with reason `done`, `parked`, or `failed`, and none after it |
 | EVT02 | A limit is hit | `parked` with reason `limit`, then `run_end` `parked` |
 | EVT03 | The fallback model takes over | A `fallback` event, and a record entry |
 | EVT04 | A request is answered by one of two clients | The other receives `ui_resolved` |
+| EVT06 | A resume finds a changed tool set | `parked` with reason `stuck` and detail `recipe_changed` |
 | EVT05 | A client reconnects with `Last-Event-ID` | Receives every missed record-derived event in order, and no live deltas |
 | REQ01 | A request is created | Saved in the record before it is sent |
 | REQ02 | A request with no connected client | Listed by `list_pending`, answerable later |

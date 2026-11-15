@@ -34,6 +34,7 @@ Slowly, and scoped before anything is built. Every decision gets written down he
 | [`engineering-practices.md`](engineering-practices.md) | How Lyra is built and tested: test-first, happy, sad and bad paths, fuzzing, end-to-end from the start, local testing with OpenRouter and OpenCode Go, and the definition of done. |
 | [`shell-tool.md`](shell-tool.md) | The optional shell: the `bash` tool, background commands, losing the host, command policy, and the credential scrub. A later slice. |
 | [`first-slice.md`](first-slice.md) | The smallest version that runs the timeline end to end, the build order, and two checkpoints. |
+| [`agents-guide-draft.md`](agents-guide-draft.md) | A draft of the new repository's `AGENTS.md`: the test-first rules, the repo map, the hard rules, the definition of done, and the release steps. |
 | [`repository.md`](repository.md) | The new repository: name, layout, license, release process, the Cloudflare foundation question, and how the plan moves over. |
 | [`timeline-first-job.md`](timeline-first-job.md) | The first job Lyra will do: the development timeline summary. What is wrong today and the tools that fix it. |
 | [`lumen-changes.md`](lumen-changes.md) | What Lumen has to change before Lyra can run a loop through it. |

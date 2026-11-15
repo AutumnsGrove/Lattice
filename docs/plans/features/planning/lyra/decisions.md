@@ -40,7 +40,7 @@ Lumen's privacy scrubber (emails, phone numbers, IP addresses, card and SSN patt
 Songbird checks only what a Wanderer types, for prompt injection. It does not inspect tool results or judge tool calls. That would be extra overhead for something not needed, and it is not what Songbird is for. The defense for tool results is that each task only has the tools it needs, so a poisoned issue comment can at worst mislead a summary.
 
 ### 10. Quota and step limits
-The timeline skips Lumen's request quota for now (Lumen has a `skipQuota` option). Lyra's maximum number of steps is an option, and the default in the core is no limit. A task can set its own limit in its recipe. (Suggested, not decided: the timeline recipe sets one, because a confused loop on a Wanderer's own provider key spends their money. Cloudflare's own limits still apply either way.)
+The timeline skips Lumen's request quota for now (Lumen has a `skipQuota` option). Lyra's maximum number of steps is an option, and the default in the core is no limit. A task can set its own limit in its recipe. The timeline recipe's step limit is set in decision 92. Cloudflare's own limits still apply either way.
 
 ### 11. Lumen gets its own `agent` task
 Agent calls use a new task type in Lumen, with its own default model, its own quota line, and its own settings. It does not reuse `summary` or `chat`.
@@ -284,6 +284,23 @@ A request can be answered by a caller whose tenant owns the session. Approving w
 
 ### 89. The shell's remaining details
 A recipe names allow patterns directly in version one, and named sets (for example `tests`, `git-read`) can come later. There is no "allow for this session" answer in version one, because it only matters in interactive use and Reverie's flow is preview then confirm. The deny list for open mode is written when the shell is built. Decided 2026-11-15.
+
+### 90. Record entries have a size cap, and oversized content is truncated with a marker
+Each record entry is capped at 1 MiB by default, configurable, and always below the storage adapter's own hard limit. Cloudflare's documentation gives a 2 MB limit on a string, BLOB, or row in a Durable Object's SQLite storage (from the limits page and secondary sources, to confirm against the live page). Content that could exceed the cap (a tool result, the model's reasoning text, a proposal's evidence, a user message) is truncated before it is saved, with a marker that says how many bytes were dropped, so an entry always saves and a run never fails midway for size. The protocol's line cap drops from 8 MiB to 2 MiB, since nothing legitimate is larger, and `get_messages` is paginated. A command whose text is over the cap is `bad_request`. Decided 2026-11-15, on Autumn's go-ahead to close this gap. The 1 MiB and 2 MiB figures are my starting values, to tune.
+
+### 91. A run pins its recipe, and a resume checks it
+The record's header stores the recipe's name and version and a hash of its tool set (the tool names and their argument schemas, not the instructions' wording). On resume, the same tool-set hash means the run continues, with a `recipe_updated` entry if the version or instructions changed. A different hash, meaning a tool was added, removed, or changed, parks the run as stuck with the detail `recipe_changed`, listing the differences. A person's `resume` then continues it with the new tools, and the record notes the change. This covers the ordinary case, because deploys evict Durable Objects once or twice a day, so a long run often resumes on new code. Decided 2026-11-15.
+
+### 92. The timeline recipe has a step limit of 40
+Forty model turns, configurable in the recipe. A normal day takes well under that, so it catches a looping run. It matters because the timeline spends the Wanderer's own OpenRouter key. No cost cap yet, because Lumen only estimates cost from the catalog. These are starting values chosen without data, and they should be tuned after the first real runs. Decided 2026-11-15. Settles the suggestion left open in decision 10.
+
+### 93. The Lyra repository gets its own `AGENTS.md` in its first commits
+A guide for people and agents working in the repository, built from Nova's and from `engineering-practices.md`: the test-first rules, the repo map, the hard rules, and the definition of done. `pi-review` reads `AGENTS.md` from the base commit, so it should exist when PR #1 lands. The draft is in `agents-guide-draft.md`, named so it is not mistaken for instructions for this repository. Decided 2026-11-15.
+
+### 94. The name is claimed in Grove
+A Lyra entry in `docs/philosophy/grove-naming.md` (Operations), `GroveLyra` as the internal name, the GroveTerm manifest regenerated, and `lyra` reserved in the username blocklist. Done in the same pull request as the plan, on Autumn's instruction. One tradeoff is on record: Lyra is also a fairly common given name, so reserving it stops a Wanderer named Lyra from claiming `lyra.grove.place`. It is one line in `domain-blocklist.json` to undo. Decided 2026-11-15.
+
+What was changed: the entry in `grove-naming.md`, a row in its ecosystem table and its Internal Names table, a regenerated `grove-term-manifest.json`, one `grove_service` entry in `libs/engine/src/lib/data/domain-blocklist.json` (category `internal_services`), and a test written first and watched failing. Two things found along the way. Most Grove infrastructure names are not reserved at all (`lumen`, `warden`, and `zephyr` are absent, `mycelium` is reserved, and `moss` is held as future-reserved), so this is a choice and not the norm. And the manifest generator lets the last entry in the naming doc (Blazes) absorb the document's footer, so its "see also" list comes from the footer text: it pointed at `foliage` and `prism` from the old footer, and now points at `lyra`. Neither link means anything. That is a bug in the generator and was left alone.
 
 ## Not discussed yet
 

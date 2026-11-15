@@ -30,6 +30,10 @@ The line counts, repo chips, and dates come from code. The words come from the m
 
 The model decides what to say. Tools produce anything that has to be exact: repo names, links, ids, and where a vine lands. A tool can reject a bad request ("no such repo, here are the real ones") and the model corrects itself inside the loop. A prompt cannot do that.
 
+## Limits for the timeline recipe
+
+A step limit of 40 model turns (decision 92), configurable in the recipe. A normal day takes well under that, so it catches a looping run, which matters because the timeline spends the Wanderer's own OpenRouter key. There is no cost cap yet, since Lumen only estimates cost from the catalog. The values are starting points chosen without data and should be tuned after the first real runs.
+
 ## What gets handed over up front
 
 Everything for the day, in full: the repos, commits, pull requests, issue activity (opened, closed, commented), and line counts. The point of the timeline is to filter noise into signal, so the model sees all of it. A very large day is a known limit, accepted because the timeline has one user. A step limit and a clear "too big" failure are enough.
