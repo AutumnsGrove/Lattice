@@ -154,6 +154,14 @@ export const PLANT_ERRORS = {
 		adminMessage: "Tenant creation rejected: identity matched a signup_blocks entry.",
 	},
 
+	TURNSTILE_NOT_CONFIGURED: {
+		code: "PLANT-048",
+		category: "admin" as const,
+		userMessage: "Verification isn't available right now. Please try again in a moment.",
+		adminMessage:
+			"TURNSTILE_SECRET_KEY is missing outside the dev stack, so signup verification cannot run.",
+	},
+
 	SIGNUP_BLOCK_CHECK_FAILED: {
 		code: "PLANT-047",
 		category: "admin" as const,
