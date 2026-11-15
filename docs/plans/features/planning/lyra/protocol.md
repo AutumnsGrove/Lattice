@@ -6,7 +6,7 @@ category: features
 
 # The protocol
 
-Last updated: 2026-11-15. Only decision 43 is decided. Everything else is a draft for discussion, marked proposed.
+Last updated: 2026-11-15. Decisions 43 to 45 are decided. Everything else is a draft for discussion, marked proposed.
 
 ## What it is
 
@@ -15,6 +15,10 @@ The protocol is how anything outside Lyra talks to it: an Arbor page, a script, 
 ## Decided
 
 **43. Lyra speaks Nova's frames.** A subset of them, plus a few new ones. One client could drive either. This was a goal of the original issue. Nova's protocol (`docs/PROTOCOL.md` in the Nova repository) is JSON, one object per line, and every connection starts with a `hello` exchange that names the version. Unknown fields are ignored.
+
+**44. A session holds many runs.** A client talks to a session, like in Nova. A follow-up sent after a run has ended starts the next run in the same session.
+
+**45. HTTP with server-sent events, and WebSocket, both from the start.** The core only speaks frames. The two transports are thin layers over it.
 
 ## What Nova's protocol looks like
 
@@ -61,8 +65,6 @@ To keep a Nova client working, a parked run emits `run_end` with the reason `par
 
 ## Open questions
 
-- Whether a client talks to a single run, or to a session that can hold several runs, as in Nova.
-- Which transport comes first on Cloudflare.
 - Whether Lyra also exposes Nova's four stateless calls (embeddings, decision models, speech, transcription).
 - The exact start-a-task command.
 - Authentication and the one-time codes on requests.

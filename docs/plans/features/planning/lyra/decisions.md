@@ -147,13 +147,18 @@ It will rarely fire, because tasks are small and most models have very large win
 ### 43. Lyra speaks Nova's frames
 A subset of Nova's frames (`hello`, commands, `response`, `event`, `ui_request`, `ui_response`), plus a few new ones for starting a task, resuming a parked run, and listing pending requests. One client could drive either Nova or Lyra. Decided 2026-11-15. See `protocol.md`.
 
+### 44. A session holds many runs, like Nova
+A client talks to a session, which is a conversation that can hold many runs. Each timeline day would be a session with one run. A chat-style use later fits the same shape. A follow-up sent after a run has ended starts the next run in the same session, which settles the open detail in decision 27. Decided 2026-11-15. See `protocol.md`.
+
+### 45. HTTP with server-sent events and WebSocket, both from the start
+Both transports are built together. HTTP: a command is a normal request, and events arrive on a stream (as in Nova's serve mode). WebSocket: one connection both ways, which suits live stop, steer, and approvals. Other Grove workers reach Lyra through a service binding. Decided 2026-11-15. This is more to build first, and the cost is accepted. Neither transport is part of the core, because the core only speaks frames (see decision 12).
+
 ## Not discussed yet
 
 These came out of the research and are waiting for their turn, one at a time:
 
 - **Record retention.** How long a record is kept, and who can delete one.
-- **Follow-up when nothing is running.** Whether it starts the next turn of the same conversation or is refused.
 - **Approvals.** How a background run asks for a yes and waits at no cost.
 - **The Cloudflare adapter's foundation.** Whether it builds on Cloudflare's agent tooling or on plain Durable Objects. A smaller question once decision 12 is settled.
-- **Protocol details.** Sessions, transport, the start command, and authentication. See `protocol.md`.
+- **Protocol details.** The start command, authentication, and whether Lyra also exposes the four stateless calls. See `protocol.md`.
 - **The new repository.** Name, layout, release process, and test setup.
