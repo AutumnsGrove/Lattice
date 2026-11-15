@@ -2,7 +2,7 @@
 title: The Grove Naming System
 description: The complete philosophy and naming system for the Grove ecosystem
 category: philosophy
-lastUpdated: "2026-02-04"
+lastUpdated: "2026-11-15"
 ---
 
 # The Grove Naming System
@@ -854,6 +854,18 @@ Memories are entirely exportable. Download everything as a portable artifact (Ma
 
 _The forest remembers through its moss._
 
+### Lyra
+
+**Agent Core** · _Library, in its own repository_
+**Standard:** Agent Core
+**Waystone:** The layer that does Grove's background work. It takes a job, calls tools and models, and brings back a result, even if you were asleep.
+
+Lyra is the harp in the summer sky: a small constellation, easy to miss if you don't look up. Its brightest star, Vega, was the north star once and will be again.
+
+In Grove, Lyra is the agent core. Give it a job, a set of tools, and limits on how far it may go, and it runs the loop: ask Lumen, use a tool, read what came back, ask again. It stops when the job is done or the budget runs out. When it needs a Wanderer's answer, it parks the run and waits without spending anything, then picks up where it left off. Every run leaves a record of what it did and why, and Moss will give it memory. Lyra is also the name of the agent itself, the way Nova is both the harness and the thing you run.
+
+_A small constellation that does the work while the grove sleeps._
+
 ### Zephyr
 
 **Email Gateway** · _Internal service_
@@ -946,6 +958,7 @@ _In a forest full of harvesters, this grove stays shaded._
 | **Mycelium**   | Ops          | MCP server                     | mycelium.grove.place            |
 | **Lumen**      | Ops          | AI gateway                     | _(internal)_                    |
 | **Moss**       | Ops          | AI memory                      | _(module inside Lumen)_         |
+| **Lyra**       | Ops          | Agent core                     | _(library, own repo)_           |
 | **Zephyr**     | Ops          | Email gateway                  | _(internal)_                    |
 | **Shade**      | Ops          | AI content protection          | grove.place/shade               |
 
@@ -1004,6 +1017,7 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Mycelium        | GroveMCP        |
 | Lumen           | GroveLumen      |
 | Moss            | GroveMoss       |
+| Lyra            | GroveLyra       |
 | Zephyr          | GroveZephyr     |
 | Shade           | GroveShade      |
 | Etch            | GroveEtch       |
@@ -1192,5 +1206,5 @@ _A small mark that tells you everything._
 
 ---
 
-_Last updated: March 8, 2026 — Added Prism (color token vocabulary for Foliage)_
+_Last updated: November 15, 2026 — Added Lyra (agent core)_
 _Status: Placeholder names, pending launch_

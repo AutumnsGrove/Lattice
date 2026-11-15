@@ -242,6 +242,7 @@
   { "username": "kestrel", "reason": "grove_service", "category": "internal_services" },
   { "username": "breeze", "reason": "grove_service", "category": "internal_services" },
   { "username": "thread", "reason": "grove_service", "category": "internal_services" },
+  { "username": "lyra", "reason": "grove_service", "category": "internal_services" },
   { "username": "domains", "reason": "grove_service", "category": "aliases" },
   { "username": "music", "reason": "grove_service", "category": "aliases" },
   { "username": "mc", "reason": "grove_service", "category": "aliases" },

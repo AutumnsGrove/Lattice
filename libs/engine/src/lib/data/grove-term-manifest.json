@@ -642,6 +642,20 @@
     ],
     "standardTerm": "AI Memory"
   },
+  "lyra": {
+    "slug": "lyra",
+    "term": "Lyra",
+    "category": "operations",
+    "tagline": "Agent Core",
+    "definition": "The layer that does Grove's background work. It takes a job, calls tools and models, and brings back a result, even if you were asleep.",
+    "seeAlso": [
+      "wander",
+      "lumen",
+      "moss",
+      "wanderer"
+    ],
+    "standardTerm": "Agent Core"
+  },
   "zephyr": {
     "slug": "zephyr",
     "term": "Zephyr",
@@ -822,10 +836,9 @@
     "tagline": "Content Type Indicators",
     "definition": "The small icon and label on each post that tells you what kind of content it is — a bloom, a note, or something else.",
     "seeAlso": [
-      "foliage",
       "meadow",
       "hum",
-      "prism"
+      "lyra"
     ],
     "standardTerm": "Content Type Badge"
   }
