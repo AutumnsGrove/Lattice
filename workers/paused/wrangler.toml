@@ -2,7 +2,6 @@
 #
 # Deploy this worker under different names to replace stale deployments:
 #   wrangler deploy --name grove-ivy
-#   wrangler deploy --name grove-loft
 #   wrangler deploy --name daily-clearing
 #   wrangler deploy --name grove-post-migrator
 #

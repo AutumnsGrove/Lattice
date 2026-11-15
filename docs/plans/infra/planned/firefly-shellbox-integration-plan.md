@@ -1,11 +1,22 @@
 ---
 title: "Firefly Integration Plan: Wake-on-HTTP, Named Instances, Pause/Resume"
-status: planned
+status: parked
 category: infra
-lastUpdated: "2026-03-06"
+lastUpdated: "2026-11-15"
 ---
 
 # Firefly Integration Plan: Wake-on-HTTP, Named Instances, Pause/Resume
+
+> **Parked 2026-11-15 (#1655).** Most of this plan was justified by Loft, and Loft
+> never shipped to Fly.io — it was retired with only the repo-side image and spec
+> left behind, now removed. So Feature 3 (pause/resume) and the Loft consumer
+> preset have nothing to apply to, and the plan's `libs/engine/src/lib/firefly/`
+> paths do not exist in the tree.
+>
+> What might still stand: named instances and wake-on-HTTP for genuinely
+> machine consumers (Queen CI, Outpost). If one of those gets built, lift those
+> two features into a fresh plan rather than reviving this one — a rewrite is
+> cheaper than archaeology.
 
 ```
                          From this height, the patterns emerge.

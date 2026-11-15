@@ -171,18 +171,6 @@ for AgentWorkflow consumers. Worker directories at `workers/{name}/`.
 - **Instance key:** Singleton or `pulse:{tenantId}`
 - **Safari ref:** Section 19
 
-### 3.6 LoftAgent
-
-- **Class:** `GroveAgent`
-- **Location:** `workers/loft/` (evolve in-place)
-- **SDK features:** `scheduleEvery()` (per-machine idle checks), `@callable()` (provision), `setState()` (active machine tracking)
-- **What it does:** Dev environment provisioning with per-machine idle detection.
-  Instead of global 2-minute polling, each machine gets its own schedule.
-  Machines tracked in agent state.
-- **Retires:** Loft's 2-min + 6-hour crons
-- **Instance key:** Singleton
-- **Safari ref:** Section 23
-
 ---
 
 ## Phase 4: New Capabilities
@@ -395,8 +383,8 @@ for AgentWorkflow consumers. Worker directories at `workers/{name}/`.
 
 | SDK Feature | Consumers |
 |---|---|
-| `schedule()` / cron | Onboarding, Vista, Timeline, Clearing, Pulse, Loft, Rings, Heartwood, PostMigrator, Warden |
-| `scheduleEvery()` | Vista, Meadow, Loft, Clearing, Curios, Sentinel |
+| `schedule()` / cron | Onboarding, Vista, Timeline, Clearing, Pulse, Rings, Heartwood, PostMigrator, Warden |
+| `scheduleEvery()` | Vista, Meadow, Clearing, Curios, Sentinel |
 | `queue()` | Onboarding, Thorn, Vista, Meadow, Timeline, Pulse, Shutter, Zephyr |
 | `@callable()` RPC | All agents (primary API surface) |
 | `setState()` + sync | All agents (real-time UI updates) |
@@ -407,7 +395,7 @@ for AgentWorkflow consumers. Worker directories at `workers/{name}/`.
 | MCP client | Timeline (→Lumen, Shutter), Fireside (→Lumen) |
 | Browser binding | Shutter |
 | `AgentWorkflow` | Petal, Patina, Amber, Forage |
-| `useAgent()` hook | Vista, Clearing, Rings, Sentinel, Loft |
+| `useAgent()` hook | Vista, Clearing, Rings, Sentinel |
 | `useAgentChat()` hook | Fireside, Ivy |
 
 ---
@@ -424,7 +412,6 @@ for AgentWorkflow consumers. Worker directories at `workers/{name}/`.
 | 3 | `workers/timeline-sync/` | TimelineAgent |
 | 3 | `apps/clearing/` crons | ClearingAgent |
 | 3 | `services/pulse/` crons | PulseAgent |
-| 3 | `workers/loft/` crons | LoftAgent |
 | 5 | `workers/patina/` cron | PatinaWorkflow |
 | 5 | `ExportJobV2` DO | AmberWorkflow |
 | 5 | `SearchJobDO` DO | ForageWorkflow |
