@@ -88,7 +88,7 @@ Quick-scan for the most obvious vibes violations. These are the things that make
 # "Submit", "Click here", "No items found", "Loading...", "An error occurred"
 ```
 
-**Reference:** Load `references/design-quality.md` (shared with Elephant and Chameleon) for the complete checklist.
+**Reference:** Load `chameleon-adapt/references/design-quality.md` (shared with chameleon and elephant) for the complete checklist.
 
 **Output:** Quick-scan results — obvious violations flagged
 
@@ -217,9 +217,9 @@ Present the full report:
 
 | Phase  | Reference                                    | Load When                                    |
 | ------ | -------------------------------------------- | -------------------------------------------- |
-| SNIFF  | `references/design-quality.md`               | Always — the cat needs to know the standards |
-| CIRCLE | Chameleon's `references/color-palette.md`    | When checking color token usage              |
-| CIRCLE | Chameleon's `references/glass-components.md` | When checking Glass usage                    |
+| SNIFF  | `chameleon-adapt/references/design-quality.md` | Always — the cat needs to know the standards |
+| CIRCLE | `chameleon-adapt/references/color-palette.md` | When checking color token usage              |
+| CIRCLE | `chameleon-adapt/references/glass-components.md` | When checking Glass usage                |
 
 **Note:** The design-quality.md reference is shared between Elephant, Chameleon, and Cat. The Cat reads it to know what to check. The builders read it to know what to build.
 

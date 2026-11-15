@@ -58,7 +58,7 @@ Gather the right information with precision.
 - Consider where this falls on the voice spectrum: API reference (clarity-first) to getting started guide (full Grove voice)
 - Determine whether GroveTerm components are needed for Grove terminology in the content
 
-**Reference:** Load `references/grove-voice-guide.md` for the complete voice guidelines, user identity terminology, queer-friendly language guidance, and voice spectrum examples
+**Reference:** Load `references/voice.md` for the complete voice guidelines, user identity terminology, queer-friendly language guidance, and voice spectrum examples
 
 **Output:** Voice anchored, audience defined, terminology confirmed
 
