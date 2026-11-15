@@ -479,8 +479,8 @@ func renderTenantTable(rows []map[string]any, now time.Time) string {
 	widths := make([]int, len(headers))
 	for _, row := range table {
 		for i, cell := range row {
-			if len(cell) > widths[i] {
-				widths[i] = len(cell)
+			if displayWidth(cell) > widths[i] {
+				widths[i] = displayWidth(cell)
 			}
 		}
 	}
@@ -652,10 +652,11 @@ func orNoValue(v string) string {
 }
 
 func padRight(v string, width int) string {
-	if len(v) >= width {
+	if w := displayWidth(v); w >= width {
 		return v
+	} else {
+		return v + strings.Repeat(" ", width-w)
 	}
-	return v + strings.Repeat(" ", width-len(v))
 }
 
 // ageLabel renders a unix timestamp as a short age. 0 means "never", which is

@@ -1,6 +1,7 @@
 package exec
 
 import (
+	"errors"
 	"strings"
 	"testing"
 )
@@ -81,5 +82,57 @@ func TestParseD1RowsRejectsNonJSON(t *testing.T) {
 	}
 	if _, err := ParseD1Rows(""); err == nil {
 		t.Fatal("expected an error for empty output")
+	}
+}
+
+func TestD1ErrorTextExtractsTheMessage(t *testing.T) {
+	raw := errors.New(`wrangler: {
+  "error": {
+    "text": "A request to the Cloudflare API failed.",
+    "notes": [{"text": "no such table: signup_blocks"}]
+  }
+}`)
+
+	err := D1ErrorText(raw)
+	if err == nil {
+		t.Fatal("expected an error")
+	}
+	// The note is the actionable part; the API-failure line above it is noise.
+	if !strings.Contains(err.Error(), "no such table: signup_blocks") {
+		t.Errorf("message not extracted: %v", err)
+	}
+	if strings.Contains(err.Error(), "notes") {
+		t.Errorf("error should be one line, got: %v", err)
+	}
+}
+
+func TestD1ErrorTextFallsBackToFirstLine(t *testing.T) {
+	err := D1ErrorText(errors.New("wrangler: Not authenticated.\nPlease run `wrangler login`."))
+	if err == nil {
+		t.Fatal("expected an error")
+	}
+	if strings.Contains(err.Error(), "wrangler login") {
+		t.Errorf("only the first line should survive, got: %v", err)
+	}
+	if !strings.Contains(err.Error(), "Not authenticated") {
+		t.Errorf("first line should survive, got: %v", err)
+	}
+}
+
+func TestD1ErrorTextPassesNilThrough(t *testing.T) {
+	if err := D1ErrorText(nil); err != nil {
+		t.Fatalf("nil in, %v out", err)
+	}
+}
+
+func TestD1ErrorTextPrefersFriendlyTextOverNotes(t *testing.T) {
+	raw := errors.New(`wrangler: {
+  "error": {
+    "text": "A request to the Cloudflare API failed."
+  }
+}`)
+	err := D1ErrorText(raw)
+	if err == nil || !strings.Contains(err.Error(), "Cloudflare API failed") {
+		t.Fatalf("got %v", err)
 	}
 }

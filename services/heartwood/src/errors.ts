@@ -95,6 +95,24 @@ export const HW_SVC_ERRORS = {
 		adminMessage: "Zephyr per-recipient verification rate limit hit for a sign-in code.",
 	},
 
+	SIGNUP_IDENTITY_BLOCKED: {
+		code: "HW-SVC-044",
+		category: "user" as const,
+		// Deliberately vague: naming the rule, the domain, or the reason tells the
+		// operator what to rotate next. The real reason is in the server log.
+		userMessage:
+			"We're not able to create an account with this email address. If you think that's a mistake, write to hello@grove.place.",
+		adminMessage: "Signup rejected: identity matched a signup_blocks entry.",
+	},
+
+	SIGNUP_BLOCK_CHECK_FAILED: {
+		code: "HW-SVC-045",
+		category: "admin" as const,
+		userMessage: "",
+		adminMessage:
+			"signup_blocks could not be read; the signup was allowed. The deny list is not currently protecting anyone — check the table and the D1 binding.",
+	},
+
 	// ─────────────────────────────────────────────────────────────────────────
 	// Internal Errors (080-099)
 	// ─────────────────────────────────────────────────────────────────────────

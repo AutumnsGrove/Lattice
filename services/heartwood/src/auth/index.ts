@@ -22,6 +22,7 @@ import { HW_SVC_ERRORS } from "../errors.js";
 import type { Env } from "../types.js";
 import { schema } from "../db/auth.schema.js";
 import { getRequestContext, bridgeSessionToSessionDO } from "../lib/sessionBridge.js";
+import { checkSignupIdentity } from "../lib/signup-blocks.js";
 import { sendLoginCodeEmail } from "../services/email.js";
 import {
 	EMAIL_OTP_LENGTH,
@@ -311,6 +312,17 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 				allowedAttempts: EMAIL_OTP_ALLOWED_ATTEMPTS,
 				storeOTP: "hashed",
 				sendVerificationOTP: async ({ email, otp, type }) => {
+					// Deny list first: a blocked identity should cost no email send, no
+					// ba_verification row, and no Zephyr quota. The check runs before the
+					// local-dev log below so a blocked address never leaks a code into the
+					// terminal either.
+					const denied = await checkSignupIdentity(env, email);
+					if (denied.blocked) {
+						throw new APIError("FORBIDDEN", {
+							message: HW_SVC_ERRORS.SIGNUP_IDENTITY_BLOCKED.userMessage,
+						});
+					}
+
 					// Local dev: Zephyr may have no Resend key, so surface the code
 					// in the Heartwood terminal. Never reachable in production —
 					// isLocalDev is derived from the localhost AUTH_BASE_URL.
@@ -339,6 +351,16 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 			user: {
 				create: {
 					before: async (user) => {
+						// The last gate before an identity exists. This covers OAuth as well
+						// as email OTP — a blocked domain cannot sign up through Google either.
+						// Return type is `false` to abort; see better-auth's databaseHooks.
+						const denied = await checkSignupIdentity(env, user.email);
+						if (denied.blocked) {
+							throw new APIError("FORBIDDEN", {
+								message: HW_SVC_ERRORS.SIGNUP_IDENTITY_BLOCKED.userMessage,
+							});
+						}
+
 						console.log("[Auth] Creating new user");
 						return { data: user };
 					},

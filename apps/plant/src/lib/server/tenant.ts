@@ -8,6 +8,12 @@ import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
 import { DEFAULT_ACCENT_COLOR, DEFAULT_FONT } from "@autumnsgrove/lattice/platform/config";
 import { logGroveError } from "@autumnsgrove/lattice/errors";
 import { normalizeEmail } from "@autumnsgrove/lattice/utils/user";
+import {
+	describeBlock,
+	findBlock,
+	loadSignupBlocks,
+	normalizeIdentity,
+} from "@autumnsgrove/lattice/server/security/signup-blocks";
 import { PLANT_ERRORS } from "$lib/errors";
 import type { GroveDatabase } from "@autumnsgrove/infra";
 
@@ -25,12 +31,56 @@ export interface CreateTenantInput {
 }
 
 /**
+ * Thrown when the signup identity is on the deny list.
+ *
+ * A distinct type so routes can answer 403 with the user-facing copy instead of
+ * collapsing into the generic "Unable to complete signup" 500.
+ */
+export class SignupBlockedError extends Error {
+	readonly reason: string;
+
+	constructor(reason: string) {
+		super("Signup blocked by identity deny list");
+		this.name = "SignupBlockedError";
+		this.reason = reason;
+	}
+}
+
+/**
+ * Check the deny list one last time before the tenant exists.
+ *
+ * Heartwood checks at OTP send and at user creation, but a block can land while
+ * someone is mid-onboarding — and comped claims don't pass through the OTP flow
+ * at all. Fail open on a database error, loudly, for the same reason as
+ * Heartwood: a broken deny list must not stop every writer from signing up.
+ */
+async function assertIdentityNotBlocked(db: GroveDatabase, email: string): Promise<void> {
+	const identity = normalizeIdentity(email);
+	if (!identity) return;
+
+	try {
+		const block = findBlock(identity, await loadSignupBlocks(db));
+		if (!block) return;
+
+		console.warn(`[Tenant] Blocked tenant creation for ${identity.normalized}`);
+		throw new SignupBlockedError(describeBlock(block));
+	} catch (err) {
+		if (err instanceof SignupBlockedError) throw err;
+		logGroveError("Plant", PLANT_ERRORS.SIGNUP_BLOCK_CHECK_FAILED, {
+			detail: `signup_blocks lookup failed for ${identity.domain}: ${String(err)}`,
+		});
+	}
+}
+
+/**
  * Create a new tenant in the database
  */
 export async function createTenant(
 	db: GroveDatabase,
 	input: CreateTenantInput,
 ): Promise<{ tenantId: string; subdomain: string }> {
+	await assertIdentityNotBlocked(db, input.email);
+
 	const tenantId = crypto.randomUUID();
 
 	console.log("[Tenant] Creating tenant:", {
