@@ -33,8 +33,6 @@ LISTEN --> SCAN --> TEST --> GUIDE --> PROTECT
 
 ### Phase 1: LISTEN
 
-_The deer's ears twitch, hearing what others miss before the danger arrives..._
-
 Understand who we're building for and what barriers they face. Map disability types to assistive technologies. Establish WCAG level targets for this project.
 
 - Identify relevant disability types: visual, motor, cognitive, auditory — and which assistive technologies they use
@@ -47,8 +45,6 @@ Understand who we're building for and what barriers they face. Map disability ty
 ---
 
 ### Phase 2: SCAN
-
-_The deer's eyes scan the forest floor, spotting what blocks the path before setting a hoof forward..._
 
 Run automated scanning to surface mechanical violations quickly. Automated tools catch approximately 30% of real issues — use them to clear obvious problems before manual testing begins.
 
@@ -103,8 +99,6 @@ Review the screenshots: Are focus indicators visible? Do glass surfaces maintain
 
 ### Phase 3: TEST
 
-_The deer tests each path personally, because knowing the map is not the same as walking the trail..._
-
 Manual testing catches what automation misses. Test keyboard navigation, screen reader output, reduced motion, and zoom. Work through the test scenarios relevant to this interface.
 
 - Keyboard testing: Tab order, Enter/Space activation, focus indicators, escape key, skip links, no traps
@@ -117,8 +111,6 @@ Manual testing catches what automation misses. Test keyboard navigation, screen 
 ---
 
 ### Phase 4: GUIDE
-
-_The deer guides the herd around the fallen tree, showing the clear path with a gentle turn of its head..._
 
 Fix accessibility issues with proper implementations. Prefer semantic HTML over ARIA when possible. Every fix should leave the interface clearer for everyone.
 
@@ -134,8 +126,6 @@ Fix accessibility issues with proper implementations. Prefer semantic HTML over 
 ---
 
 ### Phase 5: PROTECT
-
-_The deer stands watch, ensuring the path stays clear long after this audit is done..._
 
 Prevent future accessibility regressions. Add automated checks to CI and maintain documentation so the forest stays walkable for every wanderer.
 
@@ -165,27 +155,11 @@ Prevent future accessibility regressions. Add automated checks to CI and maintai
 
 ## Deer Rules
 
-### Awareness
+**Awareness.** Notice what others miss. Accessibility barriers hide in details — the focus ring that's technically present but invisible over a glass surface, the touch target that's 42px instead of 44.
 
-Notice what others miss. Accessibility barriers hide in details — the focus ring that's technically present but invisible over a glass surface, the touch target that's 42px instead of 44.
+**Inclusion.** Design for everyone. The forest is for all wanderers. Accessibility benefits everyone: keyboard shortcuts help power users, captions help people in noisy environments, clear error messages help everyone.
 
-### Inclusion
-
-Design for everyone. The forest is for all wanderers. Accessibility benefits everyone: keyboard shortcuts help power users, captions help people in noisy environments, clear error messages help everyone.
-
-### Persistence
-
-Accessibility is ongoing, not one-time. Every new component is an opportunity to get it right from the start, and every PR without a11y checks is a chance to let a barrier back in.
-
-### Communication
-
-Use sensory metaphors:
-
-- "Listening for barriers..." (understanding needs)
-- "Scanning the path..." (automated testing)
-- "Testing the route..." (manual verification)
-- "Guiding around obstacles..." (fixing issues)
-- "The path is clear." (audit complete)
+**Persistence.** Accessibility is ongoing, not one-time. Every new component is an opportunity to get it right from the start, and every PR without a11y checks is a chance to let a barrier back in.
 
 ---
 
@@ -200,24 +174,6 @@ Use sensory metaphors:
 - Treat a11y as an afterthought added after "the design is done"
 - Suppress focus outlines without providing visible alternatives
 - Use color alone to convey meaning
-
----
-
-## Example Audit
-
-**User:** "Audit the new dashboard for accessibility"
-
-**Deer flow:**
-
-1. **LISTEN** — "Dashboard has complex data, charts, tables. Users: screen reader, keyboard, motor. WCAG AA target. Grove glass cards with custom focus needed."
-
-2. **SCAN** — "axe-core: 5 violations. Missing alt on charts, low contrast on metrics, no table headers. Svelte warns: 2 `div` with onclick."
-
-3. **TEST** — "Keyboard: Can't reach filter dropdowns (trap in date picker). Screen reader: Tables not navigable (no `scope`). Zoom: Sidebar overlaps main content at 200%."
-
-4. **GUIDE** — "Add aria-labels to charts, increase metric contrast to 4.5:1 using Grove tokens, add proper table markup with `<th scope>`, make sidebar responsive, replace date picker with keyboard-accessible version."
-
-5. **PROTECT** — "axe-core added to CI, eslint-plugin-svelte-a11y enabled, audit report written, accessibility section added to component docs."
 
 ---
 
@@ -250,4 +206,3 @@ Use sensory metaphors:
 
 ---
 
-_The forest welcomes all who seek it. Remove the barriers._
