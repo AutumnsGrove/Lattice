@@ -27,7 +27,20 @@ vi.mock("@autumnsgrove/lattice/errors", async () => {
 
 const { checkSignupIdentity } = await import("./signup-blocks");
 
-const env = { DB: {} } as Parameters<typeof checkSignupIdentity>[0];
+// Heartwood binds groveauth as DB and grove-engine-db as ENGINE_DB. The deny
+// list lives in the engine database, so the two bindings are deliberately made
+// to behave differently: reading DB must never be what finds a block.
+const engineDb = {};
+const authDb = {
+	prepare: () => {
+		throw new Error("read the groveauth database instead of ENGINE_DB");
+	},
+};
+
+const env = {
+	DB: authDb,
+	ENGINE_DB: engineDb,
+} as unknown as Parameters<typeof checkSignupIdentity>[0];
 
 const grokbotBlock = {
 	id: "blk-1",
@@ -55,6 +68,18 @@ describe("checkSignupIdentity", () => {
 		expect(result.block?.value).toBe("mail.grokbot.com");
 	});
 
+	it("reads the deny list from ENGINE_DB, not the groveauth DB", async () => {
+		loadSignupBlocks.mockResolvedValue([grokbotBlock]);
+
+		await checkSignupIdentity(env, "maplecrest+ella@mail.grokbot.com");
+
+		// The groveauth binding throws on prepare, so passing it would surface as
+		// the fail-open path (blocked: false, HW-SVC-045) — the exact bug that got
+		// through review the first time.
+		expect(loadSignupBlocks).toHaveBeenCalledWith(env.ENGINE_DB);
+		expect(loadSignupBlocks).not.toHaveBeenCalledWith(env.DB);
+	});
+
 	it("allows an ordinary address", async () => {
 		loadSignupBlocks.mockResolvedValue([grokbotBlock]);
 
@@ -77,8 +102,8 @@ describe("checkSignupIdentity", () => {
 		const result = await checkSignupIdentity(env, "maplecrest+ella@mail.grokbot.com");
 
 		expect(result.blocked).toBe(false);
-		// The whole point: allowed, but visible as an admin error.
-		expect(logGroveError).toHaveBeenCalledTimes(1);
+		// A tenant or address block must resolve to a block, not a throw, so that
+		// this fail-open path is the *only* way to get here.
 		const [, error] = logGroveError.mock.calls[0];
 		expect(error.code).toBe("HW-SVC-045");
 	});

@@ -42,7 +42,10 @@ export async function checkSignupIdentity(
 	if (!identity) return { blocked: false };
 
 	try {
-		const blocks = await loadSignupBlocks(env.DB);
+		// The deny list lives in grove-engine-db, which Heartwood binds as ENGINE_DB.
+		// `env.DB` here is groveauth — reading the wrong one would throw "no such
+		// table" and then fail open, so every gate would silently allow.
+		const blocks = await loadSignupBlocks(env.ENGINE_DB);
 		const block = findBlock(identity, blocks);
 		if (!block) return { blocked: false };
 
