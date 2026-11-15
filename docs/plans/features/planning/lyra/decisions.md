@@ -94,7 +94,7 @@ The default is no. A tool that was cut off partway and is not safe to repeat is 
 A run is done when the task's done-check passes (for the timeline, `finish` was accepted), not when the model says so. If the model stops without finishing, Lyra reminds it a small number of times, then parks the run as stuck. If a tool fails the same way several times in a row, the run also parks as stuck. This is the one default-on safeguard, and it is configurable per task (whether it is on, and the counts). A reply cut off by the token limit never runs its half-written tool arguments. Decided 2026-11-14.
 
 ### 26. A failing model call is retried 3 times, with staggered backoff
-Up to 3 retries, with increasing delays between attempts. The exact delays are configuration, chosen when building. After the third failure the run parks with the reason "model unavailable". Lumen already falls back between models inside its router, so the core only retries and parks. Decided 2026-11-14.
+Up to 3 retries, with increasing delays between attempts. The exact delays are configuration, chosen when building. After the third failure the run parks with the reason "model unavailable". Correction (2026-11-15): Lumen's router does not fall back between models when tools are present, so these retries are the only protection for agent calls, and whether a fallback model is wanted is an open question (see `lumen-changes.md`). Decided 2026-11-14.
 
 ### 27. A follow-up message is supported
 A message can be queued during a run and is read after the work would otherwise end, in the same conversation. It sits next to stop and steer (decision 19). Nova and Pi both have it. Decided 2026-11-14. Open detail: what a follow-up does when nothing is running.

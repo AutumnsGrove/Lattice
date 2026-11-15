@@ -6,7 +6,7 @@ category: features
 
 # Lumen changes needed for Lyra
 
-Last updated: 2026-11-13. Based on reading the code, not on running it. Line numbers are from that reading and will drift.
+Last updated: 2026-11-15. Based on reading the code, not on running it. Line numbers are from that reading and will drift. The ordered build plan is at the end.
 
 ## The principle
 
@@ -65,6 +65,13 @@ Lumen adds an `agent` task. The task controls the default model, the quota line,
 ### 8. The message cap
 Lumen caps a request at 100 messages. That is fine for the timeline. Lyra's step limit should stay under it, or the cap should be raised.
 
+## Found while planning the order (2026-11-15)
+
+- **The router skips its fallback chain when tools are present.** `executeWithFallback` in `router.ts` (around line 137) sets `skipFallbacks = !!options.model || !!options.tools`, with the comment that tool schemas are model-specific and falling back with the same tools is unpredictable. So for agent calls Lumen does no model fallback at all, and a failing model call fails. Lyra's retries (decision 26) are the only protection. Decision 26 originally assumed Lumen's router would cover this, which was wrong. See the open question in the build plan.
+- **Cost is always an estimate from the catalog.** The OpenRouter adapter computes cost with `calculateCost(model, input, output)` from the model table, and never uses a figure the provider reports. For Lyra's usage record (decision 15) that means Lumen's cost source is `catalog`, and it should say so.
+- **Adding a task touches four places.** `LumenTask` (`types.ts`), the worker's `LumenTaskSchema` (`workers/lumen/src/types.ts`, line 45), `TASK_REGISTRY` (`config.ts`, line 137), and `LUMEN_QUOTAS` for all five tiers (`quota/limits.ts`). The last two are `Record<LumenTask, ...>`, so TypeScript will refuse to compile until every entry exists.
+- **Streaming has no tool-call deltas.** The in-process stream chunk type carries only text content, not tool calls (`providers/openrouter.ts`, around line 52). That matters for the later interactive consumers.
+
 ## Not needed for the timeline
 
 - Streaming from the worker (`stream` exists only in the in-process client). The timeline is a background job. Wisp, Fireside, and Reverie are interactive and will need it (decision 56), so it is a later change and not a never.
@@ -81,3 +88,27 @@ Items 1 and 2 are exactly what Lyra's "model" slot needs from any provider: tool
 - Only OpenRouter-routed models are in scope at first. The Workers AI provider has not been checked for tool messages.
 - Never put the Wanderer's provider key in Lyra's saved state or in a run's transcript. It is sent in the body of every request.
 - `docs/specs/lumen-tool-calling-spec.md` says single-turn only and is marked Planning. It needs updating when this work is scoped.
+
+## Build plan, in order (proposed)
+
+Each step is small and testable on its own, and none breaks an existing caller. Reverie's single-turn tool use keeps working throughout.
+
+| Step | Change | Where | Done when |
+|---|---|---|---|
+| L1 | Messages carry tool turns: a `tool` role with `tool_call_id`, and assistant messages with their own `tool_calls`. Tool messages go through the scrubber. | `types.ts`, worker `MessageSchema`, `providers/openrouter.ts` (`formatMessages`), `remote.ts`, `pipeline/preprocessor.ts` | A two-step loop (request, tool call, tool result, final answer) round-trips through the worker route and the remote client in tests, and the scrubber test covers a tool message. |
+| L2 | `finishReason` on the response, normalized to a small set (`stop`, `length`, `tool_calls`, `content_filter`, `other`). | `types.ts`, `providers/openrouter.ts`, worker `inference.ts`, `remote.ts` | A reply cut off by the token limit reports `length`, in a test. |
+| L3 | `agent` task, with quotas set to zero for every tier, so agent calls must pass `skipQuota` until a real quota rule exists. | The four places above | Typecheck passes, and a test shows an agent call without `skipQuota` is refused with a clear message. |
+| L4 | Model flags in `lumen-models.json`: `supportsTools`, accepted `tool_choice` values, and `contextWindow`. An agent call to a model without `supportsTools` fails clearly. | `lumen-models.json`, `config.ts`, router | A test with a model that does not support tools. The default model for `agent` is checked and flagged. |
+| L5 | Usage carries a cost source, `catalog` for now (decision 15). | `types.ts` (`LumenUsage`), `providers/openrouter.ts`, worker response, `remote.ts` | Usage in a response says where the cost came from. |
+| L6 | Update `docs/specs/lumen-tool-calling-spec.md` to describe caller-driven multi-turn use. | The spec | The spec no longer says multi-turn is out of scope without saying who drives it. |
+| Later | Worker streaming route, with tool-call deltas. | Worker, provider | For Wisp, Fireside, and Reverie (decision 56). |
+
+L1 and L2 are the only steps that block the first job. L3 to L5 can follow in the same change.
+
+### Open question: model fallback for agent calls
+
+Because the router does no fallback when tools are present, three choices exist:
+
+1. **None.** Lyra retries the same model three times with backoff (decision 26), then parks the run as "model unavailable".
+2. **A fallback in the task's recipe.** The recipe names a second model, used if the first fails after its retries. Lyra owns it, and Lumen's router stays untouched.
+3. **Lumen falls back among tool-capable models for the `agent` task.** This changes Lumen's router, which was written on purpose to avoid it.
