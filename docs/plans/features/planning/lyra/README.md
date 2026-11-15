@@ -10,7 +10,7 @@ Lyra is a small, portable agent core for Grove. It runs a loop: ask the model wh
 
 It is also the name of the agent itself, the way Nova is both the harness and the thing you run. Features are "powered by Lyra".
 
-- **Issue:** [#1605](https://github.com/AutumnsGrove/Lattice/issues/1605)
+- **Issues:** [#1605](https://github.com/AutumnsGrove/Lattice/issues/1605) (the design issue, with a design-update comment), [#1693](https://github.com/AutumnsGrove/Lattice/issues/1693) (the Lumen changes it depends on), [#1687](https://github.com/AutumnsGrove/Lattice/issues/1687) (the timeline vine page change, separate from Lyra), and [#1684](https://github.com/AutumnsGrove/Lattice/issues/1684) (HawkAgent, the second consumer)
 - **Name journey:** [`docs/philosophy/naming-research/agent-core-naming-journey.md`](../../../../philosophy/naming-research/agent-core-naming-journey.md)
 - **Status:** planning. Nothing is built.
 

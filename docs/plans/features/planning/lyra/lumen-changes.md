@@ -6,7 +6,7 @@ category: features
 
 # Lumen changes needed for Lyra
 
-Last updated: 2026-11-15. Based on reading the code, not on running it. Line numbers are from that reading and will drift. The ordered build plan is at the end.
+Last updated: 2026-11-15. Filed as one issue, #1693. Based on reading the code, not on running it. Line numbers are from that reading and will drift. The ordered build plan is at the end.
 
 ## The principle
 
