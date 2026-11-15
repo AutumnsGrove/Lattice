@@ -31,8 +31,6 @@
       "Bash(gh pr:*)",
       "Bash(gh issue:*)",
       "Bash(gh run:*)",
-      "Bash(gf:*)",
-      "Bash(gf-py:*)",
       "Bash(pnpm run:*)",
       "Bash(pnpm test:*)",
       "Bash(pnpm build:*)",

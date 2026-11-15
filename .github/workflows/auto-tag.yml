@@ -203,7 +203,7 @@ jobs:
           done
 
           # --- Measure Go tool source trees ---
-          for TOOL_DIR in tools/grove-find-go tools/grove-wrap-go; do
+          for TOOL_DIR in tools/grove-wrap-go; do
             [ -d "$TOOL_DIR" ] || continue
             TOOL_NAME=$(basename "$TOOL_DIR")
             echo ""
@@ -216,7 +216,7 @@ jobs:
           # --- Measure other tool directories with package manifests ---
           for TOOL_DIR in tools/*/; do
             TOOL_NAME=$(basename "$TOOL_DIR")
-            [[ "$TOOL_NAME" == "grove-find-go" || "$TOOL_NAME" == "grove-wrap-go" ]] && continue
+            [[ "$TOOL_NAME" == "grove-wrap-go" ]] && continue
             if [ -f "$TOOL_DIR/pyproject.toml" ] || [ -f "$TOOL_DIR/package.json" ]; then
               echo ""
               echo "=== tools/$TOOL_NAME ==="

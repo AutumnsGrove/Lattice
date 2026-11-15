@@ -25,25 +25,25 @@ For convention or naming migrations, the git diff IS your audit trail. Commit fr
 
 ```bash
 # Find all instances of the old convention
-gf grep "oldConvention"
-gf grep "old-convention"
-gf grep "old_convention"
+rg "oldConvention"
+rg "old-convention"
+rg "old_convention"
 
 # Check all three common casings — camelCase, kebab-case, snake_case
 # Count total occurrences
-gf grep "oldPattern" --count
+rg "oldPattern" --count
 ```
 
 ### Config Migration
 
 ```bash
 # Find all config files that reference the old setting
-gf glob "**/config.*"
-gf glob "**/.env*"
-gf glob "**/wrangler.*"
+rg --files -g "**/config.*"
+rg --files -g "**/.env*"
+rg --files -g "**/wrangler.*"
 
 # Check which ones use the old format/keys
-gf grep "OLD_KEY_NAME" --include="*.toml,*.json,*.env"
+rg "OLD_KEY_NAME" --include="*.toml,*.json,*.env"
 ```
 
 ### Environment / Tooling Migration
@@ -51,20 +51,20 @@ gf grep "OLD_KEY_NAME" --include="*.toml,*.json,*.env"
 ```bash
 # Inventory current tool versions and configs
 cat package.json | grep -E "(scripts|dependencies)"
-gf glob "**/tsconfig*.json"
-gf glob "**/.eslintrc*"
-gf glob "**/eslint.config.*"
+rg --files -g "**/tsconfig*.json"
+rg --files -g "**/.eslintrc*"
+rg --files -g "**/eslint.config.*"
 ```
 
 ### Dependency Migration
 
 ```bash
 # Find all imports of the old package
-gf grep "from \"old-package\""
-gf grep "require.*old-package"
+rg "from \"old-package\""
+rg "require.*old-package"
 
 # Check which workspace packages depend on it
-gf grep "old-package" --include="package.json"
+rg "old-package" --include="package.json"
 ```
 
 ---
@@ -131,11 +131,11 @@ When moving between external systems (e.g., one CI provider to another, one host
 
 ```bash
 # Verify no instances of old convention remain
-gf grep "oldConvention"
+rg "oldConvention"
 # Should return 0
 
 # Verify new convention is consistently applied
-gf grep "newConvention" --count
+rg "newConvention" --count
 # Should match expected count from GATHER
 ```
 
@@ -146,7 +146,7 @@ gf grep "newConvention" --count
 gw ci --affected
 
 # Verify no references to old config keys
-gf grep "OLD_KEY_NAME"
+rg "OLD_KEY_NAME"
 # Should return 0
 ```
 
@@ -154,7 +154,7 @@ gf grep "OLD_KEY_NAME"
 
 ```bash
 # Verify old package is fully removed
-gf grep "old-package"
+rg "old-package"
 # Should return 0
 
 # Verify no phantom dependency

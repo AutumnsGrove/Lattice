@@ -92,10 +92,10 @@ This runbook provides step-by-step procedures for responding to security inciden
 ```bash
 # 1. Verify the report
 cd /home/user/Lattice
-gf --agent search "getVerifiedTenantId" | head -20
+rg "getVerifiedTenantId" | head -20
 
 # 2. Check recent auth changes
-gf --agent recent 7 | grep -E "(auth|session|tenant)"
+git log --oneline --since="7 days ago" | grep -E "(auth|session|tenant)"
 
 # 3. Review auth logs (if available)
 # Look for patterns of unauthorized access
@@ -115,19 +115,19 @@ gf --agent recent 7 | grep -E "(auth|session|tenant)"
 
 ```bash
 # 1. Check all auth-related code
-gf --agent search "locals.user" --type ts
+rg "locals.user" -t ts
 
 # 2. Review session validation logic
-gf --agent func "validateSession"
+rg -n "(function|const|fn) "validateSession""
 
 # 3. Check tenant isolation
-gf --agent search "getVerifiedTenantId" --context 5
+rg "getVerifiedTenantId" -C 5
 
 # 4. Examine recent commits
 gw git log --since="1 week ago" --grep="auth\|session\|tenant" --oneline
 
 # 5. Search for IDOR vulnerabilities
-gf --agent search "params.id" | grep -v "tenantId"
+rg "params.id" | grep -v "tenantId"
 ```
 
 ### Containment
@@ -198,10 +198,10 @@ pnpm test:landing
 ```bash
 # 1. Confirm the breach
 # Check if tenant isolation is actually broken
-gf --agent search "getTenantDb"
+rg "getTenantDb"
 
 # 2. Identify the leak vector
-gf --agent search "SELECT.*FROM" --type ts | grep -v "WHERE tenant_id"
+rg "SELECT.*FROM" -t ts | grep -v "WHERE tenant_id"
 
 # 3. If confirmed, immediately block the vulnerable endpoint
 # Add emergency rate limit or disable endpoint entirely
@@ -221,7 +221,7 @@ gf --agent search "SELECT.*FROM" --type ts | grep -v "WHERE tenant_id"
 
 ```bash
 # 1. Audit all database queries for tenant scoping
-gf --agent search "\.prepare\(" --type ts | head -50
+rg "\.prepare\(" -t ts | head -50
 
 # 2. Check R2 access patterns
 # Review object keys accessed - do they cross tenant boundaries?
@@ -230,7 +230,7 @@ gf --agent search "\.prepare\(" --type ts | head -50
 gw git log --since="2 weeks ago" -- "**/*db*" --oneline
 
 # 4. Search for IDOR vulnerabilities
-gf --agent search "params\.(id|slug)" --type ts
+rg "params\.(id|slug)" -t ts
 
 # 5. Check if attacker downloaded data
 # Review R2 bandwidth logs, D1 query volumes
@@ -315,7 +315,7 @@ Use template: "Data Breach Notification"
 # Add IP block rule or challenge rule
 
 # 4. If application-level DoS (expensive query), identify the endpoint
-gf --agent search "\.all\(\)" --type ts | head -20
+rg "\.all\(\)" -t ts | head -20
 # Look for queries without LIMIT clauses
 ```
 
@@ -332,10 +332,10 @@ gf --agent search "\.all\(\)" --type ts | head -20
 # Is it network-level (volumetric) or application-level (resource exhaustion)?
 
 # 2. For application-level, find the expensive operation
-gf --agent search "json\(\{" --context 3 | grep -A3 "all()"
+rg "json\(\{" -C 3 | grep -A3 "all()"
 
 # 3. Check for missing rate limits
-gf --agent search "checkRateLimit" --type ts
+rg "checkRateLimit" -t ts
 
 # 4. Review recent performance changes
 gw git log --since="1 week ago" -- "**/*server*" --oneline
@@ -441,8 +441,8 @@ gw git log --all -S "sk_live_" --source --full-history
 # Review third-party service logs (Stripe events, etc.)
 
 # 4. Are there other secrets in the same location?
-gf --agent search "process\.env" --type ts | head -30
-gf --agent search "API_KEY\|SECRET\|PASSWORD" --type ts
+rg "process\.env" -t ts | head -30
+rg "API_KEY\|SECRET\|PASSWORD" -t ts
 
 # 5. Check for additional secret leaks
 gw git log --all -p | grep -E "(sk_|pk_|api_key|password|secret)" | head -50
@@ -516,10 +516,10 @@ pnpm test
 
 ```bash
 # 1. Confirm the escalation
-gf --agent search "isWayfinder" --type ts
+rg "isWayfinder" -t ts
 
 # 2. Check if user manipulated role/permission check
-gf --agent search "locals\.user\.role" --context 5
+rg "locals\.user\.role" -C 5
 
 # 3. Immediately revoke elevated access
 # Force logout if user has unauthorized session
@@ -538,16 +538,16 @@ gf --agent search "locals\.user\.role" --context 5
 
 ```bash
 # 1. Review authorization checks
-gf --agent search "RequestHandler" --type ts | head -30
+rg "RequestHandler" -t ts | head -30
 
 # 2. Check if role is verified server-side
-gf --agent func "isWayfinder"
+rg -n "(function|const|fn) "isWayfinder""
 
 # 3. Examine recent changes to auth/authz logic
 gw git log --since="2 weeks ago" --grep="auth\|role\|permission" --oneline
 
 # 4. Search for client-side role checks (vulnerable)
-gf --agent search "user\.role" --context 3
+rg "user\.role" -C 3
 
 # 5. Check for confused deputy scenarios
 # Is authorization delegated to another service that can be tricked?
@@ -579,7 +579,7 @@ gf --agent search "user\.role" --context 3
 # Negative tests: regular user hitting admin endpoint
 
 # 3. Audit all privileged endpoints
-gf --agent search "arbor" --type ts
+rg "arbor" -t ts
 # Verify each has proper authorization
 
 # 4. Deploy and verify
@@ -648,7 +648,7 @@ cat node_modules/<package>/package.json
 cat node_modules/<package>/README.md
 
 # 2. Check where we use it
-gf --agent search "from '<package>'" --type ts
+rg "from '<package>'" -t ts
 
 # 3. Review postinstall scripts (common attack vector)
 grep -r "postinstall" node_modules/*/package.json | grep <package>
@@ -986,23 +986,23 @@ gw git push --write
 
 ```
 ╔════════════════════════════════════════════════════════════╗
-║             GROVE INCIDENT RESPONSE QUICK REFERENCE         ║
+║             GROVE INCIDENT RESPONSE QUICK REFERENCE        ║
 ╠════════════════════════════════════════════════════════════╣
 ║ DETECT → CONTAIN → INVESTIGATE → RECOVER → COMMUNICATE     ║
 ╠════════════════════════════════════════════════════════════╣
-║ P0 CRITICAL → < 15 min     P1 HIGH → < 1 hour             ║
-║ P2 MEDIUM → < 4 hours      P3 LOW → < 24 hours            ║
+║ P0 CRITICAL → < 15 min     P1 HIGH → < 1 hour              ║
+║ P2 MEDIUM → < 4 hours      P3 LOW → < 24 hours             ║
 ╠════════════════════════════════════════════════════════════╣
 ║ First Actions (ANY incident):                              ║
 ║  1. Confirm it's real (not false positive)                 ║
-║  2. Assign severity (P0/P1/P2/P3)                         ║
+║  2. Assign severity (P0/P1/P2/P3)                          ║
 ║  3. Start incident log (timestamped notes)                 ║
 ║  4. Alert response team                                    ║
 ║  5. Preserve evidence (don't delete logs!)                 ║
 ╠════════════════════════════════════════════════════════════╣
 ║ Key Commands:                                              ║
-║  cd /home/user/Lattice                                 ║
-║  gf --agent search "pattern"      # Find code              ║
+║  cd /home/user/Lattice                                     ║
+║  rg "pattern"      # Find code                             ║
 ║  gw git log --since="1 week ago"  # Recent changes         ║
 ║  pnpm test                        # Verify fix             ║
 ╠════════════════════════════════════════════════════════════╣

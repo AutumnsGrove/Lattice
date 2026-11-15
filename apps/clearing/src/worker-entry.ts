@@ -21,6 +21,9 @@ import { recordDailyHistory, cleanupOldHistory } from "./lib/server/monitor/dail
 
 interface MonitorEnv {
 	DB: D1Database;
+	/** Service bindings used by the health checks (see monitor/config.ts) */
+	ASPEN?: Fetcher;
+	BILLING?: Fetcher;
 	MONITOR_KV: KVNamespace;
 	ZEPHYR_URL?: string;
 	ZEPHYR_API_KEY?: string;
@@ -32,7 +35,7 @@ async function runHealthChecks(env: MonitorEnv): Promise<void> {
 	const startTime = Date.now();
 
 	try {
-		const results = await checkAllComponents(COMPONENTS);
+		const results = await checkAllComponents(COMPONENTS, env);
 		const healthy = results.filter((r) => r.status === "operational").length;
 		console.log(`[Clearing Monitor] Health check complete: ${healthy}/${results.length} healthy`);
 		await processAllResults(env, results);

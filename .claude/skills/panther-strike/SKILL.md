@@ -52,10 +52,10 @@ Search the codebase for relevant files. Use the issue description as your trail 
 
 ```bash
 gw context                    # Orient — see where you are in the grove
-gf --agent search "keyword"  # Track the scent through the codebase
-gf --agent func "name"       # Find the function's den
-gf --agent usage "Name"      # Where does this creature roam?
-gf --agent impact "file"     # What trembles when this tree falls?
+rg "keyword"  # Track the scent through the codebase
+rg -n "(function|const|fn) UserProfile"  # Find the function's den
+rg -wn "Name"      # Where does this creature roam?
+rg -ln "from .*file"  # What trembles when this tree falls?
 ```
 
 Use Glob, Grep, and Read tools as backup. Move through the undergrowth without snapping a single twig.

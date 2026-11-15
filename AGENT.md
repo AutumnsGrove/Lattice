@@ -424,7 +424,7 @@ When a task spans multiple specialties, gatherings orchestrate the right animals
 
 ## Agent Ecosystem
 
-Grove uses specialized subagents. **Prefer Grove agents** (`.claude/agents/`) over generic ones — they know gw/gf, Lattice conventions, and the monorepo.
+Grove uses specialized subagents. **Prefer Grove agents** (`.claude/agents/`) over generic ones — they know gw, Lattice conventions, and the monorepo.
 
 | Task                 | Agent              |
 | -------------------- | ------------------ |

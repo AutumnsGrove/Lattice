@@ -226,3 +226,45 @@ describe("evaluateShallowCheck", () => {
 		expect(result.status).toBe("operational");
 	});
 });
+
+describe("service bindings", () => {
+	beforeEach(() => {
+		vi.restoreAllMocks();
+	});
+
+	it("reaches a component through its service binding when one is provided", async () => {
+		const publicFetch = vi.spyOn(globalThis, "fetch");
+		const bindingFetch = vi.fn(
+			async () =>
+				new Response(JSON.stringify({ status: "healthy" }), {
+					status: 200,
+					headers: { "Content-Type": "application/json" },
+				}),
+		);
+
+		const result = await checkComponent(
+			{ ...deepComponent, binding: "ASPEN" },
+			{ ASPEN: { fetch: bindingFetch } as unknown as Fetcher },
+		);
+
+		expect(bindingFetch).toHaveBeenCalledTimes(1);
+		// The binding carries the real URL, so the service still sees its own host
+		const passed = (bindingFetch.mock.calls[0] as unknown[])[0] as Request;
+		expect(passed.url).toContain("test.grove.place/api/health");
+		expect(publicFetch).not.toHaveBeenCalled();
+		expect(result.status).toBe("operational");
+	});
+
+	it("falls back to the public URL when the binding is not configured", async () => {
+		const publicFetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+			new Response(JSON.stringify({ status: "healthy" }), {
+				status: 200,
+				headers: { "Content-Type": "application/json" },
+			}),
+		);
+
+		await checkComponent({ ...deepComponent, binding: "BILLING" }, {});
+
+		expect(publicFetch).toHaveBeenCalledTimes(1);
+	});
+});

@@ -19,7 +19,7 @@ export const GET: RequestHandler = async ({ platform }) => {
 	}
 
 	try {
-		const results = await checkAllComponents(COMPONENTS);
+		const results = await checkAllComponents(COMPONENTS, env);
 		await processAllResults(env, results);
 
 		return json({

@@ -11,16 +11,13 @@
 Check if tools are available, install if not:
 
 ```bash
-gf --help && gw --help
-```
-
-```bash
-bash tools/grove-find-go/install.sh   # gf — codebase search (Go binary, ~40ms)
 bash tools/grove-wrap-go/install.sh   # gw — infrastructure CLI (secrets, worktrees, warden, publishing)
 ```
 
 `gw` handles things raw CLIs can't (encrypted vaults, issue-driven worktrees, npm publishing, Warden).
 For git, gh, and wrangler — use them directly.
+
+For codebase search, use semantic search for discovery and `rg`/`find`/`glob` for exact matches.
 
 ---
 

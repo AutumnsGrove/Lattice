@@ -9,7 +9,7 @@ docs/plans/
   features/          Product features, UI, meadow, curios, waystones, grafts
   infra/             Cloudflare, D1, auth, email, CDN, workers, payments
   security/          Audits, hardening, encryption, remediation
-  tooling/           gf, gw, claude skills, testing, DX
+  tooling/           gw, claude skills, testing, DX
 
 docs/safaris/        Safari expedition journals (separate from plans)
 ```

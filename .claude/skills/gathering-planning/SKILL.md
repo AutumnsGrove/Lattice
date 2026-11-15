@@ -19,11 +19,11 @@ The drum echoes through the meadow. The Bee arrives first, buzzing from flower t
 
 ## Grove Tools for This Gathering
 
-Use `gw` and `gf` throughout. Quick reference for planning work:
+Use `gw` for git and infra; semantic search for discovery, `rg`/`find`/`glob` for exact matches. Quick reference for planning work:
 
 ```bash
 # Find existing work items in the codebase
-gf --agent todo                     # Find TODO/FIXME/HACK comments
+rg -n \"TODO|FIXME\"                     # Find TODO/FIXME/HACK comments
 
 # Batch issue creation (Bee phase)
 gw gh issue batch --write --from-json  # Create issues in bulk
