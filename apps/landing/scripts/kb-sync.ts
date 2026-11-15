@@ -324,17 +324,27 @@ async function d1Query(
 	return { success: true, results: json.result?.[0]?.results };
 }
 
-/** Get existing content hashes and statuses from D1 */
-async function getExistingHashes(): Promise<Map<string, { hash: string; status: string | null }>> {
-	const result = await d1Query("SELECT category, slug, content_hash, status FROM kb_articles");
-	const map = new Map<string, { hash: string; status: string | null }>();
+/** A row that already lives in the kb_articles table */
+type ExistingRow = { hash: string; status: string | null; published: number };
+
+/** Get existing content hashes, statuses and published flags from D1 */
+async function getExistingHashes(): Promise<Map<string, ExistingRow>> {
+	const result = await d1Query(
+		"SELECT category, slug, content_hash, status, published FROM kb_articles",
+	);
+	const map = new Map<string, ExistingRow>();
 	for (const row of (result.results || []) as Array<{
 		category: string;
 		slug: string;
 		content_hash: string;
 		status: string | null;
+		published: number;
 	}>) {
-		map.set(`${row.category}:${row.slug}`, { hash: row.content_hash, status: row.status });
+		map.set(`${row.category}:${row.slug}`, {
+			hash: row.content_hash,
+			status: row.status,
+			published: row.published,
+		});
 	}
 	return map;
 }
@@ -403,27 +413,67 @@ async function main() {
 
 	console.log(`\n  Total: ${allArticles.length} articles\n`);
 
-	if (dryRun) {
-		// In dry-run mode, just show what would be synced
-		for (const a of allArticles) {
-			const htmlSize = new Blob([a.html]).size;
-			console.log(
-				`  ${a.category}/${a.slug} — ${a.title} (${(htmlSize / 1024).toFixed(1)}KB HTML)`,
-			);
-		}
-		console.log("\n✓ Dry run complete");
-		return;
-	}
+	// Only the categories this run actually scanned are in play. With
+	// --category, every other category in D1 has no counterpart in
+	// allArticles, and treating that as "deleted" unpublishes the whole
+	// knowledge base. It did exactly that once.
+	const scannedCategories = new Set(allArticles.map((a) => a.category));
 
-	// Get existing hashes to skip unchanged articles
-	let existingHashes: Map<string, { hash: string; status: string | null }>;
+	// Load existing rows before the dry-run preview, so a dry run can report
+	// what it would unpublish instead of only listing files.
+	let existingHashes = new Map<string, ExistingRow>();
 	try {
 		existingHashes = await getExistingHashes();
 		console.log(`  ${existingHashes.size} existing articles in D1\n`);
 	} catch (err) {
-		console.error("  ✗ Could not query existing hashes:", (err as Error).message);
-		console.error("    Is the kb_articles table created? Run the migration first.");
-		process.exit(1);
+		const message = (err as Error).message;
+		if (!dryRun) {
+			console.error("  ✗ Could not query existing hashes:", message);
+			console.error("    Is the kb_articles table created? Run the migration first.");
+			process.exit(1);
+		}
+		console.log(`  ⚠ Could not read D1 (${message}) — preview covers files only\n`);
+	}
+
+	const currentKeys = new Set(allArticles.map((a) => `${a.category}:${a.slug}`));
+
+	/** A row is only a deletion if it belongs to a category we scanned, its file
+	 * is gone, and it is still publicly visible. */
+	const isDeletion = (key: string): boolean => {
+		const [category] = key.split(":");
+		if (!scannedCategories.has(category)) return false;
+		if (currentKeys.has(key)) return false;
+		return existingHashes.get(key)?.published === 1;
+	};
+
+	if (dryRun) {
+		let wouldSync = 0;
+		let unchanged = 0;
+		for (const a of allArticles) {
+			const existing = existingHashes.get(`${a.category}:${a.slug}`);
+			if (existing?.hash === a.contentHash && existing.status === a.status) {
+				unchanged++;
+				continue;
+			}
+			const htmlSize = new Blob([a.html]).size;
+			console.log(
+				`  → would ${existing ? "update" : "insert"}: ${a.category}/${a.slug} — ${a.title} (${(htmlSize / 1024).toFixed(1)}KB HTML)`,
+			);
+			wouldSync++;
+		}
+
+		const wouldUnpublish = [...existingHashes.keys()].filter(isDeletion);
+		for (const key of wouldUnpublish) {
+			console.log(`  → would unpublish: ${key}`);
+		}
+
+		console.log(
+			`\n✓ Dry run complete: ${wouldSync} to sync, ${unchanged} unchanged, ${wouldUnpublish.length} to unpublish`,
+		);
+		if (wouldUnpublish.length > 0) {
+			console.log("  Re-run without --dry-run to apply.");
+		}
+		return;
 	}
 
 	// Sync changed articles
@@ -457,14 +507,8 @@ async function main() {
 		}
 	}
 
-	// Detect deleted articles (in D1 but not in filesystem)
-	const currentKeys = new Set(allArticles.map((a) => `${a.category}:${a.slug}`));
-	const deleted: string[] = [];
-	for (const key of existingHashes.keys()) {
-		if (!currentKeys.has(key)) {
-			deleted.push(key);
-		}
-	}
+	// Detect deleted articles (in D1, in a scanned category, but not on disk)
+	const deleted = [...existingHashes.keys()].filter(isDeletion);
 
 	if (deleted.length > 0) {
 		console.log(`\n  Marking ${deleted.length} deleted articles as unpublished:`);
