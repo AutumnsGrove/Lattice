@@ -61,6 +61,10 @@ binding = "BILLING"
 service = "grove-billing"
 
 [[services]]
+binding = "CLEARING"
+service = "grove-clearing"
+
+[[services]]
 binding = "ASPEN"
 service = "grove-aspen"
 
