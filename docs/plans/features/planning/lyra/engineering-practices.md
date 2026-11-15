@@ -194,7 +194,7 @@ Since there is a scripted fake model, there can also be a fake Lumen to test the
 
 **What the code shows.** Lumen's own tests already come in two kinds. `workers/lumen/src/routes/inference.test.ts` replaces the whole client with canned answers, so it never runs validation, scrubbing, routing, or response parsing. `libs/engine/src/lib/ai/lumen/lumen-integration.test.ts` runs the real client pipeline (preprocessor, router, provider, postprocessor) and fakes only the network call, an OpenRouter-shaped response.
 
-**Option A: a standalone fake Lumen.** A small server that imitates Lumen's HTTP shape (`POST /inference` and its success and error envelopes). Fast and independent. The risk is drift: it is a second copy of Lumen's behavior, and it will quietly stop matching the real one.
+**Option A: a standalone fake Lumen.** A small server that imitates Lumen's HTTP shape (`POST /inference` and its success and error envelopes). Fast and independent. The risk is drift: it is a second copy of Lumen's behavior, and it will stop matching the real one without anyone noticing.
 
 **Option B: the real Lumen over a fake model (recommended).** Run the actual Lumen worker routes in-process, and replace only the network call underneath with the scripted fake model, speaking OpenRouter's response shape. Everything of Lumen's runs for real: request validation, the privacy scrubber, quota, routing (including the rule that skips fallbacks when tools are present), response parsing, finish reason, and cost. There is nothing to drift, because it is the real code. It still needs no network and costs nothing.
 
