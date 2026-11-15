@@ -84,7 +84,21 @@ WHERE COALESCE(operational_checks, 0) + COALESCE(degraded_checks, 0)
            + COALESCE(partial_outage_checks, 0) + COALESCE(major_outage_checks, 0))
       ) AS INTEGER) >= 3;
 
--- ── 2. Recount incidents by the day they started ────────────────────────────
+-- ── 2. Mark the incidents the monitor created ────────────────────────────────
+--
+-- Only monitor incidents may be auto-resolved. The monitor is identifiable by
+-- the first update it writes on insert, which always begins "Automated
+-- monitoring detected". Admin and Sentinel incidents keep auto_resolve = 0 and
+-- stay open until a human closes them.
+
+UPDATE status_incidents
+SET auto_resolve = 1
+WHERE id IN (
+  SELECT incident_id FROM status_updates
+  WHERE message LIKE 'Automated monitoring detected%'
+);
+
+-- ── 3. Recount incidents by the day they started ────────────────────────────
 
 UPDATE status_daily_history
 SET incident_count = (

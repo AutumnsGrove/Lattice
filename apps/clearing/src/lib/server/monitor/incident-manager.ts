@@ -162,8 +162,8 @@ async function createIncident(
 	await db.batch([
 		db
 			.prepare(
-				`INSERT INTO status_incidents (id, title, slug, status, impact, type, started_at, created_at, updated_at)
-         VALUES (?, ?, ?, 'investigating', ?, ?, ?, ?, ?)`,
+				`INSERT INTO status_incidents (id, title, slug, status, impact, type, started_at, created_at, updated_at, auto_resolve)
+         VALUES (?, ?, ?, 'investigating', ?, ?, ?, ?, ?, 1)`,
 			)
 			.bind(incidentId, fullTitle, slug, impact, type, now, now, now),
 		db
@@ -263,12 +263,16 @@ async function touchComponentCheck(
 }
 
 /**
- * Every incident still open for a component, straight from D1.
+ * The monitor's own incidents still open for a component, straight from D1.
  *
  * The old code trusted a single `activeIncidentId` in KV, with a 7-day TTL.
  * Lose that key — expiry, eviction, a corrupt write — and the incident became
  * unreachable and unclosable forever, which is how a single flaky check in
  * November was still "ongoing" weeks later. D1 is the record of truth.
+ *
+ * Scoped to `auto_resolve = 1` on purpose: incidents are also opened by the
+ * Arbor admin form and by Sentinel, and automation has no business closing an
+ * operator's security or maintenance notice just because checks are green.
  */
 async function findOpenIncidents(
 	db: D1Database,
@@ -279,7 +283,7 @@ async function findOpenIncidents(
 			`SELECT i.id, i.title
 			 FROM status_incidents i
 			 INNER JOIN status_incident_components ic ON i.id = ic.incident_id
-			 WHERE ic.component_id = ? AND i.resolved_at IS NULL
+			 WHERE ic.component_id = ? AND i.resolved_at IS NULL AND i.auto_resolve = 1
 			 ORDER BY i.started_at ASC`,
 		)
 		.bind(componentId)
@@ -449,9 +453,12 @@ export async function processHealthCheckResult(
  * Close incidents that have outlived their component's trouble.
  *
  * A backstop, not the main path — recovery closes incidents within a couple of
- * checks. This catches the residue: an incident left open for a component that
- * has been operational for longer than `maxAgeHours`, usually because the
- * monitor or its KV state was lost mid-incident.
+ * checks. This catches the residue: a monitor-created incident left open for a
+ * component that has been operational for longer than `maxAgeHours`, usually
+ * because the monitor or its KV state was lost mid-incident.
+ *
+ * Operator-created incidents are never swept. The monitor cannot know whether a
+ * manual security notice is still being worked.
  */
 export async function closeStaleIncidents(env: IncidentEnv, maxAgeHours = 24): Promise<number> {
 	const cutoff = new Date(Date.now() - maxAgeHours * 60 * 60 * 1000).toISOString();
@@ -462,6 +469,7 @@ export async function closeStaleIncidents(env: IncidentEnv, maxAgeHours = 24): P
 		 INNER JOIN status_incident_components ic ON i.id = ic.incident_id
 		 INNER JOIN status_components c ON c.id = ic.component_id
 		 WHERE i.resolved_at IS NULL
+		   AND i.auto_resolve = 1
 		   AND i.started_at < ?
 		   AND c.current_status = 'operational'`,
 	)

@@ -20,3 +20,16 @@ ALTER TABLE status_components ADD COLUMN last_check_at TEXT;
 
 CREATE INDEX IF NOT EXISTS idx_incident_components_component
   ON status_incident_components(component_id);
+
+-- 3. auto_resolve
+--
+-- Incidents can be created three ways: the monitor, the Arbor admin form, and
+-- the Sentinel load test. Only the monitor's own incidents may be closed by
+-- automation — an operator's security or maintenance notice on a healthy
+-- component must stay open until a human closes it.
+--
+-- Defaults to 0, so every existing row and every future manual insert is
+-- operator-owned. The monitor sets it to 1 on insert; migration 0013 marks the
+-- ones it already created, identified by their automated first update.
+
+ALTER TABLE status_incidents ADD COLUMN auto_resolve INTEGER NOT NULL DEFAULT 0;

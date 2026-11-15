@@ -131,6 +131,12 @@ describe("processHealthCheckResult - State Machine", () => {
 
 		// Should have called db.batch for incident creation
 		expect(env.DB.batch).toHaveBeenCalled();
+
+		// The row must be marked as monitor-created, so recovery can close it.
+		const insert = (env.DB.prepare as Mock).mock.calls
+			.map((call) => String(call[0]))
+			.find((query) => query.includes("INSERT INTO status_incidents"));
+		expect(insert).toContain("auto_resolve");
 	});
 
 	it("should NOT create incident with fewer than 3 failures", async () => {
@@ -183,6 +189,13 @@ describe("processHealthCheckResult - State Machine", () => {
 
 		// Should have called db.batch for resolution
 		expect(env.DB.batch).toHaveBeenCalled();
+
+		// ...but only for incidents the monitor created. An operator's security
+		// or maintenance notice must survive a green check.
+		const sql = (env.DB.prepare as Mock).mock.calls
+			.map((call) => String(call[0]))
+			.find((query) => query.includes("FROM status_incidents i"));
+		expect(sql).toContain("auto_resolve = 1");
 	});
 
 	it("should not resolve anything when D1 has no open incident", async () => {
@@ -485,6 +498,12 @@ describe("closeStaleIncidents", () => {
 
 		expect(closed).toBe(1);
 		expect(env.DB.batch).toHaveBeenCalled();
+
+		// The sweep must never close an incident a human is working.
+		const sql = (env.DB.prepare as Mock).mock.calls
+			.map((call) => String(call[0]))
+			.find((query) => query.includes("FROM status_incidents i"));
+		expect(sql).toContain("auto_resolve = 1");
 	});
 
 	it("closes nothing when no incident is stale", async () => {
