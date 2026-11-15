@@ -69,6 +69,13 @@ describe("isUsernameBlocked - Exact Matches", () => {
 		expect(isUsernameBlocked("heartwood")).toBe("grove_service");
 	});
 
+	it("should reserve lyra for the agent core", () => {
+		// Lyra is also a given name. Reserving it is a deliberate tradeoff (see
+		// docs/plans/features/planning/lyra/decisions.md, decision 94).
+		expect(isUsernameBlocked("lyra")).toBe("grove_service");
+		expect(isUsernameBlocked("LYRA")).toBe("grove_service");
+	});
+
 	it("should reserve link for the short links host", () => {
 		expect(isUsernameBlocked("link")).toBe("grove_service");
 	});

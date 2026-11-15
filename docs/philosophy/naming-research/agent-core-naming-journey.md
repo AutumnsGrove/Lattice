@@ -551,8 +551,8 @@ Terms that came up naturally in the sentence test. Not final, and not a spec.
 
 Decisions for Autumn, not yet done:
 
-- [ ] Add a row to `docs/philosophy/grove-naming.md` and the `Internal Names` table (suggested internal name: `GroveLyra`), then regenerate the GroveTerm manifest.
-- [ ] Reserve `lyra` so no Wanderer can claim `lyra.grove.place` (Loam's blocklist, plus the router and username check).
+- [x] Add a row to `docs/philosophy/grove-naming.md` and the `Internal Names` table (`GroveLyra`), then regenerate the GroveTerm manifest. Done 2026-11-15.
+- [x] Reserve `lyra` so no Wanderer can claim `lyra.grove.place`, in `domain-blocklist.json` with a test written first. Done 2026-11-15. The router needed no change, since Lyra has no subdomain of its own. Lyra is also a given name, so this blocks a real Wanderer named Lyra (decision 94).
 - [ ] Create the repository and the `@autumnsgrove/lyra` package.
 - [ ] Update #1605 (new name, and the corrected protocol frames from the research).
 - [ ] Decide whether the entry above goes through `museum-documentation` for a fuller treatment later.
