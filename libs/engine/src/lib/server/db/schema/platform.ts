@@ -232,13 +232,12 @@ export const reclaimedAccounts = sqliteTable("reclaimed_accounts", {
 	createdAt: integer("created_at").default(sql`(unixepoch())`),
 });
 
-export const freeAccountCreationLog = sqliteTable("free_account_creation_log", {
-	id: text("id").primaryKey(),
-	ipAddress: text("ip_address").notNull(),
-	createdAt: integer("created_at")
-		.notNull()
-		.default(sql`(unixepoch())`),
-});
+// ─────────────────────────────────────────────────────────────────────────────
+// Wanderer reclamation (migration 053)
+// NOTE: none of 053's artefacts exist in production despite d1_migrations
+// claiming otherwise — see #1691 and #1692. freeAccountCreationLog was deleted
+// in #1683: the per-IP signup limiter was never deployed and never ran.
+// ─────────────────────────────────────────────────────────────────────────────
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AI: Lumen & Wisp Usage Tracking

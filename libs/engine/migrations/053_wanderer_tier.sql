@@ -40,6 +40,10 @@ CREATE INDEX IF NOT EXISTS idx_reclaimed_accounts_archive_expires
   ON reclaimed_accounts(archive_expires_at);
 
 -- Track free account creation by IP to prevent abuse (max 3 per IP per 30 days).
+-- SUPERSEDED 2026-11-17 (#1683): this limiter was never deployed and has been
+-- removed from the application. The table does not exist in production despite
+-- d1_migrations listing this file as applied — see #1692. Identity-based
+-- counting replaces it in #1681. Kept here only as migration history.
 CREATE TABLE IF NOT EXISTS free_account_creation_log (
   id TEXT PRIMARY KEY,
   ip_address TEXT NOT NULL,
