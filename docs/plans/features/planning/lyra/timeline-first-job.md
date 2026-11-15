@@ -57,9 +57,37 @@ Shared with other tasks: `finish`, `search_past_days`, and (later) asking a huma
 
 Lumen's privacy scrubber runs over tool results (decision 8). It can rewrite text that looks like an email, phone number, or IP address, and long hashes and numbers are exactly what it might touch. So tools should give the model short handles, such as `c1` for a commit, `pr12` for a pull request, and `i34` for an issue. Lyra keeps the map back to the real hash, number, and link. The model cites handles and never copies a long exact string, which also stops it mistyping one. This matches the rule that tools own anything exact.
 
-## Things to check before building
+## Checked (2026-11-15): vines, links, and past days
 
-- **Can a bullet carry its own anchor?** The page supports three anchor kinds (`libs/engine/src/lib/utils/gutter.ts`, `parseAnchor`): a header (`## Text`), a numbered paragraph (`paragraph:N`), and a named tag (`anchor:name`). The timeline only uses headers. Whether a single bullet inside a list can carry a tag on the rendered page is not checked. If it cannot, vines need a small page change.
-- **Where past days live.** `timeline_summaries` in the Curio database already stores each day's context brief, detected focus, summary, and commit count. `search_past_days` can read it. Whether that is enough detail to judge a real continuation is not checked.
-- **The vine layout.** The vines in the screenshot render as a row under the heading. Moving them beside their line is a display change on the page, separate from Lyra.
-- **The model.** The timeline picks its model from tenant config with a default (`src/generator.ts`, line 228). The default has to support tool calls. See `lumen-changes.md`, item 7.
+Read from the code. Nothing was run.
+
+### Vines can only attach to a heading, and the cause is the page, not the model
+
+The timeline page does not use the engine's general gutter system. `libs/curios/src/timeline/Timeline.svelte` has its own renderer (`renderMarkdownWithGutter`, around lines 148 to 210):
+
+- It groups every vine by the text of its anchor header, then finds the matching `<h3>` with a regular expression and inserts one row of vines (`header-gutter-group`) right after it.
+- It has no other kind of anchor. A vine whose heading text does not match exactly is silently dropped, since neither pattern matches.
+- The timeline's markdown parser (`timelineMd`, line 18) is created without HTML enabled, so an anchor marker comment written into the text would be escaped, not rendered.
+
+Meanwhile the engine has a fuller system that the timeline does not use. `ContentWithGutter` supports three anchor kinds (heading, `paragraph:N`, and a named tag found by a `data-anchor` attribute) and places a vine right before the anchored element. But it only counts top-level paragraphs, not list items, so a bullet cannot be a paragraph anchor either.
+
+So the answer to "can a bullet carry its own vine anchor?" is no, in both places. A real change is needed in `Timeline.svelte` regardless of Lyra. Two ways to do it, not yet chosen:
+
+1. **Markers in the text.** Enable a limited form of HTML in the timeline's parser, or add a small plugin, so each bullet can carry a marker such as `<!-- anchor:l3 -->`, and have the page place the vine beside that element.
+2. **Structure, not text.** Store each day as structured lines with ids, and render the page from that. Vines then point at a line id. This matches Lyra's tools (`add_line` returns an id, `add_vine` takes one) and removes the need to parse text at all. It is a bigger change to the page and to what `detailed_timeline` holds.
+
+### Repo links are already built by the page
+
+The page turns every `### RepoName` into a link to `github.com/<username>/<RepoName>` using whatever name the model typed (`Timeline.svelte`, around line 172). A wrong or invented name becomes a dead link. That confirms the design: `start_project` should only accept a repo from the day's list, so the name on the page is always real.
+
+### Past days hold enough for continuation checks, with one caveat
+
+`timeline_summaries` (`libs/engine/migrations/curios/001_initial_schema.sql`) stores for each day: the short summary, the full detailed markdown, the vines, the commit count, the list of active repos, the line counts, and the model's own earlier conclusions (`detected_focus`, `continuation_of`, `focus_streak`).
+
+So `search_past_days` can search the real text and repo lists of earlier days. It should not treat the stored `detected_focus` or `focus_streak` as evidence, because those are the keyword guesses that are wrong today. It also should not rely on a list of commits, pull requests, or issues from earlier days: the table keeps prose and repo names, not those identifiers. If each day's run record is kept (see record retention in `decisions.md`), the record holds the exact data the model was given, and would make a much better source.
+
+### Still open
+
+- Which of the two vine approaches to take.
+- Whether the default model supports tools (`lumen-changes.md`, item 7).
+- That GitHub access for pull requests and issues goes through Warden. Unchecked.

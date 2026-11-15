@@ -172,6 +172,7 @@ These came out of the research and are waiting for their turn, one at a time:
 - **The shell tool.** Its command policy (which commands are allowed), the default deadline before a command moves to the background, and what happens to a running command if the host is lost (see decisions 16 and 38 and `approvals.md`).
 - **Who may approve** once more than one person uses Lyra, and approving with edited arguments (see `approvals.md`).
 - **Lumen changes to scope in detail:** the message shape, the finish reason, the `agent` task, and the model flags (see `lumen-changes.md`).
-- **Checks on the timeline** before building: whether a bullet can carry its own vine anchor, and whether saved past days hold enough detail (see `timeline-first-job.md`).
+- **How vines attach to a line.** The timeline page only supports vines under a heading, so it needs a change. Two approaches are written up in `timeline-first-job.md`.
+- **HawkAgent (#1684) and the other possible consumers** (see `consumers.md`).
 - **The first slice.** What the smallest useful version contains, and the build order.
 - **The new repository.** Name, layout, release process, and test setup.
