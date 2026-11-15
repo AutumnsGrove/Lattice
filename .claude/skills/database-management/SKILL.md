@@ -201,11 +201,3 @@ def db_transaction(operations: List[tuple]) -> bool:
 3. ✅ **Meaningful return types** - Optional, List, bool, int
 4. ✅ **Transaction support** - for multi-operation consistency
 5. ✅ **Add *.db to .gitignore** - don't commit databases
-
-## Related Resources
-
-See `AgentUsage/db_usage.md` for complete documentation including:
-- Full database.py template
-- Migration patterns
-- Testing database functions
-- Performance optimization

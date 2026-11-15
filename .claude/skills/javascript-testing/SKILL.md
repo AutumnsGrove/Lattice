@@ -199,11 +199,3 @@ it('should validate login', async () => {
     expect(result.success).toBe(true);
 });
 ```
-
-## Related Resources
-
-See `AgentUsage/testing_javascript.md` for complete documentation including:
-- Jest configuration
-- Async testing patterns
-- SvelteKit-specific patterns
-- CI/CD integration

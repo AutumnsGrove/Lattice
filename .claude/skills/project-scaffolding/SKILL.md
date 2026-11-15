@@ -72,7 +72,6 @@ git commit -m "chore: initialize repository from BaseProject"
 ### Python with UV
 ```bash
 uv init
-cp AgentUsage/templates/pyproject.toml.example pyproject.toml
 uv add fastapi uvicorn sqlalchemy
 uv add --dev pytest black ruff mypy
 
@@ -146,7 +145,6 @@ project/
 
 ```bash
 # Create template
-cp AgentUsage/templates/secrets_template.json secrets_template.json
 
 # Create actual secrets (gitignored)
 cp secrets_template.json secrets.json
@@ -189,7 +187,7 @@ uv run python src/projectname/main.py
 1. **Create GitHub Issues** for project-specific tasks
 2. **Create initial code** entry points
 3. **Configure IDE** settings and extensions
-4. **Review relevant guides** in AgentUsage/
+4. **Review** `AGENT.md` and `CODE-STANDARDS.md`
 
 ## Common Issues
 
@@ -213,11 +211,3 @@ uv cache clean
 rm -rf node_modules pnpm-lock.yaml
 pnpm install
 ```
-
-## Related Resources
-
-See `AgentUsage/project_setup.md` and `AgentUsage/project_structure.md` for:
-- Detailed directory patterns
-- CI/CD setup
-- Pre-commit hook installation
-- Technology-specific guides

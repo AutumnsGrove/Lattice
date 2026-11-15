@@ -100,12 +100,3 @@ API_KEY = SECRETS.get("anthropic_api_key", os.getenv("ANTHROPIC_API_KEY", ""))
 | OpenRouter | `sk-or-v1-...` |
 | OpenAI | `sk-...` |
 | AWS Access | `AKIA...` |
-
-## Related Resources
-
-See `AgentUsage/secrets_management.md` for complete documentation including:
-- Advanced loading patterns with validation
-- .env file integration
-- Automated testing patterns
-- Emergency key rotation procedures
-- Production deployment strategies

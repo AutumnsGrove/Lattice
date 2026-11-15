@@ -256,11 +256,3 @@ docker inspect container_name       # Check network config
 docker system df           # Check usage
 docker system prune -a     # Clean everything
 ```
-
-## Related Resources
-
-See `AgentUsage/docker_guide.md` for complete documentation including:
-- Advanced multi-stage patterns
-- Docker Compose variations
-- Production optimization
-- CI/CD integration

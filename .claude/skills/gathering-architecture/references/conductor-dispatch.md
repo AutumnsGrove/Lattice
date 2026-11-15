@@ -224,7 +224,7 @@ Read the specification file at that path. It is your single source of truth.
 - ALL catch blocks use isRedirect()/isHttpError() type guards
 - NO `as any` or unsafe casts at trust boundaries
 - Engine-first: check @autumnsgrove/lattice before creating utilities
-- Reference: AgentUsage/error_handling.md, AgentUsage/rootwork_type_safety.md
+- Reference: `CODE-STANDARDS.md` (Signpost errors, Rootwork type safety)
 
 ## Constraints
 - You MUST read your skill file first

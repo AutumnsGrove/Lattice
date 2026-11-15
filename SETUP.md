@@ -230,7 +230,6 @@ Lattice/
 │   ├── zephyr/            # Email gateway
 ├── workers/               # Scheduled/utility workers
 ├── docs/                  # Specs, patterns, guides
-├── AgentUsage/            # Agent workflow documentation
 ├── AGENT.md               # Agent instructions
 ├── CONTRIBUTING.md         # Contribution guidelines
 └── CLAUDE.md              # Claude Code configuration

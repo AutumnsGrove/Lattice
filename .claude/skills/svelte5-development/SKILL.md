@@ -340,7 +340,7 @@ export const actions = {
 };
 ```
 
-See `AgentUsage/error_handling.md` and `AgentUsage/rootwork_type_safety.md` for the full reference.
+See `CODE-STANDARDS.md` for the full Signpost and Rootwork reference.
 
 ## Project Structure
 
@@ -381,12 +381,3 @@ When building Grove UI that includes nature-themed terminology, always use the G
 ```
 
 See `libs/engine/src/lib/ui/components/ui/groveterm/` for component source and `chameleon-adapt` skill for full UI design guidance.
-
-## Related Resources
-
-See `AgentUsage/svelte5_guide.md` for complete documentation including:
-
-- Advanced rune patterns
-- Snippets for reusable markup
-- Performance optimization
-- TypeScript integration

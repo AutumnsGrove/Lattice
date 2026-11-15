@@ -1,6 +1,6 @@
 ---
 name: baseproject-update
-description: Update an existing BaseProject installation by syncing skills, docs, and AGENT.md from the latest upstream. Use when you want to pull the newest BaseProject templates, skills, and guides into your project.
+description: Update an existing BaseProject installation by syncing skills and AGENT.md from the latest upstream. Use when you want to pull the newest BaseProject templates and skills into your project.
 ---
 
 # BaseProject Update Skill
@@ -9,13 +9,13 @@ description: Update an existing BaseProject installation by syncing skills, docs
 
 Activate this skill when:
 - Updating an existing BaseProject installation to latest
-- Syncing skills or AgentUsage docs with upstream
+- Syncing skills with upstream
 - User says "update baseproject", "sync baseproject", or invokes `/baseproject-update`
 - Refreshing project templates after upstream changes
 
 ## Prerequisites
 
-- Project already has BaseProject installed (`.claude/skills/` and/or `AgentUsage/` exist)
+- Project already has BaseProject installed (`.claude/skills/` exists)
 - Git repository is clean (commit or stash changes first)
 
 ## Update Workflow
@@ -25,7 +25,7 @@ Execute these steps in order:
 ### Step 1: Verify Current State
 ```bash
 # Confirm BaseProject is installed
-ls .claude/skills/ AgentUsage/ AGENT.md 2>/dev/null
+ls .claude/skills/ AGENT.md 2>/dev/null
 
 # Ensure git is clean
 git status --porcelain
@@ -43,7 +43,6 @@ git clone --depth 1 https://github.com/AutumnsGrove/BaseProject.git /tmp/bp-upda
 BACKUP_DIR=".baseproject-backup-$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$BACKUP_DIR"
 cp -r .claude/skills/ "$BACKUP_DIR/skills-backup/" 2>/dev/null
-cp -r AgentUsage/ "$BACKUP_DIR/AgentUsage-backup/" 2>/dev/null
 cp AGENT.md "$BACKUP_DIR/AGENT.md.backup" 2>/dev/null
 ```
 
@@ -54,42 +53,33 @@ Compare `.claude/skills/` with `/tmp/bp-update/.claude/skills/`:
 - **Preserve** unchanged skills (skip if identical)
 - Report: added, updated, unchanged counts
 
-### Step 5: Sync AgentUsage Docs
-Compare `AgentUsage/` with `/tmp/bp-update/AgentUsage/`:
-- **Add** new files/directories from upstream
-- **Update** existing files where upstream content has changed
-- **Preserve** custom files that only exist locally (user additions)
-- **Preserve** unchanged files (skip if identical)
-- Report: added, updated, unchanged, custom-preserved counts
-
-### Step 6: Merge .gitignore
+### Step 5: Merge .gitignore
 ```bash
 # Add any new entries from upstream that aren't already present
 # Never remove existing entries
 ```
 
-### Step 7: Update AGENT.md
+### Step 6: Update AGENT.md
 Intelligently merge AGENT.md:
 - **Preserve** all project-specific content (purpose, tech stack, architecture, custom sections)
 - **Update** BaseProject template sections (skills list, workflow references, tool instructions)
 - **Add** any new template sections from upstream
 - Use content analysis to distinguish template boilerplate from custom project content
 
-### Step 8: Cleanup
+### Step 7: Cleanup
 ```bash
 rm -rf /tmp/bp-update
 ```
 
-### Step 9: Commit
+### Step 8: Commit
 ```bash
-git add .claude/skills/ AgentUsage/ .gitignore AGENT.md
-git commit -m "chore: sync BaseProject skills, docs, and agent config"
+git add .claude/skills/ .gitignore AGENT.md
+git commit -m "chore: sync BaseProject skills and agent config"
 ```
 
-### Step 10: Display Summary
+### Step 9: Display Summary
 Show:
 - Skills: added/updated/unchanged with full list of available skills
-- AgentUsage: added/updated/unchanged/custom-preserved
 - .gitignore: entries added (if any)
 - AGENT.md: sections updated (if any)
 - Backup location
@@ -99,7 +89,6 @@ Show:
 | Target | Action |
 |--------|--------|
 | `.claude/skills/` | Sync all skills from upstream |
-| `AgentUsage/` | Sync docs, preserve custom files |
 | `.gitignore` | Merge new entries |
 | `AGENT.md` | Merge template sections, preserve custom content |
 
@@ -131,6 +120,5 @@ If AGENT.md structure is too different to merge cleanly:
 ```bash
 # Restore from backup if something went wrong
 cp -r .baseproject-backup-*/skills-backup/ .claude/skills/
-cp -r .baseproject-backup-*/AgentUsage-backup/ AgentUsage/
 cp .baseproject-backup-*/AGENT.md.backup AGENT.md
 ```

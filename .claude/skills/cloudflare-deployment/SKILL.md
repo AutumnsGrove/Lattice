@@ -277,12 +277,3 @@ export default {
 	},
 };
 ```
-
-## Related Resources
-
-See `AgentUsage/cloudflare_guide.md` for complete documentation including:
-
-- MCP server configuration
-- Advanced D1 patterns
-- Production deployment strategies
-- Troubleshooting guide

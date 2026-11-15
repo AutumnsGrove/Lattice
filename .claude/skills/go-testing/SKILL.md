@@ -234,11 +234,3 @@ func BenchmarkXxx(b *testing.B) // Benchmark
 func ExampleXxx()               // Example (docs)
 func FuzzXxx(f *testing.F)      // Fuzz test
 ```
-
-## Related Resources
-
-See `AgentUsage/testing_go.md` for complete documentation including:
-- Fuzz testing patterns
-- Build tags for test types
-- TestMain for package-level setup
-- Coverage in CI

@@ -234,11 +234,3 @@ cargo tarpaulin --out Html
 cargo install cargo-llvm-cov
 cargo llvm-cov --html
 ```
-
-## Related Resources
-
-See `AgentUsage/testing_rust.md` for complete documentation including:
-- Benchmarking with criterion
-- Setup/teardown patterns
-- Mockall crate usage
-- CI configuration

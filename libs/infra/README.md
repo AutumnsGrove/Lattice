@@ -134,6 +134,6 @@ Application code depends only on ports. Adapters are injected at startup. To sup
 ## Related
 
 - **Spec:** `docs/specs/server-sdk-spec.md`
-- **Agent guide:** `AgentUsage/server_sdk_guide.md`
-- **Error handling:** `AgentUsage/error_handling.md`
+- **Agent guide:** `AGENT.md` — SDK Boundaries
+- **Error handling:** `CODE-STANDARDS.md` — Signpost
 - **Loom SDK:** `packages/engine/src/lib/loom/` (Durable Object coordination, integrates with Infra SDK)

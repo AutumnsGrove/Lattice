@@ -30,7 +30,7 @@ Design and build the UI for:
 - Support reduced motion (prefers-reduced-motion)
 - Mobile-responsive (test at 375px minimum)
 - Import components from @autumnsgrove/lattice — engine-first pattern
-- Reference: AGENT.md design standards section, AgentUsage/design_context.md
+- Reference: AGENT.md design standards section, `DESIGN.md`
 
 ## Constraints
 - You MUST read your skill file first

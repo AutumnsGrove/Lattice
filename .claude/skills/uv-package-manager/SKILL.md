@@ -226,11 +226,3 @@ uv --verbose add package
 uv lock
 uv sync
 ```
-
-## Related Resources
-
-See `AgentUsage/uv_usage.md` for complete documentation including:
-- Docker integration patterns
-- Workspace support for monorepos
-- CI/CD configuration
-- Detailed migration guides

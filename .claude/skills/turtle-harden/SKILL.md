@@ -64,7 +64,7 @@ Apply the foundational defenses. These are non-negotiable — every piece of cod
 - **2A. Input Validation** — Validate all entry points server-side, using allowlists with Zod/Valibot, strict types, length and range limits; reject invalid input, never silently coerce
 - **2B. Output Encoding** — Encode for context at every exit point (HTML, JS, URL, CSS, JSON); never use `{@html}` with unsanitized input; use DOMPurify for rich text
 - **2C. Parameterized Queries** — Zero string concatenation in SQL; all queries use `.bind()`; typed helpers from `database.ts`; parallel queries with `Promise.all()`
-- **2D. Type Safety** — MANDATORY Rootwork utilities at all trust boundaries. `parseFormData()` for form data, `safeJsonParse()` for KV/JSON reads, `isRedirect()`/`isHttpError()` for catch blocks. No `as` casts at boundaries. TypeScript strict mode is table stakes; Rootwork is the lock. Reference: `AgentUsage/rootwork_type_safety.md`
+- **2D. Type Safety** — MANDATORY Rootwork utilities at all trust boundaries. `parseFormData()` for form data, `safeJsonParse()` for KV/JSON reads, `isRedirect()`/`isHttpError()` for catch blocks. No `as` casts at boundaries. TypeScript strict mode is table stakes; Rootwork is the lock. Reference: `CODE-STANDARDS.md`
 - **2E. Error Handling** — Every error uses a Signpost code; `logGroveError()` for server errors; generic user messages only; no enumeration leaks; no swallowed exceptions
 
 **Output:** Foundational defenses applied to all entry and exit points
