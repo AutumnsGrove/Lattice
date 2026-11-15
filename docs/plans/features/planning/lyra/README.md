@@ -22,6 +22,7 @@ Slowly, and scoped before anything is built. Every decision gets written down he
 
 | File | What it holds |
 |---|---|
+| [`overview.md`](overview.md) | **Start here.** What Lyra is and how the pieces fit, in plain words, with a pointer to each detail. |
 | [`decisions.md`](decisions.md) | Every decision so far, with the reason, plus what has not been discussed yet. Start here. |
 | [`adapters.md`](adapters.md) | How Lyra runs without Lumen or Warden: four small slots and an optional shell, with Grove's pieces as adapters. |
 | [`limits-and-interruptions.md`](limits-and-interruptions.md) | What stops a run, how it is stopped and steered, how it resumes, and what happens when something fails. |

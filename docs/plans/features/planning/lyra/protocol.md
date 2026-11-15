@@ -6,7 +6,7 @@ category: features
 
 # The protocol
 
-Last updated: 2026-11-15. Decisions 43 to 48 are decided. The wire draft at the end (decisions 83 to 87) is proposed and waits for a yes.
+Last updated: 2026-11-15. Decisions 43 to 48 and 83 to 88 are decided.
 
 ## What it is
 
@@ -70,9 +70,9 @@ Proposal: reuse Nova's `ui_request` and `ui_response` shapes for the content of 
 
 To keep a Nova client working, a parked run emits `run_end` with the reason `parked`. A `resume` then starts a new `run_start` that names the run it continues. The rule "the first `run_end` ends the request" still holds.
 
-## Wire draft (proposed, decisions 83 to 87)
+## Wire (decided, decisions 83 to 87)
 
-This is the concrete shape, written so spec rows can have IDs (decision 62). Only the parts that **differ from Nova** get rows here. For everything Nova specifies and Lyra keeps unchanged (framing, error handling of bad lines, unknown fields), Lyra's rule is "as in Nova's `docs/PROTOCOL.md`", and the tests port with it.
+This is the concrete shape, written so spec rows can have IDs (decision 62). It is decided. Only the parts that **differ from Nova** get rows here. For everything Nova specifies and Lyra keeps unchanged (framing, error handling of bad lines, unknown fields), Lyra's rule is "as in Nova's `docs/PROTOCOL.md`", and the tests port with it.
 
 ### Framing and hello
 
@@ -141,9 +141,9 @@ Events that come from a record entry (everything except live deltas) carry the e
 - **WebSocket:** `GET /v1/ws`, the same frames in both directions, with the same replay on reconnect.
 - On Cloudflare, a Durable Object holds each session, so a WebSocket can hibernate while a run is parked (to confirm against the current hibernation API).
 
-### Access (decision 87)
+### Access (decision 87), and who may approve (decision 88)
 
-Decision 47 stays: other Grove workers use a service binding, and anything outside needs a bearer token. A trusted binding caller names the tenant in `hello` (or a header over HTTP). A token caller's tenant comes from the token. Every session stores its tenant id, and every command is checked against it. A command naming another tenant's session is `not_found`, not `permission_denied`, so session ids do not leak.
+Decision 47 stays: other Grove workers use a service binding, and anything outside needs a bearer token. A trusted binding caller names the tenant in `hello` (or a header over HTTP). A token caller's tenant comes from the token. Every session stores its tenant id, and every command is checked against it. A command naming another tenant's session is `not_found`, not `permission_denied`, so session ids do not leak. A request can be answered by a caller whose tenant owns the session (decision 88). Approving with edited arguments is not in version one: a deny with a note lets the model try again.
 
 ### Spec rows
 

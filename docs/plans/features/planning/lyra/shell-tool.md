@@ -6,7 +6,7 @@ category: features
 
 # The shell tool
 
-Last updated: 2026-11-15. Decisions 79 to 82 are decided. Decision 78 and the leftovers (decision 89) are proposed. Built from Nova's `tools/bash/`, `permission/`, and `docs/DECISIONS.md`, and from the README of your `pi-background` extension. Nothing was run.
+Last updated: 2026-11-15. Everything here is decided (decisions 78 to 82 and 89). Built from Nova's `tools/bash/`, `permission/`, and `docs/DECISIONS.md`, and from the README of your `pi-background` extension. Nothing was run.
 
 This is a later slice (see `first-slice.md`). The timeline does not use it. It is for hosts with a real shell, such as a GitHub Action runner doing a review (decisions 16, 17, and 38).
 
@@ -39,9 +39,9 @@ This is a later slice (see `first-slice.md`). The timeline does not use it. It i
 
 **`pi-review`'s guard** (`.github/workflows/pi-review.yml` in Nova): the review job runs only for pull requests from the same repository, not from forks, so untrusted code does not get the agent and its secrets.
 
-## Proposed
+## Decisions
 
-### 78. The tool and its defaults
+### 78. The tool and its defaults (decided)
 One `bash` tool, with `command`, an optional `timeout`, and an optional `run_in_background`. Defaults taken from Nova and `pi-background`, which agree: a 120 second deadline, at which the command moves to the background (decision 38), and a 600 second ceiling for waiting. Output is a tail capped at 51,200 bytes, with a truncated flag. Stdin is null. The working directory is fixed for the run. When a foreground call ends, its whole process group is killed. All of these are configuration, with these as the defaults.
 
 ### 79. Background jobs (decided)
@@ -73,7 +73,7 @@ The cases below come from Nova's catalog, adapted. Each becomes a spec row with 
 - A fake shell with the same scripts as the fake model, so the core and the policy are tested without a real process, and a small set of tests with a real shell on Node.
 - Fuzzing the command splitter and the policy matcher with hostile strings: quotes, escapes, unicode, very long input, nested substitutions.
 
-## Leftovers (proposed, decision 89)
+## Leftovers (decided, decision 89)
 
 - The deny list for open mode is written when the shell is built.
 - A recipe names allow patterns directly in version one. Named sets (for example `tests`, `git-read`) can come later.

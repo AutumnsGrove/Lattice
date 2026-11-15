@@ -261,31 +261,29 @@ Strict is Nova's rules: allow, ask, deny, the most restrictive match wins, headl
 ### 82. The credential scrub
 Lyra's own secrets (the model keys and any token Lyra holds) are always removed from a command's environment and cannot be switched off. A recipe can hide more names, such as `GITHUB_TOKEN` for a review that does not need to push. No scrubbing by pattern, because Nova found that breaks builds. Decided 2026-11-15.
 
-## Proposed, waiting for a yes
-
 ### 78. The `bash` tool and its defaults
-One tool with `command`, an optional `timeout`, and an optional `run_in_background`. A 120 second deadline at which the command moves to the background, a 600 second ceiling for waiting, an output tail capped at 51,200 bytes, null stdin, a fixed working directory, and the whole process group killed when a foreground call ends. All configuration, with these as defaults. These are the defaults Nova and `pi-background` agree on. Not yet asked about directly.
+One tool with `command`, an optional `timeout`, and an optional `run_in_background`. A 120 second deadline at which the command moves to the background, a 600 second ceiling for waiting, an output tail capped at 51,200 bytes, null stdin, a fixed working directory, and the whole process group killed when a foreground call ends. All configuration, with these as defaults. These are the defaults Nova and `pi-background` agree on. Not yet asked about directly. Decided 2026-11-15.
 
 ### 83. The command set, with an idempotency key on `start`
-`start`, `prompt`, `steer`, `follow_up`, `abort`, `resume`, `get_state`, `get_messages`, `compact`, `list_sessions`, `list_pending`, and `decide_proposal`. A `start` carries an optional idempotency key, so a retried cron call does not start a second run. Nova's model, thinking, tool, session-fork, login, extension, and stateless-call commands are dropped. A new `conflict` error code is added to Nova's eight.
+`start`, `prompt`, `steer`, `follow_up`, `abort`, `resume`, `get_state`, `get_messages`, `compact`, `list_sessions`, `list_pending`, and `decide_proposal`. A `start` carries an optional idempotency key, so a retried cron call does not start a second run. Nova's model, thinking, tool, session-fork, login, extension, and stateless-call commands are dropped. A new `conflict` error code is added to Nova's eight. Decided 2026-11-15.
 
 ### 84. `run_end` reasons are `done`, `parked`, and `failed`
-A limit and a stop both park a run, so Nova's `exhausted` and `aborted` become `parked` with a `parked_reason` (`waiting_for_person`, `limit`, `stopped`, `stuck`, `model_unavailable`). `failed` is for a run that cannot continue. New events: `parked`, `resumed`, `fallback`, `ui_resolved`, `proposal`, and `proposal_decided`.
+A limit and a stop both park a run, so Nova's `exhausted` and `aborted` become `parked` with a `parked_reason` (`waiting_for_person`, `limit`, `stopped`, `stuck`, `model_unavailable`). `failed` is for a run that cannot continue. New events: `parked`, `resumed`, `fallback`, `ui_resolved`, `proposal`, and `proposal_decided`. Decided 2026-11-15.
 
 ### 85. Requests are durable, with unguessable single-use ids
-Nova's `ui_request` and `ui_response` shapes, saved in the record before they are sent. The id is a 128-bit random identifier assigned by the server. A second answer to it is `conflict`, and an unknown or expired id is `not_found`. The default on timeout is deny. This is how answers cannot be forged, with no separate code.
+Nova's `ui_request` and `ui_response` shapes, saved in the record before they are sent. The id is a 128-bit random identifier assigned by the server. A second answer to it is `conflict`, and an unknown or expired id is `not_found`. The default on timeout is deny. This is how answers cannot be forged, with no separate code. Decided 2026-11-15.
 
 ### 86. Events replay from the record
-Events that come from a record entry carry its position as `seq`, so a reconnecting client gets every missed event from the record. Live deltas are not replayed. HTTP with server-sent events and WebSocket both use it.
+Events that come from a record entry carry its position as `seq`, so a reconnecting client gets every missed event from the record. Live deltas are not replayed. HTTP with server-sent events and WebSocket both use it. Decided 2026-11-15.
 
 ### 87. Access: a trusted caller names the tenant, a token carries it, and another tenant's session is `not_found`
-Extends decision 47. Every session stores its tenant id and every command is checked against it.
+Extends decision 47. Every session stores its tenant id and every command is checked against it. Decided 2026-11-15.
 
 ### 88. Who may approve: the session's owner, with no edited approvals in version one
-A request can be answered by a caller whose tenant owns the session. Approving with edited arguments is not in version one: a deny with a note lets the model try again with the change you wanted. Token scopes (who may approve what) arrive when someone other than the owner uses Lyra.
+A request can be answered by a caller whose tenant owns the session. Approving with edited arguments is not in version one: a deny with a note lets the model try again with the change you wanted. Token scopes (who may approve what) arrive when someone other than the owner uses Lyra. Decided 2026-11-15.
 
 ### 89. The shell's remaining details
-A recipe names allow patterns directly in version one, and named sets (for example `tests`, `git-read`) can come later. There is no "allow for this session" answer in version one, because it only matters in interactive use and Reverie's flow is preview then confirm. The deny list for open mode is written when the shell is built.
+A recipe names allow patterns directly in version one, and named sets (for example `tests`, `git-read`) can come later. There is no "allow for this session" answer in version one, because it only matters in interactive use and Reverie's flow is preview then confirm. The deny list for open mode is written when the shell is built. Decided 2026-11-15.
 
 ## Not discussed yet
 
