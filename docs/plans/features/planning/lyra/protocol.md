@@ -6,7 +6,7 @@ category: features
 
 # The protocol
 
-Last updated: 2026-11-15. Decisions 43 to 45 are decided. Everything else is a draft for discussion, marked proposed.
+Last updated: 2026-11-15. Decisions 43 to 47 are decided. Everything else is a draft for discussion, marked proposed.
 
 ## What it is
 
@@ -19,6 +19,10 @@ The protocol is how anything outside Lyra talks to it: an Arbor page, a script, 
 **44. A session holds many runs.** A client talks to a session, like in Nova. A follow-up sent after a run has ended starts the next run in the same session.
 
 **45. HTTP with server-sent events, and WebSocket, both from the start.** The core only speaks frames. The two transports are thin layers over it.
+
+**46. A `start` command begins a task.** It names the task and passes its inputs. `prompt` stays for chat-style use.
+
+**47. Access.** Service bindings for other Grove workers, a bearer token for anything outside, and a tenant id stored on every session. Per-tenant sign-in is added later if someone else uses Lyra.
 
 ## What Nova's protocol looks like
 
@@ -44,11 +48,11 @@ A run always ends with exactly one `run_end`, even on error or abort. A client t
 **Dropped** (coding, terminal, and sign-in commands): `login`, `bash` as a user command, `reload`, `set_tools`, `get_extensions`, and the other terminal-interface and extension commands. Thinking events stay optional.
 
 **Added** (Nova has no equivalent, because a Nova session is attended):
-- A way to **start a task** by name with its inputs, for example the timeline for a given date.
+- **`start`**, a command that begins a task by name with its inputs, for example the timeline for a given date (decision 46).
 - **`resume`** for a parked run.
 - A way to **list pending requests**, so a viewer can show the glow (decision 36).
 - A **parked** and **resumed** event.
-- **Who is asking**: a tenant and credential in `hello`. Nova assumes one trusted agent per server.
+- **Who is asking**: a tenant id and a credential in `hello` (decision 47). Nova assumes one trusted agent per server.
 
 ## The main difference: approvals are durable
 
@@ -66,5 +70,5 @@ To keep a Nova client working, a parked run emits `run_end` with the reason `par
 ## Open questions
 
 - Whether Lyra also exposes Nova's four stateless calls (embeddings, decision models, speech, transcription).
-- The exact start-a-task command.
-- Authentication and the one-time codes on requests.
+- The exact fields of `start`, and how a task declares its inputs.
+- The one-time codes on approval requests.

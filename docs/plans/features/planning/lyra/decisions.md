@@ -153,6 +153,12 @@ A client talks to a session, which is a conversation that can hold many runs. Ea
 ### 45. HTTP with server-sent events and WebSocket, both from the start
 Both transports are built together. HTTP: a command is a normal request, and events arrive on a stream (as in Nova's serve mode). WebSocket: one connection both ways, which suits live stop, steer, and approvals. Other Grove workers reach Lyra through a service binding. Decided 2026-11-15. This is more to build first, and the cost is accepted. Neither transport is part of the core, because the core only speaks frames (see decision 12).
 
+### 46. A `start` command begins a task
+A new command, `start`, names a task and passes its inputs, for example the timeline for a given date. Nova's `prompt` stays for chat-style use, where the task is a general conversation. Decided 2026-11-15. See `protocol.md`.
+
+### 47. Access: service bindings plus a token, one owner for now
+Other Grove workers reach Lyra through a service binding. Anything from outside needs a bearer token. Every session is owned by a tenant id, stored on its record, so per-tenant checks can be added later without changing the format. No Heartwood sign-in per call for now, because the only task is Autumn's. Decided 2026-11-15.
+
 ## Not discussed yet
 
 These came out of the research and are waiting for their turn, one at a time:
@@ -160,5 +166,5 @@ These came out of the research and are waiting for their turn, one at a time:
 - **Record retention.** How long a record is kept, and who can delete one.
 - **Approvals.** How a background run asks for a yes and waits at no cost.
 - **The Cloudflare adapter's foundation.** Whether it builds on Cloudflare's agent tooling or on plain Durable Objects. A smaller question once decision 12 is settled.
-- **Protocol details.** The start command, authentication, and whether Lyra also exposes the four stateless calls. See `protocol.md`.
+- **Protocol details.** Whether Lyra also exposes the four stateless calls (embeddings, decision models, speech, transcription), and the exact shape of frames and codes. See `protocol.md`.
 - **The new repository.** Name, layout, release process, and test setup.
