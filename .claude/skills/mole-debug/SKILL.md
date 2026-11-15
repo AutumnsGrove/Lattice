@@ -35,8 +35,6 @@ Issue   Flow    Test     Test    rence
 
 ### Phase 1: FEEL
 
-_The mole presses its paw against the earth. Something trembles beneath..._
-
 **Reproduce the issue. Get it to fail on demand. No reproduction, no debugging.**
 
 **Reproduction checklist:**
@@ -55,8 +53,6 @@ _The mole presses its paw against the earth. Something trembles beneath..._
 ---
 
 ### Phase 2: DIG
-
-_The mole begins to dig. Not frantically — deliberately..._
 
 **Trace the data flow from entry to exit. Instrument the boundaries.**
 
@@ -79,8 +75,6 @@ For detailed instrumentation techniques, see `references/debugging-strategies.md
 ---
 
 ### Phase 3: TUNNEL
-
-_The mole chooses a direction. One tunnel. One hypothesis..._
 
 **Form hypotheses. Test ONE at a time. Binary search the problem space.**
 
@@ -106,8 +100,6 @@ Three failures in three different places = architectural problem, not isolated b
 
 ### Phase 4: SURFACE
 
-_The mole breaks through to daylight..._
-
 **Write a failing test that demonstrates the bug. Then fix the code. Then the test passes.**
 
 This order is mandatory:
@@ -128,8 +120,6 @@ gw ci --affected --fail-fast --diagnose
 ---
 
 ### Phase 5: SEAL
-
-_The mole packs the earth behind it, sealing the tunnel forever..._
 
 **Prevent recurrence.**
 

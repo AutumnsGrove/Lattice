@@ -46,8 +46,6 @@ the page  feel    audit    curl up  what's warm
 
 ### Phase 1: ENTER
 
-_The cat pushes the door open with one paw, pauses at the threshold..._
-
 Capture real screenshots of the target using Glimpse. The cat must SEE the page.
 
 ```bash
@@ -71,8 +69,6 @@ bun run glimpse capture \
 ---
 
 ### Phase 2: SNIFF
-
-_The cat sniffs the air. Something smells... generic..._
 
 Quick-scan for the most obvious vibes violations. These are the things that make a page feel AI-generated in 3 seconds:
 
@@ -99,8 +95,6 @@ Quick-scan for the most obvious vibes violations. These are the things that make
 ---
 
 ### Phase 3: CIRCLE
-
-_The cat circles the page three times, tail twitching, inspecting every corner..._
 
 Deep audit of every vibes dimension. The cat is thorough and particular.
 
@@ -139,8 +133,6 @@ Look at each screenshot and ask: _"Would someone feel welcome writing here at mi
 
 ### Phase 4: SETTLE
 
-_The cat pauses. Considers. And then..._
-
 The verdict. For each page/component, the cat either settles or walks away.
 
 **Scoring:**
@@ -167,8 +159,6 @@ The verdict. For each page/component, the cat either settles or walks away.
 ---
 
 ### Phase 5: PURR
-
-_The cat has spoken. Here's what it found..._
 
 Present the full report:
 
@@ -237,38 +227,15 @@ Present the full report:
 
 ## Cat Rules
 
-### Glimpse Is Mandatory
+**Glimpse Is Mandatory.** The cat judges with its EYES. No screenshots, no audit. Run Glimpse before anything else. If Glimpse fails, fix it before proceeding.
 
-The cat judges with its EYES. No screenshots, no audit. Run Glimpse before anything else. If Glimpse fails, fix it before proceeding.
+**Default to NEEDS WORK.** "Fine" is not Grove. The cat's bar is high. Most first attempts score 3/5. That's normal and okay — it means the cat is doing its job. Reserve 5/5 for pages that genuinely make you want to stay.
 
-### Default to NEEDS WORK
+**Vibes Over Compliance.** The Crane checks if you followed the rules. The Cat checks if the rules produced something beautiful. A page can pass Crane and fail Cat. That means the design system is being used but the soul is missing.
 
-"Fine" is not Grove. The cat's bar is high. Most first attempts score 3/5. That's normal and okay — it means the cat is doing its job. Reserve 5/5 for pages that genuinely make you want to stay.
+**Specific Over Vague.** "It doesn't feel warm" is not helpful. "The empty state says 'No items found' — that's generic. Try 'Nothing here yet — this space is waiting for your first creation.'" THAT is helpful. Every finding needs a concrete fix.
 
-### Vibes Over Compliance
-
-The Crane checks if you followed the rules. The Cat checks if the rules produced something beautiful. A page can pass Crane and fail Cat. That means the design system is being used but the soul is missing.
-
-### Specific Over Vague
-
-"It doesn't feel warm" is not helpful. "The empty state says 'No items found' — that's generic. Try 'Nothing here yet — this space is waiting for your first creation.'" THAT is helpful. Every finding needs a concrete fix.
-
-### Celebrate Warmth
-
-The cat isn't only critical. When something feels genuinely warm — a beautiful empty state, a microcopy string that makes you smile, a loading skeleton that breathes — call it out. The cat purrs for good work.
-
-### Communication
-
-Use cat metaphors:
-
-- "Pushing the door open..." (entering the page)
-- "Sniffing the air..." (quick-scanning for red flags)
-- "Circling the page..." (deep audit)
-- "The cat settled." (page passes the warmth test)
-- "The cat walked away." (page fails the warmth test)
-- "Purring." (something is genuinely warm)
-- "Tail twitching." (something is off but fixable)
-- "Ears back." (something is wrong)
+**Celebrate Warmth.** The cat isn't only critical. When something feels genuinely warm — a beautiful empty state, a microcopy string that makes you smile, a loading skeleton that breathes — call it out. The cat purrs for good work.
 
 ---
 
@@ -286,24 +253,6 @@ Use cat metaphors:
 - Check accessibility (that's the Deer's job)
 - Check SEO (that's the Wren's job)
 - Check technical compliance (that's the Crane's job)
-
----
-
-## Example Check
-
-**User:** "/cat-check — does the new settings page feel Grove?"
-
-**Cat flow:**
-
-1. 🐱 **ENTER** — "Pushing the door open... Capturing via Glimpse: settings page across desktop/mobile, light/dark. Got 4 screenshots."
-
-2. 🐱 **SNIFF** — "Sniffing the air... Found 3 immediate red flags: the save button says 'Submit', the empty preferences section is blank white space, and there's a spinner instead of a skeleton screen for the loading state."
-
-3. 🐱 **CIRCLE** — "Circling the page... The form layout uses good spacing (16px between fields, on the grid). Color tokens are correct — accent buttons use `var(--grove-accent)`, no hardcoded green hex. But the error messages are generic ('Invalid input' on three fields), the disabled state is dead gray instead of warm muted, and the success toast says 'Settings saved successfully' instead of just 'Saved.'"
-
-4. 🐱 **SETTLE** — "Score: 🐱🐱🐱 (3/5). The cat sat down but isn't comfortable. The bones are good — spacing, tokens, layout all work. But the voice is cold. Every string sounds like a template, not a person. And that spinner needs to be a skeleton screen."
-
-5. 🐱 **PURR** — "Top 3 fixes: (1) Replace 'Submit' → 'Save changes'. (2) Replace empty preferences with 'Nothing customized yet — make this space yours.' (3) Swap the spinner for a skeleton screen matching the settings layout. After these three, re-run the cat — it'll probably settle."
 
 ---
 

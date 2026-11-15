@@ -111,8 +111,6 @@ const pending = this.refreshInProgress.get(userId);
 if (pending) return pending;
 ```
 
-_If a refresh is already happening for this person, we wait for that one instead of starting another. One kitchen, one cook._
-
 ---
 
 ## Structural Framework
@@ -214,7 +212,6 @@ Or a poetic one-liner:
 ```markdown
 ---
 
-_Trust is built one verified request at a time._
 ```
 
 ---
@@ -265,8 +262,6 @@ export async function authGuard(request: Request): Promise<Response | null> {
   return null; // Continue to the page
 }
 ```
-
-_If you're not logged in, you go to login. If you are, you continue. Simple checkpoint logic._
 
 ---
 
@@ -420,13 +415,6 @@ Before finalizing any museum documentation:
 
 ---
 
-## Example: A Complete Exhibit
-
-````markdown
-# The Session Exhibit
-
-> How Grove remembers who you are.
-
 ## What You're Looking At
 
 When you log in, Grove needs to remember you. Not forever—just long
@@ -447,8 +435,6 @@ const SESSION_COOKIE = "grove_session";
 const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
 ```
 ````
-
-_Seven days. Long enough to be convenient, short enough to stay secure._
 
 When you log in, we generate a random ID and store it in this cookie.
 The ID itself means nothing—it's just a key to look you up.
@@ -484,8 +470,6 @@ if (session.expiresAt < Date.now() + SESSION_DURATION / 2) {
   await extendSession(session.id);
 }
 ```
-
-_Active visitors stay. Abandoned sessions expire._
 
 ---
 
