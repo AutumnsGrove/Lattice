@@ -44,7 +44,7 @@ _The frost cracks. A cautious face pokes out, blinking in the light..._
 
 ```bash
 # Project identity
-gf --agent search "package.json"        # Dependencies, scripts, package manager
+rg "package.json"        # Dependencies, scripts, package manager
 # Read: package.json, tsconfig.json, svelte.config.js, wrangler.toml
 
 # Agent context
@@ -54,7 +54,7 @@ gf --agent search "package.json"        # Dependencies, scripts, package manager
 
 # History
 gw context                              # Branch, recent changes, state
-gf --agent recent 3                     # Files changed in last 3 days
+git log --oneline -10 3                     # Files changed in last 3 days
 ```
 
 **What to notice:** Framework, runtime, database, package manager, test framework, monorepo structure, deployment target, auth system, styling approach.

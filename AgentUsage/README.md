@@ -53,11 +53,11 @@ skill: "grove-ui-design"
 | [ci_cd_patterns.md](ci_cd_patterns.md)         | GitHub Actions, `gw ci`, pnpm workspaces  | CI/CD pipelines for Lattice         |
 | [testing_javascript.md](testing_javascript.md) | Vitest/Jest for JS/TS                     | Writing JavaScript/TypeScript tests |
 | [testing_python.md](testing_python.md)         | pytest for Python                         | Writing Python tests (tools)        |
-| [testing_go.md](testing_go.md)                 | Go testing with built-in framework        | Writing Go tests (gf, tools)        |
+| [testing_go.md](testing_go.md)                 | Go testing with built-in framework        | Writing Go tests (tools)            |
 | [testing_rust.md](testing_rust.md)             | Rust testing with cargo test              | Writing Rust tests                  |
 | [npm_publish.md](npm_publish.md)               | Publishing `@autumnsgrove/lattice` to npm | npm package releases                |
 | [code_style_guide.md](code_style_guide.md)     | General code style principles             | Writing clean, maintainable code    |
-| [rich_formatting.md](rich_formatting.md)       | Terminal output with Rich library         | Building CLI tools (gw, gf)         |
+| [rich_formatting.md](rich_formatting.md)       | Terminal output with Rich library         | Building CLI tools (gw)             |
 
 ### Design & Documentation
 

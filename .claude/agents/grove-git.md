@@ -26,9 +26,9 @@ git diff main...HEAD             # Compare current branch to main
 git log --oneline -20            # Recent commits
 git log --stat -5                # Last 5 with file stats
 
-# Grove Find (gf) for structured diffs
-gf diff-summary                  # Structured diff with per-file stats and categories
-gf --agent changed               # Files changed on current branch
+# Structured diffs
+git diff --stat main...HEAD      # Per-file stats against main
+git diff --name-status main...HEAD  # Files changed on current branch
 ```
 
 # Conventional Commit Knowledge
@@ -82,7 +82,7 @@ Branch: [current] → [target]
 
 # Execution Strategy
 
-1. **Run read-only git commands** via `git` or `gf`
+1. **Run read-only git commands** via `git`
 2. **Categorize changes** by package and impact
 3. **Identify patterns** — is this a feature, fix, refactor?
 4. **Assess PR readiness** if requested

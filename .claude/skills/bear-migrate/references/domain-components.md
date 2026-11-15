@@ -26,21 +26,21 @@ The "backup" for component migrations is the git branch. If the migration goes s
 
 ```bash
 # Find every file that imports the component
-gf grep "import.*ComponentName"
+rg "import.*ComponentName"
 
 # Find template usage (Svelte)
-gf grep "<ComponentName"
+rg "<ComponentName"
 
 # Find re-exports through barrels
-gf grep "export.*ComponentName"
+rg "export.*ComponentName"
 ```
 
 ### Map the Prop Surface
 
 ```bash
 # Find all props being passed
-gf grep "ComponentName.*prop="
-gf grep "<ComponentName" --context 5
+rg "ComponentName.*prop="
+rg "<ComponentName" --context 5
 ```
 
 ### Categorize Usages
@@ -85,7 +85,7 @@ import GlassCard from "$lib/ui/components/ui/GlassCard.svelte";
 <GlassCard glass="outlined" title="Settings">
 ```
 
-**Strategy:** Use `gf grep` to find all usages, build a mapping, apply consistently.
+**Strategy:** Use `rg` to find all usages, build a mapping, apply consistently.
 
 ### Component Replacement
 
@@ -148,7 +148,7 @@ For UI component migrations, always visually inspect a sample:
 
 ```bash
 # After migration, verify no old imports remain
-gf grep "import.*OldComponentName"
+rg "import.*OldComponentName"
 # Should return 0 results
 ```
 

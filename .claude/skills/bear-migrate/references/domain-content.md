@@ -25,16 +25,16 @@ For icon/asset migrations, the git branch is your backup. For document format mi
 
 ```bash
 # Find all icon imports from the old library
-gf grep "from \"@lucide/svelte\""
-gf grep "from \"@iconify"
-gf grep "from \"svelte-icons"
+rg "from \"@lucide/svelte\""
+rg "from \"@iconify"
+rg "from \"svelte-icons"
 
 # Count unique icons used
-gf grep "import.*from \"@lucide/svelte\"" | sort -u
+rg "import.*from \"@lucide/svelte\"" | sort -u
 
 # Find dynamic icon usage (harder to migrate automatically)
-gf grep "Icon.*name={"
-gf grep "\[iconName\]"
+rg "Icon.*name={"
+rg "\[iconName\]"
 ```
 
 Build a mapping table:
@@ -49,8 +49,8 @@ Build a mapping table:
 
 ```bash
 # Find all references to the old asset path
-gf grep "static/icons/"
-gf grep "/images/old-path/"
+rg "static/icons/"
+rg "/images/old-path/"
 
 # Inventory the actual files
 ls -la static/icons/ | wc -l
@@ -60,15 +60,15 @@ ls -la static/icons/ | wc -l
 
 ```bash
 # Find all files in the old format
-gf glob "**/*.mdx"
-gf glob "docs/**/*.md"
+rg --files -g "**/*.mdx"
+rg --files -g "docs/**/*.md"
 
 # Check frontmatter structure
-gf grep "^---" --include="*.md" | head -20
+rg "^---" --include="*.md" | head -20
 
 # Find format-specific syntax that needs changing
-gf grep "import.*from" --include="*.mdx"  # MDX imports
-gf grep "{{.*}}" --include="*.md"          # Template syntax
+rg "import.*from" --include="*.mdx"  # MDX imports
+rg "{{.*}}" --include="*.md"          # Template syntax
 ```
 
 ---
@@ -114,8 +114,8 @@ const ICON_MAP: Record<string, string> = {
 
 ```bash
 # After moving files to new locations, update all references
-# Use gf grep to find references, then update each file
-gf grep "static/old-icons/" --files-with-matches
+# Use rg to find references, then update each file
+rg "static/old-icons/" --files-with-matches
 ```
 
 ### Document Frontmatter Migration
@@ -154,7 +154,7 @@ done
 
 ```bash
 # Verify no old icon imports remain
-gf grep "from \"@lucide/svelte\""
+rg "from \"@lucide/svelte\""
 # Should return 0 (or only intentionally kept usages)
 
 # Verify new icons resolve
@@ -167,7 +167,7 @@ Visual spot check: navigate to 3-5 pages and confirm icons render correctly at t
 
 ```bash
 # Verify no broken references to old paths
-gf grep "old-path/"
+rg "old-path/"
 # Should return 0
 
 # Verify new files exist
@@ -180,7 +180,7 @@ ls static/new-path/ | wc -l
 ```bash
 # Verify all documents parse in new format
 # (specific to your tooling — markdown parser, frontmatter validator, etc.)
-gf glob "**/*.md" | wc -l
+rg --files -g "**/*.md" | wc -l
 # Should match count from GATHER
 ```
 

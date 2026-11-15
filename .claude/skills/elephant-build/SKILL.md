@@ -55,7 +55,7 @@ _The elephant collects stones and branches, preparing the foundation..._
 Collect everything needed before building begins.
 
 - Check dependencies — verify required packages exist, install what's missing
-- Research existing patterns with `gf --agent usage "ServiceName"` and `gf --agent func "functionName"`
+- Research existing patterns with `rg -wn "ServiceName"` and `rg -n "(function|const|fn) ServiceName"`
 - Examine similar implementations to understand conventions before diverging
 - Set up environment variables in `.env.local` and `.env.example`
 

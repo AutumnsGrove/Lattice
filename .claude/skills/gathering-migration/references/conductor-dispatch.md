@@ -30,7 +30,7 @@ Scout the codebase to map the territory for this migration:
 
 ## Constraints
 - READ-ONLY. Do not create or modify any files.
-- Use `gf` commands for all codebase search.
+- Use semantic search for discovery, `rg`/`find`/`glob` for exact matches.
 - Be EXHAUSTIVE — a missed reference means a broken migration.
 - Count everything. The Bear will use your counts to verify completeness.
 
@@ -89,7 +89,7 @@ Use the `{domain_guide}` reference from your skill for domain-specific patterns.
 - Use Signpost error codes if adding/modifying error paths
 - Use Rootwork utilities at trust boundaries
 - Engine-first: import from @autumnsgrove/lattice before creating utilities
-- Use `gw` for all git operations, `gf` for codebase search
+- Use `gw` for all git operations; semantic search for discovery, `rg`/`find`/`glob` for exact matches
 
 ## Constraints
 - You MUST read your skill file and domain guide first

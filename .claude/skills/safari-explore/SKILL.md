@@ -48,9 +48,9 @@ What are you reviewing? Name every item:
 
 ```bash
 # Examples — adapt to what you're actually reviewing:
-gf --agent search "curios"           # Find all curio-related files
+rg "curios"           # Find all curio-related files
 ls apps/ libs/ services/ workers/   # All packages in the monorepo
-gf --agent search "admin page"       # All admin pages
+rg "admin page"       # All admin pages
 ```
 
 **Build the Route Map:**
@@ -178,9 +178,9 @@ At each stop, read the actual code and document what exists:
 **Use Grove tools to investigate:**
 
 ```bash
-gf --agent search "CurioHitcounter"     # Find related files
-gf --agent usage "CurioHitcounter"       # Where is it used?
-gf --agent func "hitcounter"             # Function definitions
+rg "CurioHitcounter"     # Find related files
+rg -wn "CurioHitcounter"       # Where is it used?
+rg -n "(function|const|fn) CurioHitcounter"  # Function definitions
 ```
 
 **Use Glimpse to see the rendered state:**

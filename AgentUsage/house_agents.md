@@ -11,7 +11,7 @@
 | Layer             | Location            | Scope                                                    | Examples                                                                    |
 | ----------------- | ------------------- | -------------------------------------------------------- | --------------------------------------------------------------------------- |
 | **User-level**    | `~/.claude/agents/` | Generic, portable across all projects                    | house-bash, house-git, house-research, haiku-coder, web-research-specialist |
-| **Project-level** | `.claude/agents/`   | Grove-specific, knows gw/gf/monorepo/Lattice conventions | grove-runner, grove-git, grove-coder, grove-scout, grove-verifier           |
+| **Project-level** | `.claude/agents/`   | Grove-specific, knows gw/monorepo/Lattice conventions | grove-runner, grove-git, grove-coder, grove-verifier           |
 
 ### Observer / Actor / Executor Split
 
@@ -103,7 +103,7 @@ Web research and content extraction. Searches the web, fetches URLs, returns con
 
 ## Grove-Specific Agents (.claude/agents/)
 
-These agents know Grove's monorepo, gw/gf commands, Lattice conventions, Signpost errors, and engine-first patterns.
+These agents know Grove's monorepo, `gw` commands, Lattice conventions, Signpost errors, and engine-first patterns.
 
 ### grove-runner
 
@@ -123,13 +123,13 @@ CI/Build/Test executor using `gw` commands. The Grove-specific replacement for h
 
 **Role:** Observer | **Model:** Haiku | **Tools:** Bash, Read, Grep
 
-Git analyst using `gw git` and `gf` commands. Understands conventional commits, monorepo package boundaries, and PR readiness.
+Git analyst using `gw git` and raw `git` commands. Understands conventional commits, monorepo package boundaries, and PR readiness.
 
 **Use when:**
 
 - Analyzing changes before commit/PR
 - `gw git pr-prep` for PR readiness
-- `gf diff-summary` for structured diffs
+- `git diff --stat main...HEAD` for structured diffs
 
 **Cannot:** Run git write commands. Edit files. Fix issues.
 
@@ -146,20 +146,6 @@ Grove-aware code patcher (0-250 lines). Knows engine-first imports, Signpost err
 - Implementing features with Signpost error handling
 
 **Cannot:** Run Bash commands. Execute tests. Skip/disable tests.
-
-### grove-scout
-
-**Role:** Observer | **Model:** Haiku | **Tools:** Bash, Read, Grep, Glob
-
-Codebase explorer using `gf` commands. Maps the monorepo, traces imports, finds usage, and analyzes impact.
-
-**Use when:**
-
-- `gf impact` to understand change impact
-- `gf --agent usage` to find where something is used
-- Exploring unfamiliar areas of the monorepo
-
-**Cannot:** Create/edit/delete files. Run build/test commands.
 
 ### grove-verifier
 

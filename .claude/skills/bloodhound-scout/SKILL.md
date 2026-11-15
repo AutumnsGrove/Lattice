@@ -48,15 +48,15 @@ What scent do we have?
 
 **Search Strategy Selection:**
 
-Grove Find (`gf`) is the bloodhound's primary nose -- fast, agent-friendly, purpose-built:
+Discovery starts with semantic search; `rg` handles exact names and literals:
 
 ```bash
-# PRIMARY — Grove Find (the bloodhound's best tools)
-gf --agent search "functionName"   # Pick up the scent across the codebase
-gf --agent func "getUserById"      # Track down a function's definition
-gf --agent usage "UserProfile"     # Follow every trail this name leaves
-gf --agent class "PaymentService"  # Find where a class/component lives
-gf --agent impact "src/lib/auth.ts" # What trembles when this file changes?
+# PRIMARY — semantic search, then rg
+rg "functionName"   # Pick up the scent across the codebase
+rg -n "(function|const|fn) getUserById"  # Track down a function's definition
+rg -wn "UserProfile"     # Follow every trail this name leaves
+rg -n "class PaymentService"  # Find where a class/component lives
+rg -ln "from .*auth"     # What trembles when this file changes?
 
 # Git context — orient before tracking
 gw context                         # Where are we? Branch, recent changes, state
@@ -115,10 +115,10 @@ mysql.execute()
 **Reference Finding:**
 
 ```bash
-# Grove Find — the bloodhound's fastest nose
-gf --agent usage "getUserById"      # Who calls this function?
-gf --agent impact "src/lib/user.ts" # What depends on this file?
-gf --agent search "UserProfile"     # Where is this type used?
+# Discovery — semantic search first, rg for exact names
+rg -wn "getUserById"      # Who calls this function?
+rg -ln "from .*user"     # What depends on this file?
+rg "UserProfile"     # Where is this type used?
 
 # Finer-grained tracking (fallback)
 grep -r "from.*user" src/ --include="*.ts" -l

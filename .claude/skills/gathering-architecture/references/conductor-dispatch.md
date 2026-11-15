@@ -23,7 +23,7 @@ If it has references/, read those too. Follow your skill's workflow exactly.
 ## Constraints
 - You MUST read your skill file first — it defines your workflow
 - {animal_specific_constraints}
-- Use `gw` for all git operations, `gf` for codebase search
+- Use `gw` for all git operations; semantic search for discovery, `rg`/`find`/`glob` for exact matches
 - Infrastructure: prefer Server SDK abstractions (GroveDatabase, GroveStorage, GroveKV)
 - Boundaries: use Rootwork utilities (parseFormData, safeJsonParse) at trust boundaries
 
@@ -56,7 +56,7 @@ Design the architecture for this system:
 - Prefer simplicity (modular monolith > microservices for small teams)
 - Use Server SDK infrastructure abstractions for portability
 - Consider Cloudflare-first: Workers, D1 (SQLite), KV, R2
-- Use `gf` to explore existing architecture patterns in the codebase
+- Use semantic search to explore existing architecture patterns in the codebase
 
 ## Output Format
 ARCHITECTURE OVERVIEW:
@@ -176,7 +176,7 @@ A specification document written to an appropriate file path with:
 - Use ASCII art for diagrams (not external tools)
 - Every API endpoint must specify its error codes
 - Database schema must include indexes and constraints
-- Use `gf` to check existing spec formats in docs/specs/
+- `rg --files docs/specs` to check existing spec formats
 
 ## Output Format
 SPECIFICATION REPORT:
@@ -231,7 +231,7 @@ Read the specification file at that path. It is your single source of truth.
 - Build ONLY what the specification demands
 - Follow the implementation checklist order from the spec
 - Create test stubs but do NOT write full test suites
-- Use `gw` for all git operations, `gf` for codebase search
+- Use `gw` for all git operations; semantic search for discovery, `rg`/`find`/`glob` for exact matches
 
 ## Output Format
 BUILD MANIFEST:

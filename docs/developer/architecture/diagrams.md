@@ -74,10 +74,9 @@ flowchart TB
         MIGRATOR["post-migrator<br/>Data migration"]
     end
 
-    subgraph tools["CLI Tools — Python/UV"]
+    subgraph tools["CLI Tools"]
         GW["gw<br/>Grove Wrap CLI"]
-        GF["gf<br/>Codebase search"]
-        GLIMPSE["glimpse<br/>Monitoring"]
+        GLIMPSE["glimpse<br/>Visual verification"]
     end
 
     ENGINE --> HEARTWOOD

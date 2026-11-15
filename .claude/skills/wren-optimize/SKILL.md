@@ -40,14 +40,14 @@ Survey the territory — what pages exist and what does the site look like to a 
 
 ```bash
 # Find all routes/pages in the project
-gf --agent search "+page" --glob "*.svelte"
-gf --agent search "+page" --glob "*.ts"
+rg "+page" --glob "*.svelte"
+rg "+page" --glob "*.ts"
 
 # Check for existing SEO infrastructure
-gf --agent search "meta" --glob "*.svelte"
-gf --agent search "og:" --glob "*.svelte"
-gf --agent search "sitemap"
-gf --agent search "robots.txt"
+rg "meta" --glob "*.svelte"
+rg "og:" --glob "*.svelte"
+rg "sitemap"
+rg "robots.txt"
 ```
 
 **What to map:**

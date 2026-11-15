@@ -63,13 +63,11 @@ _The mole begins to dig. Not frantically — deliberately..._
 Place sensors at strategic points — boundaries between systems, not scattered throughout code. Use `[MOLE:LOCATION]` labels so you can find and remove them later.
 
 ```bash
-# Find the entry point
-gf --agent func "functionName"
-gf --agent search "POST /api/endpoint"
+rg "POST /api/endpoint"
 
 # Trace imports and impact
-gf --agent usage "ServiceName"
-gf --agent impact "src/lib/server/services/affected-file.ts"
+rg -wn "ServiceName"
+rg -ln "from .*affected-file"
 ```
 
 For Grove-specific debugging patterns (routes, D1, KV, auth, build), see `references/grove-debugging-patterns.md`.
@@ -141,15 +139,15 @@ _The mole packs the earth behind it, sealing the tunnel forever..._
 
 ```bash
 # If schema/query mismatch, check ALL queries
-gf --agent search "SELECT.*content.*FROM posts"
+rg "SELECT.*content.*FROM posts"
 # If missing tenant scope, check ALL tenant queries
-gf --agent search "FROM posts WHERE"  # Missing tenant_id?
+rg "FROM posts WHERE"  # Missing tenant_id?
 ```
 
 4. **Clean up** — Remove ALL `[MOLE:*]` debug logging. The mole seals its tunnels.
 
 ```bash
-gf --agent search "MOLE:"
+rg "MOLE:"
 ```
 
 **Output:** Sealed tunnel. Regression test. Root cause documented. Class-of-bug checked. Debug instrumentation removed.

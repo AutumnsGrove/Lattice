@@ -1943,49 +1943,6 @@ gw mcp serve
 
 ---
 
-## Integration with grove-find
-
-> **Note:** grove-find has been rewritten as a Python CLI (`tools/grove-find/`).
-> The bash version (`grove-find.sh`) is archived at `archive/grove-find-bash/`.
-> Use `uv run --project tools/grove-find gf --agent <command>` instead.
-
-The `gw` CLI integrates with the grove-find toolkit. These shell aliases are available locally:
-
-```bash
-# Shell aliases (local dev only — not available in remote/web sessions)
-
-# ─── Cloudflare Shortcuts ───
-gwd                    # Alias for: gw db
-gwq "sql"              # Quick query: gw db query "sql"
-gwt                    # Tables: gw db tables
-gwc tenant             # Cache purge: gw cache purge --tenant
-gws                    # Status: gw status
-
-# ─── Git Shortcuts ───
-gwgs                   # Git status: gw git status
-gwgl                   # Git log: gw git log
-gwgd                   # Git diff: gw git diff
-gwgc "msg"             # Git commit: gw git commit --write -m "msg"
-gwgp                   # Git push: gw git push --write
-gwgsave                # Quick save: gw git save --write
-gwgsync                # Sync with main: gw git sync --write
-
-# ─── GitHub Shortcuts ───
-gwpr                   # PR list: gw gh pr list
-gwprc                  # PR create: gw gh pr create --write
-gwprv 123              # PR view: gw gh pr view 123
-gwiss                  # Issue list: gw gh issue list
-gwissv 348             # Issue view: gw gh issue view 348
-
-# ─── Dev Shortcuts ───
-gwdev                  # Start dev: gw dev
-gwtest                 # Run tests: gw test
-gwbuild                # Build: gw build
-gwci                   # Run CI locally: gw ci
-```
-
----
-
 ## Directory Structure
 
 ```
@@ -2169,7 +2126,6 @@ tools/grove-wrap/
 
 - [ ] MCP server implementation
 - [ ] Agent mode safety restrictions
-- [ ] grove-find Python CLI integration (`gwq`, `gwc`, `gws`, etc.)
 - [ ] Claude Code settings documentation
 - [ ] Full test coverage
 
@@ -2356,7 +2312,6 @@ tools/grove-wrap/
 - **Issue #348**: Database safety layer integration (parent issue)
 - **Issue #527**: Cache management admin tool (CLI implementation)
 - **database-safety.ts**: TypeScript safety layer (pattern to port)
-- **tools/grove-find/**: Python CLI search toolkit (integration target)
 
 ---
 

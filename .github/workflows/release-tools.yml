@@ -1,16 +1,15 @@
 ---
 name: Release Grove Tools
 
-# Build and release gw/gf binaries.
+# Build and release gw binaries.
 # Triggered by:
-#   1. Tag push (gw/v*, gf/v*) — manual via `make release TAG=v2.0.0`
+#   1. Tag push (gw/v*) — manual via `make release TAG=v2.0.0`
 #   2. workflow_call — automatic from auto-release-tools.yml
 
 on:
   push:
     tags:
       - "gw/v*"
-      - "gf/v*"
   workflow_call:
     inputs:
       tag:
@@ -53,10 +52,6 @@ jobs:
             gw)
               DIR="tools/grove-wrap-go"
               MOD="github.com/AutumnsGrove/Lattice/tools/grove-wrap-go"
-              ;;
-            gf)
-              DIR="tools/grove-find-go"
-              MOD="github.com/AutumnsGrove/Lattice/tools/grove-find-go"
               ;;
             *)
               echo "Unknown tool: $TOOL"
@@ -203,10 +198,6 @@ jobs:
 
           TOOL_NAME="gw (Grove Wrap)"
           DIR="grove-wrap-go"
-          if [ "$TOOL" = "gf" ]; then
-            TOOL_NAME="gf (Grove Find)"
-            DIR="grove-find-go"
-          fi
 
           # Extract changelog from annotated tag body
           # (populated by gw publish)
