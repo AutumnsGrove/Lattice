@@ -52,8 +52,9 @@ describe("TenantDO", () => {
 		it("should return cached config when available and fresh", async () => {
 			const { doInstance, sql } = await createTenantDO(sampleConfig);
 
-			// refreshConfig: queryAll for cached config (still fresh)
-			sql._pushResults([{ value: JSON.stringify(sampleConfig) }]);
+			// refreshConfig: queryAll for cached config (still fresh — real rows always
+			// carry updated_at, so the fixture must too)
+			sql._pushResults([{ value: JSON.stringify(sampleConfig), updated_at: Date.now() }]);
 
 			const res = await doInstance.fetch(doRequest("/config"));
 			const body = (await res.json()) as any;
@@ -101,6 +102,58 @@ describe("TenantDO", () => {
 
 			expect(res.status).toBe(200);
 			expect(body.subdomain).toBe("autumn");
+		});
+
+		it("should clear the cache and 404 when the tenant row is deleted from D1", async () => {
+			const { doInstance, sql, db } = await createTenantDO(sampleConfig);
+
+			// Fresh instance: memory starts empty and is rehydrated from DO SQLite by
+			// loadState(), then the first request is past the in-memory window — so
+			// refreshConfig runs, and the cached row is older than the SQLite TTL.
+			// That is the shape of a warm DO meeting a tenant deleted from D1.
+			const staleAt = Date.now() - 2 * 60 * 60 * 1000;
+			sql._pushResults([{ value: JSON.stringify(sampleConfig), updated_at: staleAt }]);
+			db._pushResult({ results: [] });
+
+			const res = await doInstance.fetch(
+				doRequest("/config", { headers: { "X-Tenant-Subdomain": "autumn" } }),
+			);
+
+			expect(res.status).toBe(404);
+
+			// The cache row must be gone, not merely ignored — otherwise the next
+			// memory eviction rehydrates the deleted tenant and the site comes back
+			const deleted = sql._calls.some(
+				(c) => c.query.includes("DELETE FROM config") && c.query.includes("tenant_config"),
+			);
+			expect(deleted).toBe(true);
+		});
+
+		it("should keep serving a tenant that D1 still returns", async () => {
+			const { doInstance, sql, db } = await createTenantDO(null);
+
+			// No cache, so the first request goes to D1 directly
+			sql._pushResults([]);
+			db._pushResult({
+				results: [
+					{
+						id: "tenant-uuid-1",
+						subdomain: "autumn",
+						displayName: "Autumn's Blog",
+						theme: null,
+						tier: "seedling",
+						ownerId: "user-1",
+					},
+				],
+			});
+
+			const res = await doInstance.fetch(
+				doRequest("/config", { headers: { "X-Tenant-Subdomain": "autumn" } }),
+			);
+			const body = (await res.json()) as any;
+
+			expect(res.status).toBe(200);
+			expect(body.id).toBe("tenant-uuid-1");
 		});
 	});
 

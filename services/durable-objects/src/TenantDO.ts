@@ -329,7 +329,16 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 			);
 
 			this.configLoadedAt = Date.now();
+			return;
 		}
+
+		// A tenant that is no longer in D1 is not a tenant. Clear both cache layers,
+		// or a deleted (or suspended) site keeps serving its cached config forever —
+		// the rehydration in loadState() means memory eviction does not save us.
+		this.log.info(`Tenant ${subdomain} is no longer active in D1 — clearing cached config`);
+		this.state_data = null;
+		this.configLoadedAt = 0;
+		this.sql.exec("DELETE FROM config WHERE key = 'tenant_config'");
 	}
 
 	/**

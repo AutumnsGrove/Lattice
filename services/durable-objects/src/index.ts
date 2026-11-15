@@ -156,6 +156,53 @@ async function handleGetTenantDrafts(
 	});
 }
 
+/**
+ * POST /tenant/flush/:subdomain — operator-only cache eviction for one tenant.
+ *
+ * This is the 2am lever. A tenant that is deleted or suspended in D1 keeps
+ * serving its cached config from TenantDO (memory and DO SQLite, 1h TTL), so a
+ * removal performed with SQL or wrangler is cosmetic until the DO is told. The
+ * alternative is an authenticated platform-admin browser session, which is
+ * exactly what nobody has at 2am.
+ *
+ * The response distinguishes the three cases the operator actually cares about:
+ *   tenantExists: false          — no D1 row; the site is now dark (404)
+ *   tenantExists: true, inactive — suspended; still dark
+ *   tenantExists: true, active   — live again; this was a cache refresh, not a takedown
+ */
+async function handleTenantFlush(request: Request, env: Env, subdomain: string): Promise<Response> {
+	const authError = await checkOpsAuth(request, env);
+	if (authError) return authError;
+
+	if (!subdomain) {
+		return Response.json({ error: "bad_request", message: "Missing subdomain" }, { status: 400 });
+	}
+
+	const id = env.TENANTS.idFromName(`tenant:${subdomain}`);
+	const stub = env.TENANTS.get(id);
+	const res = await stub.fetch("https://tenant.internal/config/flush", {
+		method: "POST",
+		headers: { "X-Tenant-Subdomain": subdomain },
+	});
+
+	// Ask D1 directly rather than inferring from the flush alone, so the operator
+	// gets one unambiguous answer instead of a "flushed: true" that means nothing.
+	const row = await env.DB.prepare("SELECT active FROM tenants WHERE subdomain = ?")
+		.bind(subdomain)
+		.first<{ active: number }>();
+
+	return Response.json(
+		{
+			subdomain,
+			flushed: res.ok,
+			tenantExists: !!row,
+			tenantActive: row ? row.active === 1 : false,
+			config: await res.json().catch(() => null),
+		},
+		{ status: res.ok ? 200 : res.status },
+	);
+}
+
 export default {
 	/** Daily gallery_images reconcile so storage usage and quota never depend on a manual sync. */
 	async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
@@ -184,6 +231,11 @@ export default {
 
 		if (url.pathname === "/threshold/reset" && request.method === "POST") {
 			return handleThresholdReset(request, env);
+		}
+
+		const flushMatch = url.pathname.match(/^\/tenant\/flush\/([^/]+)$/);
+		if (flushMatch && request.method === "POST") {
+			return handleTenantFlush(request, env, decodeURIComponent(flushMatch[1]));
 		}
 
 		const draftsMatch = url.pathname.match(/^\/tenant-drafts\/([^/]+)(?:\/([^/]+))?$/);

@@ -504,6 +504,63 @@ pnpm test
 
 ---
 
+## Incident Type: Spam Tenant / Link Farm
+
+An account created to place outbound links or programmatic content on a fresh `*.grove.place` subdomain. See #1596 for the history and the observed operator signature.
+
+### Detection
+
+- A signup that publishes within minutes, in several languages, with zero engagement
+- `pulse_events` for the tenant shows only publish, then logout
+- An email domain that is either an agent mailbox provider (`mail.grokbot.com`) or the product being promoted
+- Googlebot crawling the subdomain hours after publish
+
+### Immediate Actions (0-5 minutes)
+
+```bash
+# 1. Take the site down, reversibly. `active = 0` is what every tenant lookup
+#    filters on (hooks.server.ts: WHERE subdomain = ? AND active = 1).
+#    Prefer `gw tenant suspend <subdomain> --write` once #1680 lands.
+npx wrangler d1 execute grove-engine-db --remote \
+  --command "UPDATE tenants SET active = 0, updated_at = unixepoch() WHERE subdomain = '<subdomain>'"
+
+# 2. Evict the TenantDO. Without this the suspension is cosmetic: the DO serves
+#    its cached config for up to an hour, and rehydrates it from its own SQLite
+#    after memory eviction. See #1677.
+gw secret exec OPS_ADMIN_KEY --write -- bash -c \
+  'curl -sS -X POST -H "Authorization: Bearer $OPS_ADMIN_KEY" \
+   https://<durable-objects-worker>/tenant/flush/<subdomain>'
+
+# 3. Confirm it is actually gone — do not trust the column change alone
+curl -s -o /dev/null -w '%{http_code}\n' https://<subdomain>.grove.place/
+# expect 404; a 200 means the flush did not take
+
+# 4. Preserve evidence before anything is deleted: the posts, the outbound
+#    domains, the sibling accounts. Removal destroys the evidence (#1684).
+```
+
+The `/tenant/flush/:subdomain` response tells you which of three states you are in:
+
+| response | meaning |
+|---|---|
+| `tenantExists: false` | no D1 row — deleted; the site is now dark |
+| `tenantExists: true`, `tenantActive: false` | suspended; dark, and reversible |
+| `tenantExists: true`, `tenantActive: true` | still live — you flushed a cache, not a takedown |
+
+### Severity Assessment
+
+- **P2 (MEDIUM)** if: one tenant, free tier, no evidence of crawl
+- **P1 (HIGH)** if: crawled and indexed, or the same operator has several tenants
+- **P1 (HIGH)** if: a paid or comped tenant is involved (check `platform_billing`)
+
+### Escalation
+
+Suspension is the reversible first move. Permanent removal is `removeTenant()` (#1596 §B) — never hand-written SQL, which took 61 statements against engine, 44 against curios and 14 against groveauth on 2026-11-16. Until that lands, `gw tenant delete` (#1680) does not exist and the sweep is manual, with a pre-deletion snapshot.
+
+After acting: block the identity domain so the same operator cannot re-sign-up (#1681), and record the verdict so the scorer learns from it (#1684).
+
+---
+
 ## Incident Type: Privilege Escalation
 
 ### Detection
