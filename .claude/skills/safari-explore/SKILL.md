@@ -429,7 +429,7 @@ Use safari metaphors throughout:
 **During the Safari:**
 
 - `bee-collect` — If observations reveal new issues to capture
-- `grove-documentation` — For writing the journal in Grove voice
+- `owl-archive` — For writing the journal in Grove voice
 
 **After the Safari:**
 

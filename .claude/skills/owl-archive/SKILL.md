@@ -120,9 +120,10 @@ Share the knowledge effectively.
 
 | Phase | Reference | Load When |
 |-------|-----------|-----------|
-| HUNT | `references/grove-voice-guide.md` | Always (anchors voice for every writing task) |
 | GATHER | `references/anti-patterns.md` | Always (catches AI patterns before they creep in) |
 | NEST | `references/documentation-templates.md` | When building structure for specific doc types |
+| HUNT    | `references/voice.md`              | Always — anchors voice for every writing task |
+| WRITE   | `references/voice.md`              | Writing or reviewing prose in the archive |
 
 ---
 

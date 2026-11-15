@@ -1,7 +1,6 @@
----
-name: grove-spec-writing
-description: Write and validate Grove technical specifications with consistent formatting, ASCII art headers, diagrams, and the Grove voice. Use when creating new specs, reviewing existing specs for completeness, or standardizing spec formatting.
----
+# Swan Design: Spec Format
+
+> Loaded by swan-design when structuring a spec. See SKILL.md for the design process.
 
 # Grove Spec Writing
 
@@ -417,16 +416,16 @@ A porch is where you sit and talk. You come up the steps, have a seat, and the g
 
 ### After Writing
 
-4. **grove-spec-writing** (this skill) — Run validation checklist
+4. **This checklist** — Run it before the spec is considered done
 5. Review with fresh eyes: Does it feel like a storybook entry?
 
 ### When to Use museum-documentation Instead
 
-This skill (grove-spec-writing) is for **internal technical specifications**: architecture decisions, system design, implementation plans. Documentation for developers.
+This guide is for **internal technical specifications**: architecture decisions, system design, implementation plans. Documentation for developers.
 
 Use **museum-documentation** when writing for **Wanderers who want to understand**:
 
-| Use grove-spec-writing | Use museum-documentation |
+| Use this guide | Use museum-documentation |
 |-----------------------|-------------------------|
 | Technical specifications | "How it works" for curious visitors |
 | Architecture decisions | Codebase guided tours |

@@ -19,7 +19,7 @@ The firefly drifts through the dark, finding what glows. Most of your best work 
 
 **IMPORTANT:** The firefly does NOT post anything on your behalf. It drafts. You decide. Human in the loop, always.
 
-**Pair with:** `bee-collect` for turning discoveries into issues, `owl-archive` for documentation, `grove-documentation` for longer-form writing
+**Pair with:** `bee-collect` for turning discoveries into issues, `owl-archive` for documentation, `owl-archive` for longer-form writing
 
 ---
 
@@ -296,7 +296,7 @@ Use glow metaphors:
 **After Glowing:**
 - `bee-collect` — If the review surfaces work that needs tracking
 - `owl-archive` — If a story deserves full documentation
-- `grove-documentation` — For longer-form writing in Grove voice
+- `owl-archive` — For longer-form writing in Grove voice
 
 **Natural Pairings:**
 - `chameleon-adapt` — If the post needs visual assets (screenshots, before/after)

@@ -235,15 +235,15 @@ When the `chameleon-adapt` skill encounters something that needs naming:
 
 This keeps the naming intentional rather than rushed.
 
-### grove-documentation
+### owl-archive
 
-After finding the right name, you'll need to write its description. Invoke the **grove-documentation** skill when:
+After finding the right name, you'll need to write its description. Invoke the **owl-archive** skill when:
 
 1. Writing the entry for `docs/grove-naming.md`
 2. Crafting the tagline
 3. Writing the poetic one-liner
 
-The naming document entries should follow Grove's voice: warm, direct, avoiding AI patterns. The `grove-documentation` skill has the full guidelines.
+The naming document entries should follow Grove's voice: warm, direct, avoiding AI patterns. The `owl-archive` skill has the full guidelines.
 
 ---
 

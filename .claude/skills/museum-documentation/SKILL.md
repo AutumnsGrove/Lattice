@@ -23,8 +23,8 @@ This is Grove's elegant documentation style—meant for Wanderers of any experie
 
 **Not for:**
 
-- API references (use grove-documentation)
-- Technical specs (use grove-spec-writing)
+- API references (use owl-archive)
+- Technical specs (use swan-design)
 - Quick-reference guides
 
 ---
@@ -383,7 +383,7 @@ Before finalizing any museum documentation:
 - [ ] Code blocks with explanatory context
 - [ ] No walls of text longer than 4-5 paragraphs
 
-### Voice (refer to grove-documentation)
+### Voice (refer to owl-archive)
 
 - [ ] No em-dashes
 - [ ] No corporate jargon
@@ -405,12 +405,12 @@ Before finalizing any museum documentation:
 ### Before Writing
 
 1. **walking-through-the-grove** — If the exhibit needs a name
-2. **grove-documentation** — Review voice guidelines, especially the "avoid" lists
+2. **owl-archive** — Review voice guidelines, especially the "avoid" lists
 
 ### While Writing
 
-3. **grove-spec-writing** — Borrow ASCII art techniques for diagrams
-4. **grove-documentation** — Check terminology (Wanderer, Rooted, etc.)
+3. **swan-design** — Borrow ASCII art techniques for diagrams
+4. **owl-archive** — Check terminology (Wanderer, Rooted, etc.)
 5. **GroveTerm components** — When exhibits include Grove terminology in UI, use `GroveTerm`, `GroveSwap`, or `GroveText` from `@autumnsgrove/lattice/ui` instead of hardcoding terms. New visitors see standard terms by default; Grove Mode users see the nature-themed vocabulary. Use `[[term]]` syntax in markdown content for auto-transformation via the rehype-groveterm plugin.
 
 ### After Writing

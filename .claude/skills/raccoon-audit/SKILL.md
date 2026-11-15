@@ -387,7 +387,7 @@ npx husky add .husky/pre-commit "npm run lint && npm run security-check"
 **After Audit:**
 
 - `panther-strike` — If fixing specific security issues rapidly
-- `grove-documentation` — Update security runbooks
+- `owl-archive` — Update security runbooks
 
 ---
 
