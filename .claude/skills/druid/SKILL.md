@@ -65,7 +65,6 @@ Ecosystem Journey  Phases    SKILL.md  & Guide
 | Lynx | 🐈‍⬛ | PR review repair | `lynx-repair` |
 | Vulture | 🦅 | Issue cleanup | `vulture-sweep` |
 | Safari | 🚙 | Collection review | `safari-explore` |
-| Osprey | 🦅 | Project estimation | `osprey-appraise` |
 | Hawk | 🦅 | Security survey | `hawk-survey` |
 | Raven | 🐦‍⬛ | Security detection | `raven-investigate` |
 | Turtle | 🐢 | Code hardening | `turtle-harden` |

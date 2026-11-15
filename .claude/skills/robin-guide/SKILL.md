@@ -462,10 +462,6 @@ Use guiding metaphors:
 │     Cross-codebase security detective with parallel sub-agents     │
 │     Use: Auditing unfamiliar codebases, security posture reports   │
 │                                                                    │
-│  🦅 osprey-appraise                                                │
-│     Turn audits into professional proposals with precision         │
-│     Use: Project estimates, scoping, pricing quotes                │
-│                                                                    │
 │  🚙 safari-explore                                                 │
 │     Drive across the savanna, reviewing each stop systematically   │
 │     Use: Reviewing collections, systematic polishing               │

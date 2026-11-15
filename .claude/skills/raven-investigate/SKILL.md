@@ -248,8 +248,6 @@ Use noir detective metaphors:
 - `beaver-build` — Security regression tests for fixed vulnerabilities
 - `bee-collect` — Create GitHub issues from remediation items
 
-**The Raven-Osprey Pipeline:** After the Raven closes the case, `osprey-appraise` can turn the findings into a professional client proposal — scope, timeline, pricing, and deliverables for remediation work. Raven finds the problems; Osprey quotes the fix.
-
 **The Raven dispatches, it does not remediate.** Investigation and fixing are separate. Always.
 
 ---
