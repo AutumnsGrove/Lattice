@@ -167,7 +167,11 @@ Decision models, embeddings, speech, and transcription are single calls, not run
 These came out of the research and are waiting for their turn, one at a time:
 
 - **Record retention.** How long a record is kept, and who can delete one.
-- **Approvals.** How a background run asks for a yes and waits at no cost.
 - **The Cloudflare adapter's foundation.** Whether it builds on Cloudflare's agent tooling or on plain Durable Objects. A smaller question once decision 12 is settled.
 - **Protocol details.** The exact shape of frames and codes, written when the core is built. See `protocol.md`.
+- **The shell tool.** Its command policy (which commands are allowed), the default deadline before a command moves to the background, and what happens to a running command if the host is lost (see decisions 16 and 38 and `approvals.md`).
+- **Who may approve** once more than one person uses Lyra, and approving with edited arguments (see `approvals.md`).
+- **Lumen changes to scope in detail:** the message shape, the finish reason, the `agent` task, and the model flags (see `lumen-changes.md`).
+- **Checks on the timeline** before building: whether a bullet can carry its own vine anchor, and whether saved past days hold enough detail (see `timeline-first-job.md`).
+- **The first slice.** What the smallest useful version contains, and the build order.
 - **The new repository.** Name, layout, release process, and test setup.
