@@ -24,7 +24,7 @@ Lyra's core defines four small slots. Each is a short interface, a few functions
 | **Storage** | Save and load a run's record and its progress. Append-only. | Durable Object storage | Memory (for tests), SQLite or a file (Node) |
 | **Secrets** | Let a tool ask for a key or token by name. | Warden, or the tenant's encrypted secrets | Environment variables |
 | **Waking** | Wake a run later, after a wait or an interruption. | A Durable Object alarm | A timer (Node), or nothing for a simple script |
-| **Shell** (optional) | Run a command, return its output. The tool is `bash` on every host. | None at first | A real shell (Node). A virtual shell such as just-bash could fill it on Workers later (untested). |
+| **Shell** (optional) | Run a command, return its output. The tool is `bash` on every host. Long commands move to the background (decision 38). | None at first | A real shell (Node). A virtual shell such as just-bash could fill it on Workers later (untested). |
 
 The list is expected to grow as more places Lyra runs are discussed.
 

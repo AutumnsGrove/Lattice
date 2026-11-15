@@ -27,6 +27,7 @@ Slowly, and scoped before anything is built. Every decision gets written down he
 | [`limits-and-interruptions.md`](limits-and-interruptions.md) | What stops a run, how it is stopped and steered, how it resumes, and what happens when something fails. |
 | [`run-record.md`](run-record.md) | The saved record of a run: what it holds, how it is shaped, and how progress is rebuilt on resume. |
 | [`approvals.md`](approvals.md) | How a run asks a person for a yes or an answer, waits at no cost, and carries on. |
+| [`context-size.md`](context-size.md) | What happens when a run no longer fits in the model's memory, and how Lyra's compactor differs from a coding agent's. |
 | [`timeline-first-job.md`](timeline-first-job.md) | The first job Lyra will do: the development timeline summary. What is wrong today and the tools that fix it. |
 | [`lumen-changes.md`](lumen-changes.md) | What Lumen has to change before Lyra can run a loop through it. |
 | [`research/`](research/) | Raw research notes from 2026-11-11 (Nova, Pi, Cloudflare's agent tools, the Lattice codebase, the wider landscape). Written fast by research passes, and some claims are marked unverified inside. Useful as source material, not as settled fact. |

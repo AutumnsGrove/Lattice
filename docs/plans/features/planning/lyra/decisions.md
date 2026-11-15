@@ -129,12 +129,26 @@ No email and no push. A waiting run is shown as a soft glow, a quiet indicator. 
 ### 37. An optional timeout per task, with no timeout by default
 After the timeout, an unanswered request is denied. Useful for tasks that run in the background. Confirmed 2026-11-14.
 
+### 38. The shell tool moves long commands to the background
+A command still running at a deadline keeps running instead of being killed. The model gets an id and carries on, and is told when the command exits. It can look at the output so far, wait for it, or stop it. This follows Autumn's `pi-background` extension. While a request is pending, the exit notice queues (see the design note in `approvals.md`). Decided 2026-11-15. Open details: the default deadline, how long finished jobs are remembered, and what happens to a running command when the host process is lost.
+
+## Proposed, waiting for a yes
+
+These are from `context-size.md`, where each is explained.
+
+### 39. The record keeps everything, and the model sees a built view
+Compaction adds a `compaction` entry with a summary and a pointer to the first entry kept. It never deletes from the record. The cut never falls between a tool call and its result, and recent steps stay verbatim.
+
+### 40. What survives compaction is decided by the task
+The task's instructions are pinned. Tools can supply a "current state" shown after a compaction (for the timeline, the page so far). The task supplies the summarizer's instructions, with a generic default. Bulky tool results are capped when they arrive.
+
+### 41. Compaction triggers from the tokens Lumen reports
+When the last request's input tokens pass the model's context window minus a reserve. Reserve and amount kept are configurable per task. Needs a `contextWindow` field per model in `lumen-models.json`. If the first message alone is too large, the run fails clearly with "input too large".
+
 ## Not discussed yet
 
 These came out of the research and are waiting for their turn, one at a time:
 
-- **Long-running tools.** A command that outlives its call (the `pi-background` pattern: moved to the background at a deadline, with a notification when it exits). To confirm whether this is wanted.
-- **Context size.** What is sent to the model when a long run no longer fits in its memory (trimming or summarizing).
 - **Record retention.** How long a record is kept, and who can delete one.
 - **Follow-up when nothing is running.** Whether it starts the next turn of the same conversation or is refused.
 - **Approvals.** How a background run asks for a yes and waits at no cost.
