@@ -6,18 +6,20 @@ category: features
 
 # The first slice
 
-Last updated: 2026-11-15. Everything here is proposed and waits for a yes. It is built from decisions 1 to 58 and from reading the code, not from running anything.
+Last updated: 2026-11-15. Decided (decisions 59 to 61). Built from decisions 1 to 58 and from reading the code, not from running anything.
 
 ## The goal
 
-The smallest version of Lyra that runs the timeline job end to end on Cloudflare Workers, through Lumen, with a saved record, and that survives being interrupted. Then the rest of version one, in an order that lets you see the timeline working before the parts it does not need.
+Version one of Lyra, complete, and then the timeline job running on it end to end on Cloudflare Workers, through Lumen, with a saved record, surviving interruptions. Everything in version one is built before the timeline runs on it (decision 59).
 
-## Two checkpoints
+## One checkpoint (decision 59)
 
-Two of the decisions put more into version one than the timeline uses: compaction (decision 42) and both transports (decision 45). Both stay in version one. The plan puts them last, behind a checkpoint.
+I had proposed two checkpoints, with the timeline running before compaction and WebSocket were built. The decision is the opposite: version one is built whole, including compaction (decision 42) and both transports (decision 45), and the timeline runs on it at the end. There is one checkpoint, **version one is complete and the timeline runs through it.**
 
-- **Checkpoint 1: the timeline runs.** A real day goes through Lyra on Workers, with tools, a record, limits, retries, and resume.
-- **Checkpoint 2: version one is complete.** Compaction and the WebSocket transport are in.
+The cost of this is that the first real end-to-end run comes late, so integration problems would show up late. Two things reduce that without changing the decision:
+
+- Steps 4 to 6 each end with a real test against the real thing (a Durable Object killed mid-run, a real call through Lumen, a client over HTTP). Step 6 also runs a small two-tool test task through the whole stack, from `start` to done, with a record. That is the early end-to-end run, and it does not need the timeline.
+- Everything the timeline needs that does not depend on Lyra can be built and tested at any time, in Lattice: the GitHub fetching for pull requests and issues, the tool functions, and the one shared function both entry points will call.
 
 ## What is in, and what is later
 
@@ -28,9 +30,9 @@ Two of the decisions put more into version one than the timeline uses: compactio
 | Limits, stop, steering, follow-ups, retries, a fallback model, the stuck safeguard, safe-to-repeat tools, resume (18 to 27, 58) | A Node host and file tools (16) |
 | Slots: Model, Storage, Secrets, Waking (12) | Streaming and the interactive consumers (56), for Wisp, Fireside, Reverie |
 | Adapters: in-memory, Cloudflare Durable Object, OpenAI-style model, and Lumen | The `GroveAgent`-style hosts (out of date, decision 55) |
-| The protocol: frames, `start`, `abort`, `steer`, `follow_up`, `get_state`, `get_messages`, HTTP with server-sent events (43, 44, 46, 47) | Who may approve, once others use Lyra |
-| Compaction (42), after checkpoint 1 | |
-| WebSocket (45), after checkpoint 1 | |
+| The protocol: frames, `start`, `abort`, `steer`, `follow_up`, `get_state`, `get_messages` (43, 44, 46, 47) | Who may approve, once others use Lyra |
+| Compaction (42) | |
+| HTTP with server-sent events and WebSocket (45) | |
 
 ## The order
 
@@ -38,18 +40,17 @@ Two of the decisions put more into version one than the timeline uses: compactio
 |---|---|---|---|
 | **0. Lumen** | L1 (tool turns) and L2 (finish reason) block everything. L3 to L5 follow alongside (decision 57). | Lattice | A two-step tool loop round-trips through Lumen in tests, and a reply cut off by the token limit reports `length`. |
 | **1. Core with fakes** | The types, the four slots, the record entries, and the loop. Tested against a scripted fake model and in-memory storage. Port Pi's loop tests as the conformance suite (the research found them to be about 2,200 lines of edge cases). | Lyra repo | A scripted multi-step run produces a record and exactly one `run_end`, even on error and abort. |
-| **2. Limits, retries, resume** | Optional limits, stop and steer, 3 retries with backoff, the recipe fallback, the stuck safeguard, safe-to-repeat tools, resume by replaying the record. | Lyra repo | A fault-injection test kills a run partway and checks that resume continues and that a tool not safe to repeat is never run twice. |
+| **2. Limits, retries, resume** | Optional limits, stop and steer, follow-ups, 3 retries with backoff, the recipe fallback model (decision 58), the stuck safeguard, safe-to-repeat tools, resume by replaying the record. | Lyra repo | A fault-injection test kills a run partway and checks that resume continues and that a tool not safe to repeat is never run twice. |
 | **3. Recipes and tools** | The task recipe, tool validation errors going back to the model, handles, and the `finish` coverage check. | Lyra repo | A fake-model test where a bad repo name is rejected by a tool, corrected, and the run finishes. |
 | **4. Cloudflare adapter** | Durable Object storage (one row per entry in SQLite) and alarm waking. | Lyra repo | In a workerd test, a Durable Object is killed mid-run and the run resumes. |
 | **5. Models** | The Lumen adapter, and a plain OpenAI-style adapter for OpenRouter and OpenCode Go. | Lumen adapter in Lattice. OpenAI-style in Lyra repo. | One real call with a tool goes through each. |
-| **6. Protocol, HTTP** | Frames, the commands above, and server-sent events. | Lyra repo | A client can `start` a task, watch events, `abort` it, and `get_messages`. |
-| **7. The timeline task** | GitHub fetching for pull requests and issues, the tools from `timeline-first-job.md`, the recipe, and one function that both entry points call. | Lattice | A real day runs on Workers with a record. You compare the output with the current one for a few days. |
-| **Checkpoint 1** | | | The timeline works through Lyra. |
-| **8. Compaction** | The generic summarizer, tools' "current state", and capped tool results. | Lyra repo | A long scripted run compacts, and replay still rebuilds tool state from the full record. |
-| **9. WebSocket** | The second transport. | Lyra repo | The same client works over both. |
-| **Checkpoint 2** | | | Version one is complete. |
+| **6. Protocol, HTTP** | Frames, the commands above, and server-sent events. | Lyra repo | A client can `start` a task, watch events, `abort` it, and `get_messages`. A small two-tool test task runs on Workers through Lumen from `start` to done, with a record. |
+| **7. Compaction** | The generic summarizer, tools' "current state", and capped tool results. | Lyra repo | A long scripted run compacts, and replay still rebuilds tool state from the full record. |
+| **8. WebSocket** | The second transport. | Lyra repo | The same client works over both. |
+| **9. The timeline task** | GitHub fetching for pull requests and issues, the tools from `timeline-first-job.md`, the recipe, and one function that both entry points call: the nightly worker and the Arbor generate and backfill routes (decision 61). | Lattice | A real day runs on Workers with a record, from both entry points. You compare the output with the current one for a few days. |
+| **Checkpoint** | | | Version one is complete, and the timeline runs through Lyra. |
 
-### Where things live
+### Where things live (decision 60)
 
 A rule that falls out of decision 12: **generic adapters go in the Lyra repository, and anything specific to Grove goes in Lattice.**
 
@@ -65,7 +66,5 @@ So the Lyra repository never imports anything from Lattice, and the check for th
 
 ## Open questions
 
-- Whether the checkpoints are right, or compaction and WebSocket should come before the timeline runs.
-- Whether the rule above (generic in Lyra, Grove-specific in Lattice) is right.
-- Which entry point runs the timeline through Lyra first: the manual Arbor generate route, or the nightly worker.
 - The new repository's name, layout, and release process.
+- Whether the Cloudflare adapter builds on Cloudflare's current agent tooling or on plain Durable Objects (see `decisions.md`). Step 4 is where it matters, so it should be settled before step 4.

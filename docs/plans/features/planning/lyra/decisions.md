@@ -192,6 +192,15 @@ L1: messages carry tool turns. L2: the response reports why the model stopped. L
 ### 58. A task's recipe can name a fallback model
 Lumen's router does no model fallback when tools are present, so the fallback lives in Lyra. A recipe can name a second model, used if the first fails after its 3 retries. A recipe with none just retries and parks the run as "model unavailable". Lumen's router is left untouched. Decided 2026-11-15. Open detail: how many retries the fallback model gets, and whether a run that switched models says so in the record (it should, as an entry).
 
+### 59. Version one is built whole, then the timeline runs on it
+Version one includes compaction (42) and both transports (45), and all of it is built before the timeline runs on Lyra. There is one checkpoint at the end, not two. I had recommended a middle checkpoint, and this overrides it. The late first end-to-end run is covered by a small two-tool test task that runs the whole stack at step 6, and by building the timeline's non-Lyra parts (GitHub fetching, the tool functions, the shared function) at any time. Decided 2026-11-15. See `first-slice.md`.
+
+### 60. Generic adapters live in the Lyra repo, Grove-specific pieces in Lattice
+The Lyra repo holds the core, the in-memory and Cloudflare adapters, the OpenAI-style model adapter, and the protocol. Lattice holds the Lumen adapter (it needs Lumen's own types and contract), the secrets adapter for tenant tokens, and the tasks, like the timeline recipe and its tools. The Lyra repo never imports from Lattice, and a check enforces it. Decided 2026-11-15.
+
+### 61. The timeline runs on Lyra from both entry points together
+The nightly worker and the Arbor generate and backfill routes both call one shared function, which runs the Lyra task. They switch over together, not one first. Decided 2026-11-15. This also means the GitHub fetching, which is duplicated between the two today, is written once.
+
 ## Not discussed yet
 
 These came out of the research and are waiting for their turn, one at a time:
@@ -201,5 +210,4 @@ These came out of the research and are waiting for their turn, one at a time:
 - **The shell tool.** Its command policy (which commands are allowed), the default deadline before a command moves to the background, and what happens to a running command if the host is lost (see decisions 16 and 38 and `approvals.md`).
 - **Who may approve** once more than one person uses Lyra, and approving with edited arguments (see `approvals.md`).
 - **Proposal wire details.** The exact command and event names for deciding a proposal (see `protocol.md`).
-- **The first slice.** Proposed in `first-slice.md`, waiting for a yes.
 - **The new repository.** Name, layout, release process, and test setup.
