@@ -94,7 +94,7 @@ The default is no. A tool that was cut off partway and is not safe to repeat is 
 A run is done when the task's done-check passes (for the timeline, `finish` was accepted), not when the model says so. If the model stops without finishing, Lyra reminds it a small number of times, then parks the run as stuck. If a tool fails the same way several times in a row, the run also parks as stuck. This is the one default-on safeguard, and it is configurable per task (whether it is on, and the counts). A reply cut off by the token limit never runs its half-written tool arguments. Decided 2026-11-14.
 
 ### 26. A failing model call is retried 3 times, with staggered backoff
-Up to 3 retries, with increasing delays between attempts. The exact delays are configuration, chosen when building. After the third failure the run parks with the reason "model unavailable". Correction (2026-11-15): Lumen's router does not fall back between models when tools are present, so these retries are the only protection for agent calls, and whether a fallback model is wanted is an open question (see `lumen-changes.md`). Decided 2026-11-14.
+Up to 3 retries, with increasing delays between attempts. The exact delays are configuration, chosen when building. After the third failure the run parks with the reason "model unavailable". Correction (2026-11-15): Lumen's router does not fall back between models when tools are present, so these retries are the only protection for agent calls, and a recipe may name a fallback model (decision 58). Decided 2026-11-14.
 
 ### 27. A follow-up message is supported
 A message can be queued during a run and is read after the work would otherwise end, in the same conversation. It sits next to stop and steer (decision 19). Nova and Pi both have it. Decided 2026-11-14. Open detail: what a follow-up does when nothing is running.
@@ -186,6 +186,12 @@ Letting the timeline page attach a vine to a specific line is a change to the pa
 ### 56. Lyra serves interactive uses as well as background jobs
 Autumn named further consumers: Wisp (a writing assistant, currently parked in the junk drawer), Fireside (a conversational writing mode of Wisp), and Reverie (a chatbot-style theme engine that tweaks a grove). All three are interactive, with a Wanderer in the conversation, unlike the timeline and HawkAgent. Nothing in the existing decisions has to change, because sessions with many runs, steering, follow-ups, live approvals, and WebSocket were already decided. It does affect Lumen: streaming is not needed for the first job but is needed for these. Decided 2026-11-15. See `consumers.md`.
 
+### 57. The Lumen build order is L1 to L6
+L1: messages carry tool turns. L2: the response reports why the model stopped. L3: a new `agent` task, with quotas set to zero in every tier so agent calls must skip quota until a real rule exists. L4: model flags (supports tools, accepted `tool_choice` values, context window). L5: usage carries a cost source, `catalog` for now. L6: update the tool-calling spec. A worker streaming route comes later, for the interactive consumers. L1 and L2 are the only steps that block the first job. Decided 2026-11-15. See `lumen-changes.md`.
+
+### 58. A task's recipe can name a fallback model
+Lumen's router does no model fallback when tools are present, so the fallback lives in Lyra. A recipe can name a second model, used if the first fails after its 3 retries. A recipe with none just retries and parks the run as "model unavailable". Lumen's router is left untouched. Decided 2026-11-15. Open detail: how many retries the fallback model gets, and whether a run that switched models says so in the record (it should, as an entry).
+
 ## Not discussed yet
 
 These came out of the research and are waiting for their turn, one at a time:
@@ -194,7 +200,6 @@ These came out of the research and are waiting for their turn, one at a time:
 - **Protocol details.** The exact shape of frames and codes, written when the core is built. See `protocol.md`.
 - **The shell tool.** Its command policy (which commands are allowed), the default deadline before a command moves to the background, and what happens to a running command if the host is lost (see decisions 16 and 38 and `approvals.md`).
 - **Who may approve** once more than one person uses Lyra, and approving with edited arguments (see `approvals.md`).
-- **Lumen changes to scope in detail:** the message shape, the finish reason, the `agent` task, and the model flags (see `lumen-changes.md`).
 - **Proposal wire details.** The exact command and event names for deciding a proposal (see `protocol.md`).
 - **The first slice.** What the smallest useful version contains, and the build order.
 - **The new repository.** Name, layout, release process, and test setup.

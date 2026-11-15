@@ -50,7 +50,7 @@ So tools ask the Secrets slot for what they need by name. A tool written once th
 
 ## What stays in the adapters
 
-Lumen's concepts live in the Lumen adapter and nowhere else: task types (including the new `agent` task), the privacy scrubber, quota, Songbird, and the tenant's provider key. The Cloudflare adapter holds the bindings. The Warden client lives in Grove's tools.
+A fallback model is part of a task's recipe, not of the Model slot (decision 58), so the same recipe works against any adapter. Lumen's concepts live in the Lumen adapter and nowhere else: task types (including the new `agent` task), the privacy scrubber, quota, Songbird, and the tenant's provider key. The Cloudflare adapter holds the bindings. The Warden client lives in Grove's tools.
 
 ## The rules that keep it honest
 

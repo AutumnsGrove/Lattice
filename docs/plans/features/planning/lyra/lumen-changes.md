@@ -89,7 +89,7 @@ Items 1 and 2 are exactly what Lyra's "model" slot needs from any provider: tool
 - Never put the Wanderer's provider key in Lyra's saved state or in a run's transcript. It is sent in the body of every request.
 - `docs/specs/lumen-tool-calling-spec.md` says single-turn only and is marked Planning. It needs updating when this work is scoped.
 
-## Build plan, in order (proposed)
+## Build plan, in order (decided, decision 57)
 
 Each step is small and testable on its own, and none breaks an existing caller. Reverie's single-turn tool use keeps working throughout.
 
@@ -105,10 +105,6 @@ Each step is small and testable on its own, and none breaks an existing caller. 
 
 L1 and L2 are the only steps that block the first job. L3 to L5 can follow in the same change.
 
-### Open question: model fallback for agent calls
+### Model fallback for agent calls (decision 58)
 
-Because the router does no fallback when tools are present, three choices exist:
-
-1. **None.** Lyra retries the same model three times with backoff (decision 26), then parks the run as "model unavailable".
-2. **A fallback in the task's recipe.** The recipe names a second model, used if the first fails after its retries. Lyra owns it, and Lumen's router stays untouched.
-3. **Lumen falls back among tool-capable models for the `agent` task.** This changes Lumen's router, which was written on purpose to avoid it.
+Because the router does no fallback when tools are present, the fallback lives in Lyra. A task's recipe can name a second model, used if the first fails after its retries. Lumen's router is untouched. A task with no fallback retries and parks the run.

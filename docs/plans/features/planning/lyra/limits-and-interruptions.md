@@ -67,7 +67,7 @@ Reasons a run can be parked: waiting for an approval, a limit was reached, stopp
 - If a tool fails the same way several times in a row, Lyra parks the run as stuck. This is the one default-on safeguard, because the default has no limits and a stuck loop spends a Wanderer's own provider key. It is configurable per task: whether it is on, and the counts.
 - A reply that was cut off by the token limit never runs its half-written tool arguments. It counts as a failure and the model is asked again. This needs Lumen to report a finish reason (`lumen-changes.md`, item 2).
 
-**E. A failing model call is retried 3 times with staggered, increasing delays, then the run parks as "model unavailable".** The exact delays are configuration, chosen when building. Lumen's router does no fallback to another model when tools are present, so these retries are the only protection for agent calls (see `lumen-changes.md`). After the retries, the core parks the run.
+**E. A failing model call is retried 3 times with staggered, increasing delays, then the run parks as "model unavailable".** The exact delays are configuration, chosen when building. Lumen's router does no fallback to another model when tools are present, so these retries, and an optional fallback model named in the task's recipe (decision 58), are the only protection for agent calls (see `lumen-changes.md`). If the fallback also fails, or none is named, the core parks the run.
 
 ## Not discussed yet
 
