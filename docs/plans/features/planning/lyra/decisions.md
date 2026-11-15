@@ -201,5 +201,5 @@ These came out of the research and are waiting for their turn, one at a time:
 - **The shell tool.** Its command policy (which commands are allowed), the default deadline before a command moves to the background, and what happens to a running command if the host is lost (see decisions 16 and 38 and `approvals.md`).
 - **Who may approve** once more than one person uses Lyra, and approving with edited arguments (see `approvals.md`).
 - **Proposal wire details.** The exact command and event names for deciding a proposal (see `protocol.md`).
-- **The first slice.** What the smallest useful version contains, and the build order.
+- **The first slice.** Proposed in `first-slice.md`, waiting for a yes.
 - **The new repository.** Name, layout, release process, and test setup.
