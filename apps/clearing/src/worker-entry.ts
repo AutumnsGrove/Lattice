@@ -16,7 +16,7 @@
 import svelteKitWorker from "./_worker.js";
 import { COMPONENTS } from "./lib/server/monitor/config";
 import { checkAllComponents } from "./lib/server/monitor/health-checks";
-import { processAllResults } from "./lib/server/monitor/incident-manager";
+import { processAllResults, closeStaleIncidents } from "./lib/server/monitor/incident-manager";
 import { recordDailyHistory, cleanupOldHistory } from "./lib/server/monitor/daily-history";
 
 interface MonitorEnv {
@@ -52,6 +52,14 @@ async function runDailyAggregation(env: MonitorEnv): Promise<void> {
 	try {
 		await recordDailyHistory(env);
 		await cleanupOldHistory(env);
+
+		// Backstop: an incident left open against a component that has been
+		// operational for a day is residue, not an outage. Close it and say so.
+		const closed = await closeStaleIncidents(env);
+		if (closed > 0) {
+			console.log(`[Clearing Monitor] Closed ${closed} stale incident(s)`);
+		}
+
 		console.log("[Clearing Monitor] Daily aggregation complete");
 	} catch (err) {
 		console.error(

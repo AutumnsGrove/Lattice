@@ -6,32 +6,36 @@
 	 * Each day is a thin vertical bar colored by the worst status of that day.
 	 * Hover reveals details about specific days.
 	 */
-	import { cn } from '@autumnsgrove/lattice/ui/utils';
-	import { formatDateShort } from '$lib/utils/date';
-	import type { ComponentStatus, DailyStatus } from '$lib/types/status';
-	import { getStatusLabel } from '$lib/types/status';
+	import { cn } from "@autumnsgrove/lattice/ui/utils";
+	import { formatDateShort } from "$lib/utils/date";
+	import type { DailyStatus, DailyStatusKind } from "$lib/types/status";
+	import { getStatusLabel } from "$lib/types/status";
 
 	interface Props {
 		componentName: string;
 		days: DailyStatus[];
-		uptimePercentage: number;
+		/** Null when not a single day in the window is measurable. */
+		uptimePercentage: number | null;
+		countedDays: number;
 		class?: string;
 	}
 
-	let { componentName, days, uptimePercentage, class: className }: Props = $props();
+	let { componentName, days, uptimePercentage, countedDays, class: className }: Props = $props();
 
 	// State for tooltip
 	let hoveredDay = $state<DailyStatus | null>(null);
 	let tooltipPosition = $state({ x: 0, y: 0 });
 
-	// Status to color mapping
-	function getStatusColor(status: ComponentStatus): string {
-		const colors: Record<ComponentStatus, string> = {
-			operational: 'bg-success',
-			degraded: 'bg-warning',
-			partial_outage: 'bg-warning',
-			major_outage: 'bg-error',
-			maintenance: 'bg-info'
+	// Status to color mapping. "unknown" is a hatched grey, not green and not red:
+	// an unchecked day is not evidence of anything.
+	function getStatusColor(status: DailyStatusKind): string {
+		const colors: Record<DailyStatusKind, string> = {
+			operational: "bg-success",
+			degraded: "bg-warning",
+			partial_outage: "bg-warning",
+			major_outage: "bg-error",
+			maintenance: "bg-info",
+			unknown: "bg-foreground-subtle/25",
 		};
 		return colors[status];
 	}
@@ -42,7 +46,7 @@
 		const rect = (event.target as HTMLElement).getBoundingClientRect();
 		tooltipPosition = {
 			x: rect.left + rect.width / 2,
-			y: rect.top - 8
+			y: rect.top - 8,
 		};
 	}
 
@@ -52,19 +56,26 @@
 
 	// Uptime color based on percentage
 	const uptimeColor = $derived(
-		uptimePercentage >= 99.9 ? 'text-success' :
-		uptimePercentage >= 99 ? 'text-success' :
-		uptimePercentage >= 95 ? 'text-warning' :
-		'text-error'
+		uptimePercentage === null
+			? "text-foreground-subtle"
+			: uptimePercentage >= 99
+				? "text-success"
+				: uptimePercentage >= 95
+					? "text-warning"
+					: "text-error",
 	);
 </script>
 
-<div class={cn('glass-card p-4', className)}>
+<div class={cn("glass-card p-4", className)}>
 	<!-- Header with component name and uptime percentage -->
 	<div class="flex items-center justify-between mb-3">
 		<h4 class="font-medium text-foreground">{componentName}</h4>
-		<span class={cn('text-sm font-medium', uptimeColor)}>
-			{uptimePercentage.toFixed(2)}% uptime
+		<span class={cn("text-sm font-medium", uptimeColor)}>
+			{#if uptimePercentage === null}
+				No data yet
+			{:else}
+				{uptimePercentage.toFixed(2)}% uptime
+			{/if}
 		</span>
 	</div>
 
@@ -75,9 +86,9 @@
 				<button
 					type="button"
 					class={cn(
-						'flex-1 rounded-sm transition-all duration-150',
-						'hover:opacity-80 hover:scale-y-110 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-grove-500',
-						getStatusColor(day.status)
+						"flex-1 rounded-sm transition-all duration-150",
+						"hover:opacity-80 hover:scale-y-110 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-grove-500",
+						getStatusColor(day.status),
 					)}
 					style="height: 100%"
 					aria-label={`${formatDateShort(day.date)}: ${getStatusLabel(day.status)}`}
@@ -92,7 +103,13 @@
 		<!-- Date labels -->
 		<div class="flex justify-between mt-2 text-xs text-foreground-subtle">
 			<span>90 days ago</span>
-			<span>Today</span>
+			<span>
+				{#if countedDays < days.length}
+					{countedDays} of {days.length} days measured
+				{:else}
+					Today
+				{/if}
+			</span>
 		</div>
 	</div>
 </div>
@@ -107,10 +124,12 @@
 		<div class="text-cream-300">{getStatusLabel(hoveredDay.status)}</div>
 		{#if hoveredDay.incidentCount > 0}
 			<div class="text-cream-400 text-xs mt-0.5">
-				{hoveredDay.incidentCount} incident{hoveredDay.incidentCount > 1 ? 's' : ''}
+				{hoveredDay.incidentCount} incident{hoveredDay.incidentCount > 1 ? "s" : ""}
 			</div>
 		{/if}
 		<!-- Arrow -->
-		<div class="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-3 h-3 bg-bark-900 dark:bg-bark-800 rotate-45"></div>
+		<div
+			class="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-3 h-3 bg-bark-900 dark:bg-bark-800 rotate-45"
+		></div>
 	</div>
 {/if}

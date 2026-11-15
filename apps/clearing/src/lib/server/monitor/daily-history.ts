@@ -5,7 +5,7 @@
  * Runs at midnight UTC to record the previous day's status.
  */
 
-import { COMPONENTS, STATUS_PRIORITY } from "./config";
+import { COMPONENTS } from "./config";
 import { generateUUID } from "./utils";
 
 /**
@@ -18,23 +18,10 @@ export interface DailyHistoryEnv {
 /**
  * Get yesterday's date in YYYY-MM-DD format (UTC)
  */
-function getYesterdayDate(): string {
+export function getYesterdayDate(): string {
 	const yesterday = new Date();
 	yesterday.setUTCDate(yesterday.getUTCDate() - 1);
 	return yesterday.toISOString().split("T")[0];
-}
-
-/**
- * Determine the worst status from a list of statuses
- */
-function getWorstStatus(statuses: string[]): string {
-	if (statuses.length === 0) return "operational";
-
-	return statuses.reduce((worst, current) => {
-		const worstPriority = STATUS_PRIORITY[worst] ?? 0;
-		const currentPriority = STATUS_PRIORITY[current] ?? 0;
-		return currentPriority > worstPriority ? current : worst;
-	}, "operational");
 }
 
 /**
@@ -49,13 +36,23 @@ const STATUS_CHECK_COLUMN: Record<string, string> = {
 	maintenance: "maintenance_checks",
 };
 
-const PRIORITY_TO_STATUS = [
-	"operational",
-	"maintenance",
-	"degraded",
-	"partial_outage",
-	"major_outage",
-];
+/**
+ * Severity of a check outcome, for averaging over a day.
+ *
+ * Maintenance is deliberately absent: it is planned, not a fault, and it has no
+ * place on a linear scale. Putting it between "operational" and "degraded"
+ * meant a day that was a third partial-outage rounded onto the maintenance
+ * bucket and collected 100% uptime credit. Maintenance checks are excluded from
+ * the severity average and only describe a day that was entirely maintenance.
+ */
+const DAILY_STATUS_WEIGHT: Record<string, number> = {
+	operational: 0,
+	degraded: 1,
+	partial_outage: 2,
+	major_outage: 3,
+};
+
+const STATUS_FROM_BUCKET = ["operational", "degraded", "partial_outage", "major_outage"];
 
 /**
  * Derive a single representative status for the day from the count of
@@ -63,75 +60,55 @@ const PRIORITY_TO_STATUS = [
  * blips among hundreds of healthy checks barely moves this average —
  * unlike the old "worst status seen" approach, which locked in red for
  * the rest of the day after a single failure.
+ *
+ * The same arithmetic is duplicated in migration 0013 to rebuild historical
+ * rows; keep the two in step.
  */
-function averageStatusFromCounts(counts: Record<string, number>): string {
-	const total = Object.values(counts).reduce((sum, n) => sum + n, 0);
-	if (total === 0) return "operational";
+export function averageStatusFromCounts(counts: Record<string, number>): string {
+	let ratedChecks = 0;
+	let weightedSum = 0;
 
-	const weightedSum = Object.entries(counts).reduce(
-		(sum, [status, count]) => sum + (STATUS_PRIORITY[status] ?? 0) * count,
-		0,
-	);
-	const bucket = Math.min(4, Math.max(0, Math.round(weightedSum / total)));
-	return PRIORITY_TO_STATUS[bucket];
+	for (const [status, weight] of Object.entries(DAILY_STATUS_WEIGHT)) {
+		const count = counts[status] ?? 0;
+		ratedChecks += count;
+		weightedSum += weight * count;
+	}
+
+	if (ratedChecks === 0) {
+		// Nothing to average. A full day of maintenance is the one case we can
+		// name; otherwise we have no data and no opinion.
+		return (counts.maintenance ?? 0) > 0 ? "maintenance" : "unknown";
+	}
+
+	const bucket = Math.min(3, Math.max(0, Math.round(weightedSum / ratedChecks)));
+	return STATUS_FROM_BUCKET[bucket];
 }
 
 /**
- * Count incidents for a component on a given date
+ * Count the incidents that STARTED on a given date.
+ *
+ * Counting every incident that merely overlapped the day made one slow
+ * afternoon stack up into double figures of "incidents" on days that were
+ * 100% operational, and the number grew every day an old incident stayed open.
+ * An incident happens once, on the day it begins.
  */
-async function countIncidentsForDate(
+async function countIncidentsStartedOnDate(
 	db: D1Database,
 	componentId: string,
 	date: string,
-): Promise<{ incidentCount: number; worstStatus: string }> {
-	// Get all incidents that overlapped with this date
-	const dateStart = `${date}T00:00:00.000Z`;
-	const dateEnd = `${date}T23:59:59.999Z`;
-
-	// Find incidents that were active during this date
-	// (started before end of day AND (not resolved OR resolved after start of day))
+): Promise<number> {
 	const result = await db
 		.prepare(
-			`SELECT i.id, i.type, i.impact
+			`SELECT COUNT(*) AS incident_count
 			 FROM status_incidents i
 			 INNER JOIN status_incident_components ic ON i.id = ic.incident_id
 			 WHERE ic.component_id = ?
-			   AND i.started_at <= ?
-			   AND (i.resolved_at IS NULL OR i.resolved_at >= ?)`,
+			   AND substr(i.started_at, 1, 10) = ?`,
 		)
-		.bind(componentId, dateEnd, dateStart)
-		.all<{ id: string; type: string; impact: string }>();
+		.bind(componentId, date)
+		.first<{ incident_count: number }>();
 
-	const incidents = result.results || [];
-	const incidentCount = incidents.length;
-
-	// Map incident impact to component status
-	const statusesFromIncidents = incidents.map((i) => {
-		switch (i.impact) {
-			case "critical":
-				return "major_outage";
-			case "major":
-				return "partial_outage";
-			case "minor":
-				return "degraded";
-			default:
-				return "operational";
-		}
-	});
-
-	// Get current component status as fallback
-	const componentResult = await db
-		.prepare(`SELECT current_status FROM status_components WHERE id = ?`)
-		.bind(componentId)
-		.first<{ current_status: string }>();
-
-	const _currentStatus = componentResult?.current_status || "operational";
-
-	// If no incidents, use operational; otherwise use worst incident status
-	const worstStatus =
-		statusesFromIncidents.length > 0 ? getWorstStatus(statusesFromIncidents) : "operational";
-
-	return { incidentCount, worstStatus };
+	return result?.incident_count ?? 0;
 }
 
 /**
@@ -192,30 +169,33 @@ export async function recordCheckResult(
 /**
  * Record daily status for a single component.
  * Health checks already maintain an averaged status in real-time via
- * recordCheckResult(). This midnight job enriches the record with incident
- * counts, and provides an incident-derived fallback status for days where
- * the monitor cron didn't run at all (no check rows exist yet).
+ * recordCheckResult(). This midnight job enriches the record with the day's
+ * incident count, and creates a placeholder for days where the monitor cron
+ * didn't run at all.
+ *
+ * That placeholder is 'unknown', never a guessed status: a day without checks
+ * is a day we know nothing about, and it is excluded from uptime rather than
+ * being painted green or red on the strength of an incident that overlapped it.
  */
 async function recordDailyStatusForComponent(
 	db: D1Database,
 	componentId: string,
 	date: string,
 ): Promise<void> {
-	const { incidentCount, worstStatus } = await countIncidentsForDate(db, componentId, date);
+	const incidentCount = await countIncidentsStartedOnDate(db, componentId, date);
 
 	const id = generateUUID();
 	const now = new Date().toISOString();
 
 	// If a record already exists (from real-time health checks), only update incident_count.
-	// If no record exists yet, insert with the incident-derived status as fallback.
 	await db
 		.prepare(
 			`INSERT INTO status_daily_history (id, component_id, date, status, incident_count, created_at)
-       VALUES (?, ?, ?, ?, ?, ?)
+       VALUES (?, ?, ?, 'unknown', ?, ?)
        ON CONFLICT(component_id, date)
        DO UPDATE SET incident_count = excluded.incident_count`,
 		)
-		.bind(id, componentId, date, worstStatus, incidentCount, now)
+		.bind(id, componentId, date, incidentCount, now)
 		.run();
 }
 
