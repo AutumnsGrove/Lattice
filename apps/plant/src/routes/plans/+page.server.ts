@@ -2,6 +2,7 @@ import { redirect, fail } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
 import { transformAllTiers, type PricingTier } from "@autumnsgrove/lattice/platform/pricing";
 import { type TierKey, isValidTier } from "@autumnsgrove/lattice/platform/config";
+import { isHumanVerified, turnstileEnv } from "$lib/server/human-check";
 
 // Valid billing cycles for database storage (maps from graft's "annual" to "yearly")
 const VALID_BILLING_CYCLES = ["monthly", "yearly"] as const;
@@ -29,8 +30,13 @@ function getTierByKey(id: string): PricingTier | undefined {
 	return tiers.find((t) => t.key === id);
 }
 
-export const load: PageServerLoad = async ({ parent, platform, cookies }) => {
+export const load: PageServerLoad = async ({ parent, platform, cookies, url }) => {
 	const { user, onboarding } = await parent();
+
+	// Human check before any plan is chosen (#1678)
+	if (!(await isHumanVerified(cookies, turnstileEnv(platform).TURNSTILE_SECRET_KEY, url.origin))) {
+		redirect(302, `/verify?returnTo=${encodeURIComponent("/plans")}`);
+	}
 
 	// Redirect if not authenticated
 	if (!user) {
@@ -106,7 +112,16 @@ export const load: PageServerLoad = async ({ parent, platform, cookies }) => {
 };
 
 export const actions: Actions = {
-	default: async ({ request, cookies, platform }) => {
+	default: async ({ request, cookies, platform, url }) => {
+		if (
+			!(await isHumanVerified(cookies, turnstileEnv(platform).TURNSTILE_SECRET_KEY, url.origin))
+		) {
+			return fail(403, {
+				error: "Please complete the quick check first.",
+				needsVerification: true,
+			});
+		}
+
 		const formData = await request.formData();
 		const plan = formData.get("plan")?.toString();
 		const billingCycle = formData.get("billingCycle")?.toString() || "monthly";

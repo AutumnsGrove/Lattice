@@ -56,7 +56,18 @@ export const load: PageServerLoad = async ({ parent, cookies, platform, url }) =
 };
 
 export const actions: Actions = {
-	default: async ({ request, cookies, platform }) => {
+	default: async ({ request, cookies, platform, url }) => {
+		// The load gate is a redirect, which a script can ignore — every write path
+		// checks the cookie itself (#1678).
+		if (
+			!(await isHumanVerified(cookies, turnstileEnv(platform).TURNSTILE_SECRET_KEY, url.origin))
+		) {
+			return fail(403, {
+				error: "Please complete the quick check first.",
+				needsVerification: true,
+			});
+		}
+
 		const formData = await request.formData();
 		const result = parseFormData(formData, ProfileSchema);
 		if (!result.success) {

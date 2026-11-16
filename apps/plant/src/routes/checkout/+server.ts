@@ -1,6 +1,7 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { buildCheckoutUrl } from "@autumnsgrove/lattice/platform/config";
+import { isHumanVerified, turnstileEnv } from "$lib/server/human-check";
 
 interface CompedInvite {
 	id: string;
@@ -9,10 +10,18 @@ interface CompedInvite {
 	custom_message: string | null;
 }
 
-export const POST: RequestHandler = async ({ cookies, platform }) => {
+export const POST: RequestHandler = async ({ cookies, platform, url }) => {
 	const onboardingId = cookies.get("onboarding_id");
 	if (!onboardingId) {
 		return json({ error: "Session expired. Please start over." }, { status: 401 });
+	}
+
+	// No checkout session without a solved challenge (#1678).
+	if (!(await isHumanVerified(cookies, turnstileEnv(platform).TURNSTILE_SECRET_KEY, url.origin))) {
+		return json(
+			{ error: "Please complete the quick check first.", needsVerification: true },
+			{ status: 403 },
+		);
 	}
 
 	const db = platform?.env?.DB;
