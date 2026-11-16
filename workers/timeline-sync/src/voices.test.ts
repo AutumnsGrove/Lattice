@@ -715,10 +715,10 @@ describe("edge cases and integration", () => {
 // =============================================================================
 
 /**
- * Lumen rejects serialized input past 100,000 characters before a model is
- * chosen, so maxTokens never comes into it. 2026-11-15 was 183 commits whose
- * messages totalled ~116k characters — mostly squash-merge bodies — and the
- * nightly run wrote no row at all.
+ * Lumen rejects serialized input past MAX_INPUT_LENGTH before a model is chosen,
+ * so maxTokens never comes into it. 2026-11-15 was 183 commits whose messages
+ * totalled ~116k characters — mostly squash-merge bodies — and the nightly run
+ * wrote no row at all.
  */
 describe("buildVoicedPrompt - input budget", () => {
 	function heavyCommit(index: number): Commit {
@@ -728,7 +728,7 @@ describe("buildVoicedPrompt - input budget", () => {
 		});
 	}
 
-	it("keeps a 183-commit day under Lumen's 100k character wall", () => {
+	it("keeps a 183-commit day under Lumen's input wall", () => {
 		const commits = Array.from({ length: 183 }, (_, i) => heavyCommit(i));
 		for (const voiceId of ["professional", "quest", "casual", "poetic", "minimal"]) {
 			const { systemPrompt, userPrompt } = buildVoicedPrompt(
@@ -741,7 +741,7 @@ describe("buildVoicedPrompt - input budget", () => {
 				{ role: "system", content: systemPrompt },
 				{ role: "user", content: userPrompt },
 			]);
-			expect(serialized.length, `${voiceId} would be rejected by Lumen`).toBeLessThan(100_000);
+			expect(serialized.length, `${voiceId} would be rejected by Lumen`).toBeLessThan(300_000);
 		}
 	});
 
@@ -750,14 +750,21 @@ describe("buildVoicedPrompt - input budget", () => {
 		const { userPrompt } = buildVoicedPrompt("professional", commits, "2026-11-15");
 		expect(userPrompt).toContain("183 total");
 		expect(userPrompt).toContain("feat(timeline): land change 182");
+	});
+
+	it("drops the bodies when the day will not fit with them", () => {
+		const commits = Array.from({ length: 500 }, (_, i) => heavyCommit(i));
+		const { userPrompt } = buildVoicedPrompt("professional", commits, "2026-11-15");
+		expect(userPrompt).toContain("feat(timeline): land change 499");
 		expect(userPrompt).not.toContain("Merge description.");
 	});
 
 	it("states the overflow instead of dropping it silently", () => {
-		const commits = Array.from({ length: 2_000 }, (_, i) => heavyCommit(i));
+		// 5,000 subject lines is past the 120k budget, so the note has to appear.
+		const commits = Array.from({ length: 5_000 }, (_, i) => heavyCommit(i));
 		const { userPrompt } = buildVoicedPrompt("professional", commits, "2026-11-15");
 		expect(userPrompt).toContain("shortened to fit");
-		expect(userPrompt).toContain("2000-commit day");
+		expect(userPrompt).toContain("5000-commit day");
 		expect(userPrompt.indexOf("shortened to fit")).toBeLessThan(
 			userPrompt.indexOf("GENERATE THREE OUTPUTS"),
 		);

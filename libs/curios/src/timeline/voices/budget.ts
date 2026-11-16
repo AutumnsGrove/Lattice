@@ -27,10 +27,9 @@ export const DETAILED_BUDGET = `   - Cover at most 6 projects. If the day touche
  *
  * The input side has its own ceiling, and it is a hard wall rather than a
  * suggestion: Lumen rejects any request whose serialized input runs past
- * 100,000 characters (MAX_INPUT_LENGTH in
- * libs/engine/src/lib/ai/lumen/pipeline/preprocessor.ts) before a model is ever
- * chosen. maxTokens does not apply to it — raising the output ceiling changes
- * nothing here.
+ * MAX_INPUT_LENGTH (in libs/engine/src/lib/ai/lumen/pipeline/preprocessor.ts)
+ * before a model is ever chosen. maxTokens does not apply to it — raising the
+ * output ceiling changes nothing here.
  *
  * Commit *bodies* are what blow through it. On 2026-11-15, 183 commits over 11
  * repos carried ~116k characters of message text and only ~10.7k of subject
@@ -40,10 +39,12 @@ export const DETAILED_BUDGET = `   - Cover at most 6 projects. If the day touche
  * actually written from, so the budget goes to those first and the bodies only
  * if they fit.
  *
- * 60k leaves room for the system prompt, the historical context and JSON
- * escaping, and still sits well clear of the 100k wall.
+ * 120k is about 30k tokens: enough that a 500-commit day still lists every
+ * commit by name, and still well clear of Lumen's 300k wall, which leaves room
+ * for the system prompt, the historical context and JSON escaping (and is not
+ * a number this budget should ever be tuned toward).
  */
-export const COMMIT_LIST_BUDGET_CHARS = 60_000;
+export const COMMIT_LIST_BUDGET_CHARS = 120_000;
 
 /** Longest subject line to keep — past this it is a paragraph, not a subject. */
 const MAX_SUBJECT_CHARS = 120;
