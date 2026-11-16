@@ -555,7 +555,52 @@ The `/tenant/flush/:subdomain` response tells you which of three states you are 
 
 ### Escalation
 
-Suspension is the reversible first move. Permanent removal is `removeTenant()` (#1596 §B) — never hand-written SQL, which took 61 statements against engine, 44 against curios and 14 against groveauth on 2026-11-16. Until that lands, `gw tenant delete` (#1680) does not exist and the sweep is manual, with a pre-deletion snapshot.
+Suspension is the reversible first move. Permanent removal is `removeTenant()` from
+`@autumnsgrove/lattice/server/tenants/remove-tenant` — never hand-written SQL,
+which took 61 statements against engine, 44 against curios and 14 against
+groveauth on 2026-11-16.
+
+```ts
+// Always dry-run first. It prints per-table counts and touches nothing.
+const plan = await removeTenant(
+  { engine: env.DB, curios: env.CURIO_DB, observability: env.OBS_DB },
+  { tenantId, subdomain, email },
+  { reason: "link farm", actor: "you@grove.place" },   // dryRun defaults to true
+);
+
+// Then for real, passing the outside-the-database work explicitly so it is
+// visible in the diff whether it happened:
+const result = await removeTenant(dbs, target, {
+  reason: "link farm",
+  dryRun: false,
+  evictCache: evictTenantDO,        // or the site keeps serving (#1677)
+  deleteIdentity: deleteAuthIdentity,
+  deleteR2: deleteTenantObjects,
+  notify: emailAccountHolder,
+});
+
+if (result.leftovers.length > 0) {
+  // Incomplete. Do not tell anyone it is handled.
+}
+```
+
+`removeTenant` reads one registry (`tenant-tables.ts`) covering 47 engine tables,
+43 curios tables and 1 observability table, including the six that use a column
+other than `tenant_id`. A table that is not registered fails the test, so a new
+one cannot be silently missed.
+
+It keeps the tenant's `audit_log` rows — the record of a removal has to outlive
+the tenant — and writes two of its own: `tenant_remove_started` with the plan
+counts *before* anything is deleted, and `tenant_remove` with the outcome after.
+Both hold counts, never content. A sweep that dies halfway leaves the first row,
+which is the difference between "a half-removed tenant" and "a half-removed
+tenant somebody can reconstruct".
+
+Deletes run curios → observability → engine, children before parents (the
+registry stores that order, and a test pins it), then the `tenants` row itself
+last. A statement that throws does not abort the sweep: it is collected into
+`failures`, re-counted into `leftovers`, and reported. Never trust a removal whose
+result mentions either.
 
 After acting: block the identity domain so the same operator cannot re-sign-up (#1681), and record the verdict so the scorer learns from it (#1684).
 
