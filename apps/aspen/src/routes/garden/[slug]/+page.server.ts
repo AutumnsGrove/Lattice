@@ -5,6 +5,7 @@ import {
 	renderMarkdown,
 	type GutterItem,
 } from "@autumnsgrove/grove-markdown";
+import { applyLinkPolicy, type LinkPolicy } from "@autumnsgrove/grove-markdown";
 import { SITE_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import { getTenantDb } from "@autumnsgrove/lattice/server/services/database";
 import * as cache from "@autumnsgrove/lattice/server/services/cache";
@@ -16,6 +17,7 @@ import {
 	buildCommentTree,
 } from "@autumnsgrove/lattice/server/services/reeds";
 import type { PageServerLoad } from "./$types.js";
+import { linkPolicyFromContext } from "$lib/server/link-policy";
 
 // Disable prerendering - D1 posts are fetched dynamically at runtime
 export const prerender = false;
@@ -78,6 +80,10 @@ export const load: PageServerLoad = async ({ params, locals, platform, setHeader
 	const { slug } = params;
 	const tenantId = locals?.tenantId;
 
+	// Outbound link policy for this tenant (#1682). Free tier and young accounts
+	// get `rel="nofollow ugc"`, because a link farm's product is link equity.
+	const tenantLinkPolicy = linkPolicyFromContext(locals.context);
+
 	// Get author name from context (needed for cache key and response)
 	const context = locals.context;
 	const authorName = context?.type === "tenant" ? context.tenant.name : "Grove Author";
@@ -101,7 +107,7 @@ export const load: PageServerLoad = async ({ params, locals, platform, setHeader
 			const cachedPost = await cache.getOrSet<CachedPost | null>(kv, cacheKey, {
 				ttl: CACHE_TTL_SECONDS,
 				compute: async () => {
-					return await fetchAndProcessPost(slug, tenantId, db, authorName);
+					return await fetchAndProcessPost(slug, tenantId, db, authorName, tenantLinkPolicy.policy);
 				},
 			});
 
@@ -128,11 +134,18 @@ export const load: PageServerLoad = async ({ params, locals, platform, setHeader
 					comments,
 					commentTotal,
 					commentSettings,
+					noindex: tenantLinkPolicy.noindex,
 				};
 			}
 		} else if (db && tenantId) {
 			// No KV available, fall back to direct D1 (no caching)
-			const post = await fetchAndProcessPost(slug, tenantId, db, authorName);
+			const post = await fetchAndProcessPost(
+				slug,
+				tenantId,
+				db,
+				authorName,
+				tenantLinkPolicy.policy,
+			);
 			if (post) {
 				const { comments, commentTotal, commentSettings } = await loadComments(db, tenantId, slug);
 				return {
@@ -141,6 +154,7 @@ export const load: PageServerLoad = async ({ params, locals, platform, setHeader
 					comments,
 					commentTotal,
 					commentSettings,
+					noindex: tenantLinkPolicy.noindex,
 				};
 			}
 		}
@@ -252,6 +266,7 @@ async function fetchAndProcessPost(
 	tenantId: string,
 	db: D1Database,
 	authorName: string,
+	linkPolicy: LinkPolicy,
 ): Promise<CachedPost | null> {
 	const tenantDb = getTenantDb(db, { tenantId });
 
@@ -267,12 +282,17 @@ async function fetchAndProcessPost(
 	// Extract headers from markdown for TOC (this generates IDs)
 	const headers = post.markdown_content ? extractHeaders(post.markdown_content) : [];
 
-	// Generate HTML from markdown if not stored
+	// Generate HTML from markdown if not stored. Passing the policy into the
+	// renderer avoids a second pass over fresh HTML.
 	let htmlContent = post.html_content;
 	if (!htmlContent && post.markdown_content) {
 		// renderMarkdown handles heading IDs and sanitization
-		htmlContent = renderMarkdown(post.markdown_content);
+		htmlContent = renderMarkdown(post.markdown_content, { linkPolicy });
 	}
+
+	// Stored HTML was rendered before this policy existed (or before the account
+	// aged into trust), so rewrite its links in place.
+	htmlContent = applyLinkPolicy(htmlContent ?? "", linkPolicy);
 
 	// Process anchor tags
 	const processedHtml = processAnchorTags(htmlContent || "");

@@ -9,6 +9,7 @@
 import { BROWSER } from "esm-env";
 import type { DOMPurify as DOMPurifyInstance } from "dompurify";
 import sanitizeHtml from "sanitize-html";
+import { externalLinkRel, isExternalLink, type LinkPolicy } from "./link-rel";
 
 const GROVE_MARKDOWN_TAGS = [
 	"a",
@@ -124,6 +125,13 @@ const GROVE_FORBIDDEN_ATTRS = [
 
 let DOMPurify: DOMPurifyInstance | null = null;
 
+/**
+ * Policy for the current browser-side sanitize call. The DOMPurify hook is
+ * registered once, so the policy is passed through this variable rather than
+ * re-registering a hook per render.
+ */
+let activeLinkPolicy: LinkPolicy = "standard";
+
 if (BROWSER) {
 	import("dompurify").then((module) => {
 		DOMPurify = module.default;
@@ -131,16 +139,10 @@ if (BROWSER) {
 		DOMPurify.addHook("afterSanitizeAttributes", (node) => {
 			if (node.tagName === "A") {
 				const href = node.getAttribute("href") || "";
-				const target = node.getAttribute("target");
-				const isExternal =
-					href.startsWith("http://") || href.startsWith("https://") || target === "_blank";
-
-				if (isExternal) {
-					const existingRel = node.getAttribute("rel") || "";
-					const relParts = new Set(existingRel.split(/\s+/).filter(Boolean));
-					relParts.add("noopener");
-					relParts.add("noreferrer");
-					node.setAttribute("rel", Array.from(relParts).join(" "));
+				const target = node.getAttribute("target") ?? undefined;
+				if (isExternalLink(href, target)) {
+					const existingRel = node.getAttribute("rel") ?? undefined;
+					node.setAttribute("rel", externalLinkRel(existingRel, activeLinkPolicy));
 				}
 			}
 		});
@@ -150,20 +152,13 @@ if (BROWSER) {
 /**
  * Reverse-tabnabbing protection transformer for sanitize-html.
  */
-function tabnabbingTransform(tagName: string, attribs: sanitizeHtml.Attributes): sanitizeHtml.Tag {
-	const href = attribs.href || "";
-	const target = attribs.target;
-	const isExternal =
-		href.startsWith("http://") || href.startsWith("https://") || target === "_blank";
-
-	if (isExternal) {
-		const existingRel = attribs.rel || "";
-		const relParts = new Set(existingRel.split(/\s+/).filter(Boolean));
-		relParts.add("noopener");
-		relParts.add("noreferrer");
-		attribs.rel = Array.from(relParts).join(" ");
-	}
-	return { tagName, attribs };
+function linkRelTransform(policy: LinkPolicy) {
+	return (tagName: string, attribs: sanitizeHtml.Attributes): sanitizeHtml.Tag => {
+		if (isExternalLink(attribs.href, attribs.target)) {
+			attribs.rel = externalLinkRel(attribs.rel, policy);
+		}
+		return { tagName, attribs };
+	};
 }
 
 /**
@@ -179,7 +174,7 @@ function normalizeTagWhitespace(html: string): string {
  * Server-safe sanitization using sanitize-html (htmlparser2-based).
  * Immune to mXSS, encoding tricks, and SVG/MathML namespace attacks.
  */
-function sanitizeServerSafe(html: string): string {
+function sanitizeServerSafe(html: string, linkPolicy: LinkPolicy = "standard"): string {
 	if (!html || typeof html !== "string") {
 		return "";
 	}
@@ -193,7 +188,7 @@ function sanitizeServerSafe(html: string): string {
 		allowedStyles: GROVE_FIGURE_STYLES,
 		allowedSchemes: ["http", "https", "mailto", "tel"],
 		transformTags: {
-			a: tabnabbingTransform,
+			a: linkRelTransform(linkPolicy),
 		},
 	});
 }
@@ -203,14 +198,19 @@ function sanitizeServerSafe(html: string): string {
  *
  * Uses DOMPurify in browsers, sanitize-html on the server (SSR/Workers).
  */
-export function sanitizeMarkdown(markdownHTML: string): string {
+export function sanitizeMarkdown(
+	markdownHTML: string,
+	linkPolicy: LinkPolicy = "standard",
+): string {
 	if (!markdownHTML || typeof markdownHTML !== "string") {
 		return "";
 	}
 
 	if (!BROWSER || !DOMPurify) {
-		return sanitizeServerSafe(markdownHTML);
+		return sanitizeServerSafe(markdownHTML, linkPolicy);
 	}
+
+	activeLinkPolicy = linkPolicy;
 
 	return DOMPurify.sanitize(markdownHTML, {
 		ALLOWED_TAGS: GROVE_MARKDOWN_TAGS,

@@ -206,6 +206,8 @@ interface TenantInfo {
 	ownerId: string;
 	/** Subscription tier (free, seedling, sapling, oak, evergreen) */
 	plan: string;
+	/** `tenants.created_at` in unix seconds — drives the link/noindex policy (#1682). */
+	createdAt?: number;
 }
 
 export { AppContext, TenantInfo };

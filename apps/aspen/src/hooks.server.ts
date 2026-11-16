@@ -326,7 +326,7 @@ async function getTenantConfig(
 	try {
 		const tenant = await db
 			.prepare(
-				"SELECT id, subdomain, display_name, email, theme, plan FROM tenants WHERE subdomain = ? AND active = 1",
+				"SELECT id, subdomain, display_name, email, theme, plan, created_at FROM tenants WHERE subdomain = ? AND active = 1",
 			)
 			.bind(subdomain)
 			.first<{
@@ -336,6 +336,7 @@ async function getTenantConfig(
 				email: string;
 				theme: string | null;
 				plan: string;
+				created_at: number | null;
 			}>();
 
 		if (!tenant) return null;
@@ -362,6 +363,7 @@ async function getTenantConfig(
 			theme: parsedTheme,
 			tier,
 			ownerId: tenant.email,
+			createdAt: Number(tenant.created_at ?? 0),
 			limits: getTierLimits(tier),
 		};
 	} catch (err) {
@@ -608,6 +610,7 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 					theme: tenant.theme ? JSON.stringify(tenant.theme) : null,
 					ownerId: tenant.ownerId,
 					plan: tenant.tier || "seedling",
+					createdAt: tenant.createdAt,
 				},
 			};
 			event.locals.tenantId = tenant.id;

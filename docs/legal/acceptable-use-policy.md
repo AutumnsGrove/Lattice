@@ -165,7 +165,29 @@ Commercial promotion is allowed with the following restrictions:
 - Sponsored content must be labeled as such
 - Paid partnerships must be acknowledged
 
-### 3.2 Not Considered Promotional
+### 3.2 Outbound Links and Search Engines
+
+Grove is a place for writers, not a place to place links.
+
+**What we do:**
+
+- Outbound links on **free-tier** blogs carry `nofollow` and are marked as
+  user-generated content, so they do not pass search ranking.
+- Outbound links on accounts **younger than 14 days** carry the same treatment,
+  whatever the plan. It lifts on its own; there is nothing to request.
+- A blog in its first two weeks is not indexed by search engines. That lifts on
+  its own too.
+
+**Why:** accounts created to place links are the single most common abuse we see.
+Rotating an email address costs nothing; a link that doesn't count costs the
+whole point of the account. Treating new links this way is cheaper and kinder
+than blocking every new signup, and it means a new writer can publish the moment
+they arrive.
+
+**What this does not affect:** your writing, your readers, your own domain, or
+internal links between your pages. Paid blogs older than two weeks are unchanged.
+
+### 3.3 Not Considered Promotional
 
 The following is generally not considered promotional:
 - Mentioning where you work in a personal context
