@@ -5,6 +5,7 @@ import { z } from "zod";
 import { parseFormData } from "@autumnsgrove/lattice/server";
 import { safeParseJson } from "@autumnsgrove/lattice/utils";
 import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
+import { isHumanVerified, turnstileEnv } from "$lib/server/human-check";
 
 // ─── Zod schema for profile form validation (Rootwork Phase 3) ──────
 const ProfileSchema = z.object({
@@ -25,12 +26,23 @@ const ProfileSchema = z.object({
 
 const InterestsSchema = z.array(z.string()).max(20);
 
-export const load: PageServerLoad = async ({ parent }) => {
+export const load: PageServerLoad = async ({ parent, cookies, platform, url }) => {
 	const { user, onboarding } = await parent();
 
 	// Redirect if not authenticated
 	if (!user) {
 		redirect(302, "/");
+	}
+
+	// Human check before any profile is written — see #1678. The cookie is shared
+	// with Aspen, so anyone who has already verified on their blog skips this.
+	const verified = await isHumanVerified(
+		cookies,
+		turnstileEnv(platform).TURNSTILE_SECRET_KEY,
+		url.origin,
+	);
+	if (!verified) {
+		redirect(302, "/verify?returnTo=/profile");
 	}
 
 	// Redirect if profile already completed
@@ -44,7 +56,18 @@ export const load: PageServerLoad = async ({ parent }) => {
 };
 
 export const actions: Actions = {
-	default: async ({ request, cookies, platform }) => {
+	default: async ({ request, cookies, platform, url }) => {
+		// The load gate is a redirect, which a script can ignore — every write path
+		// checks the cookie itself (#1678).
+		if (
+			!(await isHumanVerified(cookies, turnstileEnv(platform).TURNSTILE_SECRET_KEY, url.origin))
+		) {
+			return fail(403, {
+				error: "Please complete the quick check first.",
+				needsVerification: true,
+			});
+		}
+
 		const formData = await request.formData();
 		const result = parseFormData(formData, ProfileSchema);
 		if (!result.success) {

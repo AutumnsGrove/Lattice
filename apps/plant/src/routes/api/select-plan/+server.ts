@@ -15,6 +15,7 @@ import { PLANT_ERRORS, logPlantError } from "$lib/errors";
 import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
 import { createTenant, getTenantForOnboarding, SignupBlockedError } from "$lib/server/tenant";
 import { shouldSkipCheckout } from "$lib/server/onboarding-helper";
+import { isHumanVerified, turnstileEnv } from "$lib/server/human-check";
 import { CloudflareDatabase } from "@autumnsgrove/infra/cloudflare";
 
 // Valid billing cycles for database storage
@@ -37,7 +38,18 @@ function getTierByKey(id: string): PricingTier | undefined {
 	return tiers.find((t: PricingTier) => t.key === id);
 }
 
-export const POST: RequestHandler = async ({ request, cookies, platform }) => {
+export const POST: RequestHandler = async ({ request, cookies, platform, url }) => {
+	// Defence in depth for #1678: even with a valid onboarding_id, no tenant until
+	// the challenge is solved. The profile gate is the first line.
+	const verified = await isHumanVerified(
+		cookies,
+		turnstileEnv(platform).TURNSTILE_SECRET_KEY,
+		url.origin,
+	);
+	if (!verified) {
+		return json({ error: "Please complete the quick check first." }, { status: 403 });
+	}
+
 	let body: {
 		plan?: string;
 		billingCycle?: string;
