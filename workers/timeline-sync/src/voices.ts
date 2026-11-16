@@ -9,7 +9,7 @@
  * components in with it, and this runs in a Worker.
  */
 
-import { DETAILED_BUDGET } from "@autumnsgrove/curios/timeline/voices";
+import { DETAILED_BUDGET, condenseCommitsForPrompt } from "@autumnsgrove/curios/timeline/voices";
 import type { Commit, VoicePreset, CustomVoiceConfig } from "./config";
 
 // =============================================================================
@@ -637,64 +637,6 @@ REQUIREMENTS:
 }
 
 /**
- * Maximum commits to include verbatim in the prompt.
- * Beyond this, commits are summarized to keep prompt size manageable.
- */
-const MAX_PROMPT_COMMITS = 40;
-
-/**
- * Truncate commits for prompt inclusion.
- * If there are more than MAX_PROMPT_COMMITS, include the first batch verbatim
- * and summarize the remainder to prevent context window overflow.
- */
-function truncateCommitsForPrompt(commits: Commit[]): {
-  commitList: string;
-  truncated: boolean;
-  totalCount: number;
-} {
-  if (commits.length <= MAX_PROMPT_COMMITS) {
-    return {
-      commitList: commits
-        .map(
-          (c, i) =>
-            `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`,
-        )
-        .join("\n"),
-      truncated: false,
-      totalCount: commits.length,
-    };
-  }
-
-  // Include the first MAX_PROMPT_COMMITS verbatim
-  const included = commits.slice(0, MAX_PROMPT_COMMITS);
-  const remaining = commits.slice(MAX_PROMPT_COMMITS);
-
-  // Summarize the remaining commits by repo
-  const remainingByRepo: Record<string, number> = {};
-  for (const c of remaining) {
-    remainingByRepo[c.repo] = (remainingByRepo[c.repo] || 0) + 1;
-  }
-  const remainingSummary = Object.entries(remainingByRepo)
-    .map(([repo, count]) => `${repo}: ${count}`)
-    .join(", ");
-
-  const commitList =
-    included
-      .map(
-        (c, i) =>
-          `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`,
-      )
-      .join("\n") +
-    `\n... and ${remaining.length} more commits (${remainingSummary})`;
-
-  return {
-    commitList,
-    truncated: true,
-    totalCount: commits.length,
-  };
-}
-
-/**
  * Build the complete prompt for summary generation using the selected voice.
  *
  * @param voiceId - The voice preset ID (or "custom")
@@ -723,7 +665,22 @@ export function buildVoicedPrompt(
     voice = getVoice(voiceId);
   }
 
-  let userPrompt = voice.buildPrompt(commits, date, ownerName);
+  // Lumen rejects inputs past 100k characters outright (see COMMIT_LIST_BUDGET_CHARS
+  // in libs/curios), so a heavy day is condensed before it reaches a prompt.
+  const condensed = condenseCommitsForPrompt(commits);
+
+  let userPrompt = voice.buildPrompt(condensed.commits, date, ownerName);
+
+  // Same marker every preset carries — state the overflow instead of dropping it.
+  if (condensed.note) {
+    const marker = "GENERATE THREE OUTPUTS";
+    const markerIndex = userPrompt.indexOf(marker);
+    const note = `${condensed.note}\n\n`;
+    userPrompt =
+      markerIndex > 0
+        ? userPrompt.slice(0, markerIndex) + note + userPrompt.slice(markerIndex)
+        : `${userPrompt}\n\n${note}`;
+  }
 
   // Append long-horizon context if provided (condensed to save tokens)
   if (context) {

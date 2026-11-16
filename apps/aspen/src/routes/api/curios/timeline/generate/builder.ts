@@ -6,6 +6,7 @@
 
 import {
 	buildVoicedPrompt,
+	SUMMARY_MAX_OUTPUT_TOKENS,
 	parseAIResponse,
 	getHistoricalContext,
 	detectTaskFromText,
@@ -129,7 +130,7 @@ export async function generateSummary(
 	);
 
 	// Call AI via Lumen
-	const maxTokens = 8192;
+	const maxTokens = SUMMARY_MAX_OUTPUT_TOKENS;
 	const aiResponse = await lumen.run({
 		task: "summary",
 		input: [

@@ -20,6 +20,7 @@ import { safeDecryptToken } from "./encryption";
 import { fetchGitHubCommits, fetchCommitStats } from "./github";
 import { parseAIResponse } from "./response-parser";
 import { buildVoicedPrompt } from "./voices";
+import { SUMMARY_MAX_OUTPUT_TOKENS } from "@autumnsgrove/curios/timeline/voices";
 import {
 	getHistoricalContext,
 	detectTaskFromText,
@@ -215,7 +216,7 @@ export async function processTenantTimeline(
 		// A cron run only gets one shot — there's no user sitting there to hit
 		// "retry" if Lumen's whole fallback chain trips on a transient network
 		// blip. Retrying the entire chain (not just one model) absorbs that.
-		const maxTokens = 8192;
+		const maxTokens = SUMMARY_MAX_OUTPUT_TOKENS;
 		const aiResult = await withRetry(
 			() =>
 				lumen.run({
@@ -228,12 +229,12 @@ export async function processTenantTimeline(
 					options: {
 						model: config.openrouterModel || DEFAULT_OPENROUTER_MODEL,
 						tenantApiKey: openrouterKey,
-						// The full brief+detailed+gutter JSON envelope has to land inside
-						// this ceiling, or the model gets cut off mid-object. 2048 and 4096
-						// were both too tight; 8192 plus the DETAILED_BUDGET in voices.ts
-						// (a named word/project ceiling for the detailed section) is the
-						// current pairing. Raising this alone is not a fix — 2026-11-13
-						// pinned exactly 8192 output tokens and still truncated.
+						// Shared with aspen's manual generate, next to DETAILED_BUDGET in
+						// libs/curios so the ceiling and the word budget that keeps it
+						// honest live in one place. Raising this alone never fixed a
+						// truncation — 2026-11-13 pinned exactly 8192 and still got cut
+						// off mid-JSON — and it has nothing to do with Lumen's *input*
+						// wall, which is a separate limit (see GH #1703).
 						maxTokens,
 						temperature: 0.7,
 					},

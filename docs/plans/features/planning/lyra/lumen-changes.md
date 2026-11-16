@@ -20,7 +20,7 @@ Every change below is additive. Reverie's single-turn tool use keeps working.
 - Every response reports usage: input tokens, output tokens, and an estimated cost in USD (`LumenUsage`, `libs/engine/src/lib/ai/lumen/types.ts`). That is enough for Lyra to keep a running total against a budget.
 - A Wanderer's own provider key can be passed per request (`tenant_api_key`).
 - `RemoteLumenClient` already forwards `tools` and returns tool calls (`remote.ts`).
-- Limits: 100 messages per request. No length limit on message text. Only the plain-string form of `input` is capped, at 100 KB.
+- Limits: 100 messages per request. No length limit on message text. The serialized `input` is capped at 300 KB (`MAX_INPUT_LENGTH`), whichever form it takes.
 
 ## Must change (blocks Lyra)
 

@@ -61,6 +61,7 @@ export {
   // Constants
   VOICE_PRESETS,
   DEFAULT_VOICE,
+  SUMMARY_MAX_OUTPUT_TOKENS,
   // Individual presets
   professional,
   quest,

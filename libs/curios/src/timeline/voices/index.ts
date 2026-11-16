@@ -6,7 +6,7 @@
  */
 
 import { professional, quest, casual, poetic, minimal } from "./presets";
-import { DETAILED_BUDGET } from "./budget";
+import { DETAILED_BUDGET, condenseCommitsForPrompt } from "./budget";
 import type {
   VoicePreset,
   VoicePromptResult,
@@ -39,7 +39,13 @@ export const DEFAULT_VOICE = "professional";
  * Re-exported so consumers that build prompts themselves (the timeline-sync
  * worker inlines these presets) share the same ceiling instead of copying it.
  */
-export { DETAILED_BUDGET };
+export {
+  DETAILED_BUDGET,
+  COMMIT_LIST_BUDGET_CHARS,
+  SUMMARY_MAX_OUTPUT_TOKENS,
+  condenseCommitsForPrompt,
+} from "./budget";
+export type { CondensedCommitList } from "./budget";
 
 // =============================================================================
 // Voice Selection
@@ -195,7 +201,24 @@ export function buildVoicedPrompt(
     voice = getVoice(voiceId);
   }
 
-  let userPrompt = voice.buildPrompt(commits, date, ownerName);
+  // Lumen rejects inputs past 100k characters outright, so a heavy day has to
+  // be condensed before it is rendered into a prompt, not after.
+  const condensed = condenseCommitsForPrompt(commits);
+
+  let userPrompt = voice.buildPrompt(condensed.commits, date, ownerName);
+
+  // A day big enough to overflow the commit budget still has to reach the
+  // model as a real day, so the overflow is stated rather than dropped. The
+  // marker is in every preset's prompt, custom included.
+  if (condensed.note) {
+    const marker = "GENERATE THREE OUTPUTS";
+    const markerIndex = userPrompt.indexOf(marker);
+    const note = `${condensed.note}\n\n`;
+    userPrompt =
+      markerIndex > 0
+        ? userPrompt.slice(0, markerIndex) + note + userPrompt.slice(markerIndex)
+        : `${userPrompt}\n\n${note}`;
+  }
 
   // Append long-horizon context if provided (condensed to save tokens)
   if (context) {
