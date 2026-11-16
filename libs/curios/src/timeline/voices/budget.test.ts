@@ -2,8 +2,9 @@
  * Voice Presets - Output Budget Tests
  *
  * The detailed section is the part that runs long, and the whole
- * brief+detailed+gutter JSON envelope has to fit inside the request's
- * maxTokens (8192). Every preset — custom included — has to carry the same
+ * brief+detailed+gutter JSON envelope has to fit inside the request's output
+ * ceiling (SUMMARY_MAX_OUTPUT_TOKENS). Every preset — custom included — has to
+ * carry the same
  * budget, or its heavy days get cut off mid-JSON and the caller stores a
  * fallback summary instead (2026-11-13).
  */

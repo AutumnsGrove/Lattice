@@ -5,8 +5,9 @@
  * ceiling lives in one place.
  *
  * The model writes until it runs out of tokens, and the whole brief+detailed+
- * gutter response has to fit inside the request's maxTokens (8192) as valid
- * JSON. A 53-commit day across 5 repos blew straight through that on
+ * gutter response has to fit inside the request's output ceiling
+ * (SUMMARY_MAX_OUTPUT_TOKENS) as valid JSON. A 53-commit day across 5 repos blew
+ * straight through it on
  * 2026-11-13 — the JSON was cut off mid-object and the run silently stored a
  * "got a bit tangled" fallback. Naming the budget explicitly keeps heavy days
  * inside the envelope instead of relying on the model to self-limit.
@@ -21,6 +22,24 @@ export const DETAILED_BUDGET = `   - Cover at most 6 projects. If the day touche
      final "### Also" section with one bullet each.
    - At most 5 bullets per project, one line each.
    - The whole detailed breakdown must stay under ~350 words.`;
+
+/**
+ * Output ceiling, in tokens, for the whole summary request.
+ *
+ * Both callers (the cron worker and aspen's manual generate) send this and both
+ * enforce it the same way: an output that lands *on* the ceiling is treated as
+ * truncated mid-JSON and fails the run instead of storing a partial summary.
+ * That guard is what makes the ceiling safe to be generous with.
+ *
+ * 8192 until 2026-11-16, raised to 64k for headroom on days that provoke long
+ * answers. The realistic envelope is far smaller — DETAILED_BUDGET caps the
+ * detailed section at ~350 words — so this is headroom, not a target, and the
+ * per-request cost ceiling it implies is the reason not to go higher than the
+ * model's own maximum completion length. Lumen does not check the latter before
+ * calling, so a provider that rejects 64k will surface as a provider error and
+ * take the retry chain with it.
+ */
+export const SUMMARY_MAX_OUTPUT_TOKENS = 64_000;
 
 /**
  * Input Budget

@@ -97,7 +97,7 @@ describe("condenseCommitsForPrompt", () => {
 
 		expect(result.commits.length).toBeLessThan(2_000);
 		expect(renderedCommitList(result.commits).length).toBeLessThanOrEqual(4_000);
-		expect(result.note).toContain("2000-commit day");
+		expect(result.note).toContain("The day was 2000 commits");
 		expect(result.note).toContain(`Lattice: ${2_000 - result.commits.length}`);
 	});
 
@@ -130,7 +130,7 @@ describe("buildVoicedPrompt input budget", () => {
 		const commits = Array.from({ length: 5_000 }, (_, i) => heavyCommit(i));
 		const { userPrompt } = buildVoicedPrompt("professional", commits, "2026-11-15", "Autumn");
 		expect(userPrompt).toContain("shortened to fit");
-		expect(userPrompt).toContain("5000-commit day");
+		expect(userPrompt).toContain("The day was 5000 commits");
 		// The note lands before the instructions, not after them.
 		expect(userPrompt.indexOf("shortened to fit")).toBeLessThan(
 			userPrompt.indexOf("GENERATE THREE OUTPUTS"),

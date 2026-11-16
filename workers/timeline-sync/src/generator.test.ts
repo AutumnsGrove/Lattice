@@ -89,6 +89,7 @@ vi.mock("./context", () => ({
 	}),
 }));
 
+import { SUMMARY_MAX_OUTPUT_TOKENS } from "@autumnsgrove/curios/timeline/voices";
 import { processTenantTimeline } from "./generator";
 
 // =============================================================================
@@ -229,7 +230,7 @@ describe("processTenantTimeline resilience", () => {
 			runMock.mockResolvedValue({
 				...successfulLumenResult,
 				content: '{"brief": "Some work happened today. The summary got a bit',
-				usage: { input: 7753, output: 8192, cost: 0.015945 },
+				usage: { input: 7753, output: SUMMARY_MAX_OUTPUT_TOKENS, cost: 0.015945 },
 			});
 			parseMock.mockReturnValue({ ...successfulParseResult, success: false });
 

@@ -39,7 +39,12 @@ export const DEFAULT_VOICE = "professional";
  * Re-exported so consumers that build prompts themselves (the timeline-sync
  * worker inlines these presets) share the same ceiling instead of copying it.
  */
-export { DETAILED_BUDGET, COMMIT_LIST_BUDGET_CHARS, condenseCommitsForPrompt } from "./budget";
+export {
+  DETAILED_BUDGET,
+  COMMIT_LIST_BUDGET_CHARS,
+  SUMMARY_MAX_OUTPUT_TOKENS,
+  condenseCommitsForPrompt,
+} from "./budget";
 export type { CondensedCommitList } from "./budget";
 
 // =============================================================================

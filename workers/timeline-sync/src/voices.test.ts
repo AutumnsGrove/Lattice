@@ -764,7 +764,7 @@ describe("buildVoicedPrompt - input budget", () => {
 		const commits = Array.from({ length: 5_000 }, (_, i) => heavyCommit(i));
 		const { userPrompt } = buildVoicedPrompt("professional", commits, "2026-11-15");
 		expect(userPrompt).toContain("shortened to fit");
-		expect(userPrompt).toContain("5000-commit day");
+		expect(userPrompt).toContain("The day was 5000 commits");
 		expect(userPrompt.indexOf("shortened to fit")).toBeLessThan(
 			userPrompt.indexOf("GENERATE THREE OUTPUTS"),
 		);
