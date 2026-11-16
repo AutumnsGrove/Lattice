@@ -169,7 +169,11 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
 			{ provider: "openrouter", model: MODELS.QWEN3_8_FLASH },
 			{ provider: "openrouter", model: MODELS.LLAMA_3_1_8B },
 		],
-		defaultMaxTokens: 1024,
+		// Also the ceiling the router falls back to when a caller's larger
+		// max_tokens is refused by the provider (router.ts, isMaxTokensRejection).
+		// 1024 was too tight for the timeline envelope — brief + detailed + gutter
+		// as valid JSON — so a downgraded request would have come back truncated.
+		defaultMaxTokens: 4096,
 		defaultTemperature: 0.3,
 		description: "Content summarization",
 	},

@@ -103,6 +103,21 @@ export function routeTask(
 // =============================================================================
 
 /**
+ * Does this failure mean the provider refused our `max_tokens` (or the requested
+ * tokens plus the prompt) rather than failing for a reason of its own?
+ *
+ * Providers word this differently — OpenRouter passes through whatever the
+ * underlying model says — so match on the concept, not on one string.
+ */
+const MAX_TOKENS_REJECTION =
+	/max[_ ]?tokens|maximum context|context length|max(?:imum)? output|completion tokens|too many tokens|token limit/i;
+
+export function isMaxTokensRejection(err: unknown): boolean {
+	const message = err instanceof Error ? err.message : "";
+	return MAX_TOKENS_REJECTION.test(message);
+}
+
+/**
  * Execute a request with automatic fallback on failure.
  * Tries primary provider first, then falls back through the chain.
  *
@@ -174,25 +189,27 @@ export async function executeWithFallback(
 		const provider = providers[providerName];
 		if (!provider) continue;
 
+		// Build providerOptions to carry tool definitions through to the provider
+		const providerOptions: Record<string, unknown> | undefined = options.tools
+			? {
+					tools: options.tools,
+					...(options.toolChoice !== undefined && {
+						toolChoice: options.toolChoice,
+					}),
+				}
+			: undefined;
+
+		const requestedMaxTokens = options.maxTokens ?? config.defaultMaxTokens;
+
+		const inferenceOptions: LumenInferenceOptions = {
+			maxTokens: requestedMaxTokens,
+			temperature: options.temperature ?? config.defaultTemperature,
+			timeoutMs: options.timeoutMs,
+			apiKeyOverride: options.apiKeyOverride,
+			providerOptions,
+		};
+
 		try {
-			// Build providerOptions to carry tool definitions through to the provider
-			const providerOptions: Record<string, unknown> | undefined = options.tools
-				? {
-						tools: options.tools,
-						...(options.toolChoice !== undefined && {
-							toolChoice: options.toolChoice,
-						}),
-					}
-				: undefined;
-
-			const inferenceOptions: LumenInferenceOptions = {
-				maxTokens: options.maxTokens ?? config.defaultMaxTokens,
-				temperature: options.temperature ?? config.defaultTemperature,
-				timeoutMs: options.timeoutMs,
-				apiKeyOverride: options.apiKeyOverride,
-				providerOptions,
-			};
-
 			const response = await provider.inference(model, messages, inferenceOptions);
 
 			return {
@@ -202,6 +219,44 @@ export async function executeWithFallback(
 				toolCalls: response.toolCalls,
 			};
 		} catch (err) {
+			// A caller's ceiling is headroom, not a target. Models have wildly
+			// different maximum completion lengths, and a provider rejects a
+			// request whose max_tokens is over its model's limit rather than
+			// clamping it — which would otherwise cost the whole call (and, on the
+			// timeline path, the day's summary) for a number nobody needed.
+			// One retry at the task default keeps the caller's intent and still
+			// produces output.
+			if (
+				requestedMaxTokens > config.defaultMaxTokens &&
+				isMaxTokensRejection(err)
+			) {
+				console.warn(
+					`[Lumen/Router] ${model} rejected max_tokens=${requestedMaxTokens}, retrying at ${config.defaultMaxTokens}`,
+				);
+				try {
+					const response = await provider.inference(model, messages, {
+						...inferenceOptions,
+						maxTokens: config.defaultMaxTokens,
+					});
+
+					return {
+						response,
+						provider: providerName,
+						model,
+						toolCalls: response.toolCalls,
+					};
+				} catch (retryErr) {
+					attempts.push({
+						provider: providerName,
+						model,
+						error: `max_tokens retry at ${config.defaultMaxTokens} also failed: ${
+							retryErr instanceof Error ? retryErr.message : "Unknown error"
+						}`,
+					});
+					continue;
+				}
+			}
+
 			attempts.push({
 				provider: providerName,
 				model,
