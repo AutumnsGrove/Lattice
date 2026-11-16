@@ -133,20 +133,29 @@ let DOMPurify: DOMPurifyInstance | null = null;
 let activeLinkPolicy: LinkPolicy = "standard";
 
 if (BROWSER) {
-	import("dompurify").then((module) => {
-		DOMPurify = module.default;
+	import("dompurify")
+		.then((module) => {
+			DOMPurify = module.default;
 
-		DOMPurify.addHook("afterSanitizeAttributes", (node) => {
-			if (node.tagName === "A") {
-				const href = node.getAttribute("href") || "";
-				const target = node.getAttribute("target") ?? undefined;
-				if (isExternalLink(href, target)) {
-					const existingRel = node.getAttribute("rel") ?? undefined;
-					node.setAttribute("rel", externalLinkRel(existingRel, activeLinkPolicy));
+			// See the note in libs/engine's copy: an environment that resolves the
+			// module without a DOMPurify instance must not produce an unhandled
+			// rejection at teardown.
+			if (typeof DOMPurify?.addHook !== "function") return;
+
+			DOMPurify.addHook("afterSanitizeAttributes", (node) => {
+				if (node.tagName === "A") {
+					const href = node.getAttribute("href") || "";
+					const target = node.getAttribute("target") ?? undefined;
+					if (isExternalLink(href, target)) {
+						const existingRel = node.getAttribute("rel") ?? undefined;
+						node.setAttribute("rel", externalLinkRel(existingRel, activeLinkPolicy));
+					}
 				}
-			}
+			});
+		})
+		.catch((err) => {
+			console.warn("[sanitize] DOMPurify unavailable:", err);
 		});
-	});
 }
 
 /**
