@@ -232,10 +232,12 @@ export function detectDrift(shims, wranglers, repoRoot = REPO_ROOT) {
 	const stalePath = [];
 	for (const shim of shims) {
 		for (const pattern of shim.triggers?.paths ?? []) {
-			const dir = pattern.replace(/\/\*\*$/, "");
-			// Only directory globs, and only ones that look like repo paths —
-			// exact file triggers are checked by git at push time instead.
-			if (dir === pattern || !/^(apps|services|workers|libs|scripts|tools)\//.test(dir)) continue;
+			// Only `dir/**` triggers are checkable this way. Anything with a glob
+			// in the directory part, a leading `!`, or no trailing `/**` cannot be
+			// reduced to a directory to stat, so it is left to git at push time.
+			if (!pattern.endsWith("/**") || pattern.startsWith("!")) continue;
+			const dir = pattern.slice(0, -3);
+			if (dir.includes("*")) continue;
 			if (!existsSync(join(repoRoot, dir))) {
 				stalePath.push({ shim: shim.file, pattern, dir });
 			}
