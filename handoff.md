@@ -16,6 +16,17 @@ coming through the email path (#1677, #1678, #1679, #1680, #1681, #1682, #1683,
 
 **Applied to production:** migration `123_signup_blocks.sql` on `grove-engine-db`, and two live blocks — `mail.grokbot.com` (`incident:2026-11-14`) and `upsampler.com` (`incident:2026-11-07`).
 
+## Shipped after that handoff (same day)
+
+| PR | what it closed |
+|---|---|
+| #1701 | **#1678** — Turnstile on Plant signup. `/verify` step, verify endpoint setting the shared `grove_verified` cookie, and every write path gated: `/profile` + `/plans` **form actions** (not just loads), `/checkout`, `/comped`, `/api/claim-comped`, `/api/save-profile`, `/api/select-plan`. First review caught that only loads were gated; second pass was clean. |
+| #1702 | **#1682** — nofollow for link spam. Free-tier and <14-day tenants render outbound links as `rel="nofollow ugc"`; young accounts also get `<meta robots="noindex">`. One helper decides (`libs/engine/security/link-policy`), one applies (`grove-markdown`'s `externalLinkRel`, which also de-duplicated four copies of the tabnabbing logic). `createdAt` now reaches the renderer via TenantDO config → hooks → `TenantInfo`. AUP §3.2 documents the rule. |
+
+**Verified in production:** a blocked address on the OTP endpoint returns `403` with the intended copy (both `mail.grokbot.com` and `upsampler.com`), confirming #1700's fix — the deny list reaches the client instead of answering `{"success":true}`.
+
+Also fixed in passing: `import("dompurify").then()` in both sanitizers had no `catch` and assumed `module.default` had `addHook`, so a misresolved module produced an unhandled rejection *after* every test passed (green report, non-zero exit). Guarded in both copies.
+
 ## Open, in flight
 
 - **#1701** — `feat(plant): gate signup behind the Turnstile that was already configured` (#1678). Open PR, CI running at handoff time. Wires the configured-but-unused `TURNSTILE_SITE_KEY` into a `/verify` step, sets the same `grove_verified` cookie Aspen uses, and gates `/profile`, `/api/save-profile` and `/api/select-plan`. Known gaps are in the PR body: not tested against a real challenge, and `user_onboarding` rows are still created in `/auth/callback` before the gate.
