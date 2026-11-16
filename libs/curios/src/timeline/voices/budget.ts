@@ -155,6 +155,6 @@ export function condenseCommitsForPrompt<C extends Commit>(
 
   return {
     commits: kept,
-    note: `The list above is shortened to fit. This was a ${commits.length}-commit day; the ${remaining.length} commits not listed are across: ${repoCounts}.`,
+    note: `The commit list above is shortened to fit. The day was ${commits.length} commits; ${kept.length} are listed below and the remaining ${remaining.length} are across: ${repoCounts}. The total in the heading counts only the listed commits.`,
   };
 }
