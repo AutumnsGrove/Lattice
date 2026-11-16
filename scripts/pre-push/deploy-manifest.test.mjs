@@ -189,3 +189,34 @@ describe("detectDrift", () => {
 		assert.equal(d.orphanedWrangler.length, 0);
 	});
 });
+
+describe("detectDrift - path triggers", () => {
+	function shimWith(paths) {
+		return {
+			path: "workers/lumen",
+			file: "deploy-lumen.yml",
+			triggers: { paths },
+		};
+	}
+
+	test("flags a directory trigger that no longer exists", () => {
+		// deploy-lumen.yml pointed at libs/engine/src/lib/lumen/** for months
+		// after the code moved to ai/lumen/, so the worker never redeployed.
+		const shims = [shimWith(["workers/lumen/**", "libs/engine/src/lib/ai/lumen/**"])];
+		const d = detectDrift(shims, [], "/definitely-not-a-real-root");
+		assert.equal(d.stalePath.length, 2);
+		assert.equal(d.stalePath[0].pattern, "workers/lumen/**");
+	});
+
+	test("accepts a directory trigger that exists", () => {
+		const shims = [shimWith(["/tmp/**"])];
+		const d = detectDrift(shims, [], "/tmp");
+		assert.equal(d.stalePath.length, 0);
+	});
+
+	test("ignores exact file triggers and non-repo globs", () => {
+		const shims = [shimWith(["package.json", "**/*.md", ".github/workflows/x.yml"])];
+		const d = detectDrift(shims, [], "/definitely-not-a-real-root");
+		assert.equal(d.stalePath.length, 0);
+	});
+});
