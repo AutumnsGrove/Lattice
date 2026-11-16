@@ -4,8 +4,10 @@ import {
 	type GutterItem,
 	type Header,
 	renderMarkdown,
+	applyLinkPolicy,
 } from "@autumnsgrove/grove-markdown";
 import type { PageServerLoad } from "./$types.js";
+import { linkPolicyFromContext } from "$lib/server/link-policy";
 
 interface HeroData {
 	title?: string;
@@ -73,12 +75,19 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
 			}
 		}
 
+		// Outbound link policy for this tenant (#1682)
+		const linkPolicy = linkPolicyFromContext(locals.context);
+
 		// Generate HTML from markdown if not stored
 		let htmlContent = pageData.html_content;
 		const rawMarkdown = pageData.markdown_content || "";
 		if (!htmlContent && rawMarkdown && typeof rawMarkdown === "string") {
-			htmlContent = renderMarkdown(rawMarkdown);
+			htmlContent = renderMarkdown(rawMarkdown, { linkPolicy: linkPolicy.policy });
 		}
+
+		// Stored HTML predates this policy, or the account aged into trust — either
+		// way, rewrite the links in place rather than re-rendering the body.
+		htmlContent = applyLinkPolicy(htmlContent ?? "", linkPolicy.policy);
 
 		// Extract headers from raw markdown for table of contents
 		// Note: ContentWithGutter will add IDs to headers client-side based on this data

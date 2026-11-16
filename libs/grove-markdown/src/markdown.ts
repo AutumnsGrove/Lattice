@@ -2,6 +2,7 @@ import MarkdownIt from "markdown-it";
 import footnotePlugin from "markdown-it-footnote";
 import matter from "@11ty/gray-matter";
 import { sanitizeMarkdown } from "./utils/sanitize.js";
+import type { LinkPolicy } from "./utils/link-rel.js";
 import { humPlugin } from "./hum-plugin.js";
 import { groveDirectivePlugin } from "./directives.js";
 import { mentionsPlugin } from "./mentions.js";
@@ -298,8 +299,16 @@ md.renderer.rules.fence = function (tokens, idx) {
  * This is the primary export for route files — replaces the old
  * `sanitizeMarkdown(marked.parse(X, { async: false }) as string)` pattern.
  */
-export function renderMarkdown(content: string): string {
-	return sanitizeMarkdown(md.render(content));
+export function renderMarkdown(content: string, options: RenderMarkdownOptions = {}): string {
+	return sanitizeMarkdown(md.render(content), options.linkPolicy);
+}
+
+export interface RenderMarkdownOptions {
+	/**
+	 * Outbound link policy for this render. Defaults to `standard`; pass
+	 * `nofollow-ugc` for a young or free-tier tenant (#1682).
+	 */
+	linkPolicy?: LinkPolicy;
 }
 
 // ============================================================================

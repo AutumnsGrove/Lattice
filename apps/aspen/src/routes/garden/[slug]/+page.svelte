@@ -45,6 +45,12 @@
 	>
 	<meta name="description" content={data.post.description || data.post.title} />
 
+	<!-- A brand-new blog is not useful to the open web in its first hours, and very
+	     useful to a link farm. Lifts on its own once the account has a track record. -->
+	{#if data.noindex}
+		<meta name="robots" content="noindex, nofollow" />
+	{/if}
+
 	<!-- Open Graph metadata for better content detection -->
 	<meta property="og:title" content={data.post.title} />
 	<meta property="og:description" content={data.post.description || data.post.title} />

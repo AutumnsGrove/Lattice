@@ -309,12 +309,24 @@ async function getTenantConfig(
 					id?: string;
 				};
 
-				// TenantDO now caches tenant ID - no need for separate D1 query
-				if (config.id && config.subdomain) {
+				// TenantDO now caches tenant ID - no need for separate D1 query.
+				//
+				// `createdAt` was added with the link policy (#1682). A DO whose
+				// cache predates that deploy reports 0/undefined, which the policy
+				// reads as "unknown age" and therefore as young — that would noindex
+				// every established tenant until the SQLite entry went stale. A
+				// config without it falls through to D1 instead of being trusted.
+				if (config.id && config.subdomain && config.createdAt) {
 					return {
 						...config,
 						id: config.id,
 					};
+				}
+
+				if (config.id && config.subdomain) {
+					console.warn(
+						`[Hooks] TenantDO config for ${subdomain} has no createdAt; falling through to D1`,
+					);
 				}
 			}
 		} catch (err) {
@@ -326,7 +338,7 @@ async function getTenantConfig(
 	try {
 		const tenant = await db
 			.prepare(
-				"SELECT id, subdomain, display_name, email, theme, plan FROM tenants WHERE subdomain = ? AND active = 1",
+				"SELECT id, subdomain, display_name, email, theme, plan, created_at FROM tenants WHERE subdomain = ? AND active = 1",
 			)
 			.bind(subdomain)
 			.first<{
@@ -336,6 +348,7 @@ async function getTenantConfig(
 				email: string;
 				theme: string | null;
 				plan: string;
+				created_at: number | null;
 			}>();
 
 		if (!tenant) return null;
@@ -362,6 +375,7 @@ async function getTenantConfig(
 			theme: parsedTheme,
 			tier,
 			ownerId: tenant.email,
+			createdAt: Number(tenant.created_at ?? 0),
 			limits: getTierLimits(tier),
 		};
 	} catch (err) {
@@ -608,6 +622,7 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 					theme: tenant.theme ? JSON.stringify(tenant.theme) : null,
 					ownerId: tenant.ownerId,
 					plan: tenant.tier || "seedling",
+					createdAt: tenant.createdAt,
 				},
 			};
 			event.locals.tenantId = tenant.id;
