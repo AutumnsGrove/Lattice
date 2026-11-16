@@ -175,8 +175,26 @@ const VALID_TASKS: LumenTask[] = [
 	"transcription",
 ];
 
-const MAX_INPUT_LENGTH = 100000; // 100KB max input
 const MAX_MESSAGES = 100; // Max messages in a conversation
+
+/**
+ * Maximum serialized input, in characters.
+ *
+ * This is a backstop, not a budget: it exists so one runaway caller cannot
+ * post a 40 MB prompt through the gateway, and it should sit far above what any
+ * real caller sends. 300k characters is roughly 75k tokens, which is the most
+ * that makes sense while Lumen picks a model without checking that model's
+ * context window — a bigger wall than that only moves the failure from a clear
+ * INVALID_INPUT here to an opaque provider error several steps later.
+ *
+ * Callers still own their own input budgets well under this line. The timeline
+ * summary keeps its commit list at 120k (COMMIT_LIST_BUDGET_CHARS in
+ * libs/curios) rather than spending the whole wall on one request.
+ *
+ * Was 100,000 until 2026-11-16, when a 183-commit day at ~116k characters was
+ * refused outright and silently cost the day's summary (GH #1703).
+ */
+const MAX_INPUT_LENGTH = 300_000;
 
 /**
  * Validate a Lumen request

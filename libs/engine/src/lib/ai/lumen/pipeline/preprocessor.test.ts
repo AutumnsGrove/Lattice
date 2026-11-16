@@ -294,8 +294,15 @@ describe("Request Validation", () => {
 		expect(() => validateRequest({ task: "generation", input: "" })).toThrow("Input is required");
 	});
 
+	it("should accept input right at the max length", () => {
+		const atLimit = "a".repeat(300_000);
+		expect(() => validateRequest({ task: "generation", input: atLimit })).not.toThrow();
+	});
+
 	it("should reject input that exceeds max length", () => {
-		const longInput = "a".repeat(100001);
+		// 2026-11-15: a 183-commit timeline prompt at ~116k characters was
+		// refused outright by the old 100k wall and the day's summary was lost.
+		const longInput = "a".repeat(300_001);
 		expect(() => validateRequest({ task: "generation", input: longInput })).toThrow(
 			"exceeds maximum length",
 		);
