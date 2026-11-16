@@ -309,12 +309,24 @@ async function getTenantConfig(
 					id?: string;
 				};
 
-				// TenantDO now caches tenant ID - no need for separate D1 query
-				if (config.id && config.subdomain) {
+				// TenantDO now caches tenant ID - no need for separate D1 query.
+				//
+				// `createdAt` was added with the link policy (#1682). A DO whose
+				// cache predates that deploy reports 0/undefined, which the policy
+				// reads as "unknown age" and therefore as young — that would noindex
+				// every established tenant until the SQLite entry went stale. A
+				// config without it falls through to D1 instead of being trusted.
+				if (config.id && config.subdomain && config.createdAt) {
 					return {
 						...config,
 						id: config.id,
 					};
+				}
+
+				if (config.id && config.subdomain) {
+					console.warn(
+						`[Hooks] TenantDO config for ${subdomain} has no createdAt; falling through to D1`,
+					);
 				}
 			}
 		} catch (err) {

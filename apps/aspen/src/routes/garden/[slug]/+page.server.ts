@@ -107,7 +107,7 @@ export const load: PageServerLoad = async ({ params, locals, platform, setHeader
 			const cachedPost = await cache.getOrSet<CachedPost | null>(kv, cacheKey, {
 				ttl: CACHE_TTL_SECONDS,
 				compute: async () => {
-					return await fetchAndProcessPost(slug, tenantId, db, authorName, tenantLinkPolicy.policy);
+					return await fetchAndProcessPost(slug, tenantId, db, authorName);
 				},
 			});
 
@@ -129,7 +129,7 @@ export const load: PageServerLoad = async ({ params, locals, platform, setHeader
 				// Load comments (not cached — always fresh from D1)
 				const { comments, commentTotal, commentSettings } = await loadComments(db, tenantId, slug);
 				return {
-					post: cachedPost,
+					post: withLinkPolicy(cachedPost, tenantLinkPolicy.policy),
 					isOwner: isOwner || false,
 					comments,
 					commentTotal,
@@ -139,17 +139,11 @@ export const load: PageServerLoad = async ({ params, locals, platform, setHeader
 			}
 		} else if (db && tenantId) {
 			// No KV available, fall back to direct D1 (no caching)
-			const post = await fetchAndProcessPost(
-				slug,
-				tenantId,
-				db,
-				authorName,
-				tenantLinkPolicy.policy,
-			);
+			const post = await fetchAndProcessPost(slug, tenantId, db, authorName);
 			if (post) {
 				const { comments, commentTotal, commentSettings } = await loadComments(db, tenantId, slug);
 				return {
-					post,
+					post: withLinkPolicy(post, tenantLinkPolicy.policy),
 					isOwner: isOwner || false,
 					comments,
 					commentTotal,
@@ -231,6 +225,17 @@ export const load: PageServerLoad = async ({ params, locals, platform, setHeader
  * Fails gracefully — comments are non-critical for page rendering.
  * Per-post toggle (commentSettings.comments_enabled) controls visibility.
  */
+/**
+ * Rewrite outbound links on a post for the current policy.
+ *
+ * Applied after every cache read rather than inside the cached compute, so the
+ * stored copy never carries a policy that has since changed (an account passing
+ * 14 days, or upgrading off the free tier).
+ */
+function withLinkPolicy(post: CachedPost, policy: LinkPolicy): CachedPost {
+	return { ...post, content: applyLinkPolicy(post.content ?? "", policy) };
+}
+
 async function loadComments(db: D1Database, tenantId: string, slug: string) {
 	try {
 		const tenantDb = getTenantDb(db, { tenantId });
@@ -266,7 +271,6 @@ async function fetchAndProcessPost(
 	tenantId: string,
 	db: D1Database,
 	authorName: string,
-	linkPolicy: LinkPolicy,
 ): Promise<CachedPost | null> {
 	const tenantDb = getTenantDb(db, { tenantId });
 
@@ -282,17 +286,14 @@ async function fetchAndProcessPost(
 	// Extract headers from markdown for TOC (this generates IDs)
 	const headers = post.markdown_content ? extractHeaders(post.markdown_content) : [];
 
-	// Generate HTML from markdown if not stored. Passing the policy into the
-	// renderer avoids a second pass over fresh HTML.
+	// Render without the link policy: this result is stored in KV, and the policy
+	// changes as an account ages or upgrades. It is applied on the way out, after
+	// the cache read, so a cached post cannot carry yesterday's policy.
 	let htmlContent = post.html_content;
 	if (!htmlContent && post.markdown_content) {
 		// renderMarkdown handles heading IDs and sanitization
-		htmlContent = renderMarkdown(post.markdown_content, { linkPolicy });
+		htmlContent = renderMarkdown(post.markdown_content);
 	}
-
-	// Stored HTML was rendered before this policy existed (or before the account
-	// aged into trust), so rewrite its links in place.
-	htmlContent = applyLinkPolicy(htmlContent ?? "", linkPolicy);
 
 	// Process anchor tags
 	const processedHtml = processAnchorTags(htmlContent || "");
