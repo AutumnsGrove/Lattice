@@ -47,102 +47,117 @@ export interface TenantTable {
 	retain?: boolean;
 }
 
-/** Tables in `grove-engine-db`. */
+/**
+ * Tables in `grove-engine-db`, **children before parents**.
+ *
+ * The order is not alphabetical, it is dependency order derived from the live
+ * foreign keys: `comments` and `post_views` before `posts`, `poll_votes` before
+ * `polls`, `gallery_collections` before `gallery_images`,
+ * `sentinel_checkpoints`/`metrics`/`schedules` before `sentinel_runs`. Deleting a
+ * parent first would either cascade rows we are about to delete anyway, or fail
+ * mid-sweep on a constraint.
+ *
+ * `tenant-tables.test.ts` asserts the ordering still holds, so regenerating this
+ * list cannot quietly undo it.
+ */
 const ENGINE_TABLES: readonly string[] = [
-	"audit_log",
-	"billing_audit_log",
-	"blaze_definitions",
-	"blocked_commenters",
-	"chat_read_cursors",
-	"comment_settings",
-	"comments",
-	"custom_fonts",
-	"draft_backups",
-	"friends",
-	"gallery_collections",
-	"gallery_curio_config",
-	"gallery_images",
-	"gallery_tags",
-	"greenhouse_tenants",
-	"image_hashes",
-	"lumen_usage",
-	"meadow_posts",
-	"media",
-	"pages",
-	"petal_ncmec_queue",
-	"petal_security_log",
-	"platform_billing",
+	"webhook_events",
+	"users",
+	"username_history",
+	"user_onboarding",
+	"thorn_moderation_log",
+	"thorn_flagged_content",
+	"thorn_entity_labels",
+	"theme_settings",
+	"tenant_settings",
+	"tenant_secrets",
+	"storage_exports",
+	"site_settings",
+	"short_links",
+	"sentinel_test_data",
+	"sentinel_schedules",
+	"sentinel_metrics",
+	"sentinel_checkpoints",
+	"sentinel_runs",
+	"sentinel_baselines",
+	"reverie_interactions",
+	"post_views",
 	"poll_votes",
 	"polls",
-	"post_views",
+	"platform_billing",
+	"petal_security_log",
+	"petal_ncmec_queue",
+	"pages",
+	"media",
+	"meadow_posts",
+	"lumen_usage",
+	"image_hashes",
+	"greenhouse_tenants",
+	"gallery_tags",
+	"gallery_curio_config",
+	"gallery_collections",
+	"gallery_images",
+	"friends",
+	"draft_backups",
+	"custom_fonts",
+	"comments",
 	"posts",
-	"reverie_interactions",
-	"sentinel_baselines",
-	"sentinel_checkpoints",
-	"sentinel_metrics",
-	"sentinel_runs",
-	"sentinel_schedules",
-	"sentinel_test_data",
-	"short_links",
-	"site_settings",
-	"storage_exports",
-	"tenant_secrets",
-	"tenant_settings",
-	"theme_settings",
-	"thorn_entity_labels",
-	"thorn_flagged_content",
-	"thorn_moderation_log",
-	"user_onboarding",
-	"username_history",
-	"users",
-	"webhook_events",
+	"comment_settings",
+	"chat_read_cursors",
+	"blocked_commenters",
+	"blaze_definitions",
+	"billing_audit_log",
+	"audit_log",
 ];
 
-/** Tables in `grove-curios-db`. None of these can cascade — `tenants` is in another database. */
+/**
+ * Tables in `grove-curios-db`, children before parents for the same reason.
+ * None of these can cascade — `tenants` is in another database.
+ */
 const CURIOS_TABLES: readonly string[] = [
-	"activity_status",
-	"ambient_config",
-	"artifacts",
-	"blogroll_items",
-	"bookmark_shelves",
-	"bookmarks",
-	"cathedral_panels",
-	"clipart_placements",
-	"cursor_config",
-	"custom_badges",
-	"custom_uploads",
-	"gallery_collections",
-	"gallery_curio_config",
-	"gallery_images",
-	"gallery_tags",
-	"guestbook_config",
-	"guestbook_entries",
-	"hit_counter_visitors",
-	"hit_counters",
-	"journey_curio_config",
-	"journey_jobs",
-	"journey_snapshots",
-	"journey_summaries",
-	"library_config",
-	"mood_ring_config",
-	"mood_ring_log",
-	"nowplaying_config",
-	"nowplaying_history",
+	"wishing_well_counts",
+	"webring_memberships",
+	"timeline_summaries",
+	"timeline_curio_config",
+	"timeline_ai_usage",
+	"timeline_activity",
+	"tenant_badges",
+	"status_badges",
+	"shrines",
+	"pulse_hourly_activity",
+	"pulse_events",
+	"pulse_daily_stats",
+	"pulse_curio_config",
 	"poll_votes",
 	"polls",
-	"pulse_curio_config",
-	"pulse_daily_stats",
-	"pulse_events",
-	"pulse_hourly_activity",
-	"shrines",
-	"status_badges",
-	"tenant_badges",
-	"timeline_activity",
-	"timeline_ai_usage",
-	"timeline_curio_config",
-	"timeline_summaries",
-	"webring_memberships",
-	"wishing_well_counts",
+	"nowplaying_history",
+	"nowplaying_config",
+	"mood_ring_log",
+	"mood_ring_config",
+	"library_config",
+	"journey_summaries",
+	"journey_snapshots",
+	"journey_jobs",
+	"journey_curio_config",
+	"hit_counters",
+	"hit_counter_visitors",
+	"guestbook_entries",
+	"guestbook_config",
+	"gallery_tags",
+	"gallery_curio_config",
+	"gallery_collections",
+	"gallery_images",
+	"custom_uploads",
+	"custom_badges",
+	"cursor_config",
+	"clipart_placements",
+	"cathedral_panels",
+	"bookmarks",
+	"bookmark_shelves",
+	"blogroll_items",
+	"artifacts",
+	"ambient_config",
+	"activity_status",
 ];
 
 /** Tables in `grove-observability-db`. Analytics is not part of any cascade. */
@@ -203,6 +218,20 @@ function hasTenantIdColumn(database: TenantDatabase, table: string): boolean {
 	if (database === "engine") return ENGINE_TABLES.includes(table);
 	return true; // every curios/observability table above carries tenant_id
 }
+
+/**
+ * The tenant row itself.
+ *
+ * Registered separately because it is keyed on `id`, not `tenant_id`, and because
+ * it must be deleted **last** — after everything that references it. A sweep that
+ * leaves this row behind leaves the subdomain claimed, and reports clean while
+ * the tenant still exists.
+ */
+export const TENANT_ROOT = {
+	database: "engine" as TenantDatabase,
+	table: "tenants",
+	column: "id",
+} as const;
 
 /** Every table that holds per-tenant rows, in every database. */
 export const TENANT_TABLE_REGISTRY: readonly TenantTable[] = buildRegistry();

@@ -90,10 +90,12 @@ describe("planTenantRemoval", () => {
 		const curios = fakeDb();
 		const plan = await planTenantRemoval({ engine: engine.db, curios: curios.db }, target);
 
-		// One count per tenant column per registered table.
-		const expectedCounts = TENANT_TABLE_REGISTRY.filter(
-			(e) => e.database === "engine" || e.database === "curios",
-		).reduce((sum, e) => sum + e.columns.length, 0);
+		// One count per tenant column per registered table, plus the tenants row
+		// itself (keyed on id, so a tenant_id sweep would never reach it).
+		const expectedCounts =
+			TENANT_TABLE_REGISTRY.filter(
+				(e) => e.database === "engine" || e.database === "curios",
+			).reduce((sum, e) => sum + e.columns.length, 0) + 1;
 		expect(engine.state.counts + curios.state.counts).toBe(expectedCounts);
 	});
 
@@ -155,7 +157,11 @@ describe("removeTenant", () => {
 		expect(result.dryRun).toBe(false);
 		expect(result.leftovers).toEqual([]);
 		expect(result.auditRecorded).toBe(true);
-		expect(engine.state.auditInserts).toBe(1);
+		// Intent before the sweep, outcome after it: a half-finished removal must
+		// leave a record of what it was trying to do.
+		expect(engine.state.auditInserts).toBe(2);
+		expect(result.tenantRowDeleted).toBe(true);
+		expect(engine.state.deletes.some((d) => d.table === "tenants" && d.column === "id")).toBe(true);
 
 		// The tenant's audit rows are kept — that record outlives the tenant.
 		expect(engine.state.deletes.some((d) => d.table === "audit_log")).toBe(false);
@@ -228,7 +234,7 @@ describe("removeTenant", () => {
 		expect(result.notified).toBe(true);
 	});
 
-	it("still records the removal when a delete throws", async () => {
+	it("keeps sweeping past a failing statement and reports it", async () => {
 		const engine = fakeDb(seedForTenant());
 		const failing: RemovalDatabase = {
 			prepare(sql: string) {
@@ -247,11 +253,17 @@ describe("removeTenant", () => {
 			},
 		};
 
-		// The delete throws, so removeTenant rejects — but the caller must not be
-		// able to think the tenant is gone, and the audit path is not reached.
-		await expect(
-			removeTenant({ engine: failing }, target, { reason: "link farm", dryRun: false }),
-		).rejects.toThrow("fk violation");
+		const result = await removeTenant({ engine: failing }, target, {
+			reason: "link farm",
+			dryRun: false,
+		});
+
+		// One constraint must not strand the rest of the tenant's data.
+		expect(result.failures.map((f) => f.table)).toContain("pages");
+		expect(result.leftovers.map((l) => l.table)).toContain("pages");
+		expect(engine.state.deletes.some((d) => d.table === "posts")).toBe(true);
+		expect(result.auditRecorded).toBe(true);
+		expect(formatRemovalResult(result)).toContain("Statements that failed");
 	});
 
 	it("reports a failed audit write without pretending the removal failed", async () => {

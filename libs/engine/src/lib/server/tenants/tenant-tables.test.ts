@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import snapshot from "./tenant-tables.snapshot.json";
 import {
+	TENANT_ROOT,
 	TENANT_TABLE_REGISTRY,
 	isRegistered,
 	registryByDatabase,
@@ -83,6 +84,35 @@ describe("tenant table registry", () => {
 		);
 		expect(grouped.curios.length).toBe(snapshot.curios.length);
 		expect(grouped.observability.length).toBe(snapshot.observability.length);
+	});
+
+	it("orders children before parents, so a foreign key cannot abort the sweep", () => {
+		const order = TENANT_TABLE_REGISTRY.filter((e) => e.database === "engine").map((e) => e.table);
+		const index = (table: string) => order.indexOf(table);
+
+		// Pairs taken from the live foreign keys: [child, parent]. Deleting the
+		// parent first would either cascade rows we are about to delete anyway, or
+		// fail mid-sweep on a constraint.
+		const pairs: [string, string][] = [
+			["comments", "posts"],
+			["post_views", "posts"],
+			["poll_votes", "polls"],
+			["gallery_collections", "gallery_images"],
+			["sentinel_checkpoints", "sentinel_runs"],
+			["sentinel_metrics", "sentinel_runs"],
+			["sentinel_schedules", "sentinel_runs"],
+		];
+
+		for (const [child, parent] of pairs) {
+			expect(index(child), `${child} must come before ${parent}`).toBeLessThan(index(parent));
+		}
+	});
+
+	it("puts the tenants row last, after everything that references it", () => {
+		// `tenants` is not in the registry (keyed on id, not tenant_id) but removal
+		// deletes it after the sweep; nothing may be deleted after it.
+		expect(TENANT_ROOT.table).toBe("tenants");
+		expect(TENANT_ROOT.column).toBe("id");
 	});
 
 	it("defaults an unregistered table's columns to tenant_id rather than guessing a name", () => {

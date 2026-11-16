@@ -590,7 +590,17 @@ other than `tenant_id`. A table that is not registered fails the test, so a new
 one cannot be silently missed.
 
 It keeps the tenant's `audit_log` rows — the record of a removal has to outlive
-the tenant — and writes its own `tenant_remove` entry with counts, not content.
+the tenant — and writes two of its own: `tenant_remove_started` with the plan
+counts *before* anything is deleted, and `tenant_remove` with the outcome after.
+Both hold counts, never content. A sweep that dies halfway leaves the first row,
+which is the difference between "a half-removed tenant" and "a half-removed
+tenant somebody can reconstruct".
+
+Deletes run curios → observability → engine, children before parents (the
+registry stores that order, and a test pins it), then the `tenants` row itself
+last. A statement that throws does not abort the sweep: it is collected into
+`failures`, re-counted into `leftovers`, and reported. Never trust a removal whose
+result mentions either.
 
 After acting: block the identity domain so the same operator cannot re-sign-up (#1681), and record the verdict so the scorer learns from it (#1684).
 
