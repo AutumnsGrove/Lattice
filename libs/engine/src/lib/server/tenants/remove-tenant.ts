@@ -275,8 +275,18 @@ export async function removeTenant(
 
 	// 2. The tenant row, last. Without this the subdomain stays claimed and the
 	//    sweep looks clean while the tenant still exists.
+	//
+	//    But only when the sweep actually succeeded: deleting the root while child
+	//    rows survived would orphan them with nothing to find them by, and the next
+	//    attempt would have no tenant to resolve.
 	let tenantRowDeleted = false;
-	if (dbs.engine) {
+	if (dbs.engine && failures.length > 0) {
+		failures.push({
+			database: "engine",
+			table: TENANT_ROOT.table,
+			error: `not deleted — ${failures.length} earlier statement(s) failed, so the tenant is kept for a retry`,
+		});
+	} else if (dbs.engine) {
 		try {
 			await dbs.engine
 				.prepare(`DELETE FROM ${TENANT_ROOT.table} WHERE ${TENANT_ROOT.column} = ?`)
@@ -294,14 +304,48 @@ export async function removeTenant(
 
 	// 3. Outside-the-database work, in the order the runbook uses: take it off the
 	//    web, then the identity, then the files, then tell the person.
+	// Each of these already runs after the rows are gone, so a throw must not
+	// prevent the verification pass, the outcome record, or the notification.
+	// One failed side-effect is a line in `failures`, not a lost result object.
 	let cacheEvicted = false;
 	if (options.evictCache) {
-		await options.evictCache(target);
-		cacheEvicted = true;
+		try {
+			await options.evictCache(target);
+			cacheEvicted = true;
+		} catch (err) {
+			failures.push({
+				database: "engine",
+				table: "tenant_do",
+				error: `cache eviction failed: ${err instanceof Error ? err.message : String(err)}`,
+			});
+		}
 	}
 
-	const identitiesDeleted = options.deleteIdentity ? await options.deleteIdentity(target) : 0;
-	const r2ObjectsDeleted = options.deleteR2 ? await options.deleteR2(target) : 0;
+	let identitiesDeleted = 0;
+	if (options.deleteIdentity) {
+		try {
+			identitiesDeleted = await options.deleteIdentity(target);
+		} catch (err) {
+			failures.push({
+				database: "engine",
+				table: "groveauth_identity",
+				error: `identity deletion failed: ${err instanceof Error ? err.message : String(err)}`,
+			});
+		}
+	}
+
+	let r2ObjectsDeleted = 0;
+	if (options.deleteR2) {
+		try {
+			r2ObjectsDeleted = await options.deleteR2(target);
+		} catch (err) {
+			failures.push({
+				database: "engine",
+				table: "r2_objects",
+				error: `R2 deletion failed: ${err instanceof Error ? err.message : String(err)}`,
+			});
+		}
+	}
 
 	// 4. Verify. A removal that cannot show zero is not a removal.
 	const leftovers = (await planTenantRemoval(dbs, target)).tables.filter(
@@ -322,8 +366,12 @@ export async function removeTenant(
 
 	let notified = false;
 	if (options.notify) {
-		await options.notify(target, plan);
-		notified = true;
+		try {
+			await options.notify(target, plan);
+			notified = true;
+		} catch (err) {
+			console.error("[removeTenant] Notification failed:", err);
+		}
 	}
 
 	return {

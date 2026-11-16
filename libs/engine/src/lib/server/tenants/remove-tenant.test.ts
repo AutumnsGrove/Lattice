@@ -266,6 +266,65 @@ describe("removeTenant", () => {
 		expect(formatRemovalResult(result)).toContain("Statements that failed");
 	});
 
+	it("keeps the tenants row when the sweep failed, so a retry can find it", async () => {
+		const engine = fakeDb(seedForTenant());
+		const failing: RemovalDatabase = {
+			prepare(sql: string) {
+				if (/DELETE FROM pages/.test(sql)) {
+					return {
+						bind: () => ({
+							first: async () => null,
+							all: async () => ({ results: [] }),
+							run: async () => {
+								throw new Error("fk violation");
+							},
+						}),
+					};
+				}
+				return engine.db.prepare(sql);
+			},
+		};
+
+		const result = await removeTenant({ engine: failing }, target, {
+			reason: "link farm",
+			dryRun: false,
+		});
+
+		// Deleting the root while child rows survive orphans them with nothing to
+		// find them by, and leaves no tenant for the retry to resolve.
+		expect(result.tenantRowDeleted).toBe(false);
+		expect(engine.state.deletes.some((d) => d.table === "tenants")).toBe(false);
+		expect(result.failures.find((f) => f.table === "tenants")?.error).toMatch(/kept for a retry/);
+	});
+
+	it("records a throwing callback instead of losing the result", async () => {
+		const engine = fakeDb(seedForTenant());
+
+		const result = await removeTenant({ engine: engine.db }, target, {
+			reason: "link farm",
+			dryRun: false,
+			evictCache: async () => {
+				throw new Error("DO unavailable");
+			},
+			deleteR2: async () => {
+				throw new Error("bucket missing");
+			},
+			notify: async () => {
+				throw new Error("zephyr down");
+			},
+		});
+
+		// The rows were already gone by the time these ran, so a throw must not
+		// prevent the verification pass or the outcome record.
+		expect(result.failures.map((f) => f.table)).toEqual(
+			expect.arrayContaining(["tenant_do", "r2_objects"]),
+		);
+		expect(result.cacheEvicted).toBe(false);
+		expect(result.notified).toBe(false);
+		expect(result.auditRecorded).toBe(true);
+		expect(formatRemovalResult(result)).toContain("cache eviction failed");
+	});
+
 	it("reports a failed audit write without pretending the removal failed", async () => {
 		const engine = fakeDb(seedForTenant());
 		const noAudit: RemovalDatabase = {
