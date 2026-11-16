@@ -709,3 +709,62 @@ describe("edge cases and integration", () => {
 		}
 	});
 });
+
+// =============================================================================
+// Input Budget Tests
+// =============================================================================
+
+/**
+ * Lumen rejects serialized input past 100,000 characters before a model is
+ * chosen, so maxTokens never comes into it. 2026-11-15 was 183 commits whose
+ * messages totalled ~116k characters — mostly squash-merge bodies — and the
+ * nightly run wrote no row at all.
+ */
+describe("buildVoicedPrompt - input budget", () => {
+	function heavyCommit(index: number): Commit {
+		return makeCommit({
+			sha: `sha${index}`,
+			message: `feat(timeline): land change ${index}\n\n${"Merge description. ".repeat(30)}`,
+		});
+	}
+
+	it("keeps a 183-commit day under Lumen's 100k character wall", () => {
+		const commits = Array.from({ length: 183 }, (_, i) => heavyCommit(i));
+		for (const voiceId of ["professional", "quest", "casual", "poetic", "minimal"]) {
+			const { systemPrompt, userPrompt } = buildVoicedPrompt(
+				voiceId,
+				commits,
+				"2026-11-15",
+				"Autumn",
+			);
+			const serialized = JSON.stringify([
+				{ role: "system", content: systemPrompt },
+				{ role: "user", content: userPrompt },
+			]);
+			expect(serialized.length, `${voiceId} would be rejected by Lumen`).toBeLessThan(100_000);
+		}
+	});
+
+	it("keeps every commit's subject line on a heavy day", () => {
+		const commits = Array.from({ length: 183 }, (_, i) => heavyCommit(i));
+		const { userPrompt } = buildVoicedPrompt("professional", commits, "2026-11-15");
+		expect(userPrompt).toContain("183 total");
+		expect(userPrompt).toContain("feat(timeline): land change 182");
+		expect(userPrompt).not.toContain("Merge description.");
+	});
+
+	it("states the overflow instead of dropping it silently", () => {
+		const commits = Array.from({ length: 2_000 }, (_, i) => heavyCommit(i));
+		const { userPrompt } = buildVoicedPrompt("professional", commits, "2026-11-15");
+		expect(userPrompt).toContain("shortened to fit");
+		expect(userPrompt).toContain("2000-commit day");
+		expect(userPrompt.indexOf("shortened to fit")).toBeLessThan(
+			userPrompt.indexOf("GENERATE THREE OUTPUTS"),
+		);
+	});
+
+	it("leaves an ordinary day's messages intact", () => {
+		const { userPrompt } = buildVoicedPrompt("professional", [makeCommit()], "2026-03-12");
+		expect(userPrompt).not.toContain("shortened to fit");
+	});
+});

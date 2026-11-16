@@ -47,6 +47,7 @@ const VALID_APPS = new Set([
 	"landing",
 	"login",
 	"plant",
+	"timeline-sync",
 ]);
 
 interface Env {
