@@ -228,6 +228,22 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
 		description: "Code generation and analysis",
 	},
 
+	// Agent loop step (DeepSeek V4.1 Flash)
+	//
+	// No fallback chain, on purpose. The router skips fallbacks whenever tools
+	// are present (`skipFallbacks = !!options.model || !!options.tools`), because
+	// tool schemas are model-specific — so a chain here could never run for the
+	// task it is defined for. Fallback for agent calls lives in the caller
+	// (Lyra decision 58), not in Lumen.
+	agent: {
+		primaryModel: MODELS.DEEPSEEK_V4_1_FLASH,
+		primaryProvider: "openrouter",
+		fallbackChain: [],
+		defaultMaxTokens: 4096,
+		defaultTemperature: 0.2,
+		description: "One step of an agent loop: a tool-using turn",
+	},
+
 	// Transcription (CF Whisper Turbo → Whisper → Whisper Tiny)
 	transcription: {
 		primaryModel: MODELS.CF_WHISPER_TURBO,

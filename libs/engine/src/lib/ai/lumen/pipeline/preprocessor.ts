@@ -184,6 +184,7 @@ const VALID_TASKS: LumenTask[] = [
 	"image",
 	"code",
 	"transcription",
+	"agent",
 ];
 
 const MAX_MESSAGES = 100; // Max messages in a conversation

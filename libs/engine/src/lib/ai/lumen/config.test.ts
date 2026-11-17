@@ -95,6 +95,7 @@ describe("Task Registry", () => {
 		"image",
 		"code",
 		"transcription",
+		"agent",
 	];
 
 	it("should have configuration for all tasks", () => {
@@ -127,6 +128,14 @@ describe("Task Registry", () => {
 		);
 		expect(openRouterPrimary.length + cfTasks.length).toBe(allTasks.length);
 		expect(cfTasks).toEqual(["transcription"]);
+	});
+
+	it("gives the agent task no fallback chain, because it could never run", () => {
+		// The router skips fallbacks whenever tools are present, and the agent task
+		// exists to carry tools. A chain here would be decoration; fallback for
+		// agent calls lives in the caller (Lyra decision 58).
+		expect(TASK_REGISTRY.agent.fallbackChain).toEqual([]);
+		expect(TASK_REGISTRY.agent.defaultMaxTokens).toBeGreaterThan(0);
 	});
 
 	it("should have fallback chains for reliability", () => {

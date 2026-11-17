@@ -23,7 +23,18 @@ export type LumenTask =
 	| "chat" // Conversational → DeepSeek V4.1 Flash (OpenRouter)
 	| "image" // Image analysis → Claude Haiku 5.5 via OpenRouter
 	| "code" // Code tasks → DeepSeek V4.1 Flash via OpenRouter
-	| "transcription"; // Voice-to-text → Whisper (CF Workers AI)
+	| "transcription" // Voice-to-text → Whisper (CF Workers AI)
+	/**
+	 * A step in an agent loop: a tool-using model that is expected to call
+	 * something rather than answer. Separate from `chat` because it needs its
+	 * own model (one that supports tools), its own quota line, and its own
+	 * Songbird context.
+	 *
+	 * Its quota is 0 on every tier until a real rule exists, so a caller has to
+	 * pass `skipQuota`. That is deliberate: a ten-step run would otherwise cost
+	 * ten requests against a limit meant for one answer.
+	 */
+	| "agent";
 
 // =============================================================================
 // MESSAGE TYPES

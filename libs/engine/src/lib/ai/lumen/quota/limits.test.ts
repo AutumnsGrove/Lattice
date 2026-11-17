@@ -32,6 +32,8 @@ describe("Quota Structure", () => {
 		"chat",
 		"image",
 		"code",
+		"transcription",
+		"agent",
 	];
 
 	it("should have quotas defined for all tiers", () => {
@@ -63,6 +65,21 @@ describe("Quota Structure", () => {
 // =============================================================================
 // WANDERER TIER RESTRICTIONS
 // =============================================================================
+
+describe("Agent quota", () => {
+	const allTiers: TierKey[] = ["wanderer", "seedling", "sapling", "oak", "evergreen"];
+
+	it("is zero on every tier until a real rule exists", () => {
+		for (const tier of allTiers) {
+			expect(LUMEN_QUOTAS[tier].agent).toBe(0);
+			expect(isTaskAvailable(tier, "agent")).toBe(false);
+		}
+	});
+
+	it("is not counted by wouldExceedQuota, which has no allowance to spend", () => {
+		expect(wouldExceedQuota(0, LUMEN_QUOTAS.oak.agent)).toBe(true);
+	});
+});
 
 describe("Wanderer Tier Restrictions", () => {
 	it("should have no image access", () => {

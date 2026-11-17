@@ -52,6 +52,7 @@ export const LumenTaskSchema = z.enum([
 	"moderation",
 	"embedding",
 	"transcription",
+	"agent",
 ]);
 
 /** Tool call schema (returned by models) */

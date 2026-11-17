@@ -40,6 +40,7 @@ export const LUMEN_QUOTAS: Record<TierKey, Record<LumenTask, number>> = {
 		image: 0, // No image analysis
 		code: 0, // No code help
 		transcription: 10, // Basic voice capture
+		agent: 0, // Not metered yet — callers pass skipQuota
 	},
 
 	// Seedling ($8/mo): Entry tier with basic AI
@@ -52,6 +53,7 @@ export const LUMEN_QUOTAS: Record<TierKey, Record<LumenTask, number>> = {
 		image: 10,
 		code: 10,
 		transcription: 100,
+		agent: 0, // Not metered yet — callers pass skipQuota
 	},
 
 	// Sapling ($12/mo): Growing tier with more AI
@@ -64,6 +66,7 @@ export const LUMEN_QUOTAS: Record<TierKey, Record<LumenTask, number>> = {
 		image: 50,
 		code: 50,
 		transcription: 500,
+		agent: 0, // Not metered yet — callers pass skipQuota
 	},
 
 	// Oak ($25/mo): Full tier with generous AI
@@ -76,6 +79,7 @@ export const LUMEN_QUOTAS: Record<TierKey, Record<LumenTask, number>> = {
 		image: 200,
 		code: 200,
 		transcription: 2000,
+		agent: 0, // Not metered yet — callers pass skipQuota
 	},
 
 	// Evergreen ($35/mo): Premium tier with abundant AI
@@ -88,6 +92,7 @@ export const LUMEN_QUOTAS: Record<TierKey, Record<LumenTask, number>> = {
 		image: 1000,
 		code: 1000,
 		transcription: 10000,
+		agent: 0, // Not metered yet — callers pass skipQuota
 	},
 };
 
