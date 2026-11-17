@@ -199,6 +199,7 @@ export class CloudflareAIProvider implements LumenProvider {
 					input: inputTokens,
 					output: outputTokens,
 					cost: 0, // CF AI is included in Workers pricing
+					costSource: "catalog",
 				},
 				model,
 			};
