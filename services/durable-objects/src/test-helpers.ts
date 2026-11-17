@@ -39,6 +39,7 @@ export interface MockSqlStorage {
 }
 
 interface SqlStorageCursorLike {
+	next: () => IteratorResult<Record<string, unknown>>;
 	one: () => Record<string, unknown> | null;
 	toArray: () => Record<string, unknown>[];
 	columnNames: string[];
@@ -91,7 +92,11 @@ export function createMockSql(): MockSqlStorage {
 }
 
 function makeCursor(rows: Record<string, unknown>[]): SqlStorageCursorLike {
+	// `exec()` returns a fresh cursor each call, and `next()` walks it one row at
+	// a time (Loom's `queryOne` depends on that: `.next()` then read `.done`).
+	const iterator = rows[Symbol.iterator]();
 	return {
+		next: () => iterator.next(),
 		one: () => rows[0] ?? null,
 		toArray: () => rows,
 		columnNames: rows.length > 0 ? Object.keys(rows[0]) : [],

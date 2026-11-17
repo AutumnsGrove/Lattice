@@ -7,6 +7,7 @@
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { CloudflareDatabase } from "../../src/cloudflare/database.js";
+import { SRV_ERRORS } from "../../src/errors.js";
 import { createMockD1, createMockD1Statement, type MockD1Database } from "./helpers.js";
 
 // Mock logGroveError to verify error logging
@@ -191,7 +192,18 @@ describe("CloudflareDatabase", () => {
 	describe("transaction", () => {
 		it("should throw because D1 does not support interactive transactions", async () => {
 			await expect(db.transaction(async () => "result")).rejects.toThrow(
-				/transactions not supported/i,
+				SRV_ERRORS.TRANSACTIONS_NOT_SUPPORTED.userMessage,
+			);
+
+			// The throw carries the generic user message. What to use instead is
+			// admin-facing guidance, so it rides the log rather than the error.
+			const { logGroveError } = await import("@autumnsgrove/grove-errors");
+			expect(logGroveError).toHaveBeenCalledWith(
+				"InfraSDK",
+				SRV_ERRORS.TRANSACTIONS_NOT_SUPPORTED,
+				expect.objectContaining({
+					detail: expect.stringContaining("Use batch() for atomic operations"),
+				}),
 			);
 		});
 	});
