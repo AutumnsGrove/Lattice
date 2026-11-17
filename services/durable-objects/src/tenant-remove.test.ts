@@ -164,6 +164,37 @@ describe("POST /tenant/remove", () => {
 		expect(body.leftovers).toEqual([]);
 	});
 
+	it("pages through R2 instead of deleting only the first 1000 objects", async () => {
+		// R2 list() truncates at 1000 keys. The first page is full, so a
+		// single-call implementation would stop here and report success while
+		// leaving the rest of the tenant's uploads in the bucket.
+		const { env, r2Deleted } = makeEnv({ opsKey: KEY, tenantRow });
+		const listing = env as unknown as { IMAGES: { list: ReturnType<typeof vi.fn> } };
+
+		listing.IMAGES.list
+			.mockResolvedValueOnce({
+				objects: [{ key: "tenants/t-1/1.png" }, { key: "tenants/t-1/2.png" }],
+				truncated: true,
+				cursor: "page-2",
+			})
+			.mockResolvedValueOnce({
+				objects: [{ key: "tenants/t-1/3.png" }],
+				truncated: false,
+				cursor: undefined,
+			});
+
+		const res = await worker.fetch(
+			removeRequest({ subdomain: "gone", reason: "x", dryRun: false }, KEY),
+			env,
+		);
+		const body = (await res.json()) as any;
+
+		expect(listing.IMAGES.list).toHaveBeenCalledTimes(2);
+		expect(listing.IMAGES.list.mock.calls[1][0]).toMatchObject({ cursor: "page-2" });
+		expect(r2Deleted).toHaveLength(3);
+		expect(body.r2ObjectsDeleted).toBe(3);
+	});
+
 	it("reports the summary text an operator actually reads", async () => {
 		const { env } = makeEnv({ opsKey: KEY, tenantRow });
 		const res = await worker.fetch(

@@ -482,9 +482,23 @@ async function handleTenantRemove(request: Request, env: Env): Promise<Response>
 					});
 				},
 				deleteR2: async (tenant) => {
-					const listed = await env.IMAGES.list({ prefix: `tenants/${tenant.tenantId}/` });
-					await Promise.all(listed.objects.map((object) => env.IMAGES.delete(object.key)));
-					return listed.objects.length;
+					// R2 list() caps at 1000 keys per call and says so with
+					// `truncated`. Deleting one page and reporting success would leave
+					// the rest of a prolific tenant's uploads in the bucket, and the
+					// `leftovers` check only covers D1 — so nothing downstream would
+					// notice.
+					let deleted = 0;
+					let cursor: string | undefined;
+					do {
+						const page = await env.IMAGES.list({
+							prefix: `tenants/${tenant.tenantId}/`,
+							...(cursor ? { cursor } : {}),
+						});
+						await Promise.all(page.objects.map((object) => env.IMAGES.delete(object.key)));
+						deleted += page.objects.length;
+						cursor = page.truncated ? page.cursor : undefined;
+					} while (cursor);
+					return deleted;
 				},
 				// Not bound here, and pretending otherwise would be worse than saying so.
 				deleteIdentity: async () => 0,
