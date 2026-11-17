@@ -149,6 +149,18 @@ export interface LumenRequestOptions {
 	metadata?: Record<string, unknown>;
 }
 
+/**
+ * Why the model stopped generating, normalized across providers.
+ *
+ * - `stop` — the model finished its thought
+ * - `length` — it hit the token ceiling. **The content may be half-written**, so
+ *   nothing derived from it (especially tool-call arguments) can be trusted
+ * - `tool_calls` — it is waiting for tool results
+ * - `content_filter` — a safety filter cut it off
+ * - `other` — a provider reason that does not fit the above
+ */
+export type LumenFinishReason = "stop" | "length" | "tool_calls" | "content_filter" | "other";
+
 export interface LumenResponse {
 	/** Generated content (may be empty string when model only returns tool calls) */
 	content: string;
@@ -157,8 +169,22 @@ export interface LumenResponse {
 	 * Tool calls returned by the model (only present when tools were provided).
 	 * Each call includes the function name and JSON-encoded arguments.
 	 * The caller is responsible for parsing arguments and executing the calls.
+	 *
+	 * When `finishReason` is `length`, these arguments may be truncated JSON.
+	 * A caller running a loop should discard the turn rather than parse it.
 	 */
 	toolCalls?: LumenToolCall[];
+
+	/**
+	 * Why the model stopped. Absent only when the provider did not report one;
+	 * OpenRouter always does. Treat absent as "unknown" rather than "finished".
+	 *
+	 * This exists because a reply cut off by the token ceiling can contain
+	 * half-written tool arguments, and running those is worse than retrying. The
+	 * timeline hit the same failure in plain text (see the "cut off mid-object"
+	 * note in workers/timeline-sync/src/generator.ts) before it could see it.
+	 */
+	finishReason?: LumenFinishReason;
 
 	/** Model that was used */
 	model: string;

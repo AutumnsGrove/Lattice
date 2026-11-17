@@ -84,6 +84,7 @@ inference.post("/", async (c) => {
 				usage: result.usage,
 				cached: result.cached,
 				...(result.toolCalls && { tool_calls: result.toolCalls }),
+				...(result.finishReason && { finish_reason: result.finishReason }),
 			},
 			meta: {
 				task: req.task,

@@ -9,7 +9,13 @@
 
 import { PROVIDERS, calculateCost } from "../config.js";
 import { ProviderError, ProviderTimeoutError } from "../errors.js";
-import type { LumenMessage, LumenProviderName, LumenStreamChunk, LumenToolCall } from "../types.js";
+import type {
+	LumenFinishReason,
+	LumenMessage,
+	LumenProviderName,
+	LumenStreamChunk,
+	LumenToolCall,
+} from "../types.js";
 import type { LumenInferenceOptions, LumenProvider, LumenProviderResponse } from "./types.js";
 import { safeParseJson } from "../../../utils/json.js";
 
@@ -319,6 +325,7 @@ export class OpenRouterProvider implements LumenProvider {
 						arguments: tc.function.arguments,
 					},
 				})),
+				finishReason: normalizeFinishReason(data.choices?.[0]?.finish_reason),
 			};
 		} catch (err) {
 			// Handle timeout
@@ -755,6 +762,32 @@ Provide your safety assessment for User in the above conversation:
 			}
 		}
 		return Math.ceil(chars / 4);
+	}
+}
+
+/**
+ * Map a provider's `finish_reason` onto the small set Lumen promises.
+ *
+ * OpenRouter passes through whatever the underlying model said — `stop`,
+ * `length`, `tool_calls`, `content_filter`, and occasionally provider-specific
+ * values like `eos` or `null`. A caller deciding whether to trust truncated
+ * tool arguments only needs the distinction that matters: did it run out of
+ * room, or did it finish. Everything unrecognized becomes `other` rather than
+ * being dropped, because "unknown" and "finished" must not look the same.
+ */
+export function normalizeFinishReason(
+	raw: string | null | undefined,
+): LumenFinishReason | undefined {
+	if (raw === null || raw === undefined) return undefined;
+
+	switch (raw) {
+		case "stop":
+		case "length":
+		case "tool_calls":
+		case "content_filter":
+			return raw;
+		default:
+			return "other";
 	}
 }
 

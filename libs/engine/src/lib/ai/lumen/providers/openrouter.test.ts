@@ -380,6 +380,51 @@ describe("inference()", () => {
 		expect(body.messages[0]).toEqual({ role: "user", content: "hello" });
 	});
 
+	it("reports finish_reason as a normalized finishReason", async () => {
+		const provider = new OpenRouterProvider("test-key");
+
+		(globalThis.fetch as any).mockResolvedValue(
+			createMockResponse({
+				choices: [{ message: { content: '{"partial":' }, finish_reason: "length" }],
+				usage: { prompt_tokens: 100, completion_tokens: 50 },
+			}),
+		);
+
+		const result = await provider.inference("test/model", [{ role: "user", content: "go" }], {
+			maxTokens: 50,
+			temperature: 0,
+		});
+
+		// The timeline's "cut off mid-object" failure, now visible to the caller.
+		expect(result.finishReason).toBe("length");
+	});
+
+	it("normalizes unknown provider reasons to other rather than dropping them", async () => {
+		const provider = new OpenRouterProvider("test-key");
+
+		for (const [raw, expected] of [
+			["stop", "stop"],
+			["tool_calls", "tool_calls"],
+			["content_filter", "content_filter"],
+			["eos", "other"],
+			[undefined, undefined],
+		] as const) {
+			(globalThis.fetch as any).mockResolvedValue(
+				createMockResponse({
+					choices: [{ message: { content: "x" }, finish_reason: raw }],
+					usage: { prompt_tokens: 1, completion_tokens: 1 },
+				}),
+			);
+
+			const result = await provider.inference("test/model", [{ role: "user", content: "go" }], {
+				maxTokens: 10,
+				temperature: 0,
+			});
+
+			expect(result.finishReason).toBe(expected);
+		}
+	});
+
 	it("uses apiKeyOverride when provided", async () => {
 		const provider = new OpenRouterProvider("original-key");
 

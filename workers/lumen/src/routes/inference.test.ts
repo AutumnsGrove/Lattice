@@ -104,6 +104,7 @@ describe("POST /inference", () => {
 			provider: "openrouter",
 			usage: { input: 30, output: 8, cost: 0 },
 			cached: false,
+			finishReason: "stop",
 		});
 
 		const app = createApp();
@@ -165,6 +166,41 @@ describe("POST /inference", () => {
 		const body: LumenWorkerResponse = (await res.json()) as any;
 		expect(body.error?.code).toBe("INVALID_PARAMS");
 		expect(body.error?.message).toContain("tool_call_id");
+	});
+
+	it("returns finish_reason so a caller can see a truncated reply", async () => {
+		mockRun.mockResolvedValue({
+			content: '{"partial":',
+			model: "m",
+			provider: "openrouter",
+			usage: { input: 100, output: 50, cost: 0 },
+			cached: false,
+			finishReason: "length",
+			toolCalls: [{ id: "call_9", type: "function", function: { name: "t", arguments: '{"a":' } }],
+		});
+
+		const app = createApp();
+		const res = await app.request(post({ task: "generation", input: "go" }), undefined, mockEnv);
+
+		const body = (await res.json()) as any;
+		expect(body.data?.finish_reason).toBe("length");
+		expect(body.data?.tool_calls).toHaveLength(1);
+	});
+
+	it("omits finish_reason when the client did not report one", async () => {
+		mockRun.mockResolvedValue({
+			content: "x",
+			model: "m",
+			provider: "openrouter",
+			usage: { input: 1, output: 1, cost: 0 },
+			cached: false,
+		});
+
+		const app = createApp();
+		const res = await app.request(post({ task: "generation", input: "go" }), undefined, mockEnv);
+
+		const body = (await res.json()) as any;
+		expect(body.data?.finish_reason).toBeUndefined();
 	});
 
 	it("should return 400 for invalid JSON body", async () => {

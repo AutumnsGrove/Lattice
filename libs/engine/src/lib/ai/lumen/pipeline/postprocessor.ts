@@ -62,6 +62,9 @@ export function normalizeResponse(input: PostprocessInput): LumenResponse {
 		...(input.providerResponse.toolCalls && {
 			toolCalls: input.providerResponse.toolCalls,
 		}),
+		...(input.providerResponse.finishReason && {
+			finishReason: input.providerResponse.finishReason,
+		}),
 	};
 }
 

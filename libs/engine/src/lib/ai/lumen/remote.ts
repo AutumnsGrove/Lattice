@@ -68,6 +68,8 @@ const ToolCallSchema = z.object({
 	}),
 });
 
+const FinishReasonSchema = z.enum(["stop", "length", "tool_calls", "content_filter", "other"]);
+
 const InferenceDataSchema = z.object({
 	content: z.string(),
 	model: z.string(),
@@ -75,6 +77,7 @@ const InferenceDataSchema = z.object({
 	usage: UsageSchema,
 	cached: z.boolean().optional().default(false),
 	tool_calls: z.array(ToolCallSchema).optional(),
+	finish_reason: FinishReasonSchema.optional(),
 });
 
 const EmbedDataSchema = z.object({
@@ -223,6 +226,7 @@ export class RemoteLumenClient {
 			cached: data.data.cached,
 			latency: envelope.data.meta?.latencyMs ?? 0,
 			...(data.data.tool_calls && { toolCalls: data.data.tool_calls }),
+			...(data.data.finish_reason && { finishReason: data.data.finish_reason }),
 		};
 	}
 
