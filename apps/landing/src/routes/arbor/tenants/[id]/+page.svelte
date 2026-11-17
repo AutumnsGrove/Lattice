@@ -26,6 +26,12 @@
 
 	let copiedCommand = $state<string | null>(null);
 
+	// ── Danger Zone commands ──────────────────────────────────────────
+	// One string per command, displayed and copied from the same place, so the
+	// panel cannot drift from the verbs `gw` actually offers.
+	const suspendCommand = $derived(`gw tenant suspend ${data.tenant.subdomain} --write`);
+	const resumeCommand = $derived(`gw tenant resume ${data.tenant.subdomain} --write`);
+
 	// ── Hidden form refs ──────────────────────────────────────────────
 	let enrollFormRef = $state<HTMLFormElement | null>(null);
 	let unenrollFormRef = $state<HTMLFormElement | null>(null);
@@ -438,16 +444,12 @@
 			<div>
 				<div class="text-sm font-sans font-medium text-foreground">Suspend Tenant</div>
 				<code class="text-xs font-mono text-foreground-muted">
-					gw db query --write "UPDATE tenants SET active = 0 WHERE subdomain = '{data.tenant.subdomain}'"
+					{suspendCommand}
 				</code>
 			</div>
 			<button
 				type="button"
-				onclick={() =>
-					copyCommand(
-						`gw db query --write "UPDATE tenants SET active = 0 WHERE subdomain = '${data.tenant.subdomain}'"`,
-						'suspend'
-					)}
+				onclick={() => copyCommand(suspendCommand, 'suspend')}
 				class="shrink-0 p-2 rounded-lg hover:bg-error/20 transition-colors"
 				aria-label={copiedCommand === 'suspend' ? 'Copied!' : 'Copy suspend command'}
 			>
@@ -465,16 +467,12 @@
 				<div>
 					<div class="text-sm font-sans font-medium text-foreground">Reactivate Tenant</div>
 					<code class="text-xs font-mono text-foreground-muted">
-						gw db query --write "UPDATE tenants SET active = 1 WHERE subdomain = '{data.tenant.subdomain}'"
+						{resumeCommand}
 					</code>
 				</div>
 				<button
 					type="button"
-					onclick={() =>
-						copyCommand(
-							`gw db query --write "UPDATE tenants SET active = 1 WHERE subdomain = '${data.tenant.subdomain}'"`,
-							'reactivate'
-						)}
+					onclick={() => copyCommand(resumeCommand, 'reactivate')}
 					class="shrink-0 p-2 rounded-lg hover:bg-success hover:bg-opacity-20 transition-colors"
 					aria-label={copiedCommand === 'reactivate' ? 'Copied!' : 'Copy reactivate command'}
 				>
@@ -487,29 +485,14 @@
 			</div>
 		{/if}
 
-		<!-- Delete Command -->
-		<div class="flex items-center justify-between gap-4 p-3 rounded-lg bg-error-bg">
-			<div>
-				<div class="text-sm font-sans font-medium text-error">
-					Delete Tenant
-				</div>
-				<code class="text-xs font-mono text-foreground-muted">
-					gw tenant delete {data.tenant.subdomain} --write
-				</code>
-			</div>
-			<button
-				type="button"
-				onclick={() =>
-					copyCommand(`gw tenant delete ${data.tenant.subdomain} --write`, 'delete')}
-				class="shrink-0 p-2 rounded-lg hover:bg-error/20 transition-colors"
-				aria-label={copiedCommand === 'delete' ? 'Copied!' : 'Copy delete command'}
-			>
-				{#if copiedCommand === 'delete'}
-					<Check class="w-4 h-4 text-success" />
-				{:else}
-					<Copy class="w-4 h-4 text-error" />
-				{/if}
-			</button>
+		<!-- Delete: no `gw` verb yet, so point at the path that exists -->
+		<div class="p-3 rounded-lg bg-error-bg">
+			<div class="text-sm font-sans font-medium text-error">Delete Tenant</div>
+			<p class="mt-1 text-xs font-sans text-foreground-muted">
+				Permanent removal runs through <code class="font-mono">removeTenant()</code> in the engine,
+				not from this panel — see the incident-response runbook. Suspension is the reversible first
+				move and keeps the content.
+			</p>
 		</div>
 	</div>
 </GlassCard>
