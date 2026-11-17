@@ -25,6 +25,11 @@ describe("readViteEnv", () => {
 // THE REGRESSION GUARD
 // =============================================================================
 
+/** Comments explain the hazard; they are not the hazard. */
+function stripComments(source: string): string {
+	return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+}
+
 /** Every source file under `src/lib`, so a new one cannot slip past. */
 function sourceFiles(dir: string, found: string[] = []): string[] {
 	for (const entry of readdirSync(dir)) {
@@ -57,11 +62,6 @@ describe("no module reads import.meta.env without a guard", () => {
 	// The single file allowed to touch it, where the access is deliberate.
 	const ALLOWED = new Set(["utils/vite-env.ts"]);
 
-	/** Comments explain the hazard; they are not the hazard. */
-	function stripComments(source: string): string {
-		return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-	}
-
 	it("finds no bare `import.meta.env.` access outside the helper", () => {
 		const root = join(process.cwd(), "src/lib");
 		const offenders = sourceFiles(root)
@@ -72,5 +72,33 @@ describe("no module reads import.meta.env without a guard", () => {
 			);
 
 		expect(offenders).toEqual([]);
+	});
+});
+
+/**
+ * The other half of the same lesson.
+ *
+ * Vite finds `import.meta.env` by its literal token. The first version of this
+ * helper hoisted it (`const meta = import.meta; meta.env?.[name]`), which is
+ * safe in a Worker and silently kills every `VITE_*` override under Vite — the
+ * build leaves `import.meta.env` untouched, so `meta.env` is undefined at
+ * runtime and the default always wins. Confirmed in a real build: the override
+ * was dropped.
+ *
+ * So: the literal has to stay visible, and this asserts it does.
+ */
+describe("readViteEnv keeps the literal Vite looks for", () => {
+	const source = stripComments(
+		readFileSync(join(process.cwd(), "src/lib/utils/vite-env.ts"), "utf8"),
+	);
+
+	it("contains the literal `import.meta.env` token", () => {
+		expect(source).toContain("import.meta.env");
+	});
+
+	it("guards that literal with typeof rather than hoisting it", () => {
+		expect(source).toMatch(/typeof import\.meta\.env/);
+		// Hoisting import.meta into a variable is what breaks the substitution.
+		expect(source).not.toMatch(/const meta = import\.meta/);
 	});
 });
