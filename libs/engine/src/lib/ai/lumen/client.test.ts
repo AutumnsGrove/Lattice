@@ -7,6 +7,7 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { LumenClient, createLumenClient } from "./client.js";
+import { MODELS } from "./config.js";
 import { LumenError } from "./errors.js";
 import type { LumenProvider, ProviderRegistry } from "./providers/index.js";
 import type { LumenProviderResponse } from "./providers/types.js";
@@ -83,6 +84,58 @@ function createMockProvider(
 // =============================================================================
 // CLIENT CREATION & CONFIGURATION
 // =============================================================================
+
+describe("LumenClient — tool support guard", () => {
+	it("refuses tools on a model that cannot call them, before reaching a provider", async () => {
+		const provider = {
+			...createMockProvider("openrouter"),
+			inference: vi.fn(),
+		};
+
+		const client = createLumenClient({ openrouterApiKey: "test-key" });
+		// @ts-expect-error - Accessing private for testing
+		client.providers = { openrouter: provider };
+
+		await expect(
+			client.run(
+				{
+					task: "agent",
+					input: "do something",
+					options: {
+						model: MODELS.LLAMAGUARD_4,
+						tools: [
+							{
+								type: "function",
+								function: { name: "t", description: "d", parameters: {} },
+							},
+						],
+					},
+				},
+				"oak",
+			),
+		).rejects.toThrow(/cannot call tools/);
+
+		expect(provider.inference).not.toHaveBeenCalled();
+	});
+
+	it("lets a tool-capable model through to the provider", async () => {
+		const provider = createMockProvider("openrouter");
+		const client = createLumenClient({ openrouterApiKey: "test-key" });
+		// @ts-expect-error - Accessing private for testing
+		client.providers = { openrouter: provider };
+
+		const result = await client.run({
+			task: "agent",
+			input: "do something",
+			options: {
+				tools: [{ type: "function", function: { name: "t", description: "d", parameters: {} } }],
+			},
+		});
+
+		expect(provider.inference).toHaveBeenCalled();
+		expect(result.content).toContain("Response from openrouter");
+	});
+});
 
 describe("LumenClient - Creation", () => {
 	it("should create client with OpenRouter API key", () => {

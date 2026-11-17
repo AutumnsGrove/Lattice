@@ -7,7 +7,10 @@
       "provider": "openrouter",
       "cost": { "input": 0.30, "output": 1.20 },
       "quality": "highest",
-      "speed": "fast"
+      "speed": "fast",
+      "supportsTools": true,
+      "toolChoice": ["auto", "required", "none", "function"],
+      "contextWindow": 128000
     },
     "QWEN3_8_FLASH": {
       "id": "qwen/qwen3.8-flash",
@@ -16,7 +19,10 @@
       "provider": "openrouter",
       "cost": { "input": 0.15, "output": 0.47 },
       "quality": "high",
-      "speed": "fast"
+      "speed": "fast",
+      "supportsTools": true,
+      "toolChoice": ["auto", "required", "none", "function"],
+      "contextWindow": 128000
     },
     "LLAMA_3_1_8B": {
       "id": "meta-llama/llama-3.1-8b-instruct",
@@ -25,7 +31,10 @@
       "provider": "openrouter",
       "cost": { "input": 0.02, "output": 0.04 },
       "quality": "good",
-      "speed": "fastest"
+      "speed": "fastest",
+      "supportsTools": true,
+      "toolChoice": ["auto", "required", "none", "function"],
+      "contextWindow": 128000
     },
     "KIMI_K2_7_CODE": {
       "id": "moonshotai/kimi-k2.7-code",
@@ -34,7 +43,10 @@
       "provider": "openrouter",
       "cost": { "input": 0.60, "output": 3.50 },
       "quality": "high",
-      "speed": "fast"
+      "speed": "fast",
+      "supportsTools": true,
+      "toolChoice": ["auto", "required", "none", "function"],
+      "contextWindow": 256000
     },
     "CLAUDE_HAIKU_55": {
       "id": "anthropic/claude-haiku-5.5",
@@ -43,7 +55,10 @@
       "provider": "openrouter",
       "cost": { "input": 0.10, "output": 0.50 },
       "quality": "highest",
-      "speed": "fast"
+      "speed": "fast",
+      "supportsTools": true,
+      "toolChoice": ["auto", "required", "none", "function"],
+      "contextWindow": 200000
     },
     "GEMMA_4_26B": {
       "id": "google/gemma-4-26b-a4b-it",
@@ -52,7 +67,10 @@
       "provider": "openrouter",
       "cost": { "input": 0.08, "output": 0.10 },
       "quality": "high",
-      "speed": "fast"
+      "speed": "fast",
+      "supportsTools": true,
+      "toolChoice": ["auto", "required", "none", "function"],
+      "contextWindow": 131072
     },
     "GPT_OSS_SAFEGUARD": {
       "id": "openai/gpt-oss-safeguard-20b",
@@ -61,7 +79,9 @@
       "provider": "openrouter",
       "cost": { "input": 0.075, "output": 0.30 },
       "quality": "high",
-      "speed": "fast"
+      "speed": "fast",
+      "supportsTools": false,
+      "contextWindow": 131072
     },
     "LLAMAGUARD_4": {
       "id": "meta-llama/llama-guard-4-12b",
@@ -70,7 +90,9 @@
       "provider": "openrouter",
       "cost": { "input": 0.18, "output": 0.18 },
       "quality": "high",
-      "speed": "fast"
+      "speed": "fast",
+      "supportsTools": false,
+      "contextWindow": 131072
     },
     "PPLX_EMBED_0_6B": {
       "id": "perplexity/pplx-embed-v1-0.6b",
@@ -79,7 +101,9 @@
       "provider": "openrouter",
       "cost": { "input": 0.004, "output": 0 },
       "quality": "high",
-      "speed": "fastest"
+      "speed": "fastest",
+      "supportsTools": false,
+      "contextWindow": 32768
     },
     "BGE_M3": {
       "id": "baai/bge-m3",
@@ -88,7 +112,9 @@
       "provider": "openrouter",
       "cost": { "input": 0.01, "output": 0 },
       "quality": "highest",
-      "speed": "fast"
+      "speed": "fast",
+      "supportsTools": false,
+      "contextWindow": 8192
     },
     "CF_SHIELDGEMMA": {
       "id": "@hf/google/shieldgemma-2b",
@@ -97,7 +123,9 @@
       "provider": "cloudflare-ai",
       "cost": { "input": 0, "output": 0 },
       "quality": "good",
-      "speed": "fastest"
+      "speed": "fastest",
+      "supportsTools": false,
+      "contextWindow": 8192
     },
     "CF_BGE_BASE": {
       "id": "@cf/baai/bge-base-en-v1.5",
@@ -106,7 +134,9 @@
       "provider": "cloudflare-ai",
       "cost": { "input": 0, "output": 0 },
       "quality": "good",
-      "speed": "fastest"
+      "speed": "fastest",
+      "supportsTools": false,
+      "contextWindow": 512
     },
     "CF_LLAMAGUARD_3": {
       "id": "@cf/meta/llama-guard-3-8b",
@@ -115,7 +145,9 @@
       "provider": "cloudflare-ai",
       "cost": { "input": 0, "output": 0 },
       "quality": "good",
-      "speed": "fastest"
+      "speed": "fastest",
+      "supportsTools": false,
+      "contextWindow": 8192
     },
     "CF_LLAMA4_SCOUT": {
       "id": "@cf/meta/llama-4-scout-17b-16e-instruct",
@@ -124,7 +156,9 @@
       "provider": "cloudflare-ai",
       "cost": { "input": 0, "output": 0 },
       "quality": "good",
-      "speed": "fast"
+      "speed": "fast",
+      "supportsTools": false,
+      "contextWindow": 131072
     },
     "CF_WHISPER_TURBO": {
       "id": "@cf/openai/whisper-large-v3-turbo",
@@ -133,7 +167,8 @@
       "provider": "cloudflare-ai",
       "cost": { "input": 0, "output": 0 },
       "quality": "high",
-      "speed": "fast"
+      "speed": "fast",
+      "supportsTools": false
     },
     "CF_WHISPER": {
       "id": "@cf/openai/whisper",
@@ -142,7 +177,8 @@
       "provider": "cloudflare-ai",
       "cost": { "input": 0, "output": 0 },
       "quality": "highest",
-      "speed": "medium"
+      "speed": "medium",
+      "supportsTools": false
     },
     "CF_WHISPER_TINY": {
       "id": "@cf/openai/whisper-tiny-en",
@@ -151,7 +187,8 @@
       "provider": "cloudflare-ai",
       "cost": { "input": 0, "output": 0 },
       "quality": "good",
-      "speed": "fastest"
+      "speed": "fastest",
+      "supportsTools": false
     }
   }
 }

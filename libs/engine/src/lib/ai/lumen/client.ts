@@ -28,7 +28,7 @@
 import type { TierKey } from "$lib/platform/config/tiers.js";
 import { safeDecryptToken, isEncryptedToken } from "$lib/server/encryption.js";
 
-import { getTaskConfig } from "./config.js";
+import { assertToolSupport, getTaskConfig } from "./config.js";
 import { LumenError } from "./errors.js";
 import { runSongbird } from "./songbird.js";
 import { preprocess, type PreprocessResult } from "./pipeline/preprocessor.js";
@@ -141,6 +141,17 @@ export class LumenClient {
 		// 4. Get task config for defaults
 		const taskConfig = getTaskConfig(request.task);
 
+		// 4b. A tool call to a model that cannot call tools fails silently — it
+		//     just returns prose and the loop ends having done nothing. Refuse it
+		//     while the model is still a value we can name.
+		if (request.options?.tools?.length) {
+			assertToolSupport(
+				request.task,
+				request.options.model ?? taskConfig.primaryModel,
+				request.options.toolChoice,
+			);
+		}
+
 		// 5. Execute with fallback
 		const result = await executeWithFallback(
 			request.task,
@@ -221,6 +232,10 @@ export class LumenClient {
 
 		// 5. Stream response
 		const model = request.options?.model ?? taskConfig.primaryModel;
+
+		if (request.options?.tools?.length) {
+			assertToolSupport(request.task, model, request.options.toolChoice);
+		}
 
 		const stream = provider.stream(model, preprocessResult.messages, {
 			maxTokens: request.options?.maxTokens ?? taskConfig.defaultMaxTokens,
