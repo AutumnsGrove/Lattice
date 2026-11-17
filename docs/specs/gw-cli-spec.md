@@ -503,14 +503,58 @@ or `tenant_resume`, actor `gw`). An empty reason is recorded as
 
 Safety: `list` and `show` are READ. `suspend` and `resume` are WRITE.
 
+#### `gw tenant create` — fixtures, not onboarding
+
+```bash
+# What would it write? Changes nothing, needs no --write.
+gw tenant create --subdomain autumn-test --email autumn+fixtures@grove.place \
+  --plan seedling --dry-run
+
+# A two-day-old fixture (young enough for the nofollow/young policy)
+gw tenant create --subdomain autumn-test --email autumn+fixtures@grove.place \
+  --plan wanderer --created-at 2d --write
+
+# A mature one on a paid tier
+gw tenant create --subdomain old-fixture --email fixtures@grove.place \
+  --plan oak --created-at 2026-01-15 --write
+```
+
+`--created-at` takes a unix timestamp, `Nd` for N days ago, or `YYYY-MM-DD` at
+midnight UTC. It exists because the link policy (#1682) decides `nofollow ugc`
+on a 14-day window, and testing both sides of that should not take two weeks.
+
+**This bypasses the abuse gates on purpose, and that is the entire point.** It
+skips Turnstile (#1678) and, unless `--force-identity "<reason>"` is given,
+refuses an address on the signup deny list (#1681). Bypassing it records the
+reason in `audit_log`. The command exists so that fixtures stop being live
+tenants: before it, the only way to make a tenant was to walk the real signup,
+so every abuse fixture was made by a bot and every removal test ran against
+whatever happened to be in production.
+
+It calls the **same** `createTenant()` Plant calls — moved into the engine for
+this reason (`libs/engine/src/lib/server/tenants/create-tenant.ts`). A fixture
+that is not the same shape as a real tenant makes the removal test meaningless.
+
+Where it goes: `gw` → `POST /tenant/create` on the Durable Objects worker,
+behind `OPS_ADMIN_KEY`, the same shape as `/tenant/flush/:subdomain`. The
+endpoint lives there rather than on a tenant-facing app because it *is* a signup
+bypass. `--endpoint` or `$GROVE_OPS_ENDPOINT` says which deployment to talk to;
+there is no built-in default, because guessing a worker hostname is how a
+maintenance command talks to the wrong one.
+
+Safety: `create` is WRITE (`--write`), except `--dry-run` which writes nothing.
+`--json` returns `{ subdomain, tenantId, written, plan, steps,
+identityBlockOverridden }`.
+
+Verified afterwards the same way `suspend` is: the command probes the new site
+and prints the status code, so "the row exists" and "it serves" are not confused.
+
 **Not implemented, deliberately:**
 
 - `gw tenant delete` — permanent removal needs one registry of tenant-carrying
   tables and a reversible pre-deletion snapshot. That is `removeTenant()` in
   #1596 §B, and the CLI becomes a thin wrapper over it rather than a second
   implementation of the sweep.
-- `gw tenant create` — signup goes through Plant, which owns onboarding,
-  payment and email verification. There is no reason for a second path in.
 
 ### Email Test Commands (`gw email`)
 
@@ -2108,7 +2152,8 @@ tools/grove-wrap/
 
 ### Phase 6: Tenant Management & Email (Week 6)
 
-- [ ] `gw tenant create` - Interactive creation wizard
+- [x] `gw tenant create` - From flags, for fixtures (#1710). Not a wizard:
+  a wizard that creates tenants is a signup UI with none of the gates.
 - [ ] `gw tenant delete` - Safe deletion with CASCADE preview
 - [ ] `gw email test` - Test email sending
 - [ ] `gw email status` - Email config check

@@ -276,3 +276,95 @@ func TestStorageLabel(t *testing.T) {
 		}
 	}
 }
+
+func TestParseCreatedAt(t *testing.T) {
+	now := time.Now()
+
+	t.Run("empty means now", func(t *testing.T) {
+		got, err := parseCreatedAt("")
+		if err != nil || got != nil {
+			t.Fatalf("expected nil, nil; got %v, %v", got, err)
+		}
+	})
+
+	t.Run("unix timestamp passes through", func(t *testing.T) {
+		got, err := parseCreatedAt("1700000000")
+		if err != nil || got == nil || *got != 1700000000 {
+			t.Fatalf("got %v, %v", got, err)
+		}
+	})
+
+	t.Run("days-ago form", func(t *testing.T) {
+		got, err := parseCreatedAt("30d")
+		if err != nil || got == nil {
+			t.Fatalf("got %v, %v", got, err)
+		}
+		// Allow a day of slack so this cannot flake across a DST or midnight edge.
+		drift := now.AddDate(0, 0, -30).Unix() - *got
+		if drift < -86400 || drift > 86400 {
+			t.Fatalf("30d resolved to %d, want about %d", *got, now.AddDate(0, 0, -30).Unix())
+		}
+	})
+
+	t.Run("calendar date is midnight UTC", func(t *testing.T) {
+		got, err := parseCreatedAt("2026-01-15")
+		if err != nil || got == nil {
+			t.Fatalf("got %v, %v", got, err)
+		}
+		want := time.Date(2026, 1, 15, 0, 0, 0, 0, time.UTC).Unix()
+		if *got != want {
+			t.Fatalf("got %d, want %d", *got, want)
+		}
+	})
+
+	t.Run("rejects nonsense", func(t *testing.T) {
+		for _, bad := range []string{"yesterday", "-5", "0", "3x", "2026-13-40"} {
+			if _, err := parseCreatedAt(bad); err == nil {
+				t.Fatalf("expected %q to be rejected", bad)
+			}
+		}
+	})
+}
+
+func TestSubdomainPatternMatchesTheEngine(t *testing.T) {
+	// libs/engine/src/lib/utils/grove-url.ts: no trailing hyphen, no leading
+	// hyphen, 1-63 chars. gw used to accept a trailing one and the endpoint
+	// then refused it, which is a confusing way to fail.
+	valid := []string{"autumn", "a", "midnight-bloom", "garden-2"}
+	invalid := []string{"", "-autumn", "autumn-", "Autumn", "autumn_grove", "a.b", strings.Repeat("a", 64)}
+
+	for _, v := range valid {
+		if !subdomainPattern.MatchString(v) {
+			t.Errorf("%q should be valid", v)
+		}
+	}
+	for _, v := range invalid {
+		if subdomainPattern.MatchString(v) {
+			t.Errorf("%q should be invalid", v)
+		}
+	}
+}
+
+func TestResolveOpsEndpoint(t *testing.T) {
+	t.Run("flag wins", func(t *testing.T) {
+		got, err := resolveOpsEndpoint("https://ops.example")
+		if err != nil || got != "https://ops.example" {
+			t.Fatalf("got %q, %v", got, err)
+		}
+	})
+
+	t.Run("environment next", func(t *testing.T) {
+		t.Setenv("GROVE_OPS_ENDPOINT", "https://env.example")
+		got, err := resolveOpsEndpoint("")
+		if err != nil || got != "https://env.example" {
+			t.Fatalf("got %q, %v", got, err)
+		}
+	})
+
+	t.Run("refuses to guess", func(t *testing.T) {
+		t.Setenv("GROVE_OPS_ENDPOINT", "")
+		if _, err := resolveOpsEndpoint(""); err == nil {
+			t.Fatal("expected an error rather than a guessed hostname")
+		}
+	})
+}
