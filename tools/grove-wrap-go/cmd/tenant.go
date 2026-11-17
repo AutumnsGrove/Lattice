@@ -58,6 +58,9 @@ var (
 	tenantCreateForce      string
 	tenantCreateDryRun     bool
 	tenantCreateEndpoint   string
+
+	tenantDeleteReason string
+	tenantDeleteDryRun bool
 )
 
 var tenantCmd = &cobra.Command{
@@ -147,6 +150,35 @@ Examples:
 The endpoint defaults to $GROVE_OPS_ENDPOINT, or --endpoint.`,
 	Args: cobra.NoArgs,
 	RunE: runTenantCreate,
+}
+
+var tenantDeleteCmd = &cobra.Command{
+	Use:   "delete <subdomain> --reason <text> --write",
+	Short: "Permanently remove a tenant and everything keyed to it",
+	Long: `Permanently remove a tenant: every registered table across engine, curios and
+observability, then the tenants row, then the TenantDO cache.
+
+Dry run by default. It prints per-table counts and touches nothing; --write is
+what actually destroys. A reason is required because it becomes the audit trail.
+
+The sweep runs inside the ops worker, not here. Tenant rows live in 91 tables
+across three databases, and driving that from the CLI means one subprocess per
+statement — which timed out mid-sweep on 2026-11-17 and left a half-removed
+tenant behind. The worker has all three bindings and removeTenant() is one
+function, so it does the whole thing in one invocation.
+
+Not done by this command, and reported as such: the Better Auth identity in
+groveauth, and the email to the account holder.
+
+Examples:
+
+  # what would it delete?
+  gw tenant delete spamgarden --reason "link farm"
+
+  # do it
+  gw tenant delete spamgarden --reason "link farm" --write`,
+	Args: cobra.ExactArgs(1),
+	RunE: runTenantDelete,
 }
 
 var tenantShowCmd = &cobra.Command{
@@ -283,7 +315,7 @@ var tenantResumeCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(tenantCmd)
-	tenantCmd.AddCommand(tenantListCmd, tenantShowCmd, tenantSuspendCmd, tenantResumeCmd, tenantCreateCmd)
+	tenantCmd.AddCommand(tenantListCmd, tenantShowCmd, tenantSuspendCmd, tenantResumeCmd, tenantCreateCmd, tenantDeleteCmd)
 
 	tenantListCmd.Flags().BoolVar(&tenantListAll, "all", false, "include suspended tenants")
 	tenantListCmd.Flags().BoolVar(&tenantListInactive, "inactive", false, "only suspended tenants")
@@ -304,6 +336,10 @@ func init() {
 	tenantCreateCmd.Flags().StringVar(&tenantCreateForce, "force-identity", "", "override the deny list, with a reason (recorded)")
 	tenantCreateCmd.Flags().BoolVar(&tenantCreateDryRun, "dry-run", false, "print the writes, change nothing")
 	tenantCreateCmd.Flags().StringVar(&tenantCreateEndpoint, "endpoint", "", "ops worker URL (defaults to $GROVE_OPS_ENDPOINT)")
+
+	tenantDeleteCmd.Flags().StringVar(&tenantDeleteReason, "reason", "", "why (required — recorded in audit_log)")
+	tenantDeleteCmd.Flags().BoolVar(&tenantDeleteDryRun, "dry-run", false, "print the per-table counts, delete nothing (default when --write is absent)")
+	tenantDeleteCmd.Flags().StringVar(&tenantCreateEndpoint, "endpoint", "", "ops worker URL (defaults to $GROVE_OPS_ENDPOINT)")
 }
 
 // ============================================================================
@@ -633,6 +669,135 @@ func runTenantCreate(cmd *cobra.Command, _ []string) error {
 	} else {
 		ui.Warning(fmt.Sprintf("Site returned %d — the TenantDO may need a flush.", code))
 	}
+
+	return nil
+}
+
+type tenantRemoveResponse struct {
+	Summary          string   `json:"summary"`
+	DryRun           bool     `json:"dryRun"`
+	Removed          int      `json:"removed"`
+	TenantRowDeleted bool     `json:"tenantRowDeleted"`
+	CacheEvicted     bool     `json:"cacheEvicted"`
+	R2ObjectsDeleted int      `json:"r2ObjectsDeleted"`
+	Leftovers        []string `json:"leftovers"`
+	Failures         []string `json:"failures"`
+	AuditRecorded    bool     `json:"auditRecorded"`
+	NotDone          struct {
+		Identity string `json:"identity"`
+		Email    string `json:"email"`
+	} `json:"notDone"`
+	Error   string `json:"error"`
+	Message string `json:"message"`
+}
+
+func runTenantDelete(cmd *cobra.Command, args []string) error {
+	cfg := config.Get()
+	subdomain := args[0]
+
+	if err := validateSubdomain(subdomain); err != nil {
+		return err
+	}
+	if tenantDeleteReason == "" {
+		return fmt.Errorf("--reason is required: it becomes the audit trail for a permanent removal")
+	}
+
+	// Dry run unless --write. A removal is the one operation where a forgotten
+	// flag must not mean "destroy".
+	write := cfg.WriteFlag
+	if !write && !tenantDeleteDryRun {
+		ui.Info("Dry run (pass --write to actually remove)…")
+	}
+
+	endpoint, err := resolveOpsEndpoint(tenantCreateEndpoint)
+	if err != nil {
+		return err
+	}
+	key, err := opsAdminKey()
+	if err != nil {
+		return err
+	}
+
+	body, err := json.Marshal(map[string]any{
+		"subdomain": subdomain,
+		"reason":    tenantDeleteReason,
+		"dryRun":    !write,
+		"actor":     "gw",
+	})
+	if err != nil {
+		return err
+	}
+
+	client := &http.Client{Timeout: 120 * time.Second}
+	req, err := http.NewRequest(http.MethodPost, strings.TrimSuffix(endpoint, "/")+"/tenant/remove", strings.NewReader(string(body)))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+key)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("could not reach the ops endpoint at %s: %w", endpoint, err)
+	}
+	defer resp.Body.Close()
+
+	var out tenantRemoveResponse
+	_ = json.NewDecoder(resp.Body).Decode(&out)
+
+	if resp.StatusCode >= 400 {
+		if out.Message == "" {
+			out.Message = fmt.Sprintf("endpoint returned %d", resp.StatusCode)
+		}
+		return fmt.Errorf("%s", out.Message)
+	}
+
+	if cfg.JSONMode {
+		enc := json.NewEncoder(os.Stdout)
+		enc.SetIndent("", "  ")
+		return enc.Encode(out)
+	}
+
+	fmt.Println(out.Summary)
+
+	if out.DryRun {
+		ui.Hint("Nothing was deleted. Run again with --write to remove it.")
+		return nil
+	}
+
+	if len(out.Leftovers) > 0 {
+		ui.Warning("This removal is INCOMPLETE — rows remain:")
+		for _, leftover := range out.Leftovers {
+			fmt.Printf("  • %s\n", leftover)
+		}
+	}
+	if len(out.Failures) > 0 {
+		ui.Warning("Statements that failed:")
+		for _, failure := range out.Failures {
+			fmt.Printf("  • %s\n", failure)
+		}
+	}
+	if !out.TenantRowDeleted {
+		ui.Warning("The tenants row survived — the subdomain is still claimed.")
+	} else {
+		ui.Success("Tenant row deleted.")
+	}
+	if out.CacheEvicted {
+		ui.Info("TenantDO evicted.")
+	} else {
+		ui.Warning("TenantDO was NOT evicted — the site may keep serving (#1677).")
+	}
+
+	// Say what was not done, rather than letting silence imply it was.
+	ui.Hint(out.NotDone.Identity)
+	ui.Hint(out.NotDone.Email)
+
+	code, probeErr := probeSite(subdomain)
+	if probeErr != nil {
+		ui.Warning(fmt.Sprintf("Could not probe https://%s.grove.place: %v", subdomain, probeErr))
+		return nil
+	}
+	ui.Info(fmt.Sprintf("Site returned %d. A 302 to /verify means the Turnstile gate answered, not the tenant (#1734).", code))
 
 	return nil
 }

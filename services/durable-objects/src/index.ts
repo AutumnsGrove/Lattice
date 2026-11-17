@@ -14,6 +14,10 @@ import {
 	describeTenantCreationPlan,
 	SignupBlockedError,
 } from "@autumnsgrove/lattice/server/tenants/create-tenant";
+import {
+	formatRemovalResult,
+	removeTenant,
+} from "@autumnsgrove/lattice/server/tenants/remove-tenant";
 import { isValidSubdomain } from "@autumnsgrove/lattice/utils/subdomain";
 import { TIERS, type TierKey } from "@autumnsgrove/lattice/platform/config/tiers";
 
@@ -52,6 +56,9 @@ interface Env {
 	THRESHOLD: DurableObjectNamespace;
 	TENANTS: DurableObjectNamespace;
 	DB: D1Database;
+	/** Tenant rows also live in these two; the removal registry knows which. */
+	CURIO_DB: D1Database;
+	OBS_DB: D1Database;
 	IMAGES: R2Bucket;
 	/** Shared secret for operator-only endpoints (e.g. rate limit reset). Not exposed to any tenant-facing app. */
 	OPS_ADMIN_KEY?: string;
@@ -395,6 +402,124 @@ async function writeCreateAudit(
 	}
 }
 
+/**
+ * POST /tenant/remove — operator-only permanent removal (#1596 §B).
+ *
+ * This exists because the sweep cannot be done well from a CLI. `removeTenant`
+ * counts and deletes across every registered table — 47 engine, 43 curios, 1
+ * observability — so driving it from Go would mean either reimplementing the
+ * registry (two sources of truth, and the fixture/real-tenant shapes diverge)
+ * or shelling out per statement, which times out mid-sweep and leaves exactly
+ * the half-removed tenant the `leftovers` check warns about. That is not
+ * hypothetical; it happened on 2026-11-17.
+ *
+ * One Worker invocation, three bindings, one implementation.
+ *
+ * `dryRun` defaults to **true**. A caller has to ask to destroy.
+ *
+ * The callbacks are deliberate: `evictCache` is wired (the DO is right here, and
+ * a removed tenant that keeps serving is #1677), R2 deletion is wired, and the
+ * identity and email steps are reported as **not done** rather than silently
+ * skipped — groveauth is not bound to this worker, so the response says so.
+ */
+async function handleTenantRemove(request: Request, env: Env): Promise<Response> {
+	const authError = await checkOpsAuth(request, env);
+	if (authError) return authError;
+
+	const body = (await request.json().catch(() => null)) as {
+		subdomain?: string;
+		email?: string | null;
+		reason?: string;
+		actor?: string | null;
+		dryRun?: boolean;
+	} | null;
+
+	if (!body?.subdomain) {
+		return Response.json(
+			{ error: "bad_request", message: "subdomain is required" },
+			{ status: 400 },
+		);
+	}
+	if (!body.reason?.trim()) {
+		return Response.json(
+			{
+				error: "bad_request",
+				message: "reason is required — removeTenant keeps it as the audit trail",
+			},
+			{ status: 400 },
+		);
+	}
+
+	const row = await env.DB.prepare(
+		"SELECT id, subdomain, email FROM tenants WHERE subdomain = ? LIMIT 1",
+	)
+		.bind(body.subdomain)
+		.first<{ id: string; subdomain: string; email: string | null }>();
+
+	if (!row) {
+		return Response.json(
+			{ error: "not_found", message: `no tenant with subdomain ${body.subdomain}` },
+			{ status: 404 },
+		);
+	}
+
+	const target = { tenantId: row.id, subdomain: row.subdomain, email: body.email ?? row.email };
+
+	try {
+		const result = await removeTenant(
+			{ engine: env.DB, curios: env.CURIO_DB, observability: env.OBS_DB },
+			target,
+			{
+				reason: body.reason,
+				actor: body.actor || "gw",
+				dryRun: body.dryRun !== false,
+				evictCache: async (tenant) => {
+					const id = env.TENANTS.idFromName(`tenant:${tenant.subdomain}`);
+					const stub = env.TENANTS.get(id);
+					await stub.fetch("https://tenant.internal/config/flush", {
+						method: "POST",
+						headers: { "X-Tenant-Subdomain": tenant.subdomain },
+					});
+				},
+				deleteR2: async (tenant) => {
+					const listed = await env.IMAGES.list({ prefix: `tenants/${tenant.tenantId}/` });
+					await Promise.all(listed.objects.map((object) => env.IMAGES.delete(object.key)));
+					return listed.objects.length;
+				},
+				// Not bound here, and pretending otherwise would be worse than saying so.
+				deleteIdentity: async () => 0,
+				notify: async () => {},
+			},
+		);
+
+		return Response.json(
+			{
+				summary: formatRemovalResult(result),
+				dryRun: result.dryRun,
+				removed: result.plan.totalRows,
+				tenantRowDeleted: result.tenantRowDeleted,
+				cacheEvicted: result.cacheEvicted,
+				r2ObjectsDeleted: result.r2ObjectsDeleted,
+				leftovers: result.leftovers.map((t) => `${t.database}.${t.table}=${t.rows}`),
+				failures: result.failures.map((f) => `${f.database}.${f.table}: ${f.error}`),
+				auditRecorded: result.auditRecorded,
+				notDone: {
+					identity:
+						"groveauth is not bound to this worker — delete the Better Auth identity separately",
+					email: "no notification sent — the account holder has not been told",
+				},
+			},
+			{ status: result.dryRun ? 200 : 200 },
+		);
+	} catch (err) {
+		console.error("[tenant/remove] failed:", err);
+		return Response.json(
+			{ error: "remove_failed", message: err instanceof Error ? err.message : String(err) },
+			{ status: 500 },
+		);
+	}
+}
+
 export default {
 	/** Daily gallery_images reconcile so storage usage and quota never depend on a manual sync. */
 	async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
@@ -432,6 +557,10 @@ export default {
 
 		if (url.pathname === "/tenant/create" && request.method === "POST") {
 			return handleTenantCreate(request, env);
+		}
+
+		if (url.pathname === "/tenant/remove" && request.method === "POST") {
+			return handleTenantRemove(request, env);
 		}
 
 		const draftsMatch = url.pathname.match(/^\/tenant-drafts\/([^/]+)(?:\/([^/]+))?$/);
