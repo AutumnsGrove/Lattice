@@ -195,6 +195,24 @@ describe("POST /tenant/remove", () => {
 		expect(body.r2ObjectsDeleted).toBe(3);
 	});
 
+	it("records a failed DO flush as a failure instead of claiming the cache went", async () => {
+		const { env } = makeEnv({ opsKey: KEY, tenantRow });
+		const tenants = env as unknown as { TENANTS: { get: () => { fetch: unknown } } };
+		tenants.TENANTS.get = () => ({
+			fetch: vi.fn(async () => new Response("nope", { status: 500 })),
+		});
+
+		const res = await worker.fetch(
+			removeRequest({ subdomain: "gone", reason: "x", dryRun: false }, KEY),
+			env,
+		);
+		const body = (await res.json()) as any;
+
+		// `fetch` resolves on 500, so an unchecked call would report success.
+		expect(body.cacheEvicted).toBe(false);
+		expect(body.failures.some((f: string) => f.includes("cache eviction failed"))).toBe(true);
+	});
+
 	it("reports the summary text an operator actually reads", async () => {
 		const { env } = makeEnv({ opsKey: KEY, tenantRow });
 		const res = await worker.fetch(

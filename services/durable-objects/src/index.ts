@@ -476,10 +476,17 @@ async function handleTenantRemove(request: Request, env: Env): Promise<Response>
 				evictCache: async (tenant) => {
 					const id = env.TENANTS.idFromName(`tenant:${tenant.subdomain}`);
 					const stub = env.TENANTS.get(id);
-					await stub.fetch("https://tenant.internal/config/flush", {
+					const res = await stub.fetch("https://tenant.internal/config/flush", {
 						method: "POST",
 						headers: { "X-Tenant-Subdomain": tenant.subdomain },
 					});
+					// `fetch` resolves on 4xx/5xx, so an unchecked call reports the
+					// cache as evicted no matter what the DO said — and a tenant whose
+					// config is still cached keeps serving after "removal" (#1677).
+					// Throwing here makes removeTenant record it as a failure instead.
+					if (!res.ok) {
+						throw new Error(`flush returned ${res.status} ${res.statusText}`);
+					}
 				},
 				deleteR2: async (tenant) => {
 					// R2 list() caps at 1000 keys per call and says so with
