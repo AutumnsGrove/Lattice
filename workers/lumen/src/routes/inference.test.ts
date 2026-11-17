@@ -97,6 +97,76 @@ describe("POST /inference", () => {
 		expect(body.meta?.latencyMs).toBeGreaterThanOrEqual(0);
 	});
 
+	it("carries a tool conversation through to the client, ids intact", async () => {
+		mockRun.mockResolvedValue({
+			content: "18C and clear",
+			model: "m",
+			provider: "openrouter",
+			usage: { input: 30, output: 8, cost: 0 },
+			cached: false,
+		});
+
+		const app = createApp();
+		const res = await app.request(
+			post({
+				task: "generation",
+				input: [
+					{ role: "user", content: "what is the weather" },
+					{
+						role: "assistant",
+						content: "",
+						tool_calls: [
+							{
+								id: "call_1",
+								type: "function",
+								function: { name: "weather", arguments: '{"city":"NYC"}' },
+							},
+						],
+					},
+					{ role: "tool", content: "18C", tool_call_id: "call_1", name: "weather" },
+				],
+				options: {
+					tools: [
+						{
+							type: "function",
+							function: {
+								name: "weather",
+								description: "Get the weather",
+								parameters: { type: "object", properties: {} },
+							},
+						},
+					],
+				},
+			}),
+			undefined,
+			mockEnv,
+		);
+
+		expect(res.status).toBe(200);
+
+		const passed = mockRun.mock.calls[0][0];
+		expect(passed.input[1].toolCalls?.[0].id).toBe("call_1");
+		expect(passed.input[2]).toMatchObject({ role: "tool", toolCallId: "call_1" });
+		expect(passed.options.tools).toHaveLength(1);
+	});
+
+	it("rejects a tool message with no tool_call_id", async () => {
+		const app = createApp();
+		const res = await app.request(
+			post({
+				task: "generation",
+				input: [{ role: "tool", content: "orphan result" }],
+			}),
+			undefined,
+			mockEnv,
+		);
+
+		expect(res.status).toBe(400);
+		const body: LumenWorkerResponse = (await res.json()) as any;
+		expect(body.error?.code).toBe("INVALID_PARAMS");
+		expect(body.error?.message).toContain("tool_call_id");
+	});
+
 	it("should return 400 for invalid JSON body", async () => {
 		const app = createApp();
 		const res = await app.request(postRaw("not json {{{"), undefined, mockEnv);

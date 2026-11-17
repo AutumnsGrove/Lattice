@@ -11,6 +11,7 @@
 
 import { z } from "zod";
 import type {
+	LumenMessage,
 	LumenRequest,
 	LumenResponse,
 	LumenEmbeddingRequest,
@@ -21,6 +22,32 @@ import type {
 	LumenTranscriptionResponse,
 	LumenTask,
 } from "./types.js";
+
+// =============================================================================
+// Wire format
+// =============================================================================
+
+/**
+ * Map a message onto the worker's wire shape.
+ *
+ * The worker API is snake_case (`tool_call_id`, `tool_calls`, `tenant_id`),
+ * while the engine types are camelCase. Without this, a tool turn would be sent
+ * with fields the worker schema does not know about, z.object strips them, and
+ * step two of a loop would arrive at the provider as a bare message with no id —
+ * a rejection several layers away from the mistake.
+ */
+function toWireMessage(message: LumenMessage): Record<string, unknown> {
+	const wire: Record<string, unknown> = {
+		role: message.role,
+		content: message.content,
+	};
+
+	if (message.toolCalls?.length) wire.tool_calls = message.toolCalls;
+	if (message.toolCallId) wire.tool_call_id = message.toolCallId;
+	if (message.name) wire.name = message.name;
+
+	return wire;
+}
 
 // =============================================================================
 // Response Schemas (Rootwork: validate upstream responses at boundary)
@@ -148,7 +175,7 @@ export class RemoteLumenClient {
 	async run(request: LumenRequest, tier?: string): Promise<LumenResponse> {
 		const body = {
 			task: request.task,
-			input: request.input,
+			input: Array.isArray(request.input) ? request.input.map(toWireMessage) : request.input,
 			tenant_id: request.tenant,
 			tier,
 			options: request.options

@@ -29,11 +29,39 @@ export type LumenTask =
 // MESSAGE TYPES
 // =============================================================================
 
-export type LumenMessageRole = "system" | "user" | "assistant";
+export type LumenMessageRole = "system" | "user" | "assistant" | "tool";
 
+/**
+ * One message in a conversation.
+ *
+ * A tool-using loop needs three shapes, not one:
+ *
+ * - `assistant` messages that carry the `toolCalls` the model made, so the
+ *   next request can show the model what it asked for;
+ * - `tool` messages that carry a result and the `toolCallId` it answers;
+ * - everything else, which is just role + content.
+ *
+ * Lumen does not run tools and does not run the loop. It carries both sides of
+ * the exchange faithfully and lets the caller decide what to do next.
+ */
 export interface LumenMessage {
 	role: LumenMessageRole;
 	content: string | LumenContentPart[];
+
+	/**
+	 * `assistant` only. The calls the model returned on this turn.
+	 *
+	 * Sending these back is what makes step two of a loop possible: a provider
+	 * rejects a `tool` message whose `toolCallId` does not match a call in the
+	 * preceding assistant turn.
+	 */
+	toolCalls?: LumenToolCall[];
+
+	/** `tool` only. Which assistant `toolCalls` entry this result answers. */
+	toolCallId?: string;
+
+	/** `tool` only. The tool's name, when a provider wants it alongside the id. */
+	name?: string;
 }
 
 export interface LumenContentPart {

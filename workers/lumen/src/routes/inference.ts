@@ -10,7 +10,7 @@
 
 import { Hono } from "hono";
 import type { Env, LumenWorkerResponse } from "../types";
-import { InferenceRequestSchema } from "../types";
+import { InferenceRequestSchema, toLumenMessages } from "../types";
 import type { AuthVariables } from "../auth/middleware";
 import { createLumenClientForWorker } from "../lib/client-factory";
 import { buildErrorResponse } from "../lib/errors";
@@ -57,7 +57,7 @@ inference.post("/", async (c) => {
 		const result = await lumen.run(
 			{
 				task: req.task,
-				input: req.input,
+				input: toLumenMessages(req.input),
 				tenant: req.tenant_id,
 				options: {
 					model: req.options?.model,

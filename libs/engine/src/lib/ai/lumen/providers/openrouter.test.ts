@@ -265,6 +265,70 @@ describe("inference()", () => {
 		});
 	});
 
+	it("sends an assistant turn's tool_calls and the tool result's id back to the model", async () => {
+		const provider = new OpenRouterProvider("test-key");
+		(globalThis.fetch as any).mockResolvedValue(
+			createMockResponse({
+				choices: [{ message: { content: "done" }, finish_reason: "stop" }],
+				usage: { prompt_tokens: 30, completion_tokens: 5 },
+			}),
+		);
+
+		// The conversation a two-step loop sends on its second turn.
+		const conversation: LumenMessage[] = [
+			{ role: "system", content: "You are a helper." },
+			{ role: "user", content: "What is the weather?" },
+			{
+				role: "assistant",
+				content: "",
+				toolCalls: [
+					{
+						id: "call_abc",
+						type: "function",
+						function: { name: "weather", arguments: '{"city":"NYC"}' },
+					},
+				],
+			},
+			{ role: "tool", content: "18C and clear", toolCallId: "call_abc", name: "weather" },
+		];
+
+		await provider.inference("test/model", conversation, {
+			maxTokens: 100,
+			temperature: 0.7,
+		});
+
+		const body = JSON.parse((globalThis.fetch as any).mock.calls[0][1].body);
+
+		expect(body.messages[2]).toMatchObject({
+			role: "assistant",
+			tool_calls: [{ id: "call_abc", type: "function", function: { name: "weather" } }],
+		});
+		expect(body.messages[3]).toEqual({
+			role: "tool",
+			content: "18C and clear",
+			tool_call_id: "call_abc",
+			name: "weather",
+		});
+	});
+
+	it("omits tool fields from ordinary messages", async () => {
+		const provider = new OpenRouterProvider("test-key");
+		(globalThis.fetch as any).mockResolvedValue(
+			createMockResponse({
+				choices: [{ message: { content: "hi" }, finish_reason: "stop" }],
+				usage: { prompt_tokens: 5, completion_tokens: 2 },
+			}),
+		);
+
+		await provider.inference("test/model", [{ role: "user", content: "hello" }], {
+			maxTokens: 10,
+			temperature: 0,
+		});
+
+		const body = JSON.parse((globalThis.fetch as any).mock.calls[0][1].body);
+		expect(body.messages[0]).toEqual({ role: "user", content: "hello" });
+	});
+
 	it("uses apiKeyOverride when provided", async () => {
 		const provider = new OpenRouterProvider("original-key");
 
