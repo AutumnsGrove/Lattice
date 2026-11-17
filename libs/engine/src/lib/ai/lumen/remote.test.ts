@@ -334,6 +334,50 @@ describe("RemoteLumenClient", () => {
 
 			expect(JSON.parse(fetcher.fetch.mock.calls[0][1].body).input).toBe("just text");
 		});
+
+		it("parses finish_reason back into finishReason", async () => {
+			const fetcher = createMockFetcher(
+				successEnvelope({
+					content: "",
+					model: "m",
+					provider: "openrouter",
+					usage: { input: 1, output: 50, cost: 0 },
+					tool_calls: [
+						{ id: "call_9", type: "function", function: { name: "t", arguments: '{"a":' } },
+					],
+					finish_reason: "length",
+				}),
+			);
+			const client = new RemoteLumenClient({
+				baseUrl: "https://lumen.grove.place",
+				apiKey: "key",
+				fetcher,
+			});
+
+			const result = await client.run({ task: "generation", input: "go" });
+
+			expect(result.finishReason).toBe("length");
+			expect(result.toolCalls).toHaveLength(1);
+		});
+
+		it("leaves finishReason absent when the worker does not report one", async () => {
+			const fetcher = createMockFetcher(
+				successEnvelope({
+					content: "x",
+					model: "m",
+					provider: "openrouter",
+					usage: { input: 1, output: 1, cost: 0 },
+				}),
+			);
+			const client = new RemoteLumenClient({
+				baseUrl: "https://lumen.grove.place",
+				apiKey: "key",
+				fetcher,
+			});
+
+			const result = await client.run({ task: "generation", input: "go" });
+			expect(result.finishReason).toBeUndefined();
+		});
 	});
 
 	// =============================================================================

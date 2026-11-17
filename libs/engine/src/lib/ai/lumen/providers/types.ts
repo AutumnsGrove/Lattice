@@ -6,6 +6,7 @@
  */
 
 import type {
+	LumenFinishReason,
 	LumenMessage,
 	LumenProviderName,
 	LumenStreamChunk,
@@ -56,6 +57,9 @@ export interface LumenProviderResponse {
 
 	/** Tool calls returned by the model (when tools were provided in the request) */
 	toolCalls?: LumenToolCall[];
+
+	/** Why generation stopped, when the provider says */
+	finishReason?: LumenFinishReason;
 }
 
 // =============================================================================
