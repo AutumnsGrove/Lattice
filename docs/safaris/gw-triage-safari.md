@@ -85,7 +85,7 @@ The safety tier system (READ/WRITE/DANGER) is the one genuinely good idea — bu
 | `gw bindings` | bindings.go | 287 | Wrangler binding inspector. |
 | `gw glimpse` | glimpse.go | 146 | Screenshot wrapper. Just call glimpse directly. |
 | `gw logs` | logs.go | 92 | `wrangler tail`. |
-| `gw tenant` | tenant.go | 608 | Tenant management. Raw API or D1 is fine. |
+| `gw tenant` | tenant.go | 608 | **Reversed (#1680).** Kept, and it is now the documented first move in abuse response. Raw D1 sets `active = 0` but leaves the TenantDO warm, which is #1677's bug; `gw tenant suspend` writes `audit_log` and probes the site afterwards. |
 | `gw auth` | auth.go | 360 | OAuth client management. Niche. |
 | `gw login/logout` | login.go | 336 | Grove login. Could stay but questionable. |
 | `gw process` | process_unix/windows.go | 52 | OS process helpers for killed commands. |

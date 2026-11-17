@@ -518,11 +518,10 @@ An account created to place outbound links or programmatic content on a fresh `*
 ### Immediate Actions (0-5 minutes)
 
 ```bash
-# 1. Take the site down, reversibly. `active = 0` is what every tenant lookup
-#    filters on (hooks.server.ts: WHERE subdomain = ? AND active = 1).
-#    Prefer `gw tenant suspend <subdomain> --write` once #1680 lands.
-npx wrangler d1 execute grove-engine-db --remote \
-  --command "UPDATE tenants SET active = 0, updated_at = unixepoch() WHERE subdomain = '<subdomain>'"
+# 1. Take the site down, reversibly. Every tenant lookup filters on
+#    `active = 1`, and `gw tenant suspend` writes an audit_log row and probes
+#    the site for you afterwards.
+gw tenant suspend <subdomain> --write
 
 # 2. Evict the TenantDO. Without this the suspension is cosmetic: the DO serves
 #    its cached config for up to an hour, and rehydrates it from its own SQLite
