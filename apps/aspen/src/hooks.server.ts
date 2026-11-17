@@ -26,6 +26,7 @@ import {
 	validateGroveSession,
 } from "@autumnsgrove/lattice/server";
 import { getUserByTenantId } from "@autumnsgrove/lattice/server/services/users";
+import { isValidSubdomain } from "@autumnsgrove/lattice/utils/subdomain";
 
 /**
  * Reserved subdomains that route to internal apps or have special handling.
@@ -226,18 +227,9 @@ interface TenantLookupResult extends TenantConfig {
 	id: string;
 }
 
-/**
- * Validate subdomain format before database lookup.
- * Prevents SQL injection and ensures subdomains follow RFC 1035 label rules.
- *
- * Valid: lowercase alphanumeric, hyphens (not at start/end), 1-63 chars
- * Invalid: uppercase, underscores, dots, special chars, leading/trailing hyphens
- */
-const SUBDOMAIN_PATTERN = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
-
-function isValidSubdomain(subdomain: string): boolean {
-	return SUBDOMAIN_PATTERN.test(subdomain);
-}
+// Subdomain validation lives in the engine (`utils/grove-url`) so the hook, the
+// ops worker and the CLI all describe the same rule. Valid: lowercase
+// alphanumeric and hyphens, 1-63 chars, no leading or trailing hyphen.
 
 /**
  * Check if a subdomain has an active username redirect (30-day hold).

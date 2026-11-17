@@ -552,6 +552,26 @@ The `/tenant/flush/:subdomain` response tells you which of three states you are 
 - **P1 (HIGH)** if: crawled and indexed, or the same operator has several tenants
 - **P1 (HIGH)** if: a paid or comped tenant is involved (check `platform_billing`)
 
+### Practising this without a live incident
+
+Do not rehearse removal on a real writer's blog. Make a fixture:
+
+```bash
+export GROVE_OPS_ENDPOINT=https://grove-durable-objects.<account>.workers.dev
+
+gw tenant create --subdomain drift-fixture --email fixtures@grove.place \
+  --plan wanderer --created-at 2d --write
+
+# warm the TenantDO, then remove it and check for leftovers
+curl -s -o /dev/null https://drift-fixture.grove.place/
+```
+
+The fixture is made by the same `createTenant()` a real tenant is
+(`libs/engine/src/lib/server/tenants/create-tenant.ts`), so a sweep that leaves
+nothing behind on a fixture is evidence about real tenants too — which is what
+#1596 §B's criterion actually asks for. `--created-at 2d` also makes it young
+enough to exercise the `nofollow ugc` rule (#1682) on a live page.
+
 ### Escalation
 
 Suspension is the reversible first move. Permanent removal is `removeTenant()` from

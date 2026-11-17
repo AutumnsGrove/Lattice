@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -13,6 +15,7 @@ import (
 	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/config"
 	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/exec"
 	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/ui"
+	"github.com/AutumnsGrove/Lattice/tools/grove-wrap-go/internal/vault"
 )
 
 // Tenant inspection and the suspension lever.
@@ -30,7 +33,11 @@ const (
 )
 
 var (
-	subdomainPattern = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{0,62}$`)
+	// The engine's rule (libs/engine/src/lib/utils/grove-url.ts) is
+	// ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$ — no trailing hyphen. This used to
+	// allow one, which meant gw would accept a subdomain the endpoint then
+	// refused. Two copies of a rule is how they stop agreeing.
+	subdomainPattern = regexp.MustCompile(`^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$`)
 	emailPattern     = regexp.MustCompile(`^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$`)
 
 	tenantListAll      bool
@@ -39,6 +46,18 @@ var (
 	tenantListLimit    int
 	tenantShowEmail    string
 	tenantSuspendNote  string
+
+	tenantCreateSubdomain  string
+	tenantCreateEmail      string
+	tenantCreateName       string
+	tenantCreatePlan       string
+	tenantCreateAccent     string
+	tenantCreateCreatedAt  string
+	tenantCreateGroveauth  string
+	tenantCreateOnboarding string
+	tenantCreateForce      string
+	tenantCreateDryRun     bool
+	tenantCreateEndpoint   string
 )
 
 var tenantCmd = &cobra.Command{
@@ -93,6 +112,41 @@ var tenantListCmd = &cobra.Command{
 		fmt.Print(renderTenantTable(rows, time.Now()))
 		return nil
 	},
+}
+
+var tenantCreateCmd = &cobra.Command{
+	Use:   "create --subdomain <name> --email <address> --plan <tier>",
+	Short: "Create a tenant from flags, without walking the signup (fixtures)",
+	Long: `Create a tenant without going through Plant.
+
+This is for fixtures and for restoring an account, not for onboarding anyone.
+It skips Turnstile (#1678) and normally the identity deny list (#1681) — that is
+the point, and it is why it needs --write and an operator endpoint.
+
+It calls the same createTenant() Plant calls, in the engine, so a fixture is the
+same shape as a real tenant. That matters: a fixture can be handed straight to
+removeTenant(), which is how the removal path gets tested at all (#1596 §B).
+
+--created-at makes a fixture young or established, which is the only way to test
+the link policy (#1682) without waiting two weeks. Three accepted forms:
+
+  1700000000   a unix timestamp
+  30d          thirty days ago
+  2026-01-15   that date, midnight UTC
+
+Examples:
+
+  # what would it write?
+  gw tenant create --subdomain autumn-test --email autumn+fixtures@grove.place \
+    --plan seedling --dry-run
+
+  # a two-day-old fixture
+  gw tenant create --subdomain autumn-test --email autumn+fixtures@grove.place \
+    --plan wanderer --created-at 2d --write
+
+The endpoint defaults to $GROVE_OPS_ENDPOINT, or --endpoint.`,
+	Args: cobra.NoArgs,
+	RunE: runTenantCreate,
 }
 
 var tenantShowCmd = &cobra.Command{
@@ -229,7 +283,7 @@ var tenantResumeCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(tenantCmd)
-	tenantCmd.AddCommand(tenantListCmd, tenantShowCmd, tenantSuspendCmd, tenantResumeCmd)
+	tenantCmd.AddCommand(tenantListCmd, tenantShowCmd, tenantSuspendCmd, tenantResumeCmd, tenantCreateCmd)
 
 	tenantListCmd.Flags().BoolVar(&tenantListAll, "all", false, "include suspended tenants")
 	tenantListCmd.Flags().BoolVar(&tenantListInactive, "inactive", false, "only suspended tenants")
@@ -238,6 +292,18 @@ func init() {
 
 	tenantShowCmd.Flags().StringVar(&tenantShowEmail, "email", "", "look the tenant up by email")
 	tenantSuspendCmd.Flags().StringVar(&tenantSuspendNote, "reason", "", "why (recorded in audit_log)")
+
+	tenantCreateCmd.Flags().StringVar(&tenantCreateSubdomain, "subdomain", "", "subdomain to claim (required)")
+	tenantCreateCmd.Flags().StringVar(&tenantCreateEmail, "email", "", "owner address (required)")
+	tenantCreateCmd.Flags().StringVar(&tenantCreateName, "display-name", "", "display name (defaults to the subdomain)")
+	tenantCreateCmd.Flags().StringVar(&tenantCreatePlan, "plan", "wanderer", "wanderer | seedling | sapling | oak | evergreen")
+	tenantCreateCmd.Flags().StringVar(&tenantCreateAccent, "accent-color", "", "accent colour (defaults to the platform default)")
+	tenantCreateCmd.Flags().StringVar(&tenantCreateCreatedAt, "created-at", "", "unix seconds, '30d', or YYYY-MM-DD")
+	tenantCreateCmd.Flags().StringVar(&tenantCreateGroveauth, "groveauth-id", "", "attach an existing identity")
+	tenantCreateCmd.Flags().StringVar(&tenantCreateOnboarding, "onboarding-id", "", "link an existing onboarding row")
+	tenantCreateCmd.Flags().StringVar(&tenantCreateForce, "force-identity", "", "override the deny list, with a reason (recorded)")
+	tenantCreateCmd.Flags().BoolVar(&tenantCreateDryRun, "dry-run", false, "print the writes, change nothing")
+	tenantCreateCmd.Flags().StringVar(&tenantCreateEndpoint, "endpoint", "", "ops worker URL (defaults to $GROVE_OPS_ENDPOINT)")
 }
 
 // ============================================================================
@@ -415,6 +481,226 @@ VALUES (lower(hex(randomblob(16))), %s, 'admin', %s, %s, 'gw', unixepoch())`,
 
 func siteURL(subdomain string) string {
 	return "https://" + subdomain + ".grove.place/"
+}
+
+// ============================================================================
+// Creation
+// ============================================================================
+
+// tenantCreateTiers mirrors the engine's TierKey. Hardcoded here only because
+// this side of the wire is Go; the endpoint validates against TIERS for real.
+var tenantCreateTiers = []string{"wanderer", "seedling", "sapling", "oak", "evergreen"}
+
+type tenantCreateResponse struct {
+	Subdomain               string   `json:"subdomain"`
+	TenantID                string   `json:"tenantId"`
+	Written                 bool     `json:"written"`
+	Plan                    int      `json:"plan"`
+	Steps                   []string `json:"steps"`
+	IdentityBlockOverridden bool     `json:"identityBlockOverridden"`
+	Error                   string   `json:"error"`
+	Message                 string   `json:"message"`
+	Hint                    string   `json:"hint"`
+}
+
+func runTenantCreate(cmd *cobra.Command, _ []string) error {
+	cfg := config.Get()
+
+	if tenantCreateSubdomain == "" || tenantCreateEmail == "" {
+		return fmt.Errorf("both --subdomain and --email are required")
+	}
+	if err := validateSubdomain(tenantCreateSubdomain); err != nil {
+		return err
+	}
+	if err := validateEmail(tenantCreateEmail); err != nil {
+		return err
+	}
+	if !containsString(tenantCreateTiers, tenantCreatePlan) {
+		return fmt.Errorf("--plan must be one of %s", strings.Join(tenantCreateTiers, ", "))
+	}
+
+	createdAt, err := parseCreatedAt(tenantCreateCreatedAt)
+	if err != nil {
+		return err
+	}
+
+	// A dry run writes nothing, so it does not need --write. Everything else is
+	// a signup bypass and does.
+	if !tenantCreateDryRun {
+		if err := requireCFSafety("tenant_create"); err != nil {
+			return err
+		}
+	}
+
+	endpoint, err := resolveOpsEndpoint(tenantCreateEndpoint)
+	if err != nil {
+		return err
+	}
+
+	payload := map[string]any{
+		"subdomain":   tenantCreateSubdomain,
+		"email":       tenantCreateEmail,
+		"displayName": tenantCreateName,
+		"plan":        tenantCreatePlan,
+		"dryRun":      tenantCreateDryRun,
+		"actor":       "gw",
+	}
+	if tenantCreateAccent != "" {
+		payload["accentColor"] = tenantCreateAccent
+	}
+	if createdAt != nil {
+		payload["createdAt"] = *createdAt
+	}
+	if tenantCreateGroveauth != "" {
+		payload["groveauthId"] = tenantCreateGroveauth
+	}
+	if tenantCreateOnboarding != "" {
+		payload["onboardingId"] = tenantCreateOnboarding
+	}
+	if tenantCreateForce != "" {
+		payload["forceIdentity"] = tenantCreateForce
+	}
+
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+
+	key, err := opsAdminKey()
+	if err != nil {
+		return err
+	}
+
+	client := &http.Client{Timeout: 30 * time.Second}
+	req, err := http.NewRequest(http.MethodPost, strings.TrimSuffix(endpoint, "/")+"/tenant/create", strings.NewReader(string(body)))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+key)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("could not reach the ops endpoint at %s: %w", endpoint, err)
+	}
+	defer resp.Body.Close()
+
+	var out tenantCreateResponse
+	_ = json.NewDecoder(resp.Body).Decode(&out)
+
+	if resp.StatusCode >= 400 {
+		if out.Message == "" {
+			out.Message = fmt.Sprintf("endpoint returned %d", resp.StatusCode)
+		}
+		if out.Error == "identity_blocked" {
+			ui.Error(out.Message)
+			ui.Hint("Pass --force-identity \"<reason>\" to override; the reason lands in audit_log.")
+			return fmt.Errorf("identity is on the signup deny list")
+		}
+		return fmt.Errorf("%s", out.Message)
+	}
+
+	if cfg.JSONMode {
+		enc := json.NewEncoder(os.Stdout)
+		enc.SetIndent("", "  ")
+		return enc.Encode(out)
+	}
+
+	if tenantCreateDryRun {
+		ui.Info(fmt.Sprintf("Would create %s on the %s plan — %d writes, nothing changed:",
+			tenantCreateSubdomain, tenantCreatePlan, out.Plan))
+		for _, step := range out.Steps {
+			fmt.Printf("  • %s\n", step)
+		}
+		ui.Hint("Run again with --write to create it.")
+		return nil
+	}
+
+	ui.Success(fmt.Sprintf("Created %s (%s, %s plan)", out.Subdomain, out.TenantID, tenantCreatePlan))
+	if out.IdentityBlockOverridden {
+		ui.Warning("The identity deny list was overridden — the reason is in audit_log.")
+	}
+
+	// A row in D1 is not the same as a site that serves. Say what the internet
+	// actually gets, the way suspend does.
+	code, probeErr := probeSite(out.Subdomain)
+	if probeErr != nil {
+		ui.Warning(fmt.Sprintf("Could not probe https://%s.grove.place: %v", out.Subdomain, probeErr))
+		return nil
+	}
+	if code == http.StatusOK || code == http.StatusFound || code == http.StatusMovedPermanently {
+		ui.Info(fmt.Sprintf("Site is serving (%d).", code))
+	} else {
+		ui.Warning(fmt.Sprintf("Site returned %d — the TenantDO may need a flush.", code))
+	}
+
+	return nil
+}
+
+// parseCreatedAt accepts the three forms the help text promises: a unix
+// timestamp, "30d" for thirty days ago, or YYYY-MM-DD at midnight UTC.
+func parseCreatedAt(value string) (*int64, error) {
+	if value == "" {
+		return nil, nil
+	}
+
+	if strings.HasSuffix(value, "d") {
+		days, err := strconv.Atoi(strings.TrimSuffix(value, "d"))
+		if err != nil || days < 0 {
+			return nil, fmt.Errorf("--created-at %q is not a number of days", value)
+		}
+		ts := time.Now().AddDate(0, 0, -days).Unix()
+		return &ts, nil
+	}
+
+	if date, err := time.Parse("2006-01-02", value); err == nil {
+		ts := date.UTC().Unix()
+		return &ts, nil
+	}
+
+	ts, err := strconv.ParseInt(value, 10, 64)
+	if err != nil || ts <= 0 {
+		return nil, fmt.Errorf("--created-at %q is not a unix timestamp, 'Nd', or YYYY-MM-DD", value)
+	}
+	return &ts, nil
+}
+
+// resolveOpsEndpoint prefers the flag, then the environment. There is no
+// built-in default on purpose: guessing a worker hostname is how a maintenance
+// command silently talks to the wrong deployment.
+func resolveOpsEndpoint(flagValue string) (string, error) {
+	if flagValue != "" {
+		return flagValue, nil
+	}
+	if env := os.Getenv("GROVE_OPS_ENDPOINT"); env != "" {
+		return env, nil
+	}
+	return "", fmt.Errorf(
+		"no ops endpoint: pass --endpoint or set GROVE_OPS_ENDPOINT (e.g. https://grove-durable-objects.<account>.workers.dev)",
+	)
+}
+
+// opsAdminKey reads OPS_ADMIN_KEY from the vault. It is never printed, never
+// logged, and never placed in an argument list.
+func opsAdminKey() (string, error) {
+	vault, err := vault.AutoUnlock()
+	if err != nil {
+		return "", fmt.Errorf("could not unlock the vault for OPS_ADMIN_KEY: %w", err)
+	}
+	key, ok := vault.Get("OPS_ADMIN_KEY")
+	if !ok || key == "" {
+		return "", fmt.Errorf("OPS_ADMIN_KEY is not in the vault (gw secret set OPS_ADMIN_KEY)")
+	}
+	return key, nil
+}
+
+func containsString(haystack []string, needle string) bool {
+	for _, v := range haystack {
+		if v == needle {
+			return true
+		}
+	}
+	return false
 }
 
 func probeSite(subdomain string) (int, error) {
