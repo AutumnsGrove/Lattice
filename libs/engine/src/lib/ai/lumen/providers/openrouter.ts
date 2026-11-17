@@ -314,6 +314,7 @@ export class OpenRouterProvider implements LumenProvider {
 					input: inputTokens,
 					output: outputTokens,
 					cost: calculateCost(model, inputTokens, outputTokens),
+					costSource: "catalog",
 				},
 				model: data.model ?? model,
 				raw: data,
@@ -418,6 +419,7 @@ export class OpenRouterProvider implements LumenProvider {
 							output:
 								outputTokens || this.estimateTokens([{ role: "assistant", content: totalContent }]),
 							cost: calculateCost(model, inputTokens, outputTokens),
+							costSource: "catalog",
 						},
 					};
 					break;

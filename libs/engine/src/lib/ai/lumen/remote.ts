@@ -12,6 +12,7 @@
 import { z } from "zod";
 import type {
 	LumenMessage,
+	LumenUsage,
 	LumenRequest,
 	LumenResponse,
 	LumenEmbeddingRequest,
@@ -49,6 +50,27 @@ function toWireMessage(message: LumenMessage): Record<string, unknown> {
 	return wire;
 }
 
+/**
+ * Map wire usage back onto the engine's shape.
+ *
+ * `cost_source` is snake_case on the wire. Dropping it here would make every
+ * cost at the caller look like a first-party figure, which is the opposite of
+ * what the field is for.
+ */
+function fromWireUsage(usage: {
+	input: number;
+	output: number;
+	cost: number;
+	cost_source?: "catalog" | "provider";
+}): LumenUsage {
+	return {
+		input: usage.input,
+		output: usage.output,
+		cost: usage.cost,
+		...(usage.cost_source && { costSource: usage.cost_source }),
+	};
+}
+
 // =============================================================================
 // Response Schemas (Rootwork: validate upstream responses at boundary)
 // =============================================================================
@@ -57,6 +79,7 @@ const UsageSchema = z.object({
 	input: z.number(),
 	output: z.number(),
 	cost: z.number(),
+	cost_source: z.enum(["catalog", "provider"]).optional(),
 });
 
 const ToolCallSchema = z.object({
@@ -222,7 +245,7 @@ export class RemoteLumenClient {
 			content: data.data.content,
 			model: data.data.model,
 			provider: data.data.provider as LumenResponse["provider"],
-			usage: data.data.usage,
+			usage: fromWireUsage(data.data.usage),
 			cached: data.data.cached,
 			latency: envelope.data.meta?.latencyMs ?? 0,
 			...(data.data.tool_calls && { toolCalls: data.data.tool_calls }),

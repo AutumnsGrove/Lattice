@@ -380,6 +380,69 @@ describe("RemoteLumenClient", () => {
 		});
 	});
 
+	describe("cost source", () => {
+		it("maps cost_source back onto costSource", async () => {
+			const fetcher = createMockFetcher(
+				successEnvelope({
+					content: "x",
+					model: "m",
+					provider: "openrouter",
+					usage: { input: 10, output: 5, cost: 0.002, cost_source: "catalog" },
+				}),
+			);
+			const client = new RemoteLumenClient({
+				baseUrl: "https://lumen.grove.place",
+				apiKey: "key",
+				fetcher,
+			});
+
+			const result = await client.run({ task: "generation", input: "go" });
+
+			expect(result.usage.costSource).toBe("catalog");
+			expect(result.usage.cost).toBe(0.002);
+		});
+
+		it("leaves costSource absent when the worker does not report one", async () => {
+			const fetcher = createMockFetcher(
+				successEnvelope({
+					content: "x",
+					model: "m",
+					provider: "openrouter",
+					usage: { input: 10, output: 5, cost: 0.002 },
+				}),
+			);
+			const client = new RemoteLumenClient({
+				baseUrl: "https://lumen.grove.place",
+				apiKey: "key",
+				fetcher,
+			});
+
+			const result = await client.run({ task: "generation", input: "go" });
+			expect(result.usage.costSource).toBeUndefined();
+		});
+
+		it("does not put a camelCase field on the wire", async () => {
+			const fetcher = createMockFetcher(
+				successEnvelope({
+					content: "x",
+					model: "m",
+					provider: "openrouter",
+					usage: { input: 1, output: 1, cost: 0 },
+				}),
+			);
+			const client = new RemoteLumenClient({
+				baseUrl: "https://lumen.grove.place",
+				apiKey: "key",
+				fetcher,
+			});
+
+			await client.run({ task: "generation", input: "go" });
+
+			const sent = JSON.parse(fetcher.fetch.mock.calls[0][1].body);
+			expect(JSON.stringify(sent)).not.toContain("costSource");
+		});
+	});
+
 	// =============================================================================
 	// EMBED
 	// =============================================================================

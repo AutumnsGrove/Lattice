@@ -298,7 +298,7 @@ export class LumenClient {
 				"embedding",
 				result.model,
 				"cloudflare-ai",
-				{ input: result.tokens, output: 0, cost: 0 },
+				{ input: result.tokens, output: 0, cost: 0, costSource: "catalog" },
 				0,
 				false,
 			);
@@ -346,7 +346,7 @@ export class LumenClient {
 				"moderation",
 				result.model,
 				result.provider,
-				{ input: Math.ceil(request.content.length / 4), output: 0, cost: 0 },
+				{ input: Math.ceil(request.content.length / 4), output: 0, cost: 0, costSource: "catalog" },
 				0,
 				false,
 			);
@@ -479,7 +479,7 @@ export class LumenClient {
 				"transcription",
 				usedModel,
 				"cloudflare-ai",
-				{ input: 0, output: 0, cost: 0 }, // CF AI is included in Workers pricing
+				{ input: 0, output: 0, cost: 0, costSource: "catalog" }, // CF AI is included in Workers pricing
 				Date.now() - startTime,
 				false,
 			);

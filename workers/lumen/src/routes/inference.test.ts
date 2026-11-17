@@ -203,6 +203,43 @@ describe("POST /inference", () => {
 		expect(body.data?.finish_reason).toBeUndefined();
 	});
 
+	it("carries the cost source out as cost_source", async () => {
+		mockRun.mockResolvedValue({
+			content: "x",
+			model: "m",
+			provider: "openrouter",
+			usage: { input: 10, output: 5, cost: 0.002, costSource: "catalog" },
+			cached: false,
+		});
+
+		const app = createApp();
+		const res = await app.request(post({ task: "generation", input: "go" }), undefined, mockEnv);
+
+		const body = (await res.json()) as any;
+		expect(body.data.usage).toEqual({
+			input: 10,
+			output: 5,
+			cost: 0.002,
+			cost_source: "catalog",
+		});
+	});
+
+	it("omits cost_source when the client did not report one", async () => {
+		mockRun.mockResolvedValue({
+			content: "x",
+			model: "m",
+			provider: "openrouter",
+			usage: { input: 1, output: 1, cost: 0 },
+			cached: false,
+		});
+
+		const app = createApp();
+		const res = await app.request(post({ task: "generation", input: "go" }), undefined, mockEnv);
+
+		const body = (await res.json()) as any;
+		expect(body.data.usage).not.toHaveProperty("cost_source");
+	});
+
 	it("should return 400 for invalid JSON body", async () => {
 		const app = createApp();
 		const res = await app.request(postRaw("not json {{{"), undefined, mockEnv);

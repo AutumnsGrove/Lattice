@@ -10,7 +10,7 @@
 
 import { Hono } from "hono";
 import type { Env, LumenWorkerResponse } from "../types";
-import { InferenceRequestSchema, toLumenMessages } from "../types";
+import { InferenceRequestSchema, toLumenMessages, toWireUsage } from "../types";
 import type { AuthVariables } from "../auth/middleware";
 import { createLumenClientForWorker } from "../lib/client-factory";
 import { buildErrorResponse } from "../lib/errors";
@@ -81,7 +81,7 @@ inference.post("/", async (c) => {
 				content: result.content,
 				model: result.model,
 				provider: result.provider,
-				usage: result.usage,
+				usage: toWireUsage(result.usage),
 				cached: result.cached,
 				...(result.toolCalls && { tool_calls: result.toolCalls }),
 				...(result.finishReason && { finish_reason: result.finishReason }),

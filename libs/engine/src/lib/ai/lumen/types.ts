@@ -213,6 +213,20 @@ export interface LumenResponse {
 	latency: number;
 }
 
+/**
+ * Where a cost figure came from.
+ *
+ * - `catalog` — Lumen's own model table (USD per million tokens). This is an
+ *   estimate of what the call *should* cost, not what anyone was billed.
+ * - `provider` — a figure the provider reported for this specific call.
+ *
+ * Nothing reports `provider` today: every adapter computes cost with
+ * `calculateCost()` from the registry. The distinction exists because a run
+ * record that stores a cost needs to say whether it is an invoice or a guess,
+ * and "we will add that later" is how a cost number becomes quietly trusted.
+ */
+export type LumenCostSource = "catalog" | "provider";
+
 export interface LumenUsage {
 	/** Input tokens consumed */
 	input: number;
@@ -222,6 +236,12 @@ export interface LumenUsage {
 
 	/** Estimated cost in USD */
 	cost: number;
+
+	/**
+	 * Where `cost` came from. Absent means unknown — treat it as an estimate,
+	 * never as a billed amount.
+	 */
+	costSource?: LumenCostSource;
 }
 
 // =============================================================================

@@ -171,6 +171,28 @@ export const TranscribeRequestSchema = z.object({
 	mode: z.enum(["raw", "draft"]).default("raw"),
 });
 
+/**
+ * Map usage onto the wire shape.
+ *
+ * `cost_source` is snake_case here for the same reason `tool_call_id` is: this
+ * is a JSON boundary, and the caller maps it back. It is carried rather than
+ * dropped because a run record that stores a cost needs to know whether it is
+ * an invoice or an estimate.
+ */
+export function toWireUsage(usage: {
+	input: number;
+	output: number;
+	cost: number;
+	costSource?: "catalog" | "provider";
+}): Record<string, unknown> {
+	return {
+		input: usage.input,
+		output: usage.output,
+		cost: usage.cost,
+		...(usage.costSource && { cost_source: usage.costSource }),
+	};
+}
+
 // =============================================================================
 // Response Types
 // =============================================================================
