@@ -47,7 +47,7 @@ Lumen currently speaks in content: you ask, it answers with text. Tool calling t
 
 **Spec Type:** Extension to [Lumen Spec](lumen-spec.md)
 **First Consumer:** [Reverie](reverie-spec.md) (Natural Language Configuration)
-**Status:** Implemented (single-turn and tool turns); streaming tool deltas deferred
+**Status:** Implemented — including streaming tool deltas (#1730)
 **Last Updated:** March 2026
 
 This is an additive change. Every existing consumer (Wisp, Thorn, Timeline, Fireside, Petal) continues to call `lumen.run()` exactly as before and receives `content: string`. The tool calling path only activates when a caller passes `tools` in the request options.
@@ -80,10 +80,11 @@ Reverie needs to translate "make my site feel like a midnight library" into conc
 - **Running tools.** Lumen does not execute a tool call, does not validate its
   arguments against the caller's business rules, and never retries a failed one.
 - MCP server integration (that's the existing stub in `mcp.ts`, separate concern)
-- Streaming tool calls — still deferred. The in-process stream chunk type carries
-  only text content, not tool-call deltas. The first consumer (Lyra's timeline
-  job, #1605) is background, so it does not need this; Wisp, Fireside and Reverie
-  are interactive and will (#1693).
+- **A streaming route on the worker.** Streaming stays in-process: no consumer
+  needs it over HTTP yet, and a passthrough route would have to buffer and
+  re-frame SSE without adding anything. `RemoteLumenClient` has no `stream()`.
+  The decision is recorded here rather than left implicit; it changes when an
+  out-of-process consumer appears.
 
 ### Who Drives the Loop
 
@@ -101,6 +102,8 @@ scheduler, and it is why the following exist:
 | `finishReason` | `length` means the turn may hold truncated arguments — discard, don't parse |
 | `costSource` on `usage` | whether a cost is an estimate from the model table or a billed figure |
 | `supportsTools` / `contextWindow` per model | whether a model can do this at all, and how much history fits |
+| `toolCallDeltas` on a stream chunk | a tool call as it arrives — fragments, not a call |
+| `assembleToolCallDeltas()` | folds fragments into `LumenToolCall[]`, and refuses the ones that were cut off |
 
 A step, as a caller sees it:
 
@@ -115,6 +118,27 @@ if (turn.finishReason === "length") throw new Error("model ran out of room");
 messages.push({ role: "assistant", content: turn.content, toolCalls: turn.toolCalls });
 messages.push({ role: "tool", content: result, toolCallId: turn.toolCalls[0].id });
 ```
+
+A streaming step looks the same, except the call assembles at the end:
+
+```ts
+const deltas: LumenToolCallDelta[] = [];
+let finishReason: LumenFinishReason | undefined;
+
+for await (const chunk of lumen.stream({ task: "agent", input: messages, options: { tools } })) {
+  if (chunk.content) render(chunk.content);
+  if (chunk.toolCallDeltas) deltas.push(...chunk.toolCallDeltas);
+  if (chunk.done) finishReason = chunk.finishReason;
+}
+
+const { calls, incomplete } = assembleToolCallDeltas(deltas);
+if (finishReason === "length" || incomplete.length > 0) throw new Error("cut off");
+```
+
+**A delta is not a call.** `LumenStreamChunk` carries fragments and never a
+complete `toolCalls` array, because half a call parsed as a whole is exactly the
+mistake the assembly helper exists to prevent — it returns `incomplete` rather
+than guessing.
 
 Two consequences worth knowing before building on this:
 
@@ -1010,7 +1034,8 @@ Shipped in #1693's L1–L5. Boxes left empty are still open, and say why.
 - [x] `normalizeResponse()` carries `toolCalls`, `finishReason`, `costSource`
 - [x] `validateToolTurns()` rejects an unmatched `toolCallId`, naming the id
 - [x] Tests across the provider, the preprocessor, the client and the wire
-- [ ] Streaming tool-call deltas — deferred; the chunk type is text-only
+- [x] Streaming tool-call deltas — **#1730**: `toolCallDeltas`, `finishReason`
+      on the final chunk, and `assembleToolCallDeltas()`
 - [ ] Task per consumer (`reverie`, `reverie-compose`) — not added; `agent` is
       the one task, deliberately
 
@@ -1029,6 +1054,7 @@ Shipped in #1693's L1–L5. Boxes left empty are still open, and say why.
 
 - [x] This spec: who drives the loop, and what Lumen refuses to do
 - [ ] `lumen-spec.md` cross-reference
+- [ ] A worker streaming route — decided against for now; see Non-Goals
 
 ---
 

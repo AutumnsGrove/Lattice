@@ -12,6 +12,7 @@ import { ProviderError, ProviderTimeoutError } from "../errors.js";
 import type {
 	LumenFinishReason,
 	LumenMessage,
+	LumenToolCallDelta,
 	LumenProviderName,
 	LumenStreamChunk,
 	LumenToolCall,
@@ -59,6 +60,13 @@ interface OpenRouterStreamChunk {
 		delta?: {
 			content?: string;
 			role?: string;
+			/** Fragmented: first has id + name, the rest are argument slices. */
+			tool_calls?: Array<{
+				index: number;
+				id?: string;
+				type?: string;
+				function?: { name?: string; arguments?: string };
+			}>;
 		};
 		finish_reason?: string | null;
 		index?: number;
@@ -381,6 +389,10 @@ export class OpenRouterProvider implements LumenProvider {
 					max_tokens: options.maxTokens,
 					temperature: options.temperature,
 					stream: true,
+					...(options.providerOptions?.tools ? { tools: options.providerOptions.tools } : {}),
+					...(options.providerOptions?.toolChoice !== undefined
+						? { tool_choice: options.providerOptions.toolChoice }
+						: {}),
 				}),
 				signal: controller.signal,
 			});
@@ -400,6 +412,8 @@ export class OpenRouterProvider implements LumenProvider {
 			let totalContent = "";
 			let inputTokens = 0;
 			let outputTokens = 0;
+			// Arrives on the choice just before [DONE], so it has to be held.
+			let finishReason: LumenFinishReason | undefined;
 
 			// Safety limit to prevent infinite loops from malformed streams
 			// At ~100 tokens/chunk, 10000 iterations = ~1M tokens (well beyond any model limit)
@@ -414,6 +428,7 @@ export class OpenRouterProvider implements LumenProvider {
 					yield {
 						content: "",
 						done: true,
+						finishReason,
 						usage: {
 							input: inputTokens || this.estimateTokens(messages),
 							output:
@@ -437,11 +452,31 @@ export class OpenRouterProvider implements LumenProvider {
 
 					try {
 						const chunk = JSON.parse(data) as OpenRouterStreamChunk;
-						const content = chunk.choices?.[0]?.delta?.content ?? "";
+						const choice = chunk.choices?.[0];
+						const content = choice?.delta?.content ?? "";
 
-						if (content) {
-							totalContent += content;
-							yield { content, done: false };
+						if (choice?.finish_reason) {
+							finishReason = normalizeFinishReason(choice.finish_reason);
+						}
+
+						const toolCallDeltas = choice?.delta?.tool_calls?.map((call) => {
+							const delta: LumenToolCallDelta = { index: call.index };
+							if (call.id) delta.id = call.id;
+							if (call.function?.name) delta.name = call.function.name;
+							if (call.function?.arguments) delta.argumentsDelta = call.function.arguments;
+							return delta;
+						});
+
+						if (content) totalContent += content;
+
+						// Yield when there is something to say. A chunk may carry text,
+						// fragments, or both.
+						if (content || toolCallDeltas?.length) {
+							yield {
+								content,
+								done: false,
+								...(toolCallDeltas?.length && { toolCallDeltas }),
+							};
 						}
 
 						// Capture usage if provided
