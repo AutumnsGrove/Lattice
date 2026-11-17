@@ -6,10 +6,15 @@ on:
     branches: [main]
     paths:
       - "services/durable-objects/**"
-      - "libs/engine/src/lib/durable-objects/**"
       - "libs/loom/**"
-      - "libs/engine/src/lib/ai/lumen/**"
-      - "libs/engine/src/lib/zephyr/**"
+      # The whole engine, not a hand-picked list (#1733). This worker imports
+      # @autumnsgrove/lattice, so any module reachable from src/index.ts can
+      # break its bundle — and #1723 proved it: a config-barrel import added
+      # `import.meta.env` at module load and the worker stopped deploying for
+      # two hours. Then #1732 fixed it and did not redeploy, because the repair
+      # touched paths the old list did not name. A subset is always wrong
+      # eventually; redeploying too often is the cheaper mistake.
+      - "libs/engine/**"
   workflow_dispatch:
 
 permissions:
