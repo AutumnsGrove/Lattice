@@ -660,6 +660,151 @@ describe("stream()", () => {
 		expect(finalChunk!.usage).toBeDefined();
 	});
 
+	it("reassembles a tool call fragmented across SSE events", async () => {
+		const provider = new OpenRouterProvider("test-key");
+
+		// Shape recorded from OpenRouter: the id and name arrive first, then the
+		// JSON arguments a slice at a time, then finish_reason, then [DONE].
+		(globalThis.fetch as any).mockResolvedValue({
+			ok: true,
+			body: createSSEStream([
+				'data: {"choices":[{"delta":{"role":"assistant","content":""}}]}\n\n',
+				'data: {"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call_abc","type":"function","function":{"name":"get_weather","arguments":""}}]}}]}\n\n',
+				'data: {"choices":[{"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{\\"ci"}}]}}]}\n\n',
+				'data: {"choices":[{"delta":{"tool_calls":[{"index":0,"function":{"arguments":"ty\\":\\"NYC\\"}"}}]}}]}\n\n',
+				'data: {"choices":[{"delta":{},"finish_reason":"tool_calls"}]}\n\n',
+				'data: {"choices":[],"usage":{"prompt_tokens":30,"completion_tokens":12}}\n\n',
+				"data: [DONE]\n\n",
+			]),
+		});
+
+		const chunks = [];
+		for await (const chunk of provider.stream(
+			"test/model",
+			[{ role: "user", content: "weather in NYC?" }] as LumenMessage[],
+			{
+				maxTokens: 200,
+				temperature: 0.2,
+				providerOptions: {
+					tools: [
+						{
+							type: "function",
+							function: { name: "get_weather", description: "d", parameters: {} },
+						},
+					],
+				},
+			},
+		)) {
+			chunks.push(chunk);
+		}
+
+		const deltas = chunks.flatMap((c) => c.toolCallDeltas ?? []);
+		expect(deltas.length).toBeGreaterThanOrEqual(3);
+
+		const finalChunk = chunks.find((c) => c.done)!;
+		expect(finalChunk.finishReason).toBe("tool_calls");
+	});
+
+	it("keeps parallel tool calls apart by index", async () => {
+		const provider = new OpenRouterProvider("test-key");
+
+		(globalThis.fetch as any).mockResolvedValue({
+			ok: true,
+			body: createSSEStream([
+				'data: {"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call_a","function":{"name":"one","arguments":"{}"}},{"index":1,"id":"call_b","function":{"name":"two","arguments":"{}"}}]}}]}\n\n',
+				"data: [DONE]\n\n",
+			]),
+		});
+
+		const chunks = [];
+		for await (const chunk of provider.stream(
+			"test/model",
+			[{ role: "user", content: "both" }] as LumenMessage[],
+			{ maxTokens: 100, temperature: 0 },
+		)) {
+			chunks.push(chunk);
+		}
+
+		const deltas = chunks.flatMap((c) => c.toolCallDeltas ?? []);
+		expect(deltas.map((d) => d.index)).toEqual([0, 1]);
+		expect(deltas.map((d) => d.id)).toEqual(["call_a", "call_b"]);
+	});
+
+	it("forwards tools and tool_choice in the streaming request body", async () => {
+		const provider = new OpenRouterProvider("test-key");
+
+		(globalThis.fetch as any).mockResolvedValue({
+			ok: true,
+			body: createSSEStream(["data: [DONE]\n\n"]),
+		});
+
+		const tools = [
+			{ type: "function" as const, function: { name: "t", description: "d", parameters: {} } },
+		];
+
+		for await (const _chunk of provider.stream(
+			"test/model",
+			[{ role: "user", content: "go" }] as LumenMessage[],
+			{
+				maxTokens: 10,
+				temperature: 0,
+				providerOptions: { tools, toolChoice: "required" },
+			},
+		)) {
+			void _chunk;
+		}
+
+		const body = JSON.parse((globalThis.fetch as any).mock.calls[0][1].body);
+		expect(body.tools).toHaveLength(1);
+		expect(body.tool_choice).toBe("required");
+		expect(body.stream).toBe(true);
+	});
+
+	it("omits tools from the body when none were given", async () => {
+		const provider = new OpenRouterProvider("test-key");
+
+		(globalThis.fetch as any).mockResolvedValue({
+			ok: true,
+			body: createSSEStream(["data: [DONE]\n\n"]),
+		});
+
+		for await (const _chunk of provider.stream(
+			"test/model",
+			[{ role: "user", content: "go" }] as LumenMessage[],
+			{ maxTokens: 10, temperature: 0 },
+		)) {
+			void _chunk;
+		}
+
+		const body = JSON.parse((globalThis.fetch as any).mock.calls[0][1].body);
+		expect(body).not.toHaveProperty("tools");
+		expect(body).not.toHaveProperty("tool_choice");
+	});
+
+	it("reports a stream cut off by the token limit", async () => {
+		const provider = new OpenRouterProvider("test-key");
+
+		(globalThis.fetch as any).mockResolvedValue({
+			ok: true,
+			body: createSSEStream([
+				'data: {"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call_x","function":{"name":"t","arguments":"{\\"ci"}}]}}]}\n\n',
+				'data: {"choices":[{"delta":{},"finish_reason":"length"}]}\n\n',
+				"data: [DONE]\n\n",
+			]),
+		});
+
+		const chunks = [];
+		for await (const chunk of provider.stream(
+			"test/model",
+			[{ role: "user", content: "go" }] as LumenMessage[],
+			{ maxTokens: 10, temperature: 0 },
+		)) {
+			chunks.push(chunk);
+		}
+
+		expect(chunks.find((c) => c.done)!.finishReason).toBe("length");
+	});
+
 	it("handles [DONE] sentinel correctly", async () => {
 		const provider = new OpenRouterProvider("test-key");
 

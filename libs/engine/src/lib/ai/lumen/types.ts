@@ -248,12 +248,55 @@ export interface LumenUsage {
 // STREAMING
 // =============================================================================
 
+/**
+ * One fragment of a tool call, as a streaming provider sends it.
+ *
+ * OpenRouter streams a call in pieces distributed across many events: the first
+ * fragment carries the `id` and function `name`, and every fragment after that
+ * carries a slice of the JSON arguments. Fragments from several parallel calls
+ * are interleaved, distinguished only by `index`.
+ *
+ * This is deliberately **not** `LumenToolCall`. A chunk is not a call: half of a
+ * call parsed as though it were complete is exactly the bug that produces a
+ * wrong side effect. Consumers collect deltas and call
+ * `assembleToolCallDeltas()` once the stream ends.
+ */
+export interface LumenToolCallDelta {
+	/** Which call this belongs to. Providers index from 0 within one response. */
+	index: number;
+
+	/** Present on the first fragment for an index. */
+	id?: string;
+
+	/** Tool name. Present on the first fragment, occasionally repeated. */
+	name?: string;
+
+	/** A slice of the JSON arguments. Concatenate in arrival order, per index. */
+	argumentsDelta?: string;
+}
+
 export interface LumenStreamChunk {
 	/** Partial content */
 	content: string;
 
 	/** Whether this is the final chunk */
 	done: boolean;
+
+	/**
+	 * Tool-call fragments in this chunk, if any. Absent on text-only chunks.
+	 *
+	 * Empty-but-present is meaningful: a provider may open a tool call before it
+	 * has anything to put in it.
+	 */
+	toolCallDeltas?: LumenToolCallDelta[];
+
+	/**
+	 * Why generation stopped. Only on the final chunk.
+	 *
+	 * A stream that ends with `length` was cut off, so any tool-call fragments
+	 * collected from it are incomplete JSON and must not be run.
+	 */
+	finishReason?: LumenFinishReason;
 
 	/** Final usage stats (only on done=true) */
 	usage?: LumenUsage;

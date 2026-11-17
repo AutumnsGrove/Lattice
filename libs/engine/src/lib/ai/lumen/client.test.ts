@@ -85,6 +85,79 @@ function createMockProvider(
 // CLIENT CREATION & CONFIGURATION
 // =============================================================================
 
+describe("LumenClient — streaming", () => {
+	it("forwards tools to the provider so a streamed call is possible", async () => {
+		const stream = vi.fn().mockImplementation(async function* () {
+			yield {
+				content: "",
+				done: false,
+				toolCallDeltas: [{ index: 0, id: "call_s", name: "t", argumentsDelta: "{}" }],
+			};
+			yield { content: "", done: true, finishReason: "tool_calls" as const };
+		});
+
+		const client = createLumenClient({ openrouterApiKey: "test-key" });
+		// @ts-expect-error - Accessing private for testing
+		client.providers = { openrouter: { name: "openrouter", inference: vi.fn(), stream } };
+
+		const chunks = [];
+		for await (const chunk of client.stream({
+			task: "agent",
+			input: "go",
+			options: {
+				tools: [{ type: "function", function: { name: "t", description: "d", parameters: {} } }],
+			},
+		})) {
+			chunks.push(chunk);
+		}
+
+		const passed = stream.mock.calls[0][2];
+		expect(passed.providerOptions.tools).toHaveLength(1);
+
+		expect(chunks.flatMap((c) => c.toolCallDeltas ?? [])).toHaveLength(1);
+		expect(chunks.find((c) => c.done)?.finishReason).toBe("tool_calls");
+	});
+
+	it("refuses a stream with tools on a model that cannot call them", async () => {
+		const stream = vi.fn();
+		const client = createLumenClient({ openrouterApiKey: "test-key" });
+		// @ts-expect-error - Accessing private for testing
+		client.providers = { openrouter: { name: "openrouter", inference: vi.fn(), stream } };
+
+		await expect(async () => {
+			for await (const _chunk of client.stream({
+				task: "agent",
+				input: "go",
+				options: {
+					model: MODELS.LLAMAGUARD_4,
+					tools: [{ type: "function", function: { name: "t", description: "d", parameters: {} } }],
+				},
+			})) {
+				void _chunk;
+			}
+		}).rejects.toThrow(/cannot call tools/);
+
+		expect(stream).not.toHaveBeenCalled();
+	});
+
+	it("omits providerOptions when no tools were given", async () => {
+		const stream = vi.fn().mockImplementation(async function* () {
+			yield { content: "hi", done: false };
+			yield { content: "", done: true };
+		});
+
+		const client = createLumenClient({ openrouterApiKey: "test-key" });
+		// @ts-expect-error - Accessing private for testing
+		client.providers = { openrouter: { name: "openrouter", inference: vi.fn(), stream } };
+
+		for await (const _chunk of client.stream({ task: "chat", input: "go" })) {
+			void _chunk;
+		}
+
+		expect(stream.mock.calls[0][2]).not.toHaveProperty("providerOptions");
+	});
+});
+
 describe("LumenClient — tool support guard", () => {
 	it("refuses tools on a model that cannot call them, before reaching a provider", async () => {
 		const provider = {

@@ -241,6 +241,15 @@ export class LumenClient {
 			maxTokens: request.options?.maxTokens ?? taskConfig.defaultMaxTokens,
 			temperature: request.options?.temperature ?? taskConfig.defaultTemperature,
 			apiKeyOverride: request.options?.tenantApiKey,
+			// Without these, a streaming caller is refused by the guard above only
+			// when it names an incapable model — the capable one would receive a
+			// request with no tools at all and answer in prose.
+			...(request.options?.tools && {
+				providerOptions: {
+					tools: request.options.tools,
+					toolChoice: request.options.toolChoice,
+				},
+			}),
 		});
 
 		// 6. Yield chunks and record usage on completion
