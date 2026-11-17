@@ -323,6 +323,92 @@ describe("Request Validation", () => {
 // PROMPT SECURITY
 // =============================================================================
 
+describe("Tool turns", () => {
+	const loop: LumenMessage[] = [
+		{ role: "user", content: "look up autumn@grove.place" },
+		{
+			role: "assistant",
+			content: "",
+			toolCalls: [
+				{
+					id: "call_1",
+					type: "function",
+					function: { name: "lookup", arguments: '{"email":"autumn@grove.place"}' },
+				},
+			],
+		},
+		{ role: "tool", content: "found autumn@grove.place", toolCallId: "call_1" },
+	];
+
+	it("scrubs a tool result like any other message", () => {
+		const result = scrubMessages(loop);
+		const toolMessage = result.messages[2];
+
+		expect(toolMessage.content).toBe("found [EMAIL]");
+		expect(result.piiCount).toBeGreaterThan(0);
+	});
+
+	it("does not rewrite tool-call arguments", () => {
+		// The arguments are model output the caller has to parse. Scrubbing them
+		// would corrupt JSON, and the private data arrives in the tool result.
+		const result = scrubMessages(loop);
+		const assistant = result.messages[1];
+
+		expect(assistant.toolCalls?.[0].function.arguments).toBe('{"email":"autumn@grove.place"}');
+	});
+
+	it("keeps the tool_call_id on the scrubbed message", () => {
+		const result = scrubMessages(loop);
+		expect(result.messages[2].toolCallId).toBe("call_1");
+	});
+
+	it("accepts a well-formed tool conversation", () => {
+		expect(() => validateRequest({ task: "generation", input: loop })).not.toThrow();
+	});
+
+	it("rejects a tool result with no toolCallId", () => {
+		const broken: LumenMessage[] = [
+			loop[1],
+			{ role: "tool", content: "unmatched", toolCallId: "" },
+		];
+		expect(() => validateRequest({ task: "generation", input: broken })).toThrow(/no toolCallId/);
+	});
+
+	it("rejects a tool result whose id is not in the preceding assistant turn", () => {
+		const broken: LumenMessage[] = [
+			loop[1],
+			{ role: "tool", content: "wrong call", toolCallId: "call_other" },
+		];
+		expect(() => validateRequest({ task: "generation", input: broken })).toThrow(
+			/not in the preceding assistant turn/,
+		);
+	});
+
+	it("names the id that did not match, so a loop failing on step two is diagnosable", () => {
+		const broken: LumenMessage[] = [
+			loop[1],
+			{ role: "tool", content: "x", toolCallId: "call_other" },
+		];
+		expect(() => validateRequest({ task: "generation", input: broken })).toThrow(/call_other/);
+	});
+
+	it("accepts several results answering several calls in one turn", () => {
+		const multi: LumenMessage[] = [
+			{
+				role: "assistant",
+				content: "",
+				toolCalls: [
+					{ id: "a", type: "function", function: { name: "one", arguments: "{}" } },
+					{ id: "b", type: "function", function: { name: "two", arguments: "{}" } },
+				],
+			},
+			{ role: "tool", content: "one done", toolCallId: "a" },
+			{ role: "tool", content: "two done", toolCallId: "b" },
+		];
+		expect(() => validateRequest({ task: "generation", input: multi })).not.toThrow();
+	});
+});
+
 describe("Prompt Security", () => {
 	it("should wrap user content with security markers", () => {
 		const content = "Hello world";

@@ -260,6 +260,83 @@ describe("RemoteLumenClient", () => {
 	});
 
 	// =============================================================================
+	// TOOL TURNS (L1) AND FINISH REASON (L2)
+	// =============================================================================
+
+	describe("tool turns", () => {
+		it("sends tool turns in the worker's wire shape", async () => {
+			const fetcher = createMockFetcher(
+				successEnvelope({
+					content: "done",
+					model: "test-model",
+					provider: "openrouter",
+					usage: { input: 10, output: 5, cost: 0.001 },
+				}),
+			);
+			const client = new RemoteLumenClient({
+				baseUrl: "https://lumen.grove.place",
+				apiKey: "key",
+				fetcher,
+			});
+
+			await client.run({
+				task: "generation",
+				input: [
+					{ role: "user", content: "what is the weather" },
+					{
+						role: "assistant",
+						content: "",
+						toolCalls: [
+							{
+								id: "call_1",
+								type: "function",
+								function: { name: "weather", arguments: '{"city":"NYC"}' },
+							},
+						],
+					},
+					{ role: "tool", content: "18C", toolCallId: "call_1", name: "weather" },
+				],
+			});
+
+			const sent = JSON.parse(fetcher.fetch.mock.calls[0][1].body);
+			expect(sent.input[1]).toMatchObject({
+				role: "assistant",
+				tool_calls: [{ id: "call_1" }],
+			});
+			expect(sent.input[2]).toEqual({
+				role: "tool",
+				content: "18C",
+				tool_call_id: "call_1",
+				name: "weather",
+			});
+			// camelCase must not leak onto the wire — z.object would strip it and
+			// the provider would reject a tool result with no id.
+			expect(sent.input[1].toolCalls).toBeUndefined();
+			expect(sent.input[2].toolCallId).toBeUndefined();
+		});
+
+		it("leaves string input alone", async () => {
+			const fetcher = createMockFetcher(
+				successEnvelope({
+					content: "x",
+					model: "m",
+					provider: "openrouter",
+					usage: { input: 1, output: 1, cost: 0 },
+				}),
+			);
+			const client = new RemoteLumenClient({
+				baseUrl: "https://lumen.grove.place",
+				apiKey: "key",
+				fetcher,
+			});
+
+			await client.run({ task: "generation", input: "just text" });
+
+			expect(JSON.parse(fetcher.fetch.mock.calls[0][1].body).input).toBe("just text");
+		});
+	});
+
+	// =============================================================================
 	// EMBED
 	// =============================================================================
 

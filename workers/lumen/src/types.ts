@@ -6,6 +6,7 @@
  */
 
 import type { GroveContext } from "@autumnsgrove/infra";
+import type { LumenMessage } from "@autumnsgrove/lattice/ai/lumen/types";
 import { z } from "zod";
 
 // =============================================================================
@@ -53,25 +54,55 @@ export const LumenTaskSchema = z.enum([
 	"transcription",
 ]);
 
-/** Message format — supports text and multimodal */
-const MessageSchema = z.object({
-	role: z.enum(["system", "user", "assistant"]),
-	content: z.union([
-		z.string(),
-		z.array(
-			z.object({
-				type: z.enum(["text", "image_url"]),
-				text: z.string().optional(),
-				image_url: z
-					.object({
-						url: z.string(),
-						detail: z.enum(["auto", "low", "high"]).optional(),
-					})
-					.optional(),
-			}),
-		),
-	]),
+/** Tool call schema (returned by models) */
+export const ToolCallSchema = z.object({
+	id: z.string(),
+	type: z.literal("function"),
+	function: z.object({
+		name: z.string(),
+		arguments: z.string(),
+	}),
 });
+
+/** Message format — supports text, multimodal, and tool turns */
+const MessageSchema = z
+	.object({
+		role: z.enum(["system", "user", "assistant", "tool"]),
+		content: z.union([
+			z.string(),
+			z.array(
+				z.object({
+					type: z.enum(["text", "image_url"]),
+					text: z.string().optional(),
+					image_url: z
+						.object({
+							url: z.string(),
+							detail: z.enum(["auto", "low", "high"]).optional(),
+						})
+						.optional(),
+				}),
+			),
+		]),
+		/** assistant only — the calls the model returned, to be echoed back */
+		tool_calls: z.array(ToolCallSchema).max(64).optional(),
+		/** tool only — which assistant tool call this result answers */
+		tool_call_id: z.string().max(128).optional(),
+		/** tool only — the tool's name */
+		name: z.string().max(64).optional(),
+	})
+	.refine(
+		(msg) =>
+			msg.role !== "tool" ||
+			// A tool result with no id is rejected several layers down by the
+			// provider with a message that does not mention the id. Refuse it here
+			// with one that does.
+			Boolean(msg.tool_call_id),
+		{ message: "a tool message requires tool_call_id", path: ["tool_call_id"] },
+	)
+	.refine((msg) => msg.role !== "tool" || typeof msg.content === "string", {
+		message: "a tool message's content must be a string",
+		path: ["content"],
+	});
 
 /** Tool definition schema (OpenAI/OpenRouter function calling format) */
 const ToolDefinitionSchema = z.object({
@@ -92,16 +123,6 @@ const ToolChoiceSchema = z.union([
 		function: z.object({ name: z.string().max(64) }),
 	}),
 ]);
-
-/** Tool call schema (returned by models) */
-export const ToolCallSchema = z.object({
-	id: z.string(),
-	type: z.literal("function"),
-	function: z.object({
-		name: z.string(),
-		arguments: z.string(),
-	}),
-});
 
 /** POST /inference request body */
 export const InferenceRequestSchema = z.object({
@@ -186,6 +207,32 @@ export type LumenWorkerErrorCode =
 // =============================================================================
 
 export type InferenceRequest = z.infer<typeof InferenceRequestSchema>;
+
+/**
+ * Map validated wire messages onto the engine's message shape.
+ *
+ * The worker API is snake_case (`tool_call_id`, `tool_calls`) because it is a
+ * JSON boundary; the engine type is camelCase. Without this mapping a tool turn
+ * arrives at `validateRequest` with its id in a field nothing reads, and the
+ * provider rejects it several layers later. Trust boundaries get translated, not
+ * cast.
+ */
+export function toLumenMessages(input: InferenceRequest["input"]): LumenMessage[] | string {
+	if (typeof input === "string") return input;
+
+	return input.map((message): LumenMessage => {
+		const mapped: LumenMessage = {
+			role: message.role,
+			content: message.content as LumenMessage["content"],
+		};
+
+		if (message.tool_calls?.length) mapped.toolCalls = message.tool_calls;
+		if (message.tool_call_id) mapped.toolCallId = message.tool_call_id;
+		if (message.name) mapped.name = message.name;
+
+		return mapped;
+	});
+}
 export type EmbedRequest = z.infer<typeof EmbedRequestSchema>;
 export type ModerateRequest = z.infer<typeof ModerateRequestSchema>;
 export type TranscribeRequest = z.infer<typeof TranscribeRequestSchema>;

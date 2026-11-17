@@ -120,6 +120,19 @@ export class CloudflareAIProvider implements LumenProvider {
 	): Promise<LumenProviderResponse> {
 		const timeoutMs = options.timeoutMs ?? PROVIDERS["cloudflare-ai"].timeoutMs;
 
+		// Workers AI has no tool-calling path here: the formatter below keeps only
+		// role and content, so a tool turn would arrive with its ids silently
+		// stripped and the model would see prose where a result belonged. Refuse
+		// instead of pretending. The router already skips fallbacks when tools are
+		// present, so this is a guard against a caller re-sending history without
+		// its tool definitions, not a limit on the normal path.
+		if (messages.some((m) => m.role === "tool" || m.toolCalls?.length)) {
+			throw new ProviderError(
+				this.name,
+				"Tool calls are not supported by the Cloudflare Workers AI provider. Use an OpenRouter-routed model for tool use.",
+			);
+		}
+
 		try {
 			// Format messages, preserving multimodal content for vision models
 			const formattedMessages = messages.map((m) => {

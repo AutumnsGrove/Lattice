@@ -9,7 +9,7 @@
 
 import { PROVIDERS, calculateCost } from "../config.js";
 import { ProviderError, ProviderTimeoutError } from "../errors.js";
-import type { LumenMessage, LumenProviderName, LumenStreamChunk } from "../types.js";
+import type { LumenMessage, LumenProviderName, LumenStreamChunk, LumenToolCall } from "../types.js";
 import type { LumenInferenceOptions, LumenProvider, LumenProviderResponse } from "./types.js";
 import { safeParseJson } from "../../../utils/json.js";
 
@@ -667,40 +667,74 @@ Provide your safety assessment for User in the above conversation:
 	// ===========================================================================
 
 	/**
-	 * Format messages for OpenRouter API
+	 * Format messages for OpenRouter.
+	 *
+	 * The chat-completions shape carries a whole loop in one array: an assistant
+	 * turn with `tool_calls`, then one `tool` message per result carrying the
+	 * `tool_call_id` it answers. Providers reject a `tool` message whose id does
+	 * not appear in the preceding assistant turn, so both sides have to travel.
 	 */
 	private formatMessages(messages: LumenMessage[]): Array<{
 		role: string;
 		content:
 			| string
+			| null
 			| Array<{
 					type: string;
 					text?: string;
 					image_url?: { url: string; detail?: string };
 			  }>;
+		tool_calls?: LumenToolCall[];
+		tool_call_id?: string;
+		name?: string;
 	}> {
 		return messages.map((msg) => {
-			// Simple string content
-			if (typeof msg.content === "string") {
-				return { role: msg.role, content: msg.content };
+			const formatted: {
+				role: string;
+				content:
+					| string
+					| null
+					| Array<{
+							type: string;
+							text?: string;
+							image_url?: { url: string; detail?: string };
+					  }>;
+				tool_calls?: LumenToolCall[];
+				tool_call_id?: string;
+				name?: string;
+			} = {
+				role: msg.role,
+				content:
+					typeof msg.content === "string"
+						? msg.content
+						: msg.content.map((part) => {
+								if (part.type === "text") {
+									return { type: "text", text: part.text };
+								}
+								return {
+									type: "image_url",
+									image_url: {
+										url: part.image_url?.url ?? "",
+										detail: part.image_url?.detail ?? "auto",
+									},
+								};
+							}),
+			};
+
+			// An assistant turn that only called tools has no prose, and `null` is
+			// the content every OpenAI-shaped API documents for it. An empty string
+			// happens to work on OpenRouter and is rejected by stricter compatible
+			// servers, so send the shape the spec describes rather than the one that
+			// got through one test.
+			if (msg.role === "assistant" && msg.toolCalls?.length && formatted.content === "") {
+				formatted.content = null;
 			}
 
-			// Multimodal content (images)
-			return {
-				role: msg.role,
-				content: msg.content.map((part) => {
-					if (part.type === "text") {
-						return { type: "text", text: part.text };
-					}
-					return {
-						type: "image_url",
-						image_url: {
-							url: part.image_url?.url ?? "",
-							detail: part.image_url?.detail ?? "auto",
-						},
-					};
-				}),
-			};
+			if (msg.toolCalls?.length) formatted.tool_calls = msg.toolCalls;
+			if (msg.toolCallId) formatted.tool_call_id = msg.toolCallId;
+			if (msg.name) formatted.name = msg.name;
+
+			return formatted;
 		});
 	}
 
