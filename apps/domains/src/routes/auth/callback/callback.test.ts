@@ -42,7 +42,13 @@ function makeEvent(
 	}
 
 	const cookieStore: Record<string, string> = { ...options.cookies };
-	const defaultEnv = { DB: {} };
+	// The handler reaches Better Auth over the AUTH service binding, so the harness
+	// has to provide one. Delegate to the global fetch, which is what the tests
+	// stub (`vi.stubGlobal("fetch", ...)`) and then assert against.
+	const defaultEnv = {
+		DB: {},
+		AUTH: { fetch: (input: RequestInfo | URL, init?: RequestInit) => fetch(input, init) },
+	};
 
 	return {
 		url,
@@ -75,7 +81,7 @@ describe("GET /auth/callback", () => {
 			expect.fail("Should have thrown");
 		} catch (err: any) {
 			expect(err.status).toBe(500);
-			expect(err.message).toContain("Database not available");
+			expect(err.message).toContain("Database or auth service not available");
 		}
 	});
 
@@ -235,10 +241,10 @@ describe("GET /auth/callback", () => {
 			expect(err.status).toBe(302);
 			expect(err.location).toBe("/arbor");
 
-			// Verify fetch uses the cookie
+			// Verify fetch uses the cookie, prefixed the same way it was found
 			expect(fetchMock).toHaveBeenCalledWith("https://login.grove.place/api/auth/session", {
 				headers: {
-					Cookie: "better-auth.session_token=valid-token",
+					Cookie: "__Secure-better-auth.session_token=valid-token",
 				},
 			});
 		}
