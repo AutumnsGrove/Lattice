@@ -7,6 +7,7 @@
 
 import type { AuthProvider, ProviderConfig } from "./types.js";
 import { AUTH_HUB_URL } from "../../platform/config/auth.js";
+import { readViteEnv } from "../../utils/vite-env.js";
 
 // =============================================================================
 // PROVIDER REGISTRY
@@ -85,7 +86,7 @@ export const DEFAULT_RETURN_TO = "/arbor";
  * in .env.local to override the production auth API base URL.
  * @example VITE_AUTH_API_URL=https://dev.grove.place
  */
-const AUTH_API_BASE = import.meta.env.VITE_AUTH_API_URL ?? AUTH_HUB_URL;
+const AUTH_API_BASE = readViteEnv("VITE_AUTH_API_URL") ?? AUTH_HUB_URL;
 
 export const GROVEAUTH_URLS = {
 	/** Frontend login page (legacy - kept for reference) */
@@ -107,7 +108,7 @@ export const DEFAULT_LOGIN_URL = "/auth/login";
  * All auth flows go through this origin.
  * Overridable via VITE_LOGIN_URL for local development.
  */
-export const LOGIN_URL = import.meta.env.VITE_LOGIN_URL ?? "https://login.grove.place";
+export const LOGIN_URL = readViteEnv("VITE_LOGIN_URL") ?? "https://login.grove.place";
 
 /**
  * Build a URL to the login hub with a redirect parameter.
