@@ -678,6 +678,7 @@ Provide your safety assessment for User in the above conversation:
 		role: string;
 		content:
 			| string
+			| null
 			| Array<{
 					type: string;
 					text?: string;
@@ -692,6 +693,7 @@ Provide your safety assessment for User in the above conversation:
 				role: string;
 				content:
 					| string
+					| null
 					| Array<{
 							type: string;
 							text?: string;
@@ -702,9 +704,6 @@ Provide your safety assessment for User in the above conversation:
 				name?: string;
 			} = {
 				role: msg.role,
-				// A tool result is plain text by definition. An assistant turn that
-				// only called tools has no content at all, and `null` is what
-				// providers expect there — an empty string trips some validators.
 				content:
 					typeof msg.content === "string"
 						? msg.content
@@ -721,6 +720,15 @@ Provide your safety assessment for User in the above conversation:
 								};
 							}),
 			};
+
+			// An assistant turn that only called tools has no prose, and `null` is
+			// the content every OpenAI-shaped API documents for it. An empty string
+			// happens to work on OpenRouter and is rejected by stricter compatible
+			// servers, so send the shape the spec describes rather than the one that
+			// got through one test.
+			if (msg.role === "assistant" && msg.toolCalls?.length && formatted.content === "") {
+				formatted.content = null;
+			}
 
 			if (msg.toolCalls?.length) formatted.tool_calls = msg.toolCalls;
 			if (msg.toolCallId) formatted.tool_call_id = msg.toolCallId;

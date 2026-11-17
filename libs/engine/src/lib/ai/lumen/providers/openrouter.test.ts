@@ -311,6 +311,57 @@ describe("inference()", () => {
 		});
 	});
 
+	it("sends null content for an assistant turn that only called tools", async () => {
+		const provider = new OpenRouterProvider("test-key");
+		(globalThis.fetch as any).mockResolvedValue(
+			createMockResponse({
+				choices: [{ message: { content: "done" } }],
+				usage: { prompt_tokens: 10, completion_tokens: 2 },
+			}),
+		);
+
+		await provider.inference(
+			"test/model",
+			[
+				{
+					role: "assistant",
+					content: "",
+					toolCalls: [{ id: "call_a", type: "function", function: { name: "t", arguments: "{}" } }],
+				},
+			],
+			{ maxTokens: 10, temperature: 0 },
+		);
+
+		const body = JSON.parse((globalThis.fetch as any).mock.calls[0][1].body);
+		// `null`, not `""` — the shape the spec documents for a tool-only turn.
+		expect(body.messages[0].content).toBeNull();
+	});
+
+	it("keeps prose content on an assistant turn that also called tools", async () => {
+		const provider = new OpenRouterProvider("test-key");
+		(globalThis.fetch as any).mockResolvedValue(
+			createMockResponse({
+				choices: [{ message: { content: "done" } }],
+				usage: { prompt_tokens: 10, completion_tokens: 2 },
+			}),
+		);
+
+		await provider.inference(
+			"test/model",
+			[
+				{
+					role: "assistant",
+					content: "Let me check that.",
+					toolCalls: [{ id: "call_b", type: "function", function: { name: "t", arguments: "{}" } }],
+				},
+			],
+			{ maxTokens: 10, temperature: 0 },
+		);
+
+		const body = JSON.parse((globalThis.fetch as any).mock.calls[0][1].body);
+		expect(body.messages[0].content).toBe("Let me check that.");
+	});
+
 	it("omits tool fields from ordinary messages", async () => {
 		const provider = new OpenRouterProvider("test-key");
 		(globalThis.fetch as any).mockResolvedValue(
