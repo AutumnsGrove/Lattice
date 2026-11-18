@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
 	import { GlassCard, GlassChat, GroveTerm, createChatController } from "@autumnsgrove/lattice/ui";
+	import { porchCategoryLabel } from "@autumnsgrove/lattice/platform/config";
 	import type { ChatMessageData } from "@autumnsgrove/lattice/ui";
 	import { featureIcons, metricIcons, stateIcons, navIcons, actionIcons, authIcons } from "@autumnsgrove/prism/icons";
 	const MessageCircle = featureIcons.messageCircle;
@@ -27,14 +28,6 @@
 		pending: { label: "Pending", icon: Clock, color: "text-warning bg-warning-bg" },
 		resolved: { label: "Resolved", icon: CheckCircle, color: "text-success bg-success-bg" },
 	} as const;
-
-	const categoryLabels: Record<string, string> = {
-		billing: "Billing",
-		technical: "Technical",
-		account: "Account",
-		hello: "Just saying hi",
-		other: "Other",
-	};
 
 	function formatDate(timestamp: number): string {
 		return new Date(timestamp * 1000).toLocaleDateString("en-US", {
@@ -88,8 +81,16 @@
 					<div>
 						<span class="text-xs font-mono text-foreground/50">{data.visit.visit_number}</span>
 						<h1 class="text-xl font-serif text-foreground mt-1">{data.visit.subject}</h1>
+						{#if data.visit.category === "appeal"}
+							<p class="text-sm font-sans mt-2 rounded px-3 py-2 text-warning-foreground bg-warning-bg" role="note">
+								An appeal — someone is asking a person to reconsider a block, suspension,
+								or ban. Worth checking what we know before replying:
+								<code class="font-mono text-xs">gw block list</code>
+								<code class="font-mono text-xs">gw tenant show &lt;subdomain&gt;</code>
+							</p>
+						{/if}
 						<p class="text-sm text-foreground-muted font-sans mt-1">
-							{categoryLabels[data.visit.category] || data.visit.category} &middot; {formatDate(
+							{porchCategoryLabel(data.visit.category)} &middot; {formatDate(
 								data.visit.created_at,
 							)}
 						</p>
