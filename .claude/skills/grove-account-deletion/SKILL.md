@@ -191,9 +191,18 @@ npx wrangler d1 execute groveauth --remote \
 Fresh-tenant round trip, when you want to prove the path works end to end:
 
 ```bash
-gw tenant create --subdomain final-fixture --plan seedling --created-at 20d --write
+# Use hello@grove.place as the owner address when you want to read the removal
+# email yourself — the notice goes to the address on file, not to support.
+gw tenant create --subdomain final-fixture --email hello@grove.place \
+  --plan seedling --created-at 20d --write
 gw tenant delete final-fixture --reason "round trip check" --policy aup-1.4 --write
 ```
+
+The email arrives at `hello@grove.place` with the reason quoted verbatim, the
+citation, and the reply path — which is also `hello@grove.place` (`SUPPORT_EMAIL`).
+Before running it, confirm the durable-objects worker has `ZEPHYR_API_KEY` and
+`ZEPHYR_URL` set; without a gateway the command refuses to claim it notified
+anyone and says so.
 
 ## Step 7 — Report
 
@@ -242,7 +251,7 @@ If anything was skipped, it goes in the report. A clean-looking report over an u
 | Operator endpoint           | `services/durable-objects/src/index.ts` (`POST /tenant/remove`)         |
 | CLI                         | `tools/grove-wrap-go/cmd/tenant.go`                                     |
 | Policy                      | `docs/legal/acceptable-use-policy.md`, `docs/legal/terms-of-service.md` |
-| What people read            | `docs/help-center/articles/account-deletion.md`                    |
+| What people read            | `docs/help-center/articles/account-deletion.md`                         |
 | Operator runbook            | `docs/security/incident-response-runbook.md`                            |
 
 Migrations are applied by hand with `wrangler d1 execute --file`, never `migrations apply` — see #1692.

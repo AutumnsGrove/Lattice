@@ -20,9 +20,10 @@
  * - **Resolve the identity alone.** `ba_user.tenant_id` is often null — the
  *   mapping normally lives in `engine.users.groveauth_id`, which the tenant
  *   sweep deletes. Callers resolve before the sweep and pass `knownUserIds`.
- * - **Decide whether the person has other blogs.** That is the caller's job:
- *   an identity shared with a surviving tenant must not be deleted. See
- *   `POST /tenant/remove`, which resolves first and refuses to guess.
+ * - **Decide whether the person has other blogs.** `identityHasOtherTenants`
+ *   answers that from three sources, and `POST /tenant/remove` refuses to delete
+ *   a login that still owns one. Getting that wrong locks somebody out of a
+ *   garden that is still theirs, and there is no undo.
  */
 
 import type { RemovalDatabase } from "./remove-tenant";
@@ -161,31 +162,76 @@ export async function resolveIdentity(
 }
 
 /**
- * True when the identity is still referenced by a tenant that is not being
- * removed.
+ * Which other blogs this login still owns.
  *
  * A person may have two blogs on one login. Deleting the identity because one
  * of them went away locks them out of the other, which is both wrong and the
  * kind of wrong that gets discovered by the person, not by us.
+ *
+ * Three sources, because any one of them alone misses the case it exists for:
+ *
+ * - `ba_user.tenant_id` names **at most one** tenant, and is null for accounts
+ *   created before it was populated. A login owning two blogs will point at one
+ *   of them — possibly the one being removed. Checking only this column was the
+ *   first version of this function, and it could return `[]` for exactly the
+ *   login it was meant to protect.
+ * - `engine.users.groveauth_id` is the real mapping and can hold many rows per
+ *   login. Only readable before the sweep — the engine sweep deletes `users`.
+ * - `tenants.email` catches a second blog registered under the same address but
+ *   never linked through `users`.
+ *
+ * Every source is read from outside the tenant being removed, so a hit is always
+ * somebody else's blog rather than a self-reference.
  */
 export async function identityHasOtherTenants(
-	db: RemovalDatabase,
+	groveauth: RemovalDatabase,
 	identities: IdentitySet,
 	removingTenantId: string,
+	engine?: RemovalDatabase,
 ): Promise<string[]> {
 	const others = new Set<string>();
-	if (identities.userIds.length === 0) return [];
+	if (identities.userIds.length === 0 && identities.emails.length === 0) return [];
 
-	const rows = await db
-		.prepare(
-			`SELECT DISTINCT tenant_id FROM ba_user
-			 WHERE tenant_id IS NOT NULL AND id IN (${identities.userIds.map(() => "?").join(", ")})`,
-		)
-		.bind(...identities.userIds)
-		.all<{ tenant_id: string }>();
+	if (identities.userIds.length > 0) {
+		const placeholders = identities.userIds.map(() => "?").join(", ");
 
-	for (const row of rows.results ?? []) {
-		if (row.tenant_id && row.tenant_id !== removingTenantId) others.add(row.tenant_id);
+		const byBaUser = await groveauth
+			.prepare(
+				`SELECT DISTINCT tenant_id FROM ba_user
+				 WHERE tenant_id IS NOT NULL AND tenant_id != ? AND id IN (${placeholders})`,
+			)
+			.bind(removingTenantId, ...identities.userIds)
+			.all<{ tenant_id: string }>();
+		for (const row of byBaUser.results ?? []) {
+			if (row.tenant_id) others.add(row.tenant_id);
+		}
+
+		if (engine) {
+			const byUsers = await engine
+				.prepare(
+					`SELECT DISTINCT tenant_id FROM users
+					 WHERE tenant_id IS NOT NULL AND tenant_id != ? AND groveauth_id IN (${placeholders})`,
+				)
+				.bind(removingTenantId, ...identities.userIds)
+				.all<{ tenant_id: string }>();
+			for (const row of byUsers.results ?? []) {
+				if (row.tenant_id) others.add(row.tenant_id);
+			}
+		}
+	}
+
+	if (engine && identities.emails.length > 0) {
+		const placeholders = identities.emails.map(() => "?").join(", ");
+		const byEmail = await engine
+			.prepare(
+				`SELECT DISTINCT id FROM tenants
+				 WHERE id != ? AND lower(email) IN (${placeholders})`,
+			)
+			.bind(removingTenantId, ...identities.emails)
+			.all<{ id: string }>();
+		for (const row of byEmail.results ?? []) {
+			if (row.id) others.add(row.id);
+		}
 	}
 
 	return [...others];
@@ -215,7 +261,11 @@ function identityPredicate(
 		params.push(...identities.userIds);
 	}
 	if (entry.emailColumn && identities.emails.length > 0) {
-		clauses.push(`${entry.emailColumn} IN (${identities.emails.map(() => "?").join(", ")})`);
+		// Addressed are resolved lowercased, so the comparison has to be too:
+		// `ba_verification.identifier` and `failed_attempts.email` are not
+		// normalised, and a row stored as `Em@Example.com` would survive the
+		// sweep and then show up as a leftover on a removal that had worked.
+		clauses.push(`lower(${entry.emailColumn}) IN (${identities.emails.map(() => "?").join(", ")})`);
 		params.push(...identities.emails);
 	}
 

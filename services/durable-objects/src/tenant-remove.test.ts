@@ -81,6 +81,11 @@ function makeEnv(
 			otherTenants?: string[];
 			counts?: Record<string, number>;
 		};
+		/**
+		 * A second blog this login owns, visible only through `engine.users` —
+		 * the case `ba_user.tenant_id` cannot answer.
+		 */
+		otherBlogViaEngine?: string;
 		/** Supply a Zephyr stub to exercise the notification path. */
 		zephyr?: { ok?: boolean };
 	} = {},
@@ -101,7 +106,15 @@ function makeEnv(
 					return null;
 				},
 				async all<R>() {
-					return { results: [] as R[] };
+					const results: Record<string, string>[] = [];
+					if (db === "engine" && options.otherBlogViaEngine) {
+						if (/SELECT DISTINCT tenant_id FROM users/.test(sql)) {
+							results.push({ tenant_id: options.otherBlogViaEngine });
+						} else if (/SELECT DISTINCT id FROM tenants/.test(sql)) {
+							results.push({ id: options.otherBlogViaEngine });
+						}
+					}
+					return { results: results as R[] };
 				},
 				async run() {
 					deletes.push({ sql: `${db}:${sql}`, bindings });
@@ -368,6 +381,28 @@ describe("POST /tenant/remove", () => {
 		expect(body.identitiesDeleted).toBe(0);
 		expect(body.notDone.identity).toContain("t-kept");
 		expect(body.notDone.identity).toContain("still theirs");
+	});
+
+	it("keeps an identity whose other blog is only visible through engine.users", async () => {
+		// `ba_user.tenant_id` is a single column, so a login owning two blogs
+		// points at one of them — here, the one being removed. Checking only that
+		// column deletes the login and locks the person out of `t-surviving`.
+		const { env, authDeletes } = makeEnv({
+			opsKey: KEY,
+			tenantRow,
+			identity: { userIds: ["u-1"], otherTenants: [] },
+			otherBlogViaEngine: "t-surviving",
+		});
+
+		const res = await worker.fetch(
+			removeRequest({ subdomain: "gone", reason: "link farm", dryRun: false }, KEY),
+			env,
+		);
+		const body = (await res.json()) as any;
+
+		expect(authDeletes).toHaveLength(0);
+		expect(body.identitiesDeleted).toBe(0);
+		expect(body.notDone.identity).toContain("t-surviving");
 	});
 
 	it("sweeps, evicts the DO and clears R2 when asked to destroy", async () => {

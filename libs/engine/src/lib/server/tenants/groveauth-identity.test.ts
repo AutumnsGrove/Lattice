@@ -53,20 +53,27 @@ function matches(sql: string, row: Row, params: string[]): boolean {
 
 		let value: boolean;
 		const notNull = /^(\w+)\s+IS\s+NOT\s+NULL$/i.exec(token);
+		const notEqual = /^(\w+)\s*!=\s*\?$/i.exec(token);
 		const equality = /^(lower\()?(\w+)\)?\s*=\s*\?$/i.exec(token);
+		const lowerInList = /^lower\((\w+)\)\s+IN\s*\(([^)]*)\)$/i.exec(token);
 		const inList = /^(\w+)\s+IN\s*\(([^)]*)\)$/i.exec(token);
 
 		if (notNull) {
 			value = row[notNull[1]] != null;
+		} else if (notEqual) {
+			const bound = params[paramIndex++] ?? "";
+			value = String(row[notEqual[1]] ?? "") !== bound;
 		} else if (equality) {
 			const bound = params[paramIndex++] ?? "";
 			const actual = String(row[equality[2]] ?? "");
 			value = (equality[1] ? actual.toLowerCase() : actual) === bound;
-		} else if (inList) {
-			const count = inList[2].split(",").length;
+		} else if (lowerInList || inList) {
+			const [, column, placeholders] = (lowerInList ?? inList)!;
+			const count = placeholders.split(",").length;
 			const values = params.slice(paramIndex, paramIndex + count);
 			paramIndex += count;
-			value = values.includes(String(row[inList[1]] ?? ""));
+			const actual = String(row[column] ?? "");
+			value = values.includes(lowerInList ? actual.toLowerCase() : actual);
 		} else {
 			value = true;
 		}
@@ -182,15 +189,62 @@ describe("identityHasOtherTenants", () => {
 			],
 		});
 
-		expect(await identityHasOtherTenants(auth.db, identities, "t-1")).toEqual(["t-kept"]);
+		const found = await identityHasOtherTenants(auth.db, identities, "t-1");
+		expect(found).toEqual(["t-kept"]);
+	});
+
+	it("finds the other blog through engine.users when ba_user.tenant_id names only one", async () => {
+		// The bug this test exists for. `ba_user.tenant_id` is a single column, so
+		// a login that owns two blogs points at exactly one of them — possibly the
+		// one being removed. Checking only that column returns [] and deletes the
+		// login, locking the person out of the blog that survived.
+		const auth = fakeAuth({
+			ba_user: [{ id: "u-1", email: "spam@example.com", tenant_id: "t-1" }],
+		});
+		const engine = fakeAuth({
+			users: [{ id: "row-1", groveauth_id: "u-1", tenant_id: "t-kept" }],
+		});
+
+		const found = await identityHasOtherTenants(auth.db, identities, "t-1", engine.db);
+		expect(found).toEqual(["t-kept"]);
+	});
+
+	it("finds a second blog registered under the same address", async () => {
+		const auth = fakeAuth();
+		const engine = fakeAuth({
+			tenants: [{ id: "t-kept", email: "Spam@Example.com" }],
+		});
+
+		const found = await identityHasOtherTenants(auth.db, identities, "t-1", engine.db);
+		expect(found).toEqual(["t-kept"]);
+	});
+
+	it("does not count the tenant being removed as another tenant", async () => {
+		const auth = fakeAuth({
+			ba_user: [{ id: "u-1", email: "spam@example.com", tenant_id: "t-1" }],
+		});
+		const engine = fakeAuth({
+			users: [{ id: "row-1", groveauth_id: "u-1", tenant_id: "t-1" }],
+			tenants: [{ id: "t-1", email: "spam@example.com" }],
+		});
+
+		expect(await identityHasOtherTenants(auth.db, identities, "t-1", engine.db)).toEqual([]);
 	});
 
 	it("is empty when the login belongs to nothing else", async () => {
 		const auth = fakeAuth({
 			ba_user: [{ id: "u-1", email: "spam@example.com", tenant_id: "t-1" }],
 		});
+		const engine = fakeAuth({
+			users: [{ id: "row-1", groveauth_id: "u-1", tenant_id: "t-1" }],
+		});
 
-		expect(await identityHasOtherTenants(auth.db, identities, "t-1")).toEqual([]);
+		expect(await identityHasOtherTenants(auth.db, identities, "t-1", engine.db)).toEqual([]);
+	});
+
+	it("does nothing when there is no identity to check", async () => {
+		const auth = fakeAuth();
+		expect(await identityHasOtherTenants(auth.db, { userIds: [], emails: [] }, "t-1")).toEqual([]);
 	});
 });
 
@@ -250,6 +304,23 @@ describe("removeIdentity", () => {
 
 		// Somebody else's session, in the same table, is untouched.
 		expect(auth.state.rows.user_sessions).toEqual([{ id: "s-2", user_id: "other" }]);
+	});
+
+	it("matches address-keyed rows whatever case they were stored in", async () => {
+		// `ba_verification.identifier` and `failed_attempts.email` are not
+		// normalised. A plain `IN` would miss the row, leave it behind, and then
+		// report a leftover on a removal that had actually worked.
+		const auth = fakeAuth({
+			ba_verification: [{ id: "v-1", identifier: "Spam@Example.COM" }],
+			failed_attempts: [{ email: "SPAM@example.com", attempts: "2" }],
+		});
+
+		const result = await removeIdentity(auth.db, identities);
+
+		expect(result.failures).toEqual([]);
+		expect(result.leftovers).toEqual([]);
+		expect(auth.state.rows.ba_verification).toEqual([]);
+		expect(auth.state.rows.failed_attempts).toEqual([]);
 	});
 
 	it("reports a failed delete rather than claiming the identity is gone", async () => {

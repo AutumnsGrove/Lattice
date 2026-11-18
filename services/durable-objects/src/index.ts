@@ -544,29 +544,6 @@ async function handleTenantRemove(request: Request, env: Env): Promise<Response>
 
 	const target = { tenantId: row.id, subdomain: row.subdomain, email: body.email ?? row.email };
 
-	// The identity has to be resolved *now*, while `engine.users` still exists.
-	// The tenant sweep deletes that table, and `ba_user.tenant_id` is null for
-	// every account created before it was populated — afterwards there is no
-	// link left saying which login this blog belonged to.
-	const linked = await env.DB.prepare(
-		"SELECT groveauth_id FROM users WHERE tenant_id = ? AND groveauth_id IS NOT NULL AND groveauth_id != ''",
-	)
-		.bind(row.id)
-		.all<{ groveauth_id: string }>();
-
-	const identity = await resolveIdentity(env.GROVEAUTH_DB, {
-		tenantId: row.id,
-		email: target.email,
-		knownUserIds: (linked.results ?? []).map((r) => r.groveauth_id),
-	});
-	const identityPlan = await planIdentityRemoval(env.GROVEAUTH_DB, identity);
-
-	// One login can own more than one blog. Removing `emmareed` must not lock
-	// someone out of a second garden that is still theirs, so the identity is
-	// deleted only when this tenant was its last.
-	const otherTenants = await identityHasOtherTenants(env.GROVEAUTH_DB, identity, row.id);
-	const removeIdentityToo = otherTenants.length === 0;
-
 	// The email runs after the identity step, so this is filled in by the time it
 	// needs to say whether the login went with the blog. Saying "the login you
 	// used to sign in" when there was no identity to delete would be a lie in the
@@ -574,6 +551,34 @@ async function handleTenantRemove(request: Request, env: Env): Promise<Response>
 	let identitiesRemoved = 0;
 
 	try {
+		// The identity has to be resolved *now*, while `engine.users` still exists.
+		// The tenant sweep deletes that table, and `ba_user.tenant_id` is null for
+		// every account created before it was populated — afterwards there is no
+		// link left saying which login this blog belonged to.
+		//
+		// Inside the `try` on purpose: a missing binding or a schema difference in
+		// another environment is a structured 500, not an unhandled throw.
+		const linked = await env.DB.prepare(
+			"SELECT groveauth_id FROM users WHERE tenant_id = ? AND groveauth_id IS NOT NULL AND groveauth_id != ''",
+		)
+			.bind(row.id)
+			.all<{ groveauth_id: string }>();
+
+		const identity = await resolveIdentity(env.GROVEAUTH_DB, {
+			tenantId: row.id,
+			email: target.email,
+			knownUserIds: (linked.results ?? []).map((r) => r.groveauth_id),
+		});
+		const identityPlan = await planIdentityRemoval(env.GROVEAUTH_DB, identity);
+
+		// One login can own more than one blog. Removing `emmareed` must not lock
+		// someone out of a second garden that is still theirs, so the identity is
+		// deleted only when this tenant was its last. `ba_user.tenant_id` is a
+		// single column and cannot answer that alone — the engine database goes in
+		// with it.
+		const otherTenants = await identityHasOtherTenants(env.GROVEAUTH_DB, identity, row.id, env.DB);
+		const removeIdentityToo = otherTenants.length === 0;
+
 		const result = await removeTenant(
 			{ engine: env.DB, curios: env.CURIO_DB, observability: env.OBS_DB },
 			target,
