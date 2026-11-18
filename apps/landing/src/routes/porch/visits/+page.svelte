@@ -4,6 +4,7 @@
 	import { seasonStore } from '@autumnsgrove/lattice/ui/chrome';
 	import Footer from '$lib/components/Footer.svelte';
 	import { Logo } from '@autumnsgrove/lattice/ui/nature';
+	import { porchCategoryLabel } from '@autumnsgrove/lattice/platform/config';
 	import { featureIcons, metricIcons, stateIcons, navIcons } from '@autumnsgrove/prism/icons';
 	const MessageCircle = featureIcons.messageCircle;
 	const Clock = metricIcons.clock;
@@ -19,14 +20,6 @@
 		pending: { label: 'Pending', icon: Clock, color: 'text-warning-foreground bg-warning-bg' },
 		resolved: { label: 'Resolved', icon: CheckCircle, color: 'text-success-foreground bg-success-bg' },
 	} as const;
-
-	const categoryLabels: Record<string, string> = {
-		billing: 'Billing',
-		technical: 'Technical',
-		account: 'Account',
-		hello: 'Just saying hi',
-		other: 'Other',
-	};
 
 	function formatDate(timestamp: number): string {
 		return new Date(timestamp * 1000).toLocaleDateString('en-US', {
@@ -106,7 +99,7 @@
 									</div>
 									<h3 class="font-serif text-foreground truncate">{visit.subject}</h3>
 									<p class="text-sm text-foreground-muted font-sans mt-1">
-										{categoryLabels[visit.category] || visit.category} &middot; {formatDate(visit.created_at)}
+										{porchCategoryLabel(visit.category)} &middot; {formatDate(visit.created_at)}
 									</p>
 								</div>
 								<ArrowRight class="w-5 h-5 text-foreground/30 flex-shrink-0 mt-2" />

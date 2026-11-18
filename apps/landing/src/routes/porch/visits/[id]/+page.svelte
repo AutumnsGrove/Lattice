@@ -12,6 +12,7 @@
 	import { seasonStore } from "@autumnsgrove/lattice/ui/chrome";
 	import Footer from "$lib/components/Footer.svelte";
 	import { Logo } from "@autumnsgrove/lattice/ui/nature";
+	import { porchCategoryLabel } from "@autumnsgrove/lattice/platform/config";
 	import { featureIcons, metricIcons, stateIcons, navIcons } from "@autumnsgrove/prism/icons";
 	const MessageCircle = featureIcons.messageCircle;
 	const Clock = metricIcons.clock;
@@ -39,14 +40,6 @@
 			color: "text-success bg-success-bg",
 		},
 	} as const;
-
-	const categoryLabels: Record<string, string> = {
-		billing: "Billing",
-		technical: "Technical",
-		account: "Account",
-		hello: "Just saying hi",
-		other: "Other",
-	};
 
 	function formatDate(timestamp: number): string {
 		return new Date(timestamp * 1000).toLocaleDateString("en-US", {
@@ -125,7 +118,7 @@
 						<span class="text-xs font-mono text-foreground/50">{data.visit.visit_number}</span>
 						<h1 class="text-xl font-serif text-foreground mt-1">{data.visit.subject}</h1>
 						<p class="text-sm text-foreground-muted font-sans mt-1">
-							{categoryLabels[data.visit.category] || data.visit.category} &middot; Started {formatDate(
+							{porchCategoryLabel(data.visit.category)} &middot; Started {formatDate(
 								data.visit.created_at,
 							)}
 						</p>

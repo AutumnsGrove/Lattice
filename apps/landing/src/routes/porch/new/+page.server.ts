@@ -2,7 +2,12 @@ import { fail, type Actions } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { verifyTurnstileToken, generateId } from "@autumnsgrove/lattice/services";
 import { parseFormData } from "@autumnsgrove/lattice/server";
-import { GROVE_EMAILS } from "@autumnsgrove/lattice/platform/config";
+import {
+	DEFAULT_PORCH_CATEGORY,
+	GROVE_EMAILS,
+	isPorchCategory,
+	porchCategoryLabel,
+} from "@autumnsgrove/lattice/platform/config";
 import { escapeHtml } from "@autumnsgrove/lattice/utils";
 import { Resend } from "resend";
 import { z } from "zod";
@@ -56,8 +61,6 @@ async function generateVisitNumber(db: D1Database, kv?: KVNamespace): Promise<st
 	return `PORCH-${year}-${sequence.toString().padStart(5, "0")}`;
 }
 
-const VALID_CATEGORIES = ["billing", "technical", "account", "hello", "other"] as const;
-
 const PorchSubmitSchema = z.object({
 	name: z.string().trim().optional().default(""),
 	email: z.string().trim().min(1, "Email is required so I can get back to you."),
@@ -94,12 +97,11 @@ export const actions: Actions = {
 		const name = result.data.name || null;
 		const turnstileToken = result.data["cf-turnstile-response"];
 
-		// Validate category
-		const category = VALID_CATEGORIES.includes(
-			result.data.category as (typeof VALID_CATEGORIES)[number],
-		)
+		// Validate category against the shared registry. An unknown value is a
+		// category we do not show, not a reason to refuse the visit.
+		const category = isPorchCategory(result.data.category)
 			? result.data.category
-			: "other";
+			: DEFAULT_PORCH_CATEGORY;
 
 		// Turnstile verification for guests
 		if (!locals.user) {
@@ -195,20 +197,14 @@ export const actions: Actions = {
 			try {
 				const resend = new Resend(platform.env.RESEND_API_KEY);
 
-				const categoryLabels: Record<string, string> = {
-					billing: "Billing",
-					technical: "Technical",
-					account: "Account",
-					hello: "Just saying hi",
-					other: "Other",
-				};
+				const categoryLabel = porchCategoryLabel(category);
 
 				const emailSubject = `[Porch ${visitNumber}] ${subject}`;
 
 				const emailText = `New Porch visit from ${name || "A Wanderer"}
 
 Visit: ${visitNumber}
-Category: ${categoryLabels[category] || category}
+Category: ${categoryLabel}
 From: ${name || "Anonymous"}
 Email: ${email}
 ${locals.user ? `User ID: ${locals.user.id}` : "(Guest)"}
@@ -223,7 +219,7 @@ Reply in Arbor: https://grove.place/arbor/porch/${visitId}`;
 				const emailHtml = `<div style="font-family: sans-serif; line-height: 1.6;">
 <h2 style="color: #166534; margin-bottom: 0.5rem;">New Porch Visit</h2>
 <p style="color: #666; margin-top: 0;">
-<strong>${escapeHtml(visitNumber)}</strong> &middot; ${categoryLabels[category] || category}
+<strong>${escapeHtml(visitNumber)}</strong> &middot; ${categoryLabel}
 </p>
 
 <p><strong>From:</strong> ${escapeHtml(name) || "A Wanderer"}<br>
@@ -263,6 +259,14 @@ ${locals.user ? `<strong>User:</strong> ${escapeHtml(locals.user.id)}<br>` : "<e
 
 				const confirmSubject = `Your Porch visit: ${visitNumber}`;
 
+				// An appeal is not a support ticket. The usual "I typically respond
+				// within a day" sets an expectation nobody can meet, because the answer
+				// is a decision rather than a fix — and sometimes the decision is no.
+				const responseLine =
+					category === "appeal"
+						? "A person reads every appeal — not a form, and not a queue that clears itself. I'll write back either way, and if the answer is that nothing changes, I'll tell you why."
+						: "I typically respond within a day, often much sooner. You'll get an email when I reply.";
+
 				const confirmText = `Hi ${name || "there"},
 
 Thanks for reaching out! I've received your message and I'll get back to you as soon as I can.
@@ -277,7 +281,7 @@ ${message}
 
 ---
 
-I typically respond within a day, often much sooner. You'll get an email when I reply.
+${responseLine}
 
 —Autumn
 Grove`;
@@ -294,7 +298,7 @@ Grove`;
 <p style="margin: 0; white-space: pre-wrap; color: #166534;">${escapeHtml(message)}</p>
 </div>
 
-<p style="color: #666;">I typically respond within a day, often much sooner. You'll get an email when I reply.</p>
+<p style="color: #666;">${responseLine}</p>
 
 <p style="margin-top: 24px;">—Autumn<br><a href="https://grove.place" style="color: #166534;">Grove</a></p>
 </div>`;
