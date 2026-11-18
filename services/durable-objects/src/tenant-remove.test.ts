@@ -299,6 +299,40 @@ describe("POST /tenant/remove", () => {
 		expect(body.notDone.email).toBeUndefined();
 	});
 
+	it("rejects an email override that does not match the address on file", async () => {
+		// The override exists for a tenant row with no address. A differing one is a
+		// typo away from deleting a stranger's login and emailing them about a blog
+		// they have never had.
+		const { env, deletes, authDeletes } = makeEnv({
+			opsKey: KEY,
+			tenantRow,
+			identity: { userIds: ["u-1"], counts: { ba_user: 1 } },
+		});
+
+		const res = await worker.fetch(
+			removeRequest(
+				{ subdomain: "gone", reason: "x", email: "someone.else@example.com", dryRun: false },
+				KEY,
+			),
+			env,
+		);
+
+		expect(res.status).toBe(400);
+		expect(((await res.json()) as any).message).toContain("does not match the address on file");
+		expect(deletes).toHaveLength(0);
+		expect(authDeletes).toHaveLength(0);
+	});
+
+	it("accepts an override that matches the address on file, whatever the case", async () => {
+		const { env } = makeEnv({ opsKey: KEY, tenantRow });
+		const res = await worker.fetch(
+			removeRequest({ subdomain: "gone", reason: "x", email: "Gone@Grove.Place" }, KEY),
+			env,
+		);
+
+		expect(res.status).toBe(200);
+	});
+
 	it("rejects an unknown policy citation instead of defaulting", async () => {
 		const { env, deletes } = makeEnv({ opsKey: KEY, tenantRow, zephyr: { ok: true } });
 		const res = await worker.fetch(

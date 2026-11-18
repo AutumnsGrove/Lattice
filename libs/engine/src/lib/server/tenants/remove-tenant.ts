@@ -323,14 +323,27 @@ export async function removeTenant(
 
 	let identitiesDeleted = 0;
 	if (options.deleteIdentity) {
-		try {
-			identitiesDeleted = await options.deleteIdentity(target);
-		} catch (err) {
+		// The identity is the login. If the sweep failed, the tenants row was kept
+		// so a retry can find it — and deleting the login now would lock the person
+		// out of a blog that still exists while the retry is pending. The blog goes
+		// first, or neither does.
+		if (!tenantRowDeleted || failures.length > 0) {
 			failures.push({
 				database: "engine",
 				table: "groveauth_identity",
-				error: `identity deletion failed: ${err instanceof Error ? err.message : String(err)}`,
+				error:
+					"not deleted — the tenant sweep failed, and removing the login would lock the person out of a blog that still exists",
 			});
+		} else {
+			try {
+				identitiesDeleted = await options.deleteIdentity(target);
+			} catch (err) {
+				failures.push({
+					database: "engine",
+					table: "groveauth_identity",
+					error: `identity deletion failed: ${err instanceof Error ? err.message : String(err)}`,
+				});
+			}
 		}
 	}
 

@@ -542,7 +542,22 @@ async function handleTenantRemove(request: Request, env: Env): Promise<Response>
 		);
 	}
 
-	const target = { tenantId: row.id, subdomain: row.subdomain, email: body.email ?? row.email };
+	// An address override exists for a tenant row with no address on file. When the
+	// row *does* have one, a differing override is a typo away from deleting a
+	// stranger's login and emailing them about a removal of a blog they never had.
+	// `tenants.email` is the authority; the override only fills a gap.
+	const override = body.email?.trim() ?? "";
+	if (override && row.email && override.toLowerCase() !== row.email.trim().toLowerCase()) {
+		return Response.json(
+			{
+				error: "bad_request",
+				message: `email ${override} does not match the address on file for ${row.subdomain} (${row.email}) — refusing to touch an identity that may not be theirs`,
+			},
+			{ status: 400 },
+		);
+	}
+
+	const target = { tenantId: row.id, subdomain: row.subdomain, email: override || row.email };
 
 	// The email runs after the identity step, so this is filled in by the time it
 	// needs to say whether the login went with the blog. Saying "the login you

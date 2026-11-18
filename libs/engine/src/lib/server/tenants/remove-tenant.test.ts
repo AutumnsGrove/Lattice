@@ -213,6 +213,41 @@ describe("removeTenant", () => {
 		expect(formatRemovalResult(result)).toContain("incomplete");
 	});
 
+	it("keeps the login when the tenant sweep failed, so the blog still has an owner", async () => {
+		// The tenants row was kept for a retry. Deleting the identity now removes the
+		// only way back into a blog that still exists — and on the retry,
+		// `engine.users.groveauth_id` may already be gone, leaving only the address.
+		const engine = fakeDb(seedForTenant());
+		const failing: RemovalDatabase = {
+			prepare(sql: string) {
+				if (/DELETE FROM pages/.test(sql)) {
+					return {
+						bind: () => ({
+							first: async () => null,
+							all: async () => ({ results: [] }),
+							run: async () => {
+								throw new Error("fk violation");
+							},
+						}),
+					};
+				}
+				return engine.db.prepare(sql);
+			},
+		};
+
+		const deleteIdentity = vi.fn(async () => 3);
+		const result = await removeTenant({ engine: failing }, target, {
+			reason: "link farm",
+			dryRun: false,
+			deleteIdentity,
+		});
+
+		expect(result.tenantRowDeleted).toBe(false);
+		expect(deleteIdentity).not.toHaveBeenCalled();
+		expect(result.identitiesDeleted).toBe(0);
+		expect(formatRemovalResult(result)).toContain("would lock the person out");
+	});
+
 	it("runs the outside-the-database work in order and reports what it skipped", async () => {
 		const engine = fakeDb(seedForTenant());
 		const order: string[] = [];
