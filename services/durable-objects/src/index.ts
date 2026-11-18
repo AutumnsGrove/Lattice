@@ -643,7 +643,7 @@ async function handleTenantRemove(request: Request, env: Env): Promise<Response>
 								// binding's `fetch` needs its own `this`, and `const f = env.ZEPHYR.fetch`
 								// fails at runtime with "Illegal invocation" — which is exactly
 								// what happened on the first production removal.
-								const request = new Request(`${zephyrUrl}/send`, {
+								const sendRequest = new Request(`${zephyrUrl}/send`, {
 									method: "POST",
 									headers: {
 										"Content-Type": "application/json",
@@ -659,7 +659,9 @@ async function handleTenantRemove(request: Request, env: Env): Promise<Response>
 									}),
 								});
 
-								const res = env.ZEPHYR ? await env.ZEPHYR.fetch(request) : await fetch(request);
+								const res = env.ZEPHYR
+									? await env.ZEPHYR.fetch(sendRequest)
+									: await fetch(sendRequest);
 
 								if (!res.ok) {
 									throw new Error(`Zephyr responded ${res.status} ${res.statusText}`);
