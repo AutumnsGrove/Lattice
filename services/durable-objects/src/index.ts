@@ -507,9 +507,10 @@ async function handleTenantRemove(request: Request, env: Env): Promise<Response>
 					} while (cursor);
 					return deleted;
 				},
-				// Not bound here, and pretending otherwise would be worse than saying so.
-				deleteIdentity: async () => 0,
-				notify: async () => {},
+				// Deliberately NOT passed. A no-op callback resolves, so removeTenant
+				// sets `notified: true` and `identitiesDeleted: 0` — reporting work
+				// this worker never did. Left undefined, the result says false and the
+				// response's `notDone` explains why.
 			},
 		);
 

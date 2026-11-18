@@ -143,6 +143,15 @@ describe("removeTenant", () => {
 		expect(engine.state.auditInserts).toBe(0);
 	});
 
+	it("says 'Would remove' on a dry run, not 'Removed'", async () => {
+		// A dry run prints the same block. Claiming it removed anything is how an
+		// operator skims the output and believes the tenant is gone.
+		const engine = fakeDb(seedForTenant());
+		const result = await removeTenant({ engine: engine.db }, target, { reason: "test" });
+
+		expect(formatRemovalResult(result).startsWith("Would remove")).toBe(true);
+	});
+
 	it("deletes from every registered table and verifies nothing survived", async () => {
 		const engine = fakeDb(seedForTenant());
 		const curios = fakeDb({ guestbook_entries: ["tenant_id=t-1"] });

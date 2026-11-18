@@ -135,6 +135,20 @@ describe("POST /tenant/remove", () => {
 		expect(flushed).toHaveLength(0);
 	});
 
+	it("does not claim to have notified the account holder", async () => {
+		// A no-op `notify` callback resolves, which makes removeTenant report
+		// notified: true. Nobody was emailed.
+		const { env } = makeEnv({ opsKey: KEY, tenantRow });
+		const res = await worker.fetch(
+			removeRequest({ subdomain: "gone", reason: "x", dryRun: false }, KEY),
+			env,
+		);
+		const body = (await res.json()) as any;
+
+		expect(body.summary).not.toContain("notified: yes");
+		expect(body.notDone.email).toContain("has not been told");
+	});
+
 	it("says which steps it did not do rather than pretending", async () => {
 		const { env } = makeEnv({ opsKey: KEY, tenantRow });
 		const res = await worker.fetch(removeRequest({ subdomain: "gone", reason: "x" }, KEY), env);

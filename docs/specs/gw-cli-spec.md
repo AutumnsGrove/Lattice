@@ -549,12 +549,39 @@ identityBlockOverridden }`.
 Verified afterwards the same way `suspend` is: the command probes the new site
 and prints the status code, so "the row exists" and "it serves" are not confused.
 
-**Not implemented, deliberately:**
+#### `gw tenant delete` — permanent removal
 
-- `gw tenant delete` — permanent removal needs one registry of tenant-carrying
-  tables and a reversible pre-deletion snapshot. That is `removeTenant()` in
-  #1596 §B, and the CLI becomes a thin wrapper over it rather than a second
-  implementation of the sweep.
+```bash
+# dry run: per-table counts, deletes nothing
+gw tenant delete spamgarden --reason "link farm"
+
+# destroy
+gw tenant delete spamgarden --reason "link farm" --write
+```
+
+`--reason` is required — it becomes the `audit_log` trail (`tenant_remove_started`
+before the sweep, `tenant_remove` after). Without `--write` you get the dry run
+and a hint; a removal is the one operation where a forgotten flag must not mean
+"destroy".
+
+**The sweep runs in the Worker, not here.** `POST /tenant/remove` calls
+`removeTenant()` with the engine, curios and observability bindings. That is not
+a preference: tenant rows live in 91 tables across three databases, and driving
+it from the CLI means one subprocess per statement — which timed out mid-sweep on
+2026-11-17 and left `pages`, `settings` and `billing` deleted with the `tenants`
+row still present. The half-removed tenant the `leftovers` check exists to warn
+about, produced by a timeout.
+
+The worker evicts the TenantDO and purges R2 (`tenants/<id>/`, paged — `list()`
+truncates at 1000 keys). Two steps it does **not** do, and says so rather than
+returning a clean success:
+
+- the Better Auth identity in `groveauth` (not bound to that worker)
+- the email to the account holder
+
+Afterwards it prints the summary, warns about leftovers or failures, and probes
+the site. A `302` to `/verify` means the Turnstile gate answered rather than the
+tenant — see #1734.
 
 ### Email Test Commands (`gw email`)
 
@@ -2154,7 +2181,7 @@ tools/grove-wrap/
 
 - [x] `gw tenant create` - From flags, for fixtures (#1710). Not a wizard:
   a wizard that creates tenants is a signup UI with none of the gates.
-- [ ] `gw tenant delete` - Safe deletion with CASCADE preview
+- [x] `gw tenant delete` - dry run with per-table counts, `--write` to remove
 - [ ] `gw email test` - Test email sending
 - [ ] `gw email status` - Email config check
 - [ ] `gw deploy` - Deployment helpers

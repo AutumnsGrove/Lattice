@@ -574,10 +574,28 @@ enough to exercise the `nofollow ugc` rule (#1682) on a live page.
 
 ### Escalation
 
-Suspension is the reversible first move. Permanent removal is `removeTenant()` from
-`@autumnsgrove/lattice/server/tenants/remove-tenant` — never hand-written SQL,
-which took 61 statements against engine, 44 against curios and 14 against
-groveauth on 2026-11-16.
+Suspension is the reversible first move. Permanent removal is one command:
+
+```bash
+export GROVE_OPS_ENDPOINT=https://grove-durable-objects.m7jv4v7npb.workers.dev
+
+# prints per-table counts, deletes nothing
+gw tenant delete <subdomain> --reason "link farm"
+
+# destroys: every registered table across engine, curios and observability, then
+# the tenants row, then the TenantDO cache
+gw tenant delete <subdomain> --reason "link farm" --write
+```
+
+**Do not hand-write the SQL.** The 2026-11-16 sweep took 61 statements against
+engine, 44 against curios and 14 against groveauth, and nothing joined them up.
+
+Two things the command does not do, and says so: the Better Auth identity in
+`groveauth`, and the email to the account holder. Do those by hand and record
+them in the run notes.
+
+The engine also exposes `removeTenant()` directly for anything the command cannot
+express:
 
 ```ts
 // Always dry-run first. It prints per-table counts and touches nothing.
