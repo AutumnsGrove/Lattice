@@ -4,6 +4,41 @@ Start here next time. This slice is the cluster of issues about bot signups
 coming through the email path (#1677, #1678, #1679, #1680, #1681, #1682, #1683,
 #1684) plus two findings filed along the way (#1691, #1692).
 
+## #1596 closed — and what it actually took (2026-11-18)
+
+**#1596 is done and merged (#1738, with #1740 on top).** Three slices, in the end:
+
+1. **§A policy copy** — AUP §1.4 now names link schemes and SEO abuse, §3.1
+   requires disclosure, and a new §1.9 is *one account per person or business,
+   operated by a human*, aliases counted as one inbox. ToS §16.2 adds spam and
+   automated signup to the termination list with "we act first, then email";
+   new §16.4 describes what a removal takes away.
+2. **Identity deletion** — `groveauth-identity.ts`, keyed on the person rather
+   than the blog, with `ba_user` last. `GROVEAUTH_DB` is bound to the ops worker.
+3. **The notice** — `removal-email.ts` + `removal-policy.ts` (aup-1.4 / 1.5 /
+   1.9 / requested). A test reads the real AUP and fails if a cited section
+   stops existing.
+
+**The lesson worth keeping:** the first production removal worked and the email
+still failed — `const f = env.ZEPHYR.fetch` throws *Illegal invocation*, because
+a service binding's `fetch` needs its own `this`. The unit test could not see
+it: a `vi.fn` does not care about `this`. Verified live on a fixture after the
+fix — Zephyr logged `hello@grove.place`, `success: 1`, and the tenant left
+nothing behind.
+
+**Still not observable:** whether a removed site 404s. #1734 (Turnstile gate
+before tenant lookup) means an unknown and a suspended subdomain both answer
+`302 → /verify`.
+
+**New hard rule, in the skill and in `removeTenant`:** never email "your account
+is gone" while rows remain, and never delete the login when the sweep failed.
+Both are now enforced in code, not by the operator remembering.
+
+`gw` is released again: **v1.3.0** (`gw publish gw --bump minor`), first tag
+since v1.2.11 in March. The flow is `gw publish gw --bump <type> --dry-run`,
+then `--write`; CI cross-compiles four platforms and the annotated tag body
+becomes the changelog.
+
 ## Shipped and merged
 
 | PR | what it closed |
