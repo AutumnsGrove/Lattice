@@ -17,7 +17,20 @@ import {
 import {
 	formatRemovalResult,
 	removeTenant,
+	type TenantRemovalResult,
 } from "@autumnsgrove/lattice/server/tenants/remove-tenant";
+import {
+	identityHasOtherTenants,
+	planIdentityRemoval,
+	removeIdentity,
+	resolveIdentity,
+	type IdentityCount,
+} from "@autumnsgrove/lattice/server/tenants/groveauth-identity";
+import { buildRemovalEmail } from "@autumnsgrove/lattice/server/tenants/removal-email";
+import {
+	resolveRemovalPolicy,
+	type RemovalPolicy,
+} from "@autumnsgrove/lattice/server/tenants/removal-policy";
 import { isValidSubdomain } from "@autumnsgrove/lattice/utils/subdomain";
 import { TIERS, type TierKey } from "@autumnsgrove/lattice/platform/config/tiers";
 
@@ -59,6 +72,14 @@ interface Env {
 	/** Tenant rows also live in these two; the removal registry knows which. */
 	CURIO_DB: D1Database;
 	OBS_DB: D1Database;
+	/** `groveauth` — the Better Auth identity, deleted last in a removal. */
+	GROVEAUTH_DB: D1Database;
+	/** Email gateway (`grove-zephyr`), for the removal notice. */
+	ZEPHYR?: { fetch: typeof fetch };
+	ZEPHYR_URL?: string;
+	ZEPHYR_API_KEY?: string;
+	/** Where a removed account holder can reply. Defaults to hello@grove.place. */
+	SUPPORT_EMAIL?: string;
 	IMAGES: R2Bucket;
 	/** Shared secret for operator-only endpoints (e.g. rate limit reset). Not exposed to any tenant-facing app. */
 	OPS_ADMIN_KEY?: string;
@@ -403,6 +424,46 @@ async function writeCreateAudit(
 }
 
 /**
+ * The steps a removal did not take, in the words the response and the CLI use.
+ *
+ * An empty `notDone` is the good case, and it must mean "nothing was skipped",
+ * not "nobody filled in this field". An earlier version passed no-op callbacks,
+ * so `removeTenant` reported `notified: true` because a function resolved — and
+ * the summary printed "Account holder notified: yes" directly above a line
+ * saying nobody had been told (#1737). Silence is not success here.
+ */
+function notDone(input: {
+	result: TenantRemovalResult;
+	identityPlan: IdentityCount[];
+	otherTenants: string[];
+	removeIdentityToo: boolean;
+}): { identity?: string; email?: string } {
+	const notes: { identity?: string; email?: string } = {};
+	const identityRows = input.identityPlan.reduce((sum, row) => sum + row.rows, 0);
+
+	if (!input.removeIdentityToo) {
+		const count = input.otherTenants.length;
+		notes.identity = `NOT deleted — the same login still owns ${
+			count === 1 ? "another blog" : `${count} other blogs`
+		} (${input.otherTenants.join(", ")}). Deleting it would lock the person out of a blog that is still theirs.`;
+	} else if (input.result.dryRun) {
+		if (identityRows > 0) {
+			notes.identity = `${identityRows} identity rows would be deleted (dry run) — see identityPlan`;
+		}
+	} else if (input.result.identitiesDeleted === 0 && identityRows > 0) {
+		notes.identity = "no identity rows deleted — see failures";
+	}
+
+	if (!input.result.dryRun && !input.result.notified) {
+		notes.email = input.result.failures.some((f) => f.table === "notification")
+			? "notification failed — the account holder has not been told. See failures."
+			: "no notification sent — the account holder has not been told";
+	}
+
+	return notes;
+}
+
+/**
  * POST /tenant/remove — operator-only permanent removal (#1596 §B).
  *
  * This exists because the sweep cannot be done well from a CLI. `removeTenant`
@@ -417,10 +478,11 @@ async function writeCreateAudit(
  *
  * `dryRun` defaults to **true**. A caller has to ask to destroy.
  *
- * The callbacks are deliberate: `evictCache` is wired (the DO is right here, and
- * a removed tenant that keeps serving is #1677), R2 deletion is wired, and the
- * identity and email steps are reported as **not done** rather than silently
- * skipped — groveauth is not bound to this worker, so the response says so.
+ * Every step is wired: `evictCache` (the DO is right here), R2, the groveauth
+ * identity (bound as `GROVEAUTH_DB`) and the email (via `ZEPHYR`). A callback
+ * is only left out when this worker genuinely cannot do the work, and the
+ * response's `notDone` says which and why — a no-op callback resolves, so
+ * `removeTenant` would report it as done (#1737).
  */
 async function handleTenantRemove(request: Request, env: Env): Promise<Response> {
 	const authError = await checkOpsAuth(request, env);
@@ -431,6 +493,8 @@ async function handleTenantRemove(request: Request, env: Env): Promise<Response>
 		email?: string | null;
 		reason?: string;
 		actor?: string | null;
+		/** Which rule the removal cites — see `removal-policy.ts`. */
+		policy?: string | null;
 		dryRun?: boolean;
 	} | null;
 
@@ -445,6 +509,21 @@ async function handleTenantRemove(request: Request, env: Env): Promise<Response>
 			{
 				error: "bad_request",
 				message: "reason is required — removeTenant keeps it as the audit trail",
+			},
+			{ status: 400 },
+		);
+	}
+
+	// An unknown citation is an error, not a default: an email that names the
+	// wrong rule is worse than one that names none.
+	let policy: RemovalPolicy;
+	try {
+		policy = resolveRemovalPolicy(body.policy);
+	} catch (err) {
+		return Response.json(
+			{
+				error: "bad_request",
+				message: err instanceof Error ? err.message : String(err),
 			},
 			{ status: 400 },
 		);
@@ -465,6 +544,35 @@ async function handleTenantRemove(request: Request, env: Env): Promise<Response>
 
 	const target = { tenantId: row.id, subdomain: row.subdomain, email: body.email ?? row.email };
 
+	// The identity has to be resolved *now*, while `engine.users` still exists.
+	// The tenant sweep deletes that table, and `ba_user.tenant_id` is null for
+	// every account created before it was populated — afterwards there is no
+	// link left saying which login this blog belonged to.
+	const linked = await env.DB.prepare(
+		"SELECT groveauth_id FROM users WHERE tenant_id = ? AND groveauth_id IS NOT NULL AND groveauth_id != ''",
+	)
+		.bind(row.id)
+		.all<{ groveauth_id: string }>();
+
+	const identity = await resolveIdentity(env.GROVEAUTH_DB, {
+		tenantId: row.id,
+		email: target.email,
+		knownUserIds: (linked.results ?? []).map((r) => r.groveauth_id),
+	});
+	const identityPlan = await planIdentityRemoval(env.GROVEAUTH_DB, identity);
+
+	// One login can own more than one blog. Removing `emmareed` must not lock
+	// someone out of a second garden that is still theirs, so the identity is
+	// deleted only when this tenant was its last.
+	const otherTenants = await identityHasOtherTenants(env.GROVEAUTH_DB, identity, row.id);
+	const removeIdentityToo = otherTenants.length === 0;
+
+	// The email runs after the identity step, so this is filled in by the time it
+	// needs to say whether the login went with the blog. Saying "the login you
+	// used to sign in" when there was no identity to delete would be a lie in the
+	// one message the person keeps.
+	let identitiesRemoved = 0;
+
 	try {
 		const result = await removeTenant(
 			{ engine: env.DB, curios: env.CURIO_DB, observability: env.OBS_DB },
@@ -473,6 +581,67 @@ async function handleTenantRemove(request: Request, env: Env): Promise<Response>
 				reason: body.reason,
 				actor: body.actor || "gw",
 				dryRun: body.dryRun !== false,
+				deleteIdentity: removeIdentityToo
+					? async () => {
+							const outcome = await removeIdentity(env.GROVEAUTH_DB, identity);
+							// `removeTenant` reports a callback that threw as a failed step, which is
+							// exactly what a half-deleted identity is. Returning a count for a sweep
+							// that left rows behind would print "Identity: 3 rows" over a login that
+							// still works.
+							if (outcome.failures.length > 0 || outcome.leftovers.length > 0) {
+								const detail = [...outcome.failures.map((f) => `${f.table}: ${f.error}`)].concat(
+									outcome.leftovers.map((l) => `${l.table}: ${l.rows} rows left`),
+								);
+								throw new Error(detail.join("; "));
+							}
+							identitiesRemoved = outcome.deleted;
+							return outcome.deleted;
+						}
+					: undefined,
+				// Only wired when a gateway is configured. Falling back to the production
+				// URL would make a test (or a local run) send real mail to a real person
+				// whose account we just deleted.
+				notify:
+					env.ZEPHYR || env.ZEPHYR_URL
+						? async (tenant) => {
+								// No address, no email — but say so rather than reporting a notice that
+								// never left. `removeTenant` turns a throw here into a failed step.
+								if (!tenant.email) {
+									throw new Error("no email address on file for this tenant");
+								}
+
+								const email = buildRemovalEmail({
+									subdomain: tenant.subdomain,
+									reason: body.reason ?? "",
+									policy,
+									identityDeleted: identitiesRemoved > 0,
+									contact: env.SUPPORT_EMAIL || "hello@grove.place",
+								});
+
+								const zephyrUrl = env.ZEPHYR_URL || "https://grove-zephyr.m7jv4v7npb.workers.dev";
+								const zephyrFetch = env.ZEPHYR?.fetch ?? fetch;
+
+								const res = await zephyrFetch(`${zephyrUrl}/send`, {
+									method: "POST",
+									headers: {
+										"Content-Type": "application/json",
+										"X-API-Key": env.ZEPHYR_API_KEY || "",
+									},
+									body: JSON.stringify({
+										type: "transactional",
+										template: "raw",
+										to: tenant.email,
+										subject: email.subject,
+										html: email.html,
+										text: email.text,
+									}),
+								});
+
+								if (!res.ok) {
+									throw new Error(`Zephyr responded ${res.status} ${res.statusText}`);
+								}
+							}
+						: undefined,
 				evictCache: async (tenant) => {
 					const id = env.TENANTS.idFromName(`tenant:${tenant.subdomain}`);
 					const stub = env.TENANTS.get(id);
@@ -507,10 +676,6 @@ async function handleTenantRemove(request: Request, env: Env): Promise<Response>
 					} while (cursor);
 					return deleted;
 				},
-				// Deliberately NOT passed. A no-op callback resolves, so removeTenant
-				// sets `notified: true` and `identitiesDeleted: 0` — reporting work
-				// this worker never did. Left undefined, the result says false and the
-				// response's `notDone` explains why.
 			},
 		);
 
@@ -519,17 +684,20 @@ async function handleTenantRemove(request: Request, env: Env): Promise<Response>
 				summary: formatRemovalResult(result),
 				dryRun: result.dryRun,
 				removed: result.plan.totalRows,
+				identityPlan: identityPlan.filter((row) => row.rows > 0),
+				identitiesDeleted: result.identitiesDeleted,
 				tenantRowDeleted: result.tenantRowDeleted,
 				cacheEvicted: result.cacheEvicted,
 				r2ObjectsDeleted: result.r2ObjectsDeleted,
 				leftovers: result.leftovers.map((t) => `${t.database}.${t.table}=${t.rows}`),
 				failures: result.failures.map((f) => `${f.database}.${f.table}: ${f.error}`),
 				auditRecorded: result.auditRecorded,
-				notDone: {
-					identity:
-						"groveauth is not bound to this worker — delete the Better Auth identity separately",
-					email: "no notification sent — the account holder has not been told",
-				},
+				notDone: notDone({
+					result,
+					identityPlan,
+					otherTenants,
+					removeIdentityToo,
+				}),
 			},
 			{ status: result.dryRun ? 200 : 200 },
 		);

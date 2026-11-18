@@ -334,6 +334,53 @@ describe("removeTenant", () => {
 		expect(formatRemovalResult(result)).toContain("cache eviction failed");
 	});
 
+	it("records a failed notification, and does not claim the person was told", async () => {
+		const engine = fakeDb(seedForTenant());
+
+		const result = await removeTenant({ engine: engine.db }, target, {
+			reason: "link farm",
+			dryRun: false,
+			notify: async () => {
+				throw new Error("zephyr down");
+			},
+		});
+
+		expect(result.notified).toBe(false);
+		expect(result.failures.find((f) => f.table === "notification")?.error).toContain("zephyr down");
+		expect(formatRemovalResult(result)).toContain("they have not been told");
+	});
+
+	it("does not email a removal that is incomplete", async () => {
+		// "Your account is gone" is the version of the #1737 mistake the person
+		// keeps. If rows survived, nobody gets told it worked.
+		const engine = fakeDb(seedForTenant());
+		const stubborn: RemovalDatabase = {
+			prepare(sql: string) {
+				if (/DELETE FROM posts/.test(sql)) {
+					return {
+						bind: () => ({
+							first: async () => null,
+							all: async () => ({ results: [] }),
+							run: async () => ({}),
+						}),
+					};
+				}
+				return engine.db.prepare(sql);
+			},
+		};
+
+		const notify = vi.fn(async () => {});
+		const result = await removeTenant({ engine: stubborn }, target, {
+			reason: "link farm",
+			dryRun: false,
+			notify,
+		});
+
+		expect(notify).not.toHaveBeenCalled();
+		expect(result.notified).toBe(false);
+		expect(result.failures.find((f) => f.table === "notification")?.error).toContain("incomplete");
+	});
+
 	it("reports a failed audit write without pretending the removal failed", async () => {
 		const engine = fakeDb(seedForTenant());
 		const noAudit: RemovalDatabase = {

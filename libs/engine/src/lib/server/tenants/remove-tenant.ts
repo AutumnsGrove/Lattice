@@ -366,11 +366,30 @@ export async function removeTenant(
 
 	let notified = false;
 	if (options.notify) {
-		try {
-			await options.notify(target, plan);
-			notified = true;
-		} catch (err) {
-			console.error("[removeTenant] Notification failed:", err);
+		// Telling somebody their account is gone while rows remain is the #1737
+		// mistake in a different medium: the CLI stopped claiming success, and an
+		// email claiming it would be worse — it is the version the person keeps.
+		if (leftovers.length > 0 || failures.length > 0) {
+			failures.push({
+				database: "engine",
+				table: "notification",
+				error:
+					"not sent — the removal is incomplete, and telling the account holder it worked would be false",
+			});
+		} else {
+			try {
+				await options.notify(target, plan);
+				notified = true;
+			} catch (err) {
+				// A swallowed failure here used to be a console line and nothing else,
+				// so the result said `notified: false` with no reason attached.
+				const detail = err instanceof Error ? err.message : String(err);
+				failures.push({
+					database: "engine",
+					table: "notification",
+					error: `notification failed: ${detail}`,
+				});
+			}
 		}
 	}
 

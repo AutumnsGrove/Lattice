@@ -61,6 +61,7 @@ var (
 
 	tenantDeleteReason string
 	tenantDeleteDryRun bool
+	tenantDeletePolicy string
 )
 
 var tenantCmd = &cobra.Command{
@@ -156,19 +157,25 @@ var tenantDeleteCmd = &cobra.Command{
 	Use:   "delete <subdomain> --reason <text> --write",
 	Short: "Permanently remove a tenant and everything keyed to it",
 	Long: `Permanently remove a tenant: every registered table across engine, curios and
-observability, then the tenants row, then the TenantDO cache.
+observability, then the tenants row, then the TenantDO cache, then the login
+identity, then an email to the person who held it.
 
-Dry run by default. It prints per-table counts and touches nothing; --write is
-what actually destroys. A reason is required because it becomes the audit trail.
+Dry run by default. It prints per-table counts (and the groveauth rows) and
+touches nothing; --write is what actually destroys. A reason is required
+because it becomes the audit trail, and because it is quoted verbatim in the
+email the account holder receives.
+
+--policy names the rule this removal cites, so the email can point at a section
+somebody can read. It defaults to aup-1.4 (spam and link schemes). Use
+--policy requested when the person asked to be deleted.
 
 The sweep runs inside the ops worker, not here. Tenant rows live in 91 tables
 across three databases, and driving that from the CLI means one subprocess per
 statement — which timed out mid-sweep on 2026-11-17 and left a half-removed
-tenant behind. The worker has all three bindings and removeTenant() is one
-function, so it does the whole thing in one invocation.
+tenant behind. The worker has every binding and removeTenant() is one function,
+so it does the whole thing in one invocation.
 
-Not done by this command, and reported as such: the Better Auth identity in
-groveauth, and the email to the account holder.
+Anything it could not do is printed, not omitted. Silence is not success.
 
 Examples:
 
@@ -176,7 +183,10 @@ Examples:
   gw tenant delete spamgarden --reason "link farm"
 
   # do it
-  gw tenant delete spamgarden --reason "link farm" --write`,
+  gw tenant delete spamgarden --reason "link farm" --write
+
+  # a deletion the person asked for
+  gw tenant delete quietblog --reason "asked in email" --policy requested --write`,
 	Args: cobra.ExactArgs(1),
 	RunE: runTenantDelete,
 }
@@ -337,8 +347,9 @@ func init() {
 	tenantCreateCmd.Flags().BoolVar(&tenantCreateDryRun, "dry-run", false, "print the writes, change nothing")
 	tenantCreateCmd.Flags().StringVar(&tenantCreateEndpoint, "endpoint", "", "ops worker URL (defaults to $GROVE_OPS_ENDPOINT)")
 
-	tenantDeleteCmd.Flags().StringVar(&tenantDeleteReason, "reason", "", "why (required — recorded in audit_log)")
+	tenantDeleteCmd.Flags().StringVar(&tenantDeleteReason, "reason", "", "why (required — recorded in audit_log, and quoted in the email)")
 	tenantDeleteCmd.Flags().BoolVar(&tenantDeleteDryRun, "dry-run", false, "print the per-table counts, delete nothing (default when --write is absent)")
+	tenantDeleteCmd.Flags().StringVar(&tenantDeletePolicy, "policy", "aup-1.4", "the rule this removal cites: aup-1.4, aup-1.5, aup-1.9, or requested")
 	tenantDeleteCmd.Flags().StringVar(&tenantCreateEndpoint, "endpoint", "", "ops worker URL (defaults to $GROVE_OPS_ENDPOINT)")
 }
 
@@ -674,16 +685,21 @@ func runTenantCreate(cmd *cobra.Command, _ []string) error {
 }
 
 type tenantRemoveResponse struct {
-	Summary          string   `json:"summary"`
-	DryRun           bool     `json:"dryRun"`
-	Removed          int      `json:"removed"`
-	TenantRowDeleted bool     `json:"tenantRowDeleted"`
-	CacheEvicted     bool     `json:"cacheEvicted"`
-	R2ObjectsDeleted int      `json:"r2ObjectsDeleted"`
-	Leftovers        []string `json:"leftovers"`
-	Failures         []string `json:"failures"`
-	AuditRecorded    bool     `json:"auditRecorded"`
-	NotDone          struct {
+	Summary      string `json:"summary"`
+	DryRun       bool   `json:"dryRun"`
+	Removed      int    `json:"removed"`
+	IdentityPlan []struct {
+		Table string `json:"table"`
+		Rows  int    `json:"rows"`
+	} `json:"identityPlan"`
+	IdentitiesDeleted int      `json:"identitiesDeleted"`
+	TenantRowDeleted  bool     `json:"tenantRowDeleted"`
+	CacheEvicted      bool     `json:"cacheEvicted"`
+	R2ObjectsDeleted  int      `json:"r2ObjectsDeleted"`
+	Leftovers         []string `json:"leftovers"`
+	Failures          []string `json:"failures"`
+	AuditRecorded     bool     `json:"auditRecorded"`
+	NotDone           struct {
 		Identity string `json:"identity"`
 		Email    string `json:"email"`
 	} `json:"notDone"`
@@ -721,6 +737,7 @@ func runTenantDelete(cmd *cobra.Command, args []string) error {
 	body, err := json.Marshal(map[string]any{
 		"subdomain": subdomain,
 		"reason":    tenantDeleteReason,
+		"policy":    tenantDeletePolicy,
 		"dryRun":    !write,
 		"actor":     "gw",
 	})
@@ -761,6 +778,12 @@ func runTenantDelete(cmd *cobra.Command, args []string) error {
 	fmt.Println(out.Summary)
 
 	if out.DryRun {
+		if len(out.IdentityPlan) > 0 {
+			ui.Info("groveauth identity:")
+			for _, row := range out.IdentityPlan {
+				fmt.Printf("  • %s: %d rows\n", row.Table, row.Rows)
+			}
+		}
 		ui.Hint("Nothing was deleted. Run again with --write to remove it.")
 		return nil
 	}
@@ -789,8 +812,15 @@ func runTenantDelete(cmd *cobra.Command, args []string) error {
 	}
 
 	// Say what was not done, rather than letting silence imply it was.
-	ui.Hint(out.NotDone.Identity)
-	ui.Hint(out.NotDone.Email)
+	if out.IdentitiesDeleted > 0 {
+		ui.Info(fmt.Sprintf("groveauth identity deleted: %d rows.", out.IdentitiesDeleted))
+	}
+	if out.NotDone.Identity != "" {
+		ui.Warning(out.NotDone.Identity)
+	}
+	if out.NotDone.Email != "" {
+		ui.Warning(out.NotDone.Email)
+	}
 
 	code, probeErr := probeSite(subdomain)
 	if probeErr != nil {
