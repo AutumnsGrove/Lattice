@@ -307,6 +307,12 @@ export async function removeTenant(
 	// Each of these already runs after the rows are gone, so a throw must not
 	// prevent the verification pass, the outcome record, or the notification.
 	// One failed side-effect is a line in `failures`, not a lost result object.
+	//
+	// Captured before the side-effects push their own failures: "did the rows go?"
+	// and "did the cache flush?" are different questions, and only the first one
+	// decides whether the login may be deleted.
+	const sweepFailed = failures.length > 0;
+
 	let cacheEvicted = false;
 	if (options.evictCache) {
 		try {
@@ -327,7 +333,11 @@ export async function removeTenant(
 		// so a retry can find it — and deleting the login now would lock the person
 		// out of a blog that still exists while the retry is pending. The blog goes
 		// first, or neither does.
-		if (!tenantRowDeleted || failures.length > 0) {
+		//
+		// `sweepFailed`, not `failures.length`, because a failed cache eviction is
+		// not a reason to keep the login — the rows are gone and the blog is not
+		// coming back. It would also report the wrong reason.
+		if (!tenantRowDeleted || sweepFailed) {
 			failures.push({
 				database: "engine",
 				table: "groveauth_identity",

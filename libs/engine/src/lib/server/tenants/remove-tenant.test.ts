@@ -248,6 +248,29 @@ describe("removeTenant", () => {
 		expect(formatRemovalResult(result)).toContain("would lock the person out");
 	});
 
+	it("deletes the login even when only the cache eviction failed", async () => {
+		// The rows are gone and the blog is not coming back. A warm cache is a flush
+		// away, not a reason to leave somebody's login intact — and reporting it as
+		// "the tenant sweep failed" would be the wrong reason besides.
+		const engine = fakeDb(seedForTenant());
+		const deleteIdentity = vi.fn(async () => 2);
+
+		const result = await removeTenant({ engine: engine.db }, target, {
+			reason: "link farm",
+			dryRun: false,
+			evictCache: async () => {
+				throw new Error("DO unavailable");
+			},
+			deleteIdentity,
+		});
+
+		expect(deleteIdentity).toHaveBeenCalled();
+		expect(result.identitiesDeleted).toBe(2);
+		expect(result.failures.map((f) => f.table)).toContain("tenant_do");
+		// The message is about the cache, not about the sweep.
+		expect(result.failures.some((f) => /tenant sweep failed/.test(f.error))).toBe(false);
+	});
+
 	it("runs the outside-the-database work in order and reports what it skipped", async () => {
 		const engine = fakeDb(seedForTenant());
 		const order: string[] = [];
