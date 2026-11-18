@@ -287,15 +287,41 @@ describe("POST /tenant/remove", () => {
 		);
 		const body = (await res.json()) as any;
 
-		const [url, init] = zep.ZEPHYR.fetch.mock.calls[0] as [string, RequestInit];
-		const sent = JSON.parse(String(init.body));
+		const [request] = zep.ZEPHYR.fetch.mock.calls[0] as [Request];
+		const sent = JSON.parse(await request.text());
 
-		expect(String(url)).toContain("/send");
+		expect(request.url).toContain("/send");
 		expect(sent.to).toBe("gone@grove.place");
 		expect(sent.subject).toBe("Your Grove account was removed");
 		expect(sent.text).toContain("§1.4 Spam and Malicious Content");
 		expect(sent.text).toContain("18 posts in one session");
 		expect(body.summary).toContain("notified: yes");
+		expect(body.notDone.email).toBeUndefined();
+	});
+
+	it("calls the Zephyr binding as a method, not a detached function", async () => {
+		// A service binding's `fetch` throws "Illegal invocation" when it is pulled
+		// off the object into a local first. That is the exact failure the first
+		// production removal hit, and the stub above cannot see it: a `vi.fn` does
+		// not care what `this` is.
+		const { env } = makeEnv({ opsKey: KEY, tenantRow });
+		const binding = {
+			calls: 0,
+			async fetch(this: unknown) {
+				if (this !== binding) throw new Error("Illegal invocation");
+				binding.calls++;
+				return new Response("", { status: 200 });
+			},
+		};
+		(env as unknown as { ZEPHYR: typeof binding }).ZEPHYR = binding;
+
+		const res = await worker.fetch(
+			removeRequest({ subdomain: "gone", reason: "x", dryRun: false }, KEY),
+			env,
+		);
+		const body = (await res.json()) as any;
+
+		expect(binding.calls).toBe(1);
 		expect(body.notDone.email).toBeUndefined();
 	});
 
