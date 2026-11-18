@@ -483,8 +483,11 @@ export function formatRemovalPlan(plan: TenantRemovalPlan): string {
 
 /** Human-readable result of a real removal. */
 export function formatRemovalResult(result: TenantRemovalResult): string {
+	// A dry run prints the same shape, so it must not claim anything happened.
 	const lines: string[] = [
-		`Removed ${result.plan.target.subdomain}.grove.place — ${result.plan.totalRows} rows`,
+		result.dryRun
+			? `Would remove ${result.plan.target.subdomain}.grove.place — ${result.plan.totalRows} rows`
+			: `Removed ${result.plan.target.subdomain}.grove.place — ${result.plan.totalRows} rows`,
 	];
 
 	if (result.identitiesDeleted > 0) lines.push(`Identity: ${result.identitiesDeleted} rows`);
@@ -494,7 +497,9 @@ export function formatRemovalResult(result: TenantRemovalResult): string {
 		`Tenant row deleted: ${result.tenantRowDeleted ? "yes" : "NO — subdomain still claimed"}`,
 	);
 	lines.push(`Cache evicted: ${result.cacheEvicted ? "yes" : "NO — the site may still serve"}`);
-	lines.push(`Account holder notified: ${result.notified ? "yes" : "no"}`);
+	lines.push(
+		`Account holder notified: ${result.notified ? "yes" : "no — they have not been told"}`,
+	);
 	lines.push(`Audit recorded: ${result.auditRecorded ? "yes" : "NO"}`);
 
 	if (result.failures.length > 0) {

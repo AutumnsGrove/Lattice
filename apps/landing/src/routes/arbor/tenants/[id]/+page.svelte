@@ -31,6 +31,9 @@
 	// panel cannot drift from the verbs `gw` actually offers.
 	const suspendCommand = $derived(`gw tenant suspend ${data.tenant.subdomain} --write`);
 	const resumeCommand = $derived(`gw tenant resume ${data.tenant.subdomain} --write`);
+	const deleteCommand = $derived(
+		`gw tenant delete ${data.tenant.subdomain} --reason "..." --write`
+	);
 
 	// ── Hidden form refs ──────────────────────────────────────────────
 	let enrollFormRef = $state<HTMLFormElement | null>(null);
@@ -485,14 +488,31 @@
 			</div>
 		{/if}
 
-		<!-- Delete: no `gw` verb yet, so point at the path that exists -->
-		<div class="p-3 rounded-lg bg-error-bg">
-			<div class="text-sm font-sans font-medium text-error">Delete Tenant</div>
-			<p class="mt-1 text-xs font-sans text-foreground-muted">
-				Permanent removal runs through <code class="font-mono">removeTenant()</code> in the engine,
-				not from this panel — see the incident-response runbook. Suspension is the reversible first
-				move and keeps the content.
-			</p>
+		<!-- Delete command -->
+		<div class="flex items-center justify-between gap-4 p-3 rounded-lg bg-error-bg">
+			<div>
+				<div class="text-sm font-sans font-medium text-error">Delete Tenant</div>
+				<code class="text-xs font-mono text-foreground-muted">
+					{deleteCommand}
+				</code>
+				<p class="mt-1 text-xs font-sans text-foreground-muted">
+					Permanent. Dry runs unless <code class="font-mono">--write</code> is passed, sweeps
+					every table keyed to the tenant, and evicts the cache. Suspension is the reversible
+					first move.
+				</p>
+			</div>
+			<button
+				type="button"
+				onclick={() => copyCommand(deleteCommand, 'delete')}
+				class="shrink-0 p-2 rounded-lg hover:bg-error/20 transition-colors"
+				aria-label={copiedCommand === 'delete' ? 'Copied!' : 'Copy delete command'}
+			>
+				{#if copiedCommand === 'delete'}
+					<Check class="w-4 h-4 text-success" />
+				{:else}
+					<Copy class="w-4 h-4 text-error" />
+				{/if}
+			</button>
 		</div>
 	</div>
 </GlassCard>
