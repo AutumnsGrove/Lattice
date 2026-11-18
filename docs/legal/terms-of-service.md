@@ -2,14 +2,14 @@
 title: Terms of Service
 description: Terms and conditions for using Grove
 category: legal
-lastUpdated: "2026-01-16"
+lastUpdated: "2026-11-18"
 ---
 
 # Terms of Service
 
 **Grove Platform**
 **Effective Date:** January 11, 2026
-**Last Updated:** January 16, 2026
+**Last Updated:** November 18, 2026
 
 ---
 
@@ -59,6 +59,10 @@ To use certain features of the Service, you must create an account. You agree to
 - Maintain and update your information as needed
 - Keep your login credentials secure
 - Notify us immediately of any unauthorized access
+
+An account must be operated by a person, and there is **one account per person
+or business**. Automation and email aliases do not create new people. See
+Section 1.9 of our [Acceptable Use Policy](https://grove.place/legal/acceptable-use) for the detail.
 
 ### 4.2 Account Responsibility
 
@@ -250,6 +254,11 @@ We may terminate or suspend your account if you:
 - Engage in fraudulent or illegal activity
 - Fail to pay for the Service after the grace period
 - Abuse the Service or other users
+- Create accounts primarily to place outbound links, publish doorway content, or otherwise manipulate search rankings (see Section 1.4 of the Acceptable Use Policy)
+- Create accounts by automated means, or operate an account on behalf of nobody
+- Create more than one account per person or business, or use email aliases to work around a removal
+
+For spam, link schemes, or automated account creation we may **suspend or terminate immediately, without prior notice**, because notice is exactly what lets a spammer publish again in the meantime. We will email the address on file after we act, and we will tell you why.
 
 ### 16.3 Effect of Termination
 
@@ -258,6 +267,33 @@ Upon termination:
 - Your right to use the Service ends immediately
 - We may delete your data after the retention period specified in our Privacy Policy
 - Provisions that should survive termination (such as limitations of liability) will continue to apply
+
+### 16.4 What Removal Means
+
+When we remove an account, here is what happens. Numbers in brackets are the
+retention window from our [Privacy Policy](https://grove.place/legal/privacy).
+
+- **Admin access is revoked** and every active session is closed.
+- **Your content is unpublished and then deleted** — posts, pages, media records,
+  comments, and the settings that held them together.
+- **Your subdomain is released** and may be registered by someone else. Do not
+depend on it coming back.
+- **Your images and uploads are deleted** from our storage.
+- **Your identity is deleted** from our authentication system — the account, its
+  sessions, and any connected sign-in methods.
+- **Backups are purged** on the existing 90-day clock. Until then, a removed
+  account may still exist in a backup we have not yet rotated out.
+- **We email the address on file**, with the reason and a way to reach us. Where
+  the removal is not an abuse takedown, we will also offer an export of your
+  content before we delete it.
+
+We keep a record of the removal itself — that it happened, when, why, and how
+many rows of each kind were removed. That record contains no content of yours.
+It is how we answer "what happened to this account?" a year later, including for
+ourselves.
+
+If we removed your account for abuse, the email you receive will say so. If you
+believe we got it wrong, reply to that email. We read those.
 
 ---
 
