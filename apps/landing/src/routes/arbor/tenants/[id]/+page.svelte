@@ -32,7 +32,7 @@
 	const suspendCommand = $derived(`gw tenant suspend ${data.tenant.subdomain} --write`);
 	const resumeCommand = $derived(`gw tenant resume ${data.tenant.subdomain} --write`);
 	const deleteCommand = $derived(
-		`gw tenant delete ${data.tenant.subdomain} --reason "..." --write`
+		`gw tenant delete ${data.tenant.subdomain} --reason "..." --policy aup-1.4 --write`
 	);
 
 	// ── Hidden form refs ──────────────────────────────────────────────
@@ -496,9 +496,10 @@
 					{deleteCommand}
 				</code>
 				<p class="mt-1 text-xs font-sans text-foreground-muted">
-					Permanent. Dry runs unless <code class="font-mono">--write</code> is passed, sweeps
-					every table keyed to the tenant, and evicts the cache. Suspension is the reversible
-					first move.
+					Permanent. Dry runs unless <code class="font-mono">--write</code> is passed. Sweeps
+					every table keyed to the tenant, deletes the login identity, evicts the cache, and
+					emails the address on file with the reason and the rule cited by
+					<code class="font-mono">--policy</code>. Suspension is the reversible first move.
 				</p>
 			</div>
 			<button

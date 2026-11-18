@@ -578,7 +578,7 @@ Suspension is the reversible first move. Permanent removal is one command:
 
 ```bash
 # prints per-table counts and who the login is; deletes nothing
-gw tenant delete <subdomain> --reason "link farm"
+gw tenant delete <subdomain> --reason "link farm" --policy aup-1.4
 
 # destroys: every registered table across engine, curios and observability, then
 # the tenants row, then the TenantDO cache, then the login identity, then emails
