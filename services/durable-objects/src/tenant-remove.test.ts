@@ -16,10 +16,78 @@ interface Recorded {
 	bindings: unknown[];
 }
 
+/**
+ * A stand-in for `groveauth`.
+ *
+ * Counts are per table and go to zero once the table has been deleted from, so
+ * a sweep that deletes everything still re-counts clean — and one that silently
+ * skips a table leaves a leftover, which is the behaviour being asserted.
+ */
+function makeAuth(
+	options: {
+		userIds?: string[];
+		email?: string;
+		otherTenants?: string[];
+		counts?: Record<string, number>;
+	} = {},
+) {
+	const deletes: Recorded[] = [];
+	const cleared = new Set<string>();
+
+	const db = {
+		deletes,
+		prepare: (sql: string) => ({
+			bind(...bindings: unknown[]) {
+				const table = /FROM (\w+)/.exec(sql)?.[1] ?? "";
+				return {
+					async first<T>() {
+						const n = cleared.has(table) ? 0 : (options.counts?.[table] ?? 0);
+						return { n } as T;
+					},
+					async all<R>() {
+						const results: Record<string, string>[] = [];
+						if (/FROM ba_user WHERE tenant_id = /.test(sql)) {
+							for (const id of options.userIds ?? []) {
+								results.push({ id, email: options.email ?? "" });
+							}
+						} else if (/FROM ba_user WHERE lower\(email\)/.test(sql)) {
+							for (const id of options.userIds ?? []) results.push({ id });
+						} else if (/SELECT DISTINCT tenant_id FROM ba_user/.test(sql)) {
+							for (const tenant_id of options.otherTenants ?? []) results.push({ tenant_id });
+						}
+						return { results: results as R[] };
+					},
+					async run() {
+						deletes.push({ sql, bindings });
+						cleared.add(table);
+						return { changes: 1 };
+					},
+				};
+			},
+		}),
+	};
+
+	return { db, deletes };
+}
+
 function makeEnv(
 	options: {
 		opsKey?: string;
 		tenantRow?: { id: string; subdomain: string; email: string } | null;
+		/** groveauth ids and addresses `resolveIdentity` should find. */
+		identity?: {
+			userIds?: string[];
+			email?: string;
+			otherTenants?: string[];
+			counts?: Record<string, number>;
+		};
+		/**
+		 * A second blog this login owns, visible only through `engine.users` —
+		 * the case `ba_user.tenant_id` cannot answer.
+		 */
+		otherBlogViaEngine?: string;
+		/** Supply a Zephyr stub to exercise the notification path. */
+		zephyr?: { ok?: boolean };
 	} = {},
 ) {
 	const deletes: Recorded[] = [];
@@ -38,7 +106,15 @@ function makeEnv(
 					return null;
 				},
 				async all<R>() {
-					return { results: [] as R[] };
+					const results: Record<string, string>[] = [];
+					if (db === "engine" && options.otherBlogViaEngine) {
+						if (/SELECT DISTINCT tenant_id FROM users/.test(sql)) {
+							results.push({ tenant_id: options.otherBlogViaEngine });
+						} else if (/SELECT DISTINCT id FROM tenants/.test(sql)) {
+							results.push({ id: options.otherBlogViaEngine });
+						}
+					}
+					return { results: results as R[] };
 				},
 				async run() {
 					deletes.push({ sql: `${db}:${sql}`, bindings });
@@ -53,6 +129,20 @@ function makeEnv(
 		DB: { prepare: makePrepare("engine") },
 		CURIO_DB: { prepare: makePrepare("curios") },
 		OBS_DB: { prepare: makePrepare("obs") },
+		GROVEAUTH_DB: makeAuth(options.identity).db,
+		...(options.zephyr
+			? {
+					ZEPHYR: {
+						fetch: vi.fn(
+							async () =>
+								new Response("", {
+									status: options.zephyr?.ok === false ? 500 : 200,
+									statusText: options.zephyr?.ok === false ? "boom" : "OK",
+								}),
+						),
+					},
+				}
+			: {}),
 		IMAGES: {
 			list: vi.fn(async () => ({
 				objects: [{ key: "tenants/t-1/a.png" }, { key: "tenants/t-1/b.png" }],
@@ -72,7 +162,13 @@ function makeEnv(
 		},
 	};
 
-	return { env: env as unknown as Parameters<typeof worker.fetch>[1], deletes, flushed, r2Deleted };
+	return {
+		env: env as unknown as Parameters<typeof worker.fetch>[1],
+		deletes,
+		flushed,
+		r2Deleted,
+		authDeletes: env.GROVEAUTH_DB.deletes,
+	};
 }
 
 const tenantRow = { id: "t-1", subdomain: "gone", email: "gone@grove.place" };
@@ -149,13 +245,198 @@ describe("POST /tenant/remove", () => {
 		expect(body.notDone.email).toContain("has not been told");
 	});
 
-	it("says which steps it did not do rather than pretending", async () => {
+	it("reports nothing as skipped on a dry run, because nothing was meant to happen", async () => {
 		const { env } = makeEnv({ opsKey: KEY, tenantRow });
 		const res = await worker.fetch(removeRequest({ subdomain: "gone", reason: "x" }, KEY), env);
 		const body = (await res.json()) as any;
 
-		expect(body.notDone.identity).toContain("groveauth");
+		// The identity is no longer a manual step: when there is one to find, the
+		// worker deletes it. Nothing to find means nothing to report, not a claim
+		// that it was removed.
+		expect(body.notDone.identity).toBeUndefined();
+		// Nor is a dry run an unfinished removal — nobody was supposed to be told.
+		expect(body.notDone.email).toBeUndefined();
+	});
+
+	it("says nobody was told when the removal runs without a mail gateway", async () => {
+		const { env } = makeEnv({ opsKey: KEY, tenantRow });
+		const res = await worker.fetch(
+			removeRequest({ subdomain: "gone", reason: "x", dryRun: false }, KEY),
+			env,
+		);
+		const body = (await res.json()) as any;
+
 		expect(body.notDone.email).toContain("has not been told");
+	});
+
+	it("emails the account holder through Zephyr, citing the rule", async () => {
+		const { env } = makeEnv({ opsKey: KEY, tenantRow, zephyr: { ok: true } });
+		const zep = env as unknown as { ZEPHYR: { fetch: ReturnType<typeof vi.fn> } };
+
+		const res = await worker.fetch(
+			removeRequest(
+				{
+					subdomain: "gone",
+					reason: "18 posts in one session",
+					policy: "aup-1.4",
+					dryRun: false,
+				},
+				KEY,
+			),
+			env,
+		);
+		const body = (await res.json()) as any;
+
+		const [url, init] = zep.ZEPHYR.fetch.mock.calls[0] as [string, RequestInit];
+		const sent = JSON.parse(String(init.body));
+
+		expect(String(url)).toContain("/send");
+		expect(sent.to).toBe("gone@grove.place");
+		expect(sent.subject).toBe("Your Grove account was removed");
+		expect(sent.text).toContain("§1.4 Spam and Malicious Content");
+		expect(sent.text).toContain("18 posts in one session");
+		expect(body.summary).toContain("notified: yes");
+		expect(body.notDone.email).toBeUndefined();
+	});
+
+	it("rejects an email override that does not match the address on file", async () => {
+		// The override exists for a tenant row with no address. A differing one is a
+		// typo away from deleting a stranger's login and emailing them about a blog
+		// they have never had.
+		const { env, deletes, authDeletes } = makeEnv({
+			opsKey: KEY,
+			tenantRow,
+			identity: { userIds: ["u-1"], counts: { ba_user: 1 } },
+		});
+
+		const res = await worker.fetch(
+			removeRequest(
+				{ subdomain: "gone", reason: "x", email: "someone.else@example.com", dryRun: false },
+				KEY,
+			),
+			env,
+		);
+
+		expect(res.status).toBe(400);
+		expect(((await res.json()) as any).message).toContain("does not match the address on file");
+		expect(deletes).toHaveLength(0);
+		expect(authDeletes).toHaveLength(0);
+	});
+
+	it("accepts an override that matches the address on file, whatever the case", async () => {
+		const { env } = makeEnv({ opsKey: KEY, tenantRow });
+		const res = await worker.fetch(
+			removeRequest({ subdomain: "gone", reason: "x", email: "Gone@Grove.Place" }, KEY),
+			env,
+		);
+
+		expect(res.status).toBe(200);
+	});
+
+	it("rejects an unknown policy citation instead of defaulting", async () => {
+		const { env, deletes } = makeEnv({ opsKey: KEY, tenantRow, zephyr: { ok: true } });
+		const res = await worker.fetch(
+			removeRequest({ subdomain: "gone", reason: "x", policy: "aup-9.9" }, KEY),
+			env,
+		);
+
+		expect(res.status).toBe(400);
+		expect(((await res.json()) as any).message).toContain("unknown removal policy");
+		expect(deletes).toHaveLength(0);
+	});
+
+	it("records a failed send as a failure, not as silence", async () => {
+		const { env } = makeEnv({ opsKey: KEY, tenantRow, zephyr: { ok: false } });
+		const res = await worker.fetch(
+			removeRequest({ subdomain: "gone", reason: "x", dryRun: false }, KEY),
+			env,
+		);
+		const body = (await res.json()) as any;
+
+		expect(body.notDone.email).toContain("notification failed");
+		expect(body.summary).toContain("notified: no");
+	});
+
+	it("counts the identity rows a dry run would delete, and deletes none", async () => {
+		const { env, authDeletes } = makeEnv({
+			opsKey: KEY,
+			tenantRow,
+			identity: { userIds: ["u-1"], counts: { ba_user: 1, ba_session: 1 } },
+		});
+
+		const res = await worker.fetch(removeRequest({ subdomain: "gone", reason: "x" }, KEY), env);
+		const body = (await res.json()) as any;
+
+		expect(body.dryRun).toBe(true);
+		// Children first, so `ba_user` is last — deleting it first would cascade out
+		// from under the rows we are about to delete anyway.
+		expect(body.identityPlan).toEqual([
+			{ table: "ba_session", rows: 1 },
+			{ table: "ba_user", rows: 1 },
+		]);
+		expect(body.notDone.identity).toContain("would be deleted");
+		expect(authDeletes).toHaveLength(0);
+	});
+
+	it("deletes the groveauth identity once the tenant row is gone", async () => {
+		const { env, authDeletes } = makeEnv({
+			opsKey: KEY,
+			tenantRow,
+			identity: { userIds: ["u-1"], counts: { ba_user: 1, ba_session: 1 } },
+		});
+
+		const res = await worker.fetch(
+			removeRequest({ subdomain: "gone", reason: "link farm", dryRun: false }, KEY),
+			env,
+		);
+		const body = (await res.json()) as any;
+
+		expect(body.identitiesDeleted).toBe(2);
+		expect(body.notDone.identity).toBeUndefined();
+		expect(authDeletes.some((d) => /DELETE FROM ba_user/.test(d.sql))).toBe(true);
+	});
+
+	it("keeps an identity that still owns another blog", async () => {
+		// Two blogs on one login. Removing one must not lock the person out of the
+		// other, and the response has to say why the identity survived.
+		const { env, authDeletes } = makeEnv({
+			opsKey: KEY,
+			tenantRow,
+			identity: { userIds: ["u-1"], otherTenants: ["t-kept"] },
+		});
+
+		const res = await worker.fetch(
+			removeRequest({ subdomain: "gone", reason: "link farm", dryRun: false }, KEY),
+			env,
+		);
+		const body = (await res.json()) as any;
+
+		expect(authDeletes).toHaveLength(0);
+		expect(body.identitiesDeleted).toBe(0);
+		expect(body.notDone.identity).toContain("t-kept");
+		expect(body.notDone.identity).toContain("still theirs");
+	});
+
+	it("keeps an identity whose other blog is only visible through engine.users", async () => {
+		// `ba_user.tenant_id` is a single column, so a login owning two blogs
+		// points at one of them — here, the one being removed. Checking only that
+		// column deletes the login and locks the person out of `t-surviving`.
+		const { env, authDeletes } = makeEnv({
+			opsKey: KEY,
+			tenantRow,
+			identity: { userIds: ["u-1"], otherTenants: [] },
+			otherBlogViaEngine: "t-surviving",
+		});
+
+		const res = await worker.fetch(
+			removeRequest({ subdomain: "gone", reason: "link farm", dryRun: false }, KEY),
+			env,
+		);
+		const body = (await res.json()) as any;
+
+		expect(authDeletes).toHaveLength(0);
+		expect(body.identitiesDeleted).toBe(0);
+		expect(body.notDone.identity).toContain("t-surviving");
 	});
 
 	it("sweeps, evicts the DO and clears R2 when asked to destroy", async () => {

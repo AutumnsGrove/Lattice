@@ -577,22 +577,39 @@ enough to exercise the `nofollow ugc` rule (#1682) on a live page.
 Suspension is the reversible first move. Permanent removal is one command:
 
 ```bash
-export GROVE_OPS_ENDPOINT=https://grove-durable-objects.m7jv4v7npb.workers.dev
-
-# prints per-table counts, deletes nothing
-gw tenant delete <subdomain> --reason "link farm"
+# prints per-table counts and who the login is; deletes nothing
+gw tenant delete <subdomain> --reason "link farm" --policy aup-1.4
 
 # destroys: every registered table across engine, curios and observability, then
-# the tenants row, then the TenantDO cache
-gw tenant delete <subdomain> --reason "link farm" --write
+# the tenants row, then the TenantDO cache, then the login identity, then emails
+# the address on file
+gw tenant delete <subdomain> --reason "link farm" --policy aup-1.4 --write
 ```
+
+`--policy` names the rule the removal cites, so the email can point at a section
+the person can read. `aup-1.4` (spam and link schemes) is the default;
+`aup-1.5` is impersonation, `aup-1.9` is an automated or extra account, and
+`requested` is a deletion the person asked for. The vocabulary lives in
+`libs/engine/src/lib/server/tenants/removal-policy.ts`, and a test reads
+`docs/legal/acceptable-use-policy.md` to make sure every section it cites still
+exists.
+
+The `--reason` is quoted verbatim in that email. Write it for the person who
+will read it at 2am, not for the changelog: "18 posts to upsampler.com in one
+session, no personalisation" beats "spam".
 
 **Do not hand-write the SQL.** The 2026-11-16 sweep took 61 statements against
 engine, 44 against curios and 14 against groveauth, and nothing joined them up.
 
-Two things the command does not do, and says so: the Better Auth identity in
-`groveauth`, and the email to the account holder. Do those by hand and record
-them in the run notes.
+The command now does the identity and the email itself; it prints anything it
+could not do (`notDone` in the JSON, a warning in the summary) rather than
+leaving you to infer it. Two things it will still refuse or skip:
+
+- **A login that owns another blog.** Deleting the identity would lock the
+  person out of a blog that is still theirs. It says which tenant, and the
+  identity stays.
+- **An incomplete sweep.** It will not email "your account is gone" while rows
+  remain — that is the #1737 mistake in a medium the person keeps.
 
 The engine also exposes `removeTenant()` directly for anything the command cannot
 express:
@@ -611,13 +628,13 @@ const result = await removeTenant(dbs, target, {
   reason: "link farm",
   dryRun: false,
   evictCache: evictTenantDO,        // or the site keeps serving (#1677)
-  deleteIdentity: deleteAuthIdentity,
+  deleteIdentity: deleteAuthIdentity, // see groveauth-identity.ts
   deleteR2: deleteTenantObjects,
-  notify: emailAccountHolder,
+  notify: emailAccountHolder,       // see removal-email.ts
 });
 
-if (result.leftovers.length > 0) {
-  // Incomplete. Do not tell anyone it is handled.
+if (result.leftovers.length > 0 || result.failures.length > 0) {
+  // Incomplete. Nobody was emailed, and the summary says why.
 }
 ```
 
@@ -625,6 +642,13 @@ if (result.leftovers.length > 0) {
 43 curios tables and 1 observability table, including the six that use a column
 other than `tenant_id`. A table that is not registered fails the test, so a new
 one cannot be silently missed.
+
+The login identity has its own registry (`groveauth-identity.ts`) because it is
+keyed on the person rather than the blog: `ba_user` last, then the sessions,
+OAuth links, 2FA secrets, verification tokens, device codes, refresh tokens,
+legacy sessions, and anything else that still points at the id or the address.
+It resolves the identity **before** the tenant sweep deletes `engine.users`,
+which is where the `groveauth_id` link lives.
 
 It keeps the tenant's `audit_log` rows — the record of a removal has to outlive
 the tenant — and writes two of its own: `tenant_remove_started` with the plan

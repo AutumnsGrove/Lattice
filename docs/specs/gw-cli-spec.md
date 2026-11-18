@@ -552,17 +552,25 @@ and prints the status code, so "the row exists" and "it serves" are not confused
 #### `gw tenant delete` — permanent removal
 
 ```bash
-# dry run: per-table counts, deletes nothing
+# dry run: per-table counts and the login identity, deletes nothing
 gw tenant delete spamgarden --reason "link farm"
 
-# destroy
-gw tenant delete spamgarden --reason "link farm" --write
+# destroy, citing the rule the email names
+gw tenant delete spamgarden --reason "link farm" --policy aup-1.4 --write
+
+# a deletion the person asked for
+gw tenant delete quietblog --reason "asked in email" --policy requested --write
 ```
 
 `--reason` is required — it becomes the `audit_log` trail (`tenant_remove_started`
-before the sweep, `tenant_remove` after). Without `--write` you get the dry run
-and a hint; a removal is the one operation where a forgotten flag must not mean
-"destroy".
+before the sweep, `tenant_remove` after) and it is quoted verbatim in the email.
+Without `--write` you get the dry run and a hint; a removal is the one operation
+where a forgotten flag must not mean "destroy".
+
+`--policy` selects the citation the email carries — `aup-1.4` (spam and link
+schemes, the default), `aup-1.5` (impersonation), `aup-1.9` (an automated or
+extra account), or `requested`. An unknown value is a 400, not a fallback: an
+email naming the wrong rule is worse than one naming none.
 
 **The sweep runs in the Worker, not here.** `POST /tenant/remove` calls
 `removeTenant()` with the engine, curios and observability bindings. That is not
@@ -572,12 +580,16 @@ it from the CLI means one subprocess per statement — which timed out mid-sweep
 row still present. The half-removed tenant the `leftovers` check exists to warn
 about, produced by a timeout.
 
-The worker evicts the TenantDO and purges R2 (`tenants/<id>/`, paged — `list()`
-truncates at 1000 keys). Two steps it does **not** do, and says so rather than
-returning a clean success:
+The worker evicts the TenantDO, purges R2 (`tenants/<id>/`, paged — `list()`
+truncates at 1000 keys), deletes the `groveauth` identity, and emails the address
+on file.
 
-- the Better Auth identity in `groveauth` (not bound to that worker)
-- the email to the account holder
+The identity is resolved **before** the sweep, while `engine.users.groveauth_id`
+still exists, and deleted only when the login owns no other blog — otherwise the
+person is locked out of a garden that is still theirs, and the response says
+which one. The email is only sent when the sweep was clean: telling somebody
+their account is gone while rows remain is the #1737 mistake in a medium they
+keep. Anything not done appears in `notDone` and is printed as a warning.
 
 Afterwards it prints the summary, warns about leftovers or failures, and probes
 the site. A `302` to `/verify` means the Turnstile gate answered rather than the

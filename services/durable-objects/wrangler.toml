@@ -90,6 +90,14 @@ binding = "OBS_DB"
 database_name = "grove-observability-db"
 database_id = "59e70f9e-8f9c-4021-96e5-1e130e753766"
 
+# A removal is not finished until the login identity is gone (#1596 §B). This
+# is the same database Heartwood writes (`services/heartwood` binds it as DB);
+# the ops worker only ever deletes from it, never creates or reads for auth.
+[[d1_databases]]
+binding = "GROVEAUTH_DB"
+database_name = "groveauth"
+database_id = "45eae4c7-8ae7-4078-9218-8e1677a4360f"
+
 # =============================================================================
 # R2 Bucket - For reading user-uploaded images (included in export zips)
 # =============================================================================

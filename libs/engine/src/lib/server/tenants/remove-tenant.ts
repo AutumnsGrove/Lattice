@@ -307,6 +307,12 @@ export async function removeTenant(
 	// Each of these already runs after the rows are gone, so a throw must not
 	// prevent the verification pass, the outcome record, or the notification.
 	// One failed side-effect is a line in `failures`, not a lost result object.
+	//
+	// Captured before the side-effects push their own failures: "did the rows go?"
+	// and "did the cache flush?" are different questions, and only the first one
+	// decides whether the login may be deleted.
+	const sweepFailed = failures.length > 0;
+
 	let cacheEvicted = false;
 	if (options.evictCache) {
 		try {
@@ -323,14 +329,31 @@ export async function removeTenant(
 
 	let identitiesDeleted = 0;
 	if (options.deleteIdentity) {
-		try {
-			identitiesDeleted = await options.deleteIdentity(target);
-		} catch (err) {
+		// The identity is the login. If the sweep failed, the tenants row was kept
+		// so a retry can find it — and deleting the login now would lock the person
+		// out of a blog that still exists while the retry is pending. The blog goes
+		// first, or neither does.
+		//
+		// `sweepFailed`, not `failures.length`, because a failed cache eviction is
+		// not a reason to keep the login — the rows are gone and the blog is not
+		// coming back. It would also report the wrong reason.
+		if (!tenantRowDeleted || sweepFailed) {
 			failures.push({
 				database: "engine",
 				table: "groveauth_identity",
-				error: `identity deletion failed: ${err instanceof Error ? err.message : String(err)}`,
+				error:
+					"not deleted — the tenant sweep failed, and removing the login would lock the person out of a blog that still exists",
 			});
+		} else {
+			try {
+				identitiesDeleted = await options.deleteIdentity(target);
+			} catch (err) {
+				failures.push({
+					database: "engine",
+					table: "groveauth_identity",
+					error: `identity deletion failed: ${err instanceof Error ? err.message : String(err)}`,
+				});
+			}
 		}
 	}
 
@@ -366,11 +389,30 @@ export async function removeTenant(
 
 	let notified = false;
 	if (options.notify) {
-		try {
-			await options.notify(target, plan);
-			notified = true;
-		} catch (err) {
-			console.error("[removeTenant] Notification failed:", err);
+		// Telling somebody their account is gone while rows remain is the #1737
+		// mistake in a different medium: the CLI stopped claiming success, and an
+		// email claiming it would be worse — it is the version the person keeps.
+		if (leftovers.length > 0 || failures.length > 0) {
+			failures.push({
+				database: "engine",
+				table: "notification",
+				error:
+					"not sent — the removal is incomplete, and telling the account holder it worked would be false",
+			});
+		} else {
+			try {
+				await options.notify(target, plan);
+				notified = true;
+			} catch (err) {
+				// A swallowed failure here used to be a console line and nothing else,
+				// so the result said `notified: false` with no reason attached.
+				const detail = err instanceof Error ? err.message : String(err);
+				failures.push({
+					database: "engine",
+					table: "notification",
+					error: `notification failed: ${detail}`,
+				});
+			}
 		}
 	}
 
