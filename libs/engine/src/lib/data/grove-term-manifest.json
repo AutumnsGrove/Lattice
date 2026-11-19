@@ -836,9 +836,7 @@
     "tagline": "Content Type Indicators",
     "definition": "The small icon and label on each post that tells you what kind of content it is — a bloom, a note, or something else.",
     "seeAlso": [
-      "meadow",
-      "hum",
-      "lyra"
+      "meadow"
     ],
     "standardTerm": "Content Type Badge"
   }

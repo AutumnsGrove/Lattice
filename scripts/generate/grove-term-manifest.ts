@@ -11,7 +11,7 @@
  */
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
-import { join, dirname } from "path";
+import { join, dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 
 // ============================================================================
@@ -204,7 +204,7 @@ function findRelatedTerms(content: string, allTerms: Set<string>, currentTerm: s
 // MAIN PARSER
 // ============================================================================
 
-function parseGroveNaming(content: string): GroveTermManifest {
+export function parseGroveNaming(content: string): GroveTermManifest {
 	const manifest: GroveTermManifest = {};
 	const lines = content.split("\n");
 
@@ -278,6 +278,19 @@ function parseGroveNaming(content: string): GroveTermManifest {
 			}
 
 			currentTerm = termName;
+			termLines = [];
+			continue;
+		}
+
+		// A horizontal rule ends the entry. Without this the last term in the file
+		// swallows the separator, the footnotes and the `_Last updated:_` footer,
+		// and `findRelatedTerms` then reads whatever term the footer happens to
+		// mention as a genuine cross-reference (#1697).
+		if (line.trim() === "---") {
+			if (currentTerm && termLines.length > 0) {
+				commitTerm();
+			}
+			currentTerm = "";
 			termLines = [];
 			continue;
 		}
@@ -426,7 +439,11 @@ async function main() {
 	console.log(`✨ Output: ${outputPath}`);
 }
 
-main().catch((err) => {
-	console.error("Error:", err);
-	process.exit(1);
-});
+// Importable without side effects: the test imports `parseGroveNaming` to check
+// parsing, and running it would rewrite the manifest mid-test.
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+	main().catch((err) => {
+		console.error("Error:", err);
+		process.exit(1);
+	});
+}
