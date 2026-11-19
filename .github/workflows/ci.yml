@@ -211,6 +211,9 @@ jobs:
       - name: Check README inventory
         run: pnpm readme:check
 
+      - name: Test repo scripts
+        run: pnpm test:scripts
+
       - name: Comment on PR with lint errors
         if: >-
           steps.lint.outcome == 'failure' &&
