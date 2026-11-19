@@ -11,6 +11,7 @@ import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { DEFAULT_TIMELINE_CONFIG, CLEAR_TOKEN_VALUE } from "@autumnsgrove/curios/timeline";
 import {
+	hasTimelineToken,
 	setTimelineToken,
 	TIMELINE_SECRET_KEYS,
 } from "@autumnsgrove/curios/timeline/secrets.server";
@@ -109,7 +110,18 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 		});
 	}
 
-	// Transform to camelCase, don't expose encrypted tokens
+	// Tokens live in tenant_secrets now; the legacy columns are always NULL, so
+	// asking them whether a token exists would always answer no.
+	const secretEnv = {
+		DB: platform?.env?.DB as D1Database,
+		GROVE_KEK: platform?.env?.GROVE_KEK,
+	};
+	const [hasGithubToken, hasOpenrouterKey] = await Promise.all([
+		hasTimelineToken(secretEnv, tenantId, TIMELINE_SECRET_KEYS.GITHUB_TOKEN),
+		hasTimelineToken(secretEnv, tenantId, TIMELINE_SECRET_KEYS.OPENROUTER_KEY),
+	]);
+
+	// Transform to camelCase, don't expose tokens
 	return json({
 		config: {
 			enabled: Boolean(config.enabled),
@@ -124,8 +136,8 @@ export const GET: RequestHandler = async ({ platform, locals }) => {
 			timezone: config.timezone,
 			ownerName: config.owner_name,
 			// Indicate if tokens are set without exposing them
-			hasGithubToken: Boolean(config.github_token_encrypted),
-			hasOpenrouterKey: Boolean(config.openrouter_key_encrypted),
+			hasGithubToken,
+			hasOpenrouterKey,
 			updatedAt: config.updated_at,
 		},
 	});
