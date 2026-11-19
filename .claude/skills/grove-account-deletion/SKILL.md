@@ -235,7 +235,7 @@ If anything was skipped, it goes in the report. A clean-looking report over an u
 
 - **Suspension** (reversible) — `gw tenant suspend <subdomain> --write`. Use it first when you might be wrong.
 - **Self-serve deletion** in Arbor — not built. Today this is an operator command.
-- **Billing.** Deleting rows does not cancel a LemonSqueezy subscription. Check `platform_billing` / `user_onboarding.lemonsqueezy_subscription_id` and say so.
+- **Billing.** Deleting rows does not cancel a Stripe subscription. `removeTenant()` sweeps `platform_billing` and never calls the provider, so the card keeps being charged after the rows that could cancel it are gone. Check `platform_billing.provider_subscription_id` (joined through `tenants`) and say so — see #1745.
 - **Custom domains.** A BYOD domain keeps pointing at nothing; an Evergreen domain needs a transfer code before deletion.
 - **The site actually 404s** — currently unobservable from outside (#1734).
 

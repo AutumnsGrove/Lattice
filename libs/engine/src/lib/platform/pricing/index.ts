@@ -4,17 +4,18 @@
  * Reusable pricing table, cards, and checkout components for any Grove product.
  * Transform tier config into display-ready format and render consistent pricing UI.
  *
+ * Buy links are not built here. They come from `buildCheckoutUrl()` in
+ * `../config/billing.js`, which points at billing-api.
+ *
  * @example
  * ```typescript
  * // In +page.server.ts
- * import { transformAllTiers, getAllCheckoutUrls, createCheckoutConfigFromEnv } from '@autumnsgrove/lattice/platform/pricing';
+ * import { transformAllTiers } from '@autumnsgrove/lattice/platform/pricing';
  *
- * export const load = async ({ platform }) => {
- *   const checkoutConfig = createCheckoutConfigFromEnv(platform.env);
- *   const checkoutUrls = getAllCheckoutUrls(checkoutConfig);
- *   const tiers = transformAllTiers({ checkoutUrls, highlightTier: 'seedling' });
+ * export function load() {
+ *   const tiers = transformAllTiers({ highlightTier: 'seedling' });
  *   return { tiers };
- * };
+ * }
  * ```
  *
  * ```svelte
@@ -63,10 +64,6 @@ export {
 	dbFormatToBillingPeriod,
 	type DbBillingCycle,
 } from "./config.js";
-
-// Checkout URL generation
-export type { CheckoutConfig, CheckoutOptions } from "./checkout.js";
-export { getCheckoutUrl, getAllCheckoutUrls, createCheckoutConfigFromEnv } from "./checkout.js";
 
 // Components
 export { default as PricingGraft } from "./PricingGraft.svelte";

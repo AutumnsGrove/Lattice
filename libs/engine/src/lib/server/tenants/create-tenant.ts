@@ -68,9 +68,9 @@ export interface CreateTenantInput {
 	email: string;
 	plan: TierKey;
 	favoriteColor?: string | null;
-	/** Payment provider customer ID (Lemon Squeezy customer_id) */
+	/** Payment provider customer ID (Stripe customer_id) */
 	providerCustomerId?: string | null;
-	/** Payment provider subscription ID (Lemon Squeezy subscription_id) */
+	/** Payment provider subscription ID (Stripe subscription_id) */
 	providerSubscriptionId?: string | null;
 	/**
 	 * groveauth identity to attach, when there is no onboarding row to read it
