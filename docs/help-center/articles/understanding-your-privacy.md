@@ -3,7 +3,7 @@ title: Understanding Your Privacy
 description: How Grove handles your data and privacy
 category: help
 section: privacy-security
-lastUpdated: '2026-03-11'
+lastUpdated: '2026-11-19'
 keywords:
   - privacy
   - data
@@ -38,7 +38,7 @@ In your admin panel under **Account**, you can export a complete copy of everyth
 
 **You can take it and leave.**
 
-Export comes in standard formats (JSON, Markdown). If you decide to move to another platform, your writing comes with you. We don't hold your content hostage.
+Export gives you your writing as Markdown, plus your images, in a zip that works with other platforms. If you decide to move on, your writing comes with you. We don't hold your content hostage.
 
 ## Your readers' privacy
 

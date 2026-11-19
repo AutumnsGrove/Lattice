@@ -281,9 +281,10 @@ Site configuration divided into sections.
 **Account:**
 
 - Email (display only, changed via Heartwood)
-- Current plan
-- Data export
-- Danger zone (delete account)
+- Payment, plan summary, and usage cards
+- **Your Data** card — counts, then **Go to Full Export** → `/arbor/export` (zip only)
+- **Closing Your Grove** card — support-based; a `mailto:` is the whole flow
+- *Planned:* self-serve deletion, and with it a real danger-zone affordance here (#1743). Nothing in this panel deletes an account today.
 
 **Cache Management:**
 

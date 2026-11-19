@@ -3,7 +3,7 @@ title: GDPR and Privacy Rights
 description: 'Your data rights under GDPR, CCPA, and similar laws'
 category: help
 section: privacy-security
-lastUpdated: '2026-01-03'
+lastUpdated: '2026-11-19'
 keywords:
   - gdpr
   - privacy
@@ -30,11 +30,11 @@ Under GDPR (Europe), CCPA (California), and similar laws, you have the right to:
 
 You can see everything Grove stores about you:
 
-1. Go to **Admin → Settings → Data**
-2. Click **Export Data**
-3. Download a complete copy
+1. Open **Account** in your admin panel and find the **Your Data** card
+2. Choose **Go to Full Export →**
+3. Download the zip
 
-Your export includes posts, comments, images, and account settings. Everything we have.
+Your export includes your posts, pages, and images — everything you made.
 
 ### Correct your data
 
@@ -58,7 +58,7 @@ We'll email you an export link before deletion completes. After 90 days, your da
 
 ### Data portability
 
-You can take your data elsewhere. Grove exports in standard formats (Markdown, JSON) that work with other platforms. No proprietary lock-in.
+You can take your data elsewhere. Grove exports your writing as Markdown — the same files any other platform can read — with your images alongside, in a zip. No proprietary lock-in.
 
 ### Object to processing
 

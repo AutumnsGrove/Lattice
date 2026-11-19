@@ -3,7 +3,7 @@ title: Deleting Your Account
 description: How to close your Grove account and delete your data
 category: help
 section: account-billing
-lastUpdated: '2026-11-18'
+lastUpdated: '2026-11-19'
 keywords:
   - delete
   - close
@@ -34,7 +34,7 @@ If you're not sure which one happened, check your email. A removal always sends 
 
 **Export your content first.** Once your account is deleted, we can't recover it. If there's anything you want to keep, export it before proceeding.
 
-Go to **Account & Subscription** in your admin panel and scroll to the **Your Data** section. You can download all your posts, pages, and media information.
+Go to **Account** in your admin panel and find the **Your Data** card. It shows how much you have, and **Go to Full Export** takes you to the export page.
 
 See [Exporting Your Content](/knowledge/help/exporting-your-content) for details on what's included.
 
@@ -42,9 +42,9 @@ See [Exporting Your Content](/knowledge/help/exporting-your-content) for details
 
 Account deletion is handled through support to ensure you don't accidentally lose your data.
 
-1. Go to **Account & Subscription** in your admin panel
-2. Scroll to the **Danger Zone** section
-3. Click the email link to contact us
+1. Open **Account** in your admin panel
+2. Scroll to the bottom, to the **Closing Your Grove** card
+3. Use the email link in that card, or write to hello@grove.place
 4. Let us know you'd like to delete your account
 5. We'll confirm you've exported anything you want to keep
 6. We process the deletion within 30 days
@@ -122,7 +122,7 @@ These are different things:
 
 **Deletion:** Removes everything. Your account, data, and blog are gone permanently. Only do this if you're sure.
 
-If you just want to stop paying, cancel your subscription instead. Your blog stays live on whatever plan you qualify for (or becomes inaccessible if you have no free tier equivalent).
+If you just want to stop paying, cancel your subscription instead: **Cancel Membership**, under **Plan Status** on the Account page. Your blog stays live on whatever plan you qualify for (or becomes inaccessible if you have no free tier equivalent).
 
 ## If you change your mind
 
