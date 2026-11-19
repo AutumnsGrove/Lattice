@@ -32,6 +32,49 @@ js_ts_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.\(js\|js
 # Get staged YAML files
 yaml_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.\(yml\|yaml\)$' | grep -v 'pnpm-lock\.yaml' || true)
 
+# Get staged font files
+font_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.\(ttf\|otf\|woff\|woff2\|ttc\)$' || true)
+
+# ============================================================================
+# FONT FILE CHECK
+# ============================================================================
+# Fails if a staged font file does not start with a font header. Three fonts
+# were committed as GitHub "Page not found" HTML pages under a .ttf name (#1648)
+# and nothing complained for a year — browsers silently fall back, so the only
+# symptom was the wrong typeface drawn with no error anywhere.
+
+if [ -n "$font_files" ]; then
+    echo -e "${YELLOW}Checking staged font files...${NC}"
+
+    font_check_failed=""
+    for f in $font_files; do
+        # TTF: 00010000 or 'true' | OTF: OTTO | WOFF: wOFF | WOFF2: wOF2 | TTC: ttcf
+        header=$(head -c 4 "$f" 2>/dev/null | od -An -tx1 | tr -d ' \n')
+        case "$header" in
+            00010000|74727565|4f54544f|774f4646|774f4632|74746366) ;;
+            *)
+                echo -e "${RED}  $f — not a font (header: $header)${NC}"
+                font_check_failed="true"
+                ;;
+        esac
+    done
+
+    if [ -n "$font_check_failed" ]; then
+        echo -e "${RED}✗ Font file check failed${NC}"
+        echo -e "${YELLOW}A file named .ttf/.otf/.woff is not actually a font — likely a saved${NC}"
+        echo -e "${YELLOW}ERROR PAGE from a download that 404d. Re-download the real font.${NC}"
+        echo -e "${YELLOW}See #1648 for how this happens.${NC}"
+        echo ""
+        checks_failed=1
+    else
+        echo -e "${GREEN}✓ Font files are real fonts${NC}"
+    fi
+    echo ""
+else
+    echo -e "${GREEN}✓ Font file check skipped (no font files staged)${NC}"
+    echo ""
+fi
+
 # ============================================================================
 # YAMLLINT CHECK
 # ============================================================================
