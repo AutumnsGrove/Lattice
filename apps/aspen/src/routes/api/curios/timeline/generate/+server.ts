@@ -104,29 +104,15 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	const env = {
 		DB: db,
 		GROVE_KEK: platform?.env?.GROVE_KEK,
-		TOKEN_ENCRYPTION_KEY: platform?.env?.TOKEN_ENCRYPTION_KEY,
 	};
 
-	const githubResult = await getTimelineToken(
-		env,
-		tenantId,
-		TIMELINE_SECRET_KEYS.GITHUB_TOKEN,
-		config.github_token_encrypted,
-	);
+	const githubResult = await getTimelineToken(env, tenantId, TIMELINE_SECRET_KEYS.GITHUB_TOKEN);
 
 	const openrouterResult = await getTimelineToken(
 		env,
 		tenantId,
 		TIMELINE_SECRET_KEYS.OPENROUTER_KEY,
-		config.openrouter_key_encrypted,
 	);
-
-	if (githubResult.migrated) {
-		console.log(`[Timeline Generate] Auto-migrated GitHub token to SecretsManager`);
-	}
-	if (openrouterResult.migrated) {
-		console.log(`[Timeline Generate] Auto-migrated OpenRouter key to SecretsManager`);
-	}
 
 	const githubToken = githubResult.token;
 	const openrouterKey = openrouterResult.token;
@@ -143,8 +129,6 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 				debug: {
 					secretSource: githubResult.source,
 					kekConfigured: !!platform?.env?.GROVE_KEK,
-					legacyKeyConfigured: !!platform?.env?.TOKEN_ENCRYPTION_KEY,
-					legacyColumnPresent: !!config.github_token_encrypted,
 				},
 			},
 			{ status: 400 },
@@ -164,8 +148,6 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 				debug: {
 					secretSource: openrouterResult.source,
 					kekConfigured: !!platform?.env?.GROVE_KEK,
-					legacyKeyConfigured: !!platform?.env?.TOKEN_ENCRYPTION_KEY,
-					legacyColumnPresent: !!config.openrouter_key_encrypted,
 				},
 			},
 			{ status: 400 },

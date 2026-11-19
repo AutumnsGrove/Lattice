@@ -56,7 +56,6 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 	const env = {
 		DB: db,
 		GROVE_KEK: platform?.env?.GROVE_KEK,
-		TOKEN_ENCRYPTION_KEY: platform?.env?.TOKEN_ENCRYPTION_KEY,
 	};
 
 	const keyName =
@@ -70,20 +69,17 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		// Save the token
 		const saveResult = await setTimelineToken(env, tenantId, keyName, tokenValue);
 
-		// Write to legacy column (overwrite any old v1: value)
+		// Clear any legacy ciphertext still sitting in the column
 		await curioDb
 			.prepare(
 				`UPDATE timeline_curio_config
-				 SET ${columnName} = ?, updated_at = strftime('%s', 'now')
+				 SET ${columnName} = NULL, updated_at = strftime('%s', 'now')
 				 WHERE tenant_id = ?`,
 			)
-			.bind(saveResult.legacyValue, tenantId)
+			.bind(tenantId)
 			.run();
 
-		console.log(
-			`[Timeline Config] Token ${tokenType} saved via ${saveResult.system}` +
-				(saveResult.fallbackReason ? ` (fallback reason: ${saveResult.fallbackReason})` : ""),
-		);
+		console.log(`[Timeline Config] Token ${tokenType} saved via ${saveResult.system}`);
 
 		// Dual-write under Warden's canonical key name so Warden can resolve
 		// credentials without relying on the alias fallback chain
@@ -102,13 +98,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		}
 
 		// Read it back to verify it's retrievable
-		const row = await curioDb
-			.prepare(`SELECT ${columnName} FROM timeline_curio_config WHERE tenant_id = ?`)
-			.bind(tenantId)
-			.first<Record<string, string | null>>();
-
-		const legacyValue = row?.[columnName] as string | null;
-		const readBack = await getTimelineToken(env, tenantId, keyName, legacyValue);
+		const readBack = await getTimelineToken(env, tenantId, keyName);
 
 		if (readBack.token) {
 			return json({
@@ -116,14 +106,10 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 				tokenType,
 				tokenSource: readBack.source,
 				verified: true,
-				...(saveResult.fallbackReason && {
-					warning: `Used ${saveResult.system} storage (${saveResult.fallbackReason})`,
-				}),
 			});
 		} else {
 			console.error(
-				`[Timeline Config] Token ${tokenType} saved but read-back failed. ` +
-					`Source: ${readBack.source}, Legacy column value prefix: ${legacyValue?.substring(0, 4) ?? "null"}`,
+				`[Timeline Config] Token ${tokenType} saved but read-back failed. Source: ${readBack.source}`,
 			);
 			return json(
 				{

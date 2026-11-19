@@ -358,7 +358,7 @@ export class SecretsManager {
 	 * Migrate a secret from old single-key encryption to envelope encryption.
 	 * Call this when reading a secret that might be in the old format.
 	 *
-	 * @param oldKeyHex - The old TOKEN_ENCRYPTION_KEY
+	 * @param oldKeyHex - The previous KEK, before rotation
 	 */
 	async migrateSecret(
 		tenantId: string,

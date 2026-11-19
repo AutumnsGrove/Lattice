@@ -1537,6 +1537,9 @@ importers:
       '@autumnsgrove/curios':
         specifier: workspace:*
         version: link:../../libs/curios
+      '@autumnsgrove/grove-crypto':
+        specifier: workspace:*
+        version: link:../../libs/grove-crypto
       '@autumnsgrove/infra':
         specifier: workspace:*
         version: link:../../libs/infra

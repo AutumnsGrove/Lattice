@@ -118,7 +118,6 @@ declare global {
 				/** Zephyr email gateway URL */
 				ZEPHYR_URL?: string;
 				ALLOWED_ADMIN_EMAILS?: string;
-				TOKEN_ENCRYPTION_KEY?: string; // 256-bit key for encrypting API tokens in D1
 
 				// Cloudflare API for CDN cache purging
 				/** Cloudflare API token with zone:cache_purge permission */

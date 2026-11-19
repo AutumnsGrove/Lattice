@@ -15,8 +15,7 @@ import type {
 	CustomVoiceConfig,
 } from "./config";
 import { DEFAULT_OPENROUTER_MODEL } from "./config";
-import { createSecretsManager, type SecretsManager } from "./secrets-manager";
-import { safeDecryptToken } from "./encryption";
+import { createSecretsManager } from "@autumnsgrove/grove-crypto/secrets";
 import { fetchGitHubCommits, fetchCommitStats } from "./github";
 import { parseAIResponse } from "./response-parser";
 import { buildVoicedPrompt } from "./voices";
@@ -55,9 +54,7 @@ export async function getEnabledTenants(curioDb: GroveDatabase): Promise<TenantC
         repos_include,
         repos_exclude,
         timezone,
-        owner_name,
-        github_token_encrypted,
-        openrouter_key_encrypted
+        owner_name
       FROM timeline_curio_config
       WHERE enabled = 1
     `,
@@ -100,43 +97,21 @@ export async function processTenantTimeline(
 			};
 		}
 
-		// 1. Get API tokens from envelope encryption system
-		const secrets = createSecretsManager(env.DB, env.GROVE_KEK);
+		// 1. Get API tokens from envelope encryption (tenant_secrets only)
+		const secrets = await createSecretsManager({ DB: env.DB, GROVE_KEK: env.GROVE_KEK });
 
-		if (!secrets) {
-			throw new Error("GROVE_KEK not configured - cannot decrypt tenant secrets");
-		}
-
-		// Fetch tokens from tenant_secrets table, falling back to the legacy
-		// encrypted column if tenant_secrets doesn't have them yet.
 		const [githubToken, openrouterKey] = await Promise.all([
-			resolveTenantToken(
-				secrets,
-				config.tenantId,
-				"timeline_github_token",
-				config.githubTokenEncrypted,
-				env.TOKEN_ENCRYPTION_KEY,
-				logPrefix,
-			),
-			resolveTenantToken(
-				secrets,
-				config.tenantId,
-				"timeline_openrouter_key",
-				config.openrouterKeyEncrypted,
-				env.TOKEN_ENCRYPTION_KEY,
-				logPrefix,
-			),
+			secrets.safeGetSecret(config.tenantId, "timeline_github_token"),
+			secrets.safeGetSecret(config.tenantId, "timeline_openrouter_key"),
 		]);
 
 		if (!githubToken) {
-			throw new Error(
-				"GitHub token not found in tenant_secrets or legacy column (key: timeline_github_token)",
-			);
+			throw new Error("GitHub token not found in tenant_secrets (key: timeline_github_token)");
 		}
 
 		if (!openrouterKey) {
 			throw new Error(
-				"OpenRouter API key not found in tenant_secrets or legacy column (key: timeline_openrouter_key)",
+				"OpenRouter API key not found in tenant_secrets (key: timeline_openrouter_key)",
 			);
 		}
 
@@ -486,42 +461,5 @@ function parseConfigRow(row: TenantConfigRow): TenantConfig {
 		reposExclude: safeParseJsonArray(row.repos_exclude),
 		timezone: row.timezone,
 		ownerName: row.owner_name,
-		githubTokenEncrypted: row.github_token_encrypted,
-		openrouterKeyEncrypted: row.openrouter_key_encrypted,
 	};
-}
-
-/**
- * Resolve a tenant token: try SecretsManager first, fall back to the legacy
- * encrypted column + TOKEN_ENCRYPTION_KEY, and auto-migrate on recovery.
- *
- * Mirrors getTimelineToken() in libs/curios/src/timeline/secrets.server.ts —
- * kept as a local copy since this worker uses its own read-only SecretsManager.
- */
-async function resolveTenantToken(
-	secrets: SecretsManager,
-	tenantId: string,
-	keyName: "timeline_github_token" | "timeline_openrouter_key",
-	legacyEncryptedValue: string | null,
-	tokenEncryptionKey: string | undefined,
-	logPrefix: string,
-): Promise<string | null> {
-	const fromSecretsManager = await secrets.safeGetSecret(tenantId, keyName);
-	if (fromSecretsManager) return fromSecretsManager;
-
-	if (!legacyEncryptedValue || !tokenEncryptionKey) return null;
-
-	const legacyToken = await safeDecryptToken(legacyEncryptedValue, tokenEncryptionKey);
-	if (!legacyToken) return null;
-
-	console.warn(`${logPrefix} Recovered ${keyName} from legacy column, migrating to tenant_secrets`);
-	try {
-		await secrets.setSecret(tenantId, keyName, legacyToken);
-	} catch (err) {
-		console.warn(
-			`${logPrefix} Failed to auto-migrate ${keyName}: ${err instanceof Error ? err.message : String(err)}`,
-		);
-	}
-
-	return legacyToken;
 }

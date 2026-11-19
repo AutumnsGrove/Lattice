@@ -61,11 +61,6 @@ service = "grove-pulse-collector"
 # LUMEN_API_KEY        - API key for authenticating with the Lumen worker (REQUIRED)
 #                        Set via: gw secret apply LUMEN_API_KEY --worker grove-timeline-sync
 # OPENROUTER_API_KEY   - Optional fallback if tenant key fails
-# TOKEN_ENCRYPTION_KEY - Optional. Decrypts the legacy per-column token fields on
-#                        timeline_curio_config if a tenant's secret is missing from
-#                        tenant_secrets (auto-migrates it back into tenant_secrets on
-#                        read). Same value as used elsewhere for legacy token columns.
-#                        Set via: gw secret apply TOKEN_ENCRYPTION_KEY --worker grove-timeline-sync
 # TIMELINE_ADMIN_KEY   - REQUIRED to use the manual-trigger/debug HTTP routes
 #                        (GET /, /tenants, /debug). Without it those routes are
 #                        blocked entirely — this worker is cron-only otherwise.

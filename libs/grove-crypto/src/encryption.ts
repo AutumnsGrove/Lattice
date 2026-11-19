@@ -7,7 +7,7 @@
  * Format: v1:base64(iv):base64(ciphertext)
  * - Version: "v1" prefix for future algorithm changes
  * - IV: 12 bytes (96 bits) - recommended for GCM
- * - Key: 32 bytes (256 bits) from TOKEN_ENCRYPTION_KEY secret
+ * - Key: 32 bytes (256 bits), supplied by the caller
  *
  * See docs/security/token-encryption.md for setup and key rotation.
  */
@@ -335,7 +335,7 @@ export async function debugDecryptToken(
 
 async function importKey(keyHex: string): Promise<CryptoKey> {
 	if (keyHex.length !== 64) {
-		throw new Error("TOKEN_ENCRYPTION_KEY must be 64 hex characters (256 bits)");
+		throw new Error("Encryption key must be 64 hex characters (256 bits)");
 	}
 
 	const keyBytes = hexToArrayBuffer(keyHex);
@@ -348,7 +348,7 @@ async function importKey(keyHex: string): Promise<CryptoKey> {
 function hexToArrayBuffer(hex: string): ArrayBuffer {
 	// Validate hex characters before parsing
 	if (!/^[0-9a-fA-F]+$/.test(hex)) {
-		throw new Error("TOKEN_ENCRYPTION_KEY must contain only hex characters (0-9, a-f)");
+		throw new Error("Encryption key must contain only hex characters (0-9, a-f)");
 	}
 
 	const bytes = new Uint8Array(hex.length / 2);

@@ -39,15 +39,11 @@ vi.mock("@autumnsgrove/lattice/pulse", () => ({
 	flushPulse: flushPulseMock,
 }));
 
-vi.mock("./secrets-manager", () => ({
-	createSecretsManager: vi.fn().mockReturnValue({
+vi.mock("@autumnsgrove/grove-crypto/secrets", () => ({
+	createSecretsManager: vi.fn().mockResolvedValue({
 		safeGetSecret: vi.fn().mockResolvedValue("secret-token"),
 		setSecret: vi.fn().mockResolvedValue(undefined),
 	}),
-}));
-
-vi.mock("./encryption", () => ({
-	safeDecryptToken: vi.fn().mockResolvedValue(null),
 }));
 
 vi.mock("./github", () => ({
@@ -109,8 +105,6 @@ function createMockConfig(overrides: Partial<TenantConfig> = {}): TenantConfig {
 		reposExclude: null,
 		timezone: "UTC",
 		ownerName: null,
-		githubTokenEncrypted: null,
-		openrouterKeyEncrypted: null,
 		...overrides,
 	};
 }
