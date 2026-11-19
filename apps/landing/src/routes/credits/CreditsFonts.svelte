@@ -431,6 +431,45 @@
 							</div>
 						</details>
 					</div>
+
+					<!-- Served from our CDN, credited because the licence asks to be named -->
+					<div class="mt-6">
+						<h3 class="text-lg font-serif text-foreground mb-2">Also on the shelf</h3>
+						<p class="text-foreground-subtle font-sans text-sm mb-4">
+							Not offered as blog fonts. Grove serves these from its own CDN, and their licences ask
+							to be named.
+						</p>
+
+						<div class="card p-5">
+							<h3
+								class="text-xl text-accent-muted mb-2"
+								style="font-family: 'Luciole', sans-serif;"
+							>
+								Luciole
+							</h3>
+							<p
+								class="text-foreground-muted leading-relaxed mb-4"
+								style="font-family: 'Luciole', sans-serif;"
+							>
+								Drawn for visually impaired readers: a tall x-height, generous spacing, and
+								letterforms shaped so nothing can be mistaken for anything else. A reading face
+								before it is a pretty one.
+							</p>
+							<div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+								<span class="text-foreground-subtle">Author</span>
+								<span class="text-foreground-muted">Laurent Bourcellier &amp; Jonathan Perez</span>
+								<span class="text-foreground-subtle">Source</span>
+								<a
+									href="https://luciole-vision.com/"
+									target="_blank"
+									rel="noopener noreferrer"
+									class="text-accent-muted hover:underline">Luciole Vision</a
+								>
+								<span class="text-foreground-subtle">License</span>
+								<span class="text-foreground-muted">Creative Commons Attribution 4.0</span>
+							</div>
+						</div>
+					</div>
 				</section>
 
 <style>
