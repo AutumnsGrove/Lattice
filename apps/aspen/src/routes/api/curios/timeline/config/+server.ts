@@ -10,7 +10,10 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { DEFAULT_TIMELINE_CONFIG, CLEAR_TOKEN_VALUE } from "@autumnsgrove/curios/timeline";
-import { encryptToken } from "@autumnsgrove/lattice/server/encryption";
+import {
+	setTimelineToken,
+	TIMELINE_SECRET_KEYS,
+} from "@autumnsgrove/curios/timeline/secrets.server";
 import { API_ERRORS, throwGroveError, logGroveError } from "@autumnsgrove/lattice/errors";
 
 interface ConfigRow {
@@ -195,11 +198,13 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 		Array.isArray(reposExclude) && reposExclude.length > 0 ? JSON.stringify(reposExclude) : null;
 
 	try {
-		// Encrypt tokens before storing
-		// Token handling: null = preserve existing, "" = clear, "value" = set new
-		const encryptionKey = platform?.env?.TOKEN_ENCRYPTION_KEY;
+		// Token handling: null = preserve existing, "" = clear, "value" = set new.
+		// Tokens go to SecretsManager; the legacy columns are only ever cleared.
+		const secretEnv = {
+			DB: db,
+			GROVE_KEK: platform?.env?.GROVE_KEK,
+		};
 
-		// Determine token values: CLEAR_TOKEN_VALUE -> "", actual token -> encrypt, undefined -> null (preserve)
 		let githubTokenForDb: string | null = null;
 		let openrouterKeyForDb: string | null = null;
 
@@ -207,9 +212,13 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 			// Explicit clear request - use empty string to trigger CASE NULL
 			githubTokenForDb = "";
 		} else if (githubToken?.trim()) {
-			// New token value - encrypt it
-			const rawToken = githubToken.trim();
-			githubTokenForDb = encryptionKey ? await encryptToken(rawToken, encryptionKey) : rawToken;
+			await setTimelineToken(
+				secretEnv,
+				tenantId,
+				TIMELINE_SECRET_KEYS.GITHUB_TOKEN,
+				githubToken.trim(),
+			);
+			githubTokenForDb = "";
 		}
 		// else: null/undefined = preserve existing (COALESCE handles this)
 
@@ -217,13 +226,13 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 			// Explicit clear request
 			openrouterKeyForDb = "";
 		} else if (openrouterKey?.trim()) {
-			// New token value - encrypt it
-			const rawKey = openrouterKey.trim();
-			openrouterKeyForDb = encryptionKey ? await encryptToken(rawKey, encryptionKey) : rawKey;
-		}
-
-		if (!encryptionKey && (githubToken?.trim() || openrouterKey?.trim())) {
-			console.warn("TOKEN_ENCRYPTION_KEY not set - tokens will be stored unencrypted");
+			await setTimelineToken(
+				secretEnv,
+				tenantId,
+				TIMELINE_SECRET_KEYS.OPENROUTER_KEY,
+				openrouterKey.trim(),
+			);
+			openrouterKeyForDb = "";
 		}
 
 		await db

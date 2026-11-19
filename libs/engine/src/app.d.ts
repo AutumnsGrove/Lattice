@@ -106,7 +106,6 @@ declare global {
 				/** Zephyr email gateway URL */
 				ZEPHYR_URL?: string;
 				ALLOWED_ADMIN_EMAILS?: string;
-				TOKEN_ENCRYPTION_KEY?: string; // 256-bit key for encrypting API tokens in D1
 
 				// Workers AI binding (for Lumen/Petal image moderation)
 				AI?: Ai;
