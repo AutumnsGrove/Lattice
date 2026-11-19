@@ -61,7 +61,9 @@ function impostors(): Impostor[] {
 			if (!entry.isFile() || !FONT_FILE.test(entry.name)) continue;
 			const path = join(dir, entry.name);
 			const head = readFileSync(path).subarray(0, 4);
-			if (FONT_HEADERS.has(head.readUInt32BE(0))) continue;
+			// A file shorter than four bytes has no header to read, which is a failure
+			// in its own right (and `readUInt32BE` would throw rather than report).
+			if (head.length === 4 && FONT_HEADERS.has(head.readUInt32BE(0))) continue;
 			found.push({
 				file: relative(root, path),
 				header: [...head].map((b) => b.toString(16).padStart(2, "0")).join(" "),
