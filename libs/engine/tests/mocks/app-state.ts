@@ -9,13 +9,13 @@
 // Mock page state with default values
 // This is a plain object (not a store) - reactivity comes from Svelte 5 runes
 export const page = {
-  url: new URL("http://localhost/"),
-  params: {},
-  route: { id: "/" },
-  status: 200,
-  error: null,
-  data: {},
-  form: null,
+	url: new URL("http://localhost/"),
+	params: {},
+	route: { id: "/" },
+	status: 200,
+	error: null,
+	data: {},
+	form: null,
 };
 
 // Mock navigating state (null when not navigating)
@@ -23,6 +23,6 @@ export const navigating = null;
 
 // Mock updated state
 export const updated = {
-  current: false,
-  check: async () => false,
+	current: false,
+	check: async () => false,
 };

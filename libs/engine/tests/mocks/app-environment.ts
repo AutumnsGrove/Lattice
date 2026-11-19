@@ -8,7 +8,7 @@ export let browser = true;
 
 // Allow tests to override the browser value
 export function setBrowser(value: boolean) {
-  browser = value;
+	browser = value;
 }
 
 // Building/dev flags (not typically needed for store tests)
