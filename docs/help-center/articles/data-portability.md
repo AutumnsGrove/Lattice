@@ -3,7 +3,7 @@ title: Data Portability
 description: "Taking your Grove content to WordPress, Ghost, Hugo, or anywhere else"
 category: help
 section: privacy-security
-lastUpdated: "2026-02-10"
+lastUpdated: "2026-11-19"
 keywords:
   - export
   - migrate
@@ -23,52 +23,42 @@ order: 2
 
 Your content belongs to you. Not just philosophically—practically. Here's what you can do with your exported Grove data.
 
-## Export formats available
+## What an export looks like
 
-Grove offers two export options:
+Everything comes out as one zip:
 
-**ZIP Export** (recommended for migration) — Organized folders with Markdown files, actual images, and a README. Everything ready to use, no conversion needed.
+**ZIP** — organized folders of Markdown files, the actual images, and a README. Everything ready to use, no conversion needed. The content is always Markdown, which works everywhere.
 
-**JSON Export** — All your data in one file. Good for backups or if you need to parse and transform the data programmatically.
-
-Both formats include your posts, pages, and media. The content is always in Markdown, which works everywhere.
+For the steps, see [Exporting Your Content](/knowledge/help/exporting-your-content).
 
 ## Moving to another platform
 
 ### WordPress
 
-**With ZIP export:** Download your ZIP export. Each post is a Markdown file—copy-paste them into WordPress. If you have images, upload them to WordPress media and update the image references in your posts.
-
-**With JSON export:** Open the file in a text editor, find each post's `"content"` field (that's your Markdown), and copy-paste into WordPress. Or use a simple script to parse the JSON and create individual files.
+**With your export:** Download the zip. Each post is a Markdown file—copy-paste them into WordPress. If you have images, upload them to WordPress media and update the image references in your posts.
 
 ### Ghost
 
 Ghost uses Markdown natively:
 
-**With ZIP export:** Download your ZIP, unzip it, and you have all the Markdown files. Ghost can import them directly, or you can copy-paste the content into Ghost's editor.
-
-**With JSON export:** Parse your Grove export JSON, transform it to Ghost's import format (similar structure, different field names), and import via **Settings → Import/Export** in Ghost admin. A few lines of code handles the conversion.
+**With your export:** Unzip it, and you have all the Markdown files. Ghost can import them directly, or you can copy-paste the content into Ghost's editor.
 
 ### Hugo, Jekyll, and other static site generators
 
 Static generators expect Markdown files with frontmatter. Here's the easiest path:
 
-**With ZIP export:** Download your ZIP export. Each post is already a Markdown file with YAML frontmatter—exactly what static generators expect. Copy the files into your site's content directory, copy images into your assets folder, and build.
-
-**With JSON export:** Parse your Grove JSON export, write each post as a separate `.md` file with YAML frontmatter, download your images from their URLs, and build and deploy.
+**With your export:** Each post is already a Markdown file with YAML frontmatter—exactly what static generators expect. Copy the files into your site's content directory, copy images into your assets folder, and build.
 
 ### Self-hosted solutions
 
-The Markdown content in your export works anywhere. Parse the JSON, grab the `content` field from each post, and you have plain text that opens in any editor.
+The Markdown in your export works anywhere. Each file opens in any editor, frontmatter and all.
 
-## ZIP Export (Available Now)
+## What's in the zip
 
-The ZIP export is live and makes migration simple:
-
-- **ZIP file** with organized folders (posts, pages, images)
-- **Markdown files** for each post and page with YAML frontmatter
-- **Actual media files** included (not just URLs to download)
-- **README** explaining everything
+- **Organized folders** — posts, pages, and images
+- **Markdown files** for each post and page, with YAML frontmatter
+- **The actual image files** included (not just URLs to download)
+- **A README** explaining everything
 
 No parsing required. Download, unzip, and your content is ready to use anywhere. Static site generators get Markdown files with proper frontmatter. WordPress gets files you can paste directly. Every platform gets what it needs.
 

@@ -3,7 +3,7 @@ title: Exporting Your Content
 description: How to export your blog content from Grove
 category: help
 section: writing-publishing
-lastUpdated: "2026-02-10"
+lastUpdated: "2026-11-19"
 keywords:
   - export
   - download
@@ -23,35 +23,17 @@ Everything you write on Grove belongs to you. Here's how to get a complete copy 
 
 ## How to export
 
-Grove offers two ways to get your content, depending on what you need.
+Everything goes out as one zip, with your words already in Markdown.
 
-### Quick Export (JSON)
+1. Open **Account** in your admin panel
+2. Find the **Your Data** card and choose **Go to Full Export →**
+3. On the export page, tick **Include images** if you want the files themselves, not just the words
+4. Choose how to get it: **Email me a link** when it's ready, or **Download in browser** and wait on the page
+5. Click **Start Export**
 
-For a quick backup or if you're comfortable with JSON:
+The page shows what your export will contain before you start — how many posts, pages, and images, and roughly how large the zip will be.
 
-1. Go to **Account & Subscription** in your admin panel
-2. Scroll to the **Your Data** section
-3. Choose what to export:
-   - **Full Export**: All posts, pages, and media metadata
-   - **Posts Only**: Just your blog posts
-   - **Media Only**: Just your uploaded file information
-4. Click **Export Data**
-5. Your browser downloads a JSON file
-
-The page shows an estimate before you export: how many posts, pages, and media files will be included.
-
-### Full Export (ZIP)
-
-For everything organized and ready to use:
-
-1. Go to **Settings → Export** in your admin panel
-2. Choose your options:
-   - **Include images**: Toggle to download actual image files from your blog
-   - **Delivery method**: Get the ZIP as an in-browser download or sent to your email
-3. Click **Start Export**
-4. We process your content in the background and notify you when it's ready
-
-That's it. Your words, your images, organized exactly how you'd want them.
+**A note on timing.** Exports are not completing reliably at the moment. If yours stalls or the email never arrives, write to hello@grove.place and we'll get your content to you by hand. Nothing is lost when an export fails — your posts and images are untouched, and you can try again or ask us.
 
 ## What's in a ZIP export
 
@@ -82,73 +64,21 @@ grove-export-yourusername-2026-02-10/
 
 **README** explains everything inside so you're never confused about what you're looking at.
 
-## What's in the JSON export
+## Working with your export
 
-If you use the Quick Export, you get a JSON file with all the same data. Here's what you get:
+Download it, unzip it, and you're ready to go. Paste the Markdown files anywhere. Upload images where you need them. No conversion needed.
 
-**Posts** include the title, content (in Markdown), tags, status, and publication date.
+## How it works
 
-**Pages** include any custom pages you've created.
+Exports run in the background, so you don't have to keep the tab open.
 
-**Media** is a list of your uploaded files with filenames, URLs, and sizes. You can visit each URL to download the actual file.
+- **Background processing.** Start it and go — it keeps working if you close the window.
+- **Progress.** The page shows each phase as it works.
+- **Delivery.** Wait for the in-browser download, or ask for an email with the link.
+- **Cleanup.** Finished exports expire after 7 days and are removed from our servers. We don't keep copies of your content.
+- **Limits.** Three exports a day, one at a time. That's plenty for a backup habit and not much fun for abuse.
 
-Example structure:
-
-```json
-{
-  "exportedAt": "2026-01-15T12:00:00.000Z",
-  "type": "full",
-  "posts": [
-    {
-      "slug": "my-first-post",
-      "title": "My First Post",
-      "content": "# Hello world\n\nThis is my post content in Markdown...",
-      "tags": ["intro", "personal"],
-      "status": "published",
-      "publishedAt": "2026-01-10T10:00:00.000Z"
-    }
-  ],
-  "pages": [...],
-  "media": [
-    {
-      "filename": "sunset.jpg",
-      "url": "https://cdn.grove.place/...",
-      "size": 245000,
-      "mimeType": "image/jpeg"
-    }
-  ]
-}
-```
-
-## Working with your exports
-
-**For ZIP exports:** Download, unzip, and you're ready to go. Paste the Markdown files anywhere. Upload images where you need them. No conversion needed.
-
-**For JSON exports:** If you're comfortable with code, the structure is straightforward—parse it with any programming language, extract the `content` field from each post, and you have portable Markdown. If you're not a developer, open the JSON file in any text editor, search for `"content":` to jump between posts, and copy-paste into any other platform.
-
-## Limits
-
-**Rate limit**: 10 exports per hour. This prevents abuse while giving you plenty of room for regular use.
-
-**Size limit**: 5,000 items per category (posts, pages, or media). If you have more than that, contact support for a bulk export.
-
-## Full ZIP Export (Now Available)
-
-The ZIP export is live and ready to use. Here's what happens when you create one:
-
-**Background processing:** We handle everything for you. Just start the export and go—we'll process your content in the background, even if you close the window.
-
-**Progress tracking:** Watch real-time progress in the admin panel. See exactly what's being packaged.
-
-**Email delivery:** Choose to have the download link sent to your email. Perfect for large exports.
-
-**In-browser download:** Or grab it immediately as soon as it's ready.
-
-**Automatic cleanup:** Exports expire after 7 days and are automatically removed from our servers. You don't have to worry about us keeping copies of your content around.
-
-**Rate limits:** You can create 3 exports per day and run 1 at a time. This prevents abuse and keeps our infrastructure happy.
-
-The ZIP is the easiest way to take your content anywhere. Everything is organized, ready to use, and you don't need to understand any technical formats to use it.
+The zip is the easiest way to take your content anywhere. Everything is organized, ready to use, and you don't need to understand any technical formats.
 
 ## When you might want to export
 

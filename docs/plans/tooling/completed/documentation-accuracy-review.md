@@ -136,9 +136,11 @@ All 16 high-priority articles reviewed and updated. Changes committed to `claude
 
 ### Account & Data (Updated in PR #341)
 
-- [x] `account-deletion.md` — **✅ VERIFIED**: Support-based flow via Danger Zone matches implementation
-- [x] `exporting-your-content.md` — **✅ VERIFIED**: DataExportCard implementation matches article
-- [x] `data-portability.md` — **✅ VERIFIED**: Export format and process accurate
+> **2026-11-19 correction (#1744):** three of the ✅s below were verified against `arbor-spec.md` rather than by opening the panel, and the spec was wrong too. They are annotated rather than deleted, because the lesson is the one worth keeping: two stale sources agreeing with each other is not evidence.
+
+- [x] `account-deletion.md` — **FALSE PASS, corrected 2026-11-19 (#1744)**: this pass read `arbor-spec.md` instead of the panel. There is no "Danger Zone" a Wanderer can reach — that heading is the *operator's* tenant page (`apps/landing/src/routes/arbor/tenants/[id]/+page.svelte`). Rewritten from `apps/aspen/src/routes/arbor/account/+page.svelte`.
+- [x] `exporting-your-content.md` — **FALSE PASS, corrected 2026-11-19 (#1744)**: it documented a JSON quick export that #1121 had removed, and called the panel "Account & Subscription". Rewritten around the zip export.
+- [x] `data-portability.md` — **FALSE PASS, corrected 2026-11-19 (#1744)**: its WordPress/Ghost/static-site recipes each assumed that same JSON export. Rewritten around the zip.
 
 ### Getting Started
 
