@@ -360,7 +360,6 @@ export interface SanitizedStripePayload {
  * Sanitize a Stripe webhook event by stripping PII.
  *
  * Stripe events have the structure: { id, object, type, data: { object: {...} }, created, livemode }
- * This is different from Lemon Squeezy's { meta, data } format.
  *
  * @param payload - Raw Stripe webhook event (parsed JSON)
  * @returns Sanitized payload with PII removed, or null if invalid

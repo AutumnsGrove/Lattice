@@ -57,7 +57,7 @@ Each issue gets up to 3 labels:
 | `amber` | Images, CDN, R2 storage, JXL, media pipeline |
 | `clearing` | Status page, health monitoring, uptime |
 | `shade` | AI crawler protection, bot defense, rate limiting |
-| `plant` | Pricing, billing, LemonSqueezy, storefront, signup |
+| `plant` | Pricing, billing, signups, and the storefront |
 | `ivy` | Email, Resend, notifications, messaging |
 | `foliage` | Theming, design tokens, per-tenant customization |
 | `curio` | Museum exhibits, content display, guestbook |

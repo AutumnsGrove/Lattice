@@ -4,8 +4,7 @@
  * Strips PII from Stripe webhook payloads before database storage.
  * Uses a whitelist approach — only explicitly allowed fields are kept.
  *
- * Adapted from libs/engine/src/lib/utils/webhook-sanitizer.ts
- * (Stripe-specific sanitizer only — LemonSqueezy sanitizer removed).
+ * Adapted from libs/engine/src/lib/utils/webhook-sanitizer.ts.
  *
  * Critical for:
  * - GDPR compliance (minimizing stored personal data)
