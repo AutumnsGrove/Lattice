@@ -48,24 +48,23 @@ bun x tsc --noEmit
 
 ## Running Apps
 
-The monorepo is organized into `apps/`, `libs/`, `services/`, and `workers/`.
+The monorepo is organized into `apps/`, `libs/`, `services/`, `workers/` and `tools/`.
+
+`libs/engine` is the framework, not a site — `cd libs/engine && pnpm dev` renders components in isolation and will not give you a blog. To see Grove working:
 
 ```bash
-# Engine (core blog platform)
-cd libs/engine && pnpm dev
+# Everything at once: workers, Aspen, Landing, Plant, with real D1/KV/R2
+# and Durable Objects via miniflare. Prints a demo-mode login URL when ready.
+./scripts/dev-stack.sh fast
 
-# Landing page (grove.place)
-cd apps/landing && pnpm dev
-
-# Forage frontend (domain search)
-cd apps/domains && pnpm dev
-
-# Plant (tenant blog management)
-cd apps/plant && pnpm dev
-
-# Any app follows the same pattern
-cd apps/<name> && pnpm dev
+# Or one app at a time, with hot reload
+pnpm dev:aspen      # a tenant site + /arbor      (localhost:5173)
+pnpm dev:landing    # grove.place                (localhost:5174)
+pnpm dev:plant      # signup                     (localhost:5175)
+pnpm dev:heartwood  # auth
 ```
+
+Any app follows the same pattern: `cd apps/<name> && pnpm dev`.
 
 ### With Cloudflare Bindings
 
@@ -204,35 +203,39 @@ export default {
 
 ## Project Structure
 
+Only tracked directories are listed — see `README.md` for what each one does.
+
 ```
 Lattice/
 ├── apps/
 │   ├── amber/             # Media storage frontend
+│   ├── aspen/             # Tenant site renderer + /arbor admin
+│   ├── billing/           # Plan, portal, cancel, resume
 │   ├── clearing/          # Status page
 │   ├── domains/           # Forage frontend (domain search)
-│   ├── ivy/               # Zero-knowledge email client
-│   ├── landing/           # Marketing site (grove.place)
-│   ├── login/             # Auth login page
-│   ├── meadow/            # Community feed
-│   ├── plant/             # Tenant blog management
-│   ├── terrarium/         # Admin & testing interface
+│   ├── landing/           # grove.place
+│   ├── login/             # Unified auth hub
+│   └── plant/             # Signup and onboarding
 ├── libs/
-│   ├── engine/            # @autumnsgrove/lattice — core engine
-│   ├── foliage/           # Theme system
-│   ├── gossamer/          # Shared utilities
-│   ├── shutter/           # Image processing
-├── services/
-│   ├── amber/             # Storage API worker
-│   ├── durable-objects/   # Cloudflare Durable Objects
-│   ├── forage/            # Domain search service
-│   ├── grove-router/      # Subdomain routing Worker
-│   ├── heartwood/         # Authentication service
-│   ├── zephyr/            # Email gateway
-├── workers/               # Scheduled/utility workers
-├── docs/                  # Specs, patterns, guides
-├── AGENT.md               # Agent instructions
-├── CONTRIBUTING.md         # Contribution guidelines
-└── CLAUDE.md              # Claude Code configuration
+│   ├── curios/            # Gallery, guestbook, polls, timeline
+│   ├── engine/            # @autumnsgrove/lattice — the framework
+│   ├── foliage/           # Per-site theming
+│   ├── gossamer/          # ASCII visual effects
+│   ├── grove-agent/       # Agent framework
+│   ├── grove-crypto/      # Envelope encryption, SecretsManager
+│   ├── grove-errors/      # Structured error types
+│   ├── grove-markdown/    # Markdown pipeline
+│   ├── infra/             # D1/KV/R2 abstraction
+│   ├── loom/              # Durable Object framework
+│   ├── prism/             # Design tokens and icon gateway
+│   ├── shutter/           # Page summarisation (cloudflare/ is the package)
+│   └── thorn/             # Content moderation SDK
+├── services/              # Long-running Workers (auth, router, media, mail, billing)
+├── workers/               # Scheduled and background Workers
+├── tools/                 # gw, glimpse, labels, pre-commit scripts
+├── scripts/               # dev-stack.sh, migrations, generators
+├── docs/                  # Specs, patterns, plans, help centre, museum
+└── AGENT.md               # Agent instructions (start here if you are one)
 ```
 
 ---

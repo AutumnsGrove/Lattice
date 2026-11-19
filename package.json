@@ -36,6 +36,7 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"labels:check": "pnpm --filter @grove/labels run check",
+		"readme:check": "tsx scripts/repo/check-readme-inventory.ts",
 		"labels:sync": "pnpm --filter @grove/labels run sync"
 	},
 	"devDependencies": {
