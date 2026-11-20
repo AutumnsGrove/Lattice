@@ -9,6 +9,14 @@ import {
 	validateClientRedirectUri,
 	cleanupOldAuditLogs,
 } from "./queries.js";
+import { validateSubdomain } from "../types/branded.js";
+
+/** Test shorthand: returns the branded value, fails loudly if the test data is malformed. */
+const sd = (raw: string) => {
+	const brand = validateSubdomain(raw);
+	if (!brand) throw new Error(`test subdomain "${raw}" failed validation`);
+	return brand;
+};
 
 // Mock D1Database
 const createMockDb = (clientData: Record<string, unknown> | null = null) => ({
@@ -129,7 +137,7 @@ describe("extractSubdomainFromRedirectUri", () => {
 describe("isActiveTenant", () => {
 	it("returns true for active tenant", async () => {
 		const mockDb = createMockDb({ 1: 1 });
-		const result = await isActiveTenant(mockDb as unknown as D1Database, "autumn");
+		const result = await isActiveTenant(mockDb as unknown as D1Database, sd("autumn"));
 
 		expect(result).toBe(true);
 		expect(mockDb.prepare).toHaveBeenCalledWith(
@@ -139,14 +147,15 @@ describe("isActiveTenant", () => {
 
 	it("returns false for non-existent tenant", async () => {
 		const mockDb = createMockDb(null);
-		const result = await isActiveTenant(mockDb as unknown as D1Database, "doesnotexist");
+		const result = await isActiveTenant(mockDb as unknown as D1Database, sd("doesnotexist"));
 
 		expect(result).toBe(false);
 	});
 
-	it("normalizes subdomain to lowercase", async () => {
+	it("passes the pre-normalized branded subdomain straight to the query", async () => {
+		// Normalization is validateSubdomain()'s job at the trust boundary now.
 		const mockDb = createMockDb({ 1: 1 });
-		await isActiveTenant(mockDb as unknown as D1Database, "AUTUMN");
+		await isActiveTenant(mockDb as unknown as D1Database, sd("AUTUMN"));
 
 		const bindCall = mockDb.prepare().bind;
 		expect(bindCall).toHaveBeenCalledWith("autumn");
