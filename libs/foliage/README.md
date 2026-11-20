@@ -185,7 +185,7 @@ All themes must meet WCAG 2.1 AA contrast standards (4.5:1 for body text). The `
 ## Security
 
 - Custom CSS is validated and sanitized to prevent injection attacks
-- Font uploads verify WOFF2 magic bytes and parse font data
+- Font uploads are checked for format, structure and character coverage, and capped at 500KB
 - All user inputs are validated server-side
 
 ---
