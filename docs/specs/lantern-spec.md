@@ -430,6 +430,10 @@ Search for groves to add as friends. Returns public grove profiles.
 | Admin | Arbor | `/arbor` | Settings |
 | AI Chat | Lumen | (in-Arbor) | MessageCircle |
 
+### Term help (Grove mode only)
+
+In Grove mode, any destination or service that is a Grove term (it has a `termSlug`) shows a small "?" button beside its link. The button opens that term's definition (`GroveTermPopup`). It is a sibling of the link, never inside it, so clicking the link still navigates. In standard mode the plain term is shown with no "?", and entries that are not Grove terms (such as Knowledge Base) never get one. Pressing Escape with a definition open closes only the definition; a second Escape closes the panel.
+
 ---
 
 ## Interaction Design
@@ -516,6 +520,7 @@ Search for groves to add as friends. Returns public grove profiles.
 - First focusable element: "Back to My Grove" button
 - Escape returns focus to FAB
 - All destinations are standard links (screen reader friendly)
+- Each term's "?" is a separate button labelled "About {term}", with a 44px touch target
 - Reduced motion: disable animations, instant show/hide
 
 ---

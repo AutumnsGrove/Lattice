@@ -7,6 +7,7 @@
 	import LanternFriendCard from "./LanternFriendCard.svelte";
 	import LanternAddFriends from "./LanternAddFriends.svelte";
 	import LanternVisitingCard from "./LanternVisitingCard.svelte";
+	import LanternTermHelp from "./LanternTermHelp.svelte";
 	import type { LanternLayoutData } from "./types";
 	import { authIcons, actionIcons } from "@autumnsgrove/prism/icons";
 	import { api } from "$lib/utils/api";
@@ -164,17 +165,26 @@
 					>
 						{#each activeItems as item (item.href)}
 							{@const Icon = item.icon}
-							<a
-								href={item.href}
-								class="nav-item flex items-center gap-2 py-2 px-2.5 rounded-lg text-foreground no-underline text-sm transition-colors hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[-2px]"
-								target={item.external ? "_blank" : undefined}
-								rel={item.external ? "noopener noreferrer" : undefined}
-							>
-								<Icon size={16} strokeWidth={2} />
-								<span
-									>{groveModeStore.current && item.groveLabel ? item.groveLabel : item.label}</span
+							<div class="nav-row flex items-center gap-1">
+								<a
+									href={item.href}
+									class="nav-item flex flex-1 min-w-0 items-center gap-2 py-2 px-2.5 rounded-lg text-foreground no-underline text-sm transition-colors hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-[-2px]"
+									target={item.external ? "_blank" : undefined}
+									rel={item.external ? "noopener noreferrer" : undefined}
 								>
-							</a>
+									<Icon size={16} strokeWidth={2} />
+									<span
+										>{groveModeStore.current && item.groveLabel
+											? item.groveLabel
+											: item.label}</span
+									>
+								</a>
+								<!-- A Grove term gets a "?" beside it. It sits next to the link, not inside it,
+								     so clicking the link still navigates. Standard terms need no explaining. -->
+								{#if groveModeStore.current && item.termSlug}
+									<LanternTermHelp slug={item.termSlug} />
+								{/if}
+							</div>
 						{/each}
 					</div>
 				</div>
