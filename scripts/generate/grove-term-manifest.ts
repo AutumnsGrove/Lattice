@@ -63,6 +63,10 @@ function toSlug(term: string): string {
 		.replace(/^-|-$/g, "");
 }
 
+function escapeRegExp(text: string): string {
+	return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 /**
  * Extract tagline from the bold text after term name
  * Format: **Category** · tagline
@@ -186,12 +190,12 @@ function extractDefinition(lines: string[]): string {
  */
 function findRelatedTerms(content: string, allTerms: Set<string>, currentTerm: string): string[] {
 	const related: string[] = [];
-	const lowerContent = content.toLowerCase();
 
 	for (const term of allTerms) {
 		if (term === currentTerm.toLowerCase()) continue;
-		// Check if the term appears in the content (case insensitive)
-		if (lowerContent.includes(term)) {
+		// Match the term as a whole word (case insensitive). A bare substring
+		// check lets "hum" hit "humble" and "plant" hit "planted" (#1754).
+		if (new RegExp(`\\b${escapeRegExp(term)}\\b`, "i").test(content)) {
 			related.push(term);
 		}
 	}

@@ -90,3 +90,84 @@ test("footnotes and footer stay out of the definition", () => {
 	assert.ok(!manifest.blazes.definition.includes("Last updated"));
 	assert.equal(manifest.blazes.definition, "A trail blaze is a painted mark. It sits in Meadow.");
 });
+
+/**
+ * `findRelatedTerms` used to do `content.includes(slug)`, so a short slug hit
+ * inside any longer word: Hum matched "humble", Plant matched "planted", Flow
+ * matched "flowers" (#1754). Cross-references are the vocabulary's edges, and
+ * an edge that exists only because two words share letters is wrong.
+ */
+
+const SUBSTRING_DOC = `# Grove Naming
+
+## Platform Services
+
+### Hum
+
+**Music previews**
+
+Link previews for songs.
+
+---
+
+### Plant
+
+**Sign-up**
+
+Where a Wanderer takes root.
+
+---
+
+### Flow
+
+**Writing mode**
+
+A quiet place to write.
+
+---
+
+### Wander
+
+**Exploring**
+
+Moving through groves.
+
+---
+
+### Blazes
+
+**Content Type Indicators**
+
+A humble badge. Something planted, in flowers, wandering.
+
+---
+
+### Terrarium
+
+**Testing sandbox**
+
+Try Plant here, and let your Flow settle.
+`;
+
+test("a term nested inside a longer word is not a cross-reference", () => {
+	const manifest = parseGroveNaming(SUBSTRING_DOC);
+
+	// "humble", "planted", "flowers" and "wandering" contain a slug but never name it.
+	assert.equal(manifest.blazes.seeAlso, undefined);
+});
+
+test("a term named as a whole word is still a cross-reference", () => {
+	const manifest = parseGroveNaming(SUBSTRING_DOC);
+
+	assert.deepEqual(manifest.terrarium.seeAlso, ["plant", "flow"]);
+});
+
+test("a term is matched case-insensitively and next to punctuation", () => {
+	const doc = SUBSTRING_DOC.replace(
+		"Try Plant here, and let your Flow settle.",
+		"Try (plant), then FLOW. Hum!",
+	);
+	const manifest = parseGroveNaming(doc);
+
+	assert.deepEqual(manifest.terrarium.seeAlso, ["hum", "plant", "flow"]);
+});
