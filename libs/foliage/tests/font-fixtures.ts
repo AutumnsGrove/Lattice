@@ -24,6 +24,11 @@ export interface FontTable {
 	 * then declares both lengths, and the stream carries these bytes instead of `data`.
 	 */
 	transformed?: Uint8Array;
+	/**
+	 * WOFF2 only: overrides the transformation version written into the directory, to
+	 * forge a version the spec does not define for that table.
+	 */
+	transformVersion?: number;
 }
 
 export interface FixtureOptions {
@@ -282,11 +287,12 @@ export function buildWoff2(
 	streamOverride?: Uint8Array,
 ): Uint8Array {
 	const directory: number[] = [];
-	for (const { tag, data, transformed } of tables) {
+	for (const { tag, data, transformed, transformVersion: versionOverride } of tables) {
 		const index = WOFF2_KNOWN_TAGS.indexOf(tag);
-		// glyf/loca: version 0 is transformed, 3 is not. Every other table: 0 is not transformed.
+		// glyf/loca: version 0 is transformed, 3 is not. hmtx: 1 is transformed. Others: 0 only.
 		const isGlyphTable = tag === "glyf" || tag === "loca";
-		const transformVersion = transformed ? (isGlyphTable ? 0 : 1) : isGlyphTable ? 3 : 0;
+		const transformVersion =
+			versionOverride ?? (transformed ? (isGlyphTable ? 0 : 1) : isGlyphTable ? 3 : 0);
 		directory.push(((transformVersion << 6) | (index === -1 ? 63 : index)) & 0xff);
 		if (index === -1) directory.push(...ascii(tag));
 		directory.push(...uintBase128(data.length));

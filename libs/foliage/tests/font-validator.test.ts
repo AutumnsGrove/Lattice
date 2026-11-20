@@ -312,6 +312,32 @@ describe("Font Validator", () => {
 			expect(await codes(bytes)).toEqual(["TOO_LARGE_UNCOMPRESSED"]);
 		});
 
+		it("accepts the only other transform the spec defines: a transformed hmtx", async () => {
+			const tables = buildTables();
+			const hmtx = tables.find((t) => t.tag === "hmtx")!;
+			hmtx.transformed = new Uint8Array(6).fill(9);
+			const result = await validateWoff2(toArrayBuffer(buildWoff2(tables)));
+			expect(result.valid).toBe(true);
+			expect(result.warnings).toBeUndefined();
+		});
+
+		it("rejects an undefined transform version instead of skipping the coverage check", async () => {
+			// §4.1: an unknown version means the font must be rejected. Before this guard a
+			// `cmap` claiming one looked transformed, so its bytes were never read for coverage.
+			const tables = buildTables({ codepoints: [] });
+			const cmap = tables.find((t) => t.tag === "cmap")!;
+			cmap.transformed = new Uint8Array(8).fill(3);
+			cmap.transformVersion = 1;
+			expect(await codes(buildWoff2(tables))).toEqual(["BAD_TABLE_DIRECTORY"]);
+		});
+
+		it("rejects a glyf transform version that does not exist", async () => {
+			const tables = buildTables();
+			const glyf = tables.find((t) => t.tag === "glyf")!;
+			glyf.transformVersion = 1;
+			expect(await codes(buildWoff2(tables))).toEqual(["BAD_TABLE_DIRECTORY"]);
+		});
+
 		it("accepts the file with a warning when the runtime has no Brotli decoder", async () => {
 			const RealStream = globalThis.DecompressionStream;
 			vi.stubGlobal(

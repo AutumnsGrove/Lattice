@@ -248,8 +248,18 @@ function parseWoff2(view: DataView): Woff2Layout | FontValidationIssue {
 		if (!original) return issue("BAD_TABLE_DIRECTORY");
 		offset = original.next;
 
-		// glyf/loca: version 0 is transformed, 3 is not. Every other table: 0 is not transformed.
+		// WOFF2 §5 defines a transform for three tables only: glyf and loca (0 = transformed,
+		// 3 = none) and hmtx (0 = none, 1 = transformed). Every other table has only the
+		// null transform, version 0. §4.1 says a decoder must reject an unknown version —
+		// without that, a `cmap` claiming one could skip the character coverage check below
+		// by looking transformed.
 		const isGlyphTable = tag === "glyf" || tag === "loca";
+		const knownVersion = isGlyphTable
+			? transformVersion === 0 || transformVersion === 3
+			: tag === "hmtx"
+				? transformVersion === 0 || transformVersion === 1
+				: transformVersion === 0;
+		if (!knownVersion) return issue("BAD_TABLE_DIRECTORY");
 		const transformed = isGlyphTable ? transformVersion === 0 : transformVersion !== 0;
 		let streamLength = original.value;
 		if (transformed) {
