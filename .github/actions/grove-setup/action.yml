@@ -1,11 +1,16 @@
 name: "Grove Setup"
-description: "Shared setup for all Grove CI/CD workflows — checkout, pnpm, Node.js, install, and optional engine/foliage builds"
+description: >-
+  Shared setup for all Grove CI/CD workflows — checkout, pnpm, Node.js, install,
+  and optional engine/foliage builds
 
 inputs:
   node-version:
     description: "Node.js version"
     required: false
-    default: "20"
+    # Node 20 reached end-of-life on 2026-04-30 (#1758). This default is what every
+    # typecheck, test and lint job runs on, so it must stay on a supported LTS and match
+    # .nvmrc. The deploy workflows inline "24" too — keep them in step.
+    default: "24"
   build-engine:
     description: "Build the engine package (libs/engine)"
     required: false
