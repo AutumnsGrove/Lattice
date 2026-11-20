@@ -1,8 +1,8 @@
 // tests/font-validator.test.ts
 // Font validation tests
 
-import { describe, it, expect, vi } from "vitest";
-import { deflateSync } from "node:zlib";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { brotliDecompressSync, deflateSync } from "node:zlib";
 import {
 	validateFont,
 	validateWoff2,
@@ -26,6 +26,48 @@ import {
 	makeWoff2,
 	toArrayBuffer,
 } from "./font-fixtures.js";
+
+// A WOFF2 holds its tables in one Brotli stream, and DecompressionStream only learned "brotli" in
+// Node 22. CI runs Node 20 (and Workers has no Brotli either), so without help every WOFF2 test that
+// reads the stream would see the validator's "skip coverage, warn" path instead of the check it is
+// meant to exercise. Where the runtime lacks Brotli, give the tests a decoder backed by node:zlib, so
+// they run the same path everywhere. Where it has Brotli, the real one is used.
+const NativeDecompressionStream = globalThis.DecompressionStream;
+const runtimeHasBrotli = (() => {
+	try {
+		new NativeDecompressionStream("brotli" as never);
+		return true;
+	} catch {
+		return false;
+	}
+})();
+
+class DecompressionStreamWithBrotli {
+	constructor(format: string) {
+		if (format !== "brotli") return new NativeDecompressionStream(format as "deflate");
+		const chunks: Uint8Array[] = [];
+		return new TransformStream<Uint8Array, Uint8Array>({
+			transform(chunk) {
+				chunks.push(chunk);
+			},
+			flush(controller) {
+				try {
+					controller.enqueue(new Uint8Array(brotliDecompressSync(Buffer.concat(chunks))));
+				} catch (error) {
+					controller.error(error);
+				}
+			},
+		});
+	}
+}
+
+beforeEach(() => {
+	if (!runtimeHasBrotli) vi.stubGlobal("DecompressionStream", DecompressionStreamWithBrotli);
+});
+
+afterEach(() => {
+	vi.unstubAllGlobals();
+});
 
 describe("Font Validator", () => {
 	describe("WOFF2 Validation", () => {
