@@ -16,14 +16,12 @@
 		getFontFamily,
 		DEFAULT_ACCENT_COLOR,
 		DEFAULT_FONT,
-	} from "@autumnsgrove/lattice/platform/config/presets";
-	import { ALL_SEASONS, SEASON_LABELS } from "@autumnsgrove/lattice/ui/types/season";
-	import { SEASON_THEME_COLORS, getSeasonFavicons } from "@autumnsgrove/lattice/ui/season-meta";
-	import {
 		FONT_SCALE,
 		fontScaleMultiplier,
 		parseFontScale,
 	} from "@autumnsgrove/lattice/platform/config/presets";
+	import { ALL_SEASONS, SEASON_LABELS } from "@autumnsgrove/lattice/ui/types/season";
+	import { SEASON_THEME_COLORS, getSeasonFavicons } from "@autumnsgrove/lattice/ui/season-meta";
 	import "@autumnsgrove/lattice/styles/fonts-optional.css";
 
 	// ── Typography state ────────────────────────────────────────────────────────
