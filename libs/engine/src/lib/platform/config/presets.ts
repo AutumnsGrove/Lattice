@@ -83,6 +83,44 @@ export const VINE_COLOR_PRESETS: ColorPreset[] = [
 ];
 
 /**
+ * Font size scale
+ *
+ * A grove-wide text size, as a percentage of the browser's own default. The
+ * range, the step, the key it is stored under and the CSS variable it is applied
+ * through are all defined here so the settings API, the root layout and the
+ * Arbor control cannot drift apart.
+ */
+export const FONT_SCALE = {
+	/** site_settings key the scale is stored under */
+	settingKey: "font_scale",
+	/** CSS custom property the root layout applies it through (a multiplier, 1 = 100%) */
+	cssVar: "--grove-font-scale",
+	min: 80,
+	max: 150,
+	step: 10,
+	default: 100,
+} as const;
+
+/**
+ * Read a submitted or stored scale. Returns the whole percent, or null unless
+ * it is a plain whole number inside the range and on a step.
+ */
+export function parseFontScale(value: unknown): number | null {
+	if (typeof value !== "string" || !/^[0-9]{2,3}$/.test(value)) return null;
+	const percent = Number(value);
+	if (percent < FONT_SCALE.min || percent > FONT_SCALE.max) return null;
+	return (percent - FONT_SCALE.min) % FONT_SCALE.step === 0 ? percent : null;
+}
+
+/**
+ * The CSS multiplier for a stored scale. An absent or invalid value gives the
+ * default, so a bad row can never leave a grove unreadable.
+ */
+export function fontScaleMultiplier(stored: string | undefined): number {
+	return (parseFontScale(stored) ?? FONT_SCALE.default) / 100;
+}
+
+/**
  * Font presets - imported from the canonical source in fonts.ts
  * This ensures consistency across the entire application
  */

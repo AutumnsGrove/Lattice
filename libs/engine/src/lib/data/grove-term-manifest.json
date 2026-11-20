@@ -17,7 +17,6 @@
     "usageExample": "\"Browse my garden.\"\n\"New blooms in the garden.\"",
     "seeAlso": [
       "blooms",
-      "plant",
       "wander"
     ],
     "standardTerm": "Blog"
@@ -29,10 +28,6 @@
     "tagline": "Your Writing",
     "definition": "Your blog posts — the things you write and publish on your Grove site.",
     "usageExample": "\"Read my latest bloom.\"\n\"I wrote a new bloom this morning.\"\n\"Their garden has beautiful blooms.\"",
-    "seeAlso": [
-      "flow",
-      "press"
-    ],
     "standardTerm": "Posts"
   },
   "lattice": {
@@ -102,7 +97,6 @@
     "definition": "Your blog's visual theme — colors, fonts, and seasonal styles that control how your site looks.",
     "seeAlso": [
       "forests",
-      "aria",
       "prism"
     ],
     "standardTerm": "Themes"
@@ -126,10 +120,10 @@
     "tagline": "Cross-Property Access",
     "definition": "A way to give trusted people access to another Grove site without making them create a separate account.",
     "seeAlso": [
-      "arbor",
-      "wander",
       "passage",
-      "wanderer"
+      "rooted",
+      "wayfinder",
+      "prism"
     ],
     "standardTerm": "Cross-Site Access"
   },
@@ -202,9 +196,6 @@
     "tagline": "Inline Feedback",
     "definition": "A small feedback widget that lets visitors say whether something was helpful, with room for a short note.",
     "seeAlso": [
-      "wander",
-      "press",
-      "wanderer",
       "wayfinder"
     ],
     "standardTerm": "Feedback"
@@ -216,7 +207,6 @@
     "tagline": "100-Year Preservation",
     "definition": "After 12 months of paid membership, your grove.place URL stays online for 100 years — even if you stop paying.",
     "seeAlso": [
-      "plant",
       "shade",
       "sapling",
       "oak"
@@ -243,9 +233,8 @@
     "definition": "A drag-and-drop canvas where you arrange nature components into scenes, then use them as decorations on your blog.",
     "seeAlso": [
       "lattice",
-      "plant",
       "foliage",
-      "flow"
+      "moss"
     ],
     "standardTerm": "Creative Canvas"
   },
@@ -269,8 +258,7 @@
     "definition": "An AI layer that translates your intent (\"make it cozy\", \"add something that glows\") into actual component arrangements for your blog.",
     "seeAlso": [
       "foliage",
-      "terrarium",
-      "scribe"
+      "terrarium"
     ],
     "standardTerm": "Customizer"
   },
@@ -281,7 +269,6 @@
     "tagline": "Voice Transcription",
     "definition": "Voice-to-text for the blog editor — hold a button, speak, and your words appear as text at the cursor.",
     "seeAlso": [
-      "flow",
       "press",
       "lumen",
       "vines"
@@ -296,9 +283,7 @@
     "definition": "Private 1:1 messaging — quick, real-time conversations with a friend.",
     "usageExample": "\"I chirped you about that bloom.\"\n\"Check your chirps—I sent photos.\"\n\"We were chirping all night.\"",
     "seeAlso": [
-      "arbor",
-      "wander",
-      "wanderer"
+      "arbor"
     ],
     "standardTerm": "Direct Messages"
   },
@@ -324,9 +309,6 @@
     "category": "content",
     "tagline": "The Visible Grove",
     "definition": "Grove's opt-in directory — browse who's growing here, discover other wanderers, and find your people.",
-    "seeAlso": [
-      "flow"
-    ],
     "standardTerm": "Directory"
   },
   "meadow": {
@@ -349,9 +331,9 @@
     "usageExample": "\"I left a note in the meadow.\"\n\"Her notes are always worth reading.\"",
     "seeAlso": [
       "blooms",
-      "flow",
       "canopy",
-      "meadow"
+      "meadow",
+      "blazes"
     ],
     "standardTerm": "Posts / Status Updates"
   },
@@ -375,8 +357,7 @@
     "tagline": "Immersive Discovery",
     "definition": "An immersive 3D experience where you walk through a virtual forest and discover other people's Grove sites.",
     "seeAlso": [
-      "terrarium",
-      "oak"
+      "terrarium"
     ],
     "standardTerm": "Discovery"
   },
@@ -387,8 +368,6 @@
     "tagline": "Feature Customization",
     "definition": "Per-blog feature flags that the grove keeper enables for specific sites — like turning on new capabilities or beta features.",
     "seeAlso": [
-      "plant",
-      "aria",
       "wayfinder"
     ],
     "standardTerm": "Feature Flags"
@@ -410,9 +389,6 @@
     "category": "tools",
     "tagline": "ASCII Visual Effects",
     "definition": "An open-source visual effects library — ASCII patterns, ambient textures, and atmospheric backgrounds for websites.",
-    "seeAlso": [
-      "etch"
-    ],
     "standardTerm": "ASCII Effects"
   },
   "ivy": {
@@ -497,12 +473,6 @@
     "category": "tools",
     "tagline": "Link Saving & Highlights",
     "definition": "Your personal link library — save URLs, highlight text, tag what matters, and find it all later.",
-    "seeAlso": [
-      "trace",
-      "wander",
-      "passage",
-      "press"
-    ],
     "standardTerm": "Blog Importer"
   },
   "trove": {
@@ -527,9 +497,6 @@
     "category": "operations",
     "tagline": "Shop & Provisioning",
     "definition": "Grove's shop — subscriptions, merchandise, credits, and gift cards.",
-    "seeAlso": [
-      "press"
-    ],
     "standardTerm": "Data Store"
   },
   "passage": {
@@ -561,9 +528,6 @@
     "category": "operations",
     "tagline": "External API Gateway",
     "definition": "The API gateway that handles outbound requests to third-party services, keeping API keys secure and never exposed.",
-    "seeAlso": [
-      "scribe"
-    ],
     "standardTerm": "API Gateway"
   },
   "press": {
@@ -572,9 +536,6 @@
     "category": "operations",
     "tagline": "Image Processing CLI",
     "definition": "An image processing tool — converts photos to web format, generates alt text with AI, deduplicates, and uploads to storage.",
-    "seeAlso": [
-      "scribe"
-    ],
     "standardTerm": "Build System"
   },
   "vista": {
@@ -586,8 +547,7 @@
     "seeAlso": [
       "rings",
       "clearing",
-      "canopy",
-      "etch"
+      "canopy"
     ],
     "standardTerm": "Monitoring"
   },
@@ -597,9 +557,6 @@
     "category": "operations",
     "tagline": "Backup System",
     "definition": "Automated nightly backups of every Grove database, with weekly archives and 12 weeks of history.",
-    "seeAlso": [
-      "press"
-    ],
     "standardTerm": "Backups"
   },
   "mycelium": {
@@ -609,8 +566,7 @@
     "tagline": "MCP Server",
     "definition": "Grove's MCP server — lets AI assistants read your posts, manage files, and interact with Grove services through a single interface.",
     "seeAlso": [
-      "amber",
-      "seedling"
+      "amber"
     ],
     "standardTerm": "MCP Server"
   },
@@ -622,7 +578,6 @@
     "definition": "The AI gateway that routes all AI requests to the right model, with rate limiting, data scrubbing, and usage logging.",
     "seeAlso": [
       "wisp",
-      "flow",
       "thorn",
       "fireside"
     ],
@@ -638,7 +593,7 @@
       "lantern",
       "porch",
       "reverie",
-      "wander"
+      "lumen"
     ],
     "standardTerm": "AI Memory"
   },
@@ -649,7 +604,6 @@
     "tagline": "Agent Core",
     "definition": "The layer that does Grove's background work. It takes a job, calls tools and models, and brings back a result, even if you were asleep.",
     "seeAlso": [
-      "wander",
       "lumen",
       "moss",
       "wanderer"
@@ -664,8 +618,6 @@
     "definition": "The email delivery service that sends all Grove emails — onboarding, notifications, support replies — with retries and templates.",
     "seeAlso": [
       "porch",
-      "flow",
-      "wander",
       "lumen"
     ],
     "standardTerm": "Email Gateway"
@@ -688,9 +640,6 @@
     "tagline": "Everyone who enters the grove.",
     "definition": "Anyone visiting Grove, whether they have an account or not — the default word for \"visitor\" or \"user\" here.",
     "usageExample": "\"Welcome, Wanderer.\"",
-    "seeAlso": [
-      "wander"
-    ],
     "standardTerm": "Visitor"
   },
   "rooted": {
@@ -700,11 +649,6 @@
     "tagline": "Those who've planted their tree.",
     "definition": "Someone who's signed up, paid, and created their own Grove blog — what other platforms would call a \"subscriber.\"",
     "usageExample": "\"You've taken root. Welcome home.\"",
-    "seeAlso": [
-      "plant",
-      "scribe",
-      "wander"
-    ],
     "standardTerm": "Subscriber"
   },
   "pathfinder": {
@@ -715,8 +659,6 @@
     "definition": "A trusted community volunteer who helps other Grove members — appointed by the Wayfinder, similar to a moderator.",
     "usageExample": "\"Ask a Pathfinder. They'll show you the way.\"",
     "seeAlso": [
-      "wander",
-      "wanderer",
       "wayfinder"
     ],
     "standardTerm": "Trusted Guide"
@@ -728,10 +670,6 @@
     "tagline": "Autumn. Singular.",
     "definition": "Autumn — the person who built and runs Grove. There is one Wayfinder.",
     "usageExample": "\"The Wayfinder welcomes you to the grove.\"",
-    "seeAlso": [
-      "wander",
-      "wanderer"
-    ],
     "standardTerm": "Grove Keeper"
   },
   "seedling": {
@@ -741,8 +679,7 @@
     "tagline": "Starter Tier",
     "definition": "Grove's entry-level plan ($8/month) — 50 posts, 1 GB storage, and curated themes to get started.",
     "seeAlso": [
-      "blooms",
-      "plant"
+      "blooms"
     ],
     "standardTerm": "Starter"
   },
@@ -753,8 +690,7 @@
     "tagline": "Growth Tier",
     "definition": "Grove's mid-tier plan ($12/month) — more storage, more themes, email forwarding, and Centennial eligibility.",
     "seeAlso": [
-      "centennial",
-      "etch"
+      "centennial"
     ],
     "standardTerm": "Growth"
   },
@@ -784,10 +720,6 @@
     "category": "platform",
     "tagline": "Internal Services",
     "definition": "A behind-the-scenes directory of all the internal services that power Grove — for curious visitors who want to see how it works.",
-    "seeAlso": [
-      "wander",
-      "wanderer"
-    ],
     "standardTerm": "Internal Services"
   },
   "fireside": {
@@ -824,8 +756,7 @@
     "seeAlso": [
       "lattice",
       "foliage",
-      "forests",
-      "aria"
+      "forests"
     ],
     "standardTerm": "Design System"
   },

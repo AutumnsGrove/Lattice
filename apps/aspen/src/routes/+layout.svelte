@@ -10,6 +10,7 @@
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
 	import PassageTransition from "@autumnsgrove/lattice/ui/components/ui/PassageTransition.svelte";
 	import { fontMap, DEFAULT_FONT } from "@autumnsgrove/lattice/ui/tokens/fonts";
+	import { FONT_SCALE, fontScaleMultiplier } from "@autumnsgrove/lattice/platform/config/presets";
 	import { getSeasonFavicons } from "@autumnsgrove/lattice/ui/season-meta";
 	import type { Season } from "@autumnsgrove/lattice/ui/types/season";
 	import Header from "@autumnsgrove/lattice/ui/components/chrome/Header.svelte";
@@ -209,6 +210,12 @@
 	{#if data.siteSettings?.vine_color}
 		{@html `<style>:root{--grove-vine-color:${data.siteSettings.vine_color};}</style>`}
 	{/if}
+	<!-- The grove's text size (#1369), rendered on the server so the first paint is already
+	     the right size. Only the validated multiplier is interpolated, never the stored string.
+	     The property name is written out, not interpolated: the Svelte CSS preprocessor reads this
+	     <style> and cannot parse `${...}` in the property position. layout-font-scale.test.ts
+	     checks it matches FONT_SCALE.cssVar. -->
+	{@html `<style>:root{--grove-font-scale:${fontScaleMultiplier(data.siteSettings?.[FONT_SCALE.settingKey])};}</style>`}
 	{#if context?.type === "tenant"}
 		<title>{siteName}</title>
 		<link rel="alternate" type="application/rss+xml" title="{siteName} RSS Feed" href="/api/feed" />
@@ -454,6 +461,11 @@
 	/* Font family default - dynamically set via JavaScript from database settings */
 	:global(:root) {
 		--font-family-main: "Lexend", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+	}
+	/* Text size: scale the root, so every rem (all body text) follows the grove's setting on
+	   top of the browser's own default. The variable is FONT_SCALE.cssVar, set in <svelte:head>. */
+	:global(html) {
+		font-size: calc(100% * var(--grove-font-scale, 1));
 	}
 	/* Note: All other CSS variables are defined in tokens.css */
 	:global(body) {

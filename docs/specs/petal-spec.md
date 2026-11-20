@@ -6,7 +6,7 @@ description: >-
 category: specs
 specCategory: content-community
 icon: fan
-lastUpdated: '2026-01-20'
+lastUpdated: '2026-11-20'
 aliases: []
 tags:
   - content-moderation
@@ -693,6 +693,13 @@ const generateWithRetry = async (
 ## 7. Inference Provider Requirements
 
 ### 7.1 Approved Providers
+
+> **As implemented:** the vision cascade is OpenRouter (Claude Haiku 5.5), then OpenRouter
+> (Gemma 4 26B), then Cloudflare Workers AI (Llama 4 Scout). Together.ai was retired as a
+> direct inference provider in #1600; FAL.ai and Replicate were never wired in. The
+> source of truth is `PETAL_PROVIDERS` in `libs/engine/src/lib/platform/config/petal.ts`. The
+> tables and diagram below are the original provider-policy design and have not been
+> revised to match.
 
 | Provider | ZDR Support | CSAM Scan | Moderation API | Status |
 |----------|-------------|-----------|----------------|--------|

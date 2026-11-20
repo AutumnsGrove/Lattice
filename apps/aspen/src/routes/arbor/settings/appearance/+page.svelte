@@ -5,7 +5,7 @@
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import Skeleton from "@autumnsgrove/lattice/ui/components/ui/Skeleton.svelte";
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/waystone/Waystone.svelte";
-	import { ArborSection } from "@autumnsgrove/lattice/ui/arbor";
+	import { ArborSection, ArborTextSize } from "@autumnsgrove/lattice/ui/arbor";
 	import { featureIcons } from "@autumnsgrove/prism/icons";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 	import { api } from "@autumnsgrove/lattice/utils";
@@ -16,6 +16,9 @@
 		getFontFamily,
 		DEFAULT_ACCENT_COLOR,
 		DEFAULT_FONT,
+		FONT_SCALE,
+		fontScaleMultiplier,
+		parseFontScale,
 	} from "@autumnsgrove/lattice/platform/config/presets";
 	import { ALL_SEASONS, SEASON_LABELS } from "@autumnsgrove/lattice/ui/types/season";
 	import { SEASON_THEME_COLORS, getSeasonFavicons } from "@autumnsgrove/lattice/ui/season-meta";
@@ -25,6 +28,13 @@
 	let currentFont = $state(DEFAULT_FONT);
 	let savingFont = $state(false);
 	let loadingFont = $state(true);
+
+	// ── Text size state ─────────────────────────────────────────────────────────
+	// `fontScale` is what the slider shows; `appliedFontScale` is what the page is
+	// rendered at right now, so the sample text can show the chosen size faithfully.
+	let fontScale = $state<number>(FONT_SCALE.default);
+	let appliedFontScale = $state<number>(FONT_SCALE.default);
+	let savingFontScale = $state(false);
 
 	// ── Accent color state ──────────────────────────────────────────────────────
 	let currentAccentColor = $state(DEFAULT_ACCENT_COLOR);
@@ -44,6 +54,11 @@
 		try {
 			const result = await api.get("/api/settings");
 			if (result.font_family) currentFont = result.font_family;
+			const savedScale = parseFontScale(result[FONT_SCALE.settingKey]);
+			if (savedScale !== null) {
+				fontScale = savedScale;
+				appliedFontScale = savedScale;
+			}
 			if (result.accent_color) currentAccentColor = result.accent_color;
 			if (result.vine_color) {
 				vineColorMode = "custom";
@@ -75,6 +90,27 @@
 			toast.error("Couldn't save font. Please try again.");
 		}
 		savingFont = false;
+	}
+
+	async function saveFontScale() {
+		savingFontScale = true;
+		try {
+			await api.put("/api/admin/settings", {
+				setting_key: FONT_SCALE.settingKey,
+				setting_value: String(fontScale),
+			});
+			// Apply immediately so the whole page, not just the sample, shows the new size
+			document.documentElement.style.setProperty(
+				FONT_SCALE.cssVar,
+				String(fontScaleMultiplier(String(fontScale))),
+			);
+			appliedFontScale = fontScale;
+			toast.success("Text size saved.");
+		} catch (error) {
+			console.error("Failed to save text size:", error);
+			toast.error("Couldn't save text size. Please try again.");
+		}
+		savingFontScale = false;
 	}
 
 	async function saveAccentColor() {
@@ -180,6 +216,34 @@
 		<p class="note">
 			See <a href="https://grove.place/credits">font credits and licenses</a>.
 		</p>
+	</GlassCard>
+
+	<!-- ── Text Size ──────────────────────────────────────────────────────────── -->
+	<GlassCard variant="frosted" class="mb-6">
+		<div class="section-header">
+			<h2>Text Size</h2>
+		</div>
+		<p class="section-description">
+			Make the words in your grove larger or smaller. It applies to every page, for everyone who
+			visits.
+		</p>
+
+		{#if loadingFont}
+			<Skeleton class="h-24 w-full rounded-lg" />
+		{:else}
+			<ArborTextSize bind:value={fontScale} applied={appliedFontScale} />
+		{/if}
+
+		<div class="button-row">
+			<Button onclick={saveFontScale} variant="primary" disabled={savingFontScale || loadingFont}>
+				{#if savingFontScale}
+					<Spinner size="sm" />
+					Saving...
+				{:else}
+					Save Text Size
+				{/if}
+			</Button>
+		</div>
 	</GlassCard>
 
 	<!-- ── Accent Color ───────────────────────────────────────────────────────── -->

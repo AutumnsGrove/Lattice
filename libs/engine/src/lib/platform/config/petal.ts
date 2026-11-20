@@ -3,7 +3,7 @@
  *
  * Model configuration, category definitions, and thresholds for Petal.
  * Vision models are resolved from Lumen's centralized registry so Petal never
- * pins its own model IDs; the external providers are fallbacks around Lumen.
+ * pins its own model IDs; OpenRouter and Cloudflare Workers AI are the only inference paths.
  *
  * @see docs/specs/petal-spec.md
  */
@@ -19,8 +19,7 @@ import { MODELS } from "$lib/ai/lumen/config.js";
  * Vision providers with automatic fallback cascade
  * Primary: OpenRouter (Claude Haiku 5.5, cheap and fast, no reasoning tokens)
  * Fallback: OpenRouter (Gemma 4 26B, cheapest strong vision model)
- * Fallback: Cloudflare Workers AI (Llama 4 Scout, same infrastructure, ZDR inherent)
- * Tertiary: Together.ai (external API, dead-last fallback)
+ * Final fallback: Cloudflare Workers AI (Llama 4 Scout, same infrastructure, ZDR inherent)
  */
 export const PETAL_PROVIDERS: Record<string, PetalProviderConfig> = {
 	openrouter_haiku: {
@@ -52,15 +51,6 @@ export const PETAL_PROVIDERS: Record<string, PetalProviderConfig> = {
 	},
 	// Llama 3.2 Vision removed — CF requires model agreement acceptance
 	// which throws a 403 in the Worker runtime (AiError code 5016).
-	together_ai: {
-		name: "Together.ai",
-		type: "external_api",
-		role: "tertiary",
-		zdr: true, // ZDR enabled for open models
-		csamScan: true, // Built-in CSAM scanning
-		model: "meta-llama/Llama-4-Scout-17B-16E-Instruct",
-		timeoutMs: 20000,
-	},
 };
 
 /**
@@ -70,7 +60,6 @@ export const PETAL_PROVIDER_CASCADE = [
 	"openrouter_haiku",
 	"openrouter_gemma",
 	"workers_ai_llama4",
-	"together_ai",
 ] as const;
 
 // ============================================================================

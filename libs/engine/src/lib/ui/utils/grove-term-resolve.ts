@@ -16,7 +16,7 @@
 
 import { groveModeStore } from "../stores/grove-mode.svelte.js";
 import manifestData from "../../data/grove-term-manifest.json";
-import type { GroveTermManifest } from "$lib/components/terminology/types.js";
+import type { GroveTermEntry, GroveTermManifest } from "$lib/components/terminology/types.js";
 
 const manifest = manifestData as GroveTermManifest;
 
@@ -32,6 +32,20 @@ function findInManifest(slug: string) {
 }
 
 /**
+ * Look up a term's manifest entry by slug, trying the same variations as
+ * GroveSwap and GroveTerm. Returns null for a slug that is not a term.
+ *
+ * @param slug - Term slug from the manifest (e.g., "blooms", "arbor", "wanderer")
+ */
+export function getTermEntry(slug: string): GroveTermEntry | null {
+	const normalized = slug
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/^-|-$/g, "");
+	return findInManifest(normalized);
+}
+
+/**
  * Resolve a term slug to its display string based on current Grove Mode.
  * For use in non-component contexts (toasts, aria-labels, data strings).
  *
@@ -39,11 +53,7 @@ function findInManifest(slug: string) {
  * @returns The resolved display string
  */
 export function resolveTerm(slug: string): string {
-	const normalized = slug
-		.toLowerCase()
-		.replace(/[^a-z0-9]+/g, "-")
-		.replace(/^-|-$/g, "");
-	const entry = findInManifest(normalized);
+	const entry = getTermEntry(slug);
 	if (!entry) return slug;
 	// Brand terms (alwaysGrove) always show the Grove name regardless of mode —
 	// this runs after the null check so unknown slugs fall through safely above.

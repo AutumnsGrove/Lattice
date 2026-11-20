@@ -31,7 +31,7 @@ export type PetalCategory =
 export interface PetalProviderConfig {
 	name: string;
 	type: "workers_ai" | "external_api";
-	role: "primary" | "fallback" | "tertiary";
+	role: "primary" | "fallback";
 	/** Zero Data Retention support */
 	zdr: boolean;
 	/** Built-in CSAM scanning */

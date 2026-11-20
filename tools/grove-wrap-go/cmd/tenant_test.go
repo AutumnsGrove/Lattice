@@ -1,7 +1,10 @@
 package cmd
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -134,27 +137,165 @@ func TestAuditInsertCarriesReasonAndActor(t *testing.T) {
 	}
 }
 
+// gate is what the probe sees when the human-check gate answers: a redirect to /verify.
+var gate = probeResult{Code: 302, Location: "/verify?return=%2F", GateRedirect: true}
+
 func TestInterpretStatus(t *testing.T) {
 	cases := []struct {
-		code       int
+		name       string
+		probe      probeResult
 		wantActive bool
 		ok         bool
 	}{
-		{200, false, false}, // suspended but still serving: the #1677 symptom
-		{302, false, false}, // redirect to /verify: still live
-		{404, false, true},
-		{410, false, true},
-		{500, false, false},
-		{200, true, true},
-		{302, true, true},
-		{404, true, false}, // resumed but still dark: needs a DO flush
+		{"suspended but still serving: the #1677 symptom", probeResult{Code: 200}, false, false},
+		{"suspended but the gate still answers: the tenant still resolves", gate, false, false},
+		{"suspended and gone", probeResult{Code: 404}, false, true},
+		{"suspended and gone, 410", probeResult{Code: 410}, false, true},
+		{"suspended, server error", probeResult{Code: 500}, false, false},
+		{"suspended but redirecting elsewhere", probeResult{Code: 302, Location: "https://new.grove.place/"}, false, false},
+		{"resumed and serving", probeResult{Code: 200}, true, true},
+		{"resumed and the gate answers: it resolves", gate, true, true},
+		{"resumed and redirecting elsewhere", probeResult{Code: 301, Location: "https://new.grove.place/"}, true, true},
+		{"resumed but still dark: needs a DO flush", probeResult{Code: 404}, true, false},
 	}
 	for _, tc := range cases {
-		got, _ := interpretStatus(tc.code, tc.wantActive)
-		if got != tc.ok {
-			t.Errorf("interpretStatus(%d, active=%v) = %v, want %v", tc.code, tc.wantActive, got, tc.ok)
+		t.Run(tc.name, func(t *testing.T) {
+			got, _ := interpretStatus(tc.probe, tc.wantActive)
+			if got != tc.ok {
+				t.Errorf("interpretStatus(%+v, active=%v) = %v, want %v", tc.probe, tc.wantActive, got, tc.ok)
+			}
+		})
+	}
+}
+
+func TestInterpretStatusSaysWhatTheGateMeans(t *testing.T) {
+	// The whole point of #1734: a 302 to /verify is the gate answering, and since the gate now
+	// runs after the tenant lookup, it only answers for a tenant that resolves. So it must never
+	// read as "suspended", and the message has to say why.
+	_, msg := interpretStatus(gate, false)
+	for _, want := range []string{"/verify", "not suspended", "404"} {
+		if !strings.Contains(msg, want) {
+			t.Errorf("suspend verdict for the gate redirect should mention %q, got: %s", want, msg)
 		}
 	}
+
+	// A suspended tenant that went dark does not mention the gate at all.
+	_, dark := interpretStatus(probeResult{Code: 404}, false)
+	if strings.Contains(dark, "/verify") || !strings.Contains(dark, "dark") {
+		t.Errorf("dark verdict should be plain, got: %s", dark)
+	}
+
+	// Resuming reads as serving, and says the gate is what answered.
+	ok, serving := interpretStatus(gate, true)
+	if !ok || !strings.Contains(serving, "/verify") {
+		t.Errorf("resumed + gate should read as serving and name the gate, got: %v %s", ok, serving)
+	}
+}
+
+func TestDescribeProbe(t *testing.T) {
+	cases := []struct {
+		name  string
+		probe probeResult
+		want  []string
+	}{
+		{"gone", probeResult{Code: 404}, []string{"404", "gone"}},
+		{"gate answers: the tenant resolves", gate, []string{"/verify", "resolves"}},
+		{"serving", probeResult{Code: 200}, []string{"200"}},
+		{"redirecting elsewhere", probeResult{Code: 302, Location: "https://new.grove.place/"}, []string{"302", "https://new.grove.place/"}},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := describeProbe(tc.probe)
+			for _, want := range tc.want {
+				if !strings.Contains(got, want) {
+					t.Errorf("describeProbe(%+v) = %q, want it to mention %q", tc.probe, got, want)
+				}
+			}
+		})
+	}
+
+	// The note the remove command used to print said the opposite of what is now true.
+	if strings.Contains(describeProbe(gate), "not the tenant") {
+		t.Error("a gate redirect now means the tenant resolves; the old 'not the tenant' wording must be gone")
+	}
+}
+
+func TestProbeURL(t *testing.T) {
+	var requests int32
+	mux := http.NewServeMux()
+	count := func(h http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			atomic.AddInt32(&requests, 1)
+			h(w, r)
+		}
+	}
+	mux.HandleFunc("/ok", count(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200) }))
+	mux.HandleFunc("/gone", count(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(404) }))
+	mux.HandleFunc("/gate", count(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/verify?return=%2F", http.StatusFound)
+	}))
+	mux.HandleFunc("/gate-absolute", count(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "http://"+r.Host+"/verify?return=%2F", http.StatusFound)
+	}))
+	mux.HandleFunc("/gate-permanent", count(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/verify", http.StatusMovedPermanently)
+	}))
+	mux.HandleFunc("/elsewhere", count(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/somewhere-else", http.StatusFound)
+	}))
+	mux.HandleFunc("/other-host", count(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "https://other.example/verify", http.StatusFound)
+	}))
+	mux.HandleFunc("/no-location", count(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(302) }))
+	mux.HandleFunc("/verify-lookalike", count(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/verifying", http.StatusFound)
+	}))
+	mux.HandleFunc("/verify", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200) })
+	server := httptest.NewServer(mux)
+	defer server.Close()
+
+	cases := []struct {
+		path     string
+		code     int
+		gate     bool
+		location string
+	}{
+		{"/ok", 200, false, ""},
+		{"/gone", 404, false, ""},
+		{"/gate", 302, true, "/verify?return=%2F"},
+		{"/gate-absolute", 302, true, ""},
+		{"/gate-permanent", 301, true, "/verify"},
+		{"/elsewhere", 302, false, "/somewhere-else"},
+		{"/other-host", 302, false, "https://other.example/verify"},
+		{"/no-location", 302, false, ""},
+		{"/verify-lookalike", 302, false, "/verifying"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.path, func(t *testing.T) {
+			atomic.StoreInt32(&requests, 0)
+			got, err := probeURL(server.URL + tc.path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got.Code != tc.code || got.GateRedirect != tc.gate {
+				t.Errorf("probeURL(%s) = %+v, want code %d gate %v", tc.path, got, tc.code, tc.gate)
+			}
+			if tc.location != "" && got.Location != tc.location {
+				t.Errorf("location = %q, want %q", got.Location, tc.location)
+			}
+			// A redirect is reported, never followed: following /gate would land on /verify and
+			// read as a 200, which is exactly how a suspended site used to look alive.
+			if n := atomic.LoadInt32(&requests); n != 1 {
+				t.Errorf("probe made %d requests to the counted handler, want exactly 1", n)
+			}
+		})
+	}
+
+	t.Run("an unreachable site is an error, not a verdict", func(t *testing.T) {
+		if _, err := probeURL("http://127.0.0.1:1/"); err == nil {
+			t.Error("expected an error probing a closed port")
+		}
+	})
 }
 
 func TestAgeLabel(t *testing.T) {

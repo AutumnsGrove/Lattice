@@ -53,7 +53,6 @@ export async function scanImage(input: PetalScanInput, env: PetalEnv): Promise<P
 	// Build options for layer calls
 	const options = {
 		ai: env.AI,
-		togetherApiKey: env.TOGETHER_API_KEY,
 		openRouterApiKey: env.OPENROUTER_API_KEY,
 		photodnaSubscriptionKey: env.PHOTODNA_SUBSCRIPTION_KEY,
 		db: env.DB,
@@ -278,7 +277,6 @@ export async function verifyOutput(
 
 	const options = {
 		ai: env.AI,
-		togetherApiKey: env.TOGETHER_API_KEY,
 		openRouterApiKey: env.OPENROUTER_API_KEY,
 		photodnaSubscriptionKey: env.PHOTODNA_SUBSCRIPTION_KEY,
 		db: env.DB,

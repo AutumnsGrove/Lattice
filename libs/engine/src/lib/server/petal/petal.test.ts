@@ -273,7 +273,7 @@ describe("Provider Resilience", () => {
 		const env: PetalEnv = {
 			DB: createMockDB(),
 			CACHE_KV: {} as KVNamespace,
-			// No AI, no TOGETHER_API_KEY
+			// No AI, no API keys
 		};
 		const image = createMockImage();
 
@@ -496,7 +496,6 @@ describe("Error Handling", () => {
 			AI: undefined,
 			DB: createMockDB(),
 			CACHE_KV: {} as KVNamespace,
-			TOGETHER_API_KEY: undefined,
 		};
 		const image = createMockImage();
 
@@ -519,7 +518,7 @@ describe("Error Handling", () => {
 			} as unknown as Ai,
 			DB: createMockDB(),
 			CACHE_KV: {} as KVNamespace,
-			TOGETHER_API_KEY: undefined, // No fallback
+			// No OpenRouter key either, so nothing to fall back to
 		};
 		const image = createMockImage();
 

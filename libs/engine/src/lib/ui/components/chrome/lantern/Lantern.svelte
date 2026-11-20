@@ -31,7 +31,10 @@
 
 	// Handle Escape key and click-outside
 	function handleKeydown(event: KeyboardEvent) {
-		if (event.key === "Escape" && lanternStore.open) {
+		// A term popup opened from the panel handles Escape first (bits-ui calls
+		// preventDefault on its document listener, which runs before this window one).
+		// Let that Escape close only the popup, not the whole panel behind it.
+		if (event.key === "Escape" && lanternStore.open && !event.defaultPrevented) {
 			lanternStore.close();
 			// Return focus to FAB
 			const fab = document.querySelector<HTMLButtonElement>(".lantern-fab");

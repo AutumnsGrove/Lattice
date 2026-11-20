@@ -484,14 +484,14 @@ func setTenantActive(subdomain string, active bool) error {
 	// The column changing is not the same as the site going dark — the TenantDO
 	// keeps serving its cached config until it is flushed (#1677). Report what
 	// the internet actually gets.
-	code, probeErr := probeSite(subdomain)
+	probe, probeErr := probeSite(subdomain)
 	if probeErr != nil {
 		ui.Warning(fmt.Sprintf("Could not probe https://%s.grove.place: %v", subdomain, probeErr))
 		ui.Hint(fmt.Sprintf("Verify by hand — a suspended tenant can still 200 from the TenantDO cache"))
 		return nil
 	}
 
-	if verdict, msg := interpretStatus(code, active); !verdict {
+	if verdict, msg := interpretStatus(probe, active); !verdict {
 		ui.Warning(msg)
 		ui.Hint(fmt.Sprintf(
 			"Flush the DO, then re-check:\n  gw secret exec OPS_ADMIN_KEY --write -- bash -c 'curl -sS -X POST -H \"Authorization: Bearer $OPS_ADMIN_KEY\" <durable-objects-worker>/tenant/flush/%s'",
@@ -670,15 +670,15 @@ func runTenantCreate(cmd *cobra.Command, _ []string) error {
 
 	// A row in D1 is not the same as a site that serves. Say what the internet
 	// actually gets, the way suspend does.
-	code, probeErr := probeSite(out.Subdomain)
+	probe, probeErr := probeSite(out.Subdomain)
 	if probeErr != nil {
 		ui.Warning(fmt.Sprintf("Could not probe https://%s.grove.place: %v", out.Subdomain, probeErr))
 		return nil
 	}
-	if code == http.StatusOK || code == http.StatusFound || code == http.StatusMovedPermanently {
-		ui.Info(fmt.Sprintf("Site is serving (%d).", code))
+	if probe.Code == http.StatusOK || probe.Code == http.StatusFound || probe.Code == http.StatusMovedPermanently {
+		ui.Info(fmt.Sprintf("Site is serving (%d).", probe.Code))
 	} else {
-		ui.Warning(fmt.Sprintf("Site returned %d — the TenantDO may need a flush.", code))
+		ui.Warning(fmt.Sprintf("Site returned %d — the TenantDO may need a flush.", probe.Code))
 	}
 
 	return nil
@@ -822,12 +822,12 @@ func runTenantDelete(cmd *cobra.Command, args []string) error {
 		ui.Warning(out.NotDone.Email)
 	}
 
-	code, probeErr := probeSite(subdomain)
+	probe, probeErr := probeSite(subdomain)
 	if probeErr != nil {
 		ui.Warning(fmt.Sprintf("Could not probe https://%s.grove.place: %v", subdomain, probeErr))
 		return nil
 	}
-	ui.Info(fmt.Sprintf("Site returned %d. A 302 to /verify means the Turnstile gate answered, not the tenant (#1734).", code))
+	ui.Info(describeProbe(probe))
 
 	return nil
 }
@@ -898,36 +898,97 @@ func containsString(haystack []string, needle string) bool {
 	return false
 }
 
-func probeSite(subdomain string) (int, error) {
-	client := &http.Client{Timeout: siteProbeTimeout}
-	resp, err := client.Get(siteURL(subdomain))
+// probeResult is what a site answered. Redirects are reported, not followed.
+type probeResult struct {
+	Code     int
+	Location string
+	// GateRedirect is true when the answer is the human-check gate: a redirect to
+	// /verify on the same host. Aspen only sends one for a tenant that resolves (#1734).
+	GateRedirect bool
+}
+
+func probeSite(subdomain string) (probeResult, error) {
+	return probeURL(siteURL(subdomain))
+}
+
+// probeURL asks for a page and says what came back, without following redirects.
+// Following them is what hid this: a 302 to /verify landed on the /verify page, which
+// answers 200 for any subdomain, so a suspended site read as alive.
+func probeURL(rawURL string) (probeResult, error) {
+	client := &http.Client{
+		Timeout: siteProbeTimeout,
+		CheckRedirect: func(*http.Request, []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+	resp, err := client.Get(rawURL)
 	if err != nil {
-		return 0, err
+		return probeResult{}, err
 	}
 	defer resp.Body.Close()
-	return resp.StatusCode, nil
+
+	result := probeResult{Code: resp.StatusCode, Location: resp.Header.Get("Location")}
+	if resp.StatusCode >= 300 && resp.StatusCode < 400 && result.Location != "" {
+		// Resolve against the request, so a relative "/verify?..." and an absolute URL on
+		// the same host are read the same way; a lookalike path or another host is not the gate.
+		if target, err := resp.Request.URL.Parse(result.Location); err == nil {
+			result.GateRedirect = target.Host == resp.Request.URL.Host &&
+				(target.Path == "/verify" || strings.HasPrefix(target.Path, "/verify/"))
+		}
+	}
+	return result, nil
 }
 
 // interpretStatus says whether the probe agrees with what we just did.
-// A live Grove site answers 200 (or 302 to /verify). A gone one answers 404.
-func interpretStatus(code int, wantActive bool) (bool, string) {
-	live := code == 200 || code == 302 || code == 301
+//
+// A suspended or removed tenant answers 404, with no redirect. The human-check gate runs after
+// the tenant lookup (#1734), so a 302 to /verify means the tenant still resolves: the gate has
+// someone to protect. That is "not suspended", never "dark".
+func interpretStatus(p probeResult, wantActive bool) (bool, string) {
+	live := p.Code == 200 || p.Code == 302 || p.Code == 301
 	if wantActive {
-		if live {
-			return true, fmt.Sprintf("Site is serving again (%d).", code)
+		switch {
+		case p.GateRedirect:
+			return true, fmt.Sprintf("Site is serving again (%d to /verify, the human check).", p.Code)
+		case live:
+			return true, fmt.Sprintf("Site is serving again (%d).", p.Code)
 		}
-		return false, fmt.Sprintf("Site returned %d — still not serving, may need a DO flush.", code)
+		return false, fmt.Sprintf("Site returned %d — still not serving, may need a DO flush.", p.Code)
 	}
 	switch {
-	case code == 404 || code == 410:
-		return true, fmt.Sprintf("Site is dark (%d).", code)
+	case p.Code == 404 || p.Code == 410:
+		return true, fmt.Sprintf("Site is dark (%d).", p.Code)
+	case p.GateRedirect:
+		return false, fmt.Sprintf(
+			"Site answers %d to /verify, so the tenant still resolves and is not suspended yet. "+
+				"A suspended site answers 404. The TenantDO cache may be warm (#1677), "+
+				"or the Aspen change that runs the human check after the tenant lookup (#1734) has not deployed.",
+			p.Code,
+		)
 	case live:
 		return false, fmt.Sprintf(
 			"Site still returns %d — the TenantDO cache may still be warm (#1677).",
-			code,
+			p.Code,
 		)
 	default:
-		return false, fmt.Sprintf("Site returned %d — unusual; verify by hand.", code)
+		return false, fmt.Sprintf("Site returned %d — unusual; verify by hand.", p.Code)
+	}
+}
+
+// describeProbe says in a sentence what a probe saw, for commands that report but do not judge.
+func describeProbe(p probeResult) string {
+	switch {
+	case p.Code == 404 || p.Code == 410:
+		return fmt.Sprintf("Site returned %d — gone.", p.Code)
+	case p.GateRedirect:
+		return fmt.Sprintf(
+			"Site answered %d to /verify, the human check: the tenant still resolves (#1734).",
+			p.Code,
+		)
+	case p.Location != "":
+		return fmt.Sprintf("Site returned %d, redirecting to %s.", p.Code, p.Location)
+	default:
+		return fmt.Sprintf("Site returned %d.", p.Code)
 	}
 }
 

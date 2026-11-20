@@ -500,7 +500,10 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 	const isDemoModeActive = isDemoModeRequest(event.url, demoModeSecret, cookieHeader);
 	event.locals.isDemoMode = isDemoModeActive;
 
-	// Skip verification for excluded paths, embed crawlers, and demo mode
+	// Decide here whether this visitor needs the challenge, but do NOT redirect yet: the
+	// redirect is enforced after the tenant is resolved (see "enforce" below, #1734).
+	// Skipped for excluded paths, embed crawlers, and demo mode.
+	let needsChallenge = false;
 	if (
 		!shouldSkipTurnstile(event.url.pathname, event.request.headers.get("user-agent")) &&
 		!isDemoModeActive
@@ -514,12 +517,7 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 				verificationCookie ?? undefined,
 				secretKey,
 			);
-
-			if (!isVerified) {
-				// Redirect to verification page with return URL
-				const returnUrl = encodeURIComponent(event.url.pathname + event.url.search);
-				throw redirect(302, `/verify?return=${returnUrl}`);
-			}
+			needsChallenge = !isVerified;
 		}
 	}
 
@@ -531,8 +529,10 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 	// subdomain routing, saving ~100-300ms on tenant page loads.
 	const sessionCookie = extractSessionCookie(cookieHeader);
 
+	// A visitor who is about to be challenged gets no session lookup: they have not proved they
+	// are a person yet, and the gate should not be a way to make Grove do work.
 	const sessionAuthPromise =
-		sessionCookie && event.platform?.env?.AUTH
+		sessionCookie && !needsChallenge && event.platform?.env?.AUTH
 			? validateGroveSession(
 					event.platform.env.AUTH,
 					event.request,
@@ -619,6 +619,19 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 			};
 			event.locals.tenantId = tenant.id;
 		}
+	}
+
+	// =========================================================================
+	// TURNSTILE VERIFICATION — enforce (Shade)
+	// =========================================================================
+	// Enforced here, after the tenant is known, rather than before routing (#1734). A
+	// challenge is for people, and a subdomain with no active tenant has nothing to protect:
+	// it falls through to the not-found page (served as a real 404, see below). A subdomain
+	// that never existed and one that was suspended look the same from outside, on purpose.
+	// Do not move this back in front of the tenant lookup; hooks.server.test.ts pins the order.
+	if (needsChallenge && event.locals.context.type !== "not_found") {
+		const returnUrl = encodeURIComponent(event.url.pathname + event.url.search);
+		throw redirect(302, `/verify?return=${returnUrl}`);
 	}
 
 	// =========================================================================
@@ -1017,7 +1030,7 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 	// Generate a per-request nonce for CSP script-src (replaces 'unsafe-inline')
 	const cspNonce = crypto.randomUUID().replace(/-/g, "");
 
-	const response = await resolve(event, {
+	let response = await resolve(event, {
 		transformPageChunk: ({ html }) => {
 			// Inject nonce into ALL script tags (theme-detection, hydration, data serialization)
 			// Must use global regex — String.replace() only hits the first match,
@@ -1025,6 +1038,21 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 			return html.replace(/<script(?=[\s>])/g, `<script nonce="${cspNonce}"`);
 		},
 	});
+
+	// A grove that does not exist is a 404, not a 200 page that says so (#1734). Only a page
+	// that rendered successfully is changed: JSON from an API route and any status a route
+	// chose for itself are left alone.
+	if (
+		event.locals.context.type === "not_found" &&
+		response.status === 200 &&
+		response.headers.get("content-type")?.includes("text/html")
+	) {
+		response = new Response(response.body, {
+			status: 404,
+			statusText: "Not Found",
+			headers: response.headers,
+		});
+	}
 
 	// Set CSRF token cookie — always refresh for authenticated users (session-bound)
 	// or set once for unauthenticated users
