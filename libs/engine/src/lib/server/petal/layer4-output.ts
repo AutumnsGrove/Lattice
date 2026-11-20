@@ -29,7 +29,6 @@ export async function runLayer4(
 	contentHash: string,
 	options: {
 		ai?: Ai;
-		togetherApiKey?: string;
 		openRouterApiKey?: string;
 		db?: D1Database;
 		userId?: string;
@@ -118,7 +117,6 @@ export async function generateWithRetry<T extends string | Uint8Array>(
 	generateFn: (seed: number) => Promise<{ image: T; hash: string; mimeType: string }>,
 	options: {
 		ai?: Ai;
-		togetherApiKey?: string;
 		openRouterApiKey?: string;
 		db?: D1Database;
 		userId?: string;
@@ -171,7 +169,6 @@ export async function verifyOutfitMatch(
 	intendedDescription: string,
 	options: {
 		ai?: Ai;
-		togetherApiKey?: string;
 		openRouterApiKey?: string;
 	},
 ): Promise<{ matches: boolean; score: number; reason?: string }> {

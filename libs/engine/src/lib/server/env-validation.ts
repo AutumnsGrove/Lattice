@@ -13,7 +13,6 @@ export interface CloudflareEnv {
 	CACHE_KV?: KVNamespace;
 	ANTHROPIC_API_KEY?: string;
 	OPENROUTER_API_KEY?: string;
-	TOGETHER_API_KEY?: string;
 	TURNSTILE_SECRET_KEY?: string;
 	AUTH?: Fetcher;
 	IMAGES?: R2Bucket;

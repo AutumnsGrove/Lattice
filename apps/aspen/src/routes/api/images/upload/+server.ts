@@ -202,8 +202,7 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		}
 
 		// Petal Content Moderation
-		const hasPetalProvider =
-			platform?.env?.AI || platform?.env?.TOGETHER_API_KEY || platform?.env?.OPENROUTER_API_KEY;
+		const hasPetalProvider = platform?.env?.AI || platform?.env?.OPENROUTER_API_KEY;
 		if (hasPetalProvider) {
 			const petalResult = await runPetalScan(
 				buffer,
@@ -216,7 +215,6 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 					AI: platform!.env!.AI,
 					DB: db,
 					CACHE_KV: kv,
-					TOGETHER_API_KEY: platform!.env!.TOGETHER_API_KEY as string | undefined,
 					OPENROUTER_API_KEY: platform!.env!.OPENROUTER_API_KEY as string | undefined,
 				},
 			);

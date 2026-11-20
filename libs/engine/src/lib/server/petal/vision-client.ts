@@ -2,8 +2,7 @@
  * Petal Vision Client - Image Analysis with Provider Fallback
  *
  * Vision inference client for content moderation. Primary path is OpenRouter
- * (Claude Haiku 5.5 → Gemma 4 26B), with Cloudflare Workers AI and
- * Together.ai as fallbacks.
+ * (Claude Haiku 5.5 → Gemma 4 26B), with Cloudflare Workers AI as the final fallback.
  *
  * @see docs/specs/petal-spec.md
  */
@@ -299,102 +298,6 @@ async function callOpenRouter(
 }
 
 // ============================================================================
-// External API Provider (Together.ai)
-// ============================================================================
-
-/**
- * Call Together.ai API for vision
- */
-async function callTogetherAI(
-	apiKey: string,
-	model: string,
-	request: VisionRequest,
-	timeoutMs: number,
-): Promise<VisionResponse> {
-	const controller = new AbortController();
-	const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
-	try {
-		const imageDataUri = getImageDataUri(request.image, request.mimeType);
-
-		const response = await fetch("https://api.together.xyz/v1/chat/completions", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: `Bearer ${apiKey}`,
-				"X-Data-Retention": "none", // ZDR header
-			},
-			body: JSON.stringify({
-				model,
-				messages: [
-					{
-						role: "user",
-						content: [
-							{ type: "text", text: request.prompt },
-							{ type: "image_url", image_url: { url: imageDataUri } },
-						],
-					},
-				],
-				max_tokens: request.maxTokens || 256,
-				temperature: 0.1,
-			}),
-			signal: controller.signal,
-		});
-
-		if (!response.ok) {
-			// Log full error server-side for debugging, but don't include in thrown error
-			// to prevent information disclosure
-			const errorText = await response.text().catch(() => "Unknown error");
-			logGroveError("Petal", PETAL_ERRORS.TOGETHER_API_ERROR, {
-				status: response.status,
-				detail: errorText.substring(0, 500),
-				model,
-			});
-			throw new PetalError(
-				"Vision provider temporarily unavailable",
-				"PROVIDER_ERROR",
-				undefined,
-				"together_ai",
-				// Don't include status code or error details to prevent information disclosure
-			);
-		}
-
-		const data = (await response.json()) as {
-			choices?: Array<{ message?: { content?: string } }>;
-		};
-
-		const content = data.choices?.[0]?.message?.content || "";
-
-		return {
-			content,
-			model,
-			provider: "together_ai",
-		};
-	} catch (err) {
-		if (err instanceof Error && err.name === "AbortError") {
-			throw new PetalError(
-				"Vision provider request timed out",
-				"TIMEOUT",
-				undefined,
-				"together_ai",
-			);
-		}
-		if (err instanceof PetalError) throw err;
-		// Log full error server-side, but don't include in thrown error
-		logGroveError("Petal", PETAL_ERRORS.TOGETHER_UNEXPECTED, { model, cause: err });
-		throw new PetalError(
-			"Together.ai provider error",
-			"PROVIDER_ERROR",
-			undefined,
-			"together_ai",
-			// Don't include error details to prevent information disclosure
-		);
-	} finally {
-		clearTimeout(timeoutId);
-	}
-}
-
-// ============================================================================
 // Main Vision Client
 // ============================================================================
 
@@ -403,8 +306,6 @@ interface VisionClientOptions {
 	ai?: Ai;
 	/** OpenRouter API key (fallback) */
 	openRouterApiKey?: string;
-	/** Together.ai API key (dead-last fallback) */
-	togetherApiKey?: string;
 }
 
 /**
@@ -451,16 +352,6 @@ export async function callVisionModel(
 				}
 				response = await callOpenRouter(
 					options.openRouterApiKey,
-					config.model,
-					request,
-					config.timeoutMs,
-				);
-			} else if (config.type === "external_api" && providerKey === "together_ai") {
-				if (!options.togetherApiKey) {
-					continue; // API key not available
-				}
-				response = await callTogetherAI(
-					options.togetherApiKey,
 					config.model,
 					request,
 					config.timeoutMs,

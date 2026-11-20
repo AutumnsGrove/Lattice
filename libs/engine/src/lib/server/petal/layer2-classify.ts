@@ -100,7 +100,6 @@ export async function runLayer2(
 	context: PetalContext,
 	options: {
 		ai?: Ai;
-		togetherApiKey?: string;
 		openRouterApiKey?: string;
 		db?: D1Database;
 		userId?: string;
@@ -156,7 +155,6 @@ export async function checkFashionContext(
 	category: PetalCategory,
 	options: {
 		ai?: Ai;
-		togetherApiKey?: string;
 		openRouterApiKey?: string;
 	},
 ): Promise<{ appropriate: boolean; reason?: string }> {
@@ -193,7 +191,6 @@ export async function classifyImageBatch(
 	context: PetalContext,
 	options: {
 		ai?: Ai;
-		togetherApiKey?: string;
 		openRouterApiKey?: string;
 		db?: D1Database;
 		userId?: string;

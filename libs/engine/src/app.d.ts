@@ -113,9 +113,6 @@ declare global {
 				// Lumen AI Gateway (unified AI inference)
 				OPENROUTER_API_KEY?: string;
 
-				// Petal CSAM fallback provider (when Workers AI unavailable)
-				TOGETHER_API_KEY?: string;
-
 				// The Clearing (Status Page) API
 				CLEARING_API_URL?: string;
 				CLEARING_API_KEY?: string;
