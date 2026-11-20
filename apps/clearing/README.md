@@ -70,7 +70,7 @@ clearing/
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 22+
 - pnpm
 
 ### Local Development

@@ -185,6 +185,11 @@ jobs:
       - name: Test the PR link parser
         run: node --test .github/scripts/issue-refs.test.mjs
 
+      # CI and the deploy workflows drifted two Node majors apart for months and
+      # nothing said so, until it showed up as failing tests (#1758).
+      - name: Check the Node version agrees everywhere
+        run: node --test .github/scripts/node-version.test.mjs
+
   # Lint (always runs, fast)
   lint:
     name: Lint
