@@ -85,6 +85,11 @@ export interface PortalRequest {
 export interface CancelRequest {
 	tenantId: string;
 	immediately?: boolean;
+	/**
+	 * Send the cancellation email. Defaults to true. A removal passes false — it
+	 * sends its own notice (#1745).
+	 */
+	notify?: boolean;
 }
 
 export interface ResumeRequest {

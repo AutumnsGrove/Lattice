@@ -17,6 +17,7 @@ import {
 import {
 	formatRemovalResult,
 	removeTenant,
+	type BillingCancellation,
 	type TenantRemovalResult,
 } from "@autumnsgrove/lattice/server/tenants/remove-tenant";
 import {
@@ -78,6 +79,11 @@ interface Env {
 	ZEPHYR?: { fetch: typeof fetch };
 	ZEPHYR_URL?: string;
 	ZEPHYR_API_KEY?: string;
+	/**
+	 * BillingHub (`grove-billing-api`), for cancelling a subscription as part of a
+	 * removal (#1745). Service binding only — the API is not publicly reachable.
+	 */
+	BILLING?: { fetch: typeof fetch };
 	/** Where a removed account holder can reply. Defaults to hello@grove.place. */
 	SUPPORT_EMAIL?: string;
 	IMAGES: R2Bucket;
@@ -437,9 +443,14 @@ function notDone(input: {
 	identityPlan: IdentityCount[];
 	otherTenants: string[];
 	removeIdentityToo: boolean;
-}): { identity?: string; email?: string } {
-	const notes: { identity?: string; email?: string } = {};
+}): { identity?: string; email?: string; billing?: string } {
+	const notes: { identity?: string; email?: string; billing?: string } = {};
 	const identityRows = input.identityPlan.reduce((sum, row) => sum + row.rows, 0);
+
+	if (input.result.aborted) {
+		notes.billing = "the removal was abandoned before anything was deleted — see failures";
+		return notes;
+	}
 
 	if (!input.removeIdentityToo) {
 		const count = input.otherTenants.length;
@@ -461,6 +472,109 @@ function notDone(input: {
 	}
 
 	return notes;
+}
+
+/**
+ * Cancel a removal's subscription, while the rows that locate it still exist.
+ *
+ * `billing-api`'s only cancellation path finds the provider subscription through
+ * `platform_billing` → `tenants` → `user_onboarding`, all of which the sweep
+ * deletes. So this runs first, and the pre-sweep lookup here serves the plan as
+ * well as the call (#1745).
+ *
+ * Three outcomes, deliberately distinguishable:
+ *
+ * - nothing to cancel — a Wanderer tier, or a subscription already cancelled.
+ *   The removal proceeds; `note` says so rather than leaving a blank line.
+ * - something to cancel and it worked — the row the sweep deletes is now dead.
+ * - something to cancel and it failed — a throw, which aborts the removal with
+ *   nothing deleted. A blog we could not stop charging for is a blog we keep.
+ */
+async function cancelSubscription(
+	env: Env,
+	tenant: { tenantId: string; subdomain: string },
+	context: { dryRun: boolean },
+): Promise<BillingCancellation> {
+	const row = await env.DB.prepare(
+		"SELECT provider_subscription_id, plan, status FROM platform_billing WHERE tenant_id = ? LIMIT 1",
+	)
+		.bind(tenant.tenantId)
+		.first<{
+			provider_subscription_id: string | null;
+			plan: string | null;
+			status: string | null;
+		}>();
+
+	if (!row?.provider_subscription_id) {
+		return { none: true, note: "no subscription on file — nothing to cancel" };
+	}
+	if (row.status === "cancelled") {
+		return {
+			none: true,
+			subscriptionId: row.provider_subscription_id,
+			plan: row.plan,
+			note: "subscription already cancelled",
+		};
+	}
+
+	if (context.dryRun) {
+		return {
+			subscriptionId: row.provider_subscription_id,
+			plan: row.plan,
+			cancelled: false,
+			note: "would cancel immediately",
+		};
+	}
+
+	// Checked here, not at the call site: a missing binding must only stop a
+	// removal that actually has money on it. A free tenant can still be removed
+	// from a worker that has no billing binding at all.
+	if (!env.BILLING) {
+		throw new Error(
+			"no BILLING service binding — cannot cancel the subscription, so the removal was abandoned",
+		);
+	}
+
+	const request = new Request("https://billing.internal/cancel", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			tenantId: tenant.tenantId,
+			// Deletion is not a period-end thing: the account is about to stop
+			// existing, so the subscription stops now.
+			immediately: true,
+			// The removal sends its own notice. A "your subscription is cancelled"
+			// mail followed thirty seconds later by "your account is gone" reads as
+			// two systems disagreeing about what happened.
+			notify: false,
+		}),
+	});
+
+	// Called as a method: a service binding's `fetch` needs its own `this`, and
+	// detaching it fails at runtime with "Illegal invocation" (#1740).
+	const res = await env.BILLING.fetch(request);
+	if (!res.ok) {
+		const detail = await res.text().catch(() => "");
+		throw new Error(
+			`billing-api responded ${res.status} ${res.statusText}${
+				detail ? ` — ${detail.slice(0, 200)}` : ""
+			}`,
+		);
+	}
+
+	// billing-api answers 200 for a subscription Stripe already considers gone
+	// (`alreadyCancelled`), which is the case a hand-cancel in the dashboard leaves
+	// behind. Saying "cancelled" there would be technically true and unhelpful.
+	const paid = (await res.json().catch(() => null)) as { alreadyCancelled?: boolean } | null;
+
+	return {
+		subscriptionId: row.provider_subscription_id,
+		plan: row.plan,
+		cancelled: true,
+		note: paid?.alreadyCancelled
+			? "was already cancelled at Stripe — nothing left to stop"
+			: "cancelled immediately",
+	};
 }
 
 /**
@@ -668,6 +782,7 @@ async function handleTenantRemove(request: Request, env: Env): Promise<Response>
 								}
 							}
 						: undefined,
+				cancelBilling: (tenant, context) => cancelSubscription(env, tenant, context),
 				evictCache: async (tenant) => {
 					const id = env.TENANTS.idFromName(`tenant:${tenant.subdomain}`);
 					const stub = env.TENANTS.get(id);
@@ -710,6 +825,8 @@ async function handleTenantRemove(request: Request, env: Env): Promise<Response>
 				summary: formatRemovalResult(result),
 				dryRun: result.dryRun,
 				removed: result.plan.totalRows,
+				aborted: result.aborted,
+				billing: result.billing,
 				identityPlan: identityPlan.filter((row) => row.rows > 0),
 				identitiesDeleted: result.identitiesDeleted,
 				tenantRowDeleted: result.tenantRowDeleted,

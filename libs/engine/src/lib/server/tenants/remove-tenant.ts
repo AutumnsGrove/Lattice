@@ -11,9 +11,15 @@
  * afterwards that nothing survived, and keeps the audit trail.
  *
  * Deliberately **not** automatic about the parts that reach outside a database:
- * R2 objects, the auth identity, the email, and the DO eviction are passed in as
- * callbacks. The engine should not know about a bucket binding or a mail gateway,
- * and a caller that cannot do those things should be aware it skipped them.
+ * R2 objects, the auth identity, the email, the DO eviction, and billing are
+ * passed in as callbacks. The engine should not know about a bucket binding, a
+ * mail gateway, or a payment provider, and a caller that cannot do those things
+ * should be aware it skipped them.
+ *
+ * Billing is the one callback that runs *before* the sweep rather than after
+ * (#1745). The platform's only cancellation path finds the provider subscription
+ * through `platform_billing` — the rows this function exists to delete — so
+ * cancelling afterwards is impossible, not merely untidy.
  *
  * @see docs/security/incident-response-runbook.md — the runbook that calls this
  */
@@ -60,9 +66,31 @@ export interface RemovedTableCount {
 	retained?: boolean;
 }
 
+/**
+ * What the billing step did, or would do.
+ *
+ * Filled by the caller, because only the caller knows the provider. `removeTenant`
+ * only asks the question and puts the answer in the plan, the result and the audit
+ * row — a removal that takes money should never be silent about it.
+ */
+export interface BillingCancellation {
+	/** Nothing to cancel (no subscription on file, or already cancelled). */
+	none?: boolean;
+	/** Provider subscription id, for the audit trail and the dry-run line. */
+	subscriptionId?: string | null;
+	/** The plan being cancelled, if known. */
+	plan?: string | null;
+	/** True only when the provider actually cancelled something. */
+	cancelled?: boolean;
+	/** One line of plain English for the plan and the result. */
+	note?: string;
+}
+
 export interface TenantRemovalPlan {
 	target: TenantRemovalTarget;
 	dryRun: boolean;
+	/** What the billing step found (dry run) or did (real run), once it has run. */
+	billing?: BillingCancellation | null;
 	tables: RemovedTableCount[];
 	/** Rows that will be (or were) deleted, excluding retained tables. */
 	totalRows: number;
@@ -85,6 +113,18 @@ export interface RemoveTenantOptions {
 	deleteIdentity?: (tenant: TenantRemovalTarget) => Promise<number>;
 	/** Email the account holder. */
 	notify?: (tenant: TenantRemovalTarget, plan: TenantRemovalPlan) => Promise<void>;
+	/**
+	 * Cancel the subscription. Runs **before** the sweep, and a throw aborts the
+	 * removal with nothing deleted (#1745): being charged for an account we
+	 * deleted is worse than a failed removal the operator retries.
+	 *
+	 * Also called during a dry run, with `dryRun: true`, so the plan can say what
+	 * *would* be cancelled — from the same code that would cancel it.
+	 */
+	cancelBilling?: (
+		tenant: TenantRemovalTarget,
+		context: { dryRun: boolean },
+	) => Promise<BillingCancellation>;
 }
 
 export interface RemovalFailure {
@@ -97,6 +137,10 @@ export interface TenantRemovalResult {
 	plan: TenantRemovalPlan;
 	/** True when nothing was written. */
 	dryRun: boolean;
+	/** True when the billing step failed and the removal stopped before deleting anything. */
+	aborted: boolean;
+	/** What the billing step found or did. */
+	billing: BillingCancellation | null;
 	r2ObjectsDeleted: number;
 	identitiesDeleted: number;
 	cacheEvicted: boolean;
@@ -214,9 +258,24 @@ export async function removeTenant(
 	const plan = await planTenantRemoval(dbs, target);
 
 	if (dryRun) {
+		// A dry run asks the billing question too. A plan that omits the one step
+		// that costs money is a half-truth, and `gw tenant delete` prints this plan
+		// as the whole story of what a removal would do.
+		if (options.cancelBilling) {
+			try {
+				plan.billing = await options.cancelBilling(target, { dryRun: true });
+			} catch (err) {
+				plan.billing = {
+					note: `could not check billing: ${err instanceof Error ? err.message : String(err)}`,
+				};
+			}
+		}
+
 		return {
 			plan,
 			dryRun: true,
+			aborted: false,
+			billing: plan.billing ?? null,
 			r2ObjectsDeleted: 0,
 			identitiesDeleted: 0,
 			cacheEvicted: false,
@@ -244,6 +303,63 @@ export async function removeTenant(
 		cacheEvicted: false,
 		tenantRowDeleted: false,
 	});
+
+	// 0b. Cancel the subscription, while the rows that locate it still exist.
+	//     This is the only step that runs *before* the sweep, because it is the
+	//     only one the sweep destroys the inputs for (#1745). A throw here aborts:
+	//     nothing has been deleted, so a retry costs an operator a command rather
+	//     than a Wanderer a month's charge for a blog that no longer exists.
+	let billing: BillingCancellation | null = null;
+	let aborted = false;
+	if (options.cancelBilling) {
+		try {
+			billing = await options.cancelBilling(target, { dryRun: false });
+		} catch (err) {
+			failures.push({
+				database: "engine",
+				table: "billing",
+				error: `cancellation failed — nothing was deleted: ${
+					err instanceof Error ? err.message : String(err)
+				}`,
+			});
+			aborted = true;
+		}
+	}
+
+	if (aborted) {
+		// Nothing was swept, so the intent record is the whole story. Say so with a
+		// second row rather than leaving `tenant_remove_started` as the last word on
+		// a removal that never happened.
+		plan.billing = billing;
+		const auditRecorded = await recordRemoval(dbs, target, options, {
+			action: "tenant_remove_aborted",
+			plan,
+			leftovers: [],
+			failures,
+			r2ObjectsDeleted: 0,
+			identitiesDeleted: 0,
+			cacheEvicted: false,
+			tenantRowDeleted: false,
+			billing,
+		});
+
+		return {
+			plan,
+			dryRun: false,
+			aborted: true,
+			billing,
+			r2ObjectsDeleted: 0,
+			identitiesDeleted: 0,
+			cacheEvicted: false,
+			notified: false,
+			leftovers: [],
+			failures,
+			tenantRowDeleted: false,
+			auditRecorded: startedRecorded && auditRecorded,
+		};
+	}
+
+	plan.billing = billing;
 
 	// 1. Sweep the tenant's rows: curios and observability first (their rows
 	//    reference a tenant that still exists), then engine, which the registry
@@ -312,6 +428,18 @@ export async function removeTenant(
 	// and "did the cache flush?" are different questions, and only the first one
 	// decides whether the login may be deleted.
 	const sweepFailed = failures.length > 0;
+
+	// Cancelled and still online: the person is paying for nothing, and cannot be
+	// un-charged by retrying. This is the one outcome that needs a human tonight,
+	// so it is a failure with instructions rather than a quiet line in `billing`.
+	if (billing?.cancelled && sweepFailed) {
+		failures.push({
+			database: "engine",
+			table: "billing",
+			error:
+				"subscription was cancelled but the sweep failed — the account still exists and is no longer paying. Restore or refund it by hand.",
+		});
+	}
 
 	let cacheEvicted = false;
 	if (options.evictCache) {
@@ -385,6 +513,7 @@ export async function removeTenant(
 		identitiesDeleted,
 		cacheEvicted,
 		tenantRowDeleted,
+		billing,
 	});
 
 	let notified = false;
@@ -419,6 +548,8 @@ export async function removeTenant(
 	return {
 		plan,
 		dryRun: false,
+		aborted: false,
+		billing,
 		r2ObjectsDeleted,
 		identitiesDeleted,
 		cacheEvicted,
@@ -441,7 +572,7 @@ async function recordRemoval(
 	target: TenantRemovalTarget,
 	options: RemoveTenantOptions,
 	result: {
-		action: "tenant_remove_started" | "tenant_remove";
+		action: "tenant_remove_started" | "tenant_remove" | "tenant_remove_aborted";
 		plan: TenantRemovalPlan;
 		leftovers: RemovedTableCount[];
 		failures: RemovalFailure[];
@@ -449,6 +580,8 @@ async function recordRemoval(
 		identitiesDeleted: number;
 		cacheEvicted: boolean;
 		tenantRowDeleted: boolean;
+		/** Who was paying, and whether that stopped. */
+		billing?: BillingCancellation | null;
 	},
 ): Promise<boolean> {
 	const db = dbs.engine;
@@ -466,6 +599,7 @@ async function recordRemoval(
 		identitiesDeleted: result.identitiesDeleted,
 		cacheEvicted: result.cacheEvicted,
 		tenantRowDeleted: result.tenantRowDeleted,
+		billing: result.billing ?? null,
 		leftovers: result.leftovers.map((t) => `${t.database}.${t.table}=${t.rows}`),
 		failures: result.failures.map((f) => `${f.database}.${f.table}: ${f.error}`),
 	});
@@ -502,6 +636,7 @@ export function formatRemovalPlan(plan: TenantRemovalPlan): string {
 			`\u26a0 Not swept: ${plan.skippedDatabases.join(", ")} — no database binding supplied`,
 		);
 	}
+	if (plan.billing) lines.push(formatBilling(plan.billing));
 	lines.push("");
 
 	for (const database of ["engine", "curios", "observability"] as TenantDatabase[]) {
@@ -523,8 +658,33 @@ export function formatRemovalPlan(plan: TenantRemovalPlan): string {
 	return lines.join("\n");
 }
 
+/** One line about the money, shared by the plan and the result. */
+function formatBilling(billing: BillingCancellation): string {
+	if (billing.none) return `Billing: ${billing.note ?? "nothing to cancel"}`;
+	const which = `${billing.subscriptionId ?? "subscription"}${
+		billing.plan ? ` (${billing.plan})` : ""
+	}`;
+	return `Billing: ${billing.note ?? "cancelled"} — ${which}`;
+}
+
 /** Human-readable result of a real removal. */
 export function formatRemovalResult(result: TenantRemovalResult): string {
+	// A removal that stopped at the billing step deleted nothing, so it must not
+	// print "Removed" — the CLI's whole job here is not claiming what didn't happen.
+	if (result.aborted) {
+		const lines = [
+			`ABORTED — ${result.plan.target.subdomain}.grove.place was not removed. Nothing was deleted.`,
+		];
+		if (result.billing) lines.push(formatBilling(result.billing));
+		lines.push("");
+		lines.push("\u26a0 Statements that failed — the removal stopped at the first one:");
+		for (const failure of result.failures) {
+			lines.push(`  ${failure.database}.${failure.table}: ${failure.error}`);
+		}
+		lines.push(`Audit recorded: ${result.auditRecorded ? "yes" : "NO"}`);
+		return lines.join("\n");
+	}
+
 	// A dry run prints the same shape, so it must not claim anything happened.
 	const lines: string[] = [
 		result.dryRun
@@ -532,6 +692,7 @@ export function formatRemovalResult(result: TenantRemovalResult): string {
 			: `Removed ${result.plan.target.subdomain}.grove.place — ${result.plan.totalRows} rows`,
 	];
 
+	if (result.billing) lines.push(formatBilling(result.billing));
 	if (result.identitiesDeleted > 0) lines.push(`Identity: ${result.identitiesDeleted} rows`);
 	if (result.r2ObjectsDeleted > 0) lines.push(`R2 objects: ${result.r2ObjectsDeleted}`);
 

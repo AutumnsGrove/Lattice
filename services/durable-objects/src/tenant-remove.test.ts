@@ -88,11 +88,17 @@ function makeEnv(
 		otherBlogViaEngine?: string;
 		/** Supply a Zephyr stub to exercise the notification path. */
 		zephyr?: { ok?: boolean };
+		/** A `platform_billing` row, for the cancellation step (#1745). */
+		billingRow?: { subscription_id: string | null; plan?: string; status?: string } | null;
+		/** Supply a billing-api stub (the `BILLING` service binding). */
+		billing?: { ok?: boolean };
 	} = {},
 ) {
 	const deletes: Recorded[] = [];
 	const flushed: string[] = [];
 	const r2Deleted: string[] = [];
+	/** Order in which the two systems were touched — billing must come first. */
+	const events: string[] = [];
 
 	const makePrepare = (db: "engine" | "curios" | "obs") => (sql: string) => ({
 		bind(...bindings: unknown[]) {
@@ -100,6 +106,15 @@ function makeEnv(
 				async first<T>() {
 					if (sql.includes("FROM tenants WHERE subdomain")) {
 						return (options.tenantRow ?? null) as T | null;
+					}
+					if (sql.includes("FROM platform_billing")) {
+						const row = options.billingRow;
+						if (!row) return null;
+						return {
+							provider_subscription_id: row.subscription_id,
+							plan: row.plan ?? "seedling",
+							status: row.status ?? "active",
+						} as T;
 					}
 					// The registry asks for counts; report zero so nothing is "left over".
 					if (/^SELECT COUNT\(\*\)/i.test(sql.trim())) return { n: 0 } as T;
@@ -118,6 +133,7 @@ function makeEnv(
 				},
 				async run() {
 					deletes.push({ sql: `${db}:${sql}`, bindings });
+					events.push(/^INSERT/i.test(sql.trim()) ? "audit" : "delete");
 					return { changes: 1 };
 				},
 			};
@@ -140,6 +156,20 @@ function makeEnv(
 									statusText: options.zephyr?.ok === false ? "boom" : "OK",
 								}),
 						),
+					},
+				}
+			: {}),
+		...(options.billing
+			? {
+					BILLING: {
+						fetch: vi.fn(async () => {
+							events.push("billing");
+							return new Response(JSON.stringify({ success: options.billing?.ok !== false }), {
+								status: options.billing?.ok === false ? 402 : 200,
+								statusText: options.billing?.ok === false ? "payment_required" : "OK",
+								headers: { "Content-Type": "application/json" },
+							});
+						}),
 					},
 				}
 			: {}),
@@ -167,6 +197,7 @@ function makeEnv(
 		deletes,
 		flushed,
 		r2Deleted,
+		events,
 		authDeletes: env.GROVEAUTH_DB.deletes,
 	};
 }
@@ -478,7 +509,13 @@ describe("POST /tenant/remove", () => {
 		expect(body.dryRun).toBe(false);
 		expect(deletes.length).toBeGreaterThan(0);
 		// Two databases carry the rows; deletion order is curios → obs → engine.
-		expect(deletes.some((d) => d.sql.startsWith("curios:")) || body.removed >= 0).toBe(true);
+		expect(deletes.some((d) => d.sql.startsWith("curios:"))).toBe(true);
+		// The response shape is a contract with `gw tenant delete`
+		// (`tenantRemoveResponse` in tools/grove-wrap-go/cmd/tenant.go). A field
+		// renamed here decodes as a zero there, silently — so the key is asserted,
+		// not just the count.
+		expect(body).toHaveProperty("removed");
+		expect(typeof body.removed).toBe("number");
 		expect(flushed).toContain("config/flush");
 		expect(r2Deleted).toHaveLength(2);
 		expect(body.cacheEvicted).toBe(true);
@@ -541,5 +578,123 @@ describe("POST /tenant/remove", () => {
 			env,
 		);
 		expect(((await res.json()) as any).summary).toContain("Removed gone.grove.place");
+	});
+});
+
+describe("billing (#1745)", () => {
+	const paying = { subscription_id: "sub_123", plan: "seedling" };
+
+	it("cancels before it deletes anything", async () => {
+		const { env, events } = makeEnv({
+			opsKey: KEY,
+			tenantRow,
+			billingRow: paying,
+			billing: { ok: true },
+		});
+
+		await worker.fetch(removeRequest({ subdomain: "gone", reason: "x", dryRun: false }, KEY), env);
+
+		// The cancellation finds the subscription through the rows the sweep
+		// deletes, so "after the sweep" would be a call that cannot be made. The
+		// only writes before it are the audit rows, which outlive the tenant.
+		const firstSweep = events.indexOf("billing");
+		expect(firstSweep).toBeGreaterThanOrEqual(0);
+		expect(new Set(events.slice(0, firstSweep))).toEqual(new Set(["audit"]));
+		expect(events.slice(firstSweep + 1)).toContain("delete");
+	});
+
+	it("cancels immediately, and leaves the email to the removal notice", async () => {
+		const { env } = makeEnv({
+			opsKey: KEY,
+			tenantRow,
+			billingRow: paying,
+			billing: { ok: true },
+		});
+		const billing = env as unknown as { BILLING: { fetch: ReturnType<typeof vi.fn> } };
+
+		const res = await worker.fetch(
+			removeRequest({ subdomain: "gone", reason: "x", dryRun: false }, KEY),
+			env,
+		);
+		const body = (await res.json()) as any;
+
+		const [request] = billing.BILLING.fetch.mock.calls[0] as [Request];
+		const sent = JSON.parse(await request.text());
+
+		expect(request.url).toContain("/cancel");
+		expect(sent).toEqual({ tenantId: "t-1", immediately: true, notify: false });
+		expect(body.billing).toMatchObject({ cancelled: true, subscriptionId: "sub_123" });
+		expect(body.summary).toContain("cancelled immediately");
+	});
+
+	it("says what it would cancel on a dry run, and cancels nothing", async () => {
+		const { env } = makeEnv({
+			opsKey: KEY,
+			tenantRow,
+			billingRow: paying,
+			billing: { ok: true },
+		});
+		const billing = env as unknown as { BILLING: { fetch: ReturnType<typeof vi.fn> } };
+
+		const res = await worker.fetch(removeRequest({ subdomain: "gone", reason: "x" }, KEY), env);
+		const body = (await res.json()) as any;
+
+		expect(billing.BILLING.fetch).not.toHaveBeenCalled();
+		expect(body.summary).toContain("would cancel immediately");
+	});
+
+	it("removes a free tenant with no billing binding at all", async () => {
+		// A missing binding must only stop a removal that has money on it.
+		const { env, deletes } = makeEnv({ opsKey: KEY, tenantRow });
+
+		const res = await worker.fetch(
+			removeRequest({ subdomain: "gone", reason: "x", dryRun: false }, KEY),
+			env,
+		);
+		const body = (await res.json()) as any;
+
+		expect(deletes.length).toBeGreaterThan(0);
+		expect(body.aborted).toBe(false);
+		expect(body.summary).toContain("no subscription on file");
+	});
+
+	it("abandons the removal when the provider refuses, deleting nothing", async () => {
+		const setup = makeEnv({
+			opsKey: KEY,
+			tenantRow,
+			billingRow: paying,
+			billing: { ok: false },
+		});
+
+		const res = await worker.fetch(
+			removeRequest({ subdomain: "gone", reason: "x", dryRun: false }, KEY),
+			setup.env,
+		);
+		const body = (await res.json()) as any;
+
+		const tenantDeletes = (recorded: Recorded[]) =>
+			recorded.filter((d) => !d.sql.includes("audit_log"));
+
+		expect(body.aborted).toBe(true);
+		expect(tenantDeletes(setup.deletes)).toHaveLength(0);
+		expect(body.notDone.billing).toContain("abandoned");
+		expect(body.summary).toContain("ABORTED");
+	});
+
+	it("refuses to remove a paying tenant when the binding is missing", async () => {
+		// Silence here would mean "deleted the rows that could cancel it", which is
+		// exactly how a card keeps getting charged (#1745).
+		const { env, deletes } = makeEnv({ opsKey: KEY, tenantRow, billingRow: paying });
+
+		const res = await worker.fetch(
+			removeRequest({ subdomain: "gone", reason: "x", dryRun: false }, KEY),
+			env,
+		);
+		const body = (await res.json()) as any;
+
+		expect(body.aborted).toBe(true);
+		// Only the intent and abort rows were written — nothing of the tenant's.
+		expect(deletes.filter((d) => !d.sql.includes("audit_log"))).toHaveLength(0);
+		expect(body.failures.some((f: string) => f.includes("BILLING"))).toBe(true);
 	});
 });

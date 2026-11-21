@@ -687,7 +687,15 @@ func runTenantCreate(cmd *cobra.Command, _ []string) error {
 type tenantRemoveResponse struct {
 	Summary      string `json:"summary"`
 	DryRun       bool   `json:"dryRun"`
+	Aborted      bool   `json:"aborted"`
 	Removed      int    `json:"removed"`
+	Billing      *struct {
+		None           bool   `json:"none"`
+		SubscriptionID string `json:"subscriptionId"`
+		Plan           string `json:"plan"`
+		Cancelled      bool   `json:"cancelled"`
+		Note           string `json:"note"`
+	} `json:"billing"`
 	IdentityPlan []struct {
 		Table string `json:"table"`
 		Rows  int    `json:"rows"`
@@ -702,6 +710,7 @@ type tenantRemoveResponse struct {
 	NotDone           struct {
 		Identity string `json:"identity"`
 		Email    string `json:"email"`
+		Billing  string `json:"billing"`
 	} `json:"notDone"`
 	Error   string `json:"error"`
 	Message string `json:"message"`
@@ -776,6 +785,14 @@ func runTenantDelete(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Println(out.Summary)
+
+	// An aborted removal stopped at the billing step and deleted nothing, so the
+	// lines below (row survived, DO not evicted, site still serving) would each be
+	// describing a removal that never started.
+	if out.Aborted {
+		ui.Warning("Nothing was deleted — the removal stopped before the sweep.")
+		return fmt.Errorf("removal abandoned: %s", out.NotDone.Billing)
+	}
 
 	if out.DryRun {
 		if len(out.IdentityPlan) > 0 {
