@@ -612,13 +612,18 @@ engine, 44 against curios and 14 against groveauth, and nothing joined them up.
 
 The command now does the identity and the email itself; it prints anything it
 could not do (`notDone` in the JSON, a warning in the summary) rather than
-leaving you to infer it. Two things it will still refuse or skip:
+leaving you to infer it. Three things it will still refuse or skip:
 
 - **A login that owns another blog.** Deleting the identity would lock the
   person out of a blog that is still theirs. It says which tenant, and the
   identity stays.
 - **An incomplete sweep.** It will not email "your account is gone" while rows
   remain — that is the #1737 mistake in a medium the person keeps.
+- **A site that is still serving.** After flushing the TenantDO it asks
+  `https://<subdomain>.grove.place/` and requires a 404, a 410, or a redirect. A
+  200 is recorded as `the site is still serving` and blocks the email (#1677).
+  An answer it cannot interpret — a 5xx, a timeout, a 403 from the edge — is a
+  failure too: not-confirmed is not confirmed.
 
 The engine also exposes `removeTenant()` directly for anything the command cannot
 express:

@@ -92,6 +92,12 @@ function makeEnv(
 		billingRow?: { subscription_id: string | null; plan?: string; status?: string } | null;
 		/** Supply a billing-api stub (the `BILLING` service binding). */
 		billing?: { ok?: boolean };
+		/**
+		 * What the post-removal probe sees. Defaults to 404, which is what a subdomain
+		 * with no active tenant answers — a test that reaches the real internet from
+		 * CI is not a test.
+		 */
+		siteStatus?: number | "unreachable";
 	} = {},
 ) {
 	const deletes: Recorded[] = [];
@@ -173,6 +179,14 @@ function makeEnv(
 					},
 				}
 			: {}),
+		// Every removal probes the site now (#1677). Stubbed by default so no test
+		// reaches the internet; `siteStatus` opts into the answers that matter.
+		SITE_FETCH: {
+			fetch: vi.fn(async () => {
+				if (options.siteStatus === "unreachable") throw new Error("network down");
+				return new Response("", { status: options.siteStatus ?? 404 });
+			}),
+		},
 		IMAGES: {
 			list: vi.fn(async () => ({
 				objects: [{ key: "tenants/t-1/a.png" }, { key: "tenants/t-1/b.png" }],
@@ -569,6 +583,65 @@ describe("POST /tenant/remove", () => {
 		// `fetch` resolves on 500, so an unchecked call would report success.
 		expect(body.cacheEvicted).toBe(false);
 		expect(body.failures.some((f: string) => f.includes("cache eviction failed"))).toBe(true);
+	});
+
+	it("probes the public site after the flush, and accepts a 404", async () => {
+		// #1677: the flush clearing is not the claim being made. Nine tenants answered
+		// 200 for two weeks because nobody asked the site itself.
+		const { env } = makeEnv({ opsKey: KEY, tenantRow, siteStatus: 404 });
+		const site = env as unknown as { SITE_FETCH: { fetch: ReturnType<typeof vi.fn> } };
+
+		const res = await worker.fetch(
+			removeRequest({ subdomain: "gone", reason: "x", dryRun: false }, KEY),
+			env,
+		);
+		const body = (await res.json()) as any;
+
+		const [request] = site.SITE_FETCH.fetch.mock.calls[0] as [Request];
+		expect(request.url).toBe("https://gone.grove.place/");
+		expect(body.cacheEvicted).toBe(true);
+	});
+
+	it("refuses to call a removal finished while the site still serves", async () => {
+		const { env } = makeEnv({ opsKey: KEY, tenantRow, siteStatus: 200 });
+
+		const res = await worker.fetch(
+			removeRequest({ subdomain: "gone", reason: "x", dryRun: false }, KEY),
+			env,
+		);
+		const body = (await res.json()) as any;
+
+		expect(body.cacheEvicted).toBe(false);
+		expect(body.failures.some((f: string) => f.includes("still serving"))).toBe(true);
+		// The person is not told it worked while their blog is up.
+		expect(body.summary).toContain("notified: no");
+	});
+
+	it("treats a redirect as gone — an old subdomain pointing elsewhere is not serving", async () => {
+		const { env } = makeEnv({ opsKey: KEY, tenantRow, siteStatus: 302 });
+
+		const res = await worker.fetch(
+			removeRequest({ subdomain: "gone", reason: "x", dryRun: false }, KEY),
+			env,
+		);
+		const body = (await res.json()) as any;
+
+		expect(body.cacheEvicted).toBe(true);
+	});
+
+	it("fails closed when the probe cannot get an answer", async () => {
+		// An unreachable site is not evidence of absence. This is the difference
+		// between "we removed it" and "we cannot tell".
+		const { env } = makeEnv({ opsKey: KEY, tenantRow, siteStatus: "unreachable" });
+
+		const res = await worker.fetch(
+			removeRequest({ subdomain: "gone", reason: "x", dryRun: false }, KEY),
+			env,
+		);
+		const body = (await res.json()) as any;
+
+		expect(body.cacheEvicted).toBe(false);
+		expect(body.failures.some((f: string) => f.includes("could not confirm"))).toBe(true);
 	});
 
 	it("reports the summary text an operator actually reads", async () => {
