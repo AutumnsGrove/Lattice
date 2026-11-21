@@ -23,7 +23,37 @@ export const EMAIL_CODE_MESSAGES = {
 	CODE_USED_UP: "That code has been used up. Send yourself a fresh one.",
 	VERIFY_FAILED: "We couldn't sign you in. Please try again.",
 	SERVICE_UNAVAILABLE: "Auth service unavailable. Please try again shortly.",
+	/**
+	 * Heartwood refused this identity on purpose. Deliberately vague about which
+	 * rule matched — naming it tells the operator what to rotate next — and it is
+	 * never a form-level error: it gets its own page state with a way to appeal.
+	 */
+	IDENTITY_UNAVAILABLE:
+		"This account isn't available. If you think that's a mistake, you can appeal and a person will read it.",
 } as const;
+
+/**
+ * Heartwood's refusal status for a blocked signup or a banned account.
+ *
+ * Both refusals are a 403 from the Better Auth hooks, and both mean the same
+ * thing to the person: we said no, on purpose, and there is a way to ask again.
+ * The *reasons* stay in the server log — see `HW_SVC_ERRORS`.
+ *
+ * 403 alone is not enough to conclude that: Better Auth answers a burned-out code
+ * with `TOO_MANY_ATTEMPTS`, also a 403. Those codes are listed below, so a
+ * refusal is "403 and not one of the codes we know" — which is why
+ * `isRefusal` takes both.
+ */
+export const REFUSAL_STATUS = 403;
+
+/** Better Auth's own 403s on the OTP endpoints — an expired code, not a person. */
+const OTP_CODES = new Set(["INVALID_OTP", "OTP_EXPIRED", "TOO_MANY_ATTEMPTS"]);
+
+/** True when this upstream failure is a deliberate refusal, not a fault. */
+export function isRefusal(status: number, code?: string): boolean {
+	if (status !== REFUSAL_STATUS) return false;
+	return !(code && OTP_CODES.has(code));
+}
 
 /** Trim + lowercase an email; null when it isn't plausibly an address. */
 export function normalizeEmail(raw: FormDataEntryValue | null | undefined): string | null {
@@ -53,7 +83,8 @@ export function statusForUpstreamFailure(status: number): 400 | 429 | 502 {
 }
 
 /** Map a failed Heartwood send-code response to a user-facing message. */
-export function messageForSendFailure(status: number): string {
+export function messageForSendFailure(status: number, code?: string): string {
+	if (isRefusal(status, code)) return EMAIL_CODE_MESSAGES.IDENTITY_UNAVAILABLE;
 	if (status === 429) return EMAIL_CODE_MESSAGES.RATE_LIMITED;
 	if (status === 400) return EMAIL_CODE_MESSAGES.INVALID_EMAIL;
 	return EMAIL_CODE_MESSAGES.SEND_FAILED;
@@ -70,6 +101,10 @@ export function messageForVerifyFailure(status: number, code?: string): string {
 		case "TOO_MANY_ATTEMPTS":
 			return EMAIL_CODE_MESSAGES.CODE_USED_UP;
 		default:
-			return EMAIL_CODE_MESSAGES.VERIFY_FAILED;
+			// Checked after the codes above so a burned-out code stays a burned-out
+			// code. A 403 with no OTP code is the hooks refusing the identity.
+			return isRefusal(status, code)
+				? EMAIL_CODE_MESSAGES.IDENTITY_UNAVAILABLE
+				: EMAIL_CODE_MESSAGES.VERIFY_FAILED;
 	}
 }

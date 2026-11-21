@@ -173,3 +173,110 @@ describe("verifyCode", () => {
 		expect(result.location).toBe(`/callback?redirect=${encodeURIComponent("https://grove.place")}`);
 	});
 });
+
+/**
+ * The "this account isn't available" state (#1719).
+ *
+ * One state, three doors: a refused signup at code-send, a refused identity at
+ * verify, and a sign-in that worked but whose session Heartwood will not honour
+ * because the account is banned. Each used to be "please try again in a moment",
+ * which is a loop a person cannot leave.
+ */
+describe("identity refusals", () => {
+	/** A Heartwood stub that answers differently per endpoint. */
+	function heartwood(answers: {
+		otp?: { body?: unknown; status?: number };
+		validate?: { body?: unknown; status?: number };
+	}) {
+		return vi.fn(async (url: string) => {
+			if (url.includes("/session/validate")) {
+				return json(answers.validate?.body ?? { valid: false }, answers.validate?.status ?? 200);
+			}
+			return json(answers.otp?.body ?? {}, answers.otp?.status ?? 200);
+		});
+	}
+
+	it("shows the state when the signup block refuses an address", async () => {
+		const authFetch = heartwood({ otp: { status: 403 } });
+
+		const result = await run("sendCode", makeEvent({ email: "spam@example.com" }, authFetch));
+
+		expect(result.status).toBe(403);
+		expect(result.data?.state).toBe("unavailable");
+		// Not a form error: there is no step to retry and no message to re-send.
+		expect(result.data?.error).toBeUndefined();
+		expect(result.data?.step).toBeUndefined();
+	});
+
+	it("shows the state when the identity hook refuses at verify", async () => {
+		const authFetch = heartwood({ otp: { status: 403 } });
+
+		const result = await run(
+			"verifyCode",
+			makeEvent({ email: "spam@example.com", code: "123456" }, authFetch),
+		);
+
+		expect(result.status).toBe(403);
+		expect(result.data?.state).toBe("unavailable");
+	});
+
+	it("keeps a burned-out code as a burned-out code, not a refusal", async () => {
+		// Better Auth answers TOO_MANY_ATTEMPTS with a 403 as well. Reading the
+		// status alone would tell someone their account is unavailable when the
+		// only problem is that their code expired.
+		const authFetch = heartwood({ otp: { body: { code: "TOO_MANY_ATTEMPTS" }, status: 403 } });
+
+		const result = await run(
+			"verifyCode",
+			makeEvent({ email: "a@b.co", code: "123456" }, authFetch),
+		);
+
+		expect(result.data?.state).toBeUndefined();
+		expect(result.data?.error).toBe(EMAIL_CODE_MESSAGES.CODE_USED_UP);
+	});
+
+	it("refuses to hand a banned account a session it cannot use", async () => {
+		const authFetch = heartwood({
+			otp: {
+				body: { success: true },
+				status: 200,
+			},
+			validate: { body: { valid: false, reason: "banned" } },
+		});
+		// The OTP verify response has to carry a session cookie for the ban to be
+		// worth checking; a plain JSON body has none, so add one.
+		authFetch.mockResolvedValueOnce(
+			new Response("{}", {
+				status: 200,
+				headers: { "set-cookie": "better-auth.session_token=tok.sig; Path=/; HttpOnly" },
+			}),
+		);
+
+		const event = makeEvent({ email: "banned@grove.place", code: "123456" }, authFetch);
+		const result = await run("verifyCode", event);
+
+		expect(result.data?.state).toBe("unavailable");
+		// A cookie the hub refuses to honour is worse than none: it makes the next
+		// sign-in look like it half-worked.
+		expect(event.cookies.delete).toHaveBeenCalledWith("better-auth.session_token", {
+			path: "/",
+		});
+		expect(result.location).toBeUndefined();
+	});
+
+	it("lets a healthy session through", async () => {
+		const authFetch = heartwood({ validate: { body: { valid: true } } });
+		authFetch.mockResolvedValueOnce(
+			new Response("{}", {
+				status: 200,
+				headers: { "set-cookie": "better-auth.session_token=tok.sig; Path=/; HttpOnly" },
+			}),
+		);
+
+		const event = makeEvent({ email: "a@b.co", code: "123456" }, authFetch);
+		const result = await run("verifyCode", event);
+
+		expect(result.data?.state).toBeUndefined();
+		expect(result.redirectStatus).toBe(302);
+	});
+});
