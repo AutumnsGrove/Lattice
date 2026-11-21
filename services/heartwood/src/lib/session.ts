@@ -16,6 +16,8 @@
  * This prevents userId enumeration by encrypting the entire payload.
  */
 
+import { resolveClientIP } from "@autumnsgrove/lattice/server";
+
 // Salt size for per-cookie key derivation (16 bytes = 128 bits)
 const SALT_SIZE = 16;
 // IV size for AES-GCM (12 bytes = 96 bits, recommended by NIST)
@@ -455,9 +457,13 @@ export function parseDeviceName(userAgent: string | null): string {
 
 /**
  * Get client IP address from request
+ *
+ * Shared resolver: `cf-connecting-ip` when it is genuinely the client, a
+ * Worker-forwarded address when the request came over a service binding, and
+ * null rather than Cloudflare's own Worker IP. See #1679.
  */
 export function getClientIP(request: Request): string | null {
-	return request.headers.get("cf-connecting-ip") || request.headers.get("x-forwarded-for") || null;
+	return resolveClientIP(request).ip;
 }
 
 /**

@@ -17,6 +17,7 @@ import { redirect } from "@sveltejs/kit";
 import { dev } from "$app/environment";
 import type { RequestHandler } from "./$types";
 import { validateRedirectUrl } from "$lib/redirect";
+import { clientIpHeaders } from "@autumnsgrove/lattice/server";
 import { isRefusalRedirect } from "$lib/oauth-refusal";
 import { clearSessionCookies } from "$lib/session-cookies";
 
@@ -39,7 +40,7 @@ function authCookieHeader(cookies: { get(name: string): string | undefined }): s
 		.join("; ");
 }
 
-export const GET: RequestHandler = async ({ url, cookies, platform }) => {
+export const GET: RequestHandler = async ({ url, cookies, platform, getClientAddress }) => {
 	// Try query param first, then fall back to cookie.
 	// The cookie fallback handles the case where Better Auth's OAuth redirect
 	// drops the ?redirect= query parameter from the callbackURL.
@@ -67,7 +68,11 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 		try {
 			const response = await platform.env.AUTH.fetch(`${authBaseUrl}/session/validate`, {
 				method: "POST",
-				headers: { Cookie: authCookieHeader(cookies), "Content-Type": "application/json" },
+				headers: {
+					Cookie: authCookieHeader(cookies),
+					"Content-Type": "application/json",
+					...clientIpHeaders(getClientAddress()),
+				},
 				body: "{}",
 				redirect: "manual",
 			});

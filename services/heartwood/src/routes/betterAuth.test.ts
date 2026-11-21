@@ -62,6 +62,7 @@ import {
 	cleanupRequestContext as mockCleanupRequestContext,
 } from "../lib/sessionBridge.js";
 import { getSessionFromRequest } from "../lib/session.js";
+import { CLOUDFLARE_WORKER_CLIENT_IP } from "@autumnsgrove/lattice/server";
 
 // Type-safe response interfaces for tests
 interface ErrorResponse {
@@ -386,5 +387,80 @@ describe("Better Auth Handler - OAuth callback error redirect", () => {
 
 		expect(res.status).toBe(302);
 		expect(res.headers.get("Location")).toContain("https://heartwood.grove.place/login");
+	});
+});
+
+// =============================================================================
+// Client IP at the boundary (#1679)
+// =============================================================================
+
+describe("Better Auth handler - client IP", () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("hands Better Auth the forwarded client address, not Cloudflare's Worker IP", async () => {
+		const mockHandler = mockAuthHandler(new Response(JSON.stringify({ ok: true })));
+		(createAuth as ReturnType<typeof vi.fn>).mockReturnValue({ handler: mockHandler });
+
+		const app = createApp();
+		await app.request(
+			"/api/auth/sign-in/email-otp",
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					// What a Worker→Worker subrequest looks like on arrival.
+					"cf-connecting-ip": CLOUDFLARE_WORKER_CLIENT_IP,
+					// What the login hub forwarded before the hop.
+					"x-real-ip": "198.51.100.4",
+				},
+				body: JSON.stringify({ email: "friend@example.com", otp: "123456" }),
+			},
+			mockEnv,
+		);
+
+		const forwarded = mockHandler.mock.calls[0]?.[0] as Request;
+		// Better Auth's own rate limiter and session writer read these headers,
+		// so this is what decides whether per-IP limits are per-IP at all.
+		expect(forwarded.headers.get("cf-connecting-ip")).toBe("198.51.100.4");
+		expect(forwarded.headers.get("x-real-ip")).toBe("198.51.100.4");
+	});
+
+	it("strips the Worker IP rather than letting it become a rate-limit key", async () => {
+		const mockHandler = mockAuthHandler(new Response(JSON.stringify({ ok: true })));
+		(createAuth as ReturnType<typeof vi.fn>).mockReturnValue({ handler: mockHandler });
+
+		const app = createApp();
+		await app.request(
+			"/api/auth/sign-in/social",
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					"cf-connecting-ip": CLOUDFLARE_WORKER_CLIENT_IP,
+				},
+				body: JSON.stringify({ provider: "google" }),
+			},
+			mockEnv,
+		);
+
+		const forwarded = mockHandler.mock.calls[0]?.[0] as Request;
+		expect(forwarded.headers.get("cf-connecting-ip")).toBeNull();
+	});
+
+	it("leaves a direct edge request's headers untouched", async () => {
+		const mockHandler = mockAuthHandler(new Response(JSON.stringify({ ok: true })));
+		(createAuth as ReturnType<typeof vi.fn>).mockReturnValue({ handler: mockHandler });
+
+		const app = createApp();
+		await app.request(
+			"/api/auth/session",
+			{ method: "GET", headers: { "cf-connecting-ip": "203.0.113.7" } },
+			mockEnv,
+		);
+
+		const forwarded = mockHandler.mock.calls[0]?.[0] as Request;
+		expect(forwarded.headers.get("cf-connecting-ip")).toBe("203.0.113.7");
 	});
 });
