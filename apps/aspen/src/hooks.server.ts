@@ -26,6 +26,7 @@ import {
 	validateGroveSession,
 } from "@autumnsgrove/lattice/server";
 import { getUserByTenantId } from "@autumnsgrove/lattice/server/services/users";
+import { isSuspendedSubdomain } from "$lib/server/suspension";
 import { isValidSubdomain } from "@autumnsgrove/lattice/utils/subdomain";
 
 /**
@@ -601,8 +602,17 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 					`https://${redirectTarget}.grove.place${event.url.pathname}${event.url.search}`,
 				);
 			}
-			// Subdomain not registered or inactive
-			event.locals.context = { type: "not_found", subdomain };
+			// A suspended grove is not a missing one. The lookup above filters on
+			// `active = 1` on purpose and that must not change (#1677) — so ask the
+			// narrower question instead: does a row exist here that was switched off?
+			// Telling its owner their garden "doesn't exist yet" is the shape of #1720,
+			// and the page invites them to sign up again for a grove they still own.
+			if (await isSuspendedSubdomain(event.platform?.env?.DB, subdomain)) {
+				event.locals.context = { type: "suspended", subdomain };
+			} else {
+				// Subdomain not registered
+				event.locals.context = { type: "not_found", subdomain };
+			}
 		} else {
 			// Valid tenant - set context (config from TenantDO cache)
 			event.locals.context = {
@@ -629,7 +639,11 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 	// it falls through to the not-found page (served as a real 404, see below). A subdomain
 	// that never existed and one that was suspended look the same from outside, on purpose.
 	// Do not move this back in front of the tenant lookup; hooks.server.test.ts pins the order.
-	if (needsChallenge && event.locals.context.type !== "not_found") {
+	if (
+		needsChallenge &&
+		event.locals.context.type !== "not_found" &&
+		event.locals.context.type !== "suspended"
+	) {
 		const returnUrl = encodeURIComponent(event.url.pathname + event.url.search);
 		throw redirect(302, `/verify?return=${returnUrl}`);
 	}
@@ -1043,7 +1057,7 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 	// that rendered successfully is changed: JSON from an API route and any status a route
 	// chose for itself are left alone.
 	if (
-		event.locals.context.type === "not_found" &&
+		(event.locals.context.type === "not_found" || event.locals.context.type === "suspended") &&
 		response.status === 200 &&
 		response.headers.get("content-type")?.includes("text/html")
 	) {

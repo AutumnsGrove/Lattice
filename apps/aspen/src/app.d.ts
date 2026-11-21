@@ -183,7 +183,16 @@ type AppContext =
 	| { type: "landing" }
 	| { type: "app"; app: string; routePrefix: string }
 	| { type: "tenant"; tenant: TenantInfo }
-	| { type: "not_found"; subdomain: string };
+	| { type: "not_found"; subdomain: string }
+	/**
+	 * A grove whose row exists but is switched off (`tenants.active = 0`).
+	 *
+	 * Carries the subdomain and nothing else — no theme, no config, no owner
+	 * detail. The distinction from `not_found` exists so the owner is not told
+	 * their garden never existed (#1720); the strict `active = 1` lookups that
+	 * keep a suspended site from serving are untouched (#1677).
+	 */
+	| { type: "suspended"; subdomain: string };
 
 /**
  * Tenant information from the database.
