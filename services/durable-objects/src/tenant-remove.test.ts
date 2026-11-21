@@ -585,7 +585,7 @@ describe("billing (#1745)", () => {
 	const paying = { subscription_id: "sub_123", plan: "seedling" };
 
 	it("cancels before it deletes anything", async () => {
-		const { env, deletes, events } = makeEnv({
+		const { env, events } = makeEnv({
 			opsKey: KEY,
 			tenantRow,
 			billingRow: paying,
