@@ -17,32 +17,7 @@ import { redirect } from "@sveltejs/kit";
 import { dev } from "$app/environment";
 import type { RequestHandler } from "./$types";
 import { validateRedirectUrl } from "$lib/redirect";
-
-/**
- * Better Auth's own OAuth failure codes.
- *
- * These describe a round-trip that did not finish — the person cancelled the
- * consent screen, the state did not match, the provider was unreachable — and
- * none of them means "this account is refused". Anything else arriving as
- * `?error=` is our own hooks talking: an APIError thrown from `user.create`
- * reaches the browser as its *message* with spaces turned into underscores,
- * because Better Auth keeps only the text on the redirect path.
- */
-const BENIGN_OAUTH_ERRORS = new Set([
-	"access_denied",
-	"invalid_request",
-	"invalid_scope",
-	"server_error",
-	"temporarily_unavailable",
-	"state_mismatch",
-	"state_not_found",
-	"no_code",
-	"invalid_code",
-	"no_callback_url",
-	"no_state",
-	"oauth_provider_not_found",
-	"no_session",
-]);
+import { isRefusalRedirect } from "$lib/oauth-refusal";
 
 const DEFAULT_AUTH_URL = "https://login.grove.place";
 
@@ -110,9 +85,9 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 	}
 
 	const oauthError = url.searchParams.get("error");
-	if (!hasSession && oauthError && !BENIGN_OAUTH_ERRORS.has(oauthError)) {
-		// A refusal from our own hooks, on the one path where Better Auth keeps the
-		// text and drops the code.
+	if (!hasSession && isRefusalRedirect(oauthError)) {
+		// Our own block hook, recognised by the sentence it attached — the only
+		// thing Better Auth keeps on this path.
 		throw redirect(302, "/?unavailable=1");
 	}
 
