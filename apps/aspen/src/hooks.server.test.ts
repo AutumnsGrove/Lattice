@@ -206,10 +206,14 @@ describe("a subdomain with no active tenant", () => {
 		expect(response.headers.get("location")).toBeNull();
 	});
 
-	it("tells the page it is suspended, and a stranger learns nothing from the status", async () => {
-		// Same 404 as a typo, deliberately: the outside world cannot enumerate
-		// suspended groves. Inside, the context differs so the page can stop saying
-		// "this garden doesn't exist yet" to the person who owns it (#1720).
+	it("tells the page it is suspended, while the status stays the same as a typo", async () => {
+		// Same 404 as a typo, deliberately — the status is not a signal. The *body*
+		// differs, and that is the deliberate part: a stranger is told the grove is
+		// not available (which is true) rather than that it never existed (which is
+		// not), while the owner gets the explanation and a way to appeal. A visitor
+		// can tell a paused grove from an unregistered name; #1720 accepted that,
+		// on the grounds that "this grove isn't available right now" is the honest
+		// answer for someone who came here on purpose.
 		const suspended = await run(createWorld({ tenants: { paused: false } }), {
 			host: "paused.grove.place",
 		});
@@ -454,8 +458,8 @@ describe("the not-found status", () => {
 	});
 
 	it("gives a suspended grove the same 404 a typo gets, so it is not indexed", async () => {
-		// A 200 would put "this garden is resting" in search results for a grove
-		// that is merely paused, and the page carries no content worth crawling.
+		// A 200 would put a paused grove in search results and hand crawlers a page
+		// with nothing worth reading. The status says "not here"; the body says why.
 		const world = createWorld({ tenants: { paused: false } });
 
 		const { response } = await run(world, { host: "paused.grove.place" });
