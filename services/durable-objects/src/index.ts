@@ -84,6 +84,16 @@ interface Env {
 	 * removal (#1745). Service binding only — the API is not publicly reachable.
 	 */
 	BILLING?: { fetch: typeof fetch };
+	/**
+	 * Where the post-removal probe goes, as an injectable for tests (#1677).
+	 *
+	 * Production leaves this unset and the probe goes out over the public internet
+	 * to `https://<subdomain>.grove.place/`, which is the only question that
+	 * matters: not "did the cache clear?" but "does the site still answer?" A
+	 * service binding would skip the CDN and edge cache and answer a kinder
+	 * question than the one an operator is asking.
+	 */
+	SITE_FETCH?: { fetch: typeof fetch };
 	/** Where a removed account holder can reply. Defaults to hello@grove.place. */
 	SUPPORT_EMAIL?: string;
 	IMAGES: R2Bucket;
@@ -578,6 +588,49 @@ async function cancelSubscription(
 }
 
 /**
+ * Prove the site is gone, rather than trusting the flush (#1677).
+ *
+ * The flush clears the DO's memory and its own SQLite, and for two weeks after
+ * nine "removed" tenants it was the only evidence anyone had that they were
+ * gone — while all nine still answered 200 with the deleted account's name. So
+ * the last thing eviction does is ask the public internet.
+ *
+ * 404 is what Aspen serves for a subdomain with no active tenant, and it is a
+ * real 404 rather than a 200 page that says so (#1734). A redirect is also fine —
+ * an old subdomain pointed at another grove is not serving this one. A 2xx is the
+ * bug this issue is about, and an answer we cannot interpret (5xx, 403) is not a
+ * confirmation either, so both throw and `removeTenant` records a failed step.
+ */
+async function probeSiteGone(env: Env, subdomain: string): Promise<void> {
+	const url = `https://${subdomain}.grove.place/`;
+	// Explicitly bound: a service binding's `fetch` needs its own `this`, and a
+	// detached one fails at runtime with "Illegal invocation" (#1740).
+	const fetchSite = env.SITE_FETCH ? env.SITE_FETCH.fetch.bind(env.SITE_FETCH) : fetch;
+
+	let res: Response;
+	try {
+		res = await fetchSite(
+			new Request(url, {
+				method: "GET",
+				redirect: "manual",
+				// An edge that will not answer is not a reason to hold a removal open.
+				signal: AbortSignal.timeout(10_000),
+			}),
+		);
+	} catch (err) {
+		throw new Error(
+			`could not confirm the site is gone — probing ${url} failed: ${
+				err instanceof Error ? err.message : String(err)
+			}`,
+		);
+	}
+
+	if (res.status === 404 || res.status === 410 || (res.status >= 300 && res.status < 400)) return;
+
+	throw new Error(`the site is still serving — ${url} answered ${res.status}`);
+}
+
+/**
  * POST /tenant/remove — operator-only permanent removal (#1596 §B).
  *
  * This exists because the sweep cannot be done well from a CLI. `removeTenant`
@@ -797,6 +850,11 @@ async function handleTenantRemove(request: Request, env: Env): Promise<Response>
 					if (!res.ok) {
 						throw new Error(`flush returned ${res.status} ${res.statusText}`);
 					}
+
+					// The flush is done. Now check it from outside, because "the cache
+					// cleared" and "the site is gone" are different claims, and only the
+					// second one is the removal (#1677).
+					await probeSiteGone(env, tenant.subdomain);
 				},
 				deleteR2: async (tenant) => {
 					// R2 list() caps at 1000 keys per call and says so with

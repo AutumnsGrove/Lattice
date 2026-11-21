@@ -237,7 +237,7 @@ If anything was skipped, it goes in the report. A clean-looking report over an u
 - **Self-serve deletion** in Arbor — not built. Today this is an operator command.
 - **Billing.** Handled, and first. `removeTenant()` cancels the subscription through `cancelBilling` _before_ it deletes anything, because the cancellation finds the provider subscription through `platform_billing` — the rows the sweep destroys. The provider is **Stripe** (`platform_billing.provider_subscription_id`); the differently-named provider left in old docs is history, not a second integration. A tenant with no subscription says so ("no subscription on file") and the removal continues. A cancellation that _fails_ aborts the removal with nothing deleted — retry, or cancel by hand in the Stripe dashboard and run it again (#1745).
 - **Custom domains.** A BYOD domain keeps pointing at nothing; an Evergreen domain needs a transfer code before deletion.
-- **The site actually 404s** — currently unobservable from outside (#1734).
+- **Whether the _site_ is gone.** It is asserted now, not assumed: after flushing the TenantDO the removal fetches `https://<subdomain>.grove.place/` and records a failed step unless it gets a 404, a 410, or a redirect. A 200 means the removal is incomplete and nobody is emailed — so a `--write` that ends with no failures means the site was actually asked, from outside (#1677).
 
 ## Where The Pieces Live
 
