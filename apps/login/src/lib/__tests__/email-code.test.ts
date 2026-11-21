@@ -4,6 +4,7 @@ import {
 	normalizeEmail,
 	normalizeCode,
 	messageForSendFailure,
+	isRefusal,
 	messageForVerifyFailure,
 	statusForUpstreamFailure,
 } from "../email-code";
@@ -79,5 +80,31 @@ describe("statusForUpstreamFailure", () => {
 		expect(statusForUpstreamFailure(503)).toBe(502);
 		expect(statusForUpstreamFailure(400)).toBe(400);
 		expect(statusForUpstreamFailure(403)).toBe(400);
+	});
+});
+
+describe("isRefusal", () => {
+	it("treats a bare 403 as the hooks refusing the identity", () => {
+		expect(isRefusal(403)).toBe(true);
+	});
+
+	it("leaves Better Auth's own 403s alone", () => {
+		// A burned-out code is also a 403. It is not a refusal, and telling a
+		// person their account is unavailable over an expired code would be a lie
+		// with an appeal link attached (#1719).
+		expect(isRefusal(403, "TOO_MANY_ATTEMPTS")).toBe(false);
+		expect(isRefusal(403, "OTP_EXPIRED")).toBe(false);
+		expect(isRefusal(403, "INVALID_OTP")).toBe(false);
+	});
+
+	it("is false for everything that is not a 403", () => {
+		expect(isRefusal(429)).toBe(false);
+		expect(isRefusal(500)).toBe(false);
+		expect(isRefusal(400, "INVALID_OTP")).toBe(false);
+	});
+
+	it("maps a refusal to the unavailable copy, at both doors", () => {
+		expect(messageForSendFailure(403)).toBe(EMAIL_CODE_MESSAGES.IDENTITY_UNAVAILABLE);
+		expect(messageForVerifyFailure(403)).toBe(EMAIL_CODE_MESSAGES.IDENTITY_UNAVAILABLE);
 	});
 });

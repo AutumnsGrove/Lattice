@@ -17,6 +17,7 @@
 // =============================================================================
 
 import type { GroveErrorDef } from "@autumnsgrove/lattice/errors";
+import { SIGNIN_REFUSAL_MESSAGE } from "@autumnsgrove/lattice/auth/signin-refusal";
 
 // =============================================================================
 // ERROR CATALOG
@@ -98,10 +99,10 @@ export const HW_SVC_ERRORS = {
 	SIGNUP_IDENTITY_BLOCKED: {
 		code: "HW-SVC-044",
 		category: "user" as const,
-		// Deliberately vague: naming the rule, the domain, or the reason tells the
-		// operator what to rotate next. The real reason is in the server log.
-		userMessage:
-			"We're not able to create an account with this email address. If you think that's a mistake, write to hello@grove.place.",
+		// This sentence is also the OAuth redirect's identifier — Better Auth keeps
+		// the message and drops the code on that path — so it lives in one shared
+		// place rather than being written down twice (#1719).
+		userMessage: SIGNIN_REFUSAL_MESSAGE,
 		adminMessage: "Signup rejected: identity matched a signup_blocks entry.",
 	},
 

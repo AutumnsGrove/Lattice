@@ -39,6 +39,7 @@ import {
 	invalidateSession as invalidateBetterAuthSession,
 	invalidateAllUserSessions as invalidateAllBetterAuthSessions,
 } from "../lib/server/session.js";
+import { isBannedBetterAuthSession } from "../lib/server/ban-status.js";
 import type { SessionDO } from "../durables/SessionDO.js";
 import { checkRouteRateLimit } from "../middleware/rateLimit.js";
 import { getClientIP } from "../middleware/security.js";
@@ -236,6 +237,16 @@ session.post("/validate", async (c) => {
 			},
 			session: null, // Better Auth manages its own sessions
 		});
+	}
+
+	// A banned account has no valid session by design — `validateSession` answers
+	// null for it, which keeps every caller safe. Login is the one caller that has
+	// to say what happened instead of showing the sign-in form again, so the
+	// reason is named here and only here (#1719). This adds no route, no new
+	// state, and nothing an attacker can use: an invalid session still says
+	// nothing about whether an address has an account.
+	if (await isBannedBetterAuthSession(c.req.raw, c.env)) {
+		return c.json({ valid: false, reason: "banned" });
 	}
 
 	return c.json({ valid: false });
