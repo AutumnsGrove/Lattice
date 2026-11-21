@@ -65,10 +65,14 @@ async function rateLimit(
  * A 404 also means there is nothing charging under that id, which is the point
  * of the call. It cannot detect a stored id that points at some *other* live
  * subscription; no code can, and that is an operator-visible data problem.
+ *
+ * The `resource_missing` code is required rather than any 404, because a
+ * misconfigured API base URL answers 404 for every request — and "every cancel
+ * silently succeeded" is a worse failure than a removal that aborts and needs an
+ * operator. An unrecognised error fails closed.
  */
 function isAlreadyCancelled(err: unknown): boolean {
 	if (!(err instanceof StripeAPIError)) return false;
-	if (err.statusCode === 404) return true;
 	if (err.stripeCode === "resource_missing") return true;
 	return /already (been )?cancel/i.test(err.message);
 }

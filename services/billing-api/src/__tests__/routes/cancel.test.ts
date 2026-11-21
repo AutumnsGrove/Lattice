@@ -24,11 +24,15 @@ vi.mock("../../stripe/client.js", () => ({
 	StripeAPIError: class extends Error {
 		type: string;
 		statusCode: number;
+		stripeCode?: string;
 
 		constructor(e: any, s: number) {
 			super(e.message);
 			this.type = e.type;
 			this.statusCode = s;
+			// Mirrors the real class, which reads `error.code` — the cancellation's
+			// idempotency branch keys on `resource_missing`.
+			this.stripeCode = e.code;
 		}
 	},
 }));
@@ -412,7 +416,11 @@ describe("POST /cancel", () => {
 
 		mockStripe.cancelSubscription.mockRejectedValueOnce(
 			new StripeAPIError(
-				{ message: "No such subscription: sub_cancelled_by_hand", type: "invalid_request_error" },
+				{
+					message: "No such subscription: sub_cancelled_by_hand",
+					type: "invalid_request_error",
+					code: "resource_missing",
+				},
 				404,
 			),
 		);
@@ -436,7 +444,6 @@ describe("POST /cancel", () => {
 	});
 
 	it("still reports a real Stripe failure", async () => {
-		// The idempotent branch must not swallow the genuinely broken case.
 		const { db, mocks } = createMockD1();
 		mocks.first.mockResolvedValueOnce({
 			id: "billing-7",
@@ -451,6 +458,36 @@ describe("POST /cancel", () => {
 
 		mockStripe.cancelSubscription.mockRejectedValueOnce(
 			new StripeAPIError({ message: "Your card was declined", type: "card_error" }, 402),
+		);
+
+		const env = createMockEnv({ DB: db });
+		const response = await cancel.request(
+			"/",
+			{ method: "POST", body: JSON.stringify({ tenantId: TEST_TENANT_ID }) },
+			env,
+		);
+
+		expect(response.status).toBe(500);
+	});
+
+	it("does not treat a bare 404 as a cancellation", async () => {
+		// A wrong API base URL answers 404 to everything. Reading that as "already
+		// cancelled" would mark rows cancelled and let a removal delete the tenant
+		// while the subscription keeps charging — so only `resource_missing` counts.
+		const { db, mocks } = createMockD1();
+		mocks.first.mockResolvedValueOnce({
+			id: "billing-9",
+			plan: "seedling",
+			status: "active",
+			provider_subscription_id: "sub_live",
+			current_period_end: null,
+			subdomain: "gone",
+			email: null,
+			display_name: null,
+		});
+
+		mockStripe.cancelSubscription.mockRejectedValueOnce(
+			new StripeAPIError({ message: "Not Found", type: "invalid_request_error" }, 404),
 		);
 
 		const env = createMockEnv({ DB: db });
