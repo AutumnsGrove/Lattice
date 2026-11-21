@@ -8,6 +8,7 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import cancel from "../../routes/cancel.js";
+import { StripeAPIError } from "../../stripe/client.js";
 import { sendCancellationEmail } from "../../services/email.js";
 import {
 	createMockEnv,
@@ -390,5 +391,107 @@ describe("POST /cancel", () => {
 		);
 
 		expect(keys[0]).toContain(`tenant:${TEST_TENANT_ID}`);
+	});
+
+	it("treats a subscription Stripe has already cancelled as success", async () => {
+		// A removal cancels *before* it deletes and retries the whole operation, so a
+		// cancel that can never succeed makes the tenant undeletable. A 404 here means
+		// nothing is charging under that id, which is the outcome asked for.
+		const { db, mocks } = createMockD1();
+		mocks.first.mockResolvedValueOnce({
+			id: "billing-6",
+			plan: "seedling",
+			status: "active",
+			provider_subscription_id: "sub_cancelled_by_hand",
+			current_period_end: Math.floor(Date.now() / 1000) + 86400 * 30,
+			subdomain: "gone",
+			email: "gone@example.com",
+			display_name: "Gone",
+		});
+		mocks.run.mockResolvedValueOnce({ meta: { changes: 1 }, success: true });
+
+		mockStripe.cancelSubscription.mockRejectedValueOnce(
+			new StripeAPIError(
+				{ message: "No such subscription: sub_cancelled_by_hand", type: "invalid_request_error" },
+				404,
+			),
+		);
+
+		const env = createMockEnv({ DB: db });
+		const response = await cancel.request(
+			"/",
+			{
+				method: "POST",
+				body: JSON.stringify({ tenantId: TEST_TENANT_ID, immediately: true, notify: false }),
+			},
+			env,
+		);
+		const body = (await response.json()) as Record<string, unknown>;
+
+		expect(response.status).toBe(200);
+		expect(body.success).toBe(true);
+		expect(body.alreadyCancelled).toBe(true);
+		// And the row is marked, so the next attempt skips the call entirely.
+		expect(mocks.prepare).toHaveBeenCalledWith(expect.stringContaining("status = 'cancelled'"));
+	});
+
+	it("still reports a real Stripe failure", async () => {
+		// The idempotent branch must not swallow the genuinely broken case.
+		const { db, mocks } = createMockD1();
+		mocks.first.mockResolvedValueOnce({
+			id: "billing-7",
+			plan: "seedling",
+			status: "active",
+			provider_subscription_id: "sub_live",
+			current_period_end: null,
+			subdomain: "gone",
+			email: null,
+			display_name: null,
+		});
+
+		mockStripe.cancelSubscription.mockRejectedValueOnce(
+			new StripeAPIError({ message: "Your card was declined", type: "card_error" }, 402),
+		);
+
+		const env = createMockEnv({ DB: db });
+		const response = await cancel.request(
+			"/",
+			{ method: "POST", body: JSON.stringify({ tenantId: TEST_TENANT_ID }) },
+			env,
+		);
+
+		expect(response.status).toBe(500);
+	});
+
+	it("finds a subscription whose owner row is missing", async () => {
+		// The owner details are only needed for the email. An INNER JOIN on
+		// user_onboarding made a tenant with no onboarding row answer NO_CUSTOMER,
+		// which a removal reads as "nothing to cancel" and deletes the rows that
+		// could have cancelled a live subscription.
+		const { db, mocks } = createMockD1();
+		mocks.first.mockResolvedValueOnce({
+			id: "billing-8",
+			plan: "oak",
+			status: "active",
+			provider_subscription_id: "sub_orphan",
+			current_period_end: null,
+			subdomain: "orphan",
+			email: null,
+			display_name: null,
+		});
+		mocks.run.mockResolvedValueOnce({ meta: { changes: 1 }, success: true });
+
+		const env = createMockEnv({ DB: db });
+		const response = await cancel.request(
+			"/",
+			{ method: "POST", body: JSON.stringify({ tenantId: TEST_TENANT_ID, immediately: true }) },
+			env,
+		);
+
+		expect(response.status).toBe(200);
+		expect(mocks.prepare).toHaveBeenCalledWith(
+			expect.stringContaining("LEFT JOIN user_onboarding"),
+		);
+		expect(sendCancellationEmail).not.toHaveBeenCalled();
 	});
 });

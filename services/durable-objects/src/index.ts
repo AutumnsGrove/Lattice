@@ -562,11 +562,18 @@ async function cancelSubscription(
 		);
 	}
 
+	// billing-api answers 200 for a subscription Stripe already considers gone
+	// (`alreadyCancelled`), which is the case a hand-cancel in the dashboard leaves
+	// behind. Saying "cancelled" there would be technically true and unhelpful.
+	const paid = (await res.json().catch(() => null)) as { alreadyCancelled?: boolean } | null;
+
 	return {
 		subscriptionId: row.provider_subscription_id,
 		plan: row.plan,
 		cancelled: true,
-		note: "cancelled immediately",
+		note: paid?.alreadyCancelled
+			? "was already cancelled at Stripe — nothing left to stop"
+			: "cancelled immediately",
 	};
 }
 
