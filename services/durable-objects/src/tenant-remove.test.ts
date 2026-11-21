@@ -509,7 +509,13 @@ describe("POST /tenant/remove", () => {
 		expect(body.dryRun).toBe(false);
 		expect(deletes.length).toBeGreaterThan(0);
 		// Two databases carry the rows; deletion order is curios → obs → engine.
-		expect(deletes.some((d) => d.sql.startsWith("curios:")) || body.removed >= 0).toBe(true);
+		expect(deletes.some((d) => d.sql.startsWith("curios:"))).toBe(true);
+		// The response shape is a contract with `gw tenant delete`
+		// (`tenantRemoveResponse` in tools/grove-wrap-go/cmd/tenant.go). A field
+		// renamed here decodes as a zero there, silently — so the key is asserted,
+		// not just the count.
+		expect(body).toHaveProperty("removed");
+		expect(typeof body.removed).toBe("number");
 		expect(flushed).toContain("config/flush");
 		expect(r2Deleted).toHaveLength(2);
 		expect(body.cacheEvicted).toBe(true);

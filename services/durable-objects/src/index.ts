@@ -817,7 +817,7 @@ async function handleTenantRemove(request: Request, env: Env): Promise<Response>
 			{
 				summary: formatRemovalResult(result),
 				dryRun: result.dryRun,
-				remove: result.plan.totalRows,
+				removed: result.plan.totalRows,
 				aborted: result.aborted,
 				billing: result.billing,
 				identityPlan: identityPlan.filter((row) => row.rows > 0),
