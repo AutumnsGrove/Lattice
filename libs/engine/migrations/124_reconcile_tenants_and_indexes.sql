@@ -44,6 +44,20 @@
 -- ---------------------------------------------------------------------------
 -- tenants: the two columns 053 added and 116 tried to rebuild for
 -- ---------------------------------------------------------------------------
+--
+-- These two statements are NOT idempotent, and cannot be: SQLite has no
+-- `ADD COLUMN IF NOT EXISTS`, and the only way to add a column conditionally
+-- is to rebuild the table — which is the cascade-prone swap 116 must never
+-- run (see above).
+--
+-- The only databases where this can bite are ones where the *old* 053
+-- actually executed: local dev and scratch databases, never production
+-- (which lacks both columns). Those will fail here with `duplicate column
+-- name: last_activity_at`, and because the migration is then recorded as
+-- not-applied, `wrangler d1 migrations apply` will keep trying. Run
+-- `./scripts/dev-stack.sh reset` (or delete the local D1 file) once — a
+-- fresh bootstrap applies 053 as a no-op and reaches this file with 15
+-- columns, exactly like production.
 
 -- Constant default, not (unixepoch()): ALTER TABLE rejects non-constant defaults.
 ALTER TABLE tenants ADD COLUMN last_activity_at INTEGER DEFAULT 0;
@@ -82,9 +96,8 @@ CREATE INDEX IF NOT EXISTS idx_reclaimed_accounts_archive_expires
 -- Indexes the ledger claims and production does not have
 --
 -- None are unique, so no data was ever at risk — these are lookup paths that
--- silently became scans. Every one is `IF NOT EXISTS`, so this file can be
--- applied to production, a fresh bootstrap, or a local database that already
--- has some of them.
+-- silently became scans. Every one is `IF NOT EXISTS`, unlike the two ALTERs
+-- above, so this half is safe to apply to any database in any state.
 -- ---------------------------------------------------------------------------
 
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
