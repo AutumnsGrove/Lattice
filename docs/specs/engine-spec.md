@@ -43,7 +43,7 @@ If you're looking for information that was in this spec, here's where to find it
 | API Reference             | API Reference               |
 | Security                  | Security Considerations     |
 | Performance               | Performance Optimizations   |
-| Testing                   | See `testing-spec.md`       |
+| Testing                   | See `testing-strategy-spec.md`       |
 
 ---
 

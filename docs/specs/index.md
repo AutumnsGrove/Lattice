@@ -151,7 +151,7 @@ Core  Tools  Docs
 | **[gw CLI](gw-cli-spec.md)** | GroveWrap infrastructure CLI for D1, KV, R2 | Active |
 | **[Seasons](seasons-spec.md)** | Semantic versioning and release workflow | Active |
 | ~~[Versioning](versioning-spec.md)~~ | ~~npm publishing workflow~~ | Deprecated (merged into Seasons) |
-| **[Testing](testing-spec.md)** | Testing strategy and infrastructure | Active |
+| **[Testing Strategy](testing-strategy-spec.md)** | Happy, bad, and sad suites against the real Cloudflare runtime | Active |
 | **[Clearing](clearing-spec.md)** | Data export and migration tools | Active |
 
 ---
