@@ -464,25 +464,24 @@ The parent states the goal and the phases. Sub-issues are phase 1 only — phase
 are described in the parent and filed when phase 1 closes, because their real shape is
 not known yet and a backlog of guesses is a backlog nobody trusts.
 
-Draft titles, in plain language per Grove's issue convention (`Service: what happens in
+Filed titles, in plain language per Grove's issue convention (`Service: what happens in
 plain english`) — no PKCE, no DO, no SSR in a title:
 
 ```
-Parent  Aspen: prove the platform with real tests, not mocks
+Parent  #1765  Aspen: prove the platform works with real tests instead of mocks
 
-  1. Aspen: run tests against the real Cloudflare runtime
-  2. Aspen: test the reading pages with real data
-  3. Aspen: test logging in and staying logged in
-  4. Aspen: test publishing a bloom
-  5. Aspen: test changing site settings
-  6. Aspen: test exporting a site
-  7. Aspen: one full journey in a real browser
-  8. Repo: measure coverage on new code, not old code
+  #1766  Aspen: run tests inside the real Cloudflare runtime
+  #1767  Aspen: test the reading pages with real data
+  #1768  Aspen: test logging in and staying logged in
+  #1769  Aspen: test publishing a bloom
+  #1770  Aspen: test changing site settings
+  #1771  Aspen: test exporting a site
+  #1772  Aspen: one full journey in a real browser
+  #1773  Repo: only measure coverage on new code
 ```
 
-Sub-issue 1 is the harness. Sub-issue 7 is the Aspen E2E journey. Sub-issue 8 is the
-coverage gate, which is orthogonal to the migration and can land any time after the
-harness.
+#1766 is the harness. #1772 is the Aspen E2E journey. #1773 is the coverage gate, which
+is orthogonal to the migration and can land any time after the harness.
 
 Every sub-issue carries the same definition of done:
 
