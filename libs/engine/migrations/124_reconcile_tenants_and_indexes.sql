@@ -28,8 +28,18 @@
 --
 -- So this migration installs those columns the boring way — `ALTER TABLE ADD
 -- COLUMN`, which no dependent table can notice — along with the objects the
--- same backfill skipped. 053 and 116 are now documented no-ops so a fresh
--- bootstrap and production converge on this file instead of on each other.
+-- same backfill skipped.
+--
+-- Division of labour with the files around it:
+--   * 053 is a documented no-op; everything it claimed to install is here.
+--   * 116 still rebuilds `tenants` on a fresh bootstrap, but only to widen the
+--     `plan` CHECK so a from-scratch database can create a Wanderer (it
+--     produces fifteen columns, not seventeen, for exactly that reason). It
+--     never runs in production — the ledger has a row for it, and running it
+--     against a populated database cascades through 30 dependents.
+--
+-- A fresh bootstrap therefore reaches this file with fifteen columns, the same
+-- shape production has, and both leave with seventeen.
 --
 -- NOT reconciled here, deliberately:
 --   * `reserved_usernames.category` / `.notes` and 017's blocklist rows
@@ -50,9 +60,11 @@
 -- is to rebuild the table — which is the cascade-prone swap 116 must never
 -- run (see above).
 --
--- The only databases where this can bite are ones where the *old* 053
--- actually executed: local dev and scratch databases, never production
--- (which lacks both columns). Those will fail here with `duplicate column
+-- The only databases where this can bite are ones where an older 053 (or a
+-- 116 that still carried the columns) executed against data: local dev and
+-- scratch databases, never production — the single `grove-engine-db` D1 is
+-- shared by aspen and its beta deployment, so there is no second copy to
+-- check. Those will fail here with `duplicate column
 -- name: last_activity_at`, and because the migration is then recorded as
 -- not-applied, `wrangler d1 migrations apply` will keep trying. Run
 -- `./scripts/dev-stack.sh reset` (or delete the local D1 file) once — a
