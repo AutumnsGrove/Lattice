@@ -277,12 +277,12 @@ export const actions: Actions = {
 		// SvelteKit's default would encode them a second time and break the signature.
 		const cfHeaders = response.headers as unknown as { getAll?(name: string): string[] };
 		const setCookies = cfHeaders.getAll?.("set-cookie") ?? response.headers.getSetCookie();
-		const issued: { name: string; value: string }[] = [];
+		const issued: { name: string; value: string; options: SetCookieOpts }[] = [];
 		for (const raw of setCookies) {
 			const parsed = parseRawSetCookie(raw);
 			if (parsed) {
 				cookies.set(parsed.name, parsed.value, { ...parsed.options, encode: (v) => v });
-				issued.push({ name: parsed.name, value: parsed.value });
+				issued.push({ name: parsed.name, value: parsed.value, options: parsed.options });
 			}
 		}
 
@@ -291,9 +291,18 @@ export const actions: Actions = {
 		// straight back here (#1719).
 		if ((await sessionRefusal(platform.env, authCookieHeader(issued))) === "banned") {
 			// Leave nothing behind: a cookie the hub refuses to honour is a cookie that
-			// makes the next sign-in look like it half-worked.
+			// makes the next sign-in look like it half-worked. The deletion has to carry
+			// the attributes the cookie was set with — a browser treats a different
+			// `domain` as a different cookie, so `{ path: "/" }` alone leaves the
+			// `domain=.grove.place` original exactly where it was.
 			for (const cookie of issued) {
-				cookies.delete(cookie.name, { path: "/" });
+				const { path = "/", domain, secure, sameSite } = cookie.options;
+				cookies.delete(cookie.name, {
+					path,
+					...(domain ? { domain } : {}),
+					...(secure ? { secure } : {}),
+					...(sameSite ? { sameSite } : {}),
+				});
 			}
 			return fail(403, { state: "unavailable" as const, email });
 		}

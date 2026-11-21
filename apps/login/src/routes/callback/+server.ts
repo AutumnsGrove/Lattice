@@ -18,6 +18,7 @@ import { dev } from "$app/environment";
 import type { RequestHandler } from "./$types";
 import { validateRedirectUrl } from "$lib/redirect";
 import { isRefusalRedirect } from "$lib/oauth-refusal";
+import { clearSessionCookies } from "$lib/session-cookies";
 
 const DEFAULT_AUTH_URL = "https://login.grove.place";
 
@@ -81,6 +82,11 @@ export const GET: RequestHandler = async ({ url, cookies, platform }) => {
 	}
 
 	if (banned) {
+		// The cookies came off the OAuth round trip and mean nothing. Removing them
+		// matters more here than in the email flow: the person is about to be told
+		// their account is unavailable while the browser still holds a session
+		// cookie for every grove they visit.
+		clearSessionCookies(cookies, url.hostname);
 		throw redirect(302, "/?unavailable=1");
 	}
 

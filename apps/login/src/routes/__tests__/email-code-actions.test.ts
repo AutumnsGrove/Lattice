@@ -264,6 +264,33 @@ describe("identity refusals", () => {
 		expect(result.location).toBeUndefined();
 	});
 
+	it("removes the cookie with the attributes it was set with", async () => {
+		// Heartwood sets the cookie on `domain=.grove.place`. A deletion that omits
+		// the domain is a *different* cookie to the browser, so the forbidden
+		// session would survive the cleanup (#1719, caught in review).
+		const authFetch = heartwood({ validate: { body: { valid: false, reason: "banned" } } });
+		authFetch.mockResolvedValueOnce(
+			new Response("{}", {
+				status: 200,
+				headers: {
+					"set-cookie":
+						"better-auth.session_token=tok.sig; Path=/; Domain=.grove.place; Secure; SameSite=Lax; HttpOnly",
+				},
+			}),
+		);
+
+		const event = makeEvent({ email: "banned@grove.place", code: "123456" }, authFetch);
+		const result = await run("verifyCode", event);
+
+		expect(result.data?.state).toBe("unavailable");
+		expect(event.cookies.delete).toHaveBeenCalledWith("better-auth.session_token", {
+			path: "/",
+			domain: ".grove.place",
+			secure: true,
+			sameSite: "lax",
+		});
+	});
+
 	it("lets a healthy session through", async () => {
 		const authFetch = heartwood({ validate: { body: { valid: true } } });
 		authFetch.mockResolvedValueOnce(
