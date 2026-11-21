@@ -444,7 +444,7 @@ func setTenantActive(subdomain string, active bool) error {
 	rows, err := exec.D1Query(
 		engineDatabase,
 		fmt.Sprintf(
-			`SELECT id, subdomain, active FROM tenants WHERE subdomain = %s LIMIT 1`,
+			`SELECT id, subdomain, active, email FROM tenants WHERE subdomain = %s LIMIT 1`,
 			sqlString(subdomain),
 		),
 	)
@@ -477,6 +477,15 @@ func setTenantActive(subdomain string, active bool) error {
 		fmt.Println(string(out))
 	} else if active {
 		ui.Success(fmt.Sprintf("%s is active again", subdomain))
+		// Resuming a blog is not the same as letting the person back in. A ban is
+		// a separate switch (#1722), and finding that out by watching them be
+		// refused at the login page is not a way to learn it.
+		if banned, err := accountIsBanned(rowString(rows[0], "email")); err == nil && banned {
+			ui.Warning(fmt.Sprintf(
+				"%s is still banned — the site is up, but the account cannot sign in. `gw account unban %s --write` to lift it.",
+				subdomain, subdomain,
+			))
+		}
 	} else {
 		ui.Success(fmt.Sprintf("%s suspended (content untouched)", subdomain))
 	}
@@ -685,11 +694,11 @@ func runTenantCreate(cmd *cobra.Command, _ []string) error {
 }
 
 type tenantRemoveResponse struct {
-	Summary      string `json:"summary"`
-	DryRun       bool   `json:"dryRun"`
-	Aborted      bool   `json:"aborted"`
-	Removed      int    `json:"removed"`
-	Billing      *struct {
+	Summary string `json:"summary"`
+	DryRun  bool   `json:"dryRun"`
+	Aborted bool   `json:"aborted"`
+	Removed int    `json:"removed"`
+	Billing *struct {
 		None           bool   `json:"none"`
 		SubscriptionID string `json:"subscriptionId"`
 		Plan           string `json:"plan"`
