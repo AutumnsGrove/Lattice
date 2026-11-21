@@ -84,11 +84,18 @@ function createWorld({ tenants = {}, renamed = {} }: World = {}) {
 				first: async () => {
 					if (sql.includes("FROM tenants")) {
 						calls.push(`tenant-lookup:${subdomain}`);
-						// The real query filters on `active = 1`; honour it so a suspended row is invisible.
-						const active = sql.includes("active = 1");
-						const isActive = tenants[subdomain] === true;
 						const exists = subdomain in tenants;
-						if (!exists || (active && !isActive)) return null;
+						const isActive = tenants[subdomain] === true;
+						if (!exists) return null;
+
+						// A suspended grove is a row that exists and is switched off. The
+						// hook asks this as a second, narrower question after the `active = 1`
+						// lookup returns nothing (#1720).
+						if (sql.includes("active = 0")) return isActive ? null : { off: 1 };
+
+						// The real active query filters on `active = 1`; honour it so a
+						// suspended row is invisible to it.
+						if (!isActive) return null;
 						return {
 							id: `id-${subdomain}`,
 							subdomain,
@@ -199,14 +206,54 @@ describe("a subdomain with no active tenant", () => {
 		expect(response.headers.get("location")).toBeNull();
 	});
 
-	it("is indistinguishable whether it never existed or was suspended", async () => {
-		const world = createWorld({ tenants: { suspended: false } });
+	it("tells the page it is suspended, while the status stays the same as a typo", async () => {
+		// Same 404 as a typo, deliberately — the status is not a signal. The *body*
+		// differs, and that is the deliberate part: a stranger is told the grove is
+		// not available (which is true) rather than that it never existed (which is
+		// not), while the owner gets the explanation and a way to appeal. A visitor
+		// can tell a paused grove from an unregistered name; #1720 accepted that,
+		// on the grounds that "this grove isn't available right now" is the honest
+		// answer for someone who came here on purpose.
+		const suspended = await run(createWorld({ tenants: { paused: false } }), {
+			host: "paused.grove.place",
+		});
+		const never = await run(createWorld(), { host: "never.grove.place" });
 
-		const never = await run(world, { host: "never.grove.place" });
-		const suspended = await run(world, { host: "suspended.grove.place" });
-
+		expect(suspended.response.status).toBe(404);
 		expect(suspended.response.status).toBe(never.response.status);
-		expect(suspended.response.headers.get("location")).toBe(never.response.headers.get("location"));
+		// Exactly this and nothing else: no theme, no display name, no address, no
+		// config. A suspended grove must not leak the tenant it belongs to.
+		expect(suspended.event.locals.context).toEqual({ type: "suspended", subdomain: "paused" });
+		expect((never.event.locals.context as { type: string }).type).toBe("not_found");
+	});
+
+	it("goes back to being a normal tenant as soon as it is resumed", async () => {
+		// `gw tenant resume` flips `active` back. Nothing else in the hook has to
+		// change, which is the point of asking a second question rather than
+		// loosening the first one.
+		const suspended = await run(createWorld({ tenants: { paused: false } }), {
+			host: "paused.grove.place",
+		});
+		expect((suspended.event.locals.context as { type: string }).type).toBe("suspended");
+
+		const resumed = await run(createWorld({ tenants: { paused: true } }), {
+			host: "paused.grove.place",
+			cookie: HUMAN,
+		});
+		expect((resumed.event.locals.context as { type: string }).type).toBe("tenant");
+	});
+
+	it("never sends a suspended grove to the human check", async () => {
+		// The gate runs after the tenant is known and skips not-found (#1734); a
+		// suspended grove has to be skipped for the same reason — there is nothing
+		// to protect, and a /verify redirect would hide the explanation behind a
+		// challenge that can never be passed for a grove that is switched off.
+		const world = createWorld({ tenants: { paused: false } });
+
+		const { response } = await run(world, { host: "paused.grove.place" });
+
+		expect(response.headers.get("location")).toBeNull();
+		expect(response.status).toBe(404);
 	});
 
 	it("is still a 404 for a visitor who has passed the human check", async () => {
@@ -408,5 +455,16 @@ describe("the not-found status", () => {
 		const { response } = await run(world, { host: "autumn.grove.place", cookie: HUMAN });
 
 		expect(response.status).toBe(200);
+	});
+
+	it("gives a suspended grove the same 404 a typo gets, so it is not indexed", async () => {
+		// A 200 would put a paused grove in search results and hand crawlers a page
+		// with nothing worth reading. The status says "not here"; the body says why.
+		const world = createWorld({ tenants: { paused: false } });
+
+		const { response } = await run(world, { host: "paused.grove.place" });
+
+		expect(response.status).toBe(404);
+		expect(response.headers.get("content-type")).toContain("text/html");
 	});
 });

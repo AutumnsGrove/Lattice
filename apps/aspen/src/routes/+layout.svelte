@@ -12,6 +12,7 @@
 	import { fontMap, DEFAULT_FONT } from "@autumnsgrove/lattice/ui/tokens/fonts";
 	import { FONT_SCALE, fontScaleMultiplier } from "@autumnsgrove/lattice/platform/config/presets";
 	import { getSeasonFavicons } from "@autumnsgrove/lattice/ui/season-meta";
+	import { buildPorchUrl } from "@autumnsgrove/lattice/platform/config/porch";
 	import type { Season } from "@autumnsgrove/lattice/ui/types/season";
 	import Header from "@autumnsgrove/lattice/ui/components/chrome/Header.svelte";
 	import { buildTenantNavItems } from "@autumnsgrove/lattice/ui/components/chrome/tenant-nav";
@@ -43,6 +44,8 @@
 		isBeta: boolean;
 		isDemo: boolean;
 		isOwner: boolean;
+		/** True when the viewer owns the suspended grove being shown (#1720). */
+		suspensionIsOwner?: boolean;
 		siteSettings: {
 			font_family: string;
 			accent_color?: string;
@@ -108,6 +111,21 @@
 
 	// Get context from layout data (set in hooks.server.ts)
 	const context = $derived(data.context);
+
+	// A suspended grove's owner gets one next step, prefilled: the same Porch
+	// appeal link the login hub uses, built by the one helper that builds them.
+	// The subdomain goes in the subject so the person reading it knows which grove
+	// before opening the ticket (#1720).
+	const appealUrl = $derived(
+		context?.type === "suspended"
+			? buildPorchUrl({
+					category: "appeal",
+					subject: `Suspended grove: ${context.subdomain}`,
+					message: `My grove at ${context.subdomain}.grove.place says it isn't available.`,
+					...(data?.user?.email ? { email: data.user.email } : {}),
+				})
+			: "https://grove.place/porch/new",
+	);
 
 	// Derive site name based on context
 	// grove_title from site_settings takes priority over the tenant display_name
@@ -206,7 +224,7 @@
 	     resolves correctly. The scale tokens (--grove-accent-10, etc.) are defined
 	     on :root — --user-accent MUST be set at :root scope, not on a child element,
 	     because color-mix() evaluates where the property is defined. (#1512) -->
-	{@html `<style>:root{--user-accent:${data.siteSettings?.accent_color || '#16a34a'};--color-primary:${data.siteSettings?.accent_color || '#16a34a'};}</style>`}<!-- accent-ok — definition point for accent tokens -->
+	{@html `<style>:root{--user-accent:${data.siteSettings?.accent_color || "#16a34a"};--color-primary:${data.siteSettings?.accent_color || "#16a34a"};}</style>`}<!-- accent-ok — definition point for accent tokens -->
 	{#if data.siteSettings?.vine_color}
 		{@html `<style>:root{--grove-vine-color:${data.siteSettings.vine_color};}</style>`}
 	{/if}
@@ -229,8 +247,36 @@
 	{/if}
 </svelte:head>
 
-<!-- Handle not_found context (invalid subdomain) -->
-{#if context?.type === "not_found"}
+<!-- A grove that exists and is switched off (#1720).
+
+     A visitor is told only that it is not available — no suggestion it never
+     existed, no "start your own" upsell for someone who came here on purpose.
+     The owner (a boolean from the layout load, nothing more) is told what
+     happened and given one way to ask about it. -->
+{#if context?.type === "suspended"}
+	<div class="not-found-layout">
+		<div class="not-found-content">
+			{#if data?.suspensionIsOwner}
+				<h1>This garden is resting</h1>
+				<p>
+					<strong>{context.subdomain}.grove.place</strong> is paused right now. Its content is still safe
+					and nothing has been deleted.
+				</p>
+				<p>
+					If you weren't expecting this, or you'd like to ask about it, the fastest way to reach a
+					person is
+					<a href={appealUrl}>an appeal through Porch</a>. It arrives with your address already on
+					it, and a human reads every one.
+				</p>
+			{:else}
+				<h1>This garden isn't available right now</h1>
+				<p>
+					<strong>{context.subdomain}.grove.place</strong> is taking a break. Please try again later.
+				</p>
+			{/if}
+		</div>
+	</div>
+{:else if context?.type === "not_found"}
 	<div class="not-found-layout">
 		<div class="not-found-content">
 			<h1><GroveTerm term="your-garden">Garden</GroveTerm> Not Found</h1>

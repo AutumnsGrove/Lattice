@@ -10,6 +10,7 @@ import type { HomeGrove } from "@autumnsgrove/lattice/server/services/users";
 import type { DemoIdentitiesData } from "@autumnsgrove/lattice/ui/components/chrome";
 import { resolveSeasonPreference } from "@autumnsgrove/lattice/ui/season-meta";
 import { isBetaDeployment } from "$lib/server/beta";
+import { ownsSuspendedSubdomain } from "$lib/server/suspension";
 
 /** Default accent color — grove green 600. Matches @autumnsgrove/lattice/config/presets */
 const DEFAULT_ACCENT_COLOR = "#16a34a";
@@ -227,12 +228,21 @@ export const load: LayoutServerLoad = async ({ locals, platform, url, cookies })
 		context.type === "tenant" &&
 		emailsMatch(context.tenant.ownerId, locals.user.email);
 
+	// A suspended grove answers one question the context cannot: is the person
+	// reading this the one who owns it? A boolean crosses the boundary, nothing
+	// else — no theme, no name, no address (#1720).
+	const suspensionIsOwner =
+		context.type === "suspended"
+			? await ownsSuspendedSubdomain(platform?.env?.DB, context.subdomain, locals.user?.email)
+			: false;
+
 	return {
 		user: locals.user || null,
 		context: locals.context as AppContext,
 		isBeta: isBetaDeployment(locals, url),
 		isDemo: locals.isDemoMode ?? false,
 		isOwner,
+		suspensionIsOwner,
 		siteSettings,
 		navPages,
 		navPageLimit,
