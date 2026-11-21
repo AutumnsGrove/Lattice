@@ -594,6 +594,15 @@ the person can read. `aup-1.4` (spam and link schemes) is the default;
 `docs/legal/acceptable-use-policy.md` to make sure every section it cites still
 exists.
 
+**Billing is cancelled first, and it has to be.** `removeTenant()` cancels the
+Stripe subscription *before* the sweep, because the only cancellation path in the
+platform finds `provider_subscription_id` through `platform_billing` → `tenants` →
+`user_onboarding` — the rows the sweep deletes (#1745). A tenant with no
+subscription prints as much and the removal continues. A cancellation that fails
+**aborts the removal with nothing deleted**; the summary says `ABORTED`, so a
+non-zero retry is a retry, not a mystery. If billing-api itself is down, cancel in
+the Stripe dashboard and run the command again.
+
 The `--reason` is quoted verbatim in that email. Write it for the person who
 will read it at 2am, not for the changelog: "18 posts to upsampler.com in one
 session, no personalisation" beats "spam".
@@ -627,11 +636,17 @@ const plan = await removeTenant(
 const result = await removeTenant(dbs, target, {
   reason: "link farm",
   dryRun: false,
+  cancelBilling: cancelSubscription, // first, before any row is deleted — but
+                                     // only when the removal has a subscription
   evictCache: evictTenantDO,        // or the site keeps serving (#1677)
   deleteIdentity: deleteAuthIdentity, // see groveauth-identity.ts
   deleteR2: deleteTenantObjects,
   notify: emailAccountHolder,       // see removal-email.ts
 });
+
+if (result.aborted) {
+  // The subscription could not be cancelled, so nothing was deleted on purpose.
+}
 
 if (result.leftovers.length > 0 || result.failures.length > 0) {
   // Incomplete. Nobody was emailed, and the summary says why.

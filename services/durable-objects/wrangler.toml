@@ -62,6 +62,15 @@ class_name = "ThresholdDO"
 binding = "ZEPHYR"
 service = "grove-zephyr"
 
+# BillingHub (grove-billing-api) — cancelling a subscription as part of a removal
+# (#1745). A removal sweeps `platform_billing`, and that is the only table from
+# which the cancellation can find the provider subscription, so cancel has to
+# happen from here, before the sweep. The API has no public route: a missing
+# binding stops a removal that has money on it rather than letting it through.
+[[services]]
+binding = "BILLING"
+service = "grove-billing-api"
+
 # =============================================================================
 # KV Namespace - For caching and rate limiting (used by SentinelDO)
 # =============================================================================

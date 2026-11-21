@@ -8,6 +8,7 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import cancel from "../../routes/cancel.js";
+import { sendCancellationEmail } from "../../services/email.js";
 import {
 	createMockEnv,
 	createMockD1,
@@ -294,5 +295,100 @@ describe("POST /cancel", () => {
 		expect(response.status).toBe(500);
 		expect(body.error).toBe("BILLING-005");
 		expect(body.message).toMatch(/Payment provider error/);
+	});
+
+	// ───────────────────────────────────────────────────────────────────────
+	// REMOVAL (#1745)
+	// ───────────────────────────────────────────────────────────────────────
+
+	it("stays quiet when the caller sends its own notice", async () => {
+		// A removal cancels first and emails afterwards. Without this, the person gets
+		// "your subscription is cancelled" and then "your account is gone" — two
+		// systems disagreeing about what was decided.
+		const { db, mocks } = createMockD1();
+		mocks.first.mockResolvedValueOnce({
+			id: "billing-3",
+			plan: "seedling",
+			status: "active",
+			provider_subscription_id: "sub_test_789",
+			current_period_end: Math.floor(Date.now() / 1000) + 86400 * 30,
+			subdomain: "gone",
+			email: "gone@example.com",
+			display_name: "Gone",
+		});
+		mocks.run.mockResolvedValueOnce({ meta: { changes: 1 }, success: true });
+
+		const env = createMockEnv({ DB: db });
+		const response = await cancel.request(
+			"/",
+			{
+				method: "POST",
+				body: JSON.stringify({ tenantId: TEST_TENANT_ID, immediately: true, notify: false }),
+			},
+			env,
+		);
+
+		expect(response.status).toBe(200);
+		expect(sendCancellationEmail).not.toHaveBeenCalled();
+	});
+
+	it("still emails the account holder by default", async () => {
+		const { db, mocks } = createMockD1();
+		mocks.first.mockResolvedValueOnce({
+			id: "billing-4",
+			plan: "seedling",
+			status: "active",
+			provider_subscription_id: "sub_test_999",
+			current_period_end: Math.floor(Date.now() / 1000) + 86400 * 30,
+			subdomain: "stays",
+			email: "stays@example.com",
+			display_name: "Stays",
+		});
+		mocks.run.mockResolvedValueOnce({ meta: { changes: 1 }, success: true });
+
+		const env = createMockEnv({ DB: db });
+		await cancel.request(
+			"/",
+			{ method: "POST", body: JSON.stringify({ tenantId: TEST_TENANT_ID, immediately: true }) },
+			env,
+		);
+
+		expect(sendCancellationEmail).toHaveBeenCalled();
+	});
+
+	it("counts the rate limit per tenant when there is no client IP", async () => {
+		// A service binding carries no CF-Connecting-IP, so keying on it put every
+		// internal caller in one "unknown" bucket: a cleanup of nine tenants would
+		// stop at the sixth (#1745).
+		const keys: string[] = [];
+		const kv = {
+			get: vi.fn(async (key: string) => {
+				keys.push(key);
+				return null;
+			}),
+			put: vi.fn(async () => undefined),
+		};
+
+		const { db, mocks } = createMockD1();
+		mocks.first.mockResolvedValueOnce({
+			id: "billing-5",
+			plan: "seedling",
+			status: "active",
+			provider_subscription_id: "sub_test_abc",
+			current_period_end: Math.floor(Date.now() / 1000) + 86400 * 30,
+			subdomain: "internal",
+			email: "internal@example.com",
+			display_name: "Internal",
+		});
+		mocks.run.mockResolvedValueOnce({ meta: { changes: 1 }, success: true });
+
+		const env = createMockEnv({ DB: db, CACHE_KV: kv });
+		await cancel.request(
+			"/",
+			{ method: "POST", body: JSON.stringify({ tenantId: TEST_TENANT_ID }) },
+			env,
+		);
+
+		expect(keys[0]).toContain(`tenant:${TEST_TENANT_ID}`);
 	});
 });

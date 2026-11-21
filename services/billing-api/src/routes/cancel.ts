@@ -3,24 +3,52 @@
  *
  * By default, cancels at period end. Set immediately=true for
  * immediate cancellation.
+ *
+ * `notify: false` cancels without emailing the account holder. A removal uses it:
+ * the removal sends its own notice, and a "your subscription is cancelled" mail
+ * moments before "your account is gone" reads as two systems disagreeing (#1745).
  */
 
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
 import type { Env, CancelRequest } from "../types.js";
 import { BILLING_ERRORS, billingError } from "../errors.js";
 import { StripeClient, StripeAPIError } from "../stripe/client.js";
-import { rateLimitMiddleware } from "../middleware/rateLimit.js";
+import { RATE_LIMITS, checkRateLimit } from "../middleware/rateLimit.js";
 import { safeParseBody, isValidUUID } from "../utils/validation.js";
 import { logBillingAudit } from "../services/audit.js";
 import { sendCancellationEmail } from "../services/email.js";
 
 const cancel = new Hono<{ Bindings: Env }>();
 
-// Rate limit: 5 requests per hour
-cancel.use(
-	"*",
-	rateLimitMiddleware("cancel", (c) => c.req.header("CF-Connecting-IP") || "unknown"),
-);
+const CANCEL_LIMIT = RATE_LIMITS.cancel;
+
+/**
+ * 5 requests per hour, keyed per tenant rather than per IP.
+ *
+ * This route is reached over a service binding, where `CF-Connecting-IP` is
+ * absent — every internal caller would fall into one shared "unknown" bucket, so
+ * a cleanup of nine tenants (2026-11-16) would trip the limit at the sixth and
+ * abandon the removal (#1745). A real client IP is still honoured when there is
+ * one, which is how the proxied call has always behaved.
+ */
+async function rateLimit(
+	c: Context<{ Bindings: Env }>,
+	tenantId: string,
+): Promise<Response | null> {
+	const kv = c.env.CACHE_KV;
+	if (!kv) return null; // No KV binding — skip rate limiting, as before
+
+	const ip = c.req.header("CF-Connecting-IP");
+	const key = ip && ip !== "unknown" ? ip : `tenant:${tenantId}`;
+	const result = await checkRateLimit(kv, key, CANCEL_LIMIT);
+
+	if (!result.allowed) return billingError(BILLING_ERRORS.RATE_LIMITED);
+
+	c.header("X-RateLimit-Limit", String(CANCEL_LIMIT.limit));
+	c.header("X-RateLimit-Remaining", String(result.remaining));
+	c.header("X-RateLimit-Reset", String(result.resetAt));
+	return null;
+}
 
 cancel.post("/", async (c) => {
 	const body = await safeParseBody<CancelRequest>(c.req.raw);
@@ -28,12 +56,15 @@ cancel.post("/", async (c) => {
 		return billingError(BILLING_ERRORS.TENANT_NOT_FOUND, "tenantId required");
 	}
 
-	const { tenantId, immediately = false } = body;
+	const { tenantId, immediately = false, notify = true } = body;
 
 	// Validate tenantId format
 	if (!isValidUUID(tenantId)) {
 		return billingError(BILLING_ERRORS.TENANT_NOT_FOUND, "Invalid tenantId format");
 	}
+
+	const limited = await rateLimit(c, tenantId);
+	if (limited) return limited;
 	const db = c.env.DB;
 
 	// Get billing record with tenant and owner info in one query
@@ -94,8 +125,9 @@ cancel.post("/", async (c) => {
 			? { email: billing.email, display_name: billing.display_name }
 			: null;
 
-		// Send cancellation email (non-blocking)
-		if (onboarding && c.env.ZEPHYR) {
+		// Send cancellation email (non-blocking), unless the caller is sending its
+		// own notice. Suppressed on a removal, where the removal email follows.
+		if (notify && onboarding && c.env.ZEPHYR) {
 			const periodEndDate = billing.current_period_end
 				? new Date(billing.current_period_end * 1000).toLocaleDateString("en-US", {
 						month: "long",

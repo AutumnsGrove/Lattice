@@ -468,6 +468,119 @@ describe("removeTenant", () => {
 	});
 });
 
+describe("billing (#1745)", () => {
+	it("cancels before the first delete, while the rows that find it still exist", async () => {
+		// The only cancellation path in the platform looks the subscription up through
+		// `platform_billing` → `tenants` → `user_onboarding`. All three are swept here,
+		// so "cancel after the delete" is not a late step — it is an impossible one.
+		const engine = fakeDb(seedForTenant());
+		let deletesBeforeCancel = -1;
+
+		await removeTenant({ engine: engine.db }, target, {
+			reason: "link farm",
+			dryRun: false,
+			cancelBilling: async () => {
+				deletesBeforeCancel = engine.state.deletes.length;
+				return { subscriptionId: "sub_123", plan: "seedling", cancelled: true, note: "cancelled" };
+			},
+		});
+
+		expect(deletesBeforeCancel).toBe(0);
+	});
+
+	it("asks about billing on a dry run without cancelling anything", async () => {
+		const engine = fakeDb(seedForTenant());
+		const cancelBilling = vi.fn(async () => ({
+			subscriptionId: "sub_123",
+			plan: "seedling",
+			cancelled: false,
+			note: "would cancel immediately",
+		}));
+
+		const result = await removeTenant({ engine: engine.db }, target, {
+			reason: "link farm",
+			dryRun: true,
+			cancelBilling,
+		});
+
+		// Called, but told it is a dry run — a plan that omits the one step that
+		// costs money is a half-truth.
+		expect(cancelBilling).toHaveBeenCalledWith(target, { dryRun: true });
+		expect(engine.state.deletes).toHaveLength(0);
+		expect(formatRemovalResult(result)).toContain("would cancel immediately");
+	});
+
+	it("aborts the removal when the subscription cannot be cancelled", async () => {
+		// Being charged for an account we deleted is worse than a failed removal the
+		// operator retries. Nothing is deleted, and the CLI is told to say so.
+		const engine = fakeDb(seedForTenant());
+
+		const result = await removeTenant({ engine: engine.db }, target, {
+			reason: "link farm",
+			dryRun: false,
+			cancelBilling: async () => {
+				throw new Error("stripe 500");
+			},
+		});
+
+		expect(result.aborted).toBe(true);
+		expect(engine.state.deletes).toHaveLength(0);
+		expect(result.failures.find((f) => f.table === "billing")?.error).toContain("stripe 500");
+		// Intent and abort are both recorded; the removal is not left "in progress".
+		expect(engine.state.auditInserts).toBe(2);
+
+		const text = formatRemovalResult(result);
+		expect(text).toContain("ABORTED");
+		expect(text).not.toContain("Removed");
+	});
+
+	it("proceeds when there is nothing to cancel", async () => {
+		const engine = fakeDb(seedForTenant());
+
+		const result = await removeTenant({ engine: engine.db }, target, {
+			reason: "link farm",
+			dryRun: false,
+			cancelBilling: async () => ({ none: true, note: "no subscription on file" }),
+		});
+
+		expect(result.aborted).toBe(false);
+		expect(result.tenantRowDeleted).toBe(true);
+		expect(formatRemovalResult(result)).toContain("no subscription on file");
+	});
+
+	it("shouts when the subscription is cancelled and the sweep then fails", async () => {
+		// The person is no longer paying and still has a blog. Nobody can fix that by
+		// retrying, so it is a failure with instructions rather than a quiet line.
+		const engine = fakeDb(seedForTenant());
+		const failing: RemovalDatabase = {
+			prepare(sql: string) {
+				if (/DELETE FROM pages/.test(sql)) {
+					return {
+						bind: () => ({
+							first: async () => null,
+							all: async () => ({ results: [] }),
+							run: async () => {
+								throw new Error("fk violation");
+							},
+						}),
+					};
+				}
+				return engine.db.prepare(sql);
+			},
+		};
+
+		const result = await removeTenant({ engine: failing }, target, {
+			reason: "link farm",
+			dryRun: false,
+			cancelBilling: async () => ({ subscriptionId: "sub_123", cancelled: true }),
+		});
+
+		expect(
+			result.failures.some((f) => f.table === "billing" && /Restore or refund/.test(f.error)),
+		).toBe(true);
+	});
+});
+
 describe("formatting", () => {
 	it("prints a plan that shows keep vs delete", async () => {
 		const engine = fakeDb(seedForTenant());
