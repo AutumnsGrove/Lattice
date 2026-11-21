@@ -1,86 +1,38 @@
--- Migration 116: Actually fix the tenants.plan CHECK constraint (real fix for #111)
--- Database: D1 (SQLite) - grove-engine-db
+-- Migration 116: tenants plan CHECK repair — NO-OP, and it must stay one
 --
--- Migration 111 documented this same bug but shipped as a no-op — the
--- original rename-and-recreate attempt assumed `PRAGMA foreign_keys=OFF`
--- would suppress FK enforcement during the swap. It doesn't: D1 wraps a
--- migration file's statements in one implicit transaction, and the pragma
--- is silently ignored once that transaction is open. Production was hand-
--- patched directly (outside migration history) back on 2026-04-18, so this
--- has only ever blocked fresh database bootstraps — local dev, CI, or any
--- future prod rebuild from migration history alone. Confirmed while wiring
--- up local Plant dev: every Wanderer (free tier) signup failed at step 1 of
--- createTenant() with SQLITE_CONSTRAINT_CHECK on a from-scratch database.
+-- `d1_migrations` lists this as applied on 2026-08-26 17:56:22. Its effect is
+-- not in production: `tenants` still has 15 columns and `plan` still defaults
+-- to 'free'. Production was never touched by it (#1692).
 --
--- The actual blocker: SQLite CHECK constraints live in the table's stored
--- CREATE TABLE text and can't be altered in place; changing one requires
--- recreating the table. `tenants` has 27 dependent tables via FK, and two
--- more common workarounds were tried and ruled out first:
---   - PRAGMA foreign_keys=OFF: no-op mid-transaction (see above)
---   - PRAGMA writable_schema=ON + direct sqlite_master edit: D1 rejects
---     this outright with SQLITE_AUTH
+-- That is the good outcome. This migration cannot be run against a database
+-- with data in it:
 --
--- What actually works: SQLite auto-rewrites a dependent table's stored FK
--- REFERENCES clause when the table IT references is renamed — but only the
--- renamed table's dependents get rewritten, and only to follow that new
--- name. So the swap below is careful to never rename the original `tenants`
--- table at all — dependents keep referencing the literal name "tenants"
--- throughout. Steps: build the corrected table under a temp name, copy
--- data in, drop the original, then rename the temp table into the vacated
--- "tenants" name. Verified locally: PRAGMA foreign_key_check reports zero
--- violations across the whole database after this swap, and all 27
--- dependent tables' stored FK clauses are byte-identical before and after.
+--   DROP TABLE tenants;
+--   ALTER TABLE tenants_new RENAME TO tenants;
 --
--- Superseded no-op: 111_tenants_plan_add_wanderer.sql
-
-CREATE TABLE tenants_new (
-  id TEXT PRIMARY KEY,
-  subdomain TEXT UNIQUE NOT NULL,
-  display_name TEXT NOT NULL,
-  email TEXT NOT NULL,
-
-  plan TEXT DEFAULT 'seedling' CHECK (plan IN ('free', 'wanderer', 'seedling', 'sapling', 'oak', 'evergreen')),
-  storage_used INTEGER DEFAULT 0,
-  post_count INTEGER DEFAULT 0,
-
-  custom_domain TEXT,
-
-  theme TEXT DEFAULT 'default',
-  accent_color TEXT,
-
-  active INTEGER DEFAULT 1,
-
-  created_at INTEGER NOT NULL DEFAULT (unixepoch()),
-  updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
-  encrypted_dek TEXT, last_activity_at INTEGER DEFAULT 0, reclamation_status TEXT, meadow_opt_in INTEGER DEFAULT 0
-);
-
--- Explicit column list, NOT `SELECT *`: production was hand-patched outside
--- migration history back on 2026-04-18 (see above), and that hand-patch
--- predates last_activity_at/reclamation_status (053_wanderer_tier.sql) —
--- confirmed via `PRAGMA table_info(tenants)` against the live remote DB,
--- which has 15 columns, not the 17 a from-scratch migration history implies.
--- Naming every source column keeps this correct on any tenants table that
--- has ever received these two columns (fresh bootstrap) and any that
--- hasn't (current prod) — the two new columns just take their declared
--- defaults (0 and NULL) for existing rows either way.
-INSERT INTO tenants_new (
-  id, subdomain, display_name, email, plan, storage_used, post_count,
-  custom_domain, theme, accent_color, active, created_at, updated_at,
-  encrypted_dek, meadow_opt_in
-)
-SELECT
-  id, subdomain, display_name, email, plan, storage_used, post_count,
-  custom_domain, theme, accent_color, active, created_at, updated_at,
-  encrypted_dek, meadow_opt_in
-FROM tenants;
-
-DROP TABLE tenants;
-
-ALTER TABLE tenants_new RENAME TO tenants;
-
-CREATE INDEX idx_tenants_subdomain ON tenants(subdomain);
-CREATE INDEX idx_tenants_subdomain_active ON tenants(subdomain) WHERE active = 1;
-CREATE INDEX idx_tenants_custom_domain ON tenants(custom_domain) WHERE custom_domain IS NOT NULL;
-CREATE INDEX idx_tenants_email ON tenants(email);
-CREATE INDEX idx_tenants_plan ON tenants(plan);
+-- D1 enforces foreign keys, so the DROP performs an implicit `DELETE FROM
+-- tenants` and the ON DELETE CASCADE clauses on the 30 foreign keys pointing
+-- at `tenants` fire. Reproduced 2026-11-21 against a copy of production's
+-- schema with one tenant and one post: after the swap, the post was gone.
+-- (The five surviving dependents with ON DELETE SET NULL just lose their
+-- tenant_id.) The original file's reasoning — that dependents keep
+-- referencing the literal name "tenants" — is true and beside the point: the
+-- rows are deleted before any rename happens.
+--
+-- The two things it was written to deliver now live in
+-- 124_reconcile_tenants_and_indexes.sql, done the way that cannot cascade:
+--
+--   ALTER TABLE tenants ADD COLUMN last_activity_at INTEGER DEFAULT 0;
+--   ALTER TABLE tenants ADD COLUMN reclamation_status TEXT;
+--
+-- Not delivered by 124, on purpose: `plan`'s DEFAULT 'free' → 'seedling'.
+-- SQLite cannot change a column default in place, so that one genuinely needs
+-- a table rebuild, and every insert names a plan explicitly today. If it is
+-- ever worth doing, it needs the dependents handled (or
+-- `PRAGMA legacy_alter_table` semantics re-checked) rather than this swap.
+--
+-- It also used to re-create five of `tenants`' six indexes after the swap;
+-- the sixth, idx_tenants_plan_activity, was silently lost on every fresh
+-- bootstrap as a result. 124 installs it.
+--
+-- Kept as a file because `d1_migrations` has a row for it.
