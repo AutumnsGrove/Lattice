@@ -7,6 +7,7 @@
 
 import type { ThresholdResult } from "../types.js";
 import type { Threshold } from "../threshold.js";
+import { resolveClientIP } from "../../../server/utils/client-ip.js";
 
 /**
  * Bare Worker helper. Returns a Response if rate limited, or null to continue.
@@ -60,15 +61,13 @@ export async function thresholdCheck(
 }
 
 /**
- * Get client IP from Cloudflare request headers.
- * CF-Connecting-IP is set by Cloudflare's edge and cannot be spoofed.
- * Falls back to X-Forwarded-For and X-Real-IP for local development.
+ * Get client IP from a request, for use as a rate-limit key part.
+ *
+ * Delegates to the shared resolver so a Worker→Worker subrequest never keys
+ * on Cloudflare's own egress address — the failure mode that turns every
+ * per-IP limit into one global bucket (#1679). "unknown" is kept as the
+ * no-address value because callers use it as a key part.
  */
 export function getClientIP(request: Request): string {
-	return (
-		request.headers.get("cf-connecting-ip") ||
-		request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-		request.headers.get("x-real-ip") ||
-		"unknown"
-	);
+	return resolveClientIP(request).ip ?? "unknown";
 }

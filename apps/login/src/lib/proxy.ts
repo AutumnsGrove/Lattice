@@ -13,6 +13,7 @@
 
 import type { Cookies, RequestEvent } from "@sveltejs/kit";
 import { buildErrorJson } from "@autumnsgrove/lattice/errors";
+import { clientIpHeaders, resolveClientIP } from "@autumnsgrove/lattice/server";
 import { LOGIN_ERRORS } from "$lib/errors";
 
 const DEFAULT_AUTH_URL = "https://login.grove.place";
@@ -28,6 +29,12 @@ const SKIP_REQUEST_HEADERS = new Set([
 	"keep-alive",
 	"upgrade",
 	"cookie", // Handled separately via auth-only cookie filter (HAWK-007)
+	// Handled separately below — the outbound value is resolved from the edge
+	// every time, so a copied one is either redundant or Cloudflare's own
+	// Worker address (see the client IP block in proxyToHeartwood).
+	"cf-connecting-ip",
+	"x-real-ip",
+	"x-forwarded-for",
 ]);
 
 /**
@@ -120,6 +127,21 @@ export async function proxyToHeartwood(event: RequestEvent, targetPath: string):
 	// Forward relevant request headers
 	for (const [key, value] of request.headers.entries()) {
 		if (!SKIP_REQUEST_HEADERS.has(key.toLowerCase())) {
+			proxyHeaders.set(key, value);
+		}
+	}
+
+	// Carry the client's address across the service binding.
+	//
+	// This hop is Worker→Worker, and Cloudflare rewrites `cf-connecting-ip` to
+	// its own Worker address (2a06:98c0:3600::103) on the way, so Heartwood
+	// would see one shared "client" for every Wanderer and key every per-IP
+	// rate limit on it (#1679). The value comes from the edge, never from a
+	// client-supplied header, and Heartwood prefers it only when the sentinel
+	// proves the request came from a Worker.
+	const { ip: clientIp } = resolveClientIP(request);
+	if (clientIp) {
+		for (const [key, value] of Object.entries(clientIpHeaders(clientIp))) {
 			proxyHeaders.set(key, value);
 		}
 	}

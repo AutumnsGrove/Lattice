@@ -13,6 +13,7 @@ import { redirect, fail } from "@sveltejs/kit";
 import { dev } from "$app/environment";
 import type { Actions } from "./$types";
 import { logGroveError } from "@autumnsgrove/lattice/errors";
+import { clientIpHeaders } from "@autumnsgrove/lattice/server";
 import { validateRedirectUrl } from "$lib/redirect";
 import { LOGIN_ERRORS } from "$lib/errors";
 import {
@@ -82,7 +83,9 @@ function parseRawSetCookie(
  *
  * Service-binding requests carry no client IP of their own, so Better Auth's
  * per-IP rate limits would otherwise put every Wanderer in one shared bucket.
- * We forward the platform-derived address (never a client-supplied header).
+ * We forward the platform-derived address (never a client-supplied header),
+ * setting both `cf-connecting-ip` and `x-real-ip` — Cloudflare regenerates the
+ * first from the second on a Worker subrequest, so either one alone loses.
  */
 function postToHeartwood(
 	env: NonNullable<App.Platform["env"]>,
@@ -97,8 +100,7 @@ function postToHeartwood(
 		headers: {
 			"Content-Type": "application/json",
 			Origin: origin,
-			"cf-connecting-ip": clientIp,
-			"x-forwarded-for": clientIp,
+			...clientIpHeaders(clientIp),
 		},
 		body: JSON.stringify(body),
 		redirect: "manual",
@@ -119,6 +121,7 @@ function postToHeartwood(
 async function sessionRefusal(
 	env: NonNullable<App.Platform["env"]>,
 	cookieHeader: string,
+	clientIp: string,
 ): Promise<"banned" | null> {
 	if (!cookieHeader) return null;
 
@@ -126,7 +129,11 @@ async function sessionRefusal(
 	try {
 		const response = await env.AUTH.fetch(`${authBaseUrl}/session/validate`, {
 			method: "POST",
-			headers: { Cookie: cookieHeader, "Content-Type": "application/json" },
+			headers: {
+				Cookie: cookieHeader,
+				"Content-Type": "application/json",
+				...clientIpHeaders(clientIp),
+			},
 			body: "{}",
 			redirect: "manual",
 		});
@@ -289,7 +296,10 @@ export const actions: Actions = {
 		// The cookies exist either way. Whether they *mean* anything is decided by
 		// validation, so ask before sending someone to a grove that will bounce them
 		// straight back here (#1719).
-		if ((await sessionRefusal(platform.env, authCookieHeader(issued))) === "banned") {
+		if (
+			(await sessionRefusal(platform.env, authCookieHeader(issued), getClientAddress())) ===
+			"banned"
+		) {
 			// Leave nothing behind: a cookie the hub refuses to honour is a cookie that
 			// makes the next sign-in look like it half-worked. The deletion has to carry
 			// the attributes the cookie was set with — a browser treats a different
@@ -317,7 +327,7 @@ export const actions: Actions = {
 	 * sets the redirect cookie (now HttpOnly), forwards the oauth_state cookie
 	 * Better Auth generates, then redirects the browser to Google.
 	 */
-	google: async ({ request, cookies, platform, url }) => {
+	google: async ({ request, cookies, platform, url, getClientAddress }) => {
 		const formData = await request.formData();
 		const redirectTo = validateRedirectUrl(formData.get("redirect")?.toString(), dev);
 		// Relative URL — Heartwood resolves it against the login origin (login.grove.place).
@@ -350,6 +360,7 @@ export const actions: Actions = {
 				headers: {
 					"Content-Type": "application/json",
 					Origin: url.origin,
+					...clientIpHeaders(getClientAddress()),
 				},
 				// Where Better Auth sends the browser when the OAuth round-trip fails.
 				// Without this it lands on Better Auth's own /error page, which is a

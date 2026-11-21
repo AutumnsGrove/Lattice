@@ -14,6 +14,7 @@
 
 import { Hono } from "hono";
 import type { Env } from "../types.js";
+import { requestWithClientIp, resolveClientIPorLog } from "@autumnsgrove/lattice/server";
 import { createAuth } from "../auth/index.js";
 import {
 	registerRequestForBridge,
@@ -95,6 +96,10 @@ async function clearGroveSessionOnSignOut(
  * We then append the grove_session cookie to the response so users get both cookies.
  */
 betterAuthRoutes.all("/*", async (c) => {
+	// Declared outside the try so the error path can still find the bridged
+	// request it may need to clean up or revoke.
+	let handlerRequest: Request | undefined;
+
 	try {
 		// Extract geolocation fields from Cloudflare request context
 		const rawCf = c.req.raw.cf;
@@ -113,19 +118,36 @@ betterAuthRoutes.all("/*", async (c) => {
 
 		console.log("[BetterAuth] Request:", c.req.method, c.req.path);
 
-		// Register this request for SessionDO bridging
-		// The session hook will use this to create a SessionDO session
-		registerRequestForBridge(c.req.raw, c.env);
+		// Resolve the client IP once, here, and hand Better Auth a request whose
+		// IP headers mean what we think they mean (#1679).
+		//
+		// On a Worker→Worker subrequest Cloudflare replaces `cf-connecting-ip`
+		// with its own egress address (2a06:98c0:3600::103), so Better Auth's
+		// per-IP rate limits collapse into one global bucket and every
+		// ba_session.ip_address records the same non-client. The shared resolver
+		// prefers a Worker-forwarded address in that case, and returns nothing
+		// rather than the sentinel when there is no real one — which we log,
+		// because a silent fallthrough to a shared bucket is how this went
+		// unnoticed for months.
+		resolveClientIPorLog(c.req.raw, "BetterAuth");
+		handlerRequest = requestWithClientIp(c.req.raw);
 
-		// Create auth instance with current environment bindings and CF context
+		// Register this request for SessionDO bridging. The registry is keyed on
+		// the Request object itself (WeakMap), so it has to be the same object
+		// Better Auth handles and the same one read back below.
+		registerRequestForBridge(handlerRequest, c.env);
+
+		// Create auth instance with current environment bindings and CF context.
+		// The `cf` object is read from the original request — rebuilding the
+		// request for its headers drops it.
 		const auth = createAuth(c.env, cf);
 
 		// Better Auth handler expects a standard Request and returns a Response
-		let response = await auth.handler(c.req.raw);
+		let response = await auth.handler(handlerRequest);
 
 		// Check if a SessionDO session was created by the hook
 		// If so, append the grove_session cookie to the response
-		const bridgeResult = getSessionBridgeResult(c.req.raw);
+		const bridgeResult = getSessionBridgeResult(handlerRequest);
 		if (bridgeResult && bridgeResult.sessionId && !bridgeResult.error) {
 			try {
 				const cookieHeader = await createSessionCookieHeader(
@@ -158,7 +180,7 @@ betterAuthRoutes.all("/*", async (c) => {
 		// Better Auth's /sign-out never touches grove_session — mirror that
 		// teardown here so signing out actually signs out of every mechanism.
 		if (c.req.method === "POST" && c.req.path.endsWith("/sign-out") && response.ok) {
-			response = await clearGroveSessionOnSignOut(c.req.raw, c.env, response);
+			response = await clearGroveSessionOnSignOut(handlerRequest, c.env, response);
 		}
 
 		// This route serves per-user session/auth data through a catch-all —
@@ -174,7 +196,7 @@ betterAuthRoutes.all("/*", async (c) => {
 		}
 
 		// Clean up request context to prevent memory leaks
-		cleanupRequestContext(c.req.raw);
+		cleanupRequestContext(handlerRequest);
 
 		// Log response status for debugging
 		console.log("[BetterAuth] Response status:", response.status);
@@ -200,7 +222,7 @@ betterAuthRoutes.all("/*", async (c) => {
 		// hook ran), that session was never delivered as a cookie and never
 		// will be — revoke it so it doesn't linger as a phantom device in
 		// /session/list.
-		const orphanedBridge = getSessionBridgeResult(c.req.raw);
+		const orphanedBridge = handlerRequest ? getSessionBridgeResult(handlerRequest) : undefined;
 		if (orphanedBridge?.sessionId && !orphanedBridge.error) {
 			try {
 				const sessionDO = c.env.SESSIONS.get(
@@ -214,7 +236,7 @@ betterAuthRoutes.all("/*", async (c) => {
 				);
 			}
 		}
-		cleanupRequestContext(c.req.raw);
+		if (handlerRequest) cleanupRequestContext(handlerRequest);
 
 		// Log the actual error for debugging
 		console.error("[BetterAuth] Handler error:", error);
