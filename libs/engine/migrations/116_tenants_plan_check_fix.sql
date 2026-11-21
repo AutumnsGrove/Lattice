@@ -1,35 +1,39 @@
--- Migration 116: Actually fix the tenants.plan CHECK constraint (real fix for #111)
--- Database: D1 (SQLite) - grove-engine-db
+-- Migration 116: widen the tenants.plan CHECK so a fresh database can create a
+-- Wanderer — and nothing else. Must never run against a database with rows.
 --
--- Migration 111 documented this same bug but shipped as a no-op — the
--- original rename-and-recreate attempt assumed `PRAGMA foreign_keys=OFF`
--- would suppress FK enforcement during the swap. It doesn't: D1 wraps a
--- migration file's statements in one implicit transaction, and the pragma
--- is silently ignored once that transaction is open. Production was hand-
--- patched directly (outside migration history) back on 2026-04-18, so this
--- has only ever blocked fresh database bootstraps — local dev, CI, or any
--- future prod rebuild from migration history alone. Confirmed while wiring
--- up local Plant dev: every Wanderer (free tier) signup failed at step 1 of
--- createTenant() with SQLITE_CONSTRAINT_CHECK on a from-scratch database.
+-- Two separate problems got braided together here, and they need separating:
 --
--- The actual blocker: SQLite CHECK constraints live in the table's stored
--- CREATE TABLE text and can't be altered in place; changing one requires
--- recreating the table. `tenants` has 27 dependent tables via FK, and two
--- more common workarounds were tried and ruled out first:
---   - PRAGMA foreign_keys=OFF: no-op mid-transaction (see above)
---   - PRAGMA writable_schema=ON + direct sqlite_master edit: D1 rejects
---     this outright with SQLITE_AUTH
+--   1. A fresh bootstrap's `tenants.plan` CHECK omits 'wanderer' (it comes
+--      from 009/013), so `createTenant()` fails on a from-scratch database at
+--      step 1 with SQLITE_CONSTRAINT_CHECK. Only a table rebuild can widen a
+--      CHECK, and this is that rebuild. It is needed, and it is needed here,
+--      because 124 runs after it.
 --
--- What actually works: SQLite auto-rewrites a dependent table's stored FK
--- REFERENCES clause when the table IT references is renamed — but only the
--- renamed table's dependents get rewritten, and only to follow that new
--- name. So the swap below is careful to never rename the original `tenants`
--- table at all — dependents keep referencing the literal name "tenants"
--- throughout. Steps: build the corrected table under a temp name, copy
--- data in, drop the original, then rename the temp table into the vacated
--- "tenants" name. Verified locally: PRAGMA foreign_key_check reports zero
--- violations across the whole database after this swap, and all 27
--- dependent tables' stored FK clauses are byte-identical before and after.
+--   2. Production is missing `last_activity_at` and `reclamation_status`,
+--      because the ledger row for 053 is a backfill entry, not a record of
+--      anything having run (#1692). That repair is NOT this file's job any
+--      more: 124 owns those two columns with a plain ALTER TABLE, which is
+--      the only form no dependent table can notice.
+--
+-- Hence the CREATE TABLE below has fifteen columns, not seventeen. The two
+-- columns 053 also claims are deliberately absent — 124 adds them straight
+-- after, on both a fresh bootstrap and production. Wiring them in here as
+-- well would make 124 collide with them on every fresh database.
+--
+--    DANGER: do not run this against a database that has data in it.
+--
+-- D1 enforces foreign keys, so `DROP TABLE tenants` performs an implicit
+-- `DELETE FROM tenants`, and the ON DELETE CASCADE clauses on the 30 foreign
+-- keys pointing at `tenants` fire before the rename ever happens. Reproduced
+-- 2026-11-21 against a copy of production's schema with one tenant, one post
+-- and one user: the post was gone afterwards, the user's tenant_id was nulled,
+-- and the swap reported success.
+--
+-- Production never runs it: `d1_migrations` has a row for this file
+-- (2026-08-26 17:56:22, alongside 117), so `wrangler d1 migrations apply`
+-- skips it there — and production's CHECK already includes 'wanderer', so
+-- nothing is owed. The only execution path is a fresh bootstrap, where the
+-- table is empty of anything anyone cares about.
 --
 -- Superseded no-op: 111_tenants_plan_add_wanderer.sql
 
@@ -52,18 +56,12 @@ CREATE TABLE tenants_new (
 
   created_at INTEGER NOT NULL DEFAULT (unixepoch()),
   updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
-  encrypted_dek TEXT, last_activity_at INTEGER DEFAULT 0, reclamation_status TEXT, meadow_opt_in INTEGER DEFAULT 0
+  encrypted_dek TEXT, meadow_opt_in INTEGER DEFAULT 0
 );
 
--- Explicit column list, NOT `SELECT *`: production was hand-patched outside
--- migration history back on 2026-04-18 (see above), and that hand-patch
--- predates last_activity_at/reclamation_status (053_wanderer_tier.sql) —
--- confirmed via `PRAGMA table_info(tenants)` against the live remote DB,
--- which has 15 columns, not the 17 a from-scratch migration history implies.
--- Naming every source column keeps this correct on any tenants table that
--- has ever received these two columns (fresh bootstrap) and any that
--- hasn't (current prod) — the two new columns just take their declared
--- defaults (0 and NULL) for existing rows either way.
+-- Explicit column list, NOT `SELECT *`: a database that has been through 124
+-- before reaching here is not a shape this file sees, but naming every column
+-- keeps that impossibility obvious rather than relying on column order.
 INSERT INTO tenants_new (
   id, subdomain, display_name, email, plan, storage_used, post_count,
   custom_domain, theme, accent_color, active, created_at, updated_at,
@@ -79,6 +77,8 @@ DROP TABLE tenants;
 
 ALTER TABLE tenants_new RENAME TO tenants;
 
+-- The five indexes that do not depend on a column 124 adds. The sixth,
+-- idx_tenants_plan_activity, needs last_activity_at and so is created by 124.
 CREATE INDEX idx_tenants_subdomain ON tenants(subdomain);
 CREATE INDEX idx_tenants_subdomain_active ON tenants(subdomain) WHERE active = 1;
 CREATE INDEX idx_tenants_custom_domain ON tenants(custom_domain) WHERE custom_domain IS NOT NULL;

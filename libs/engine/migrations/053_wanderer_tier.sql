@@ -1,60 +1,30 @@
--- Migration 053: Wanderer Tier Support
--- Adds activity tracking and account reclamation infrastructure for the free tier (Wanderer Plan).
+-- Migration 053: Wanderer Tier Support — NO-OP, see 124
 --
--- Run with:
---   npx wrangler d1 execute grove-engine-db --file=packages/engine/migrations/053_wanderer_tier.sql --local
---   npx wrangler d1 execute grove-engine-db --file=packages/engine/migrations/053_wanderer_tier.sql --remote
-
--- Track last meaningful activity for inactivity reclamation (free tier only).
--- Updated on: login, post create/update, media upload.
--- Note: DEFAULT (unixepoch()) is valid in CREATE TABLE but not ALTER TABLE
--- in newer SQLite versions. Using constant default for compatibility.
-ALTER TABLE tenants ADD COLUMN last_activity_at INTEGER DEFAULT 0;
-
--- Track reclamation warning state for free tier accounts.
--- null = no warnings sent
--- 'first_warning' = 9-month email sent
--- 'final_warning' = 11-month email sent
--- 'reclaimed' = account reclaimed
-ALTER TABLE tenants ADD COLUMN reclamation_status TEXT;
-
--- Table for archived/reclaimed free-tier accounts.
--- Content is archived to R2 for 30 days after reclamation, then permanently deleted.
-CREATE TABLE IF NOT EXISTS reclaimed_accounts (
-  id TEXT PRIMARY KEY,
-  original_tenant_id TEXT NOT NULL,
-  username TEXT NOT NULL,
-  email TEXT NOT NULL,
-  content_archive_key TEXT,
-  reclaimed_at INTEGER NOT NULL,
-  archive_expires_at INTEGER NOT NULL,
-  created_at INTEGER DEFAULT (unixepoch())
-);
-
--- Index for looking up archives by original tenant.
-CREATE INDEX IF NOT EXISTS idx_reclaimed_accounts_tenant
-  ON reclaimed_accounts(original_tenant_id);
-
--- Index for the daily reclamation cron to find expired archives efficiently.
-CREATE INDEX IF NOT EXISTS idx_reclaimed_accounts_archive_expires
-  ON reclaimed_accounts(archive_expires_at);
-
--- Track free account creation by IP to prevent abuse (max 3 per IP per 30 days).
--- SUPERSEDED 2026-11-17 (#1683): this limiter was never deployed and has been
--- removed from the application. The table does not exist in production despite
--- d1_migrations listing this file as applied — see #1692. Identity-based
--- counting replaces it in #1681. Kept here only as migration history.
-CREATE TABLE IF NOT EXISTS free_account_creation_log (
-  id TEXT PRIMARY KEY,
-  ip_address TEXT NOT NULL,
-  created_at INTEGER NOT NULL DEFAULT (unixepoch())
-);
-
--- Index for IP-based lookups during signup.
-CREATE INDEX IF NOT EXISTS idx_free_account_creation_ip
-  ON free_account_creation_log(ip_address, created_at);
-
--- Index for the reclamation cron to find inactive free-tier accounts.
-CREATE INDEX IF NOT EXISTS idx_tenants_plan_activity
-  ON tenants(plan, last_activity_at)
-  WHERE plan = 'wanderer' AND active = 1;
+-- This file has never executed against grove-engine-db, even though
+-- `d1_migrations` lists it as applied on 2026-02-28. That row came from a bulk
+-- backfill of 95 rows sharing one timestamp, not from running this file, and
+-- `wrangler d1 migrations apply` has skipped it ever since (#1692).
+--
+-- Confirmed against production on 2026-11-21: `tenants` has 15 columns and no
+-- last_activity_at or reclamation_status, and `reclaimed_accounts` does not
+-- exist.
+--
+-- Its contents now live in 124_reconcile_tenants_and_indexes.sql, which is
+-- idempotent and applies to both a fresh bootstrap and production. It cannot
+-- live here: this file also creates `free_account_creation_log`, a per-IP
+-- signup limiter that was deliberately retired (#1683) and should not be
+-- re-created.
+--
+-- What this file used to contain, for the record:
+--   ALTER TABLE tenants ADD COLUMN last_activity_at INTEGER DEFAULT 0;
+--   ALTER TABLE tenants ADD COLUMN reclamation_status TEXT;
+--   CREATE TABLE IF NOT EXISTS reclaimed_accounts (...);
+--   CREATE INDEX idx_reclaimed_accounts_tenant ...
+--   CREATE INDEX idx_reclaimed_accounts_archive_expires ...
+--   CREATE TABLE IF NOT EXISTS free_account_creation_log (...);   -- retired
+--   CREATE INDEX idx_free_account_creation_ip ...                 -- retired
+--   CREATE INDEX idx_tenants_plan_activity ...                    -- moved to 124
+--
+-- Kept as a file because `d1_migrations` has a row for it; renaming or
+-- deleting it would make a fresh bootstrap's ledger disagree with production's
+-- in the other direction.
