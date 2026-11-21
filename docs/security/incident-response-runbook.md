@@ -574,6 +574,32 @@ enough to exercise the `nofollow ugc` rule (#1682) on a live page.
 
 ### Escalation
 
+Three switches, and they answer different questions. Knowing which one you moved
+is most of the job (#1722):
+
+| question | lever |
+| --- | --- |
+| is the site up? | `gw tenant suspend` / `gw tenant resume` — cheap, reversible, content untouched |
+| can the person sign in? | `gw account terminate` / `gw account unban` — the account, not the blog |
+| can that address sign up again? | `gw block add` / `gw block rm` — a deny list entry, which outlives the account |
+
+`gw account terminate <subdomain|email> --reason "..." [--expires 30d] --write`
+does all three in one audited step: suspend, ban (`ba_user.banned` + reason +
+expiry), revoke live sessions (`ba_session`, `refresh_tokens`,
+`user_sessions`), and block the normalized address with
+`source = terminate:<subdomain>`. Without `--write` it prints the plan and
+touches nothing.
+
+Lifting it is three decisions, not one: `gw account unban` for the ban,
+`gw tenant resume` for the site, `gw block rm` for the address. `resume` says so
+when the account is still banned rather than letting you find out at the login
+page.
+
+One bound worth knowing: Heartwood caches session data in KV for up to five
+minutes, so a banned session can still validate from cache for that long even
+after its rows are deleted. The ban is checked on every fresh lookup; the TTL is
+the window.
+
 Suspension is the reversible first move. Permanent removal is one command:
 
 ```bash
