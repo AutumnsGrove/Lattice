@@ -97,10 +97,14 @@ func TestTerminateBlocksTheNormalizedIdentity(t *testing.T) {
 }
 
 func TestTerminateIsADryRunByDefault(t *testing.T) {
-	plan := terminationPlan(testTarget(), "spam@example.com", nil, false)
-
-	if plan.DryRun {
-		t.Error("the plan built for --write must not be marked a dry run")
+	// The flag describes what happened, not which flags were typed: `--write`
+	// means the ban was applied, and the JSON says so. Reading it the other way
+	// round made a real termination report `"dryRun": true` (caught in review).
+	if plan := terminationPlan(testTarget(), "spam@example.com", nil, false); plan.DryRun {
+		t.Error("a plan built after --write must not claim to be a dry run")
+	}
+	if plan := terminationPlan(testTarget(), "spam@example.com", nil, true); !plan.DryRun {
+		t.Error("a plan built before --write must be marked a dry run")
 	}
 
 	text := renderTerminationPlan(terminationPlan(testTarget(), "spam@example.com", nil, true))

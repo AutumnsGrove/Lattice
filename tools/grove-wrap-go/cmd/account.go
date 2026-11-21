@@ -207,7 +207,10 @@ func runAccountTerminate(cmd *cobra.Command, args []string) error {
 	}
 
 	write := cfg.WriteFlag
-	plan := terminationPlan(target, blockValue, expiresAt, write)
+	// `!write`: the plan records whether anything was *changed*, and the JSON is
+	// read by automation that will act on it. Passing `write` here once already
+	// made a real termination report `"dryRun": true`.
+	plan := terminationPlan(target, blockValue, expiresAt, !write)
 
 	if !write {
 		if cfg.JSONMode {
@@ -268,6 +271,8 @@ type termination struct {
 }
 
 func terminationPlan(target *accountTarget, blockValue string, expiresAt *int64, dryRun bool) termination {
+	// `dryRun` means "nothing was written", never "--write was not passed".
+	// Callers pass `!write`.
 	return termination{
 		Subdomain:       target.Subdomain,
 		TenantID:        target.TenantID,
