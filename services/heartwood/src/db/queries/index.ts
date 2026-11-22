@@ -90,6 +90,7 @@ export {
 	getAdminStats,
 	getAllUsers,
 	getAuditLogs,
+	getTenantSignInMethods,
 } from "./admin.js";
 
 // Device Codes (RFC 8628)

@@ -5,7 +5,7 @@
  * Google OAuth is the sole authentication method.
  */
 
-import type { AuthProvider, ProviderConfig } from "./types.js";
+import type { AuthProvider, ProviderConfig, SignInMethodChip } from "./types.js";
 import { AUTH_HUB_URL } from "../../platform/config/auth.js";
 import { readViteEnv } from "../../utils/vite-env.js";
 
@@ -22,12 +22,25 @@ export const PROVIDERS: Record<AuthProvider, ProviderConfig> = {
 		name: "Google",
 		available: true,
 		description: "Sign in with your Google account",
+		tone: "info",
 	},
 	github: {
 		id: "github",
 		name: "GitHub",
 		available: false, // Not yet implemented
 		description: "Sign in with your GitHub account",
+		tone: "info",
+	},
+	// The email-code flow. `available: false` keeps it out of the OAuth button
+	// lists (it is not a provider you redirect to); it is here for its name.
+	// Better Auth records it as `credential`, which is exactly the sort of
+	// internal string that must never reach a Wanderer's eyes.
+	credential: {
+		id: "credential",
+		name: "Email code",
+		available: false,
+		description: "Sign in with a code sent to your email",
+		tone: "info",
 	},
 };
 
@@ -158,3 +171,51 @@ export const AUTH_COOKIE_OPTIONS = {
 		maxAge: 60 * 60 * 24 * 30, // 30 days
 	},
 } as const;
+
+// =============================================================================
+// LINKED SIGN-IN METHODS (admin surfaces)
+// =============================================================================
+
+/**
+ * Turn one provider id from Heartwood into something displayable (#1739).
+ *
+ * Unknown ids pass through as `Unknown` with a muted tone rather than being
+ * dropped or rendered raw: a brand-new provider should look like a gap in this
+ * registry, not like a tenant with no way in — and never like the word
+ * `credential` leaking into an admin table.
+ */
+export function signInMethodChip(providerId: string): SignInMethodChip {
+	const config = PROVIDERS[providerId as AuthProvider];
+	if (!config) return { id: providerId, label: "Unknown", tone: "muted" };
+	return { id: providerId, label: config.name, tone: config.tone ?? "info" };
+}
+
+/**
+ * Chips for every method on an account, in registry order.
+ *
+ * Registry order and not `ba_account.created_at`, so a table scan does not make
+ * the eye re-learn chip positions every refresh; unknown methods sort last, where
+ * they are easy to spot. Duplicates collapse — account linking can record the
+ * same provider twice across re-auth.
+ */
+export function signInMethodChips(providerIds: readonly string[]): SignInMethodChip[] {
+	const known = Object.keys(PROVIDERS) as AuthProvider[];
+	const seen = new Set<string>();
+	const chips: SignInMethodChip[] = [];
+
+	for (const id of known) {
+		if (providerIds.includes(id) && !seen.has(id)) {
+			seen.add(id);
+			chips.push(signInMethodChip(id));
+		}
+	}
+
+	for (const id of providerIds) {
+		if (!seen.has(id)) {
+			seen.add(id);
+			chips.push(signInMethodChip(id));
+		}
+	}
+
+	return chips;
+}

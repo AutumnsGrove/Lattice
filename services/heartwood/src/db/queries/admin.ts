@@ -112,3 +112,37 @@ export async function getAuditLogs(
 		.all<AuditLog>();
 	return result.results || [];
 }
+
+/**
+ * Which sign-in methods are linked to each tenant's account(s) (#1739).
+ *
+ * `ba_account.provider_id` is `google` for OAuth and `credential` for the
+ * email-code plugin, with one row per linked method — so the answer is a list,
+ * not a scalar, and it is read live rather than denormalised onto `tenants`.
+ *
+ * Account linking is already on (`accountLinking.enabled` in auth/index.ts), so
+ * an email-code account that later signs in with Google ends up with two rows.
+ * A column recording "how they signed up" would say "Email code" forever and lie
+ * about a tenant who now has Google attached; this answers "how do they get in
+ * today", which is the question the tenant list is asking.
+ *
+ * Rows with no `tenant_id` are excluded rather than bucketed: a login that owns
+ * no blog has no row on the tenants page to decorate.
+ */
+export async function getTenantSignInMethods(
+	db: D1DatabaseOrSession,
+): Promise<Array<{ tenantId: string; providerId: string }>> {
+	const result = await db
+		.prepare(
+			`SELECT ba_user.tenant_id AS tenant_id, ba_account.provider_id AS provider_id
+       FROM ba_account
+       JOIN ba_user ON ba_user.id = ba_account.user_id
+       WHERE ba_user.tenant_id IS NOT NULL AND ba_user.tenant_id != ''
+       ORDER BY ba_account.provider_id ASC`,
+		)
+		.all<{ tenant_id: string; provider_id: string }>();
+
+	return (result.results || [])
+		.filter((row) => typeof row.tenant_id === "string" && row.tenant_id.length > 0)
+		.map((row) => ({ tenantId: row.tenant_id, providerId: row.provider_id }));
+}

@@ -14,9 +14,24 @@ import type { BaseGraftProps } from "../../platform/types.js";
 
 /**
  * Supported authentication providers.
- * Currently Google OAuth is the only fully implemented provider.
+ *
+ * `credential` is the email-code flow (Better Auth's email OTP plugin) rather
+ * than an OAuth provider. It belongs here because this registry is also the one
+ * place a sign-in method gets a name — the login page and the admin tenant list
+ * both read it, and "Email code" should never be spelled twice (#1739).
+ *
+ * Adding Apple or Microsoft later is a line in `PROVIDERS`, not a new union.
  */
-export type AuthProvider = "google" | "github";
+export type AuthProvider = "google" | "github" | "credential";
+
+/**
+ * How certain the interface is about a method, not how pretty it should look.
+ *
+ * `info` — a method this account really has. `muted` — we do not know: a
+ * provider we have no label for. The UI maps these to Prism tokens; no component
+ * chooses a colour of its own.
+ */
+export type ProviderTone = "info" | "muted";
 
 /**
  * Configuration for a single auth provider.
@@ -33,6 +48,19 @@ export interface ProviderConfig {
 
 	/** Optional description for the provider */
 	description?: string;
+
+	/** Chip tone for surfaces that show linked methods (defaults to `info`). */
+	tone?: ProviderTone;
+}
+
+/** A sign-in method rendered as a chip beside an account (#1739). */
+export interface SignInMethodChip {
+	/** The id Heartwood recorded, so a caller can tell "unknown" from "not asked". */
+	id: string;
+	/** What a person reads: "Google", "Email code". Never `credential`. */
+	label: string;
+	/** How certain we are, not how pretty it is — the UI picks the token. */
+	tone: ProviderTone;
 }
 
 // =============================================================================

@@ -1,7 +1,8 @@
 <script lang="ts">
-	import type { PageData } from './$types';
-	import { GlassCard } from '@autumnsgrove/lattice/ui';
-	import { navIcons, authIcons, featureIcons, phaseIcons } from '@autumnsgrove/prism/icons';
+	import type { PageData } from "./$types";
+	import { GlassCard } from "@autumnsgrove/lattice/ui";
+	import { navIcons, authIcons, featureIcons, phaseIcons } from "@autumnsgrove/prism/icons";
+	import { signInMethodChips } from "@autumnsgrove/lattice/auth/login";
 	const Search = navIcons.search;
 	const Users = authIcons.users;
 	const HardDrive = featureIcons.hardDrive;
@@ -11,7 +12,7 @@
 
 	let { data }: { data: PageData } = $props();
 
-	let searchQuery = $state('');
+	let searchQuery = $state("");
 
 	let filteredTenants = $derived(
 		searchQuery.trim()
@@ -19,59 +20,86 @@
 					(t: any) =>
 						t.subdomain.toLowerCase().includes(searchQuery.toLowerCase()) ||
 						t.display_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-						t.email.toLowerCase().includes(searchQuery.toLowerCase())
+						t.email.toLowerCase().includes(searchQuery.toLowerCase()),
 				)
-			: data.tenants
+			: data.tenants,
 	);
+
+	/**
+	 * Chip tones, mapped once from the semantic tone the registry gives us to
+	 * Prism tokens. No component picks a colour of its own (#1739).
+	 */
+	const methodChipTone: Record<string, { color: string; bg: string }> = {
+		info: {
+			color: "text-info dark:text-info",
+			bg: "bg-info-bg dark:bg-info-bg/30",
+		},
+		muted: {
+			color: "text-foreground-muted",
+			bg: "bg-muted dark:bg-muted/30",
+		},
+	};
+
+	/**
+	 * Chips for one tenant: the methods Heartwood reported, or a single `Unknown`
+	 * when the lookup itself failed. An empty list is a real answer and renders
+	 * nothing — a tenant with no login linked has nothing to show, and inventing
+	 * `Unknown` for that would hide the difference between "none" and "no idea".
+	 */
+	function signInChips(tenantId: string) {
+		const methods = data.signInMethods;
+		if (!methods) return [{ id: "unknown", label: "Unknown", tone: "muted" }];
+		return signInMethodChips(methods[tenantId] ?? []);
+	}
 
 	const planConfig: Record<string, { label: string; color: string; bg: string }> = {
 		wanderer: {
-			label: 'Wanderer',
-			color: 'text-muted-foreground dark:text-muted-foreground',
-			bg: 'bg-muted dark:bg-muted/30'
+			label: "Wanderer",
+			color: "text-muted-foreground dark:text-muted-foreground",
+			bg: "bg-muted dark:bg-muted/30",
 		},
 		seedling: {
-			label: 'Seedling',
-			color: 'text-success dark:text-success',
-			bg: 'bg-success-bg dark:bg-success-bg/30'
+			label: "Seedling",
+			color: "text-success dark:text-success",
+			bg: "bg-success-bg dark:bg-success-bg/30",
 		},
 		sapling: {
-			label: 'Sapling',
-			color: 'text-info dark:text-info',
-			bg: 'bg-info-bg dark:bg-info-bg/30'
+			label: "Sapling",
+			color: "text-info dark:text-info",
+			bg: "bg-info-bg dark:bg-info-bg/30",
 		},
 		oak: {
-			label: 'Oak',
-			color: 'text-warning dark:text-warning',
-			bg: 'bg-warning-bg dark:bg-warning-bg/30'
+			label: "Oak",
+			color: "text-warning dark:text-warning",
+			bg: "bg-warning-bg dark:bg-warning-bg/30",
 		},
 		evergreen: {
-			label: 'Evergreen',
-			color: 'text-success dark:text-success',
-			bg: 'bg-success-bg dark:bg-success-bg/30'
-		}
+			label: "Evergreen",
+			color: "text-success dark:text-success",
+			bg: "bg-success-bg dark:bg-success-bg/30",
+		},
 	};
 
 	function formatStorage(bytes: number | null): string {
-		if (bytes === null) return 'Unable to load';
-		if (bytes === 0) return '0 B';
-		const units = ['B', 'KB', 'MB', 'GB'];
+		if (bytes === null) return "Unable to load";
+		if (bytes === 0) return "0 B";
+		const units = ["B", "KB", "MB", "GB"];
 		const i = Math.floor(Math.log(bytes) / Math.log(1024));
 		return `${(bytes / Math.pow(1024, i)).toFixed(i > 1 ? 1 : 0)} ${units[i]}`;
 	}
 
 	function formatDate(timestamp: number): string {
-		return new Date(timestamp * 1000).toLocaleDateString('en-US', {
-			month: 'short',
-			day: 'numeric',
-			year: 'numeric'
+		return new Date(timestamp * 1000).toLocaleDateString("en-US", {
+			month: "short",
+			day: "numeric",
+			year: "numeric",
 		});
 	}
 
 	function formatRelative(timestamp: number): string {
 		const diff = Date.now() - timestamp * 1000;
 		const days = Math.floor(diff / 86400000);
-		if (days < 1) return 'Today';
+		if (days < 1) return "Today";
 		if (days < 7) return `${days}d ago`;
 		if (days < 30) return `${Math.floor(days / 7)}w ago`;
 		return formatDate(timestamp);
@@ -116,10 +144,13 @@
 		{@const paid = data.stats.seedling + data.stats.sapling + data.stats.oak + data.stats.evergreen}
 		{@const pct = data.stats.total > 0 ? Math.round((paid / data.stats.total) * 100) : 0}
 		<div class="flex justify-center gap-1 mb-1">
-			{#each ['wanderer', 'seedling', 'sapling', 'oak', 'evergreen'] as plan}
+			{#each ["wanderer", "seedling", "sapling", "oak", "evergreen"] as plan}
 				{@const count = data.stats[plan as keyof typeof data.stats]}
-				{#if typeof count === 'number' && count > 0}
-					<span class="text-xs font-sans px-1.5 py-0.5 rounded {planConfig[plan]?.bg} {planConfig[plan]?.color}">
+				{#if typeof count === "number" && count > 0}
+					<span
+						class="text-xs font-sans px-1.5 py-0.5 rounded {planConfig[plan]?.bg} {planConfig[plan]
+							?.color}"
+					>
 						{count}
 					</span>
 				{/if}
@@ -151,7 +182,7 @@
 	<GlassCard class="text-center py-12">
 		<Users class="w-16 h-16 mx-auto mb-4 text-foreground/20" />
 		<p class="text-foreground-muted font-sans">
-			{searchQuery ? 'No tenants match your search' : 'No tenants yet'}
+			{searchQuery ? "No tenants match your search" : "No tenants yet"}
 		</p>
 	</GlassCard>
 {:else}
@@ -209,9 +240,7 @@
 						</th>
 					</tr>
 				</thead>
-				<tbody
-					class="divide-y divide-border dark:divide-border/50 bg-white dark:bg-cream-100/30"
-				>
+				<tbody class="divide-y divide-border dark:divide-border/50 bg-white dark:bg-cream-100/30">
 					{#each filteredTenants as tenant (tenant.id)}
 						{@const plan = planConfig[tenant.plan] || planConfig.seedling}
 						<tr class="group">
@@ -226,6 +255,18 @@
 							<td class="px-6 py-4">
 								<div class="text-sm font-sans text-foreground">{tenant.display_name}</div>
 								<div class="text-xs font-sans text-foreground-muted">{tenant.email}</div>
+								{#if signInChips(tenant.id).length > 0}
+									<div class="mt-1 flex flex-wrap gap-1">
+										{#each signInChips(tenant.id) as method (method.id)}
+											<span
+												class="text-xs font-sans px-2 py-0.5 rounded {methodChipTone[method.tone]
+													?.bg ?? methodChipTone.muted.bg} {methodChipTone[method.tone]?.color ??
+													methodChipTone.muted.color}"
+												title="How this account gets in">{method.label}</span
+											>
+										{/each}
+									</div>
+								{/if}
 							</td>
 							<td class="px-6 py-4">
 								<span class="text-xs font-sans px-2 py-1 rounded {plan.bg} {plan.color}">

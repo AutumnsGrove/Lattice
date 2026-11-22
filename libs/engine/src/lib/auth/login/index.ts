@@ -31,6 +31,8 @@ export type {
 	LoginGraftProps,
 	ProviderIconProps,
 	ProviderConfig,
+	ProviderTone,
+	SignInMethodChip,
 } from "./types.js";
 
 // Config & utilities
@@ -48,6 +50,8 @@ export {
 	AUTH_COOKIE_OPTIONS,
 	LOGIN_URL,
 	buildLoginUrl,
+	signInMethodChip,
+	signInMethodChips,
 } from "./config.js";
 
 // Components

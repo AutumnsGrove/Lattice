@@ -89,6 +89,7 @@ export {
 	getAdminStats,
 	getAllUsers,
 	getAuditLogs,
+	getTenantSignInMethods,
 	// Device Codes
 	createDeviceCode,
 	getDeviceCodeByUserCode,
