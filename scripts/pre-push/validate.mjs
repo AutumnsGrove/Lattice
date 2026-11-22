@@ -7,13 +7,19 @@
  * the deploy shims affected by the push.
  *
  * Checks (in order):
- *   1. Lockfile sync      (pnpm install --frozen-lockfile)
+ *   1. Lockfile sync      (pnpm install --frozen-lockfile, only when a
+ *                          package.json or the lockfile itself changed)
  *   2. Deploy drift       (deploy-manifest --drift)
- *   3. Direct typecheck   (tsc --noEmit or custom typecheck-command — shims whose
- *                          OWN directory changed, not shims that merely declare a
- *                          changed shared lib as a path trigger)
- *   4. Svelte-check       (same direct-only scope as #3)
+ *   3. Direct typecheck   (tsc --noEmit or the package's own check script —
+ *                          shims whose OWN directory changed, not shims that
+ *                          merely declare a changed shared lib as a path
+ *                          trigger. One check per package, not two.)
+ *   4. Svelte-check       (the same packages, once)
  *   5. Direct dry-run     (wrangler deploy --dry-run — only if CF token present)
+ *
+ * Shared libs (foliage, gossamer, engine) are built only when their sources
+ * changed or their dist is older than their sources. Rebuilding them on every
+ * push cost ~2 minutes for a one-line change (#1783).
  *
  * Time budget: ~30-60s for a typical single-service change. Scoping to
  * directly-changed shims (not their lib-triggered downstream consumers) is
@@ -26,12 +32,13 @@
  * Environment:
  *   PRE_PUSH_BASE              Git ref to diff against (default: origin/main)
  *   PRE_PUSH_SKIP_LOCKFILE=1   Skip the pnpm-lock.yaml sync check
+ *   PRE_PUSH_FORCE_BUILD=1     Rebuild the shared libs even if they look fresh
  *   CLOUDFLARE_API_TOKEN       If set, wrangler dry-run runs; else skipped with a note
  *   CLOUDFLARE_ACCOUNT_ID      Required alongside the token for dry-run
  */
 
 import { spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -41,6 +48,9 @@ import {
 	findWranglerConfigs,
 	getChangedFiles,
 } from "./deploy-manifest.mjs";
+// The same derived package graph CI uses, so local staleness and CI scoping
+// cannot disagree about what depends on what (see #1783).
+import { discoverPackages } from "../../.github/scripts/affected-packages.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..", "..");
@@ -90,18 +100,103 @@ function dumpTail(out, n = 25) {
 	for (const line of lines) console.log(`    ${DIM}${line}${RESET}`);
 }
 
+/**
+ * Newest mtime under a directory. A lib's dist is stale if any file that feeds
+ * it is newer than the build output, so the answer depends on the whole input
+ * set, not just the lib's own directory.
+ */
+function newestMtime(dir) {
+	let newest = 0;
+	for (const name of readdirSync(dir)) {
+		const abs = resolve(dir, name);
+		let stat;
+		try {
+			stat = statSync(abs);
+		} catch {
+			continue;
+		}
+		if (stat.isDirectory()) newest = Math.max(newest, newestMtime(abs));
+		else newest = Math.max(newest, stat.mtimeMs);
+	}
+	return newest;
+}
+
+/**
+ * A lib directory plus every workspace lib it transitively imports.
+ * engine imports prism, infra, loom, curios and the grove-* libs, so a change
+ * to any of those makes engine's dist stale even though none of their files
+ * live under libs/engine. Falls back to the lib's own directory if discovery
+ * fails: the worst case is an unnecessary rebuild, never a stale dist.
+ */
+function libInputDirs(dir) {
+	try {
+		const packages = discoverPackages(REPO_ROOT);
+		const dirByName = new Map([...packages.values()].map((p) => [p.name, p.dir]));
+		const seen = new Set();
+		const walk = (current) => {
+			if (seen.has(current) || !packages.has(current)) return;
+			seen.add(current);
+			for (const dep of Object.keys(packages.get(current).deps)) {
+				const depDir = dirByName.get(dep);
+				if (depDir) walk(depDir);
+			}
+		};
+		walk(dir);
+		return seen.size > 0 ? [...seen] : [dir];
+	} catch {
+		return [dir];
+	}
+}
+
+/**
+ * True when a library's build output is missing or older than any of its
+ * inputs. Wall-clock mtimes, not git history: this answers "is the dist on
+ * disk the build of the code on disk right now", which is what typecheck
+ * needs.
+ */
+function isStale(dir, inputDirs, entry) {
+	const entryPath = resolve(REPO_ROOT, dir, entry);
+	if (!existsSync(entryPath)) return true;
+
+	const built = statSync(entryPath).mtimeMs;
+	return inputDirs.some((input) => {
+		const src = resolve(REPO_ROOT, input, "src");
+		return existsSync(src) && newestMtime(src) > built;
+	});
+}
+
 // ─── 1. Lockfile sync ─────────────────────────────────────────────
-if (process.env.PRE_PUSH_SKIP_LOCKFILE !== "1") {
-	header("Lockfile sync");
+// Diff first: a push that touches no manifest cannot have desynced the
+// lockfile, and `pnpm install --frozen-lockfile` is 15–40s of nothing.
+header("Changed files");
+const base = process.env.PRE_PUSH_BASE || detectBase();
+let changedFiles = [];
+try {
+	changedFiles = getChangedFiles(base);
+} catch (e) {
+	note(`could not diff against ${base}: ${e.message}`);
+}
+if (changedFiles.length === 0) {
+	skip(`No files changed since ${base}`);
+} else {
+	note(`${changedFiles.length} files changed since ${base}`);
+}
+
+header("Lockfile sync");
+const manifestChanged = changedFiles.some(
+	(f) => f === "pnpm-lock.yaml" || f === "pnpm-workspace.yaml" || f.endsWith("package.json"),
+);
+if (process.env.PRE_PUSH_SKIP_LOCKFILE === "1") {
+	skip("PRE_PUSH_SKIP_LOCKFILE=1");
+} else if (!manifestChanged) {
+	skip("no package.json or lockfile changed");
+} else {
 	const r = run("pnpm install --frozen-lockfile --prefer-offline");
 	if (r.ok) ok("pnpm-lock.yaml in sync");
 	else {
 		bad("pnpm-lock.yaml out of sync — run `pnpm install` and commit");
 		dumpTail(r.stderr, 10);
 	}
-} else {
-	header("Lockfile sync");
-	skip("PRE_PUSH_SKIP_LOCKFILE=1");
 }
 
 // ─── 2. Deploy manifest drift ─────────────────────────────────────
@@ -119,7 +214,6 @@ if (drift.missingWrangler.length === 0 && drift.orphanedWrangler.length === 0) {
 
 // ─── 3. Affected shims — typecheck ────────────────────────────────
 header("Affected deploys");
-const base = process.env.PRE_PUSH_BASE || detectBase();
 let affected = [];
 try {
 	affected = filterAffected(shims, base);
@@ -131,7 +225,6 @@ try {
 // shims matched only because they declare a changed shared lib as a path
 // trigger ("lib-only"). Local checks run against `direct` only — CI still
 // covers the full fan-out remotely via the same deploy-*.yml path triggers.
-const changedFiles = affected.length > 0 ? getChangedFiles(base) : [];
 const direct = affected.filter(
 	(s) => s.path && changedFiles.some((f) => f.startsWith(s.path + "/")),
 );
@@ -148,33 +241,56 @@ if (affected.length === 0) {
 		);
 	}
 
-	// ── Build lib deps first (always) ──────────────────────────────
-	// Build all shared libs before typechecking, regardless of which
-	// specific shims declare them. Prevents "cannot find module" errors
-	// in fresh environments and guards against shims that forget to
-	// declare needs-engine/foliage.
-	const buildLib = (name, dir, label, cmd = "pnpm run package") => {
-		process.stdout.write(`  ${DIM}build ${label.padEnd(18)}...${RESET}`);
-		const r = run(cmd, resolve(REPO_ROOT, dir));
+	// ── Build lib deps when they are not already current ──────────────
+	// These dists must exist before any typecheck can resolve
+	// `@autumnsgrove/lattice` — a missing dist is what made every engine
+	// typecheck look broken in docs/tech-debt/ci-punt-list.md. But rebuilding
+	// them on every push cost ~2 minutes for a one-line change (#1783), so
+	// build only when their sources moved or the dist is older than the
+	// source tree. PRE_PUSH_FORCE_BUILD=1 overrides the guess.
+	const LIB_SPECS = [
+		{ label: "libs/foliage", dir: "libs/foliage", cmd: "pnpm run build", entry: "dist/index.js" },
+		{ label: "libs/gossamer", dir: "libs/gossamer", cmd: "pnpm run build", entry: "dist/index.js" },
+		{ label: "libs/engine", dir: "libs/engine", cmd: "pnpm run package", entry: "dist/index.d.ts" },
+	];
+
+	for (const lib of LIB_SPECS) {
+		// A lib is stale when anything it transitively imports is newer than its
+		// dist, and touched when any of those directories changed in this push.
+		const inputDirs = libInputDirs(lib.dir);
+		const touched = inputDirs.some((dir) => changedFiles.some((f) => f.startsWith(dir + "/")));
+		const stale = isStale(lib.dir, inputDirs, lib.entry);
+		if (!touched && !stale && process.env.PRE_PUSH_FORCE_BUILD !== "1") {
+			skip(`${lib.label} (already built)`);
+			continue;
+		}
+		process.stdout.write(`  ${DIM}build ${lib.label.padEnd(18)}...${RESET}`);
+		const r = run(lib.cmd, resolve(REPO_ROOT, lib.dir));
 		if (r.ok) console.log(` ${GREEN}✓${RESET}`);
 		else {
 			console.log(` ${RED}✗${RESET}`);
 			failures++;
 			dumpTail(r.stderr || r.stdout, 20);
 		}
-		return r.ok;
+	}
+
+	// A package with its own `check` script gets exactly one check: that one.
+	// Running tsc and then svelte-check over the same project was two passes
+	// over the same code (#1783). `check` scripts run `svelte-kit sync`
+	// themselves, so those shims need no separate sync either.
+	const hasCheckScript = (shim) => {
+		if (!shim.path) return false;
+		try {
+			const pkg = JSON.parse(readFileSync(resolve(REPO_ROOT, shim.path, "package.json"), "utf8"));
+			return Boolean(pkg.scripts && pkg.scripts.check);
+		} catch {
+			return false;
+		}
 	};
 
-	buildLib("foliage", "libs/foliage", "libs/foliage", "pnpm run build");
-	buildLib("gossamer", "libs/gossamer", "libs/gossamer", "pnpm run build");
-	buildLib("engine", "libs/engine", "libs/engine", "pnpm run package");
-
-	// ── SvelteKit sync for directly-changed shims ───────────────────
-	// Attempt sync for every direct shim — non-SvelteKit packages exit
-	// non-zero and are logged as ⊘. Covers apps/, workers/ that use
-	// SvelteKit, and libs/* like engine that extend .svelte-kit/tsconfig.json.
+	// ── SvelteKit sync for shims that typecheck with plain tsc ──────
 	for (const shim of direct) {
-		if (!shim.path) continue;
+		if (!shim.path || hasCheckScript(shim)) continue;
 		process.stdout.write(`  ${DIM}sync ${shim.service.padEnd(18)}...${RESET}`);
 		const r = run("pnpm exec svelte-kit sync", resolve(REPO_ROOT, shim.path));
 		if (r.ok) console.log(` ${GREEN}✓${RESET}`);
@@ -188,6 +304,14 @@ if (affected.length === 0) {
 		if (shim.with["run-typecheck"] === false) {
 			skip(`${shim.service} typecheck (run-typecheck: false)`);
 			continue;
+		}
+		if (hasCheckScript(shim)) {
+			// The same code is checked below with the package's own `check`
+			// script, which is a superset of plain tsc and runs its own
+			// svelte-kit sync. A shim with a *different* explicit command still
+			// gets that command — only the two equivalents are skipped.
+			const configured = shim.with["typecheck-command"] || "pnpm exec tsc --noEmit";
+			if (configured === "pnpm exec tsc --noEmit" || configured === "pnpm check") continue;
 		}
 		const cmd = shim.with["typecheck-command"] || "pnpm exec tsc --noEmit";
 		process.stdout.write(`  ${DIM}${shim.service.padEnd(20)} typecheck ...${RESET}`);
@@ -213,16 +337,7 @@ if (affected.length === 0) {
 	} else {
 		for (const shim of svelteShims) {
 			// Only run svelte-check on packages that have a "check" script
-			const pkgPath = resolve(REPO_ROOT, shim.path, "package.json");
-			let hasCheckScript = false;
-			try {
-				const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
-				hasCheckScript = Boolean(pkg.scripts && pkg.scripts.check);
-			} catch {
-				// No package.json or unreadable — skip
-			}
-
-			if (!hasCheckScript) continue;
+			if (!hasCheckScript(shim)) continue;
 			if (shim.with["run-svelte-check"] === false) {
 				skip(`${shim.service} svelte-check (run-svelte-check: false)`);
 				continue;

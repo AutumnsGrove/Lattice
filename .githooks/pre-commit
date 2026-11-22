@@ -236,43 +236,18 @@ fi
 echo ""
 
 # ============================================================================
-# TYPESCRIPT TYPE CHECK (if TypeScript files present)
+# TYPESCRIPT TYPE CHECK — deliberately not here
 # ============================================================================
-ts_files=$(echo "$js_ts_files" | grep '\.\(ts\|tsx\)$' || true)
-if [ -n "$ts_files" ]; then
-    if [ -f "tsconfig.json" ]; then
-        if [ "$USE_BUN" = true ]; then
-            echo -e "${YELLOW}Running TypeScript type check ${BLUE}(bun)${YELLOW}...${NC}"
-        else
-            echo -e "${YELLOW}Running TypeScript type check...${NC}"
-        fi
-
-        if [ "$USE_BUN" = true ] && [ -f "node_modules/.bin/tsc" ]; then
-            # Bun (fastest)
-            if bun x tsc --noEmit 2>&1; then
-                echo -e "${GREEN}✓ TypeScript type check passed${NC}"
-            else
-                echo -e "${RED}✗ TypeScript type check failed${NC}"
-                checks_failed=1
-            fi
-        elif command -v tsc &> /dev/null; then
-            if tsc --noEmit 2>&1; then
-                echo -e "${GREEN}✓ TypeScript type check passed${NC}"
-            else
-                echo -e "${RED}✗ TypeScript type check failed${NC}"
-                checks_failed=1
-            fi
-        elif [ -f "node_modules/.bin/tsc" ]; then
-            if npx tsc --noEmit 2>&1; then
-                echo -e "${GREEN}✓ TypeScript type check passed${NC}"
-            else
-                echo -e "${RED}✗ TypeScript type check failed${NC}"
-                checks_failed=1
-            fi
-        fi
-        echo ""
-    fi
-fi
+# This block used to run `tsc --noEmit` at the repo root whenever a .ts file was
+# staged. It was gated on [ -f tsconfig.json ], and there is no tsconfig.json at
+# the repo root — only tsconfig.base.json, which every package extends. So it
+# never ran: a silent no-op for however long it has been here (#1783).
+#
+# A root-wide tsc is the wrong check anyway. Each package has its own project
+# (and its own generated .svelte-kit/tsconfig.json), so type checking belongs
+# per package, after the shared libs are built — which is exactly what
+# scripts/pre-push/validate.mjs does on push, scoped to the packages you
+# actually changed.
 
 else
     echo -e "${GREEN}✓ No JavaScript/TypeScript files to check${NC}"

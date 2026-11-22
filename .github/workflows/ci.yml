@@ -24,6 +24,11 @@ jobs:
       has-tests: ${{ steps.affected.outputs.has_tests }}
       has-typechecks: ${{ steps.affected.outputs.has_typechecks }}
       run-all: ${{ steps.affected.outputs.run_all }}
+      # Scope flags. A job that can only fail for one kind of change waits for
+      # that kind of change instead of running on every PR (#1783).
+      engine: ${{ steps.affected.outputs.engine }}
+      ui: ${{ steps.affected.outputs.ui }}
+      tooling: ${{ steps.affected.outputs.tooling }}
 
     steps:
       - name: Checkout
@@ -48,6 +53,9 @@ jobs:
           TC_MATRIX=$(echo "$RESULT" | jq -c '.typecheckMatrix')
           NEEDS_ENGINE=$(echo "$RESULT" | jq -r '.needsEngine')
           RUN_ALL=$(echo "$RESULT" | jq -r '.runAll')
+          ENGINE=$(echo "$RESULT" | jq -r '.scope.engine')
+          UI=$(echo "$RESULT" | jq -r '.scope.ui')
+          TOOLING=$(echo "$RESULT" | jq -r '.scope.tooling')
           HAS_TESTS=$(echo "$RESULT" | \
             jq -r '.testMatrix | length > 0')
           HAS_TC=$(echo "$RESULT" | \
@@ -60,6 +68,9 @@ jobs:
           echo "has_tests=$HAS_TESTS" >> $GITHUB_OUTPUT
           echo "has_typechecks=$HAS_TC" >> $GITHUB_OUTPUT
           echo "run_all=$RUN_ALL" >> $GITHUB_OUTPUT
+          echo "engine=$ENGINE" >> $GITHUB_OUTPUT
+          echo "ui=$UI" >> $GITHUB_OUTPUT
+          echo "tooling=$TOOLING" >> $GITHUB_OUTPUT
 
           # Summary for the Actions UI
           echo "### Affected Packages" >> $GITHUB_STEP_SUMMARY
@@ -72,6 +83,8 @@ jobs:
             jq -r '.affectedPackages | length')
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**$CHANGED files changed → $AFFECTED affected**" \
+            >> $GITHUB_STEP_SUMMARY
+          echo "Scope: engine=$ENGINE ui=$UI tooling=$TOOLING" \
             >> $GITHUB_STEP_SUMMARY
 
   # Run tests only for affected packages
@@ -134,9 +147,12 @@ jobs:
         run: ${{ matrix.command }}
         working-directory: ${{ matrix.package }}
 
-  # Barrel export verification (fast, always runs)
+  # Barrel export verification. Only meaningful when the engine's surface
+  # moved, so it waits for an engine change instead of running on every PR.
   barrel-exports:
     name: Engine Barrel Exports
+    needs: detect
+    if: needs.detect.outputs.engine == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -145,9 +161,12 @@ jobs:
       - name: Verify engine barrel exports
         run: ./tools/verify-engine-exports.sh
 
-  # Accent color enforcement (fast, always runs)
+  # Accent color enforcement. Only markup, styles or tokens can introduce a
+  # hardcoded colour — a TypeScript-only PR cannot.
   accent-colors:
     name: Accent Color Tokens
+    needs: detect
+    if: needs.detect.outputs.ui == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -166,9 +185,14 @@ jobs:
   # The label manifest is load-bearing: tools/labels/sync.ts, the labeler
   # workflow and the issue templates all read it. A malformed entry fails here
   # rather than silently becoming a label nobody can explain. The pure logic
-  # behind link-pr-to-issue.yml is tested here too.
+  # behind link-pr-to-issue.yml is tested here too, as is the README inventory
+  # and the affected-package detector itself — all repo machinery, all gated on
+  # a change to repo machinery (or to the package structure, which the inventory
+  # and the label vocabulary both depend on).
   labels:
     name: Repo Tooling
+    needs: detect
+    if: needs.detect.outputs.tooling == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -190,7 +214,21 @@ jobs:
       - name: Check the Node version agrees everywhere
         run: node --test .github/scripts/node-version.test.mjs
 
-  # Lint (always runs, fast)
+      # Which changes are allowed to cascade, and which are not, is now the
+      # whole cost model of CI (#1783). It gets tests like any other logic.
+      - name: Test the affected-package detector
+        run: node --test .github/scripts/affected-packages.test.mjs
+
+      # README had meadow, terrarium and ivy in its tables for a year after they
+      # were gone, and Aspen missing entirely (#1705). Cheaper to check than to
+      # rediscover.
+      - name: Check README inventory
+        run: pnpm readme:check
+
+      - name: Test repo scripts
+        run: pnpm test:scripts
+
+  # Lint (always runs — it is the one whole-repo check that any file can break)
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -209,15 +247,6 @@ jobs:
         run: |
           pnpm lint 2>&1 | tee /tmp/lint-output.txt
         continue-on-error: true
-
-      # README had meadow, terrarium and ivy in its tables for a year after they
-      # were gone, and Aspen missing entirely (#1705). Cheaper to check than to
-      # rediscover.
-      - name: Check README inventory
-        run: pnpm readme:check
-
-      - name: Test repo scripts
-        run: pnpm test:scripts
 
       - name: Comment on PR with lint errors
         if: >-
