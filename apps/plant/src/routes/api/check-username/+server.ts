@@ -229,7 +229,8 @@ export const GET: RequestHandler = async ({ url, platform, getClientAddress }) =
 	}
 
 	try {
-		// Check reserved_usernames table (for any additional entries)
+		// Operator extras, not a mirror of the code list — `isUsernameBlocked()`
+		// above is the real list, and it has already run (#1778).
 		const reserved = await db
 			.prepare("SELECT username, reason FROM reserved_usernames WHERE username = ?")
 			.bind(username)

@@ -171,7 +171,9 @@ export async function validateUsernameAvailability(
 
 	// Database checks
 	try {
-		// Check reserved_usernames table
+		// `reserved_usernames` is the operator-extras layer, not a mirror of the
+		// code list — names added by hand without shipping code (#1778). The
+		// blocklist above is the real list and it has already run.
 		const reserved = await db
 			.prepare("SELECT username, reason FROM reserved_usernames WHERE username = ?")
 			.bind(normalized)

@@ -18,8 +18,7 @@
 		"idx_username_audit_created": "Same table — unused.",
 		"idx_username_audit_username": "Same table — unused.",
 		"git_dashboard_config": "Referenced only by the Drizzle schema (platform.ts). The dashboard that would have used it was cut.",
-		"lantern_friends": "No reference anywhere in the codebase. Dead table from a cut Lantern feature.",
-		"idx_reserved_category": "Needs reserved_usernames.category, which production lacks. Tracked in #1778 with the rest of that table's rebuild."
+		"lantern_friends": "No reference anywhere in the codebase. Dead table from a cut Lantern feature."
 	},
 	"extraInDb": {
 		"domain_search_jobs": "Created by apps/domains, which has no migrations/ directory — its schema was applied by hand. Not this repository's history to track.",
@@ -40,8 +39,7 @@
 	"differs": {
 		"tenants": "production defaults plan to 'free' where history says 'seedling'. Fixing it needs a table rebuild, and tenants has 30 dependents whose ON DELETE CASCADE fires on the implicit DELETE — this is exactly the swap 116 must never run. Every writer names a plan explicitly, so the default is unreachable today.",
 		"users": "production carries a hand-applied UNIQUE on email that 107_fix_users_schema.sql does not create. Production is stricter; a fresh bootstrap allows duplicate emails. Aligning would need a rebuild plus a decision about case-insensitivity.",
-		"polls": "production is ahead of 063_polls_curio.sql (poll_type, results_visibility, is_pinned, close_date vs multiple_choice, show_results). The curios schema moved on without the engine file following, and the table has never been used.",
-		"reserved_usernames": "production lacks category and notes, and its blocklist is 104 rows against the ~300 017_loam_blocklist.sql defines. Tracked in #1778."
+		"polls": "production is ahead of 063_polls_curio.sql (poll_type, results_visibility, is_pinned, close_date vs multiple_choice, show_results). The curios schema moved on without the engine file following, and the table has never been used."
 	},
 	"unreplayable": {
 		"001_magic_codes.sql": "apps/landing/migrations/0001_cdn.sql creates magic_codes first with a different shape, so this file's CREATE TABLE IF NOT EXISTS no-ops and its indexes fail. Pre-existing; only affects a from-empty replay.",
