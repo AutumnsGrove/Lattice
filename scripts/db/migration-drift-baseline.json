@@ -5,7 +5,6 @@
 		"including an entry that has stopped diverging, so this list has to keep shrinking.",
 		"Every entry needs a reason. 'Probably fine' is not a reason."
 	],
-
 	"absentFromDb": {
 		"failed_attempts": "Heartwood's own SQLite owns this table (services/heartwood/src/db/schema.sql). The engine-database copy is a Drizzle schema with no reader.",
 		"idx_failed_attempts_email": "Same table — never in grove-engine-db.",
@@ -22,7 +21,6 @@
 		"lantern_friends": "No reference anywhere in the codebase. Dead table from a cut Lantern feature.",
 		"idx_reserved_category": "Needs reserved_usernames.category, which production lacks. Tracked in #1778 with the rest of that table's rebuild."
 	},
-
 	"extraInDb": {
 		"domain_search_jobs": "Created by apps/domains, which has no migrations/ directory — its schema was applied by hand. Not this repository's history to track.",
 		"domain_search_config": "Same — apps/domains, hand-applied.",
@@ -39,15 +37,12 @@
 		"idx_poll_votes_unique": "Same — newer polls schema in production than in history.",
 		"idx_polls_tenant": "Same — newer polls schema in production than in history."
 	},
-
 	"differs": {
 		"tenants": "production defaults plan to 'free' where history says 'seedling'. Fixing it needs a table rebuild, and tenants has 30 dependents whose ON DELETE CASCADE fires on the implicit DELETE — this is exactly the swap 116 must never run. Every writer names a plan explicitly, so the default is unreachable today.",
 		"users": "production carries a hand-applied UNIQUE on email that 107_fix_users_schema.sql does not create. Production is stricter; a fresh bootstrap allows duplicate emails. Aligning would need a rebuild plus a decision about case-insensitivity.",
-		"email_verifications": "history's copy references user_onboarding_new, a table that only exists mid-rebuild inside 108, so a from-empty bootstrap ends up with a dangling foreign key. Production is the correct shape.",
 		"polls": "production is ahead of 063_polls_curio.sql (poll_type, results_visibility, is_pinned, close_date vs multiple_choice, show_results). The curios schema moved on without the engine file following, and the table has never been used.",
 		"reserved_usernames": "production lacks category and notes, and its blocklist is 104 rows against the ~300 017_loam_blocklist.sql defines. Tracked in #1778."
 	},
-
 	"unreplayable": {
 		"001_magic_codes.sql": "apps/landing/migrations/0001_cdn.sql creates magic_codes first with a different shape, so this file's CREATE TABLE IF NOT EXISTS no-ops and its indexes fail. Pre-existing; only affects a from-empty replay.",
 		"005_multi_tenant.sql": "Same class: expects a sessions shape that an earlier landing migration created differently.",
