@@ -24,8 +24,6 @@ export default tseslint.config(
 			"**/coverage/**",
 			// eslint-plugin-svelte doesn't support <svelte:boundary> yet (parser crash)
 			"**/PassageTransition.svelte",
-			// Generated Cloudflare adapter worker entry — minified, not hand-written
-			"apps/ivy/src/index.ts",
 		],
 	},
 

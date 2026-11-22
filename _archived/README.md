@@ -16,7 +16,6 @@ Historical materials, deprecated code, and reference documents. Everything here 
 | --------------------- | ---------- | ------------------------------------------------------------ |
 | `example-site`        | 2025-12-31 | Example site code                                            |
 | `logo-concepts`       | 2026-01-13 | Old logo iterations                                          |
-| `vineyard-standalone` | 2026-01-04 | Standalone vineyard app, merged into `libs/vineyard`          |
 
 ## Cleanup Policy
 

@@ -9,12 +9,11 @@
 // ============================================
 
 export interface Env {
-	// Source D1 Databases (7 total)
+	// Source D1 Databases (6 total)
 	GROVEAUTH_DB: D1Database;
 	GROVE_ENGINE_DB: D1Database;
 	GROVE_DOMAIN_JOBS_DB: D1Database;
 	AMBER_DB: D1Database;
-	IVY_DB: D1Database;
 	GROVE_CURIOS_DB: D1Database;
 	GROVE_OBSERVABILITY_DB: D1Database;
 
@@ -51,7 +50,6 @@ export interface DatabaseConfig {
 		| "GROVE_ENGINE_DB"
 		| "GROVE_DOMAIN_JOBS_DB"
 		| "AMBER_DB"
-		| "IVY_DB"
 		| "GROVE_CURIOS_DB"
 		| "GROVE_OBSERVABILITY_DB"
 	>;
