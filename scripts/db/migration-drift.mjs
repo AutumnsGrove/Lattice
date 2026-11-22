@@ -22,7 +22,7 @@
  *   node scripts/db/migration-drift.mjs --db grove-curios-db
  *   node scripts/db/migration-drift.mjs --dir libs/engine/migrations \
  *        --dir apps/landing/migrations
- *   node scripts/db/migration-drift.mjs --local  # against local dev state
+ *   node scripts/db/migration-drift.mjs --baseline none   # a DB built from history
  *
  * Exits 1 when drift is found, so it can be used as a check. Nothing is
  * written to the remote database.
@@ -34,7 +34,7 @@
  */
 
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -48,7 +48,7 @@ function bool(name) {
 }
 
 const db = flag("db", "grove-engine-db");
-const remote = !bool("local");
+const baselinePath = flag("baseline", "scripts/db/migration-drift-baseline.json");
 const dirs = [];
 for (let i = 0; i < args.length; i++) {
 	if (args[i] === "--dir") dirs.push(args[++i]);
@@ -71,12 +71,23 @@ function sqlite(file, sql) {
 }
 
 function remoteQuery(sql) {
-	const out = execFileSync(
-		"wrangler",
-		["d1", "execute", db, remote ? "--remote" : "--local", "--json", "--command", sql],
-		// wrangler prints progress to stderr; only stdout is JSON.
-		{ encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
-	);
+	let out;
+	try {
+		out = execFileSync(
+			"wrangler",
+			["d1", "execute", db, "--remote", "--json", "--command", sql],
+			// wrangler prints progress to stderr; only stdout is JSON.
+			{ encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
+		);
+	} catch (error) {
+		const detail = String(error.stdout ?? error.stderr ?? "")
+			.trim()
+			.split("\n")
+			.pop();
+		console.error(`\nCould not query ${db}: ${detail}`);
+		console.error("\nThis reads a real database. Check `wrangler whoami` and the --db name.");
+		process.exit(2);
+	}
 	return JSON.parse(out)[0].results;
 }
 
@@ -88,15 +99,32 @@ function normalise(sql) {
 		.replace(/--[^\n]*/g, " ")
 		.replace(/"/g, "")
 		.replace(/\s+/g, " ")
+		.replace(/\(\s+/g, "(")
+		.replace(/\s+\)/g, ")")
 		.replace(/\s*,\s*(?=\))/g, "")
 		.replace(/;\s*$/, "")
 		.trim();
 }
 
+/** Column names of a CREATE TABLE, in the order they are declared. */
+function declaredColumns(sql) {
+	const body = normalise(sql);
+	const open = body.indexOf("(");
+	if (open === -1) return [];
+	return body
+		.slice(open + 1)
+		.split(",")
+		.map((part) => part.trim().split(/\s+/)[0])
+		.filter(
+			(name) => name && !["foreign", "unique", "primary", "check", "constraint"].includes(name),
+		);
+}
+
 const SCHEMA_QUERY = `
   SELECT type, name, sql FROM sqlite_master
   WHERE name NOT LIKE 'sqlite_%'
-    AND name NOT IN ('d1_migrations', '_cf_KV')
+    AND name NOT IN ('d1_migrations')
+    AND name NOT LIKE '\_cf\_%' ESCAPE '\\' 
     AND type IN ('table', 'index')
   ORDER BY type, name
 `;
@@ -105,7 +133,7 @@ const SCHEMA_QUERY = `
 // 1. The ledger, and the files it names
 // ---------------------------------------------------------------------------
 
-console.log(`\nMigration drift — ${db} (${remote ? "remote" : "local"})\n`);
+console.log(`\nMigration drift — ${db}\n`);
 
 const ledger = remoteQuery("SELECT id, name, applied_at FROM d1_migrations ORDER BY id;");
 
@@ -196,7 +224,79 @@ const differing = [...claimedMap.keys()]
 	)
 	.sort();
 
-console.log(`\nClaimed objects: ${claimedSchema.length}   Live objects: ${actualSchema.length}`);
+// ---------------------------------------------------------------------------
+// 4. Separate new drift from known-and-deliberate drift
+// ---------------------------------------------------------------------------
+
+// The baseline describes production's divergence from history. A database that
+// was built *from* history has none of it, so pass `--baseline none` when
+// comparing a dev stack — otherwise every entry reads as stale.
+const useBaseline = baselinePath !== "none";
+const baseline =
+	useBaseline && existsSync(baselinePath) ? JSON.parse(readFileSync(baselinePath, "utf8")) : {};
+const known = {
+	absentFromDb: baseline.absentFromDb ?? {},
+	extraInDb: baseline.extraInDb ?? {},
+	differs: baseline.differs ?? {},
+	unreplayable: baseline.unreplayable ?? {},
+};
+
+const isKnown = (bucket, name) => Object.hasOwn(known[bucket], name);
+
+/**
+ * A table whose clauses are identical when sorted differs only in the order its
+ * columns were declared — usually harmless, and always noise next to a real
+ * constraint difference. Anything else (a changed CHECK, a lost UNIQUE, a
+ * dropped default) stays classified as drift.
+ */
+function isReorderOnly(name) {
+	const a = claimedMap.get(name);
+	const b = actualMap.get(name);
+	if (!a || !b || a.type !== "table") return false;
+	const clauses = (sql) => {
+		const body = normalise(sql);
+		const open = body.indexOf("(");
+		if (open === -1) return null;
+		return body
+			.slice(open + 1, body.lastIndexOf(")"))
+			.split(/,\s*(?=[a-z_]|foreign|unique|primary|check|constraint)/)
+			.map((c) => c.trim())
+			.sort()
+			.join(" | ");
+	};
+	return clauses(a.sql) === clauses(b.sql);
+}
+
+const reordered = differing.filter((n) => isReorderOnly(n));
+const differingSemantic = differing.filter((n) => !isReorderOnly(n));
+
+const novel = {
+	absent: missing.filter((n) => !isKnown("absentFromDb", n)),
+	extra: extra.filter((n) => !isKnown("extraInDb", n)),
+	differs: differingSemantic.filter((n) => !isKnown("differs", n)),
+	unreplayable: failures.filter(([name]) => !isKnown("unreplayable", name)),
+};
+
+// A baseline entry that no longer diverges is a stale excuse. Failing on it is
+// what keeps the list shrinking instead of quietly absorbing everything.
+const stale = [
+	...Object.keys(known.absentFromDb).filter((n) => !missing.includes(n)),
+	...Object.keys(known.extraInDb).filter((n) => !extra.includes(n)),
+	...Object.keys(known.differs).filter((n) => !differingSemantic.includes(n)),
+	...Object.keys(known.unreplayable).filter((n) => !failures.some(([f]) => f === n)),
+];
+
+const knownCount =
+	missing.length -
+	novel.absent.length +
+	(extra.length - novel.extra.length) +
+	(differingSemantic.length - novel.differs.length) +
+	(failures.length - novel.unreplayable.length);
+
+console.log(
+	`\nClaimed objects: ${claimedSchema.length}   Live objects: ${actualSchema.length}` +
+		`   Known divergences: ${knownCount}`,
+);
 
 function section(title, names, describe) {
 	console.log(`\n${title}: ${names.length}`);
@@ -204,21 +304,35 @@ function section(title, names, describe) {
 }
 
 section(
-	"In history, ABSENT from the database",
-	missing,
+	"NEW — in history, absent from the database",
+	novel.absent,
 	(n) => `${claimedMap.get(n).type.padEnd(5)} ${n}`,
 );
-section("In the database, NOT in history", extra, (n) => `${actualMap.get(n).type.padEnd(5)} ${n}`);
 section(
-	"Same name, DIFFERENT definition",
-	differing,
+	"NEW — in the database, not in history",
+	novel.extra,
 	(n) => `${actualMap.get(n).type.padEnd(5)} ${n}`,
 );
+section(
+	"NEW — same name, different definition",
+	novel.differs,
+	(n) => `${actualMap.get(n).type.padEnd(5)} ${n}`,
+);
+section(
+	"NEW — history not replayable",
+	novel.unreplayable,
+	([name, problem]) => `${name} — ${problem}`,
+);
 
-// Column-level detail for differing tables — the part that usually matters.
-if (differing.some((n) => claimedMap.get(n).type === "table")) {
+// Column-level detail for new differing tables — the part that usually matters.
+if (reordered.length) {
+	console.log(`\nColumn order only (same clauses, reordered — not drift): ${reordered.length}`);
+	console.log(`  ${reordered.join(", ")}`);
+}
+
+if (novel.differs.some((n) => claimedMap.get(n).type === "table")) {
 	console.log("\nColumn differences in those tables:");
-	for (const name of differing) {
+	for (const name of novel.differs) {
 		if (claimedMap.get(name).type !== "table") continue;
 		const claimedCols = sqlite(claimed, `SELECT name FROM pragma_table_info('${name}');`).map(
 			(c) => c.name,
@@ -228,20 +342,38 @@ if (differing.some((n) => claimedMap.get(n).type === "table")) {
 		);
 		const onlyClaimed = claimedCols.filter((c) => !actualCols.includes(c));
 		const onlyActual = actualCols.filter((c) => !claimedCols.includes(c));
-		if (!onlyClaimed.length && !onlyActual.length) continue;
 		console.log(`  ${name}`);
 		if (onlyClaimed.length) console.log(`    history has, live lacks: ${onlyClaimed.join(", ")}`);
 		if (onlyActual.length) console.log(`    live has, history lacks: ${onlyActual.join(", ")}`);
 	}
 }
 
+if (knownCount > 0) {
+	console.log("\nKnown and accepted (see " + baselinePath + "):");
+	for (const [bucket, entries] of Object.entries(known)) {
+		for (const [name, reason] of Object.entries(entries)) {
+			console.log(`  ${name} — ${reason}`);
+		}
+	}
+}
+
+if (stale.length) {
+	console.log(`\nStale baseline entries (no longer diverging — delete them): ${stale.length}`);
+	for (const n of stale) console.log(`  ~ ${n}`);
+}
+
 rmSync(tmp, { recursive: true, force: true });
 
-const drifted = missing.length + extra.length + differing.length > 0 || failures.length > 0;
+const drifted =
+	novel.absent.length + novel.extra.length + novel.differs.length + novel.unreplayable.length > 0 ||
+	stale.length > 0;
+
 console.log(
 	drifted
-		? "\nDRIFT — the ledger and the database disagree. Read the lists above before writing a repair.\n"
-		: "\nNo drift: the ledger describes this database.\n",
+		? "\nDRIFT — something changed that the ledger does not describe. Read the NEW lists above.\n"
+		: knownCount > 0
+			? "\nNo new drift. Everything remaining is in the baseline.\n"
+			: "\nNo drift: the ledger describes this database.\n",
 );
 
 process.exit(drifted ? 1 : 0);
