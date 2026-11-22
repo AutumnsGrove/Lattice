@@ -1,0 +1,76 @@
+---
+name: Migration Drift
+
+# `d1_migrations` is a claim, not a record — a row saying a migration applied
+# does not mean its SQL ever ran, and `wrangler d1 migrations apply` believes
+# the claim and skips the file forever. That is how `tenants` went nine months
+# without a `last_activity_at` column two migrations are on record as having
+# created (#1692).
+#
+# Weekly, and on demand, this replays what the ledger claims into a scratch
+# SQLite and diffs it against the live database. Divergence that has been
+# looked at and accepted lives in scripts/db/migration-drift-baseline.json;
+# anything else fails here.
+
+on:
+  schedule:
+    # Mondays, 09:12 UTC — after the weekend's deploys have settled.
+    - cron: "12 9 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  drift:
+    name: Ledger vs live database
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      # `wrangler` is a root devDependency, so installing the workspace is
+      # enough — and it pins the version the migrations were written against.
+      # node_modules/.bin goes on PATH because the drift script shells out to
+      # `wrangler` rather than importing it.
+      - name: Install workspace
+        run: pnpm install --frozen-lockfile
+
+      - name: Put wrangler on PATH
+        run: echo "$PWD/node_modules/.bin" >> "$GITHUB_PATH"
+
+      # sqlite3 replays the migration files into a scratch database.
+      - name: Install sqlite3
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq sqlite3
+
+      - name: Check the ledger against production
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: node scripts/db/migration-drift.mjs
+
+      - name: Explain a failure
+        if: failure()
+        run: |
+          cat <<'MESSAGE'
+          The migration ledger and grove-engine-db disagree about something that
+          is not in scripts/db/migration-drift-baseline.json.
+
+          Re-run locally to read the detail:
+
+              node scripts/db/migration-drift.mjs
+
+          Then either write a repair migration (see 124/125 for the shape that
+          is safe on a populated database) or, if the divergence is understood
+          and acceptable, add it to the baseline with a reason. Do not add an
+          entry to make this job green — the baseline only stays useful if every
+          line means something.
+          MESSAGE
