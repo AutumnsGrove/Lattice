@@ -1,363 +1,380 @@
 /**
  * Affected Packages Detection
  *
- * Given a list of changed files, determines which monorepo packages
- * need to be rebuilt and retested. Follows the dependency graph:
+ * Given a list of changed files, works out which workspace packages need to be
+ * rebuilt and rechecked. The package list and the dependency graph are read
+ * from the workspace itself — every `apps|services|workers|libs/.../package.json`
+ * — rather than a hand-kept table. A package added tomorrow is covered the day
+ * it appears, and a package deleted tomorrow stops costing CI time.
  *
- *   foliage/gossamer → engine → (all apps, some services/workers)
+ * Two rules keep the fan-out proportional to the change:
+ *
+ *   1. Files that can only be data — docs, tests, migrations, JSON, images —
+ *      revalidate their own package. They do not cascade to every consumer,
+ *      because no consumer's types can change because a value did.
+ *   2. Only changes to genuinely global inputs (the lockfile, the workspace
+ *      manifest, the shared tsconfig, the engine's term manifest) invalidate
+ *      every package. A data file that happens to live under `scripts/` is not
+ *      one of those.
  *
  * Usage:
  *   node affected-packages.mjs <base-ref>
  *   node affected-packages.mjs main            # compare against main
- *   node affected-packages.mjs HEAD~1          # compare against last commit
+ *   node affected-packages.mjs HEAD~1          # compare against the last commit
  *
- * Output: JSON with affected package info + matrix for GitHub Actions
+ * Output: JSON — affected packages, per-package check/test matrices for GitHub
+ * Actions, and scope flags for path-gating whole CI jobs.
  */
 
 import { execSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
-const baseRef = process.argv[2] || "main";
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = resolve(__dirname, "..", "..");
 
-// ─── Dependency graph ───────────────────────────────────────────────
-// If package A changes, which packages need to rebuild?
-// This is the REVERSE dependency map (what depends on me).
+// ─── Workspace discovery ────────────────────────────────────────────
+// Matches pnpm-workspace.yaml: apps/*, services/*, workers/*, libs/*, plus
+// the one nested package (libs/shutter/cloudflare). `tools/*` is tooling, not
+// something CI typechecks per-package — changes there set the `tooling` scope
+// flag instead.
+const WORKSPACE_ROOTS = ["apps", "services", "workers", "libs"];
+const NESTED_PACKAGE_DIRS = ["libs/shutter/cloudflare"];
 
-// Reverse dependency graph: if package A changes, which packages need to rebuild?
-// Shared workspace libs (engine/foliage/gossamer/infra/prism) cascade to nearly
-// every deployable, so they all share the same consumer list — a change to any
-// of them should revalidate the fleet.
-const ENGINE_CONSUMERS = [
-	"apps/amber",
-	"apps/aspen",
-	"apps/billing",
-	"apps/clearing",
-	"apps/domains",
-	"apps/ivy",
-	"apps/landing",
-	"apps/login",
-	"apps/meadow",
-	"apps/plant",
-	"apps/terrarium",
-	"services/amber",
-	"services/billing-api",
-	"services/durable-objects",
-	"services/forage",
-	"services/heartwood",
-	"services/link-worker",
-	"services/zephyr",
-	"workers/onboarding",
-	"workers/patina",
-	"workers/reverie",
-	"workers/reverie-exec",
-	"workers/subscription-digest",
-	"workers/vista-collector",
-	"workers/warden",
-];
-
-const DEPENDENTS = {
-	"libs/foliage": ["libs/engine"],
-	"libs/gossamer": ["libs/engine"],
-	"libs/engine": ENGINE_CONSUMERS,
-	"libs/infra": ENGINE_CONSUMERS, // shared Vite config — affects every SvelteKit target
-	"libs/prism": ENGINE_CONSUMERS, // design tokens + icon gateway
-	"libs/shutter": [],
-	"libs/grove-agent": ["workers/onboarding"], // sole consumer
+/**
+ * Packages whose own check command is not what CI should run, with the reason.
+ * Both were already outside CI's typecheck matrix; deriving commands would have
+ * quietly added a permanently red job. Delete an entry once the package is
+ * fixed — that is the only maintenance this table needs.
+ */
+const CHECK_OVERRIDES = {
+	// `tsc` alone cannot resolve the generated email templates; the correct
+	// command (which generates them first) lives in deploy-email-render.yml.
+	// Deploy validation owns this package's typecheck.
+	"services/email-render": { typecheck: null },
+	// Pre-existing type errors in the fetch handler, unrelated to this change.
+	"workers/paused": { typecheck: null },
 };
 
-// Package metadata: what type check command + whether it has tests
-const PACKAGES = {
-	"libs/engine": {
-		typecheck: "pnpm check",
-		hasTests: true,
-		isSvelteKit: true,
-	},
-	"libs/foliage": { typecheck: "pnpm check", hasTests: true, isSvelteKit: true },
-	"libs/gossamer": { typecheck: null, hasTests: false, isSvelteKit: false },
-	"apps/landing": {
-		typecheck: "pnpm check",
-		hasTests: true,
-		isSvelteKit: true,
-	},
-	"apps/plant": {
-		typecheck: "pnpm check",
-		hasTests: true,
-		isSvelteKit: true,
-	},
-	"libs/prism": { typecheck: "pnpm check", hasTests: false, isSvelteKit: false },
-	"libs/infra": { typecheck: "pnpm exec tsc --noEmit", hasTests: false, isSvelteKit: false },
-	"libs/grove-agent": { typecheck: "pnpm exec tsc --noEmit", hasTests: true, isSvelteKit: false },
-	"apps/amber": {
-		typecheck: "pnpm check",
-		hasTests: false,
-		isSvelteKit: true,
-	},
-	"apps/aspen": {
-		typecheck: "pnpm check",
-		hasTests: false,
-		isSvelteKit: true,
-	},
-	"apps/billing": {
-		typecheck: "pnpm check",
-		hasTests: false,
-		isSvelteKit: true,
-	},
-	"apps/clearing": {
-		typecheck: null,
-		hasTests: true,
-		isSvelteKit: true,
-	},
-	"apps/domains": {
-		typecheck: "pnpm check",
-		hasTests: false,
-		isSvelteKit: true,
-	},
-	"apps/login": {
-		typecheck: "pnpm check",
-		hasTests: true,
-		isSvelteKit: true,
-	},
-	"services/amber": {
-		typecheck: "pnpm exec tsc --noEmit",
-		hasTests: false,
-		isSvelteKit: false,
-	},
-	"services/billing-api": {
-		typecheck: "pnpm exec tsc --noEmit",
-		hasTests: false,
-		isSvelteKit: false,
-	},
-	"services/durable-objects": {
-		typecheck: "pnpm exec tsc --noEmit",
-		hasTests: false,
-		isSvelteKit: false,
-	},
-	"services/forage": {
-		typecheck: "pnpm exec tsc --noEmit",
-		hasTests: false,
-		isSvelteKit: false,
-	},
-	"services/heartwood": {
-		typecheck: "pnpm exec tsc --noEmit",
-		hasTests: true,
-		isSvelteKit: false,
-	},
-	"services/grove-router": {
-		typecheck: "pnpm exec tsc --noEmit",
-		hasTests: true,
-		isSvelteKit: false,
-	},
-	"services/link-worker": {
-		typecheck: "pnpm exec tsc --noEmit",
-		hasTests: true,
-		isSvelteKit: false,
-	},
-	"services/zephyr": {
-		typecheck: "pnpm run typecheck",
-		hasTests: true,
-		isSvelteKit: false,
-	},
-	"services/og-worker": {
-		typecheck: null,
-		hasTests: false,
-		isSvelteKit: false,
-	},
-	"services/email-render": {
-		typecheck: null,
-		hasTests: false,
-		isSvelteKit: false,
-	},
-	"workers/lumen": {
-		typecheck: "pnpm exec tsc --noEmit",
-		hasTests: true,
-		isSvelteKit: false,
-	},
-	"workers/warden": {
-		typecheck: "pnpm exec tsc --noEmit",
-		hasTests: false,
-		isSvelteKit: false,
-	},
-	"workers/vista-collector": {
-		typecheck: "pnpm exec tsc --noEmit",
-		hasTests: false,
-		isSvelteKit: false,
-	},
-	"workers/email-catchup": {
-		typecheck: "pnpm exec tsc --noEmit",
-		hasTests: true,
-		isSvelteKit: false,
-	},
-	"workers/webhook-cleanup": {
-		typecheck: null,
-		hasTests: false,
-		isSvelteKit: false,
-	},
-	"workers/onboarding": {
-		typecheck: "pnpm exec tsc --noEmit",
-		hasTests: false,
-		isSvelteKit: false,
-	},
-	"workers/patina": {
-		typecheck: "pnpm exec tsc --noEmit",
-		hasTests: false,
-		isSvelteKit: false,
-	},
-	"workers/subscription-digest": {
-		typecheck: "pnpm exec tsc --noEmit",
-		hasTests: false,
-		isSvelteKit: false,
-	},
-	"workers/pulse-collector": {
-		typecheck: "pnpm exec tsc --noEmit",
-		hasTests: false,
-		isSvelteKit: false,
-	},
-};
+/**
+ * A package directory turned into the metadata the matrix needs.
+ * Commands are derived from the package's own scripts so there is exactly one
+ * source of truth for "how do I check this package".
+ */
+function describePackage(root, dir) {
+	const abs = join(root, dir);
+	const pkgPath = join(abs, "package.json");
+	if (!existsSync(pkgPath)) return null;
 
-// ─── Get changed files from git ─────────────────────────────────────
-
-function getChangedFiles() {
+	let pkg;
 	try {
-		const output = execSync(`git diff --name-only ${baseRef}...HEAD`, {
-			encoding: "utf-8",
-		}).trim();
-		if (!output) return [];
-		return output.split("\n");
+		pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
 	} catch {
-		// Fallback: compare against HEAD~1
-		try {
-			const output = execSync("git diff --name-only HEAD~1", {
-				encoding: "utf-8",
-			}).trim();
-			if (!output) return [];
-			return output.split("\n");
-		} catch {
-			return [];
+		return null;
+	}
+
+	const scripts = pkg.scripts || {};
+	const deps = {
+		...pkg.peerDependencies,
+		...pkg.devDependencies,
+		...pkg.dependencies,
+	};
+
+	// `check` first: svelte-check covers .svelte and .ts together, which is a
+	// superset of plain tsc for the same project.
+	let typecheck = null;
+	if (scripts.check) typecheck = "pnpm check";
+	else if (scripts.typecheck) typecheck = "pnpm run typecheck";
+	else if (existsSync(join(abs, "tsconfig.json"))) typecheck = "pnpm exec tsc --noEmit";
+
+	const override = CHECK_OVERRIDES[dir];
+	if (override && "typecheck" in override) typecheck = override.typecheck;
+
+	return {
+		dir,
+		name: pkg.name || dir,
+		scripts,
+		deps,
+		typecheck,
+		hasTests: Boolean(scripts["test:run"] || scripts.test),
+		isSvelteKit: existsSync(join(abs, "svelte.config.js")),
+	};
+}
+
+/** Every workspace package, keyed by its directory. */
+export function discoverPackages(root = REPO_ROOT) {
+	const found = new Map();
+
+	for (const area of WORKSPACE_ROOTS) {
+		const areaPath = join(root, area);
+		if (!existsSync(areaPath)) continue;
+		for (const entry of readdirSync(areaPath)) {
+			const dir = `${area}/${entry}`;
+			const described = describePackage(root, dir);
+			if (described) found.set(dir, described);
 		}
 	}
-}
 
-// ─── Map files to packages ──────────────────────────────────────────
-
-function fileToPackage(file) {
-	// Match apps/X/**, services/X/**, workers/X/**, libs/X/**
-	const match = file.match(/^(apps|services|workers|libs)\/([^/]+)\//);
-	if (match) {
-		return `${match[1]}/${match[2]}`;
+	for (const dir of NESTED_PACKAGE_DIRS) {
+		const described = describePackage(root, dir);
+		if (described) found.set(dir, described);
 	}
-	return null;
+
+	return found;
 }
 
-// ─── Resolve transitive dependents ──────────────────────────────────
+/**
+ * Reverse dependency map: package directory → the directories that import it.
+ * Built from each package's `@autumnsgrove/*` dependencies, resolved through
+ * the workspace's own package names.
+ */
+export function buildDependents(packages) {
+	const dirByName = new Map([...packages.values()].map((p) => [p.name, p.dir]));
+	const dependents = new Map([...packages.keys()].map((dir) => [dir, []]));
 
-function resolveAffected(directlyChanged) {
-	const affected = new Set(directlyChanged);
-	let changed = true;
+	for (const pkg of packages.values()) {
+		for (const depName of Object.keys(pkg.deps)) {
+			const depDir = dirByName.get(depName);
+			if (depDir && depDir !== pkg.dir) dependents.get(depDir).push(pkg.dir);
+		}
+	}
 
-	while (changed) {
-		changed = false;
-		for (const pkg of [...affected]) {
-			const deps = DEPENDENTS[pkg] || [];
-			for (const dep of deps) {
-				if (!affected.has(dep)) {
-					affected.add(dep);
-					changed = true;
-				}
+	return dependents;
+}
+
+// ─── What a changed file means ──────────────────────────────────────
+
+// Changes to these invalidate the whole workspace: they are build inputs for
+// every package, not content for one of them.
+const GLOBAL_FILES = new Set([
+	"package.json",
+	"pnpm-lock.yaml",
+	"pnpm-workspace.yaml",
+	"tsconfig.base.json",
+	// libs/engine's `prepackage` step regenerates the term manifest from this
+	// file, so engine's public types shift when it does.
+	"scripts/generate/grove-term-manifest.ts",
+]);
+
+// Files that can change without changing any type a consumer sees. They still
+// revalidate their own package — a broken test is still a broken test — they
+// just don't cascade.
+const CONTENT_ONLY = [
+	/\.md$/,
+	/(^|\/)README/,
+	/\.test\.(ts|tsx|js|mjs|cjs)$/,
+	/(^|\/)migrations\//,
+	/(^|\/)test(s)?\//,
+	/\.(json|jsonc|sql|csv|txt|svg|png|jpe?g|webp|gif|ico|woff2?|ttf|otf)$/i,
+];
+
+// package.json and config files are always structural, never "content",
+// even though several end in .json.
+const STRUCTURAL_NAMES = [
+	"package.json",
+	"tsconfig.json",
+	"svelte.config.js",
+	"vite.config.ts",
+	"vite.config.js",
+	"vitest.config.ts",
+	"tailwind.config.ts",
+	"tailwind.config.js",
+	"wrangler.toml",
+];
+
+/** True when a file can only change data, never a consumer's types. */
+export function isContentOnly(file) {
+	const name = file.split("/").pop();
+	if (STRUCTURAL_NAMES.includes(name)) return false;
+	return CONTENT_ONLY.some((re) => re.test(file));
+}
+
+/** Map a file path onto the package directory that owns it, or null. */
+export function fileToPackage(file, packages) {
+	let match = null;
+	for (const dir of packages.keys()) {
+		if (file === dir || file.startsWith(dir + "/")) {
+			// Longest prefix wins: libs/shutter/cloudflare over libs/shutter.
+			if (!match || dir.length > match.length) match = dir;
+		}
+	}
+	return match;
+}
+
+// ─── Scope flags for path-gating whole jobs ─────────────────────────
+/**
+ * Booleans for jobs that are useful only for some kinds of change.
+ *   engine  — the engine's export surface may have moved (barrel awareness)
+ *   ui      — a .svelte or .css file changed (what the accent-colour check scans)
+ *   tooling — repo machinery: workflows, scripts, labels, README inventory
+ *   structure — a package was added or removed (README inventory, labels)
+ */
+export function classifyScope(entries) {
+	const files = entries.map((e) => e.path);
+	const touched = (re) => files.some((f) => re.test(f));
+
+	const structure = entries.some(
+		(e) =>
+			(e.status === "A" || e.status === "D") &&
+			/^(apps|services|workers)\/[^/]+\/package\.json$/.test(e.path),
+	);
+
+	return {
+		engine: touched(/^libs\/engine\//) || files.some((f) => GLOBAL_FILES.has(f)),
+		ui: touched(/\.(svelte|css)$/),
+		tooling:
+			touched(/^(\.github|tools|scripts)\//) ||
+			touched(/(^|\/)README/) ||
+			files.some((f) => GLOBAL_FILES.has(f)) ||
+			structure,
+		structure,
+	};
+}
+
+// ─── The decision ───────────────────────────────────────────────────
+
+/**
+ * Pure core of the detector: given changed files (and their git status),
+ * return the affected set and the matrices CI needs.
+ */
+export function detectAffected({ entries, packages, root = REPO_ROOT }) {
+	const files = entries.map((e) => e.path);
+
+	const runAll = files.some((f) => GLOBAL_FILES.has(f));
+
+	// Every changed file revalidates the package that owns it.
+	const directlyChanged = new Set();
+	for (const file of files) {
+		const dir = fileToPackage(file, packages);
+		if (dir) directlyChanged.add(dir);
+	}
+
+	// Only structural changes cascade to consumers.
+	const cascadeSources = new Set();
+	for (const file of files) {
+		if (isContentOnly(file)) continue;
+		const dir = fileToPackage(file, packages);
+		if (dir) cascadeSources.add(dir);
+	}
+
+	const dependents = buildDependents(packages);
+
+	const affected = runAll ? new Set(packages.keys()) : new Set(directlyChanged);
+	if (!runAll) {
+		const walked = new Set();
+		const queue = [...cascadeSources];
+		while (queue.length > 0) {
+			const dir = queue.shift();
+			if (walked.has(dir)) continue;
+			walked.add(dir);
+			for (const dependent of dependents.get(dir) || []) {
+				affected.add(dependent);
+				if (!walked.has(dependent)) queue.push(dependent);
 			}
 		}
 	}
 
-	return affected;
-}
+	// Engine is a library: any package that imports it needs its dist built
+	// before its own typecheck can resolve `@autumnsgrove/lattice`.
+	const engineDir = [...packages.values()].find((p) => p.name === "@autumnsgrove/lattice")?.dir;
+	const needsEngine =
+		runAll ||
+		(engineDir !== undefined &&
+			[...affected].some(
+				(dir) => dir === engineDir || packages.get(dir)?.deps["@autumnsgrove/lattice"],
+			));
 
-// ─── Root-level changes affect everything ───────────────────────────
+	const testMatrix = [];
+	const typecheckMatrix = [];
 
-function hasRootChanges(files) {
-	return files.some(
-		(f) =>
-			f === "package.json" ||
-			f === "pnpm-lock.yaml" ||
-			f === "tsconfig.json" ||
-			f.startsWith("scripts/"),
-	);
-}
+	for (const dir of [...affected].sort()) {
+		const pkg = packages.get(dir);
+		if (!pkg) continue;
+		if (!existsSync(join(root, dir))) continue;
 
-// ─── Main ───────────────────────────────────────────────────────────
+		const name = dir.split("/").pop();
 
-const changedFiles = getChangedFiles();
+		if (pkg.hasTests) {
+			testMatrix.push({ package: dir, name, isSvelteKit: pkg.isSvelteKit });
+		}
 
-if (changedFiles.length === 0) {
-	console.log(
-		JSON.stringify({
-			changedFiles: [],
-			affectedPackages: [],
-			runAll: false,
-			needsEngine: false,
-			testMatrix: [],
-			typecheckMatrix: [],
-		}),
-	);
-	process.exit(0);
-}
-
-// Check for root-level changes
-const runAll = hasRootChanges(changedFiles);
-
-// Map changed files to packages
-const directlyChanged = new Set();
-for (const file of changedFiles) {
-	const pkg = fileToPackage(file);
-	if (pkg && PACKAGES[pkg]) {
-		directlyChanged.add(pkg);
-	}
-}
-
-// Resolve transitive dependents
-const affected = runAll ? new Set(Object.keys(PACKAGES)) : resolveAffected(directlyChanged);
-
-// Check if engine build is needed — only if engine itself or an actual
-// engine dependent is affected (not every arbitrary package)
-const engineDependents = new Set(DEPENDENTS["libs/engine"] || []);
-const needsEngine =
-	runAll || affected.has("libs/engine") || [...affected].some((pkg) => engineDependents.has(pkg));
-
-// Build matrices for GitHub Actions
-const testMatrix = [];
-const typecheckMatrix = [];
-
-for (const pkg of [...affected].sort()) {
-	const meta = PACKAGES[pkg];
-	if (!meta) continue;
-
-	// Verify the package actually exists
-	if (!existsSync(pkg)) continue;
-
-	if (meta.hasTests) {
-		testMatrix.push({
-			package: pkg,
-			name: pkg.split("/").pop(),
-			isSvelteKit: meta.isSvelteKit,
-		});
+		if (pkg.typecheck) {
+			typecheckMatrix.push({
+				package: dir,
+				name,
+				command: pkg.typecheck,
+				isSvelteKit: pkg.isSvelteKit,
+			});
+		}
 	}
 
-	if (meta.typecheck) {
-		typecheckMatrix.push({
-			package: pkg,
-			name: pkg.split("/").pop(),
-			command: meta.typecheck,
-			isSvelteKit: meta.isSvelteKit,
-		});
-	}
+	return {
+		changedFiles: files.length,
+		directlyChanged: [...directlyChanged].sort(),
+		affectedPackages: [...affected].sort(),
+		runAll,
+		needsEngine,
+		testMatrix,
+		typecheckMatrix,
+		scope: classifyScope(entries, packages),
+	};
 }
 
-const result = {
-	changedFiles: changedFiles.length,
-	directlyChanged: [...directlyChanged],
-	affectedPackages: [...affected].sort(),
-	runAll,
-	needsEngine,
-	testMatrix,
-	typecheckMatrix,
-};
+// ─── Git input ──────────────────────────────────────────────────────
 
-console.log(JSON.stringify(result));
+/**
+ * Changed files with their git status, relative to `baseRef`.
+ * `A`/`D` entries are what tells us a package appeared or disappeared.
+ */
+export function getChangedEntries(baseRef) {
+	const diff = (args) =>
+		execSync(`git diff --name-status ${args}`, { encoding: "utf8", cwd: REPO_ROOT }).trim();
+
+	let out;
+	try {
+		out = diff(`${baseRef}...HEAD`);
+	} catch {
+		// Fallback for a shallow clone or a ref that isn't fetched.
+		try {
+			out = diff("HEAD~1");
+		} catch {
+			return [];
+		}
+	}
+
+	if (!out) return [];
+
+	return out.split("\n").map((line) => {
+		const [status, ...rest] = line.split("\t");
+		return { status: status[0], path: rest.join("\t") };
+	});
+}
+
+// ─── CLI ────────────────────────────────────────────────────────────
+
+function main() {
+	const baseRef = process.argv[2] || "main";
+	const entries = getChangedEntries(baseRef);
+	const packages = discoverPackages(REPO_ROOT);
+
+	const result =
+		entries.length === 0
+			? {
+					changedFiles: 0,
+					directlyChanged: [],
+					affectedPackages: [],
+					runAll: false,
+					needsEngine: false,
+					testMatrix: [],
+					typecheckMatrix: [],
+					scope: { engine: false, ui: false, tooling: false, structure: false },
+				}
+			: detectAffected({ entries, packages, root: REPO_ROOT });
+
+	console.log(JSON.stringify(result));
+}
+
+const invokedDirectly = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (invokedDirectly) main();
