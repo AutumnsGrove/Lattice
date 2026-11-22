@@ -124,7 +124,10 @@ const SCHEMA_QUERY = `
   SELECT type, name, sql FROM sqlite_master
   WHERE name NOT LIKE 'sqlite_%'
     AND name NOT IN ('d1_migrations')
-    AND name NOT LIKE '\_cf\_%' ESCAPE '\\' 
+    -- miniflare's own bookkeeping (_cf_KV, _cf_METADATA) is not our schema.
+    -- substr rather than LIKE: an ESCAPE clause inside this template literal
+    -- loses its backslashes and silently degrades to a wildcard.
+    AND substr(name, 1, 4) != '_cf_'
     AND type IN ('table', 'index')
   ORDER BY type, name
 `;
