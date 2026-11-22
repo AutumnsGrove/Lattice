@@ -83,7 +83,8 @@ runs:
     #
     # The hash covers every input to the built output, not just each lib's own
     # source: engine imports prism, infra, loom, curios and the grove-* libs,
-    # so a change in any of them has to invalidate the archive.
+    # so a change in any of them has to invalidate the archive. Per-lib build
+    # config counts too — svelte-package reads svelte.config.js and tsconfig.
     - name: Restore built libraries
       id: libs-cache
       # yamllint disable-line rule:line-length
@@ -96,7 +97,8 @@ runs:
           libs/engine/dist
         key: >-
           grove-libs-${{ runner.os }}-${{
-          hashFiles('libs/*/src/**', 'libs/*/package.json', 'pnpm-lock.yaml',
+          hashFiles('libs/*/src/**', 'libs/*/package.json', 'libs/*/tsconfig.json',
+          'libs/*/svelte.config.js', 'libs/*/vite.config.ts', 'pnpm-lock.yaml',
           'tsconfig.base.json', 'scripts/generate/grove-term-manifest.ts') }}-${{
           inputs.build-foliage }}-${{ inputs.build-gossamer }}-${{
           inputs.build-engine }}

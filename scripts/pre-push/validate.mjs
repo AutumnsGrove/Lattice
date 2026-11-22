@@ -48,6 +48,9 @@ import {
 	findWranglerConfigs,
 	getChangedFiles,
 } from "./deploy-manifest.mjs";
+// The same derived package graph CI uses, so local staleness and CI scoping
+// cannot disagree about what depends on what (see #1783).
+import { discoverPackages } from "../../.github/scripts/affected-packages.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..", "..");
@@ -98,34 +101,68 @@ function dumpTail(out, n = 25) {
 }
 
 /**
- * True when a library's build output is missing or older than its sources.
- * Wall-clock mtimes, not git history: this answers "is the dist on disk the
- * build of the code on disk right now", which is what typecheck needs.
+ * Newest mtime under a directory. A lib's dist is stale if any file that feeds
+ * it is newer than the build output, so the answer depends on the whole input
+ * set, not just the lib's own directory.
  */
-function isStale(absDir, entry) {
-	const entryPath = resolve(absDir, entry);
+function newestMtime(dir) {
+	let newest = 0;
+	for (const name of readdirSync(dir)) {
+		const abs = resolve(dir, name);
+		let stat;
+		try {
+			stat = statSync(abs);
+		} catch {
+			continue;
+		}
+		if (stat.isDirectory()) newest = Math.max(newest, newestMtime(abs));
+		else newest = Math.max(newest, stat.mtimeMs);
+	}
+	return newest;
+}
+
+/**
+ * A lib directory plus every workspace lib it transitively imports.
+ * engine imports prism, infra, loom, curios and the grove-* libs, so a change
+ * to any of those makes engine's dist stale even though none of their files
+ * live under libs/engine. Falls back to the lib's own directory if discovery
+ * fails: the worst case is an unnecessary rebuild, never a stale dist.
+ */
+function libInputDirs(dir) {
+	try {
+		const packages = discoverPackages(REPO_ROOT);
+		const dirByName = new Map([...packages.values()].map((p) => [p.name, p.dir]));
+		const seen = new Set();
+		const walk = (current) => {
+			if (seen.has(current) || !packages.has(current)) return;
+			seen.add(current);
+			for (const dep of Object.keys(packages.get(current).deps)) {
+				const depDir = dirByName.get(dep);
+				if (depDir) walk(depDir);
+			}
+		};
+		walk(dir);
+		return seen.size > 0 ? [...seen] : [dir];
+	} catch {
+		return [dir];
+	}
+}
+
+/**
+ * True when a library's build output is missing or older than any of its
+ * inputs. Wall-clock mtimes, not git history: this answers "is the dist on
+ * disk the build of the code on disk right now", which is what typecheck
+ * needs.
+ */
+function isStale(dir, inputDirs, entry) {
+	const entryPath = resolve(REPO_ROOT, dir, entry);
 	if (!existsSync(entryPath)) return true;
 
-	const newest = (dir) => {
-		let newestMtime = 0;
-		for (const name of readdirSync(dir)) {
-			const abs = resolve(dir, name);
-			let stat;
-			try {
-				stat = statSync(abs);
-			} catch {
-				continue;
-			}
-			if (stat.isDirectory()) newestMtime = Math.max(newestMtime, newest(abs));
-			else newestMtime = Math.max(newestMtime, stat.mtimeMs);
-		}
-		return newestMtime;
-	};
-
-	const srcDir = resolve(absDir, "src");
-	if (!existsSync(srcDir)) return false;
-
-	return newest(srcDir) > statSync(entryPath).mtimeMs;
+	const built = statSync(entryPath).mtimeMs;
+	return inputDirs.some((input) => {
+		const src = resolve(REPO_ROOT, input, "src");
+		return existsSync(src) && newestMtime(src) > built;
+	});
 }
 
 // ─── 1. Lockfile sync ─────────────────────────────────────────────
@@ -218,8 +255,11 @@ if (affected.length === 0) {
 	];
 
 	for (const lib of LIB_SPECS) {
-		const touched = changedFiles.some((f) => f.startsWith(lib.dir + "/"));
-		const stale = isStale(resolve(REPO_ROOT, lib.dir), lib.entry);
+		// A lib is stale when anything it transitively imports is newer than its
+		// dist, and touched when any of those directories changed in this push.
+		const inputDirs = libInputDirs(lib.dir);
+		const touched = inputDirs.some((dir) => changedFiles.some((f) => f.startsWith(dir + "/")));
+		const stale = isStale(lib.dir, inputDirs, lib.entry);
 		if (!touched && !stale && process.env.PRE_PUSH_FORCE_BUILD !== "1") {
 			skip(`${lib.label} (already built)`);
 			continue;
