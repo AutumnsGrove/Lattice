@@ -76,6 +76,13 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(needs.detect.outputs.matrix) }}
     steps:
+      # A local composite action (./.github/actions/grove-setup) can only be read
+      # once the repository is on the runner. Without this the job dies in its
+      # first second with "Can't find action.yml ... Did you forget to run
+      # actions/checkout" — which is what every affected deploy did after #1785.
+      - name: Checkout
+        uses: actions/checkout@v5
+
       # Same setup as every other job, so this one shares the built-library
       # cache instead of rebuilding engine in each of ~25 validate jobs.
       - name: Setup workspace
