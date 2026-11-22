@@ -8,11 +8,11 @@
 import { professional, quest, casual, poetic, minimal } from "./presets";
 import { DETAILED_BUDGET, condenseCommitsForPrompt } from "./budget";
 import type {
-	VoicePreset,
-	VoicePromptResult,
-	CustomVoiceConfig,
-	Commit,
-	PromptContextInput,
+  VoicePreset,
+  VoicePromptResult,
+  CustomVoiceConfig,
+  Commit,
+  PromptContextInput,
 } from "./types";
 
 // =============================================================================
@@ -23,11 +23,11 @@ import type {
  * All available voice presets
  */
 export const VOICE_PRESETS: Record<string, VoicePreset> = {
-	professional,
-	quest,
-	casual,
-	poetic,
-	minimal,
+  professional,
+  quest,
+  casual,
+  poetic,
+  minimal,
 };
 
 /**
@@ -40,10 +40,10 @@ export const DEFAULT_VOICE = "professional";
  * worker inlines these presets) share the same ceiling instead of copying it.
  */
 export {
-	DETAILED_BUDGET,
-	COMMIT_LIST_BUDGET_CHARS,
-	SUMMARY_MAX_OUTPUT_TOKENS,
-	condenseCommitsForPrompt,
+  DETAILED_BUDGET,
+  COMMIT_LIST_BUDGET_CHARS,
+  SUMMARY_MAX_OUTPUT_TOKENS,
+  condenseCommitsForPrompt,
 } from "./budget";
 export type { CondensedCommitList } from "./budget";
 
@@ -55,75 +55,83 @@ export type { CondensedCommitList } from "./budget";
  * Get a voice preset by ID
  */
 export function getVoice(voiceId: string): VoicePreset {
-	const voice = VOICE_PRESETS[voiceId];
-	if (!voice) {
-		console.warn(`Unknown voice preset: ${voiceId}, falling back to professional`);
-		return VOICE_PRESETS[DEFAULT_VOICE];
-	}
-	return voice;
+  const voice = VOICE_PRESETS[voiceId];
+  if (!voice) {
+    console.warn(
+      `Unknown voice preset: ${voiceId}, falling back to professional`,
+    );
+    return VOICE_PRESETS[DEFAULT_VOICE];
+  }
+  return voice;
 }
 
 /**
  * Get list of all available voices for UI display
  */
 export function getAllVoices() {
-	return Object.values(VOICE_PRESETS).map((voice) => ({
-		id: voice.id,
-		name: voice.name,
-		description: voice.description,
-		preview: voice.preview,
-		isDefault: voice.id === DEFAULT_VOICE,
-	}));
+  return Object.values(VOICE_PRESETS).map((voice) => ({
+    id: voice.id,
+    name: voice.name,
+    description: voice.description,
+    preview: voice.preview,
+    isDefault: voice.id === DEFAULT_VOICE,
+  }));
 }
 
 /**
  * Build a custom voice from user-provided prompts
  */
 export function buildCustomVoice(customConfig: CustomVoiceConfig): VoicePreset {
-	const {
-		systemPrompt = VOICE_PRESETS.professional.systemPrompt,
-		summaryInstructions = "",
-		gutterStyle = "",
-	} = customConfig;
+  const {
+    systemPrompt = VOICE_PRESETS.professional.systemPrompt,
+    summaryInstructions = "",
+    gutterStyle = "",
+  } = customConfig;
 
-	return {
-		id: "custom",
-		name: "Custom",
-		description: "User-defined voice",
-		preview: "Custom voice - see your configuration",
-		systemPrompt,
+  return {
+    id: "custom",
+    name: "Custom",
+    description: "User-defined voice",
+    preview: "Custom voice - see your configuration",
+    systemPrompt,
 
-		buildPrompt(commits: Commit[], date: string, ownerName = "the developer") {
-			const commitList = commits
-				.map((c, i) => `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`)
-				.join("\n");
+    buildPrompt(commits: Commit[], date: string, ownerName = "the developer") {
+      const commitList = commits
+        .map(
+          (c, i) =>
+            `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`,
+        )
+        .join("\n");
 
-			const repoGroups: Record<string, string[]> = {};
-			commits.forEach((c) => {
-				if (!repoGroups[c.repo]) repoGroups[c.repo] = [];
-				repoGroups[c.repo].push(c.message);
-			});
-			const repoSummary = Object.entries(repoGroups)
-				.map(([repo, msgs]) => `${repo}: ${msgs.length} commits`)
-				.join(", ");
+      const repoGroups: Record<string, string[]> = {};
+      commits.forEach((c) => {
+        if (!repoGroups[c.repo]) repoGroups[c.repo] = [];
+        repoGroups[c.repo].push(c.message);
+      });
+      const repoSummary = Object.entries(repoGroups)
+        .map(([repo, msgs]) => `${repo}: ${msgs.length} commits`)
+        .join(", ");
 
-			const gutterCount = Math.min(5, Math.max(1, Math.ceil(commits.length / 3)));
+      const gutterCount = Math.min(
+        5,
+        Math.max(1, Math.ceil(commits.length / 3)),
+      );
 
-			let prompt = `Write a daily development summary for ${ownerName} on ${date}.
+      let prompt = `Write a daily development summary for ${ownerName} on ${date}.
 
 COMMITS TODAY (${commits.length} total across: ${repoSummary}):
 ${commitList}
 
 `;
 
-			if (summaryInstructions) {
-				prompt += `STYLE INSTRUCTIONS:
+      if (summaryInstructions) {
+        prompt += `STYLE INSTRUCTIONS:
 ${summaryInstructions}
 
 `;
-			}
+      }
 
-			prompt += `GENERATE THREE OUTPUTS:
+      prompt += `GENERATE THREE OUTPUTS:
 
 1. BRIEF SUMMARY (2-3 sentences)
 
@@ -136,12 +144,12 @@ ${DETAILED_BUDGET}
 3. GUTTER COMMENTS (${gutterCount} margin notes):
    Short observations (10 words max).`;
 
-			if (gutterStyle) {
-				prompt += `
+      if (gutterStyle) {
+        prompt += `
    Style: ${gutterStyle}`;
-			}
+      }
 
-			prompt += `
+      prompt += `
 
 OUTPUT FORMAT (valid JSON only):
 {
@@ -158,9 +166,9 @@ REQUIREMENTS:
 - Gutter anchors must EXACTLY match "### ProjectName" headers
 - Exactly ${gutterCount} gutter comments`;
 
-			return prompt;
-		},
-	};
+      return prompt;
+    },
+  };
 }
 
 // =============================================================================
@@ -178,81 +186,83 @@ REQUIREMENTS:
  * @param context - Optional long-horizon context for multi-day awareness
  */
 export function buildVoicedPrompt(
-	voiceId: string,
-	commits: Commit[],
-	date: string,
-	ownerName = "the developer",
-	customConfig: CustomVoiceConfig | null = null,
-	context: PromptContextInput | null = null,
+  voiceId: string,
+  commits: Commit[],
+  date: string,
+  ownerName = "the developer",
+  customConfig: CustomVoiceConfig | null = null,
+  context: PromptContextInput | null = null,
 ): VoicePromptResult {
-	let voice: VoicePreset;
+  let voice: VoicePreset;
 
-	if (voiceId === "custom" && customConfig) {
-		voice = buildCustomVoice(customConfig);
-	} else {
-		voice = getVoice(voiceId);
-	}
+  if (voiceId === "custom" && customConfig) {
+    voice = buildCustomVoice(customConfig);
+  } else {
+    voice = getVoice(voiceId);
+  }
 
-	// Lumen rejects inputs past 100k characters outright, so a heavy day has to
-	// be condensed before it is rendered into a prompt, not after.
-	const condensed = condenseCommitsForPrompt(commits);
+  // Lumen rejects inputs past 100k characters outright, so a heavy day has to
+  // be condensed before it is rendered into a prompt, not after.
+  const condensed = condenseCommitsForPrompt(commits);
 
-	let userPrompt = voice.buildPrompt(condensed.commits, date, ownerName);
+  let userPrompt = voice.buildPrompt(condensed.commits, date, ownerName);
 
-	// A day big enough to overflow the commit budget still has to reach the
-	// model as a real day, so the overflow is stated rather than dropped. The
-	// marker is in every preset's prompt, custom included.
-	if (condensed.note) {
-		const marker = "GENERATE THREE OUTPUTS";
-		const markerIndex = userPrompt.indexOf(marker);
-		const note = `${condensed.note}\n\n`;
-		userPrompt =
-			markerIndex > 0
-				? userPrompt.slice(0, markerIndex) + note + userPrompt.slice(markerIndex)
-				: `${userPrompt}\n\n${note}`;
-	}
+  // A day big enough to overflow the commit budget still has to reach the
+  // model as a real day, so the overflow is stated rather than dropped. The
+  // marker is in every preset's prompt, custom included.
+  if (condensed.note) {
+    const marker = "GENERATE THREE OUTPUTS";
+    const markerIndex = userPrompt.indexOf(marker);
+    const note = `${condensed.note}\n\n`;
+    userPrompt =
+      markerIndex > 0
+        ? userPrompt.slice(0, markerIndex) + note + userPrompt.slice(markerIndex)
+        : `${userPrompt}\n\n${note}`;
+  }
 
-	// Append long-horizon context if provided (condensed to save tokens)
-	if (context) {
-		let contextSection = "";
+  // Append long-horizon context if provided (condensed to save tokens)
+  if (context) {
+    let contextSection = "";
 
-		if (context.historicalContext) {
-			contextSection += `
+    if (context.historicalContext) {
+      contextSection += `
 RECENT CONTEXT (brief awareness only — do NOT recap these):
 ${context.historicalContext}
 
 `;
-		}
+    }
 
-		if (context.continuationNote) {
-			contextSection += `${context.continuationNote}
+    if (context.continuationNote) {
+      contextSection += `${context.continuationNote}
 
 `;
-		}
+    }
 
-		// Insert context before the commit list
-		// Voice prompts use either "COMMITS TODAY" or "WHAT HAPPENED" as markers
-		const commitsMarker = "COMMITS TODAY";
-		const whatHappenedMarker = "WHAT HAPPENED";
-		let insertIndex = userPrompt.indexOf(commitsMarker);
-		if (insertIndex <= 0) {
-			insertIndex = userPrompt.indexOf(whatHappenedMarker);
-		}
-		if (insertIndex > 0) {
-			userPrompt =
-				userPrompt.slice(0, insertIndex) + contextSection + userPrompt.slice(insertIndex);
-		} else {
-			// Fallback: prepend context
-			userPrompt = contextSection + userPrompt;
-		}
-	}
+    // Insert context before the commit list
+    // Voice prompts use either "COMMITS TODAY" or "WHAT HAPPENED" as markers
+    const commitsMarker = "COMMITS TODAY";
+    const whatHappenedMarker = "WHAT HAPPENED";
+    let insertIndex = userPrompt.indexOf(commitsMarker);
+    if (insertIndex <= 0) {
+      insertIndex = userPrompt.indexOf(whatHappenedMarker);
+    }
+    if (insertIndex > 0) {
+      userPrompt =
+        userPrompt.slice(0, insertIndex) +
+        contextSection +
+        userPrompt.slice(insertIndex);
+    } else {
+      // Fallback: prepend context
+      userPrompt = contextSection + userPrompt;
+    }
+  }
 
-	return {
-		systemPrompt: voice.systemPrompt,
-		userPrompt,
-		voiceId: voice.id,
-		voiceName: voice.name,
-	};
+  return {
+    systemPrompt: voice.systemPrompt,
+    userPrompt,
+    voiceId: voice.id,
+    voiceName: voice.name,
+  };
 }
 
 // =============================================================================
@@ -261,10 +271,10 @@ ${context.historicalContext}
 
 export { professional, quest, casual, poetic, minimal };
 export type {
-	VoicePreset,
-	VoicePromptResult,
-	CustomVoiceConfig,
-	Commit,
-	GutterComment,
-	PromptContextInput,
+  VoicePreset,
+  VoicePromptResult,
+  CustomVoiceConfig,
+  Commit,
+  GutterComment,
+  PromptContextInput,
 } from "./types";

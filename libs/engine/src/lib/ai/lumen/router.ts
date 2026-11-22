@@ -226,7 +226,10 @@ export async function executeWithFallback(
 			// timeline path, the day's summary) for a number nobody needed.
 			// One retry at the task default keeps the caller's intent and still
 			// produces output.
-			if (requestedMaxTokens > config.defaultMaxTokens && isMaxTokensRejection(err)) {
+			if (
+				requestedMaxTokens > config.defaultMaxTokens &&
+				isMaxTokensRejection(err)
+			) {
 				console.warn(
 					`[Lumen/Router] ${model} rejected max_tokens=${requestedMaxTokens}, retrying at ${config.defaultMaxTokens}`,
 				);

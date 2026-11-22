@@ -9,12 +9,13 @@ import type { VoicePreset, Commit } from "../types";
 import { DETAILED_BUDGET } from "../budget";
 
 export const quest: VoicePreset = {
-	id: "quest",
-	name: "Quest Mode",
-	description: "Turn your coding into an RPG adventure",
-	preview: "Day 3 of the Authentication Saga. The session dragons have been tamed at last.",
+  id: "quest",
+  name: "Quest Mode",
+  description: "Turn your coding into an RPG adventure",
+  preview:
+    "Day 3 of the Authentication Saga. The session dragons have been tamed at last.",
 
-	systemPrompt: `You are a bard chronicling a developer's coding adventures in an RPG style.
+  systemPrompt: `You are a bard chronicling a developer's coding adventures in an RPG style.
 
 Your voice is:
 - Dramatic but not over-the-top
@@ -33,23 +34,26 @@ Keep it fun but readable. The humor should come from the juxtaposition of epic l
 
 Always respond with valid JSON only.`,
 
-	buildPrompt(commits: Commit[], date: string, ownerName = "the adventurer") {
-		const commitList = commits
-			.map((c, i) => `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`)
-			.join("\n");
+  buildPrompt(commits: Commit[], date: string, ownerName = "the adventurer") {
+    const commitList = commits
+      .map(
+        (c, i) =>
+          `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`,
+      )
+      .join("\n");
 
-		const repoGroups: Record<string, string[]> = {};
-		commits.forEach((c) => {
-			if (!repoGroups[c.repo]) repoGroups[c.repo] = [];
-			repoGroups[c.repo].push(c.message);
-		});
-		const repoSummary = Object.entries(repoGroups)
-			.map(([repo, msgs]) => `${repo}: ${msgs.length} commits`)
-			.join(", ");
+    const repoGroups: Record<string, string[]> = {};
+    commits.forEach((c) => {
+      if (!repoGroups[c.repo]) repoGroups[c.repo] = [];
+      repoGroups[c.repo].push(c.message);
+    });
+    const repoSummary = Object.entries(repoGroups)
+      .map(([repo, msgs]) => `${repo}: ${msgs.length} commits`)
+      .join(", ");
 
-		const gutterCount = Math.min(5, Math.max(1, Math.ceil(commits.length / 3)));
+    const gutterCount = Math.min(5, Math.max(1, Math.ceil(commits.length / 3)));
 
-		return `Chronicle ${ownerName}'s coding adventures on ${date} in RPG quest style.
+    return `Chronicle ${ownerName}'s coding adventures on ${date} in RPG quest style.
 
 QUEST LOG ENTRIES (${commits.length} deeds across: ${repoSummary}):
 ${commitList}
@@ -96,7 +100,7 @@ REQUIREMENTS:
 - NEVER create markdown links for section headers (no [Title](url) format)
 - Only use plain text for headings
 - Do NOT invent URLs or link to non-existent repositories`;
-	},
+  },
 };
 
 export default quest;

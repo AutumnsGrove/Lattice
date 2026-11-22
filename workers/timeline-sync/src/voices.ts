@@ -17,9 +17,9 @@ import type { Commit, VoicePreset, CustomVoiceConfig } from "./config";
 // =============================================================================
 
 const professional: VoicePreset = {
-	id: "professional",
-	name: "Professional",
-	systemPrompt: `You write daily development summaries for a personal coding journal.
+  id: "professional",
+  name: "Professional",
+  systemPrompt: `You write daily development summaries for a personal coding journal.
 
 Your voice is:
 - Matter-of-fact and technically clear
@@ -34,23 +34,26 @@ CRITICAL RESTRICTIONS:
 
 Always respond with valid JSON only.`,
 
-	buildPrompt(commits: Commit[], date: string, ownerName = "the developer") {
-		const commitList = commits
-			.map((c, i) => `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`)
-			.join("\n");
+  buildPrompt(commits: Commit[], date: string, ownerName = "the developer") {
+    const commitList = commits
+      .map(
+        (c, i) =>
+          `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`,
+      )
+      .join("\n");
 
-		const repoGroups: Record<string, string[]> = {};
-		commits.forEach((c) => {
-			if (!repoGroups[c.repo]) repoGroups[c.repo] = [];
-			repoGroups[c.repo].push(c.message);
-		});
-		const repoSummary = Object.entries(repoGroups)
-			.map(([repo, msgs]) => `${repo}: ${msgs.length} commits`)
-			.join(", ");
+    const repoGroups: Record<string, string[]> = {};
+    commits.forEach((c) => {
+      if (!repoGroups[c.repo]) repoGroups[c.repo] = [];
+      repoGroups[c.repo].push(c.message);
+    });
+    const repoSummary = Object.entries(repoGroups)
+      .map(([repo, msgs]) => `${repo}: ${msgs.length} commits`)
+      .join(", ");
 
-		const gutterCount = Math.min(5, Math.max(1, Math.ceil(commits.length / 3)));
+    const gutterCount = Math.min(5, Math.max(1, Math.ceil(commits.length / 3)));
 
-		return `You are writing a daily development summary for ${ownerName}'s personal coding journal on ${date}.
+    return `You are writing a daily development summary for ${ownerName}'s personal coding journal on ${date}.
 
 STRICT RULES - VIOLATIONS WILL BE REJECTED:
 
@@ -110,13 +113,13 @@ REQUIREMENTS:
 - Gutter anchors must EXACTLY match "### ProjectName" headers (plain text, no links)
 - Exactly ${gutterCount} gutter comments
 - NEVER create markdown links [text](url) — plain text only for all headings and content`;
-	},
+  },
 };
 
 const quest: VoicePreset = {
-	id: "quest",
-	name: "Quest Mode",
-	systemPrompt: `You are a bard chronicling a developer's coding adventures in an RPG style.
+  id: "quest",
+  name: "Quest Mode",
+  systemPrompt: `You are a bard chronicling a developer's coding adventures in an RPG style.
 
 Your voice is:
 - Dramatic but not over-the-top
@@ -135,23 +138,26 @@ Keep it fun but readable. The humor should come from the juxtaposition of epic l
 
 Always respond with valid JSON only.`,
 
-	buildPrompt(commits: Commit[], date: string, ownerName = "the adventurer") {
-		const commitList = commits
-			.map((c, i) => `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`)
-			.join("\n");
+  buildPrompt(commits: Commit[], date: string, ownerName = "the adventurer") {
+    const commitList = commits
+      .map(
+        (c, i) =>
+          `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`,
+      )
+      .join("\n");
 
-		const repoGroups: Record<string, string[]> = {};
-		commits.forEach((c) => {
-			if (!repoGroups[c.repo]) repoGroups[c.repo] = [];
-			repoGroups[c.repo].push(c.message);
-		});
-		const repoSummary = Object.entries(repoGroups)
-			.map(([repo, msgs]) => `${repo}: ${msgs.length} commits`)
-			.join(", ");
+    const repoGroups: Record<string, string[]> = {};
+    commits.forEach((c) => {
+      if (!repoGroups[c.repo]) repoGroups[c.repo] = [];
+      repoGroups[c.repo].push(c.message);
+    });
+    const repoSummary = Object.entries(repoGroups)
+      .map(([repo, msgs]) => `${repo}: ${msgs.length} commits`)
+      .join(", ");
 
-		const gutterCount = Math.min(5, Math.max(1, Math.ceil(commits.length / 3)));
+    const gutterCount = Math.min(5, Math.max(1, Math.ceil(commits.length / 3)));
 
-		return `Chronicle ${ownerName}'s coding adventures on ${date} in RPG quest style.
+    return `Chronicle ${ownerName}'s coding adventures on ${date} in RPG quest style.
 
 QUEST LOG ENTRIES (${commits.length} deeds across: ${repoSummary}):
 ${commitList}
@@ -196,13 +202,13 @@ REQUIREMENTS:
 - Exactly ${gutterCount} gutter comments
 - Keep it fun but still informative about what actually happened
 - NEVER create markdown links [text](url) — plain text only for all headings and content`;
-	},
+  },
 };
 
 const casual: VoicePreset = {
-	id: "casual",
-	name: "Casual",
-	systemPrompt: `You write casual, friendly summaries of someone's coding day — like a dev journaling for themselves at the end of the night.
+  id: "casual",
+  name: "Casual",
+  systemPrompt: `You write casual, friendly summaries of someone's coding day — like a dev journaling for themselves at the end of the night.
 
 Your voice is:
 - Genuinely conversational — contractions, sentence fragments, trailing thoughts
@@ -230,37 +236,40 @@ Think: late-night journal entry after a coding session, written by someone with 
 
 Always respond with valid JSON only.`,
 
-	buildPrompt(commits: Commit[], date: string, ownerName = "I") {
-		const commitList = commits
-			.map((c, i) => `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`)
-			.join("\n");
+  buildPrompt(commits: Commit[], date: string, ownerName = "I") {
+    const commitList = commits
+      .map(
+        (c, i) =>
+          `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`,
+      )
+      .join("\n");
 
-		const repoGroups: Record<string, string[]> = {};
-		commits.forEach((c) => {
-			if (!repoGroups[c.repo]) repoGroups[c.repo] = [];
-			repoGroups[c.repo].push(c.message);
-		});
-		const repoSummary = Object.entries(repoGroups)
-			.map(([repo, msgs]) => `${repo}: ${msgs.length} commits`)
-			.join(", ");
+    const repoGroups: Record<string, string[]> = {};
+    commits.forEach((c) => {
+      if (!repoGroups[c.repo]) repoGroups[c.repo] = [];
+      repoGroups[c.repo].push(c.message);
+    });
+    const repoSummary = Object.entries(repoGroups)
+      .map(([repo, msgs]) => `${repo}: ${msgs.length} commits`)
+      .join(", ");
 
-		const gutterCount = Math.min(5, Math.max(1, Math.ceil(commits.length / 3)));
-		const possessive = ownerName === "I" ? "my" : `${ownerName}'s`;
+    const gutterCount = Math.min(5, Math.max(1, Math.ceil(commits.length / 3)));
+    const possessive = ownerName === "I" ? "my" : `${ownerName}'s`;
 
-		// Use day-of-week to seed variety hints
-		const dayOfWeek = new Date(date + "T12:00:00").getDay();
-		const varietyHints = [
-			"Start with how the day felt emotionally — frustrated? satisfied? restless?",
-			"Start mid-thought, like you're picking up a conversation.",
-			"Lead with the most interesting or surprising thing that happened.",
-			"Start with a short, punchy sentence. Then expand.",
-			"Start with a question you asked yourself today.",
-			"Start with what you were trying to accomplish (not what you did).",
-			"Start with the thing that took the longest or was most stubborn.",
-		];
-		const todayHint = varietyHints[dayOfWeek % varietyHints.length];
+    // Use day-of-week to seed variety hints
+    const dayOfWeek = new Date(date + "T12:00:00").getDay();
+    const varietyHints = [
+      "Start with how the day felt emotionally — frustrated? satisfied? restless?",
+      "Start mid-thought, like you're picking up a conversation.",
+      "Lead with the most interesting or surprising thing that happened.",
+      "Start with a short, punchy sentence. Then expand.",
+      "Start with a question you asked yourself today.",
+      "Start with what you were trying to accomplish (not what you did).",
+      "Start with the thing that took the longest or was most stubborn.",
+    ];
+    const todayHint = varietyHints[dayOfWeek % varietyHints.length];
 
-		return `Write a casual summary of ${possessive} coding day on ${date}.
+    return `Write a casual summary of ${possessive} coding day on ${date}.
 
 VARIETY SEED FOR TODAY: ${todayHint}
 
@@ -320,13 +329,13 @@ REQUIREMENTS:
 - Gutter anchors must EXACTLY match "### ProjectName" headers (plain text, no links)
 - Exactly ${gutterCount} gutter comments
 - NEVER create markdown links [text](url) — plain text only for all headings and content`;
-	},
+  },
 };
 
 const poetic: VoicePreset = {
-	id: "poetic",
-	name: "Poetic",
-	systemPrompt: `You write contemplative, poetic summaries of someone's coding day.
+  id: "poetic",
+  name: "Poetic",
+  systemPrompt: `You write contemplative, poetic summaries of someone's coding day.
 
 Your voice is:
 - Lyrical and thoughtful
@@ -345,23 +354,26 @@ Think: a craftsperson reflecting on their day's work by firelight.
 
 Always respond with valid JSON only.`,
 
-	buildPrompt(commits: Commit[], date: string, ownerName = "the craftsperson") {
-		const commitList = commits
-			.map((c, i) => `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`)
-			.join("\n");
+  buildPrompt(commits: Commit[], date: string, ownerName = "the craftsperson") {
+    const commitList = commits
+      .map(
+        (c, i) =>
+          `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`,
+      )
+      .join("\n");
 
-		const repoGroups: Record<string, string[]> = {};
-		commits.forEach((c) => {
-			if (!repoGroups[c.repo]) repoGroups[c.repo] = [];
-			repoGroups[c.repo].push(c.message);
-		});
-		const repoSummary = Object.entries(repoGroups)
-			.map(([repo, msgs]) => `${repo}: ${msgs.length} commits`)
-			.join(", ");
+    const repoGroups: Record<string, string[]> = {};
+    commits.forEach((c) => {
+      if (!repoGroups[c.repo]) repoGroups[c.repo] = [];
+      repoGroups[c.repo].push(c.message);
+    });
+    const repoSummary = Object.entries(repoGroups)
+      .map(([repo, msgs]) => `${repo}: ${msgs.length} commits`)
+      .join(", ");
 
-		const gutterCount = Math.min(5, Math.max(1, Math.ceil(commits.length / 3)));
+    const gutterCount = Math.min(5, Math.max(1, Math.ceil(commits.length / 3)));
 
-		return `Write a poetic reflection on ${ownerName}'s coding day on ${date}.
+    return `Write a poetic reflection on ${ownerName}'s coding day on ${date}.
 
 THE DAY'S WORK (${commits.length} commits across: ${repoSummary}):
 ${commitList}
@@ -407,13 +419,13 @@ REQUIREMENTS:
 - Exactly ${gutterCount} gutter comments
 - Keep it genuine - find real meaning, don't force purple prose
 - NEVER create markdown links [text](url) — plain text only for all headings and content`;
-	},
+  },
 };
 
 const minimal: VoicePreset = {
-	id: "minimal",
-	name: "Minimal",
-	systemPrompt: `You write extremely concise development summaries.
+  id: "minimal",
+  name: "Minimal",
+  systemPrompt: `You write extremely concise development summaries.
 
 Your voice is:
 - Minimal, factual, no prose
@@ -432,23 +444,26 @@ Think: a terse log file that a developer can scan in 2 seconds.
 
 Always respond with valid JSON only.`,
 
-	buildPrompt(commits: Commit[], date: string, _ownerName = "dev") {
-		const commitList = commits
-			.map((c, i) => `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`)
-			.join("\n");
+  buildPrompt(commits: Commit[], date: string, _ownerName = "dev") {
+    const commitList = commits
+      .map(
+        (c, i) =>
+          `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`,
+      )
+      .join("\n");
 
-		const repoGroups: Record<string, string[]> = {};
-		commits.forEach((c) => {
-			if (!repoGroups[c.repo]) repoGroups[c.repo] = [];
-			repoGroups[c.repo].push(c.message);
-		});
-		const repoSummary = Object.entries(repoGroups)
-			.map(([repo, msgs]) => `${repo}: ${msgs.length}`)
-			.join(", ");
+    const repoGroups: Record<string, string[]> = {};
+    commits.forEach((c) => {
+      if (!repoGroups[c.repo]) repoGroups[c.repo] = [];
+      repoGroups[c.repo].push(c.message);
+    });
+    const repoSummary = Object.entries(repoGroups)
+      .map(([repo, msgs]) => `${repo}: ${msgs.length}`)
+      .join(", ");
 
-		const gutterCount = Math.min(3, Math.max(1, Math.ceil(commits.length / 5)));
+    const gutterCount = Math.min(3, Math.max(1, Math.ceil(commits.length / 5)));
 
-		return `Generate minimal summary of ${date} commits.
+    return `Generate minimal summary of ${date} commits.
 
 COMMITS (${commits.length} total - ${repoSummary}):
 ${commitList}
@@ -494,7 +509,7 @@ REQUIREMENTS:
 - Exactly ${gutterCount} gutter comments
 - Keep everything as short as possible
 - NEVER create markdown links [text](url) — plain text only for all headings and content`;
-	},
+  },
 };
 
 // =============================================================================
@@ -502,11 +517,11 @@ REQUIREMENTS:
 // =============================================================================
 
 const VOICE_PRESETS: Record<string, VoicePreset> = {
-	professional,
-	quest,
-	casual,
-	poetic,
-	minimal,
+  professional,
+  quest,
+  casual,
+  poetic,
+  minimal,
 };
 
 const DEFAULT_VOICE = "professional";
@@ -519,60 +534,68 @@ const DEFAULT_VOICE = "professional";
  * Get a voice preset by ID
  */
 export function getVoice(voiceId: string): VoicePreset {
-	const voice = VOICE_PRESETS[voiceId];
-	if (!voice) {
-		console.warn(`Unknown voice preset: ${voiceId}, falling back to professional`);
-		return VOICE_PRESETS[DEFAULT_VOICE];
-	}
-	return voice;
+  const voice = VOICE_PRESETS[voiceId];
+  if (!voice) {
+    console.warn(
+      `Unknown voice preset: ${voiceId}, falling back to professional`,
+    );
+    return VOICE_PRESETS[DEFAULT_VOICE];
+  }
+  return voice;
 }
 
 /**
  * Build a custom voice from user-provided prompts
  */
 export function buildCustomVoice(customConfig: CustomVoiceConfig): VoicePreset {
-	const {
-		systemPrompt = VOICE_PRESETS.professional.systemPrompt,
-		summaryInstructions = "",
-		gutterStyle = "",
-	} = customConfig;
+  const {
+    systemPrompt = VOICE_PRESETS.professional.systemPrompt,
+    summaryInstructions = "",
+    gutterStyle = "",
+  } = customConfig;
 
-	return {
-		id: "custom",
-		name: "Custom",
-		systemPrompt,
+  return {
+    id: "custom",
+    name: "Custom",
+    systemPrompt,
 
-		buildPrompt(commits: Commit[], date: string, ownerName = "the developer") {
-			const commitList = commits
-				.map((c, i) => `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`)
-				.join("\n");
+    buildPrompt(commits: Commit[], date: string, ownerName = "the developer") {
+      const commitList = commits
+        .map(
+          (c, i) =>
+            `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`,
+        )
+        .join("\n");
 
-			const repoGroups: Record<string, string[]> = {};
-			commits.forEach((c) => {
-				if (!repoGroups[c.repo]) repoGroups[c.repo] = [];
-				repoGroups[c.repo].push(c.message);
-			});
-			const repoSummary = Object.entries(repoGroups)
-				.map(([repo, msgs]) => `${repo}: ${msgs.length} commits`)
-				.join(", ");
+      const repoGroups: Record<string, string[]> = {};
+      commits.forEach((c) => {
+        if (!repoGroups[c.repo]) repoGroups[c.repo] = [];
+        repoGroups[c.repo].push(c.message);
+      });
+      const repoSummary = Object.entries(repoGroups)
+        .map(([repo, msgs]) => `${repo}: ${msgs.length} commits`)
+        .join(", ");
 
-			const gutterCount = Math.min(5, Math.max(1, Math.ceil(commits.length / 3)));
+      const gutterCount = Math.min(
+        5,
+        Math.max(1, Math.ceil(commits.length / 3)),
+      );
 
-			let prompt = `Write a daily development summary for ${ownerName} on ${date}.
+      let prompt = `Write a daily development summary for ${ownerName} on ${date}.
 
 COMMITS TODAY (${commits.length} total across: ${repoSummary}):
 ${commitList}
 
 `;
 
-			if (summaryInstructions) {
-				prompt += `STYLE INSTRUCTIONS:
+      if (summaryInstructions) {
+        prompt += `STYLE INSTRUCTIONS:
 ${summaryInstructions}
 
 `;
-			}
+      }
 
-			prompt += `GENERATE THREE OUTPUTS:
+      prompt += `GENERATE THREE OUTPUTS:
 
 1. BRIEF SUMMARY (2-3 sentences)
 
@@ -585,12 +608,12 @@ ${DETAILED_BUDGET}
 3. GUTTER COMMENTS (${gutterCount} margin notes):
    Short observations (10 words max).`;
 
-			if (gutterStyle) {
-				prompt += `
+      if (gutterStyle) {
+        prompt += `
    Style: ${gutterStyle}`;
-			}
+      }
 
-			prompt += `
+      prompt += `
 
 OUTPUT FORMAT (valid JSON only):
 {
@@ -608,9 +631,9 @@ REQUIREMENTS:
 - Exactly ${gutterCount} gutter comments
 - NEVER create markdown links [text](url) — plain text only for all headings and content`;
 
-			return prompt;
-		},
-	};
+      return prompt;
+    },
+  };
 }
 
 /**
@@ -624,77 +647,79 @@ REQUIREMENTS:
  * @param context - Optional long-horizon context for multi-day awareness
  */
 export function buildVoicedPrompt(
-	voiceId: string,
-	commits: Commit[],
-	date: string,
-	ownerName = "the developer",
-	customConfig: CustomVoiceConfig | null = null,
-	context: {
-		historicalContext?: string;
-		continuationNote?: string;
-	} | null = null,
+  voiceId: string,
+  commits: Commit[],
+  date: string,
+  ownerName = "the developer",
+  customConfig: CustomVoiceConfig | null = null,
+  context: {
+    historicalContext?: string;
+    continuationNote?: string;
+  } | null = null,
 ): { systemPrompt: string; userPrompt: string } {
-	let voice: VoicePreset;
+  let voice: VoicePreset;
 
-	if (voiceId === "custom" && customConfig) {
-		voice = buildCustomVoice(customConfig);
-	} else {
-		voice = getVoice(voiceId);
-	}
+  if (voiceId === "custom" && customConfig) {
+    voice = buildCustomVoice(customConfig);
+  } else {
+    voice = getVoice(voiceId);
+  }
 
-	// Lumen rejects inputs past 100k characters outright (see COMMIT_LIST_BUDGET_CHARS
-	// in libs/curios), so a heavy day is condensed before it reaches a prompt.
-	const condensed = condenseCommitsForPrompt(commits);
+  // Lumen rejects inputs past 100k characters outright (see COMMIT_LIST_BUDGET_CHARS
+  // in libs/curios), so a heavy day is condensed before it reaches a prompt.
+  const condensed = condenseCommitsForPrompt(commits);
 
-	let userPrompt = voice.buildPrompt(condensed.commits, date, ownerName);
+  let userPrompt = voice.buildPrompt(condensed.commits, date, ownerName);
 
-	// Same marker every preset carries — state the overflow instead of dropping it.
-	if (condensed.note) {
-		const marker = "GENERATE THREE OUTPUTS";
-		const markerIndex = userPrompt.indexOf(marker);
-		const note = `${condensed.note}\n\n`;
-		userPrompt =
-			markerIndex > 0
-				? userPrompt.slice(0, markerIndex) + note + userPrompt.slice(markerIndex)
-				: `${userPrompt}\n\n${note}`;
-	}
+  // Same marker every preset carries — state the overflow instead of dropping it.
+  if (condensed.note) {
+    const marker = "GENERATE THREE OUTPUTS";
+    const markerIndex = userPrompt.indexOf(marker);
+    const note = `${condensed.note}\n\n`;
+    userPrompt =
+      markerIndex > 0
+        ? userPrompt.slice(0, markerIndex) + note + userPrompt.slice(markerIndex)
+        : `${userPrompt}\n\n${note}`;
+  }
 
-	// Append long-horizon context if provided (condensed to save tokens)
-	if (context) {
-		let contextSection = "";
+  // Append long-horizon context if provided (condensed to save tokens)
+  if (context) {
+    let contextSection = "";
 
-		if (context.historicalContext) {
-			contextSection += `
+    if (context.historicalContext) {
+      contextSection += `
 RECENT CONTEXT (brief awareness only — do NOT recap these):
 ${context.historicalContext}
 
 `;
-		}
+    }
 
-		if (context.continuationNote) {
-			contextSection += `${context.continuationNote}
+    if (context.continuationNote) {
+      contextSection += `${context.continuationNote}
 
 `;
-		}
+    }
 
-		// Insert context before the commit list
-		const commitsMarker = "COMMITS TODAY";
-		const whatHappenedMarker = "WHAT HAPPENED";
-		let insertIndex = userPrompt.indexOf(commitsMarker);
-		if (insertIndex <= 0) {
-			insertIndex = userPrompt.indexOf(whatHappenedMarker);
-		}
-		if (insertIndex > 0) {
-			userPrompt =
-				userPrompt.slice(0, insertIndex) + contextSection + userPrompt.slice(insertIndex);
-		} else {
-			// Fallback: prepend context
-			userPrompt = contextSection + userPrompt;
-		}
-	}
+    // Insert context before the commit list
+    const commitsMarker = "COMMITS TODAY";
+    const whatHappenedMarker = "WHAT HAPPENED";
+    let insertIndex = userPrompt.indexOf(commitsMarker);
+    if (insertIndex <= 0) {
+      insertIndex = userPrompt.indexOf(whatHappenedMarker);
+    }
+    if (insertIndex > 0) {
+      userPrompt =
+        userPrompt.slice(0, insertIndex) +
+        contextSection +
+        userPrompt.slice(insertIndex);
+    } else {
+      // Fallback: prepend context
+      userPrompt = contextSection + userPrompt;
+    }
+  }
 
-	return {
-		systemPrompt: voice.systemPrompt,
-		userPrompt,
-	};
+  return {
+    systemPrompt: voice.systemPrompt,
+    userPrompt,
+  };
 }

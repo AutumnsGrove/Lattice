@@ -69,36 +69,36 @@ export const COMMIT_LIST_BUDGET_CHARS = 120_000;
 const MAX_SUBJECT_CHARS = 120;
 
 export interface CondensedCommitList<C extends Commit = Commit> {
-	/** Commits to hand to a preset's buildPrompt. */
-	commits: C[];
-	/**
-	 * Set only when the commit list itself had to be cut. Every preset's prompt
-	 * carries a "GENERATE THREE OUTPUTS" section, so the caller appends this
-	 * there instead of silently losing commits the model should know about.
-	 */
-	note: string | null;
+  /** Commits to hand to a preset's buildPrompt. */
+  commits: C[];
+  /**
+   * Set only when the commit list itself had to be cut. Every preset's prompt
+   * carries a "GENERATE THREE OUTPUTS" section, so the caller appends this
+   * there instead of silently losing commits the model should know about.
+   */
+  note: string | null;
 }
 
 /** Subject line of a commit message, collapsed to a single bounded line. */
 function subjectOf(message: string): string {
-	const firstLine = message.split("\n").find((line) => line.trim().length > 0) ?? "";
-	const collapsed = firstLine.replace(/\s+/g, " ").trim();
-	return collapsed.length > MAX_SUBJECT_CHARS
-		? `${collapsed.slice(0, MAX_SUBJECT_CHARS - 1)}…`
-		: collapsed;
+  const firstLine = message.split("\n").find((line) => line.trim().length > 0) ?? "";
+  const collapsed = firstLine.replace(/\s+/g, " ").trim();
+  return collapsed.length > MAX_SUBJECT_CHARS
+    ? `${collapsed.slice(0, MAX_SUBJECT_CHARS - 1)}…`
+    : collapsed;
 }
 
 /** The line a preset will render for a commit — budget math mirrors the output. */
 function renderLength(commits: Commit[], messages?: string[]): number {
-	let total = 0;
-	for (let i = 0; i < commits.length; i++) {
-		const message = messages ? messages[i] : commits[i].message;
-		// `${i + 1}. [repo] message (+x/-y)` plus its newline
-		total +=
-			`${i + 1}. [${commits[i].repo}] ${message} (+${commits[i].additions}/-${commits[i].deletions})`
-				.length + 1;
-	}
-	return total;
+  let total = 0;
+  for (let i = 0; i < commits.length; i++) {
+    const message = messages ? messages[i] : commits[i].message;
+    // `${i + 1}. [repo] message (+x/-y)` plus its newline
+    total +=
+      `${i + 1}. [${commits[i].repo}] ${message} (+${commits[i].additions}/-${commits[i].deletions})`
+        .length + 1;
+  }
+  return total;
 }
 
 /**
@@ -112,49 +112,49 @@ function renderLength(commits: Commit[], messages?: string[]): number {
  * The commit count never shrinks silently: step 3 always returns a note.
  */
 export function condenseCommitsForPrompt<C extends Commit>(
-	commits: C[],
-	budget: number = COMMIT_LIST_BUDGET_CHARS,
+  commits: C[],
+  budget: number = COMMIT_LIST_BUDGET_CHARS,
 ): CondensedCommitList<C> {
-	if (commits.length === 0) return { commits, note: null };
+  if (commits.length === 0) return { commits, note: null };
 
-	if (renderLength(commits) <= budget) {
-		return { commits, note: null };
-	}
+  if (renderLength(commits) <= budget) {
+    return { commits, note: null };
+  }
 
-	const subjects = commits.map((commit) => subjectOf(commit.message));
+  const subjects = commits.map((commit) => subjectOf(commit.message));
 
-	if (renderLength(commits, subjects) <= budget) {
-		return {
-			commits: commits.map((commit, i) => ({ ...commit, message: subjects[i] })),
-			note: null,
-		};
-	}
+  if (renderLength(commits, subjects) <= budget) {
+    return {
+      commits: commits.map((commit, i) => ({ ...commit, message: subjects[i] })),
+      note: null,
+    };
+  }
 
-	// Still too long: keep whole commits while they fit, then say what is left.
-	const kept: C[] = [];
-	let used = 0;
-	let index = 0;
-	for (; index < commits.length; index++) {
-		const line = `${index + 1}. [${commits[index].repo}] ${subjects[index]} (+${commits[index].additions}/-${commits[index].deletions})`;
-		// Always keep the first commit: a list with nothing in it is worse than a
-		// list one line over budget, and a single line cannot overshoot far.
-		if (kept.length > 0 && used + line.length + 1 > budget) break;
-		used += line.length + 1;
-		kept.push({ ...commits[index], message: subjects[index] });
-	}
+  // Still too long: keep whole commits while they fit, then say what is left.
+  const kept: C[] = [];
+  let used = 0;
+  let index = 0;
+  for (; index < commits.length; index++) {
+    const line = `${index + 1}. [${commits[index].repo}] ${subjects[index]} (+${commits[index].additions}/-${commits[index].deletions})`;
+    // Always keep the first commit: a list with nothing in it is worse than a
+    // list one line over budget, and a single line cannot overshoot far.
+    if (kept.length > 0 && used + line.length + 1 > budget) break;
+    used += line.length + 1;
+    kept.push({ ...commits[index], message: subjects[index] });
+  }
 
-	const remaining = commits.slice(index);
-	const byRepo: Record<string, number> = {};
-	for (const commit of remaining) {
-		byRepo[commit.repo] = (byRepo[commit.repo] || 0) + 1;
-	}
-	const repoCounts = Object.entries(byRepo)
-		.sort((a, b) => b[1] - a[1])
-		.map(([repo, count]) => `${repo}: ${count}`)
-		.join(", ");
+  const remaining = commits.slice(index);
+  const byRepo: Record<string, number> = {};
+  for (const commit of remaining) {
+    byRepo[commit.repo] = (byRepo[commit.repo] || 0) + 1;
+  }
+  const repoCounts = Object.entries(byRepo)
+    .sort((a, b) => b[1] - a[1])
+    .map(([repo, count]) => `${repo}: ${count}`)
+    .join(", ");
 
-	return {
-		commits: kept,
-		note: `The commit list above is shortened to fit. The day was ${commits.length} commits; ${kept.length} are listed below and the remaining ${remaining.length} are across: ${repoCounts}. The total in the heading counts only the listed commits.`,
-	};
+  return {
+    commits: kept,
+    note: `The commit list above is shortened to fit. The day was ${commits.length} commits; ${kept.length} are listed below and the remaining ${remaining.length} are across: ${repoCounts}. The total in the heading counts only the listed commits.`,
+  };
 }
