@@ -47,6 +47,8 @@
 
 	interface Props {
 		uploadsEnabled: boolean;
+		/** Where a suspended uploader asks for them to be turned on (#1626). */
+		uploadAccessUrl?: string | null;
 		copyFormat: string;
 		copiedItem: string | number | null;
 		onCopyFormatChange?: (format: string) => void;
@@ -56,6 +58,7 @@
 
 	let {
 		uploadsEnabled,
+		uploadAccessUrl = null,
 		copyFormat,
 		copiedItem,
 		onCopyFormatChange = () => {},
@@ -373,11 +376,18 @@
 			<span class="banner-icon">~</span>
 			<div>
 				<p>
-					Your grove needs a little time to sprout before photo uploads are available. In the
-					meantime, you can use external image links in your posts with markdown:
+					Your grove needs a little time to sprout before photo uploads are available.
+					{#if uploadAccessUrl}
+						If you'd like them sooner,
+						<a href={uploadAccessUrl} target="_blank" rel="noopener" class="underline"
+							>ask me to turn them on</a
+						>.
+					{/if}
 				</p>
-				<code class="block mt-2 text-xs opacity-80"
-					>![description](https://your-image-url.jpg)</code
+				<p class="mt-2 text-xs opacity-80">
+					In the meantime you can link images from anywhere with markdown:
+				</p>
+				<code class="block mt-2 text-xs opacity-80">![description](https://your-image-url.jpg)</code
 				>
 				<p class="mt-2 text-xs opacity-70">
 					Free image hosting: <a
@@ -399,9 +409,9 @@
 	<Glass
 		variant="tint"
 		intensity="light"
-		class="drop-zone {isDragging ? 'dragging' : ''} {uploading
-			? 'uploading'
-			: ''} {!uploadsEnabled ? 'disabled' : ''}"
+		class="drop-zone {isDragging ? 'dragging' : ''} {uploading ? 'uploading' : ''} {!uploadsEnabled
+			? 'disabled'
+			: ''}"
 		role="button"
 		tabindex={0}
 		aria-label="Drop zone for image uploads"
@@ -631,11 +641,7 @@
 						<div class="upload-error-row">
 							<p class="upload-error">
 								{upload.error}
-								<Waystone
-									slug="image-upload-failures"
-									label="Troubleshoot upload issues"
-									inline
-								/>
+								<Waystone slug="image-upload-failures" label="Troubleshoot upload issues" inline />
 							</p>
 							{#if upload.originalFile}
 								<Button variant="secondary" size="sm" onclick={() => retryUpload(upload)}

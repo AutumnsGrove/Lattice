@@ -13,12 +13,19 @@
 		isPorchCategory,
 		type PorchCategory,
 	} from "@autumnsgrove/lattice/platform/config";
-	import { metricIcons, chromeIcons, authIcons, stateIcons, actionIcons } from "@autumnsgrove/prism/icons";
+	import {
+		metricIcons,
+		chromeIcons,
+		authIcons,
+		stateIcons,
+		actionIcons,
+	} from "@autumnsgrove/prism/icons";
 	const CreditCard = metricIcons.creditCard;
 	const Wrench = chromeIcons.toolbox;
 	const User = authIcons.user;
 	const ShieldOff = authIcons.shieldOff;
 	const Hand = actionIcons.hand;
+	const Upload = actionIcons.upload;
 	const HelpCircle = stateIcons.help;
 	import type { ActionData, PageData } from "./$types";
 
@@ -61,6 +68,7 @@
 		billing: CreditCard,
 		technical: Wrench,
 		account: User,
+		uploads: Upload,
 		appeal: ShieldOff,
 		hello: Hand,
 		other: HelpCircle,
@@ -111,9 +119,7 @@
 							</svg>
 						</div>
 						<div class="flex-1">
-							<h2 class="text-lg font-serif text-success dark:text-success mb-1">
-								Visit started!
-							</h2>
+							<h2 class="text-lg font-serif text-success dark:text-success mb-1">Visit started!</h2>
 							<p class="text-sm text-success dark:text-success font-sans mb-2">
 								Your visit number is <strong>{form.visitNumber}</strong>. I'll get back to you soon.
 							</p>
@@ -132,7 +138,9 @@
 		<!-- Error Message -->
 		{#if form?.error}
 			<div role="alert">
-				<GlassCard class="mb-6 bg-error-bg/80 dark:bg-error-bg/20 border-error dark:border-error/50">
+				<GlassCard
+					class="mb-6 bg-error-bg/80 dark:bg-error-bg/20 border-error dark:border-error/50"
+				>
 					<div class="flex items-start gap-4">
 						<div
 							class="w-10 h-10 bg-error-bg dark:bg-error-bg/30 rounded-lg flex items-center justify-center text-error dark:text-error flex-shrink-0"

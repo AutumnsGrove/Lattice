@@ -46,6 +46,11 @@ export const PORCH_CATEGORIES = [
 		description: "Login, settings, data",
 	},
 	{
+		id: "uploads",
+		label: "Uploads",
+		description: "Photo uploads on your grove",
+	},
+	{
 		id: "appeal",
 		label: "Appeal",
 		description: "I was blocked, suspended, or banned",
@@ -138,4 +143,37 @@ export function buildPorchUrl(options: PorchLinkOptions): string {
 	if (options.name) url.searchParams.set("name", options.name);
 
 	return url.toString();
+}
+
+/** What a suspended uploader needs to say, and who they are. */
+export interface UploadAccessRequest {
+	/** The tenant asking, so the ticket is actionable without a reply round-trip. */
+	subdomain: string;
+	/** How to address them, if the caller knows (Arbor does; the gallery does not). */
+	name?: string;
+	/** Saves a signed-out visitor retyping it. Never proof of identity. */
+	email?: string | null;
+}
+
+/**
+ * The one place an "ask for uploads" link is built.
+ *
+ * Three surfaces hit the same gate — the Arbor upload form, the gallery page and
+ * the editor's image drop — and every one of them used to dead-end. Hand-writing
+ * the link three times is how one of them ends up with an unencoded tenant name;
+ * more to the point, the three should ask the same question in the same words.
+ *
+ * The message stays one line on purpose: it travels in a URL, and it names the
+ * grove and the person so the visit can be answered without asking "which one?".
+ */
+export function buildUploadAccessRequestUrl(request: UploadAccessRequest): string {
+	const { subdomain, name, email } = request;
+
+	return buildPorchUrl({
+		category: "uploads",
+		subject: `Photo uploads for ${subdomain}`,
+		message: `Hi — my grove at ${subdomain}.grove.place is still waiting on photo uploads. Could they be switched on when you get a chance?`,
+		...(name ? { name } : {}),
+		...(email ? { email } : {}),
+	});
 }

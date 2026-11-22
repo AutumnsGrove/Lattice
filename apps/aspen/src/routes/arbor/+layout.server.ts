@@ -8,6 +8,7 @@ import { emailsMatch, normalizeEmail } from "@autumnsgrove/lattice/utils/user";
 import { loadChannelMessages } from "@autumnsgrove/lattice/server/services/messages";
 import { getTenantDb } from "@autumnsgrove/lattice/server/services/database";
 import { getPendingCount } from "@autumnsgrove/lattice/server/services/reeds";
+import { buildUploadAccessRequestUrl } from "@autumnsgrove/lattice/platform/config/porch";
 import type { LayoutServerLoad } from "./$types";
 
 // Demo mode secret key for local development and screenshots
@@ -204,5 +205,15 @@ export const load: LayoutServerLoad = async ({ locals, url, platform, parent, co
 		csrfToken: locals.csrfToken,
 		messages,
 		pendingCommentCount,
+		// One link, built once, for every editor under Arbor (#1626). The editor
+		// renders the door when the upload gate says no; only this layout knows
+		// which grove is being written in and who to address.
+		uploadAccessUrl: tenant
+			? buildUploadAccessRequestUrl({
+					subdomain: tenant.subdomain,
+					name: locals.user?.name,
+					email: locals.user?.email,
+				})
+			: null,
 	};
 };

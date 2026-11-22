@@ -15,7 +15,10 @@
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
 	import { Blaze } from "@autumnsgrove/lattice/social/blazes/components";
 	import { GLOBAL_BLAZE_DEFAULTS } from "@autumnsgrove/lattice/social/blazes";
-	import { FONT_PRESETS, FONT_CATEGORY_LABELS } from "@autumnsgrove/lattice/platform/config/presets";
+	import {
+		FONT_PRESETS,
+		FONT_CATEGORY_LABELS,
+	} from "@autumnsgrove/lattice/platform/config/presets";
 	import type { GutterItem } from "@autumnsgrove/grove-markdown";
 
 	// Canonical font list — single source of truth, keeps this select in sync
@@ -371,9 +374,7 @@
 				toast.error("Failed to refresh live version");
 			}
 		} catch (err) {
-			toast.error(
-				err instanceof Error ? err.message : "Failed to refresh live version",
-			);
+			toast.error(err instanceof Error ? err.message : "Failed to refresh live version");
 		} finally {
 			saving = false;
 		}
@@ -737,6 +738,7 @@
 						{gutterItems}
 						flags={data?.flags ?? {}}
 						configuredCurios={data?.curios ?? []}
+						uploadAccessUrl={data.uploadAccessUrl ?? null}
 					/>
 				</div>
 				{#if showGutter}
