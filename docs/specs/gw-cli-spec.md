@@ -595,6 +595,20 @@ Afterwards it prints the summary, warns about leftovers or failures, and probes
 the site. A `302` to `/verify` means the Turnstile gate answered rather than the
 tenant — see #1734.
 
+**The probe asks an origin, and that origin defaults to production.** `SITE_ORIGIN`
+on the ops worker is a template whose only variable part is `{subdomain}`. Unset,
+it is `https://{subdomain}.grove.place/` — the question a removal has to answer,
+because "still serving through the edge cache" is the bug this step exists for.
+The dev stack sets it to `http://localhost:5173/?subdomain={subdomain}`, so a
+local removal probes the local site instead of looking for a fixture that was
+never in the production zone. A template without `{subdomain}` is refused
+outright; probing one fixed host would confirm a site nobody asked about.
+
+When the origin is not production, the summary says so in as many words. That is
+the point: **a green local run proves the local site is clear, a beta run proves
+beta, and only a production run proves production.** Read which one you did
+before you tell anyone their grove is gone.
+
 ### Email Test Commands (`gw email`)
 
 ```bash
