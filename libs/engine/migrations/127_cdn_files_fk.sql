@@ -47,7 +47,8 @@ DROP TABLE cdn_files;
 
 ALTER TABLE cdn_files_new RENAME TO cdn_files;
 
--- DROP TABLE takes these with it. Both on the old table and in 0011_cdn.sql.
+-- DROP TABLE takes these with it. Defined in apps/landing/migrations/0001_cdn.sql
+-- and re-created by 107_fix_users_schema.sql, which rebuilds this table too.
 CREATE INDEX IF NOT EXISTS idx_cdn_files_folder
   ON cdn_files(folder, created_at DESC);
 
