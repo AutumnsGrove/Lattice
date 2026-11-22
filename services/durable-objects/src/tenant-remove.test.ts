@@ -98,6 +98,8 @@ function makeEnv(
 		 * CI is not a test.
 		 */
 		siteStatus?: number | "unreachable";
+		/** Where the probe should look, instead of the production origin (#1762). */
+		siteOrigin?: string;
 	} = {},
 ) {
 	const deletes: Recorded[] = [];
@@ -187,6 +189,7 @@ function makeEnv(
 				return new Response("", { status: options.siteStatus ?? 404 });
 			}),
 		},
+		...(options.siteOrigin === undefined ? {} : { SITE_ORIGIN: options.siteOrigin }),
 		IMAGES: {
 			list: vi.fn(async () => ({
 				objects: [{ key: "tenants/t-1/a.png" }, { key: "tenants/t-1/b.png" }],
@@ -615,6 +618,75 @@ describe("POST /tenant/remove", () => {
 		expect(body.failures.some((f: string) => f.includes("still serving"))).toBe(true);
 		// The person is not told it worked while their blog is up.
 		expect(body.summary).toContain("notified: no");
+	});
+
+	it("asks the origin it was configured with, not production", async () => {
+		// #1762: a local or beta fixture probed against production finds no such
+		// subdomain, reports "gone", and passes a step nobody tested.
+		const { env } = makeEnv({
+			opsKey: KEY,
+			tenantRow,
+			siteStatus: 404,
+			siteOrigin: "http://localhost:5173/?subdomain={subdomain}",
+		});
+		const site = env as unknown as { SITE_FETCH: { fetch: ReturnType<typeof vi.fn> } };
+
+		const res = await worker.fetch(
+			removeRequest({ subdomain: "gone", reason: "x", dryRun: false }, KEY),
+			env,
+		);
+		const body = (await res.json()) as any;
+
+		const [request] = site.SITE_FETCH.fetch.mock.calls[0] as [Request];
+		expect(request.url).toBe("http://localhost:5173/?subdomain=gone");
+		expect(body.probeOrigin).toBe("http://localhost:5173/?subdomain=gone");
+		expect(body.cacheEvicted).toBe(true);
+	});
+
+	it("says out loud when the probe did not go to production", async () => {
+		// A green local run must not read like a verified production removal.
+		const { env } = makeEnv({
+			opsKey: KEY,
+			tenantRow,
+			siteOrigin: "http://localhost:5173/?subdomain={subdomain}",
+		});
+
+		const res = await worker.fetch(
+			removeRequest({ subdomain: "gone", reason: "x", dryRun: false }, KEY),
+			env,
+		);
+		const body = (await res.json()) as any;
+
+		expect(body.summary).toContain("not production");
+		expect(body.summary).toContain("http://localhost:5173/?subdomain=gone");
+	});
+
+	it("leaves the summary alone when the probe really did go to production", async () => {
+		const { env } = makeEnv({ opsKey: KEY, tenantRow });
+
+		const res = await worker.fetch(
+			removeRequest({ subdomain: "gone", reason: "x", dryRun: false }, KEY),
+			env,
+		);
+		const body = (await res.json()) as any;
+
+		expect(body.summary).not.toContain("not production");
+		expect(body.probeOrigin).toBe("https://gone.grove.place/");
+	});
+
+	it("refuses an origin with no {subdomain}, instead of confirming one fixed host", async () => {
+		// The smug failure this whole check exists to prevent: a URL that answers,
+		// about a tenant it was never asked about.
+		const { env } = makeEnv({ opsKey: KEY, tenantRow, siteOrigin: "http://localhost:5173/" });
+
+		const res = await worker.fetch(
+			removeRequest({ subdomain: "gone", reason: "x", dryRun: false }, KEY),
+			env,
+		);
+		const body = (await res.json()) as any;
+
+		expect(body.cacheEvicted).toBe(false);
+		expect(body.failures.some((f: string) => f.includes("{subdomain}"))).toBe(true);
 	});
 
 	it("treats a redirect as gone — an old subdomain pointing elsewhere is not serving", async () => {

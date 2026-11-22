@@ -425,6 +425,13 @@ write_local_do_config() {
     {
         cat "$src"
         printf '\n[[migrations]]\ntag = "local-sqlite"\nnew_sqlite_classes = [%s]\n' "$classes"
+        # The post-removal probe asks the public origin by default (#1762). Locally
+        # that finds no such subdomain — correctly, it never existed — and reports
+        # "gone", passing a step nobody tested. Point it at Aspen's dev server,
+        # which reads the tenant from ?subdomain= on localhost. This is only safe
+        # while the source config declares no [vars] table of its own, which
+        # wrangler would reject as a duplicate.
+        printf '\n[vars]\nSITE_ORIGIN = "http://localhost:5173/?subdomain={subdomain}"\n'
     } >"$dst"
 }
 

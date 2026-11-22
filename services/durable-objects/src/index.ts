@@ -94,6 +94,19 @@ interface Env {
 	 * question than the one an operator is asking.
 	 */
 	SITE_FETCH?: { fetch: typeof fetch };
+	/**
+	 * Where the probe goes, with `{subdomain}` as the only variable part (#1762).
+	 *
+	 * Production leaves this unset and the probe asks the public origin, which is
+	 * the only question that matters: not "did the cache clear?" but "does the
+	 * site still answer?" Everywhere else the default is a lie. A local or beta
+	 * fixture probed against production finds no such subdomain, reports "gone",
+	 * and passes a step that was never tested.
+	 *
+	 * Local: `http://localhost:5173/?subdomain={subdomain}` — Aspen's dev server
+	 * reads the tenant from `?subdomain=` (or `x-subdomain`) on localhost.
+	 */
+	SITE_ORIGIN?: string;
 	/** Where a removed account holder can reply. Defaults to hello@grove.place. */
 	SUPPORT_EMAIL?: string;
 	IMAGES: R2Bucket;
@@ -588,6 +601,36 @@ async function cancelSubscription(
 }
 
 /**
+ * The origin the probe asks about, with `{subdomain}` as its only variable part.
+ *
+ * Production is the default because production is the question: a deleted grove
+ * still serving through the edge cache is the bug (#1677), and only the public
+ * origin can answer it. But the same default is *wrong* in the dev stack and on
+ * beta — a fixture probed against production finds no such subdomain, reports
+ * "gone", and passes a step nobody tested (#1762).
+ */
+const DEFAULT_SITE_ORIGIN = "https://{subdomain}.grove.place/";
+
+function siteProbeUrl(env: Env, subdomain: string): string {
+	const template = env.SITE_ORIGIN?.trim() || DEFAULT_SITE_ORIGIN;
+
+	// A template with no placeholder would probe one fixed host for every tenant,
+	// which answers a question about nobody — the same smug success the check
+	// exists to prevent. Fail loudly instead of confirming a site that isn't the
+	// one being removed.
+	if (!template.includes("{subdomain}")) {
+		throw new Error(`SITE_ORIGIN must contain {subdomain} — got "${template}"`);
+	}
+
+	return template.replaceAll("{subdomain}", subdomain);
+}
+
+/** Whether the probe is asking about the real thing. */
+function probesProduction(env: Env): boolean {
+	return (env.SITE_ORIGIN?.trim() || DEFAULT_SITE_ORIGIN) === DEFAULT_SITE_ORIGIN;
+}
+
+/**
  * Prove the site is gone, rather than trusting the flush (#1677).
  *
  * The flush clears the DO's memory and its own SQLite, and for two weeks after
@@ -601,8 +644,8 @@ async function cancelSubscription(
  * bug this issue is about, and an answer we cannot interpret (5xx, 403) is not a
  * confirmation either, so both throw and `removeTenant` records a failed step.
  */
-async function probeSiteGone(env: Env, subdomain: string): Promise<void> {
-	const url = `https://${subdomain}.grove.place/`;
+async function probeSiteGone(env: Env, subdomain: string): Promise<string> {
+	const url = siteProbeUrl(env, subdomain);
 	// Explicitly bound: a service binding's `fetch` needs its own `this`, and a
 	// detached one fails at runtime with "Illegal invocation" (#1740).
 	const fetchSite = env.SITE_FETCH ? env.SITE_FETCH.fetch.bind(env.SITE_FETCH) : fetch;
@@ -625,7 +668,8 @@ async function probeSiteGone(env: Env, subdomain: string): Promise<void> {
 		);
 	}
 
-	if (res.status === 404 || res.status === 410 || (res.status >= 300 && res.status < 400)) return;
+	if (res.status === 404 || res.status === 410 || (res.status >= 300 && res.status < 400))
+		return url;
 
 	throw new Error(`the site is still serving — ${url} answered ${res.status}`);
 }
@@ -731,6 +775,9 @@ async function handleTenantRemove(request: Request, env: Env): Promise<Response>
 	// used to sign in" when there was no identity to delete would be a lie in the
 	// one message the person keeps.
 	let identitiesRemoved = 0;
+
+	/** The URL the probe actually asked, so the response can say where it looked. */
+	let probedUrl: string | null = null;
 
 	try {
 		// The identity has to be resolved *now*, while `engine.users` still exists.
@@ -854,7 +901,7 @@ async function handleTenantRemove(request: Request, env: Env): Promise<Response>
 					// The flush is done. Now check it from outside, because "the cache
 					// cleared" and "the site is gone" are different claims, and only the
 					// second one is the removal (#1677).
-					await probeSiteGone(env, tenant.subdomain);
+					probedUrl = await probeSiteGone(env, tenant.subdomain);
 				},
 				deleteR2: async (tenant) => {
 					// R2 list() caps at 1000 keys per call and says so with
@@ -878,9 +925,18 @@ async function handleTenantRemove(request: Request, env: Env): Promise<Response>
 			},
 		);
 
+		// A green local or beta run proves the site behind *that* origin is gone, not
+		// grove.place. Say so where the operator reads the outcome, rather than in a
+		// log they scroll past (#1762).
+		const probeWarning =
+			probedUrl && !probesProduction(env)
+				? `\n\n⚠ Probed ${probedUrl} — not production. A green run here proves that origin is clear, not grove.place.`
+				: "";
+
 		return Response.json(
 			{
-				summary: formatRemovalResult(result),
+				summary: `${formatRemovalResult(result)}${probeWarning}`,
+				...(probedUrl ? { probeOrigin: probedUrl } : {}),
 				dryRun: result.dryRun,
 				removed: result.plan.totalRows,
 				aborted: result.aborted,
