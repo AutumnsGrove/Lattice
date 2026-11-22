@@ -1,533 +1,2707 @@
 [
-  { "username": "www", "reason": "system", "category": "web" },
-  { "username": "api", "reason": "system", "category": "web" },
-  { "username": "app", "reason": "system", "category": "web" },
-  { "username": "auth", "reason": "system", "category": "web" },
-  { "username": "login", "reason": "system", "category": "web" },
-  { "username": "logout", "reason": "system", "category": "web" },
-  { "username": "signin", "reason": "system", "category": "web" },
-  { "username": "signout", "reason": "system", "category": "web" },
-  { "username": "signup", "reason": "system", "category": "web" },
-  { "username": "register", "reason": "system", "category": "web" },
-  { "username": "account", "reason": "system", "category": "web" },
-  { "username": "accounts", "reason": "system", "category": "web" },
-  { "username": "oauth", "reason": "system", "category": "web" },
-  { "username": "oauth2", "reason": "system", "category": "web" },
-  { "username": "sso", "reason": "system", "category": "web" },
-  { "username": "admin", "reason": "system", "category": "web" },
-  { "username": "administrator", "reason": "system", "category": "web" },
-  { "username": "dashboard", "reason": "system", "category": "web" },
-  { "username": "panel", "reason": "system", "category": "web" },
-  { "username": "console", "reason": "system", "category": "web" },
-  { "username": "backend", "reason": "system", "category": "web" },
-  { "username": "control", "reason": "system", "category": "web" },
-  { "username": "billing", "reason": "system", "category": "web" },
-  { "username": "checkout", "reason": "system", "category": "web" },
-  { "username": "subscribe", "reason": "system", "category": "web" },
-  { "username": "unsubscribe", "reason": "system", "category": "web" },
-  { "username": "payment", "reason": "system", "category": "web" },
-  { "username": "payments", "reason": "system", "category": "web" },
-  { "username": "pay", "reason": "system", "category": "web" },
-  { "username": "settings", "reason": "system", "category": "web" },
-  { "username": "preferences", "reason": "system", "category": "web" },
-  { "username": "config", "reason": "system", "category": "web" },
-  { "username": "configuration", "reason": "system", "category": "web" },
-  { "username": "profile", "reason": "system", "category": "web" },
-  { "username": "profiles", "reason": "system", "category": "web" },
-  { "username": "user", "reason": "system", "category": "web" },
-  { "username": "users", "reason": "system", "category": "web" },
-  { "username": "member", "reason": "system", "category": "web" },
-  { "username": "members", "reason": "system", "category": "web" },
-  { "username": "mail", "reason": "system", "category": "email" },
-  { "username": "email", "reason": "system", "category": "email" },
-  { "username": "emails", "reason": "system", "category": "email" },
-  { "username": "smtp", "reason": "system", "category": "email" },
-  { "username": "imap", "reason": "system", "category": "email" },
-  { "username": "pop", "reason": "system", "category": "email" },
-  { "username": "pop3", "reason": "system", "category": "email" },
-  { "username": "postmaster", "reason": "system", "category": "email" },
-  { "username": "webmail", "reason": "system", "category": "email" },
-  { "username": "mx", "reason": "system", "category": "email" },
-  { "username": "newsletter", "reason": "system", "category": "email" },
-  { "username": "newsletters", "reason": "system", "category": "email" },
-  { "username": "noreply", "reason": "system", "category": "email" },
-  { "username": "no-reply", "reason": "system", "category": "email" },
-  { "username": "mailer", "reason": "system", "category": "email" },
-  { "username": "bounce", "reason": "system", "category": "email" },
-  { "username": "mailbox", "reason": "system", "category": "email" },
-  { "username": "ftp", "reason": "system", "category": "network" },
-  { "username": "sftp", "reason": "system", "category": "network" },
-  { "username": "ssh", "reason": "system", "category": "network" },
-  { "username": "vpn", "reason": "system", "category": "network" },
-  { "username": "proxy", "reason": "system", "category": "network" },
-  { "username": "gateway", "reason": "system", "category": "network" },
-  { "username": "firewall", "reason": "system", "category": "network" },
-  { "username": "cdn", "reason": "system", "category": "network" },
-  { "username": "static", "reason": "system", "category": "network" },
-  { "username": "assets", "reason": "system", "category": "network" },
-  { "username": "media", "reason": "system", "category": "network" },
-  { "username": "images", "reason": "system", "category": "network" },
-  { "username": "files", "reason": "system", "category": "network" },
-  { "username": "img", "reason": "system", "category": "network" },
-  { "username": "js", "reason": "system", "category": "network" },
-  { "username": "css", "reason": "system", "category": "network" },
-  { "username": "fonts", "reason": "system", "category": "network" },
-  { "username": "upload", "reason": "system", "category": "network" },
-  { "username": "uploads", "reason": "system", "category": "network" },
-  { "username": "download", "reason": "system", "category": "network" },
-  { "username": "downloads", "reason": "system", "category": "network" },
-  { "username": "cache", "reason": "system", "category": "network" },
-  { "username": "server", "reason": "system", "category": "network" },
-  { "username": "servers", "reason": "system", "category": "network" },
-  { "username": "node", "reason": "system", "category": "network" },
-  { "username": "nodes", "reason": "system", "category": "network" },
-  { "username": "cluster", "reason": "system", "category": "network" },
-  { "username": "worker", "reason": "system", "category": "network" },
-  { "username": "workers", "reason": "system", "category": "network" },
-  { "username": "ns", "reason": "system", "category": "dns" },
-  { "username": "ns1", "reason": "system", "category": "dns" },
-  { "username": "ns2", "reason": "system", "category": "dns" },
-  { "username": "ns3", "reason": "system", "category": "dns" },
-  { "username": "dns", "reason": "system", "category": "dns" },
-  { "username": "nameserver", "reason": "system", "category": "dns" },
-  { "username": "whois", "reason": "system", "category": "dns" },
-  { "username": "rdap", "reason": "system", "category": "dns" },
-  { "username": "rss", "reason": "system", "category": "metadata" },
-  { "username": "atom", "reason": "system", "category": "metadata" },
-  { "username": "feed", "reason": "system", "category": "metadata" },
-  { "username": "feeds", "reason": "system", "category": "metadata" },
-  { "username": "sitemap", "reason": "system", "category": "metadata" },
-  { "username": "sitemaps", "reason": "system", "category": "metadata" },
-  { "username": "robots", "reason": "system", "category": "metadata" },
-  { "username": "favicon", "reason": "system", "category": "metadata" },
-  { "username": "manifest", "reason": "system", "category": "metadata" },
-  { "username": "status", "reason": "system", "category": "metadata" },
-  { "username": "health", "reason": "system", "category": "metadata" },
-  { "username": "healthcheck", "reason": "system", "category": "metadata" },
-  { "username": "ping", "reason": "system", "category": "metadata" },
-  { "username": "metrics", "reason": "system", "category": "metadata" },
-  { "username": "analytics", "reason": "system", "category": "metadata" },
-  { "username": "telemetry", "reason": "system", "category": "metadata" },
-  { "username": "logs", "reason": "system", "category": "metadata" },
-  { "username": "log", "reason": "system", "category": "metadata" },
-  { "username": "debug", "reason": "system", "category": "metadata" },
-  { "username": "trace", "reason": "system", "category": "metadata" },
-  { "username": "error", "reason": "system", "category": "metadata" },
-  { "username": "errors", "reason": "system", "category": "metadata" },
-  { "username": "root", "reason": "system", "category": "dev" },
-  { "username": "null", "reason": "system", "category": "dev" },
-  { "username": "undefined", "reason": "system", "category": "dev" },
-  { "username": "void", "reason": "system", "category": "dev" },
-  { "username": "nan", "reason": "system", "category": "dev" },
-  { "username": "test", "reason": "system", "category": "dev" },
-  { "username": "testing", "reason": "system", "category": "dev" },
-  { "username": "tests", "reason": "system", "category": "dev" },
-  { "username": "demo", "reason": "system", "category": "dev" },
-  { "username": "demos", "reason": "system", "category": "dev" },
-  { "username": "example", "reason": "system", "category": "dev" },
-  { "username": "examples", "reason": "system", "category": "dev" },
-  { "username": "sample", "reason": "system", "category": "dev" },
-  { "username": "samples", "reason": "system", "category": "dev" },
-  { "username": "sandbox", "reason": "system", "category": "dev" },
-  { "username": "staging", "reason": "system", "category": "dev" },
-  { "username": "dev", "reason": "system", "category": "dev" },
-  { "username": "development", "reason": "system", "category": "dev" },
-  { "username": "prod", "reason": "system", "category": "dev" },
-  { "username": "production", "reason": "system", "category": "dev" },
-  { "username": "temp", "reason": "system", "category": "dev" },
-  { "username": "tmp", "reason": "system", "category": "dev" },
-  { "username": "localhost", "reason": "system", "category": "dev" },
-  { "username": "local", "reason": "system", "category": "dev" },
-  { "username": "internal", "reason": "system", "category": "dev" },
-  { "username": "beta", "reason": "system", "category": "dev" },
-  { "username": "alpha", "reason": "system", "category": "dev" },
-  { "username": "canary", "reason": "system", "category": "dev" },
-  { "username": "nightly", "reason": "system", "category": "dev" },
-  { "username": "preview", "reason": "system", "category": "dev" },
-  { "username": "release", "reason": "system", "category": "dev" },
-  { "username": "releases", "reason": "system", "category": "dev" },
-  { "username": "legal", "reason": "system", "category": "legal" },
-  { "username": "terms", "reason": "system", "category": "legal" },
-  { "username": "privacy", "reason": "system", "category": "legal" },
-  { "username": "dmca", "reason": "system", "category": "legal" },
-  { "username": "copyright", "reason": "system", "category": "legal" },
-  { "username": "trademark", "reason": "system", "category": "legal" },
-  { "username": "tos", "reason": "system", "category": "legal" },
-  { "username": "eula", "reason": "system", "category": "legal" },
-  { "username": "abuse", "reason": "system", "category": "legal" },
-  { "username": "report", "reason": "system", "category": "legal" },
-  { "username": "reports", "reason": "system", "category": "legal" },
-  { "username": "security", "reason": "system", "category": "legal" },
-  { "username": "vulnerability", "reason": "system", "category": "legal" },
-  { "username": "cve", "reason": "system", "category": "legal" },
-  { "username": "compliance", "reason": "system", "category": "legal" },
-  { "username": "gdpr", "reason": "system", "category": "legal" },
-  { "username": "ccpa", "reason": "system", "category": "legal" },
-  { "username": "dsar", "reason": "system", "category": "legal" },
-  { "username": "docs", "reason": "system", "category": "docs" },
-  { "username": "documentation", "reason": "system", "category": "docs" },
-  { "username": "wiki", "reason": "system", "category": "docs" },
-  { "username": "guide", "reason": "system", "category": "docs" },
-  { "username": "guides", "reason": "system", "category": "docs" },
-  { "username": "tutorial", "reason": "system", "category": "docs" },
-  { "username": "tutorials", "reason": "system", "category": "docs" },
-  { "username": "faq", "reason": "system", "category": "docs" },
-  { "username": "faqs", "reason": "system", "category": "docs" },
-  { "username": "help", "reason": "system", "category": "docs" },
-  { "username": "support", "reason": "system", "category": "docs" },
-  { "username": "knowledge", "reason": "system", "category": "docs" },
-  { "username": "kb", "reason": "system", "category": "docs" },
-  { "username": "knowledgebase", "reason": "system", "category": "docs" },
-  { "username": "manual", "reason": "system", "category": "docs" },
-  { "username": "manuals", "reason": "system", "category": "docs" },
-  { "username": "reference", "reason": "system", "category": "docs" },
-  { "username": "spec", "reason": "system", "category": "docs" },
-  { "username": "specs", "reason": "system", "category": "docs" },
-  { "username": "about", "reason": "system", "category": "docs" },
-  { "username": "info", "reason": "system", "category": "docs" },
-  { "username": "contact", "reason": "system", "category": "docs" },
-  { "username": "contacts", "reason": "system", "category": "docs" },
-  { "username": "grove", "reason": "grove_service", "category": "public_services" },
-  { "username": "lattice", "reason": "grove_service", "category": "public_services" },
-  { "username": "meadow", "reason": "grove_service", "category": "public_services" },
-  { "username": "forage", "reason": "grove_service", "category": "public_services" },
-  { "username": "foliage", "reason": "grove_service", "category": "public_services" },
-  { "username": "heartwood", "reason": "grove_service", "category": "public_services" },
-  { "username": "trove", "reason": "grove_service", "category": "public_services" },
-  { "username": "outpost", "reason": "grove_service", "category": "public_services" },
-  { "username": "aria", "reason": "grove_service", "category": "public_services" },
-  { "username": "plant", "reason": "grove_service", "category": "public_services" },
-  { "username": "ivy", "reason": "grove_service", "category": "public_services" },
-  { "username": "amber", "reason": "grove_service", "category": "public_services" },
-  { "username": "bloom", "reason": "grove_service", "category": "public_services" },
-  { "username": "mycelium", "reason": "grove_service", "category": "public_services" },
-  { "username": "vista", "reason": "grove_service", "category": "public_services" },
-  { "username": "pantry", "reason": "grove_service", "category": "public_services" },
-  { "username": "nook", "reason": "grove_service", "category": "public_services" },
-  { "username": "clearing", "reason": "grove_service", "category": "public_services" },
-  { "username": "porch", "reason": "grove_service", "category": "public_services" },
-  { "username": "wander", "reason": "grove_service", "category": "public_services" },
-  { "username": "curios", "reason": "grove_service", "category": "public_services" },
-  { "username": "forests", "reason": "grove_service", "category": "public_services" },
-  { "username": "canopy", "reason": "grove_service", "category": "public_services" },
-  { "username": "shutter", "reason": "grove_service", "category": "public_services" },
-  { "username": "centennial", "reason": "grove_service", "category": "public_services" },
-  { "username": "shade", "reason": "grove_service", "category": "public_services" },
-  { "username": "trails", "reason": "grove_service", "category": "public_services" },
-  { "username": "vineyard", "reason": "grove_service", "category": "public_services" },
-  { "username": "terrarium", "reason": "grove_service", "category": "public_services" },
-  { "username": "weave", "reason": "grove_service", "category": "public_services" },
-  { "username": "patina", "reason": "grove_service", "category": "internal_services" },
-  { "username": "rings", "reason": "grove_service", "category": "internal_services" },
-  { "username": "waystone", "reason": "grove_service", "category": "internal_services" },
-  { "username": "reeds", "reason": "grove_service", "category": "internal_services" },
-  { "username": "chirp", "reason": "grove_service", "category": "internal_services" },
-  { "username": "chirps", "reason": "grove_service", "category": "internal_services" },
-  { "username": "press", "reason": "grove_service", "category": "internal_services" },
-  { "username": "wisp", "reason": "grove_service", "category": "internal_services" },
-  { "username": "thorn", "reason": "grove_service", "category": "internal_services" },
-  { "username": "fireside", "reason": "grove_service", "category": "internal_services" },
-  { "username": "vines", "reason": "grove_service", "category": "internal_services" },
-  { "username": "arbor", "reason": "grove_service", "category": "internal_services" },
-  { "username": "sway", "reason": "grove_service", "category": "internal_services" },
-  { "username": "fern", "reason": "grove_service", "category": "internal_services" },
-  { "username": "loam", "reason": "grove_service", "category": "internal_services" },
-  { "username": "gossamer", "reason": "grove_service", "category": "internal_services" },
-  { "username": "prism", "reason": "grove_service", "category": "internal_services" },
-  { "username": "loom", "reason": "grove_service", "category": "internal_services" },
-  { "username": "threshold", "reason": "grove_service", "category": "internal_services" },
-  { "username": "songbird", "reason": "grove_service", "category": "internal_services" },
-  { "username": "sentinel", "reason": "grove_service", "category": "internal_services" },
-  { "username": "canary", "reason": "grove_service", "category": "internal_services" },
-  { "username": "kestrel", "reason": "grove_service", "category": "internal_services" },
-  { "username": "breeze", "reason": "grove_service", "category": "internal_services" },
-  { "username": "thread", "reason": "grove_service", "category": "internal_services" },
-  { "username": "lyra", "reason": "grove_service", "category": "internal_services" },
-  { "username": "domains", "reason": "grove_service", "category": "aliases" },
-  { "username": "music", "reason": "grove_service", "category": "aliases" },
-  { "username": "mc", "reason": "grove_service", "category": "aliases" },
-  { "username": "auth-api", "reason": "grove_service", "category": "aliases" },
-  { "username": "scout", "reason": "grove_service", "category": "aliases" },
-  { "username": "search", "reason": "grove_service", "category": "aliases" },
-  { "username": "og", "reason": "grove_service", "category": "aliases" },
-  { "username": "link", "reason": "grove_service", "category": "aliases" },
-  { "username": "monitor", "reason": "grove_service", "category": "aliases" },
-  { "username": "grovesocial", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovedomaintool", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovethemes", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "groveauth", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovepatina", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "treasuretrove", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovemc", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovemusic", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "seedbed", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "groveanalytics", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovemail", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovestorage", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "groveshade", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovetrails", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "groveshowcase", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovebloom", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovemcp", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovemonitor", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovepress", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovewisp", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "groveshop", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovenook", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "groveclear", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovewaystone", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovereeds", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "groveporch", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovethorn", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovearbor", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovescout", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "groveengine", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "groveplace", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "groveloam", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovewander", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovecurios", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "groveforests", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "groveshutter", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovecentennial", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovegossamer", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "groveprism", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "groveloom", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovethreshold", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovesongbird", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grovesentinel", "reason": "grove_service", "category": "internal_codenames" },
-  { "username": "grov", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "grve", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "groce", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "grobe", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "grpve", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "grive", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "meadw", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "meado", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "meadwo", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "medow", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "maedow", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "forrage", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "forrge", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "forege", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "forage-grove", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "heartwod", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "hartwod", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "harwood", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "hearwood", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "hertwood", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "plat", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "palnt", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "plnt", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "pnatry", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "pantrey", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "patry", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "suport", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "supprt", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "amin", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "admn", "reason": "grove_service", "category": "typosquatting" },
-  { "username": "groveplace", "reason": "trademark", "category": "brand" },
-  { "username": "grove-place", "reason": "trademark", "category": "brand" },
-  { "username": "thegrove", "reason": "trademark", "category": "brand" },
-  { "username": "the-grove", "reason": "trademark", "category": "brand" },
-  { "username": "autumnsgrove", "reason": "trademark", "category": "brand" },
-  { "username": "autumns-grove", "reason": "trademark", "category": "brand" },
-  { "username": "autumngrove", "reason": "trademark", "category": "brand" },
-  { "username": "autumn-grove", "reason": "trademark", "category": "brand" },
-  { "username": "autumn", "reason": "trademark", "category": "brand" },
-  { "username": "autumns", "reason": "trademark", "category": "brand" },
-  { "username": "seedling", "reason": "trademark", "category": "tiers" },
-  { "username": "sapling", "reason": "trademark", "category": "tiers" },
-  { "username": "oak", "reason": "trademark", "category": "tiers" },
-  { "username": "evergreen", "reason": "trademark", "category": "tiers" },
-  { "username": "free", "reason": "trademark", "category": "tiers" },
-  { "username": "premium", "reason": "trademark", "category": "tiers" },
-  { "username": "pro", "reason": "trademark", "category": "tiers" },
-  { "username": "plus", "reason": "trademark", "category": "tiers" },
-  { "username": "basic", "reason": "trademark", "category": "tiers" },
-  { "username": "starter", "reason": "trademark", "category": "tiers" },
-  { "username": "enterprise", "reason": "trademark", "category": "tiers" },
-  { "username": "seasons", "reason": "trademark", "category": "concepts" },
-  { "username": "acorn", "reason": "trademark", "category": "concepts" },
-  { "username": "understory", "reason": "trademark", "category": "concepts" },
-  { "username": "overstory", "reason": "trademark", "category": "concepts" },
-  { "username": "forest", "reason": "trademark", "category": "concepts" },
-  { "username": "woods", "reason": "trademark", "category": "concepts" },
-  { "username": "woodland", "reason": "trademark", "category": "concepts" },
-  { "username": "tree", "reason": "trademark", "category": "concepts" },
-  { "username": "trees", "reason": "trademark", "category": "concepts" },
-  { "username": "branch", "reason": "trademark", "category": "concepts" },
-  { "username": "branches", "reason": "trademark", "category": "concepts" },
-  { "username": "root", "reason": "trademark", "category": "concepts" },
-  { "username": "roots", "reason": "trademark", "category": "concepts" },
-  { "username": "leaf", "reason": "trademark", "category": "concepts" },
-  { "username": "leaves", "reason": "trademark", "category": "concepts" },
-  { "username": "grove-keeper", "reason": "trademark", "category": "concepts" },
-  { "username": "grovekeeper", "reason": "trademark", "category": "concepts" },
-  { "username": "note", "reason": "trademark", "category": "concepts" },
-  { "username": "notes", "reason": "trademark", "category": "concepts" },
-  { "username": "official", "reason": "impersonation", "category": "official" },
-  { "username": "verified", "reason": "impersonation", "category": "official" },
-  { "username": "authentic", "reason": "impersonation", "category": "official" },
-  { "username": "real", "reason": "impersonation", "category": "official" },
-  { "username": "true", "reason": "impersonation", "category": "official" },
-  { "username": "original", "reason": "impersonation", "category": "official" },
-  { "username": "genuine", "reason": "impersonation", "category": "official" },
-  { "username": "certified", "reason": "impersonation", "category": "official" },
-  { "username": "approved", "reason": "impersonation", "category": "official" },
-  { "username": "authorized", "reason": "impersonation", "category": "official" },
-  { "username": "licensed", "reason": "impersonation", "category": "official" },
-  { "username": "legit", "reason": "impersonation", "category": "official" },
-  { "username": "legitimate", "reason": "impersonation", "category": "official" },
-  { "username": "moderator", "reason": "impersonation", "category": "roles" },
-  { "username": "mod", "reason": "impersonation", "category": "roles" },
-  { "username": "mods", "reason": "impersonation", "category": "roles" },
-  { "username": "staff", "reason": "impersonation", "category": "roles" },
-  { "username": "employee", "reason": "impersonation", "category": "roles" },
-  { "username": "team", "reason": "impersonation", "category": "roles" },
-  { "username": "founder", "reason": "impersonation", "category": "roles" },
-  { "username": "cofounder", "reason": "impersonation", "category": "roles" },
-  { "username": "co-founder", "reason": "impersonation", "category": "roles" },
-  { "username": "ceo", "reason": "impersonation", "category": "roles" },
-  { "username": "cto", "reason": "impersonation", "category": "roles" },
-  { "username": "cfo", "reason": "impersonation", "category": "roles" },
-  { "username": "coo", "reason": "impersonation", "category": "roles" },
-  { "username": "president", "reason": "impersonation", "category": "roles" },
-  { "username": "director", "reason": "impersonation", "category": "roles" },
-  { "username": "manager", "reason": "impersonation", "category": "roles" },
-  { "username": "owner", "reason": "impersonation", "category": "roles" },
-  { "username": "operator", "reason": "impersonation", "category": "roles" },
-  { "username": "creator", "reason": "impersonation", "category": "roles" },
-  { "username": "developer", "reason": "impersonation", "category": "roles" },
-  { "username": "engineer", "reason": "impersonation", "category": "roles" },
-  { "username": "maintainer", "reason": "impersonation", "category": "roles" },
-  { "username": "helpdesk", "reason": "impersonation", "category": "support" },
-  { "username": "help-desk", "reason": "impersonation", "category": "support" },
-  { "username": "customerservice", "reason": "impersonation", "category": "support" },
-  { "username": "customer-service", "reason": "impersonation", "category": "support" },
-  { "username": "trust", "reason": "impersonation", "category": "support" },
-  { "username": "safety", "reason": "impersonation", "category": "support" },
-  { "username": "moderation", "reason": "impersonation", "category": "support" },
-  { "username": "enforcement", "reason": "impersonation", "category": "support" },
-  { "username": "billing-support", "reason": "impersonation", "category": "support" },
-  { "username": "tech-support", "reason": "impersonation", "category": "support" },
-  { "username": "free-money", "reason": "fraud", "category": "money" },
-  { "username": "freemoney", "reason": "fraud", "category": "money" },
-  { "username": "getrich", "reason": "fraud", "category": "money" },
-  { "username": "get-rich", "reason": "fraud", "category": "money" },
-  { "username": "makemoney", "reason": "fraud", "category": "money" },
-  { "username": "make-money", "reason": "fraud", "category": "money" },
-  { "username": "earnmoney", "reason": "fraud", "category": "money" },
-  { "username": "earn-money", "reason": "fraud", "category": "money" },
-  { "username": "crypto-giveaway", "reason": "fraud", "category": "money" },
-  { "username": "cryptogiveaway", "reason": "fraud", "category": "money" },
-  { "username": "giveaway", "reason": "fraud", "category": "money" },
-  { "username": "airdrop", "reason": "fraud", "category": "money" },
-  { "username": "freebitcoin", "reason": "fraud", "category": "money" },
-  { "username": "free-bitcoin", "reason": "fraud", "category": "money" },
-  { "username": "password", "reason": "fraud", "category": "phishing" },
-  { "username": "passwords", "reason": "fraud", "category": "phishing" },
-  { "username": "login-here", "reason": "fraud", "category": "phishing" },
-  { "username": "signin-here", "reason": "fraud", "category": "phishing" },
-  { "username": "sign-in", "reason": "fraud", "category": "phishing" },
-  { "username": "click-here", "reason": "fraud", "category": "phishing" },
-  { "username": "clickhere", "reason": "fraud", "category": "phishing" },
-  { "username": "download-now", "reason": "fraud", "category": "phishing" },
-  { "username": "downloadnow", "reason": "fraud", "category": "phishing" },
-  { "username": "limited-time", "reason": "fraud", "category": "phishing" },
-  { "username": "limitedtime", "reason": "fraud", "category": "phishing" },
-  { "username": "act-now", "reason": "fraud", "category": "phishing" },
-  { "username": "actnow", "reason": "fraud", "category": "phishing" },
-  { "username": "winner", "reason": "fraud", "category": "scam" },
-  { "username": "congratulations", "reason": "fraud", "category": "scam" },
-  { "username": "congrats", "reason": "fraud", "category": "scam" },
-  { "username": "prize", "reason": "fraud", "category": "scam" },
-  { "username": "prizes", "reason": "fraud", "category": "scam" },
-  { "username": "lottery", "reason": "fraud", "category": "scam" },
-  { "username": "jackpot", "reason": "fraud", "category": "scam" },
-  { "username": "invoice", "reason": "fraud", "category": "scam" },
-  { "username": "receipt", "reason": "fraud", "category": "scam" },
-  { "username": "verify", "reason": "fraud", "category": "scam" },
-  { "username": "verification", "reason": "fraud", "category": "scam" },
-  { "username": "confirm", "reason": "fraud", "category": "scam" },
-  { "username": "confirmation", "reason": "fraud", "category": "scam" },
-  { "username": "account-suspended", "reason": "fraud", "category": "scam" },
-  { "username": "account-locked", "reason": "fraud", "category": "scam" },
-  { "username": "urgent", "reason": "fraud", "category": "scam" },
-  { "username": "warning", "reason": "fraud", "category": "scam" },
-  { "username": "alert", "reason": "fraud", "category": "scam" },
-  { "username": "suspended", "reason": "fraud", "category": "scam" },
-  { "username": "paypal", "reason": "fraud", "category": "brand_impersonation" },
-  { "username": "stripe", "reason": "fraud", "category": "brand_impersonation" },
-  { "username": "venmo", "reason": "fraud", "category": "brand_impersonation" },
-  { "username": "cashapp", "reason": "fraud", "category": "brand_impersonation" },
-  { "username": "zelle", "reason": "fraud", "category": "brand_impersonation" },
-  { "username": "apple", "reason": "fraud", "category": "brand_impersonation" },
-  { "username": "google", "reason": "fraud", "category": "brand_impersonation" },
-  { "username": "microsoft", "reason": "fraud", "category": "brand_impersonation" },
-  { "username": "amazon", "reason": "fraud", "category": "brand_impersonation" },
-  { "username": "facebook", "reason": "fraud", "category": "brand_impersonation" },
-  { "username": "instagram", "reason": "fraud", "category": "brand_impersonation" },
-  { "username": "twitter", "reason": "fraud", "category": "brand_impersonation" },
-  { "username": "tiktok", "reason": "fraud", "category": "brand_impersonation" },
-  { "username": "netflix", "reason": "fraud", "category": "brand_impersonation" },
-  { "username": "spotify", "reason": "fraud", "category": "brand_impersonation" },
-  { "username": "hollow", "reason": "future_reserved", "category": "places" },
-  { "username": "glade", "reason": "future_reserved", "category": "places" },
-  { "username": "thicket", "reason": "future_reserved", "category": "places" },
-  { "username": "copse", "reason": "future_reserved", "category": "places" },
-  { "username": "dell", "reason": "future_reserved", "category": "places" },
-  { "username": "glen", "reason": "future_reserved", "category": "places" },
-  { "username": "grove-commons", "reason": "future_reserved", "category": "places" },
-  { "username": "bower", "reason": "future_reserved", "category": "places" },
-  { "username": "arbor-day", "reason": "future_reserved", "category": "places" },
-  { "username": "arborday", "reason": "future_reserved", "category": "places" },
-  { "username": "seedbank", "reason": "future_reserved", "category": "growing" },
-  { "username": "greenhouse", "reason": "future_reserved", "category": "growing" },
-  { "username": "nursery", "reason": "future_reserved", "category": "growing" },
-  { "username": "mulch", "reason": "future_reserved", "category": "growing" },
-  { "username": "compost", "reason": "future_reserved", "category": "growing" },
-  { "username": "humus", "reason": "future_reserved", "category": "growing" },
-  { "username": "topsoil", "reason": "future_reserved", "category": "growing" },
-  { "username": "sprout", "reason": "future_reserved", "category": "growing" },
-  { "username": "bud", "reason": "future_reserved", "category": "growing" },
-  { "username": "petal", "reason": "future_reserved", "category": "growing" },
-  { "username": "birdsong", "reason": "future_reserved", "category": "creatures" },
-  { "username": "cricket", "reason": "future_reserved", "category": "creatures" },
-  { "username": "firefly", "reason": "future_reserved", "category": "creatures" },
-  { "username": "moth", "reason": "future_reserved", "category": "creatures" },
-  { "username": "owl", "reason": "future_reserved", "category": "creatures" },
-  { "username": "fox", "reason": "future_reserved", "category": "creatures" },
-  { "username": "deer", "reason": "future_reserved", "category": "creatures" },
-  { "username": "rabbit", "reason": "future_reserved", "category": "creatures" },
-  { "username": "cardinal", "reason": "future_reserved", "category": "creatures" },
-  { "username": "robin", "reason": "future_reserved", "category": "creatures" },
-  { "username": "bluebird", "reason": "future_reserved", "category": "creatures" },
-  { "username": "chickadee", "reason": "future_reserved", "category": "creatures" },
-  { "username": "moss", "reason": "future_reserved", "category": "plants" },
-  { "username": "lichen", "reason": "future_reserved", "category": "plants" },
-  { "username": "fern", "reason": "future_reserved", "category": "plants" },
-  { "username": "mushroom", "reason": "future_reserved", "category": "plants" },
-  { "username": "fungus", "reason": "future_reserved", "category": "plants" },
-  { "username": "truffle", "reason": "future_reserved", "category": "plants" },
-  { "username": "clover", "reason": "future_reserved", "category": "plants" },
-  { "username": "daisy", "reason": "future_reserved", "category": "plants" },
-  { "username": "wildflower", "reason": "future_reserved", "category": "plants" },
-  { "username": "stream", "reason": "future_reserved", "category": "water" },
-  { "username": "brook", "reason": "future_reserved", "category": "water" },
-  { "username": "creek", "reason": "future_reserved", "category": "water" },
-  { "username": "pond", "reason": "future_reserved", "category": "water" },
-  { "username": "spring", "reason": "future_reserved", "category": "water" },
-  { "username": "well", "reason": "future_reserved", "category": "water" },
-  { "username": "rain", "reason": "future_reserved", "category": "water" },
-  { "username": "mist", "reason": "future_reserved", "category": "water" },
-  { "username": "dew", "reason": "future_reserved", "category": "water" },
-  { "username": "sunrise", "reason": "future_reserved", "category": "time" },
-  { "username": "sunset", "reason": "future_reserved", "category": "time" },
-  { "username": "dawn", "reason": "future_reserved", "category": "time" },
-  { "username": "dusk", "reason": "future_reserved", "category": "time" },
-  { "username": "twilight", "reason": "future_reserved", "category": "time" },
-  { "username": "midnight", "reason": "future_reserved", "category": "time" },
-  { "username": "noon", "reason": "future_reserved", "category": "time" },
-  { "username": "solstice", "reason": "future_reserved", "category": "time" },
-  { "username": "equinox", "reason": "future_reserved", "category": "time" }
+	{
+		"username": "www",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "api",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "app",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "auth",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "login",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "logout",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "signin",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "signout",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "signup",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "register",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "account",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "accounts",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "oauth",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "oauth2",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "sso",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "admin",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "administrator",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "dashboard",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "panel",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "console",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "backend",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "control",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "billing",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "checkout",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "subscribe",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "unsubscribe",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "payment",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "payments",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "pay",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "settings",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "preferences",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "config",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "configuration",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "profile",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "profiles",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "user",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "users",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "member",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "members",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "blog",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "blogs",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "post",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "posts",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "create",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "new",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "start",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "join",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "plans",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "pricing",
+		"reason": "system",
+		"category": "web"
+	},
+	{
+		"username": "mail",
+		"reason": "system",
+		"category": "email"
+	},
+	{
+		"username": "email",
+		"reason": "system",
+		"category": "email"
+	},
+	{
+		"username": "emails",
+		"reason": "system",
+		"category": "email"
+	},
+	{
+		"username": "smtp",
+		"reason": "system",
+		"category": "email"
+	},
+	{
+		"username": "imap",
+		"reason": "system",
+		"category": "email"
+	},
+	{
+		"username": "pop",
+		"reason": "system",
+		"category": "email"
+	},
+	{
+		"username": "pop3",
+		"reason": "system",
+		"category": "email"
+	},
+	{
+		"username": "postmaster",
+		"reason": "system",
+		"category": "email"
+	},
+	{
+		"username": "webmail",
+		"reason": "system",
+		"category": "email"
+	},
+	{
+		"username": "mx",
+		"reason": "system",
+		"category": "email"
+	},
+	{
+		"username": "newsletter",
+		"reason": "system",
+		"category": "email"
+	},
+	{
+		"username": "newsletters",
+		"reason": "system",
+		"category": "email"
+	},
+	{
+		"username": "noreply",
+		"reason": "system",
+		"category": "email"
+	},
+	{
+		"username": "no-reply",
+		"reason": "system",
+		"category": "email"
+	},
+	{
+		"username": "mailer",
+		"reason": "system",
+		"category": "email"
+	},
+	{
+		"username": "bounce",
+		"reason": "system",
+		"category": "email"
+	},
+	{
+		"username": "mailbox",
+		"reason": "system",
+		"category": "email"
+	},
+	{
+		"username": "ftp",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "sftp",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "ssh",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "vpn",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "proxy",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "gateway",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "firewall",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "cdn",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "static",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "assets",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "media",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "images",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "files",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "img",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "js",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "css",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "fonts",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "upload",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "uploads",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "download",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "downloads",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "cache",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "server",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "servers",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "node",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "nodes",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "cluster",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "worker",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "workers",
+		"reason": "system",
+		"category": "network"
+	},
+	{
+		"username": "ns",
+		"reason": "system",
+		"category": "dns"
+	},
+	{
+		"username": "ns1",
+		"reason": "system",
+		"category": "dns"
+	},
+	{
+		"username": "ns2",
+		"reason": "system",
+		"category": "dns"
+	},
+	{
+		"username": "ns3",
+		"reason": "system",
+		"category": "dns"
+	},
+	{
+		"username": "dns",
+		"reason": "system",
+		"category": "dns"
+	},
+	{
+		"username": "nameserver",
+		"reason": "system",
+		"category": "dns"
+	},
+	{
+		"username": "whois",
+		"reason": "system",
+		"category": "dns"
+	},
+	{
+		"username": "rdap",
+		"reason": "system",
+		"category": "dns"
+	},
+	{
+		"username": "rss",
+		"reason": "system",
+		"category": "metadata"
+	},
+	{
+		"username": "atom",
+		"reason": "system",
+		"category": "metadata"
+	},
+	{
+		"username": "feed",
+		"reason": "system",
+		"category": "metadata"
+	},
+	{
+		"username": "feeds",
+		"reason": "system",
+		"category": "metadata"
+	},
+	{
+		"username": "sitemap",
+		"reason": "system",
+		"category": "metadata"
+	},
+	{
+		"username": "sitemaps",
+		"reason": "system",
+		"category": "metadata"
+	},
+	{
+		"username": "robots",
+		"reason": "system",
+		"category": "metadata"
+	},
+	{
+		"username": "favicon",
+		"reason": "system",
+		"category": "metadata"
+	},
+	{
+		"username": "manifest",
+		"reason": "system",
+		"category": "metadata"
+	},
+	{
+		"username": "status",
+		"reason": "system",
+		"category": "metadata"
+	},
+	{
+		"username": "health",
+		"reason": "system",
+		"category": "metadata"
+	},
+	{
+		"username": "healthcheck",
+		"reason": "system",
+		"category": "metadata"
+	},
+	{
+		"username": "ping",
+		"reason": "system",
+		"category": "metadata"
+	},
+	{
+		"username": "metrics",
+		"reason": "system",
+		"category": "metadata"
+	},
+	{
+		"username": "analytics",
+		"reason": "system",
+		"category": "metadata"
+	},
+	{
+		"username": "telemetry",
+		"reason": "system",
+		"category": "metadata"
+	},
+	{
+		"username": "logs",
+		"reason": "system",
+		"category": "metadata"
+	},
+	{
+		"username": "log",
+		"reason": "system",
+		"category": "metadata"
+	},
+	{
+		"username": "debug",
+		"reason": "system",
+		"category": "metadata"
+	},
+	{
+		"username": "trace",
+		"reason": "system",
+		"category": "metadata"
+	},
+	{
+		"username": "error",
+		"reason": "system",
+		"category": "metadata"
+	},
+	{
+		"username": "errors",
+		"reason": "system",
+		"category": "metadata"
+	},
+	{
+		"username": "root",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "null",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "undefined",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "void",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "nan",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "test",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "testing",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "tests",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "demo",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "demos",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "example",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "examples",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "sample",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "samples",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "sandbox",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "staging",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "dev",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "development",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "prod",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "production",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "temp",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "tmp",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "localhost",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "local",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "internal",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "beta",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "alpha",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "canary",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "nightly",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "preview",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "release",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "releases",
+		"reason": "system",
+		"category": "dev"
+	},
+	{
+		"username": "legal",
+		"reason": "system",
+		"category": "legal"
+	},
+	{
+		"username": "terms",
+		"reason": "system",
+		"category": "legal"
+	},
+	{
+		"username": "privacy",
+		"reason": "system",
+		"category": "legal"
+	},
+	{
+		"username": "dmca",
+		"reason": "system",
+		"category": "legal"
+	},
+	{
+		"username": "copyright",
+		"reason": "system",
+		"category": "legal"
+	},
+	{
+		"username": "trademark",
+		"reason": "system",
+		"category": "legal"
+	},
+	{
+		"username": "tos",
+		"reason": "system",
+		"category": "legal"
+	},
+	{
+		"username": "eula",
+		"reason": "system",
+		"category": "legal"
+	},
+	{
+		"username": "abuse",
+		"reason": "system",
+		"category": "legal"
+	},
+	{
+		"username": "report",
+		"reason": "system",
+		"category": "legal"
+	},
+	{
+		"username": "reports",
+		"reason": "system",
+		"category": "legal"
+	},
+	{
+		"username": "security",
+		"reason": "system",
+		"category": "legal"
+	},
+	{
+		"username": "vulnerability",
+		"reason": "system",
+		"category": "legal"
+	},
+	{
+		"username": "cve",
+		"reason": "system",
+		"category": "legal"
+	},
+	{
+		"username": "compliance",
+		"reason": "system",
+		"category": "legal"
+	},
+	{
+		"username": "gdpr",
+		"reason": "system",
+		"category": "legal"
+	},
+	{
+		"username": "ccpa",
+		"reason": "system",
+		"category": "legal"
+	},
+	{
+		"username": "dsar",
+		"reason": "system",
+		"category": "legal"
+	},
+	{
+		"username": "docs",
+		"reason": "system",
+		"category": "docs"
+	},
+	{
+		"username": "documentation",
+		"reason": "system",
+		"category": "docs"
+	},
+	{
+		"username": "wiki",
+		"reason": "system",
+		"category": "docs"
+	},
+	{
+		"username": "guide",
+		"reason": "system",
+		"category": "docs"
+	},
+	{
+		"username": "guides",
+		"reason": "system",
+		"category": "docs"
+	},
+	{
+		"username": "tutorial",
+		"reason": "system",
+		"category": "docs"
+	},
+	{
+		"username": "tutorials",
+		"reason": "system",
+		"category": "docs"
+	},
+	{
+		"username": "faq",
+		"reason": "system",
+		"category": "docs"
+	},
+	{
+		"username": "faqs",
+		"reason": "system",
+		"category": "docs"
+	},
+	{
+		"username": "help",
+		"reason": "system",
+		"category": "docs"
+	},
+	{
+		"username": "support",
+		"reason": "system",
+		"category": "docs"
+	},
+	{
+		"username": "knowledge",
+		"reason": "system",
+		"category": "docs"
+	},
+	{
+		"username": "kb",
+		"reason": "system",
+		"category": "docs"
+	},
+	{
+		"username": "knowledgebase",
+		"reason": "system",
+		"category": "docs"
+	},
+	{
+		"username": "manual",
+		"reason": "system",
+		"category": "docs"
+	},
+	{
+		"username": "manuals",
+		"reason": "system",
+		"category": "docs"
+	},
+	{
+		"username": "reference",
+		"reason": "system",
+		"category": "docs"
+	},
+	{
+		"username": "spec",
+		"reason": "system",
+		"category": "docs"
+	},
+	{
+		"username": "specs",
+		"reason": "system",
+		"category": "docs"
+	},
+	{
+		"username": "about",
+		"reason": "system",
+		"category": "docs"
+	},
+	{
+		"username": "info",
+		"reason": "system",
+		"category": "docs"
+	},
+	{
+		"username": "contact",
+		"reason": "system",
+		"category": "docs"
+	},
+	{
+		"username": "contacts",
+		"reason": "system",
+		"category": "docs"
+	},
+	{
+		"username": "grove",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "lattice",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "meadow",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "forage",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "foliage",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "heartwood",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "trove",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "outpost",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "aria",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "plant",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "ivy",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "amber",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "bloom",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "mycelium",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "vista",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "pantry",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "nook",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "clearing",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "porch",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "wander",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "curios",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "forests",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "canopy",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "shutter",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "centennial",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "shade",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "trails",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "vineyard",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "terrarium",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "weave",
+		"reason": "grove_service",
+		"category": "public_services"
+	},
+	{
+		"username": "patina",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "rings",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "waystone",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "reeds",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "chirp",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "chirps",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "press",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "wisp",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "thorn",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "fireside",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "vines",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "arbor",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "sway",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "fern",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "loam",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "gossamer",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "prism",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "loom",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "threshold",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "songbird",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "sentinel",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "canary",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "kestrel",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "breeze",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "thread",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "lyra",
+		"reason": "grove_service",
+		"category": "internal_services"
+	},
+	{
+		"username": "domains",
+		"reason": "grove_service",
+		"category": "aliases"
+	},
+	{
+		"username": "music",
+		"reason": "grove_service",
+		"category": "aliases"
+	},
+	{
+		"username": "mc",
+		"reason": "grove_service",
+		"category": "aliases"
+	},
+	{
+		"username": "auth-api",
+		"reason": "grove_service",
+		"category": "aliases"
+	},
+	{
+		"username": "scout",
+		"reason": "grove_service",
+		"category": "aliases"
+	},
+	{
+		"username": "search",
+		"reason": "grove_service",
+		"category": "aliases"
+	},
+	{
+		"username": "og",
+		"reason": "grove_service",
+		"category": "aliases"
+	},
+	{
+		"username": "link",
+		"reason": "grove_service",
+		"category": "aliases"
+	},
+	{
+		"username": "monitor",
+		"reason": "grove_service",
+		"category": "aliases"
+	},
+	{
+		"username": "grovesocial",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovedomaintool",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovethemes",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "groveauth",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovepatina",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "treasuretrove",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovemc",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovemusic",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "seedbed",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "groveanalytics",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovemail",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovestorage",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "groveshade",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovetrails",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "groveshowcase",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovebloom",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovemcp",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovemonitor",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovepress",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovewisp",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "groveshop",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovenook",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "groveclear",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovewaystone",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovereeds",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "groveporch",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovethorn",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovearbor",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovescout",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "groveengine",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "groveplace",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "groveloam",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovewander",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovecurios",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "groveforests",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "groveshutter",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovecentennial",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovegossamer",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "groveprism",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "groveloom",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovethreshold",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovesongbird",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grovesentinel",
+		"reason": "grove_service",
+		"category": "internal_codenames"
+	},
+	{
+		"username": "grov",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "grve",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "groce",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "grobe",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "grpve",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "grive",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "meadw",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "meado",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "meadwo",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "medow",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "maedow",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "forrage",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "forrge",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "forege",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "forage-grove",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "heartwod",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "hartwod",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "harwood",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "hearwood",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "hertwood",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "plat",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "palnt",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "plnt",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "pnatry",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "pantrey",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "patry",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "suport",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "supprt",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "amin",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "admn",
+		"reason": "grove_service",
+		"category": "typosquatting"
+	},
+	{
+		"username": "groveplace",
+		"reason": "trademark",
+		"category": "brand"
+	},
+	{
+		"username": "grove-place",
+		"reason": "trademark",
+		"category": "brand"
+	},
+	{
+		"username": "thegrove",
+		"reason": "trademark",
+		"category": "brand"
+	},
+	{
+		"username": "the-grove",
+		"reason": "trademark",
+		"category": "brand"
+	},
+	{
+		"username": "autumnsgrove",
+		"reason": "trademark",
+		"category": "brand"
+	},
+	{
+		"username": "autumns-grove",
+		"reason": "trademark",
+		"category": "brand"
+	},
+	{
+		"username": "autumngrove",
+		"reason": "trademark",
+		"category": "brand"
+	},
+	{
+		"username": "autumn-grove",
+		"reason": "trademark",
+		"category": "brand"
+	},
+	{
+		"username": "autumn",
+		"reason": "trademark",
+		"category": "brand"
+	},
+	{
+		"username": "autumns",
+		"reason": "trademark",
+		"category": "brand"
+	},
+	{
+		"username": "seedling",
+		"reason": "trademark",
+		"category": "tiers"
+	},
+	{
+		"username": "sapling",
+		"reason": "trademark",
+		"category": "tiers"
+	},
+	{
+		"username": "oak",
+		"reason": "trademark",
+		"category": "tiers"
+	},
+	{
+		"username": "evergreen",
+		"reason": "trademark",
+		"category": "tiers"
+	},
+	{
+		"username": "free",
+		"reason": "trademark",
+		"category": "tiers"
+	},
+	{
+		"username": "premium",
+		"reason": "trademark",
+		"category": "tiers"
+	},
+	{
+		"username": "pro",
+		"reason": "trademark",
+		"category": "tiers"
+	},
+	{
+		"username": "plus",
+		"reason": "trademark",
+		"category": "tiers"
+	},
+	{
+		"username": "basic",
+		"reason": "trademark",
+		"category": "tiers"
+	},
+	{
+		"username": "starter",
+		"reason": "trademark",
+		"category": "tiers"
+	},
+	{
+		"username": "enterprise",
+		"reason": "trademark",
+		"category": "tiers"
+	},
+	{
+		"username": "seasons",
+		"reason": "trademark",
+		"category": "concepts"
+	},
+	{
+		"username": "acorn",
+		"reason": "trademark",
+		"category": "concepts"
+	},
+	{
+		"username": "understory",
+		"reason": "trademark",
+		"category": "concepts"
+	},
+	{
+		"username": "overstory",
+		"reason": "trademark",
+		"category": "concepts"
+	},
+	{
+		"username": "forest",
+		"reason": "trademark",
+		"category": "concepts"
+	},
+	{
+		"username": "woods",
+		"reason": "trademark",
+		"category": "concepts"
+	},
+	{
+		"username": "woodland",
+		"reason": "trademark",
+		"category": "concepts"
+	},
+	{
+		"username": "tree",
+		"reason": "trademark",
+		"category": "concepts"
+	},
+	{
+		"username": "trees",
+		"reason": "trademark",
+		"category": "concepts"
+	},
+	{
+		"username": "branch",
+		"reason": "trademark",
+		"category": "concepts"
+	},
+	{
+		"username": "branches",
+		"reason": "trademark",
+		"category": "concepts"
+	},
+	{
+		"username": "root",
+		"reason": "trademark",
+		"category": "concepts"
+	},
+	{
+		"username": "roots",
+		"reason": "trademark",
+		"category": "concepts"
+	},
+	{
+		"username": "leaf",
+		"reason": "trademark",
+		"category": "concepts"
+	},
+	{
+		"username": "leaves",
+		"reason": "trademark",
+		"category": "concepts"
+	},
+	{
+		"username": "grove-keeper",
+		"reason": "trademark",
+		"category": "concepts"
+	},
+	{
+		"username": "grovekeeper",
+		"reason": "trademark",
+		"category": "concepts"
+	},
+	{
+		"username": "note",
+		"reason": "trademark",
+		"category": "concepts"
+	},
+	{
+		"username": "notes",
+		"reason": "trademark",
+		"category": "concepts"
+	},
+	{
+		"username": "official",
+		"reason": "impersonation",
+		"category": "official"
+	},
+	{
+		"username": "verified",
+		"reason": "impersonation",
+		"category": "official"
+	},
+	{
+		"username": "authentic",
+		"reason": "impersonation",
+		"category": "official"
+	},
+	{
+		"username": "real",
+		"reason": "impersonation",
+		"category": "official"
+	},
+	{
+		"username": "true",
+		"reason": "impersonation",
+		"category": "official"
+	},
+	{
+		"username": "original",
+		"reason": "impersonation",
+		"category": "official"
+	},
+	{
+		"username": "genuine",
+		"reason": "impersonation",
+		"category": "official"
+	},
+	{
+		"username": "certified",
+		"reason": "impersonation",
+		"category": "official"
+	},
+	{
+		"username": "approved",
+		"reason": "impersonation",
+		"category": "official"
+	},
+	{
+		"username": "authorized",
+		"reason": "impersonation",
+		"category": "official"
+	},
+	{
+		"username": "licensed",
+		"reason": "impersonation",
+		"category": "official"
+	},
+	{
+		"username": "legit",
+		"reason": "impersonation",
+		"category": "official"
+	},
+	{
+		"username": "legitimate",
+		"reason": "impersonation",
+		"category": "official"
+	},
+	{
+		"username": "moderator",
+		"reason": "impersonation",
+		"category": "roles"
+	},
+	{
+		"username": "mod",
+		"reason": "impersonation",
+		"category": "roles"
+	},
+	{
+		"username": "mods",
+		"reason": "impersonation",
+		"category": "roles"
+	},
+	{
+		"username": "staff",
+		"reason": "impersonation",
+		"category": "roles"
+	},
+	{
+		"username": "employee",
+		"reason": "impersonation",
+		"category": "roles"
+	},
+	{
+		"username": "team",
+		"reason": "impersonation",
+		"category": "roles"
+	},
+	{
+		"username": "founder",
+		"reason": "impersonation",
+		"category": "roles"
+	},
+	{
+		"username": "cofounder",
+		"reason": "impersonation",
+		"category": "roles"
+	},
+	{
+		"username": "co-founder",
+		"reason": "impersonation",
+		"category": "roles"
+	},
+	{
+		"username": "ceo",
+		"reason": "impersonation",
+		"category": "roles"
+	},
+	{
+		"username": "cto",
+		"reason": "impersonation",
+		"category": "roles"
+	},
+	{
+		"username": "cfo",
+		"reason": "impersonation",
+		"category": "roles"
+	},
+	{
+		"username": "coo",
+		"reason": "impersonation",
+		"category": "roles"
+	},
+	{
+		"username": "president",
+		"reason": "impersonation",
+		"category": "roles"
+	},
+	{
+		"username": "director",
+		"reason": "impersonation",
+		"category": "roles"
+	},
+	{
+		"username": "manager",
+		"reason": "impersonation",
+		"category": "roles"
+	},
+	{
+		"username": "owner",
+		"reason": "impersonation",
+		"category": "roles"
+	},
+	{
+		"username": "operator",
+		"reason": "impersonation",
+		"category": "roles"
+	},
+	{
+		"username": "creator",
+		"reason": "impersonation",
+		"category": "roles"
+	},
+	{
+		"username": "developer",
+		"reason": "impersonation",
+		"category": "roles"
+	},
+	{
+		"username": "engineer",
+		"reason": "impersonation",
+		"category": "roles"
+	},
+	{
+		"username": "maintainer",
+		"reason": "impersonation",
+		"category": "roles"
+	},
+	{
+		"username": "helpdesk",
+		"reason": "impersonation",
+		"category": "support"
+	},
+	{
+		"username": "help-desk",
+		"reason": "impersonation",
+		"category": "support"
+	},
+	{
+		"username": "customerservice",
+		"reason": "impersonation",
+		"category": "support"
+	},
+	{
+		"username": "customer-service",
+		"reason": "impersonation",
+		"category": "support"
+	},
+	{
+		"username": "trust",
+		"reason": "impersonation",
+		"category": "support"
+	},
+	{
+		"username": "safety",
+		"reason": "impersonation",
+		"category": "support"
+	},
+	{
+		"username": "moderation",
+		"reason": "impersonation",
+		"category": "support"
+	},
+	{
+		"username": "enforcement",
+		"reason": "impersonation",
+		"category": "support"
+	},
+	{
+		"username": "billing-support",
+		"reason": "impersonation",
+		"category": "support"
+	},
+	{
+		"username": "tech-support",
+		"reason": "impersonation",
+		"category": "support"
+	},
+	{
+		"username": "free-money",
+		"reason": "fraud",
+		"category": "money"
+	},
+	{
+		"username": "freemoney",
+		"reason": "fraud",
+		"category": "money"
+	},
+	{
+		"username": "getrich",
+		"reason": "fraud",
+		"category": "money"
+	},
+	{
+		"username": "get-rich",
+		"reason": "fraud",
+		"category": "money"
+	},
+	{
+		"username": "makemoney",
+		"reason": "fraud",
+		"category": "money"
+	},
+	{
+		"username": "make-money",
+		"reason": "fraud",
+		"category": "money"
+	},
+	{
+		"username": "earnmoney",
+		"reason": "fraud",
+		"category": "money"
+	},
+	{
+		"username": "earn-money",
+		"reason": "fraud",
+		"category": "money"
+	},
+	{
+		"username": "crypto-giveaway",
+		"reason": "fraud",
+		"category": "money"
+	},
+	{
+		"username": "cryptogiveaway",
+		"reason": "fraud",
+		"category": "money"
+	},
+	{
+		"username": "giveaway",
+		"reason": "fraud",
+		"category": "money"
+	},
+	{
+		"username": "airdrop",
+		"reason": "fraud",
+		"category": "money"
+	},
+	{
+		"username": "freebitcoin",
+		"reason": "fraud",
+		"category": "money"
+	},
+	{
+		"username": "free-bitcoin",
+		"reason": "fraud",
+		"category": "money"
+	},
+	{
+		"username": "password",
+		"reason": "fraud",
+		"category": "phishing"
+	},
+	{
+		"username": "passwords",
+		"reason": "fraud",
+		"category": "phishing"
+	},
+	{
+		"username": "login-here",
+		"reason": "fraud",
+		"category": "phishing"
+	},
+	{
+		"username": "signin-here",
+		"reason": "fraud",
+		"category": "phishing"
+	},
+	{
+		"username": "sign-in",
+		"reason": "fraud",
+		"category": "phishing"
+	},
+	{
+		"username": "click-here",
+		"reason": "fraud",
+		"category": "phishing"
+	},
+	{
+		"username": "clickhere",
+		"reason": "fraud",
+		"category": "phishing"
+	},
+	{
+		"username": "download-now",
+		"reason": "fraud",
+		"category": "phishing"
+	},
+	{
+		"username": "downloadnow",
+		"reason": "fraud",
+		"category": "phishing"
+	},
+	{
+		"username": "limited-time",
+		"reason": "fraud",
+		"category": "phishing"
+	},
+	{
+		"username": "limitedtime",
+		"reason": "fraud",
+		"category": "phishing"
+	},
+	{
+		"username": "act-now",
+		"reason": "fraud",
+		"category": "phishing"
+	},
+	{
+		"username": "actnow",
+		"reason": "fraud",
+		"category": "phishing"
+	},
+	{
+		"username": "winner",
+		"reason": "fraud",
+		"category": "scam"
+	},
+	{
+		"username": "congratulations",
+		"reason": "fraud",
+		"category": "scam"
+	},
+	{
+		"username": "congrats",
+		"reason": "fraud",
+		"category": "scam"
+	},
+	{
+		"username": "prize",
+		"reason": "fraud",
+		"category": "scam"
+	},
+	{
+		"username": "prizes",
+		"reason": "fraud",
+		"category": "scam"
+	},
+	{
+		"username": "lottery",
+		"reason": "fraud",
+		"category": "scam"
+	},
+	{
+		"username": "jackpot",
+		"reason": "fraud",
+		"category": "scam"
+	},
+	{
+		"username": "invoice",
+		"reason": "fraud",
+		"category": "scam"
+	},
+	{
+		"username": "receipt",
+		"reason": "fraud",
+		"category": "scam"
+	},
+	{
+		"username": "verify",
+		"reason": "fraud",
+		"category": "scam"
+	},
+	{
+		"username": "verification",
+		"reason": "fraud",
+		"category": "scam"
+	},
+	{
+		"username": "confirm",
+		"reason": "fraud",
+		"category": "scam"
+	},
+	{
+		"username": "confirmation",
+		"reason": "fraud",
+		"category": "scam"
+	},
+	{
+		"username": "account-suspended",
+		"reason": "fraud",
+		"category": "scam"
+	},
+	{
+		"username": "account-locked",
+		"reason": "fraud",
+		"category": "scam"
+	},
+	{
+		"username": "urgent",
+		"reason": "fraud",
+		"category": "scam"
+	},
+	{
+		"username": "warning",
+		"reason": "fraud",
+		"category": "scam"
+	},
+	{
+		"username": "alert",
+		"reason": "fraud",
+		"category": "scam"
+	},
+	{
+		"username": "suspended",
+		"reason": "fraud",
+		"category": "scam"
+	},
+	{
+		"username": "paypal",
+		"reason": "fraud",
+		"category": "brand_impersonation"
+	},
+	{
+		"username": "stripe",
+		"reason": "fraud",
+		"category": "brand_impersonation"
+	},
+	{
+		"username": "venmo",
+		"reason": "fraud",
+		"category": "brand_impersonation"
+	},
+	{
+		"username": "cashapp",
+		"reason": "fraud",
+		"category": "brand_impersonation"
+	},
+	{
+		"username": "zelle",
+		"reason": "fraud",
+		"category": "brand_impersonation"
+	},
+	{
+		"username": "apple",
+		"reason": "fraud",
+		"category": "brand_impersonation"
+	},
+	{
+		"username": "google",
+		"reason": "fraud",
+		"category": "brand_impersonation"
+	},
+	{
+		"username": "microsoft",
+		"reason": "fraud",
+		"category": "brand_impersonation"
+	},
+	{
+		"username": "amazon",
+		"reason": "fraud",
+		"category": "brand_impersonation"
+	},
+	{
+		"username": "facebook",
+		"reason": "fraud",
+		"category": "brand_impersonation"
+	},
+	{
+		"username": "instagram",
+		"reason": "fraud",
+		"category": "brand_impersonation"
+	},
+	{
+		"username": "twitter",
+		"reason": "fraud",
+		"category": "brand_impersonation"
+	},
+	{
+		"username": "tiktok",
+		"reason": "fraud",
+		"category": "brand_impersonation"
+	},
+	{
+		"username": "netflix",
+		"reason": "fraud",
+		"category": "brand_impersonation"
+	},
+	{
+		"username": "spotify",
+		"reason": "fraud",
+		"category": "brand_impersonation"
+	},
+	{
+		"username": "hollow",
+		"reason": "future_reserved",
+		"category": "places"
+	},
+	{
+		"username": "glade",
+		"reason": "future_reserved",
+		"category": "places"
+	},
+	{
+		"username": "thicket",
+		"reason": "future_reserved",
+		"category": "places"
+	},
+	{
+		"username": "copse",
+		"reason": "future_reserved",
+		"category": "places"
+	},
+	{
+		"username": "dell",
+		"reason": "future_reserved",
+		"category": "places"
+	},
+	{
+		"username": "glen",
+		"reason": "future_reserved",
+		"category": "places"
+	},
+	{
+		"username": "grove-commons",
+		"reason": "future_reserved",
+		"category": "places"
+	},
+	{
+		"username": "bower",
+		"reason": "future_reserved",
+		"category": "places"
+	},
+	{
+		"username": "arbor-day",
+		"reason": "future_reserved",
+		"category": "places"
+	},
+	{
+		"username": "arborday",
+		"reason": "future_reserved",
+		"category": "places"
+	},
+	{
+		"username": "seedbank",
+		"reason": "future_reserved",
+		"category": "growing"
+	},
+	{
+		"username": "greenhouse",
+		"reason": "future_reserved",
+		"category": "growing"
+	},
+	{
+		"username": "nursery",
+		"reason": "future_reserved",
+		"category": "growing"
+	},
+	{
+		"username": "mulch",
+		"reason": "future_reserved",
+		"category": "growing"
+	},
+	{
+		"username": "compost",
+		"reason": "future_reserved",
+		"category": "growing"
+	},
+	{
+		"username": "humus",
+		"reason": "future_reserved",
+		"category": "growing"
+	},
+	{
+		"username": "topsoil",
+		"reason": "future_reserved",
+		"category": "growing"
+	},
+	{
+		"username": "sprout",
+		"reason": "future_reserved",
+		"category": "growing"
+	},
+	{
+		"username": "bud",
+		"reason": "future_reserved",
+		"category": "growing"
+	},
+	{
+		"username": "petal",
+		"reason": "future_reserved",
+		"category": "growing"
+	},
+	{
+		"username": "birdsong",
+		"reason": "future_reserved",
+		"category": "creatures"
+	},
+	{
+		"username": "cricket",
+		"reason": "future_reserved",
+		"category": "creatures"
+	},
+	{
+		"username": "firefly",
+		"reason": "future_reserved",
+		"category": "creatures"
+	},
+	{
+		"username": "moth",
+		"reason": "future_reserved",
+		"category": "creatures"
+	},
+	{
+		"username": "owl",
+		"reason": "future_reserved",
+		"category": "creatures"
+	},
+	{
+		"username": "fox",
+		"reason": "future_reserved",
+		"category": "creatures"
+	},
+	{
+		"username": "deer",
+		"reason": "future_reserved",
+		"category": "creatures"
+	},
+	{
+		"username": "rabbit",
+		"reason": "future_reserved",
+		"category": "creatures"
+	},
+	{
+		"username": "cardinal",
+		"reason": "future_reserved",
+		"category": "creatures"
+	},
+	{
+		"username": "robin",
+		"reason": "future_reserved",
+		"category": "creatures"
+	},
+	{
+		"username": "bluebird",
+		"reason": "future_reserved",
+		"category": "creatures"
+	},
+	{
+		"username": "chickadee",
+		"reason": "future_reserved",
+		"category": "creatures"
+	},
+	{
+		"username": "moss",
+		"reason": "future_reserved",
+		"category": "plants"
+	},
+	{
+		"username": "lichen",
+		"reason": "future_reserved",
+		"category": "plants"
+	},
+	{
+		"username": "fern",
+		"reason": "future_reserved",
+		"category": "plants"
+	},
+	{
+		"username": "mushroom",
+		"reason": "future_reserved",
+		"category": "plants"
+	},
+	{
+		"username": "fungus",
+		"reason": "future_reserved",
+		"category": "plants"
+	},
+	{
+		"username": "truffle",
+		"reason": "future_reserved",
+		"category": "plants"
+	},
+	{
+		"username": "clover",
+		"reason": "future_reserved",
+		"category": "plants"
+	},
+	{
+		"username": "daisy",
+		"reason": "future_reserved",
+		"category": "plants"
+	},
+	{
+		"username": "wildflower",
+		"reason": "future_reserved",
+		"category": "plants"
+	},
+	{
+		"username": "stream",
+		"reason": "future_reserved",
+		"category": "water"
+	},
+	{
+		"username": "brook",
+		"reason": "future_reserved",
+		"category": "water"
+	},
+	{
+		"username": "creek",
+		"reason": "future_reserved",
+		"category": "water"
+	},
+	{
+		"username": "pond",
+		"reason": "future_reserved",
+		"category": "water"
+	},
+	{
+		"username": "spring",
+		"reason": "future_reserved",
+		"category": "water"
+	},
+	{
+		"username": "well",
+		"reason": "future_reserved",
+		"category": "water"
+	},
+	{
+		"username": "rain",
+		"reason": "future_reserved",
+		"category": "water"
+	},
+	{
+		"username": "mist",
+		"reason": "future_reserved",
+		"category": "water"
+	},
+	{
+		"username": "dew",
+		"reason": "future_reserved",
+		"category": "water"
+	},
+	{
+		"username": "sunrise",
+		"reason": "future_reserved",
+		"category": "time"
+	},
+	{
+		"username": "sunset",
+		"reason": "future_reserved",
+		"category": "time"
+	},
+	{
+		"username": "dawn",
+		"reason": "future_reserved",
+		"category": "time"
+	},
+	{
+		"username": "dusk",
+		"reason": "future_reserved",
+		"category": "time"
+	},
+	{
+		"username": "twilight",
+		"reason": "future_reserved",
+		"category": "time"
+	},
+	{
+		"username": "midnight",
+		"reason": "future_reserved",
+		"category": "time"
+	},
+	{
+		"username": "noon",
+		"reason": "future_reserved",
+		"category": "time"
+	},
+	{
+		"username": "solstice",
+		"reason": "future_reserved",
+		"category": "time"
+	},
+	{
+		"username": "equinox",
+		"reason": "future_reserved",
+		"category": "time"
+	}
 ]

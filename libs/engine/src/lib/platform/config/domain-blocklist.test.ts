@@ -62,6 +62,26 @@ describe("isUsernameBlocked - Exact Matches", () => {
 		expect(isUsernameBlocked("login")).toBe("system");
 	});
 
+	it("should block the route words that used to live only in the database", () => {
+		// These ten were in reserved_usernames and nowhere else, so signup
+		// depended on a table nothing seeds. They are product words like the
+		// rest of this group and belong with them (#1778).
+		for (const word of [
+			"blog",
+			"blogs",
+			"post",
+			"posts",
+			"create",
+			"new",
+			"start",
+			"join",
+			"plans",
+			"pricing",
+		]) {
+			expect(isUsernameBlocked(word), word).toBe("system");
+		}
+	});
+
 	it("should block Grove service names", () => {
 		expect(isUsernameBlocked("meadow")).toBe("grove_service");
 		expect(isUsernameBlocked("forage")).toBe("grove_service");
