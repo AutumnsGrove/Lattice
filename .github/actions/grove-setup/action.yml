@@ -68,10 +68,22 @@ runs:
 
     # Every job that needs a shared lib used to rebuild it from source — 60+
     # builds of the same `libs/engine/dist` on one PR (#1783). The dists are a
-    # pure function of their sources, so restore them by content hash and only
-    # build on a miss. This keeps the guarantee from
+    # pure function of the lib sources, so restore them by content hash and
+    # only build on a miss. This keeps the guarantee from
     # docs/tech-debt/ci-punt-list.md (engine must exist before any typecheck)
     # while paying for it once.
+    #
+    # The requested build flags are part of the key on purpose. Jobs build
+    # different subsets — the test matrix builds engine only, the typecheck
+    # matrix builds all three — and a cache entry only contains the paths that
+    # existed when it was saved. Without the flags in the key, an engine-only
+    # job could save a partial archive that a job expecting foliage and
+    # gossamer would restore as complete, skip the builds it needed, and fail
+    # intermittently depending on which job finished first.
+    #
+    # The hash covers every input to the built output, not just each lib's own
+    # source: engine imports prism, infra, loom, curios and the grove-* libs,
+    # so a change in any of them has to invalidate the archive.
     - name: Restore built libraries
       id: libs-cache
       # yamllint disable-line rule:line-length
@@ -84,10 +96,10 @@ runs:
           libs/engine/dist
         key: >-
           grove-libs-${{ runner.os }}-${{
-          hashFiles('libs/foliage/src/**', 'libs/foliage/package.json',
-          'libs/gossamer/src/**', 'libs/gossamer/package.json',
-          'libs/engine/src/**', 'libs/engine/package.json',
-          'scripts/generate/grove-term-manifest.ts') }}
+          hashFiles('libs/*/src/**', 'libs/*/package.json', 'pnpm-lock.yaml',
+          'tsconfig.base.json', 'scripts/generate/grove-term-manifest.ts') }}-${{
+          inputs.build-foliage }}-${{ inputs.build-gossamer }}-${{
+          inputs.build-engine }}
 
     - name: Build foliage
       # yamllint disable-line rule:line-length
