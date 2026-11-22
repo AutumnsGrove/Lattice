@@ -24,6 +24,9 @@ declare global {
 				ALERT_EMAIL?: string;
 				/** Zephyr email gateway URL */
 				ZEPHYR_URL?: string;
+				/** Service bindings used by the health monitor (see monitor/config.ts) */
+				ASPEN?: Fetcher;
+				BILLING?: Fetcher;
 			};
 			context: {
 				waitUntil(promise: Promise<unknown>): void;

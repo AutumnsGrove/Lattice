@@ -9,8 +9,9 @@
 
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { createTenant, getTenantForOnboarding } from "$lib/server/tenant";
+import { createTenant, getTenantForOnboarding, SignupBlockedError } from "$lib/server/tenant";
 import { PLANT_ERRORS, logPlantError } from "$lib/errors";
+import { isHumanVerified, turnstileEnv } from "$lib/server/human-check";
 import { CloudflareDatabase } from "@autumnsgrove/infra/cloudflare";
 
 interface CompedInvite {
@@ -21,7 +22,7 @@ interface CompedInvite {
 	custom_message: string | null;
 }
 
-export const POST: RequestHandler = async ({ cookies, platform }) => {
+export const POST: RequestHandler = async ({ cookies, platform, url }) => {
 	const onboardingId = cookies.get("onboarding_id");
 	if (!onboardingId) {
 		logPlantError(PLANT_ERRORS.COOKIE_ERROR, {
@@ -29,6 +30,14 @@ export const POST: RequestHandler = async ({ cookies, platform }) => {
 			detail: "Missing onboarding_id cookie",
 		});
 		return json({ error: "Session expired. Please sign in again." }, { status: 401 });
+	}
+
+	// Comped invites are not a human check (#1678).
+	if (!(await isHumanVerified(cookies, turnstileEnv(platform).TURNSTILE_SECRET_KEY, url.origin))) {
+		return json(
+			{ error: "Please complete the quick check first.", needsVerification: true },
+			{ status: 403 },
+		);
 	}
 
 	const rawDb = platform?.env?.DB;
@@ -160,6 +169,11 @@ export const POST: RequestHandler = async ({ cookies, platform }) => {
 			subdomain,
 		});
 	} catch (err) {
+		// A blocked identity is a decision, not a failure — see /api/select-plan.
+		if (err instanceof SignupBlockedError) {
+			return json({ error: PLANT_ERRORS.SIGNUP_IDENTITY_BLOCKED.userMessage }, { status: 403 });
+		}
+
 		logPlantError(PLANT_ERRORS.ONBOARDING_UPDATE_FAILED, {
 			path: "/api/claim-comped",
 			detail: "Tenant creation or invite claim failed",

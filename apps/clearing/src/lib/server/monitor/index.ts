@@ -11,10 +11,19 @@ export type { ComponentConfig } from "./config";
 export { checkAllComponents, checkComponent } from "./health-checks";
 export type { HealthCheckResult } from "./health-checks";
 
-export { processAllResults, processHealthCheckResult } from "./incident-manager";
+export {
+	processAllResults,
+	processHealthCheckResult,
+	closeStaleIncidents,
+} from "./incident-manager";
 export type { IncidentEnv, ComponentState } from "./incident-manager";
 
-export { recordDailyHistory, cleanupOldHistory, recordCheckResult } from "./daily-history";
+export {
+	recordDailyHistory,
+	cleanupOldHistory,
+	recordCheckResult,
+	averageStatusFromCounts,
+} from "./daily-history";
 export type { DailyHistoryEnv } from "./daily-history";
 
 export { ComponentStatus, generateUUID } from "./utils";

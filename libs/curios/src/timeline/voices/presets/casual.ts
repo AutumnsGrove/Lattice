@@ -6,16 +6,16 @@
  */
 
 import type { VoicePreset, Commit } from "../types";
+import { DETAILED_BUDGET } from "../budget";
 
 export const casual: VoicePreset = {
-  id: "casual",
-  name: "Casual",
-  description:
-    "Friendly and conversational, like journaling about your day at midnight",
-  preview:
-    "Auth is finally not broken? I think? Rewrote the session handling from scratch and it actually works now.",
+	id: "casual",
+	name: "Casual",
+	description: "Friendly and conversational, like journaling about your day at midnight",
+	preview:
+		"Auth is finally not broken? I think? Rewrote the session handling from scratch and it actually works now.",
 
-  systemPrompt: `You write casual, friendly summaries of someone's coding day — like a dev journaling for themselves at the end of the night.
+	systemPrompt: `You write casual, friendly summaries of someone's coding day — like a dev journaling for themselves at the end of the night.
 
 Your voice is:
 - Genuinely conversational — contractions, sentence fragments, trailing thoughts
@@ -43,40 +43,37 @@ Think: late-night journal entry after a coding session, written by someone with 
 
 Always respond with valid JSON only.`,
 
-  buildPrompt(commits: Commit[], date: string, ownerName = "I") {
-    const commitList = commits
-      .map(
-        (c, i) =>
-          `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`,
-      )
-      .join("\n");
+	buildPrompt(commits: Commit[], date: string, ownerName = "I") {
+		const commitList = commits
+			.map((c, i) => `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`)
+			.join("\n");
 
-    const repoGroups: Record<string, string[]> = {};
-    commits.forEach((c) => {
-      if (!repoGroups[c.repo]) repoGroups[c.repo] = [];
-      repoGroups[c.repo].push(c.message);
-    });
-    const repoSummary = Object.entries(repoGroups)
-      .map(([repo, msgs]) => `${repo}: ${msgs.length} commits`)
-      .join(", ");
+		const repoGroups: Record<string, string[]> = {};
+		commits.forEach((c) => {
+			if (!repoGroups[c.repo]) repoGroups[c.repo] = [];
+			repoGroups[c.repo].push(c.message);
+		});
+		const repoSummary = Object.entries(repoGroups)
+			.map(([repo, msgs]) => `${repo}: ${msgs.length} commits`)
+			.join(", ");
 
-    const gutterCount = Math.min(5, Math.max(1, Math.ceil(commits.length / 3)));
-    const possessive = ownerName === "I" ? "my" : `${ownerName}'s`;
+		const gutterCount = Math.min(5, Math.max(1, Math.ceil(commits.length / 3)));
+		const possessive = ownerName === "I" ? "my" : `${ownerName}'s`;
 
-    // Use day-of-week to seed variety hints
-    const dayOfWeek = new Date(date + "T12:00:00").getDay();
-    const varietyHints = [
-      "Start with how the day felt emotionally — frustrated? satisfied? restless?",
-      "Start mid-thought, like you're picking up a conversation.",
-      "Lead with the most interesting or surprising thing that happened.",
-      "Start with a short, punchy sentence. Then expand.",
-      "Start with a question you asked yourself today.",
-      "Start with what you were trying to accomplish (not what you did).",
-      "Start with the thing that took the longest or was most stubborn.",
-    ];
-    const todayHint = varietyHints[dayOfWeek % varietyHints.length];
+		// Use day-of-week to seed variety hints
+		const dayOfWeek = new Date(date + "T12:00:00").getDay();
+		const varietyHints = [
+			"Start with how the day felt emotionally — frustrated? satisfied? restless?",
+			"Start mid-thought, like you're picking up a conversation.",
+			"Lead with the most interesting or surprising thing that happened.",
+			"Start with a short, punchy sentence. Then expand.",
+			"Start with a question you asked yourself today.",
+			"Start with what you were trying to accomplish (not what you did).",
+			"Start with the thing that took the longest or was most stubborn.",
+		];
+		const todayHint = varietyHints[dayOfWeek % varietyHints.length];
 
-    return `Write a casual summary of ${possessive} coding day on ${date}.
+		return `Write a casual summary of ${possessive} coding day on ${date}.
 
 VARIETY SEED FOR TODAY: ${todayHint}
 
@@ -110,6 +107,7 @@ GENERATE THREE OUTPUTS:
    - Bullet points starting with "- " in casual language
    - Show personality: "finally fixed that annoying thing", "this is still janky but whatever"
    - Group related changes, don't just list every commit
+${DETAILED_BUDGET}
 
 3. GUTTER COMMENTS (${gutterCount} margin notes):
    Casual asides that feel like margin scribbles (10 words max).
@@ -135,7 +133,7 @@ REQUIREMENTS:
 - Gutter anchors must EXACTLY match "### ProjectName" headers (plain text, no links)
 - Exactly ${gutterCount} gutter comments
 - NEVER create markdown links [text](url) — plain text only for all headings and content`;
-  },
+	},
 };
 
 export default casual;

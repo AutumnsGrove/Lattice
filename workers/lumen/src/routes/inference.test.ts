@@ -97,6 +97,149 @@ describe("POST /inference", () => {
 		expect(body.meta?.latencyMs).toBeGreaterThanOrEqual(0);
 	});
 
+	it("carries a tool conversation through to the client, ids intact", async () => {
+		mockRun.mockResolvedValue({
+			content: "18C and clear",
+			model: "m",
+			provider: "openrouter",
+			usage: { input: 30, output: 8, cost: 0 },
+			cached: false,
+			finishReason: "stop",
+		});
+
+		const app = createApp();
+		const res = await app.request(
+			post({
+				task: "generation",
+				input: [
+					{ role: "user", content: "what is the weather" },
+					{
+						role: "assistant",
+						content: "",
+						tool_calls: [
+							{
+								id: "call_1",
+								type: "function",
+								function: { name: "weather", arguments: '{"city":"NYC"}' },
+							},
+						],
+					},
+					{ role: "tool", content: "18C", tool_call_id: "call_1", name: "weather" },
+				],
+				options: {
+					tools: [
+						{
+							type: "function",
+							function: {
+								name: "weather",
+								description: "Get the weather",
+								parameters: { type: "object", properties: {} },
+							},
+						},
+					],
+				},
+			}),
+			undefined,
+			mockEnv,
+		);
+
+		expect(res.status).toBe(200);
+
+		const passed = mockRun.mock.calls[0][0];
+		expect(passed.input[1].toolCalls?.[0].id).toBe("call_1");
+		expect(passed.input[2]).toMatchObject({ role: "tool", toolCallId: "call_1" });
+		expect(passed.options.tools).toHaveLength(1);
+	});
+
+	it("rejects a tool message with no tool_call_id", async () => {
+		const app = createApp();
+		const res = await app.request(
+			post({
+				task: "generation",
+				input: [{ role: "tool", content: "orphan result" }],
+			}),
+			undefined,
+			mockEnv,
+		);
+
+		expect(res.status).toBe(400);
+		const body: LumenWorkerResponse = (await res.json()) as any;
+		expect(body.error?.code).toBe("INVALID_PARAMS");
+		expect(body.error?.message).toContain("tool_call_id");
+	});
+
+	it("returns finish_reason so a caller can see a truncated reply", async () => {
+		mockRun.mockResolvedValue({
+			content: '{"partial":',
+			model: "m",
+			provider: "openrouter",
+			usage: { input: 100, output: 50, cost: 0 },
+			cached: false,
+			finishReason: "length",
+			toolCalls: [{ id: "call_9", type: "function", function: { name: "t", arguments: '{"a":' } }],
+		});
+
+		const app = createApp();
+		const res = await app.request(post({ task: "generation", input: "go" }), undefined, mockEnv);
+
+		const body = (await res.json()) as any;
+		expect(body.data?.finish_reason).toBe("length");
+		expect(body.data?.tool_calls).toHaveLength(1);
+	});
+
+	it("omits finish_reason when the client did not report one", async () => {
+		mockRun.mockResolvedValue({
+			content: "x",
+			model: "m",
+			provider: "openrouter",
+			usage: { input: 1, output: 1, cost: 0 },
+			cached: false,
+		});
+
+		const app = createApp();
+		const res = await app.request(post({ task: "generation", input: "go" }), undefined, mockEnv);
+
+		const body = (await res.json()) as any;
+		expect(body.data?.finish_reason).toBeUndefined();
+	});
+
+	it("carries the cost source out as cost_source", async () => {
+		mockRun.mockResolvedValue({
+			content: "x",
+			model: "m",
+			provider: "openrouter",
+			usage: { input: 10, output: 5, cost: 0.002, costSource: "catalog" },
+			cached: false,
+		});
+
+		const app = createApp();
+		const res = await app.request(post({ task: "generation", input: "go" }), undefined, mockEnv);
+
+		const body = (await res.json()) as any;
+		expect(body.data.usage).toEqual({
+			input: 10,
+			output: 5,
+			cost: 0.002,
+			cost_source: "catalog",
+		});
+	});
+
+	it("omits cost_source when the client did not report one", async () => {
+		mockRun.mockResolvedValue({
+			content: "x",
+			model: "m",
+			provider: "openrouter",
+			usage: { input: 1, output: 1, cost: 0 },
+			cached: false,
+		});
+
+		const app = createApp();
+		const res = await app.request(post({ task: "generation", input: "go" }), undefined, mockEnv);
+
+		const body = (await res.json()) as any;
+		expect(body.data.usage).not.toHaveProperty("cost_source");
+	});
+
 	it("should return 400 for invalid JSON body", async () => {
 		const app = createApp();
 		const res = await app.request(postRaw("not json {{{"), undefined, mockEnv);

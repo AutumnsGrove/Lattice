@@ -14,7 +14,7 @@
 import { betterAuth } from "better-auth";
 import { withCloudflare } from "better-auth-cloudflare";
 import type { CloudflareGeolocation } from "better-auth-cloudflare";
-import { APIError } from "better-auth/api";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { twoFactor, emailOTP } from "better-auth/plugins";
 import { drizzle } from "drizzle-orm/d1";
 import { logGroveError } from "@autumnsgrove/lattice/errors";
@@ -22,6 +22,11 @@ import { HW_SVC_ERRORS } from "../errors.js";
 import type { Env } from "../types.js";
 import { schema } from "../db/auth.schema.js";
 import { getRequestContext, bridgeSessionToSessionDO } from "../lib/sessionBridge.js";
+import {
+	SIGNUP_BLOCKED_PATHS,
+	checkSignupIdentity,
+	emailFromAuthContext,
+} from "../lib/signup-blocks.js";
 import { sendLoginCodeEmail } from "../services/email.js";
 import {
 	EMAIL_OTP_LENGTH,
@@ -311,6 +316,12 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 				allowedAttempts: EMAIL_OTP_ALLOWED_ATTEMPTS,
 				storeOTP: "hashed",
 				sendVerificationOTP: async ({ email, otp, type }) => {
+					// NOTE: a throw in here does NOT reach the client. Better Auth wraps this
+					// call in runInBackgroundOrAwait(), which swallows the error and still
+					// answers {"success":true} — so the deny list is enforced in the
+					// `hooks.before` block below, where a thrown APIError propagates as 403.
+					// The `user.create.before` hook is the second gate, for OAuth.
+
 					// Local dev: Zephyr may have no Resend key, so surface the code
 					// in the Heartwood terminal. Never reachable in production —
 					// isLocalDev is derived from the localhost AUTH_BASE_URL.
@@ -335,10 +346,40 @@ export function createAuth(env: Env, cf?: CloudflareGeolocation) {
 			}),
 		],
 
+		hooks: {
+			before: createAuthMiddleware(async (ctx) => {
+				// Refuse a blocked identity before any code is generated or sent, with a
+				// 403 the caller can actually see. Errors thrown from the plugin's own
+				// sendVerificationOTP are swallowed by Better Auth, so this is the only
+				// place a rejection reaches the client.
+				if (!SIGNUP_BLOCKED_PATHS.has(ctx.path)) return;
+
+				const email = await emailFromAuthContext(ctx);
+				if (!email) return;
+
+				const denied = await checkSignupIdentity(env, email);
+				if (denied.blocked) {
+					throw new APIError("FORBIDDEN", {
+						message: HW_SVC_ERRORS.SIGNUP_IDENTITY_BLOCKED.userMessage,
+					});
+				}
+			}),
+		},
+
 		databaseHooks: {
 			user: {
 				create: {
 					before: async (user) => {
+						// The last gate before an identity exists. This covers OAuth as well
+						// as email OTP — a blocked domain cannot sign up through Google either.
+						// Return type is `false` to abort; see better-auth's databaseHooks.
+						const denied = await checkSignupIdentity(env, user.email);
+						if (denied.blocked) {
+							throw new APIError("FORBIDDEN", {
+								message: HW_SVC_ERRORS.SIGNUP_IDENTITY_BLOCKED.userMessage,
+							});
+						}
+
 						console.log("[Auth] Creating new user");
 						return { data: user };
 					},

@@ -5,6 +5,9 @@
 	"license": "AGPL-3.0-only",
 	"author": "AutumnsGrove",
 	"packageManager": "pnpm@9.15.0",
+	"engines": {
+		"node": ">=22"
+	},
 	"publishConfig": {
 		"registry": "https://npm.pkg.github.com"
 	},
@@ -15,8 +18,7 @@
 	"type": "module",
 	"scripts": {
 		"prepare": "git config core.hooksPath .githooks",
-		"cairn": "bun run personal/cairn/server.ts",
-		"census": "bun run tools/census/server.ts",
+		"glimpse": "bun run tools/glimpse/src/cli.ts",
 		"dev:aspen": "pnpm --filter grove-aspen dev",
 		"dev:landing": "pnpm --filter grove-landing dev",
 		"dev:plant": "pnpm --filter grove-plant dev",
@@ -35,7 +37,11 @@
 		"lint:strict": "oxlint --deny-warnings && eslint .",
 		"lint:fix": "eslint . --fix",
 		"format": "prettier --write .",
-		"format:check": "prettier --check ."
+		"format:check": "prettier --check .",
+		"labels:check": "pnpm --filter @grove/labels run check",
+		"readme:check": "tsx scripts/repo/check-readme-inventory.ts",
+		"test:scripts": "tsx --test scripts/generate/*.test.ts",
+		"labels:sync": "pnpm --filter @grove/labels run sync"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.0.0",
@@ -46,7 +52,9 @@
 		"eslint-plugin-oxlint": "^1.48.0",
 		"eslint-plugin-svelte": "^2.46.0",
 		"globals": "^16.0.0",
+		"opentype.js": "^2.0.0",
 		"oxlint": "^1.0.0",
+		"pdf-lib": "^1.17.1",
 		"prettier": "^3.5.0",
 		"prettier-plugin-svelte": "^3.4.0",
 		"qrcode": "^1.5.4",

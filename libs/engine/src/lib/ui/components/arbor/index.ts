@@ -28,6 +28,7 @@ export { default as ShortLinksManager } from "./ShortLinksManager.svelte";
 export { default as ArborSidebarFooter } from "./ArborSidebarFooter.svelte";
 export { default as ArborSidebarHeader } from "./ArborSidebarHeader.svelte";
 export { default as ArborToggle } from "./ArborToggle.svelte";
+export { default as ArborTextSize } from "./ArborTextSize.svelte";
 
 // Types
 export type {

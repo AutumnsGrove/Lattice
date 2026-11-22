@@ -82,7 +82,6 @@ const MIME_TYPES: Record<string, string> = {
 	svg: "image/svg+xml",
 	ico: "image/x-icon",
 	avif: "image/avif",
-	jxl: "image/jxl",
 	// Documents
 	pdf: "application/pdf",
 	doc: "application/msword",

@@ -83,6 +83,20 @@ describe("getVoice", () => {
 			expect(typeof voice.buildPrompt).toBe("function");
 		}
 	});
+
+	// The detailed section is the part that runs long, and the whole JSON
+	// envelope has to fit in maxTokens. Every preset — including custom — has to
+	// carry the budget, or its heavy days truncate (2026-11-13).
+	it("every voice prompt names the output budget", () => {
+		const voiceIds = ["professional", "quest", "casual", "poetic", "minimal"];
+		for (const id of voiceIds) {
+			const prompt = getVoice(id).buildPrompt([makeCommit()], "2026-03-12");
+			expect(prompt, `${id} is missing the detailed-section budget`).toContain(
+				"Cover at most 6 projects",
+			);
+			expect(prompt, `${id} is missing the word ceiling`).toContain("under ~350 words");
+		}
+	});
 });
 
 // =============================================================================
@@ -693,5 +707,71 @@ describe("edge cases and integration", () => {
 			expect(userPrompt).toContain("OUTPUT FORMAT");
 			expect(userPrompt).toContain("JSON");
 		}
+	});
+});
+
+// =============================================================================
+// Input Budget Tests
+// =============================================================================
+
+/**
+ * Lumen rejects serialized input past MAX_INPUT_LENGTH before a model is chosen,
+ * so maxTokens never comes into it. 2026-11-15 was 183 commits whose messages
+ * totalled ~116k characters — mostly squash-merge bodies — and the nightly run
+ * wrote no row at all.
+ */
+describe("buildVoicedPrompt - input budget", () => {
+	function heavyCommit(index: number): Commit {
+		return makeCommit({
+			sha: `sha${index}`,
+			message: `feat(timeline): land change ${index}\n\n${"Merge description. ".repeat(30)}`,
+		});
+	}
+
+	it("keeps a 183-commit day under Lumen's input wall", () => {
+		const commits = Array.from({ length: 183 }, (_, i) => heavyCommit(i));
+		for (const voiceId of ["professional", "quest", "casual", "poetic", "minimal"]) {
+			const { systemPrompt, userPrompt } = buildVoicedPrompt(
+				voiceId,
+				commits,
+				"2026-11-15",
+				"Autumn",
+			);
+			const serialized = JSON.stringify([
+				{ role: "system", content: systemPrompt },
+				{ role: "user", content: userPrompt },
+			]);
+			expect(serialized.length, `${voiceId} would be rejected by Lumen`).toBeLessThan(300_000);
+		}
+	});
+
+	it("keeps every commit's subject line on a heavy day", () => {
+		const commits = Array.from({ length: 183 }, (_, i) => heavyCommit(i));
+		const { userPrompt } = buildVoicedPrompt("professional", commits, "2026-11-15");
+		expect(userPrompt).toContain("183 total");
+		expect(userPrompt).toContain("feat(timeline): land change 182");
+	});
+
+	it("drops the bodies when the day will not fit with them", () => {
+		const commits = Array.from({ length: 500 }, (_, i) => heavyCommit(i));
+		const { userPrompt } = buildVoicedPrompt("professional", commits, "2026-11-15");
+		expect(userPrompt).toContain("feat(timeline): land change 499");
+		expect(userPrompt).not.toContain("Merge description.");
+	});
+
+	it("states the overflow instead of dropping it silently", () => {
+		// 5,000 subject lines is past the 120k budget, so the note has to appear.
+		const commits = Array.from({ length: 5_000 }, (_, i) => heavyCommit(i));
+		const { userPrompt } = buildVoicedPrompt("professional", commits, "2026-11-15");
+		expect(userPrompt).toContain("shortened to fit");
+		expect(userPrompt).toContain("The day was 5000 commits");
+		expect(userPrompt.indexOf("shortened to fit")).toBeLessThan(
+			userPrompt.indexOf("GENERATE THREE OUTPUTS"),
+		);
+	});
+
+	it("leaves an ordinary day's messages intact", () => {
+		const { userPrompt } = buildVoicedPrompt("professional", [makeCommit()], "2026-03-12");
+		expect(userPrompt).not.toContain("shortened to fit");
 	});
 });

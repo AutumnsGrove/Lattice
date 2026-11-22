@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { GlassCard, GroveTerm } from '@autumnsgrove/lattice/ui';
+	import { porchCategoryLabel } from '@autumnsgrove/lattice/platform/config';
 	import { featureIcons, metricIcons, stateIcons, navIcons, actionIcons } from '@autumnsgrove/prism/icons';
 	const MessageCircle = featureIcons.messageCircle;
 	const Clock = metricIcons.clock;
@@ -19,14 +20,6 @@
 		pending: { label: 'Pending', icon: Clock, color: 'text-warning bg-warning-bg', borderColor: 'border-warning/30' },
 		resolved: { label: 'Resolved', icon: CheckCircle, color: 'text-success bg-success-bg', borderColor: 'border-success/30' },
 	} as const;
-
-	const categoryLabels: Record<string, string> = {
-		billing: 'Billing',
-		technical: 'Technical',
-		account: 'Account',
-		hello: 'Just saying hi',
-		other: 'Other',
-	};
 
 	function formatDate(timestamp: number): string {
 		return new Date(timestamp * 1000).toLocaleDateString('en-US', {
@@ -50,7 +43,8 @@
 					visit.subject.toLowerCase().includes(query) ||
 					visit.visit_number.toLowerCase().includes(query) ||
 					(visit.guest_email?.toLowerCase().includes(query) ?? false) ||
-					(visit.guest_name?.toLowerCase().includes(query) ?? false)
+					(visit.guest_name?.toLowerCase().includes(query) ?? false) ||
+					porchCategoryLabel(visit.category).toLowerCase().includes(query)
 				);
 			}
 			return true;
@@ -142,8 +136,8 @@
 										<config.icon class="w-3 h-3" />
 										{config.label}
 									</span>
-									<span class="text-xs text-foreground/40 px-2 py-0.5 rounded bg-foreground/5">
-										{categoryLabels[visit.category] || visit.category}
+									<span class="text-xs px-2 py-0.5 rounded {visit.category === 'appeal' ? 'text-warning-foreground bg-warning-bg font-medium' : 'text-foreground/40 bg-foreground/5'}">
+										{porchCategoryLabel(visit.category)}
 									</span>
 								</div>
 								<h3 class="font-serif text-foreground truncate">{visit.subject}</h3>

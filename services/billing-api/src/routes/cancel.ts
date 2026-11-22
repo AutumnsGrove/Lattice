@@ -3,24 +3,79 @@
  *
  * By default, cancels at period end. Set immediately=true for
  * immediate cancellation.
+ *
+ * `notify: false` cancels without emailing the account holder. A removal uses it:
+ * the removal sends its own notice, and a "your subscription is cancelled" mail
+ * moments before "your account is gone" reads as two systems disagreeing (#1745).
  */
 
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
 import type { Env, CancelRequest } from "../types.js";
 import { BILLING_ERRORS, billingError } from "../errors.js";
 import { StripeClient, StripeAPIError } from "../stripe/client.js";
-import { rateLimitMiddleware } from "../middleware/rateLimit.js";
+import { RATE_LIMITS, checkRateLimit } from "../middleware/rateLimit.js";
 import { safeParseBody, isValidUUID } from "../utils/validation.js";
 import { logBillingAudit } from "../services/audit.js";
 import { sendCancellationEmail } from "../services/email.js";
 
 const cancel = new Hono<{ Bindings: Env }>();
 
-// Rate limit: 5 requests per hour
-cancel.use(
-	"*",
-	rateLimitMiddleware("cancel", (c) => c.req.header("CF-Connecting-IP") || "unknown"),
-);
+const CANCEL_LIMIT = RATE_LIMITS.cancel;
+
+/**
+ * 5 requests per hour, keyed per tenant rather than per IP.
+ *
+ * This route is reached over a service binding, where `CF-Connecting-IP` is
+ * absent — every internal caller would fall into one shared "unknown" bucket, so
+ * a cleanup of nine tenants (2026-11-16) would trip the limit at the sixth and
+ * abandon the removal (#1745). A real client IP is still honoured when there is
+ * one, which is how the proxied call has always behaved.
+ */
+async function rateLimit(
+	c: Context<{ Bindings: Env }>,
+	tenantId: string,
+): Promise<Response | null> {
+	const kv = c.env.CACHE_KV;
+	if (!kv) return null; // No KV binding — skip rate limiting, as before
+
+	const ip = c.req.header("CF-Connecting-IP");
+	const key = ip && ip !== "unknown" ? ip : `tenant:${tenantId}`;
+	const result = await checkRateLimit(kv, key, CANCEL_LIMIT);
+
+	if (!result.allowed) return billingError(BILLING_ERRORS.RATE_LIMITED);
+
+	c.header("X-RateLimit-Limit", String(CANCEL_LIMIT.limit));
+	c.header("X-RateLimit-Remaining", String(result.remaining));
+	c.header("X-RateLimit-Reset", String(result.resetAt));
+	return null;
+}
+
+/**
+ * Was the subscription already in the state we wanted?
+ *
+ * Cancelling is not naturally idempotent through the provider: Stripe answers
+ * `DELETE /subscriptions/:id` for a subscription that is already gone with a 404
+ * `resource_missing`, and a caller that reads that as a failure gets a cancel
+ * that can never succeed. That matters most for removal, which cancels *before*
+ * deleting and retries the whole operation (#1745): a tenant cancelled in the
+ * Stripe dashboard, or by an attempt whose D1 write was lost, would have been
+ * undeletable through the operator path — the one case where the runbook's
+ * "cancel it by hand and run it again" advice has to work.
+ *
+ * A 404 also means there is nothing charging under that id, which is the point
+ * of the call. It cannot detect a stored id that points at some *other* live
+ * subscription; no code can, and that is an operator-visible data problem.
+ *
+ * The `resource_missing` code is required rather than any 404, because a
+ * misconfigured API base URL answers 404 for every request — and "every cancel
+ * silently succeeded" is a worse failure than a removal that aborts and needs an
+ * operator. An unrecognised error fails closed.
+ */
+function isAlreadyCancelled(err: unknown): boolean {
+	if (!(err instanceof StripeAPIError)) return false;
+	if (err.stripeCode === "resource_missing") return true;
+	return /already (been )?cancel/i.test(err.message);
+}
 
 cancel.post("/", async (c) => {
 	const body = await safeParseBody<CancelRequest>(c.req.raw);
@@ -28,12 +83,15 @@ cancel.post("/", async (c) => {
 		return billingError(BILLING_ERRORS.TENANT_NOT_FOUND, "tenantId required");
 	}
 
-	const { tenantId, immediately = false } = body;
+	const { tenantId, immediately = false, notify = true } = body;
 
 	// Validate tenantId format
 	if (!isValidUUID(tenantId)) {
 		return billingError(BILLING_ERRORS.TENANT_NOT_FOUND, "Invalid tenantId format");
 	}
+
+	const limited = await rateLimit(c, tenantId);
+	if (limited) return limited;
 	const db = c.env.DB;
 
 	// Get billing record with tenant and owner info in one query
@@ -44,7 +102,7 @@ cancel.post("/", async (c) => {
               u.email, u.display_name
        FROM platform_billing pb
        JOIN tenants t ON t.id = pb.tenant_id
-       JOIN user_onboarding u ON u.id = t.onboarding_id
+       LEFT JOIN user_onboarding u ON u.id = t.onboarding_id
        WHERE pb.tenant_id = ?`,
 		)
 		.bind(tenantId)
@@ -55,8 +113,9 @@ cancel.post("/", async (c) => {
 			provider_subscription_id: string | null;
 			current_period_end: number | null;
 			subdomain: string;
-			email: string;
-			display_name: string;
+			/** Null when the tenant has no onboarding row — the owner details, not the money. */
+			email: string | null;
+			display_name: string | null;
 		}>();
 
 	if (!billing || !billing.provider_subscription_id) {
@@ -66,10 +125,22 @@ cancel.post("/", async (c) => {
 	// Cancel via Stripe
 	try {
 		const stripe = new StripeClient(c.env.STRIPE_SECRET_KEY);
-		const sub = await stripe.cancelSubscription(billing.provider_subscription_id, immediately);
 
-		// Update platform_billing
-		if (immediately) {
+		let sub: Awaited<ReturnType<typeof stripe.cancelSubscription>> | null = null;
+		let alreadyCancelled = false;
+		try {
+			sub = await stripe.cancelSubscription(billing.provider_subscription_id, immediately);
+		} catch (err) {
+			// The end state is already true, so this is a success with a note. See
+			// `isAlreadyCancelled` for why it is the difference between a removal
+			// that can be retried and one that cannot.
+			if (!isAlreadyCancelled(err)) throw err;
+			alreadyCancelled = true;
+		}
+
+		// Update platform_billing. `alreadyCancelled` counts as immediate: whatever
+		// the period was, it is over.
+		if (immediately || alreadyCancelled) {
 			await db
 				.prepare(
 					`UPDATE platform_billing
@@ -94,8 +165,9 @@ cancel.post("/", async (c) => {
 			? { email: billing.email, display_name: billing.display_name }
 			: null;
 
-		// Send cancellation email (non-blocking)
-		if (onboarding && c.env.ZEPHYR) {
+		// Send cancellation email (non-blocking), unless the caller is sending its
+		// own notice. Suppressed on a removal, where the removal email follows.
+		if (notify && onboarding && c.env.ZEPHYR) {
 			const periodEndDate = billing.current_period_end
 				? new Date(billing.current_period_end * 1000).toLocaleDateString("en-US", {
 						month: "long",
@@ -124,16 +196,19 @@ cancel.post("/", async (c) => {
 				immediate: immediately,
 				subscriptionId: billing.provider_subscription_id,
 			},
-			userEmail: onboarding?.email,
+			userEmail: onboarding?.email ?? undefined,
 		});
 
-		const periodEnd = sub.current_period_end
+		const periodEnd = sub?.current_period_end
 			? new Date(sub.current_period_end * 1000).toISOString()
-			: null;
+			: billing.current_period_end
+				? new Date(billing.current_period_end * 1000).toISOString()
+				: null;
 
 		return c.json({
 			success: true,
 			periodEnd,
+			...(alreadyCancelled ? { alreadyCancelled: true } : {}),
 		});
 	} catch (err) {
 		if (err instanceof StripeAPIError) {

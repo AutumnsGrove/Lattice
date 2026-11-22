@@ -20,6 +20,21 @@ export interface PetalAggregateResult {
 }
 
 /**
+ * Run a query without letting one failure take down the whole aggregator —
+ * but never swallow the error silently. A broken query used to report a
+ * confident `0` on the dashboard (issue #1608); now it is logged, collected
+ * in `errors`, and reported as `partial`.
+ */
+function tolerateFailure<T>(query: Promise<T>, label: string, errors: string[]): Promise<T | null> {
+	return query.catch((err: unknown) => {
+		const message = err instanceof Error ? err.message : String(err);
+		console.error(`[Petal Aggregator] ${label} query failed: ${message}`);
+		errors.push(`${label}: ${message}`);
+		return null;
+	});
+}
+
+/**
  * Aggregate Petal image moderation data.
  */
 export async function aggregatePetal(
@@ -27,44 +42,60 @@ export async function aggregatePetal(
 ): Promise<CollectorResult & { data?: PetalAggregateResult }> {
 	const startedAt = Date.now();
 	const collectedAt = Math.floor(startedAt / 1000);
+	const errors: string[] = [];
 
 	try {
-		const [activityResult, ncmecResult, flagsResult, blocksResult] = await Promise.allSettled([
+		// Petal tables only exist once migration 030_petal.sql has run, so each
+		// query tolerates failure — but reports it via `errors`.
+		const [activity, ncmec, flags, blocksResult] = await Promise.all([
 			// 24h activity: total checks and blocks
-			db
-				.prepare(
-					`SELECT
+			tolerateFailure(
+				db
+					.prepare(
+						`SELECT
             COUNT(*) as total,
             SUM(CASE WHEN result = 'block' THEN 1 ELSE 0 END) as blocked
            FROM petal_security_log
            WHERE timestamp > datetime('now', '-1 day')`,
-				)
-				.first<{ total: number; blocked: number }>(),
+					)
+					.first<{ total: number; blocked: number }>(),
+				"activity-24h",
+				errors,
+			),
 
-			// NCMEC queue depth
-			db
-				.prepare(
-					`SELECT COUNT(*) as depth
+			// NCMEC queue depth — unreported rows. `petal_ncmec_queue` has no
+			// `submitted_at` column; reporting state is `reported` (0 = pending),
+			// completed reports are stamped in `reported_at`.
+			tolerateFailure(
+				db
+					.prepare(
+						`SELECT COUNT(*) as depth
            FROM petal_ncmec_queue
-           WHERE submitted_at IS NULL`,
-				)
-				.first<{ depth: number }>()
-				.catch(() => null), // Table may not exist in all envs
+           WHERE reported = 0`,
+					)
+					.first<{ depth: number }>(),
+				"ncmec-queue-depth",
+				errors,
+			),
 
 			// Pending account flag reviews
-			db
-				.prepare(
-					`SELECT COUNT(*) as pending
+			tolerateFailure(
+				db
+					.prepare(
+						`SELECT COUNT(*) as pending
            FROM petal_account_flags
            WHERE review_status = 'pending'`,
-				)
-				.first<{ pending: number }>()
-				.catch(() => null),
+					)
+					.first<{ pending: number }>(),
+				"pending-flag-reviews",
+				errors,
+			),
 
 			// Blocks by category (24h)
-			db
-				.prepare(
-					`SELECT
+			tolerateFailure(
+				db
+					.prepare(
+						`SELECT
             category,
             COUNT(*) as count
            FROM petal_security_log
@@ -74,14 +105,14 @@ export async function aggregatePetal(
            GROUP BY category
            ORDER BY count DESC
            LIMIT 10`,
-				)
-				.all<{ category: string; count: number }>(),
+					)
+					.all<{ category: string; count: number }>(),
+				"recent-blocks",
+				errors,
+			),
 		]);
 
-		const activity = activityResult.status === "fulfilled" ? activityResult.value : null;
-		const ncmec = ncmecResult.status === "fulfilled" ? ncmecResult.value : null;
-		const flags = flagsResult.status === "fulfilled" ? flagsResult.value : null;
-		const blocks = blocksResult.status === "fulfilled" ? (blocksResult.value.results ?? []) : [];
+		const blocks = blocksResult?.results ?? [];
 
 		const totalChecks = activity?.total ?? 0;
 		const totalBlocked = activity?.blocked ?? 0;
@@ -99,9 +130,10 @@ export async function aggregatePetal(
 
 		return {
 			name: "petal-aggregator",
-			status: "success",
+			status: errors.length > 0 ? "partial" : "success",
 			itemsCollected: 1,
 			durationMs: Date.now() - startedAt,
+			error: errors.length > 0 ? errors.join("; ") : undefined,
 			data,
 		};
 	} catch (err) {

@@ -25,6 +25,11 @@ export interface TenantConfig {
 	tier: PaidTierKey; // Uses centralized type from tiers.ts (excludes 'wanderer' since tenants are paying)
 	limits: TierLimits;
 	ownerId: string;
+	/**
+	 * `tenants.created_at` in unix seconds, cached with the rest of the config.
+	 * Drives the outbound link / noindex policy for young accounts (#1682).
+	 */
+	createdAt: number;
 }
 
 export interface TierLimits {

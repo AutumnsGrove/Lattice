@@ -6,15 +6,16 @@
  */
 
 import type { VoicePreset, Commit } from "../types";
+import { DETAILED_BUDGET } from "../budget";
 
 export const professional: VoicePreset = {
-  id: "professional",
-  name: "Professional",
-  description: "Clean and technical, like a developer's changelog",
-  preview:
-    "The auth system got most of the attention today, particularly around session edge cases.",
+	id: "professional",
+	name: "Professional",
+	description: "Clean and technical, like a developer's changelog",
+	preview:
+		"The auth system got most of the attention today, particularly around session edge cases.",
 
-  systemPrompt: `You write daily development summaries for a personal coding journal.
+	systemPrompt: `You write daily development summaries for a personal coding journal.
 
 Your voice is:
 - Matter-of-fact and technically clear
@@ -29,26 +30,23 @@ CRITICAL RESTRICTIONS:
 
 Always respond with valid JSON only.`,
 
-  buildPrompt(commits: Commit[], date: string, ownerName = "the developer") {
-    const commitList = commits
-      .map(
-        (c, i) =>
-          `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`,
-      )
-      .join("\n");
+	buildPrompt(commits: Commit[], date: string, ownerName = "the developer") {
+		const commitList = commits
+			.map((c, i) => `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`)
+			.join("\n");
 
-    const repoGroups: Record<string, string[]> = {};
-    commits.forEach((c) => {
-      if (!repoGroups[c.repo]) repoGroups[c.repo] = [];
-      repoGroups[c.repo].push(c.message);
-    });
-    const repoSummary = Object.entries(repoGroups)
-      .map(([repo, msgs]) => `${repo}: ${msgs.length} commits`)
-      .join(", ");
+		const repoGroups: Record<string, string[]> = {};
+		commits.forEach((c) => {
+			if (!repoGroups[c.repo]) repoGroups[c.repo] = [];
+			repoGroups[c.repo].push(c.message);
+		});
+		const repoSummary = Object.entries(repoGroups)
+			.map(([repo, msgs]) => `${repo}: ${msgs.length} commits`)
+			.join(", ");
 
-    const gutterCount = Math.min(5, Math.max(1, Math.ceil(commits.length / 3)));
+		const gutterCount = Math.min(5, Math.max(1, Math.ceil(commits.length / 3)));
 
-    return `You are writing a daily development summary for ${ownerName}'s personal coding journal on ${date}.
+		return `You are writing a daily development summary for ${ownerName}'s personal coding journal on ${date}.
 
 STRICT RULES - VIOLATIONS WILL BE REJECTED:
 
@@ -82,6 +80,7 @@ GENERATE THREE OUTPUTS:
    - Header: "## Projects"
    - Each project: "### ProjectName"
    - Bullet points for key changes
+${DETAILED_BUDGET}
 
 3. GUTTER COMMENTS (${gutterCount} margin notes):
    Short observations (10 words max).
@@ -105,7 +104,7 @@ REQUIREMENTS:
 - NEVER create markdown links for section headers (no [Title](url) format)
 - Only use plain text for headings like "### ProjectName"
 - Do NOT invent URLs or link to non-existent repositories`;
-  },
+	},
 };
 
 export default professional;

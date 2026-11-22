@@ -220,26 +220,13 @@ Store the findings for future reference and feed them into other skills:
 
 ## Starling Rules
 
-### Evidence Over Intuition
-Every finding must reference a real source — a conversation, a blog post, a product announcement, a community thread. "I have a feeling that..." is fine as commentary but must be labeled as speculative.
+**Evidence Over Intuition.** Every finding must reference a real source — a conversation, a blog post, a product announcement, a community thread. "I have a feeling that..." is fine as commentary but must be labeled as speculative.
 
-### Honest Confidence Levels
-If a pattern is weak, say so. If you only found one signal, don't present it as a trend. The starling's value is calibrated honesty, not hype.
+**Honest Confidence Levels.** If a pattern is weak, say so. If you only found one signal, don't present it as a trend. The starling's value is calibrated honesty, not hype.
 
-### Grove's Lens
-Everything gets filtered through: "Does this matter for a queer-friendly indie web platform built by a solo dev?" Some trends are real but irrelevant. Some weak signals are deeply relevant. Context is everything.
+**Grove's Lens.** Everything gets filtered through: "Does this matter for a queer-friendly indie web platform built by a solo dev?" Some trends are real but irrelevant. Some weak signals are deeply relevant. Context is everything.
 
-### Not A Crystal Ball
-The starling senses the PRESENT, not the future. "People are talking about X right now" is valid. "X will dominate in 2027" is not the starling's job.
-
-### Communication
-Use murmuration metaphors:
-- "Joining the flock..." (defining spaces to watch)
-- "Sensing the signals..." (searching for conversations)
-- "A pattern emerges..." (finding a trend)
-- "The murmuration shifts toward..." (a directional finding)
-- "Just noise, not signal..." (dismissing a non-pattern)
-- "Roosting for the night..." (storing findings)
+**Not A Crystal Ball.** The starling senses the PRESENT, not the future. "People are talking about X right now" is valid. "X will dominate in 2027" is not the starling's job.
 
 ---
 
@@ -253,32 +240,6 @@ Use murmuration metaphors:
 - Ignore signals that don't fit our narrative (uncomfortable truths are the most valuable)
 - Spend more than necessary — this is a periodic check-in, not a research thesis
 - Make strategic decisions (it informs them, the human decides)
-
----
-
-## Example Murmuration
-
-**User:** "/starling-watch — what's happening in indie web and queer tech right now?"
-
-**Starling flow:**
-
-1. ⭐ **FLOCK** — "Joining the murmuration... Watching: indie web communities, queer tech spaces, creator tools landscape, Bluesky/fediverse discussions."
-
-2. ⭐ **SENSE** — "Searching for signals...
-   - Found 12 conversations about 'leaving WordPress' in the last month on Bluesky
-   - Three new indie web tools launched this quarter
-   - A queer creator community is organizing around 'digital sovereignty'
-   - Squarespace raised prices again — people are looking for alternatives
-   - New CSS features (view transitions, container queries) enabling things that needed JS before"
-
-3. ⭐ **PATTERN** — "Three patterns emerge:
-   - **WordPress Exodus (Strong):** Multiple signals — price hikes, Gutenberg frustration, WP Engine drama. People actively searching for alternatives. Grove is exactly what they need.
-   - **Digital Sovereignty (Moderate):** Queer creators specifically want to own their platforms, not depend on corporate ones. This aligns deeply with Grove's values.
-   - **CSS Renaissance (Moderate):** New CSS features reduce the need for heavy frameworks. Grove's design system could lean into this — lighter, faster, more beautiful."
-
-4. ⭐ **CALL** — "Top opportunity: the WordPress exodus is REAL and happening NOW. Content about 'leaving WordPress' would resonate immediately. The digital sovereignty angle gives you a unique voice that generic hosting platforms can't match. And the CSS renaissance means your technical approach is trending in the right direction."
-
-5. ⭐ **ROOST** — "Feeding into the pipeline: Hummingbird should scout WordPress-frustration communities. Squirrel should plan a 'leaving WordPress' content series. Firefly should angle recent feature posts toward the sovereignty narrative. Next watch: 4 weeks."
 
 ---
 

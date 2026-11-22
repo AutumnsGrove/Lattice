@@ -68,10 +68,10 @@ Before creating any issue, thoroughly explore the context:
 
 ```bash
 # Grove Tools (preferred — fast, agent-friendly)
-gf --agent search "keyword"      # Search the whole codebase
-gf --agent todo                  # Find existing TODO/FIXME/HACK comments
-gf --agent usage "ComponentName" # Where is this used?
-gf --agent func "functionName"   # Find function definitions
+rg "keyword"      # Search the whole codebase
+rg -n \"TODO|FIXME\"                  # Find existing TODO/FIXME/HACK comments
+rg -wn "ComponentName" # Where is this used?
+rg -n "(function|const|fn) handleClick"   # Find function definitions
 
 # Fallback tools (use Grep/Glob/Read tools, or gw git)
 git log --oneline

@@ -24,7 +24,7 @@ Class E required real code fixes. See each section for details.
 makes all errors vanish.
 
 **Fix:** `scripts/pre-push/validate.mjs` now unconditionally builds all
-shared libs (foliage, gossamer, engine, vineyard) before any typecheck runs,
+shared libs (foliage, gossamer, engine) before any typecheck runs,
 rather than only when affected shims declare `needs-engine: true`.
 
 ---
@@ -56,11 +56,6 @@ is built.
 ## Class E — Pre-existing CI failures ✓ RESOLVED
 
 These required real code or config fixes:
-
-- **CI / Test: vineyard** — `libs/vineyard/package.json` `test` and `test:run`
-  scripts did not run `svelte-kit sync` before vitest, so
-  `.svelte-kit/tsconfig.json` was missing when vitest loaded tsconfig.
-  Fixed: scripts now run `svelte-kit sync && vitest run`.
 
 - **CI / Check: ivy** — `apps/ivy/src/routes/+layout.svelte` used bare
   `crossorigin` attribute (Svelte infers `true`, wrong type for the HTML

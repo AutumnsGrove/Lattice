@@ -212,15 +212,27 @@ describe("Grove Router", () => {
 			);
 		});
 
-		it("routes status subdomain to grove-clearing Pages", async () => {
+		it("routes status subdomain to the grove-clearing Worker", async () => {
 			const request = createRequest("status", "/");
 			await router.fetch(request, env);
 
 			expect(mockFetch).toHaveBeenCalledWith(
 				expect.objectContaining({
-					url: expect.stringContaining("grove-clearing.pages.dev"),
+					url: expect.stringContaining("grove-clearing.m7jv4v7npb.workers.dev"),
 				}),
 			);
+		});
+
+		it("routes status subdomain via Service Binding when available", async () => {
+			const mockClearingFetcher = { fetch: vi.fn(async () => new Response("status-ok")) };
+			env.CLEARING = mockClearingFetcher as unknown as Fetcher;
+
+			const request = createRequest("status", "/");
+			const response = await router.fetch(request, env);
+
+			expect(mockClearingFetcher.fetch).toHaveBeenCalled();
+			expect(mockFetch).not.toHaveBeenCalled();
+			expect(response.status).toBe(200);
 		});
 
 		it("routes clearing subdomain to same target as status", async () => {
@@ -229,9 +241,19 @@ describe("Grove Router", () => {
 
 			expect(mockFetch).toHaveBeenCalledWith(
 				expect.objectContaining({
-					url: expect.stringContaining("grove-clearing.pages.dev/incidents"),
+					url: expect.stringContaining("grove-clearing.m7jv4v7npb.workers.dev/incidents"),
 				}),
 			);
+		});
+
+		it("never routes the status page at the retired Pages project", async () => {
+			for (const subdomain of ["status", "clearing"]) {
+				mockFetch.mockClear();
+				await router.fetch(createRequest(subdomain, "/"), env);
+
+				const urls = mockFetch.mock.calls.map((call) => String((call[0] as Request).url));
+				expect(urls.some((url) => url.includes("pages.dev"))).toBe(false);
+			}
 		});
 	});
 

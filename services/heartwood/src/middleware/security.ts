@@ -3,6 +3,7 @@
  */
 
 import type { MiddlewareHandler } from "hono";
+import { resolveClientIP } from "@autumnsgrove/lattice/server";
 import type { Env } from "../types.js";
 import { SECURITY_HEADERS } from "../utils/constants.js";
 
@@ -20,20 +21,19 @@ export const securityHeaders: MiddlewareHandler<{ Bindings: Env }> = async (c, n
 
 /**
  * Extract client IP address from request
+ *
+ * Delegates to the shared engine resolver, which refuses to hand back
+ * Cloudflare's own Worker address (`2a06:98c0:3600::103`) as if it were a
+ * client. Requests that arrive over a service binding get that address in
+ * `cf-connecting-ip` unless the caller forwards the real one, and a rate
+ * limiter keyed on it is a rate limiter with a single global bucket (#1679).
+ *
+ * "unknown" is a deliberate sentinel here: callers persist it and use it as a
+ * rate-limit key part, and a shared bucket is honest where a fabricated IP
+ * would not be.
  */
 export function getClientIP(request: Request): string {
-	// CF-Connecting-IP is set by Cloudflare at the edge and can't be spoofed
-	// by the client in production. The X-Real-IP/X-Forwarded-For fallbacks
-	// ARE client-controlled — safe only because CF-Connecting-IP is always
-	// present on real Cloudflare traffic; they'd allow trivial rate-limit-key
-	// rotation if this worker were ever reachable off-CF (direct workers.dev
-	// access, local dev, or a future non-CF deployment).
-	return (
-		request.headers.get("CF-Connecting-IP") ||
-		request.headers.get("X-Real-IP") ||
-		request.headers.get("X-Forwarded-For")?.split(",")[0]?.trim() ||
-		"unknown"
-	);
+	return resolveClientIP(request).ip ?? "unknown";
 }
 
 /**

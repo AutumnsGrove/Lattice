@@ -8,7 +8,7 @@
  */
 
 import type { TierKey } from "$lib/platform/config/tiers.js";
-import { QuotaExceededError } from "../errors.js";
+import { LumenError, QuotaExceededError } from "../errors.js";
 import type { LumenProviderName, LumenTask, LumenUsage } from "../types.js";
 import { createUsageLog, type UsageLogEntry } from "../pipeline/postprocessor.js";
 import { getTierQuota, wouldExceedQuota } from "./limits.js";
@@ -80,10 +80,27 @@ export class QuotaTracker {
 	 * Check quota and throw if exceeded
 	 */
 	async enforceQuota(tenantId: string, tier: TierKey, task: LumenTask): Promise<void> {
-		const { allowed, currentUsage, limit } = await this.checkQuota(tenantId, tier, task);
+		const limit = getTierQuota(tier, task);
+
+		// A task with no allowance is a different situation from one that has been
+		// used up, and "0/0 requests used" tells an operator nothing. Say which
+		// it is.
+		if (limit === 0) {
+			throw new LumenError(
+				`Task "${task}" is not available on the ${tier} tier: its daily quota is 0. System and agent calls pass skipQuota instead of counting against a limit that does not exist yet.`,
+				"QUOTA_EXCEEDED",
+				{ task, retryable: false },
+			);
+		}
+
+		const {
+			allowed,
+			currentUsage,
+			limit: resolvedLimit,
+		} = await this.checkQuota(tenantId, tier, task);
 
 		if (!allowed) {
-			throw new QuotaExceededError(task, limit, currentUsage);
+			throw new QuotaExceededError(task, resolvedLimit, currentUsage);
 		}
 	}
 
@@ -167,6 +184,7 @@ export class QuotaTracker {
 			image: 0,
 			code: 0,
 			transcription: 0,
+			agent: 0,
 		};
 
 		// Fill in actual counts

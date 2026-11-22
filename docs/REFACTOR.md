@@ -1013,7 +1013,7 @@ libs/engine/src/lib/ui/components/ui/waystone/Waystone.svelte  ← 10 dirs deep
 **Current engine internals (24 subdirectories):**
 | Directory | Files | What it is |
 |-----------|-------|-----------|
-| `ui/` | 369 | Components, stores, tokens, chat, vineyard |
+| `ui/` | 369 | Components, stores, tokens, chat |
 | `platform/` | 108 | Config, pricing, greenhouse, threshold, upgrades |
 | `server/` | 97 | API helpers, services, middleware |
 | `utils/` | 41 | Shared utilities |

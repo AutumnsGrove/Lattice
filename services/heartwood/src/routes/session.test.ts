@@ -63,6 +63,12 @@ vi.mock("../lib/server/session.js", () => ({
 	invalidateAllUserSessions: vi.fn(),
 }));
 
+// Mock the ban check. It is a second question about the same session (#1719), and
+// these tests are about the answer `validate` gives, not about D1.
+vi.mock("../lib/server/ban-status.js", () => ({
+	isBannedBetterAuthSession: vi.fn().mockResolvedValue(false),
+}));
+
 // Mock crypto
 vi.mock("../utils/crypto.js", () => ({
 	hashSecret: vi.fn().mockResolvedValue("mock-hash"),
@@ -70,6 +76,7 @@ vi.mock("../utils/crypto.js", () => ({
 }));
 
 import sessionRoutes from "./session.js";
+import { isBannedBetterAuthSession } from "../lib/server/ban-status.js";
 import {
 	getUserById,
 	getSessionByTokenHash,
@@ -161,6 +168,37 @@ describe("POST /session/validate", () => {
 		expect(res.status).toBe(200);
 		const json: any = (await res.json()) as any;
 		expect(json.valid).toBe(false);
+	});
+
+	it("names a ban instead of leaving the person to guess (#1719)", async () => {
+		// The session is not valid — that has not changed — but "invalid" is what
+		// produced the sign-in loop: the hub could not tell a banned account from a
+		// signed-out browser, so it showed the form again.
+		vi.mocked(getSessionFromRequest).mockResolvedValue(null);
+		vi.mocked(validateBetterAuthSession).mockResolvedValue(null);
+		vi.mocked(isBannedBetterAuthSession).mockResolvedValue(true);
+
+		const app = createApp();
+		const env = createMockEnvWithSessions();
+		const res = await app.request("/session/validate", { method: "POST" }, env);
+
+		expect(res.status).toBe(200);
+		const json: any = (await res.json()) as any;
+		expect(json.valid).toBe(false);
+		expect(json.reason).toBe("banned");
+	});
+
+	it("says nothing extra for an ordinary invalid session", async () => {
+		vi.mocked(getSessionFromRequest).mockResolvedValue(null);
+		vi.mocked(validateBetterAuthSession).mockResolvedValue(null);
+		vi.mocked(isBannedBetterAuthSession).mockResolvedValue(false);
+
+		const app = createApp();
+		const env = createMockEnvWithSessions();
+		const res = await app.request("/session/validate", { method: "POST" }, env);
+
+		const json: any = (await res.json()) as any;
+		expect(json).toEqual({ valid: false });
 	});
 
 	it("validates SessionDO session and returns user info", async () => {

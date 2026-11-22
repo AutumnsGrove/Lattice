@@ -3,7 +3,7 @@ title: Understanding the Admin Panel
 description: A tour of your Grove admin dashboard
 category: help
 section: customization
-lastUpdated: '2026-02-22'
+lastUpdated: '2026-11-19'
 keywords:
   - admin
   - dashboard
@@ -75,8 +75,8 @@ View your blog's performance metrics and visitor statistics. Available on Oak an
 Manage your subscription, billing, and account settings:
 - View your current plan and usage
 - Update payment information
-- Export your data
-- Account deletion
+- Export your data — a zip of every post, page, and image
+- Account closure, by request
 
 ### Settings
 

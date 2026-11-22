@@ -3,7 +3,7 @@ title: Grove
 description: The philosophy and values behind Grove
 category: help
 section: philosophy-vision
-lastUpdated: '2026-01-03'
+lastUpdated: '2026-11-13'
 keywords:
   - vision
   - philosophy
@@ -44,7 +44,7 @@ Write in Markdown. Upload images. Publish. That's it. No plugin ecosystems, no e
 
 ### Community can exist without competition
 
-Meadow (our optional community feed) doesn't display follower counts. Reactions are private—encouragement for the author, not performance for an audience. No algorithms deciding who gets amplified. Just chronological posts from people you follow.
+If Grove grows a community feed, it won't display follower counts. Reactions will be private—encouragement for the author, not performance for an audience. No algorithms deciding who gets amplified. Just chronological posts from people you follow.
 
 ## What we're building against
 

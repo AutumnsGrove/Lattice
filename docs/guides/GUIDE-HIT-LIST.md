@@ -72,7 +72,6 @@ These are live, actively modified, and have non-obvious registration steps or fa
 | System | Location | Spec | Guide | What a guide would cover |
 |--------|----------|:----:|:-----:|--------------------------|
 | Gossamer | `libs/gossamer/` | yes | **HAS GUIDE** (`gossamer-developer-guide.md`) | Adding presets, dual render paths, performance tuning |
-| Vineyard | `libs/vineyard/` | yes | **HAS GUIDE** (`vineyard-developer-guide.md`) | Building showcase pages, component library conventions |
 | Forage | `services/forage/` | yes | **HAS GUIDE** (`forage-developer-guide.md`) | AI-powered domain search, RDAP, pricing tiers |
 | Vista | `apps/landing/.../arbor/vista/` | yes | **HAS GUIDE** (`vista-developer-guide.md`) | Monitoring dashboard, collectors, alert thresholds |
 | Patina | `workers/patina/` | yes | **HAS GUIDE** (`patina-developer-guide.md`) | Backup scheduling, cold storage, recovery procedures |
@@ -137,7 +136,6 @@ Developer guides in `docs/guides/`:
 | `reverie-developer-guide.md` | AI config pipeline, domains, atmospheres |
 | `warden-developer-guide.md` | Credential gateway, auth paths, service abstraction |
 | `gossamer-developer-guide.md` | ASCII effects, presets, dual render paths, performance |
-| `vineyard-developer-guide.md` | Component showcase library, demo pages |
 | `forage-developer-guide.md` | Domain search, RDAP, AI providers, pricing |
 | `vista-developer-guide.md` | Monitoring dashboard, collectors, alerts |
 | `patina-developer-guide.md` | Backup scheduling, cold storage, recovery |
@@ -161,7 +159,6 @@ Related docs that live elsewhere:
 | `customer-setup.md` | `docs/setup/` | Customer onboarding |
 | `tenant-setup-guide.md` | `docs/setup/` | New tenant provisioning |
 | `local-auth-testing.md` | `docs/setup/` | Local Heartwood auth setup |
-| `agent-guide-new-grove-sites.md` | `AgentUsage/` | Agent workflow for new sites |
 | `woodpecker-codeberg-setup.md` | `docs/plans/infra/` | Codeberg CI (future work) |
 | `zephyr-migration-guide.md` | `docs/archive/` | Zephyr email migration (done) |
 

@@ -22,7 +22,6 @@
 	const curioIcons: Record<string, typeof metricIcons.calendar> = {
 		timeline: metricIcons.calendar,
 		gallery: featureIcons.image,
-		journey: navIcons.map,
 		guestbook: featureIcons.bookOpen,
 		ambient: natureIcons.wind,
 		hitcounter: featureIcons.hash,
@@ -89,7 +88,7 @@
 		).length,
 	);
 	let navLimit = $derived(data.navPageLimit || 3);
-	// Curios (Gallery, Timeline, Journey) share the same limit as nav pages
+	// Curios (Gallery, Timeline) share the same limit as nav pages
 	let enabledCuriosCount = $derived(data.enabledCuriosCount ?? 0);
 	let slotsUsed = $derived(navPagesUsed + enabledCuriosCount);
 	let atLimit = $derived(slotsUsed >= navLimit);

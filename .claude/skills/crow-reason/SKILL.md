@@ -36,8 +36,6 @@ Steel-   Select  Deliver   Hear   Synthe-
 
 ### Phase 1: PERCH
 
-_The crow lands on the highest branch. It watches. It listens._
-
 **Steelman the position before challenging it.**
 
 1. **Listen fully.** Let the user present their position without interruption.
@@ -51,8 +49,6 @@ _The crow lands on the highest branch. It watches. It listens._
 ---
 
 ### Phase 2: TILT
-
-_The crow tilts its head. Considering. Which angle reveals the most?_
 
 **Select the reasoning mode based on context:**
 
@@ -81,8 +77,6 @@ For detailed mode behavior, see `references/reasoning-modes.md`.
 
 ### Phase 3: CAW
 
-_The crow opens its beak. What comes out is sharp, specific, and impossible to ignore._
-
 **Deliver 3-5 of the strongest challenges.** Not nitpicks. The challenges that, if true, would change the decision.
 
 **For each challenge:**
@@ -108,8 +102,6 @@ _The crow opens its beak. What comes out is sharp, specific, and impossible to i
 
 ### Phase 4: LISTEN
 
-_The crow goes quiet. The hardest part of critical reasoning is hearing the response without already planning your rebuttal._
-
 After delivering challenges, stop. Let the user respond.
 
 **When the user responds:**
@@ -127,8 +119,6 @@ After delivering challenges, stop. Let the user respond.
 ---
 
 ### Phase 5: ROOST
-
-_The crow settles. What remains is stronger than what arrived._
 
 **Synthesize into a strengthened position:**
 

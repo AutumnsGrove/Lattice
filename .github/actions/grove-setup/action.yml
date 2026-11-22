@@ -1,11 +1,16 @@
 name: "Grove Setup"
-description: "Shared setup for all Grove CI/CD workflows — checkout, pnpm, Node.js, install, and optional engine/foliage builds"
+description: >-
+  Shared setup for all Grove CI/CD workflows — checkout, pnpm, Node.js, install,
+  and optional engine/foliage builds
 
 inputs:
   node-version:
     description: "Node.js version"
     required: false
-    default: "20"
+    # Node 20 reached end-of-life on 2026-04-30 (#1758). This default is what every
+    # typecheck, test and lint job runs on, so it must stay on a supported LTS and match
+    # .nvmrc. The deploy workflows inline "24" too — keep them in step.
+    default: "24"
   build-engine:
     description: "Build the engine package (libs/engine)"
     required: false
@@ -61,20 +66,73 @@ runs:
           pnpm install
         fi
 
+    # Every job that needs a shared lib used to rebuild it from source — 60+
+    # builds of the same `libs/engine/dist` on one PR (#1783). The dists are a
+    # pure function of the lib sources, so restore them by content hash and
+    # only build on a miss. This keeps the guarantee from
+    # docs/tech-debt/ci-punt-list.md (engine must exist before any typecheck)
+    # while paying for it once.
+    #
+    # The requested build flags are part of the key on purpose. Jobs build
+    # different subsets — the test matrix builds engine only, the typecheck
+    # matrix builds all three — and a cache entry only contains the paths that
+    # existed when it was saved. Without the flags in the key, an engine-only
+    # job could save a partial archive that a job expecting foliage and
+    # gossamer would restore as complete, skip the builds it needed, and fail
+    # intermittently depending on which job finished first.
+    #
+    # The hash covers every input to the built output, not just each lib's own
+    # source: engine imports prism, infra, loom, curios and the grove-* libs,
+    # so a change in any of them has to invalidate the archive. Per-lib build
+    # config counts too — svelte-package reads svelte.config.js and tsconfig.
+    - name: Restore built libraries
+      id: libs-cache
+      # yamllint disable-line rule:line-length
+      if: inputs.build-engine == 'true' || inputs.build-foliage == 'true' || inputs.build-gossamer == 'true'
+      uses: actions/cache@v4
+      with:
+        path: |
+          libs/foliage/dist
+          libs/gossamer/dist
+          libs/engine/dist
+        key: >-
+          grove-libs-${{ runner.os }}-${{
+          hashFiles('libs/*/src/**', 'libs/*/package.json', 'libs/*/tsconfig.json',
+          'libs/*/svelte.config.js', 'libs/*/vite.config.ts', 'pnpm-lock.yaml',
+          'tsconfig.base.json', 'scripts/generate/grove-term-manifest.ts') }}-${{
+          inputs.build-foliage }}-${{ inputs.build-gossamer }}-${{
+          inputs.build-engine }}
+
     - name: Build foliage
-      if: inputs.build-foliage == 'true'
+      # yamllint disable-line rule:line-length
+      if: inputs.build-foliage == 'true' && steps.libs-cache.outputs.cache-hit != 'true'
       shell: bash
       run: pnpm run build
       working-directory: libs/foliage
 
     - name: Build gossamer
-      if: inputs.build-gossamer == 'true'
+      # yamllint disable-line rule:line-length
+      if: inputs.build-gossamer == 'true' && steps.libs-cache.outputs.cache-hit != 'true'
       shell: bash
       run: pnpm run build
       working-directory: libs/gossamer
 
     - name: Build engine
-      if: inputs.build-engine == 'true'
+      # yamllint disable-line rule:line-length
+      if: inputs.build-engine == 'true' && steps.libs-cache.outputs.cache-hit != 'true'
       shell: bash
       run: pnpm run package
+      working-directory: libs/engine
+
+    # `svelte-kit sync` generates libs/engine/.svelte-kit/tsconfig.json, and
+    # libs/engine/tsconfig.json extends it. The cache above restores only `dist`,
+    # so on a cache hit the build is skipped and that generated file never
+    # exists — then Vite fails to parse the tsconfig in any job that touches
+    # engine source: `TSConfckParseError: failed to resolve "extends"`, before a
+    # single test runs (#1789, four test jobs). Sync alone is seconds and writes
+    # exactly the missing file, so run it whether the build ran or not.
+    - name: Sync engine types
+      if: inputs.build-engine == 'true'
+      shell: bash
+      run: pnpm exec svelte-kit sync
       working-directory: libs/engine

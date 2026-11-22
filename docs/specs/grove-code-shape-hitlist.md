@@ -192,7 +192,6 @@ when you're already working in that module.
 - `apps/meadow` — 0 files
 - `apps/terrarium` — 0 files
 - `libs/server-sdk` — 0 files
-- `libs/vineyard` — 0 files (note: vineyard _library_ exists and has content; double-check)
 - `workers/reverie` — 0 files
 - `workers/reverie-exec` — 0 files
 - `workers/timeline-sync` — 0 files

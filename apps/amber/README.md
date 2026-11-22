@@ -114,7 +114,6 @@ pnpm deploy:worker
 
 - [Project Spec](./amber-spec.md) - Full specification
 - [AGENT.md](./AGENT.md) - Agent instructions
-- [AgentUsage/](./AgentUsage/) - Development guides
 
 ## Related Grove Products
 

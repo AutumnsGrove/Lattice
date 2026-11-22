@@ -157,4 +157,4 @@ ERROR HANDLING CHECKLIST (SIGNPOST):
 [ ] try/catch blocks don't silently swallow errors — at minimum logGroveError()
 ```
 
-See `AgentUsage/error_handling.md` for the complete Signpost reference.
+See `CODE-STANDARDS.md` for the complete Signpost reference.

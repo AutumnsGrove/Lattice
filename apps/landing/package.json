@@ -44,7 +44,6 @@
 		"@autumnsgrove/thorn": "workspace:*",
 		"@lucide/lab": "^0.1.2",
 		"@lucide/svelte": "^1.33.0",
-		"@tabler/icons-svelte": "^3.36.1",
 		"markdown-it": "^14.1.1",
 		"resend": "^4.8.0",
 		"zod": "^4.3.6"

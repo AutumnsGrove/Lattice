@@ -5,13 +5,6 @@ export const CURIO_ERRORS = {
 		code: "CURIO-TL-001",
 		category: "admin",
 		userMessage: "Unable to load your API keys. Please try again.",
-		adminMessage: "SecretsManager.get failed — falling back to legacy encryption",
-	},
-	TOKEN_UNREADABLE: {
-		code: "CURIO-TL-002",
-		category: "admin",
-		userMessage: "Your saved token needs to be re-entered.",
-		adminMessage:
-			"Encrypted token found but TOKEN_ENCRYPTION_KEY is missing — token permanently unreadable",
+		adminMessage: "SecretsManager.get failed — check GROVE_KEK and the tenant DEK",
 	},
 } as const satisfies Record<string, GroveErrorDef>;

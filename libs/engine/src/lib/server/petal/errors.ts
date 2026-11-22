@@ -81,18 +81,6 @@ export const PETAL_ERRORS = {
 		userMessage: "Image processing is temporarily unavailable.",
 		adminMessage: "Workers AI vision model call failed.",
 	},
-	TOGETHER_API_ERROR: {
-		code: "PETAL-024",
-		category: "admin" as const,
-		userMessage: "Image processing is temporarily unavailable.",
-		adminMessage: "Together.ai API returned non-OK response.",
-	},
-	TOGETHER_UNEXPECTED: {
-		code: "PETAL-025",
-		category: "bug" as const,
-		userMessage: "Image processing is temporarily unavailable.",
-		adminMessage: "Together.ai client threw an unexpected error.",
-	},
 	OPENROUTER_API_ERROR: {
 		code: "PETAL-027",
 		category: "admin" as const,

@@ -4,6 +4,7 @@ import type { RequestHandler } from "./$types";
 import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
 import { validFontIds } from "@autumnsgrove/lattice/ui/tokens/fonts";
 import { ALL_SEASONS } from "@autumnsgrove/lattice/ui/types/season";
+import { FONT_SCALE, parseFontScale } from "@autumnsgrove/lattice/platform/config/presets";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 
 export const prerender = false;
@@ -54,6 +55,7 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 		// Whitelist allowed settings to prevent arbitrary data injection
 		const allowedSettings = [
 			"font_family",
+			FONT_SCALE.settingKey,
 			"accent_color",
 			"vine_color",
 			"show_grove_logo",
@@ -110,6 +112,13 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 		// Validate font_family value against canonical font list
 		if (setting_key === "font_family") {
 			if (!validFontIds.includes(setting_value)) {
+				throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
+			}
+		}
+
+		// Validate font_scale: a whole percent inside the range and on a step
+		if (setting_key === FONT_SCALE.settingKey) {
+			if (parseFontScale(setting_value) === null) {
 				throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
 			}
 		}

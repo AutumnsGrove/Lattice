@@ -4,10 +4,10 @@ description: "Extending Lumen's inference pipeline to support OpenRouter tool ca
 category: specs
 specCategory: "infrastructure"
 icon: wrench
-lastUpdated: "2026-03-01"
+lastUpdated: "2026-11-17"
 aliases: []
 date created: Saturday, March 1st 2026
-date modified: Saturday, March 1st 2026
+date modified: Monday, November 17th 2026
 tags:
   - ai-integration
   - infrastructure
@@ -47,7 +47,7 @@ Lumen currently speaks in content: you ask, it answers with text. Tool calling t
 
 **Spec Type:** Extension to [Lumen Spec](lumen-spec.md)
 **First Consumer:** [Reverie](reverie-spec.md) (Natural Language Configuration)
-**Status:** Planning
+**Status:** Implemented — including streaming tool deltas (#1730)
 **Last Updated:** March 2026
 
 This is an additive change. Every existing consumer (Wisp, Thorn, Timeline, Fireside, Petal) continues to call `lumen.run()` exactly as before and receives `content: string`. The tool calling path only activates when a caller passes `tools` in the request options.
@@ -75,10 +75,83 @@ Reverie needs to translate "make my site feel like a midnight library" into conc
 
 ### Non-Goals
 
-- Multi-turn tool execution loops (the caller handles follow-up calls)
-- Tool result injection (the caller builds the next message with tool results)
+- **Running the loop.** Lumen carries every turn; it never decides when to go
+  round again. See [Who Drives the Loop](#who-drives-the-loop) for the boundary.
+- **Running tools.** Lumen does not execute a tool call, does not validate its
+  arguments against the caller's business rules, and never retries a failed one.
 - MCP server integration (that's the existing stub in `mcp.ts`, separate concern)
-- Streaming tool calls (complex, deferred to a future extension)
+- **A streaming route on the worker.** Streaming stays in-process: no consumer
+  needs it over HTTP yet, and a passthrough route would have to buffer and
+  re-frame SSE without adding anything. `RemoteLumenClient` has no `stream()`.
+  The decision is recorded here rather than left implicit; it changes when an
+  out-of-process consumer appears.
+
+### Who Drives the Loop
+
+Lumen is a transport layer. It carries messages, tool results and usage
+faithfully, and keeps its own jobs — routing, privacy scrubbing, quota and
+logging. It does not run the loop and does not run tools. **The caller does.**
+
+That boundary is what makes a second consumer possible without Lumen growing a
+scheduler, and it is why the following exist:
+
+| piece | what it gives the caller |
+|---|---|
+| `role: "tool"` + `toolCallId` | the tool's result can be sent back and matched to the call it answers |
+| `toolCalls` on an assistant message | the model's request can be echoed back, which every provider requires |
+| `finishReason` | `length` means the turn may hold truncated arguments — discard, don't parse |
+| `costSource` on `usage` | whether a cost is an estimate from the model table or a billed figure |
+| `supportsTools` / `contextWindow` per model | whether a model can do this at all, and how much history fits |
+| `toolCallDeltas` on a stream chunk | a tool call as it arrives — fragments, not a call |
+| `assembleToolCallDeltas()` | folds fragments into `LumenToolCall[]`, and refuses the ones that were cut off |
+
+A step, as a caller sees it:
+
+```ts
+// 1. ask
+const turn = await lumen.run({ task: "agent", input: messages, options: { tools, skipQuota: true } });
+
+// 2. refuse a truncated turn rather than parse half-written arguments
+if (turn.finishReason === "length") throw new Error("model ran out of room");
+
+// 3. run the tools yourself, append the results, go again — or stop
+messages.push({ role: "assistant", content: turn.content, toolCalls: turn.toolCalls });
+messages.push({ role: "tool", content: result, toolCallId: turn.toolCalls[0].id });
+```
+
+A streaming step looks the same, except the call assembles at the end:
+
+```ts
+const deltas: LumenToolCallDelta[] = [];
+let finishReason: LumenFinishReason | undefined;
+
+for await (const chunk of lumen.stream({ task: "agent", input: messages, options: { tools } })) {
+  if (chunk.content) render(chunk.content);
+  if (chunk.toolCallDeltas) deltas.push(...chunk.toolCallDeltas);
+  if (chunk.done) finishReason = chunk.finishReason;
+}
+
+const { calls, incomplete } = assembleToolCallDeltas(deltas);
+if (finishReason === "length" || incomplete.length > 0) throw new Error("cut off");
+```
+
+**A delta is not a call.** `LumenStreamChunk` carries fragments and never a
+complete `toolCalls` array, because half a call parsed as a whole is exactly the
+mistake the assembly helper exists to prevent — it returns `incomplete` rather
+than guessing.
+
+Two consequences worth knowing before building on this:
+
+- **The privacy scrubber applies to tool results** (#1693 decision 3). The data a
+  tool returns is the writer's data. Give the model short handles, not long exact
+  strings, or hand it something that survives `[EMAIL]` and `[IP]`.
+- **The router does not fall back when tools are present.** `skipFallbacks` is
+  set whenever `tools` or an explicit `model` is passed, because tool schemas are
+  model-specific. A fallback for agent calls belongs in the caller, not in Lumen.
+- **`agent` is the task to use.** It is unmetered on every tier for now, so it
+  must be called with `skipQuota`. The `reverie` / `reverie-compose` tasks
+  sketched further down this document were not added; `agent` covers the case
+  with one task rather than one per consumer.
 
 ---
 
@@ -940,41 +1013,48 @@ Add test coverage for all new paths.
 
 ## Implementation Checklist
 
-### Engine Library (`libs/engine/src/lib/lumen/`)
+Shipped in #1693's L1–L5. Boxes left empty are still open, and say why.
 
-- [ ] Add `LumenToolDefinition`, `LumenToolChoice`, `LumenToolCall` to `types.ts`
-- [ ] Add `tools` and `toolChoice` to `LumenRequestOptions`
-- [ ] Add `toolCalls` to `LumenResponse`
-- [ ] Add `toolCalls` to `LumenProviderResponse` in `providers/types.ts`
-- [ ] Update `OpenRouterAPIResponse` interface in `openrouter.ts`
-- [ ] Update `OpenRouterProvider.inference()` to pass tools and parse tool_calls
-- [ ] Update `executeWithFallback()` in `router.ts` to accept tools
-- [ ] Update `LumenClient.run()` in `client.ts` to pass tools
-- [ ] Update `normalizeResponse()` in `postprocessor.ts`
-- [ ] Add `LIQUID_LFM2` and `MINIMAX_M2_5` to `MODELS` in `config.ts`
-- [ ] Add model costs for new models
-- [ ] Add `reverie` and `reverie-compose` to `LumenTask` type
-- [ ] Add task registry entries for both Reverie tasks
-- [ ] Add quota entries for both Reverie tasks in `limits.ts`
-- [ ] Add Songbird Kestrel contexts for Reverie tasks
-- [ ] Update barrel exports in `index.ts`
-- [ ] Write unit tests for tool calling in OpenRouter provider
-- [ ] Write unit tests for tool calling in client
-- [ ] Write unit tests for Reverie task routing
+### Engine Library (`libs/engine/src/lib/ai/lumen/`)
+
+- [x] `LumenToolDefinition`, `LumenToolChoice`, `LumenToolCall` in `types.ts`
+- [x] `tools` and `toolChoice` on `LumenRequestOptions`
+- [x] `toolCalls` on `LumenResponse` and `LumenProviderResponse`
+- [x] `tool` role, `toolCalls` on messages, `toolCallId` — **L1**, so a loop's
+      second step can be sent at all
+- [x] `finishReason` on the response — **L2**, normalized to
+      `stop | length | tool_calls | content_filter | other`
+- [x] `costSource` on `LumenUsage` — **L5**, `catalog` for every adapter today
+- [x] `agent` task in `LumenTask`, `TASK_REGISTRY`, `LUMEN_QUOTAS` — **L3**
+- [x] `supportsTools`, `toolChoice` and `contextWindow` per model in
+      `lumen-models.json`, with `assertToolSupport()` refusing the rest — **L4**
+- [x] `OpenRouterProvider.inference()` passes tools and parses `tool_calls`
+- [x] `executeWithFallback()` accepts tools and skips its chain when present
+- [x] `LumenClient.run()` passes tools and refuses a model that cannot use them
+- [x] `normalizeResponse()` carries `toolCalls`, `finishReason`, `costSource`
+- [x] `validateToolTurns()` rejects an unmatched `toolCallId`, naming the id
+- [x] Tests across the provider, the preprocessor, the client and the wire
+- [x] Streaming tool-call deltas — **#1730**: `toolCallDeltas`, `finishReason`
+      on the final chunk, and `assembleToolCallDeltas()`
+- [ ] Task per consumer (`reverie`, `reverie-compose`) — not added; `agent` is
+      the one task, deliberately
 
 ### Worker (`workers/lumen/`)
 
-- [ ] Add Zod schemas for tool definitions in `types.ts`
-- [ ] Update `InferenceRequestSchema` with tools fields
-- [ ] Update inference route handler to pass tools
-- [ ] Update response schema to include tool_calls
-- [ ] Update `RemoteLumenClient` in `remote.ts`
-- [ ] Write integration tests for tool-calling inference
+- [x] Zod schemas for tool definitions and tool turns
+- [x] `InferenceRequestSchema` accepts `tool_calls` / `tool_call_id`, and refuses
+      a `tool` message without an id
+- [x] `toLumenMessages()` translates the wire shape instead of casting it
+- [x] Inference route passes tools through and returns `tool_calls`
+- [x] `finish_reason` and `cost_source` on the response
+- [x] `RemoteLumenClient` maps both directions (`toWireMessage`, `fromWireUsage`)
+- [x] Route tests for a full tool conversation and each refusal
 
 ### Documentation
 
-- [ ] Update `lumen-spec.md` with tool calling section
-- [ ] Update API examples with tool-calling usage
+- [x] This spec: who drives the loop, and what Lumen refuses to do
+- [ ] `lumen-spec.md` cross-reference
+- [ ] A worker streaming route — decided against for now; see Non-Goals
 
 ---
 

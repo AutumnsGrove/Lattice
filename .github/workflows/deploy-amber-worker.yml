@@ -7,6 +7,10 @@ on:
     paths:
       - "services/amber/**"
       - "libs/loom/**"
+      # Builds the engine library (needs-engine), so an engine change is a
+      # change to this bundle. See #1733: durable-objects stopped deploying for
+      # two hours because its list named directories rather than the dependency.
+      - "libs/engine/**"
   workflow_dispatch:
 
 permissions:

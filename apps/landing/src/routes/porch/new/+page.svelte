@@ -1,29 +1,57 @@
 <script lang="ts">
 	import { enhance } from "$app/forms";
+	import { page } from "$app/state";
 	import { GlassCard } from "@autumnsgrove/lattice/ui";
 	import { TurnstileWidget } from "@autumnsgrove/lattice/ui/forms";
 	import Header from "$lib/components/Header.svelte";
 	import { seasonStore } from "@autumnsgrove/lattice/ui/chrome";
 	import Footer from "$lib/components/Footer.svelte";
 	import { Logo } from "@autumnsgrove/lattice/ui/nature";
-	import { metricIcons, chromeIcons, authIcons, stateIcons, actionIcons } from "@autumnsgrove/prism/icons";
+	import {
+		DEFAULT_PORCH_CATEGORY,
+		PORCH_CATEGORIES,
+		isPorchCategory,
+		type PorchCategory,
+	} from "@autumnsgrove/lattice/platform/config";
+	import {
+		metricIcons,
+		chromeIcons,
+		authIcons,
+		stateIcons,
+		actionIcons,
+	} from "@autumnsgrove/prism/icons";
 	const CreditCard = metricIcons.creditCard;
 	const Wrench = chromeIcons.toolbox;
 	const User = authIcons.user;
+	const ShieldOff = authIcons.shieldOff;
 	const Hand = actionIcons.hand;
+	const Upload = actionIcons.upload;
 	const HelpCircle = stateIcons.help;
 	import type { ActionData, PageData } from "./$types";
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
+	/**
+	 * A deep link can arrive pre-filled — a suspended grove, a blocked sign-in, a
+	 * refused upload all land here with what they already know. Everything is
+	 * plain text in a form field: the visitor can edit or delete it, and it is a
+	 * hint for a human, never a claim about who they are.
+	 */
+	const params = page.url.searchParams;
+	const prefilled = (key: string, maxLength: number): string =>
+		(params.get(key) ?? "").slice(0, maxLength);
+	const prefilledCategory = params.get("category");
+
 	// Pre-fill from authenticated user
 	// svelte-ignore state_referenced_locally
-	let name = $state(data.user?.name || "");
+	let name = $state(data.user?.name || prefilled("name", 100));
 	// svelte-ignore state_referenced_locally
-	let email = $state(data.user?.email || "");
-	let subject = $state("");
-	let message = $state("");
-	let category = $state<"billing" | "technical" | "account" | "hello" | "other">("other");
+	let email = $state(data.user?.email || prefilled("email", 254));
+	let subject = $state(prefilled("subject", 200));
+	let message = $state(prefilled("message", 5000));
+	let category = $state<PorchCategory>(
+		isPorchCategory(prefilledCategory) ? prefilledCategory : DEFAULT_PORCH_CATEGORY,
+	);
 	let turnstileToken = $state<string | null>(null);
 	let submitting = $state(false);
 
@@ -35,18 +63,18 @@
 	const isValidLength = $derived(charCount >= 10 && charCount <= 5000);
 	const hasEmail = $derived(email.trim().length > 0);
 
-	const categories = [
-		{
-			id: "billing",
-			label: "Billing",
-			icon: CreditCard,
-			description: "Payments, subscriptions, refunds",
-		},
-		{ id: "technical", label: "Technical", icon: Wrench, description: "Something isn't working" },
-		{ id: "account", label: "Account", icon: User, description: "Login, settings, data" },
-		{ id: "hello", label: "Just saying hi", icon: Hand, description: "No issue, just chatting" },
-		{ id: "other", label: "Other", icon: HelpCircle, description: "Anything else" },
-	] as const;
+	/** Icons stay app-side; the categories themselves come from one registry. */
+	const categoryIcons: Record<PorchCategory, typeof CreditCard> = {
+		billing: CreditCard,
+		technical: Wrench,
+		account: User,
+		uploads: Upload,
+		appeal: ShieldOff,
+		hello: Hand,
+		other: HelpCircle,
+	};
+
+	const categories = PORCH_CATEGORIES.map((cat) => ({ ...cat, icon: categoryIcons[cat.id] }));
 </script>
 
 <svelte:head>
@@ -91,9 +119,7 @@
 							</svg>
 						</div>
 						<div class="flex-1">
-							<h2 class="text-lg font-serif text-success dark:text-success mb-1">
-								Visit started!
-							</h2>
+							<h2 class="text-lg font-serif text-success dark:text-success mb-1">Visit started!</h2>
 							<p class="text-sm text-success dark:text-success font-sans mb-2">
 								Your visit number is <strong>{form.visitNumber}</strong>. I'll get back to you soon.
 							</p>
@@ -112,7 +138,9 @@
 		<!-- Error Message -->
 		{#if form?.error}
 			<div role="alert">
-				<GlassCard class="mb-6 bg-error-bg/80 dark:bg-error-bg/20 border-error dark:border-error/50">
+				<GlassCard
+					class="mb-6 bg-error-bg/80 dark:bg-error-bg/20 border-error dark:border-error/50"
+				>
 					<div class="flex items-start gap-4">
 						<div
 							class="w-10 h-10 bg-error-bg dark:bg-error-bg/30 rounded-lg flex items-center justify-center text-error dark:text-error flex-shrink-0"

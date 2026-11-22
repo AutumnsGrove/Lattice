@@ -11,6 +11,7 @@ export { default as LanternPanel } from "./LanternPanel.svelte";
 export { default as LanternFriendCard } from "./LanternFriendCard.svelte";
 export { default as LanternAddFriends } from "./LanternAddFriends.svelte";
 export { default as LanternVisitingCard } from "./LanternVisitingCard.svelte";
+export { default as LanternTermHelp } from "./LanternTermHelp.svelte";
 export type {
 	LanternLayoutData,
 	LanternDestination,

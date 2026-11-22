@@ -45,7 +45,7 @@ Use this during Phase 3 (BUILD) to track progress across all files.
 
 ### Type Safety at Boundaries (Rootwork)
 
-> Validate at the boundary, trust inside. See `AgentUsage/rootwork_type_safety.md`.
+> Validate at the boundary, trust inside. See `CODE-STANDARDS.md` → Type Safety at Boundaries.
 
 ```
 [ ] Form data parsed with `parseFormData(formData, ZodSchema)` — no raw `.get()` casts

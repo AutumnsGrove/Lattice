@@ -65,6 +65,8 @@ export interface TenantConfig {
 	tier: PaidTierKey; // Uses centralized type from tiers.ts (excludes 'wanderer' since tenants are paying)
 	limits: TierLimits;
 	ownerId: string;
+	/** `tenants.created_at` in unix seconds — used for the link/noindex policy (#1682). */
+	createdAt: number;
 }
 
 export interface TierLimits {
@@ -295,7 +297,8 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 		// Query D1 for full tenant data including ID
 		const row = await this.env.DB.prepare(
 			`
-      SELECT id, subdomain, display_name as displayName, theme, plan as tier, email as ownerId
+      SELECT id, subdomain, display_name as displayName, theme, plan as tier, email as ownerId,
+             created_at
       FROM tenants
       WHERE subdomain = ? AND active = 1
     `,
@@ -317,6 +320,7 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 				theme,
 				tier,
 				ownerId: row.ownerId as string,
+				createdAt: Number(row.created_at ?? 0),
 				limits: this.getTierLimits(tier),
 			};
 
@@ -329,7 +333,16 @@ export class TenantDO extends LoomDO<TenantConfig, TenantEnv> {
 			);
 
 			this.configLoadedAt = Date.now();
+			return;
 		}
+
+		// A tenant that is no longer in D1 is not a tenant. Clear both cache layers,
+		// or a deleted (or suspended) site keeps serving its cached config forever —
+		// the rehydration in loadState() means memory eviction does not save us.
+		this.log.info(`Tenant ${subdomain} is no longer active in D1 — clearing cached config`);
+		this.state_data = null;
+		this.configLoadedAt = 0;
+		this.sql.exec("DELETE FROM config WHERE key = 'tenant_config'");
 	}
 
 	/**

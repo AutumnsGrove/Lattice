@@ -5,7 +5,7 @@ description: The drum sounds. Chameleon and Deer gather for complete UI work. Us
 
 # Gathering UI 🌲🦎🦌
 
-The drum echoes through the glade. The conductor stands at the clearing's center, orchestrating two very different kinds of attention. The Chameleon arrives with fresh eyes — no preconceptions about what the page should look like, just the spec and the forest's palette. The Deer arrives later, also with fresh eyes — it hasn't watched the CSS being written, so it tests accessibility without unconscious trust. Beautiful and accessible, built by isolated minds.
+_The conductor dispatches one subagent per animal, each with isolated context and an intentional model. It manages handoffs and gate checks — it never does the work itself._
 
 ## When to Summon
 
@@ -41,8 +41,6 @@ Spec    Chameleon  Check     Deer    Check    Visual
 
 ### Phase 1: SUMMON
 
-_The drum sounds. The glade awaits..._
-
 The conductor receives the UI request and prepares the dispatch plan:
 
 **Clarify the UI Work:**
@@ -59,8 +57,6 @@ The conductor receives the UI request and prepares the dispatch plan:
 ---
 
 ### Phase 2: ADAPT (Chameleon)
-
-_The conductor signals. The Chameleon shifts its colors..._
 
 ```
 Agent(chameleon, model: sonnet)
@@ -87,8 +83,6 @@ Dispatch a **sonnet subagent** to design and build the UI. The Chameleon receive
 ---
 
 ### Phase 3: SENSE (Deer)
-
-_The Deer steps into the glade. It hasn't watched the colors change..._
 
 ```
 Agent(deer, model: sonnet)
@@ -128,47 +122,40 @@ If the Deer's report includes issues it couldn't fix directly (e.g., structural 
 
 ### Phase 5: VERIFY
 
-_The glade is complete. But the conductor looks with its own eyes..._
-
 **Component Audit Gate (MANDATORY before page-level verification):**
 
-Before capturing full pages, the conductor audits every component the Chameleon built or modified in isolation using Showroom. This gate catches design token violations, off-grid spacing, missing focus styles, and hardcoded colors (including accent surfaces that should use `var(--grove-accent-*)` tokens) that page-level captures miss.
+Before capturing full pages, check every component the Chameleon built or modified. **Component check.** There is no isolated component harness any more (Showroom was removed in #1654). Capture the page or element where the component renders, then check it against `DESIGN.md`: colour tokens not hardcoded values, spacing on the 4px grid, type from the scale, a visible focus ring, no skipped heading levels, alt text on images. The pre-commit hooks enforce the mechanical subset (accent colours, Prism icons, barrels). Accent surfaces must use `var(--grove-accent-*)` tokens.
 
 ```bash
-# For each component built or modified by the Chameleon:
-uv run --project tools/glimpse glimpse showroom \
-  libs/engine/src/lib/ui/components/[path-to-component].svelte
-
-# For new components, scaffold fixtures first:
-uv run --project tools/glimpse glimpse showroom \
-  libs/engine/src/lib/ui/components/[path-to-component].svelte --scaffold
+# There is no isolated component harness any more (Showroom was removed in #1654).
+# Capture the component where it actually renders, then check it by hand.
+bun run glimpse capture "http://localhost:5173/[page]" \
+  -S "[component selector]" --season autumn --theme dark
 ```
 
-**All Showroom compliance violations must be resolved before proceeding to page-level Glimpse.** If violations are found, resume the Chameleon with the specific findings.
+**Fix component-level problems before page-level captures.** If you find violations, resume the Chameleon with the specific findings.
 
 **Visual Verification (MANDATORY for UI gatherings):**
 
 ```bash
 # Seed database if not already done
-uv run --project tools/glimpse glimpse seed --yes
+./scripts/dev-stack.sh seed blog
 
 # Capture across all seasons and themes
-uv run --project tools/glimpse glimpse matrix \
+bun run glimpse matrix \
   "http://localhost:5173/[page]?subdomain=midnight-bloom" \
-  --seasons spring,summer,autumn,winter --themes light,dark --logs --auto
+  --seasons spring,summer,autumn,winter --themes light,dark --logs
 
-# Interactive verification — click around, verify flows
-uv run --project tools/glimpse glimpse browse \
-  "http://localhost:5173/[page]?subdomain=midnight-bloom" \
-  --do "click navigation, scroll content, interact with elements" \
-  --screenshot-each --logs --auto
+# Interactive flows (clicks, tab order, focus traps) aren't what glimpse does.
+# Write a throwaway Playwright script against @playwright/test and screenshot
+# at each step; copy the browser setup from tools/glimpse/src/browser.ts.
 ```
 
 Review every screenshot. If something looks wrong — fix it and capture again.
 
 **Validation Checklist (after visual verification):**
 
-- [ ] Showroom: Every built/modified component passes `glimpse showroom` with no compliance violations
+- [ ] Components: every built/modified component checked against `DESIGN.md` (tokens, spacing, focus, headings)
 - [ ] Glimpse: Page captured across all target seasons — looks correct
 - [ ] Glimpse: Light and dark mode both visually verified
 - [ ] Glimpse: No console errors in `--logs` output
@@ -215,25 +202,15 @@ The glade welcomes all wanderers.
 
 ## Conductor Rules
 
-### Never Do Animal Work
+**Never Do Animal Work.** The conductor dispatches. It does not write CSS, build components, or audit accessibility.
 
-The conductor dispatches. It does not write CSS, build components, or audit accessibility.
+**Fresh Eyes Are a Feature.** The Deer hasn't watched the Chameleon work. It sees only the rendered result, not the design intent. This isolation catches contrast issues, missing labels, and navigation gaps that a sympathetic observer would miss.
 
-### Fresh Eyes Are a Feature
+**Gate Every Transition.** CI between Chameleon and Deer. Component checks after the Chameleon. CI after Deer's fixes. Screenshots after everything.
 
-The Deer hasn't watched the Chameleon work. It sees only the rendered result, not the design intent. This isolation catches contrast issues, missing labels, and navigation gaps that a sympathetic observer would miss.
+**Visual Proof Required.** The conductor MUST capture and review Glimpse screenshots before declaring complete. CI passing is not the same as looking correct.
 
-### Gate Every Transition
-
-CI between Chameleon and Deer. Showroom audit on every component after Chameleon. CI after Deer's fixes. Glimpse after everything.
-
-### Visual Proof Required
-
-The conductor MUST capture and review Glimpse screenshots before declaring complete. CI passing is not the same as looking correct.
-
-### Resume, Don't Restart
-
-If iteration is needed, resume existing agents. They have context from their prior work.
+**Resume, Don't Restart.** If iteration is needed, resume existing agents. They have context from their prior work.
 
 ---
 

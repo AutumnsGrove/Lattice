@@ -23,32 +23,42 @@ import sanitizeHtml from "sanitize-html";
 let DOMPurify: DOMPurifyInstance | null = null;
 
 if (BROWSER) {
-	import("dompurify").then((module) => {
-		DOMPurify = module.default;
+	import("dompurify")
+		.then((module) => {
+			DOMPurify = module.default;
 
-		// Add hook to enforce rel="noopener noreferrer" on external links
-		// This prevents reverse tabnabbing attacks where a linked page could
-		// manipulate the opener via window.opener
-		DOMPurify.addHook("afterSanitizeAttributes", (node) => {
-			if (node.tagName === "A") {
-				const href = node.getAttribute("href") || "";
-				const target = node.getAttribute("target");
+			// A test or SSR-ish environment can resolve this module without the
+			// DOMPurify instance (module.default is not the factory result). Guard
+			// it: an unhandled rejection here fails the whole suite at teardown,
+			// which is a much worse failure than a missing hook.
+			if (typeof DOMPurify?.addHook !== "function") return;
 
-				// External links (absolute URLs or target="_blank")
-				const isExternal =
-					href.startsWith("http://") || href.startsWith("https://") || target === "_blank";
+			// Add hook to enforce rel="noopener noreferrer" on external links
+			// This prevents reverse tabnabbing attacks where a linked page could
+			// manipulate the opener via window.opener
+			DOMPurify.addHook("afterSanitizeAttributes", (node) => {
+				if (node.tagName === "A") {
+					const href = node.getAttribute("href") || "";
+					const target = node.getAttribute("target");
 
-				if (isExternal) {
-					// Always add noopener and noreferrer for external links
-					const existingRel = node.getAttribute("rel") || "";
-					const relParts = new Set(existingRel.split(/\s+/).filter(Boolean));
-					relParts.add("noopener");
-					relParts.add("noreferrer");
-					node.setAttribute("rel", Array.from(relParts).join(" "));
+					// External links (absolute URLs or target="_blank")
+					const isExternal =
+						href.startsWith("http://") || href.startsWith("https://") || target === "_blank";
+
+					if (isExternal) {
+						// Always add noopener and noreferrer for external links
+						const existingRel = node.getAttribute("rel") || "";
+						const relParts = new Set(existingRel.split(/\s+/).filter(Boolean));
+						relParts.add("noopener");
+						relParts.add("noreferrer");
+						node.setAttribute("rel", Array.from(relParts).join(" "));
+					}
 				}
-			}
+			});
+		})
+		.catch((err) => {
+			console.warn("[sanitize] DOMPurify unavailable:", err);
 		});
-	});
 }
 
 /**

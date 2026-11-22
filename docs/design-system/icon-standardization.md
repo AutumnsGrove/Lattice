@@ -87,7 +87,6 @@ Updated in `landing/src/lib/utils/icons.ts` to match Workshop page semantics:
 - **Songbird** (Prompt Protection): `Bird` - Canary/guardian
 - **Sentinel** (Load Testing): `Radar` - Detection
 - **Firefly** (Ephemeral Servers): `Webhook` - Event trigger
-- **Vineyard** (Showcase Pattern): `Grape` - Vineyard metaphor
 
 ### Midnight Bloom (Future Vision)
 - **The Cafe**: `Coffee` - Tea/coffee shop

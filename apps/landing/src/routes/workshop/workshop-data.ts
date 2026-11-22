@@ -295,7 +295,7 @@ export const categories: Category[] = [
 				termSlug: "grafts",
 				tagline: "Feature Customization",
 				description:
-					"A graft is a branch joined onto rootstock—a deliberate act that makes one tree bear fruit no other can. Grafts are per-tenant features that operators enable for specific trees. Want JXL encoding? Graft it on. Need a custom dashboard? Graft it on. Your tree, your grafts, your fruit.",
+					"A graft is a branch joined onto rootstock—a deliberate act that makes one tree bear fruit no other can. Grafts are per-tenant features that operators enable for specific trees. Want a photo gallery? Graft it on. Need a custom dashboard? Graft it on. Your tree, your grafts, your fruit.",
 				status: "live",
 				icon: "goal",
 				integration: "Operator-configured feature customization",

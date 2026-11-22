@@ -49,25 +49,46 @@ The sequence resets each calendar year. See `generateVisitNumber()` in `apps/lan
 
 ### Categories
 
-Five categories, validated with a const array and a CHECK constraint in the schema:
+The category list lives in **one place**: `PORCH_CATEGORIES` in `libs/engine/src/lib/platform/config/porch.ts`. Everything that renders or validates a category derives from it — the picker, the server action's `isPorchCategory()` check, every label in the visit views, and the notification email. There is no second copy to forget.
 
 | Category | Label | Description |
 |----------|-------|-------------|
 | `billing` | Billing | Payments, subscriptions, refunds |
 | `technical` | Technical | Something isn't working |
 | `account` | Account | Login, settings, data |
+| `appeal` | Appeal | I was blocked, suspended, or banned |
 | `hello` | Just saying hi | No issue, chatting |
 | `other` | Other | Anything else |
+
+The `category` column has **no `CHECK` constraint** (migration `0009_porch_category_registry.sql` retired the one from `0005`). SQLite cannot alter a `CHECK`, so every new category meant rebuilding the table; the list is validated in the form action instead. `porchCategoryLabel()` renders an unknown value as itself rather than masking it, so a bad row is visible in Arbor.
+
+### Deep links
+
+Any surface that sends someone to Porch builds its link with `buildPorchUrl()` from the same module:
+
+```ts
+import { buildPorchUrl } from "@autumnsgrove/lattice/platform/config";
+
+const url = buildPorchUrl({
+  category: "appeal",
+  subject: "Suspended grove: quietfern",
+  message: "My grove at quietfern.grove.place says it isn't available…",
+});
+```
+
+The parameters are ordinary query strings, so `/porch/new` pre-fills the form from them (`category`, `subject`, `message`, `email`, `name`). Everything is plain text in a form field: the visitor can edit or clear it, and a prefilled ticket is context for a human to read, **never** evidence of who they are. An unknown `category` falls back to `other`; a message longer than the field's limit is truncated by the page.
 
 ## Adding or Modifying Porch
 
 ### Adding a new visit category
 
-Three places need updating:
+One place: add an entry to `PORCH_CATEGORIES` in `libs/engine/src/lib/platform/config/porch.ts` (`id`, `label`, `description`). That is the whole change.
 
-1. **Migration/schema**: Add the value to the CHECK constraint on `porch_visits.category`. Write a new migration since `0005_porch.sql` uses `CHECK(category IN (...))`.
-2. **Server validation**: Add the category string to `VALID_CATEGORIES` in `apps/landing/src/routes/porch/new/+page.server.ts`.
-3. **UI**: Add the category object (with `id`, `label`, `icon`, `description`) to the `categories` array in `apps/landing/src/routes/porch/new/+page.svelte`. Also update the `categoryLabels` records in `visits/+page.svelte`, `visits/[id]/+page.svelte`, `arbor/porch/+page.svelte`, and `arbor/porch/[id]/+page.svelte`. There are four separate copies of this record.
+- The picker renders a new entry automatically. **Icons are the one app-side piece** — add the id to `categoryIcons` in `apps/landing/src/routes/porch/new/+page.svelte`, which is typed as `Record<PorchCategory, …>`, so the compiler will refuse the build until you do.
+- The form action accepts it via `isPorchCategory()` with no edit.
+- Labels in both visit views and both Arbor views come from `porchCategoryLabel()`.
+- No migration. The column accepts any non-null string by design (see above); if you genuinely need a row-level constraint, that is a schema decision, not a category decision.
+- If the category should read differently for someone filing it (an appeal is a review, not a repair), handle that in the confirmation email's `responseLine` in `porch/new/+page.server.ts` — that is where `appeal` departs from the default "I typically respond within a day".
 
 ### Adding a new message sender type
 

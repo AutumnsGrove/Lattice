@@ -33,8 +33,6 @@ Vision   Materials  Power    Strength   Triumph
 
 ### Phase 1: TRUMPET
 
-_The elephant lifts its trunk and sounds the beginning..._
-
 Declare what we're building with full scope clarity.
 
 - Write one sentence: what does this feature DO for users?
@@ -50,12 +48,10 @@ Declare what we're building with full scope clarity.
 
 ### Phase 2: GATHER
 
-_The elephant collects stones and branches, preparing the foundation..._
-
 Collect everything needed before building begins.
 
 - Check dependencies — verify required packages exist, install what's missing
-- Research existing patterns with `gf --agent usage "ServiceName"` and `gf --agent func "functionName"`
+- Research existing patterns with `rg -wn "ServiceName"` and `rg -n "(function|const|fn) ServiceName"`
 - Examine similar implementations to understand conventions before diverging
 - Set up environment variables in `.env.local` and `.env.example`
 
@@ -64,8 +60,6 @@ Collect everything needed before building begins.
 ---
 
 ### Phase 3: BUILD
-
-_The elephant places each stone with precision, building what will last..._
 
 Construct the feature file by file, in order.
 
@@ -89,8 +83,6 @@ Construct the feature file by file, in order.
 
 ### Phase 4: TEST
 
-_The elephant tests each stone, ensuring the structure holds..._
-
 **MANDATORY: Verify the build before committing. The elephant does not ship broken structures.**
 
 ```bash
@@ -110,19 +102,13 @@ Once CI passes, verify manually:
 
 **Component audit gate (for UI features):**
 
-If the elephant built or modified UI components, it audits each one in isolation using Showroom BEFORE page-level Glimpse. Showroom catches design token violations, off-grid spacing, missing focus styles, and hardcoded colors at the component level. Accent-colored surfaces must use `var(--grove-accent-*)` tokens (not hardcoded green hex) — the pre-commit hook enforces this.
+**Component check.** There is no isolated component harness any more (Showroom was removed in #1654). Capture the page or element where the component renders, then check it against `DESIGN.md`: colour tokens not hardcoded values, spacing on the 4px grid, type from the scale, a visible focus ring, no skipped heading levels, alt text on images. The pre-commit hooks enforce the mechanical subset (accent colours, Prism icons, barrels). Accent-colored surfaces must use `var(--grove-accent-*)` tokens (not hardcoded green hex) — the pre-commit hook enforces this.
 
 ```bash
-# For each component built or modified:
-uv run --project tools/glimpse glimpse showroom \
-  libs/engine/src/lib/ui/components/[path-to-component].svelte
-
-# For brand new components, scaffold a fixture first:
-uv run --project tools/glimpse glimpse showroom \
-  libs/engine/src/lib/ui/components/[path-to-component].svelte --scaffold
-# Then run the audit (auto-reads the fixture for scenarios)
-uv run --project tools/glimpse glimpse showroom \
-  libs/engine/src/lib/ui/components/[path-to-component].svelte
+# There is no isolated component harness any more (Showroom was removed in #1654).
+# Capture the component where it actually renders, then check it by hand.
+bun run glimpse capture "http://localhost:5173/[page]" \
+  -S "[component selector]" --season autumn --theme dark
 ```
 
 **This is a required gate.** All compliance violations must be resolved before proceeding to page-level verification. The elephant does not ship components it hasn't audited.
@@ -133,18 +119,17 @@ If the elephant built UI, it looks at the result before declaring the structure 
 
 ```bash
 # Prerequisite: seed the database if not already done
-uv run --project tools/glimpse glimpse seed --yes
+./scripts/dev-stack.sh seed blog
 
 # Capture the page to see what was actually built
-# Local routing uses ?subdomain= for tenant isolation; --auto starts the dev server
-uv run --project tools/glimpse glimpse capture \
+# Local routing uses ?subdomain= for tenant isolation; starts the dev server
+bun run glimpse capture \
   "http://localhost:5173/[page]?subdomain=midnight-bloom" \
-  --season autumn --theme dark --logs --auto
+  --season autumn --theme dark --logs
 
-# Walk through the feature visually
-uv run --project tools/glimpse glimpse browse \
-  "http://localhost:5173/[page]?subdomain=midnight-bloom" \
-  --do "interact with the new feature" --screenshot-each --logs --auto
+# Interactive flows (clicks, tab order, focus traps) aren't what glimpse does.
+# Write a throwaway Playwright script against @playwright/test and screenshot
+# at each step; copy the browser setup from tools/glimpse/src/browser.ts.
 ```
 
 Review the screenshots. If something doesn't look right, fix it and capture again. The elephant doesn't ship structures it hasn't inspected.
@@ -154,8 +139,6 @@ Review the screenshots. If something doesn't look right, fix it and capture agai
 ---
 
 ### Phase 5: CELEBRATE
-
-_The elephant raises its trunk in triumph, the build complete..._
 
 Ship and document.
 
@@ -181,27 +164,11 @@ Write the completion summary: files created, files modified, config changes, tes
 
 ## Elephant Rules
 
-### Momentum
+**Momentum.** Keep moving forward. Don't get stuck on one file for hours. If blocked, make a TODO and move on. The elephant doesn't stop.
 
-Keep moving forward. Don't get stuck on one file for hours. If blocked, make a TODO and move on. The elephant doesn't stop.
+**Completeness.** Build the whole feature. Half-built features don't help users. If the scope is too big, scope down — but finish what you start.
 
-### Completeness
-
-Build the whole feature. Half-built features don't help users. If the scope is too big, scope down — but finish what you start.
-
-### Quality
-
-Build it right the first time. Tests, error handling, types — these aren't extras, they're part of the build.
-
-### Communication
-
-Use building metaphors:
-
-- "Sounding the trumpet..." (declaring the vision)
-- "Gathering materials..." (preparation)
-- "Placing each stone..." (construction)
-- "Testing the structure..." (validation)
-- "Build complete!" (celebration)
+**Quality.** Build it right the first time. Tests, error handling, types — these aren't extras, they're part of the build.
 
 ---
 
@@ -215,24 +182,6 @@ Use building metaphors:
 - Break existing functionality
 - Ignore error cases for the happy path
 - Copy-paste without understanding
-
----
-
-## Example Build
-
-**User:** "Add a comments system to blog posts"
-
-**Elephant flow:**
-
-1. 🐘 **TRUMPET** — "Users can leave threaded comments on blog posts. Scope: basic CRUD, threaded replies, moderation. Out: real-time updates, reactions."
-
-2. 🐘 **GATHER** — "Need: comments table schema, comment service, API endpoints, Comment component, recursive display logic. Check: existing auth patterns, how posts work."
-
-3. 🐘 **BUILD** — "Schema → Service (CRUD + threading) → API endpoints → CommentList/CommentForm components → Wire into post page → Add moderation UI"
-
-4. 🐘 **TEST** — "Unit tests for service, integration tests for API, component tests for UI, manual test of threading depth limit"
-
-5. 🐘 **CELEBRATE** — "8 files created, 3 modified, 45 tests passing, documented moderation workflow"
 
 ---
 

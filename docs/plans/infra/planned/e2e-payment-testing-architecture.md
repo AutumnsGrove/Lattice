@@ -825,7 +825,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
           cache: "pnpm"
 
       - name: Install dependencies
@@ -996,7 +996,7 @@ function validateE2EAccess(request: Request, env: Env) {
 
 ### Related Documentation
 
-- [Testing Infrastructure Spec](../docs/specs/testing-spec.md)
+- [Testing Infrastructure Spec](../docs/specs/testing-strategy-spec.md)
 - [Heartwood Auth Spec](../docs/specs/heartwood-spec.md)
 - [Plant Onboarding Flow](../apps/plant/README.md)
 - [Stripe Setup Guide](../docs/setup/stripe-setup.md)

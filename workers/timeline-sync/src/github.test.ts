@@ -42,8 +42,6 @@ function createMockConfig(overrides: Partial<TenantConfig> = {}): TenantConfig {
 		reposExclude: null,
 		timezone: "UTC",
 		ownerName: null,
-		githubTokenEncrypted: null,
-		openrouterKeyEncrypted: null,
 		...overrides,
 	};
 }

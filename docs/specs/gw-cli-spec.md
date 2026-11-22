@@ -459,51 +459,155 @@ gw health --json
 
 ### Tenant Commands (`gw tenant`)
 
-These commands wrap the logic from the `grove-account-deletion` skill and make it CLI-accessible.
+Inspection and the suspension lever. Built for abuse response: when a spam tenant
+is publishing, you need to see what it is and take it offline in seconds, without
+writing SQL from memory.
 
 ```bash
-# Look up tenant info
-gw tenant autumn                      # By subdomain
-gw tenant --email user@example.com    # By email
-gw tenant --id abc-123                # By ID
+# List tenants, newest first. Active only by default.
+gw tenant list
+# > SUBDOMAIN    EMAIL                    PLAN      POSTS  SIGNED UP  LAST PUBLISH
+# > ────────────────────────────────────────────────────────────────────────────
+# > tianjidu     saliowawa@gmail.com      wanderer  1      20d ago    20d ago
+# > autumn       autumnbrown23@pm.me      evergreen 13     10mo ago   4mo ago
 
-# Get tenant stats
-gw tenant stats autumn
-# > Tenant: autumn (autumn.grove.place)
-# > Plan: oak
-# > Created: 2025-11-24
-# > ───────────────────────
-# > Posts: 47
-# > Pages: 12
-# > Media: 234 files (1.2 GB)
-# > Sessions: 3 active
-# > ───────────────────────
-# > Storage used: 1.45 GB of 20 GB
+gw tenant list --inactive     # suspended tenants only
+gw tenant list --all          # everyone, including suspended
+gw tenant list --free         # wanderer tier only
+gw tenant list --limit 100
 
-# Create a new tenant (interactive wizard)
-gw tenant create
-# > Subdomain: newblog
-# > Display name: My New Blog
-# > Email: user@example.com
-# > Plan [seedling/sapling/oak/evergreen]: sapling
-# > ✓ Created tenant newblog (id: xxx-xxx)
+# One tenant, everything we know
+gw tenant show autumn
+gw tenant show --email user@example.com
 
-# Delete a tenant (DANGEROUS - requires --write --force)
-gw tenant delete --write --force autumn
-# > ⚠️  This will DELETE all data for tenant 'autumn':
-# >    - 47 posts
-# >    - 12 pages
-# >    - 234 media files
-# >    - 3 sessions
-# >    - All settings, products, orders, subscriptions
-# >
-# > Type 'DELETE autumn' to confirm: DELETE autumn
-# > ✓ Tenant deleted
+# Take a site down (reversible — content is untouched)
+gw tenant suspend tianjidu --write --reason "link farm"
 
-# Preview deletion (no --write, shows what would be deleted)
-gw tenant delete autumn
-# > Would delete: 47 posts, 12 pages, 234 media files...
+# Put it back
+gw tenant resume tianjidu --write
 ```
+
+`show` reports the D1 row, post counts and publish dates, and the Better Auth
+identity behind the tenant — including `banned` and `ban_reason`, which is the
+flag nothing else in the codebase currently writes.
+
+`suspend` and `resume` set `tenants.active`, which every tenant lookup already
+filters on (`WHERE subdomain = ? AND active = 1`). **Both probe the site
+afterwards and print the status code they got**, because a suspended tenant can
+keep serving from the `TenantDO` cache until it is flushed (see #1677). A 200
+after a suspend means: flush the DO, don't assume it worked.
+
+`--reason` is recorded in `audit_log` (category `admin`, action `tenant_suspend`
+or `tenant_resume`, actor `gw`). An empty reason is recorded as
+`(no reason given)` rather than omitted.
+
+Safety: `list` and `show` are READ. `suspend` and `resume` are WRITE.
+
+#### `gw tenant create` — fixtures, not onboarding
+
+```bash
+# What would it write? Changes nothing, needs no --write.
+gw tenant create --subdomain autumn-test --email autumn+fixtures@grove.place \
+  --plan seedling --dry-run
+
+# A two-day-old fixture (young enough for the nofollow/young policy)
+gw tenant create --subdomain autumn-test --email autumn+fixtures@grove.place \
+  --plan wanderer --created-at 2d --write
+
+# A mature one on a paid tier
+gw tenant create --subdomain old-fixture --email fixtures@grove.place \
+  --plan oak --created-at 2026-01-15 --write
+```
+
+`--created-at` takes a unix timestamp, `Nd` for N days ago, or `YYYY-MM-DD` at
+midnight UTC. It exists because the link policy (#1682) decides `nofollow ugc`
+on a 14-day window, and testing both sides of that should not take two weeks.
+
+**This bypasses the abuse gates on purpose, and that is the entire point.** It
+skips Turnstile (#1678) and, unless `--force-identity "<reason>"` is given,
+refuses an address on the signup deny list (#1681). Bypassing it records the
+reason in `audit_log`. The command exists so that fixtures stop being live
+tenants: before it, the only way to make a tenant was to walk the real signup,
+so every abuse fixture was made by a bot and every removal test ran against
+whatever happened to be in production.
+
+It calls the **same** `createTenant()` Plant calls — moved into the engine for
+this reason (`libs/engine/src/lib/server/tenants/create-tenant.ts`). A fixture
+that is not the same shape as a real tenant makes the removal test meaningless.
+
+Where it goes: `gw` → `POST /tenant/create` on the Durable Objects worker,
+behind `OPS_ADMIN_KEY`, the same shape as `/tenant/flush/:subdomain`. The
+endpoint lives there rather than on a tenant-facing app because it *is* a signup
+bypass. `--endpoint` or `$GROVE_OPS_ENDPOINT` says which deployment to talk to;
+there is no built-in default, because guessing a worker hostname is how a
+maintenance command talks to the wrong one.
+
+Safety: `create` is WRITE (`--write`), except `--dry-run` which writes nothing.
+`--json` returns `{ subdomain, tenantId, written, plan, steps,
+identityBlockOverridden }`.
+
+Verified afterwards the same way `suspend` is: the command probes the new site
+and prints the status code, so "the row exists" and "it serves" are not confused.
+
+#### `gw tenant delete` — permanent removal
+
+```bash
+# dry run: per-table counts and the login identity, deletes nothing
+gw tenant delete spamgarden --reason "link farm"
+
+# destroy, citing the rule the email names
+gw tenant delete spamgarden --reason "link farm" --policy aup-1.4 --write
+
+# a deletion the person asked for
+gw tenant delete quietblog --reason "asked in email" --policy requested --write
+```
+
+`--reason` is required — it becomes the `audit_log` trail (`tenant_remove_started`
+before the sweep, `tenant_remove` after) and it is quoted verbatim in the email.
+Without `--write` you get the dry run and a hint; a removal is the one operation
+where a forgotten flag must not mean "destroy".
+
+`--policy` selects the citation the email carries — `aup-1.4` (spam and link
+schemes, the default), `aup-1.5` (impersonation), `aup-1.9` (an automated or
+extra account), or `requested`. An unknown value is a 400, not a fallback: an
+email naming the wrong rule is worse than one naming none.
+
+**The sweep runs in the Worker, not here.** `POST /tenant/remove` calls
+`removeTenant()` with the engine, curios and observability bindings. That is not
+a preference: tenant rows live in 91 tables across three databases, and driving
+it from the CLI means one subprocess per statement — which timed out mid-sweep on
+2026-11-17 and left `pages`, `settings` and `billing` deleted with the `tenants`
+row still present. The half-removed tenant the `leftovers` check exists to warn
+about, produced by a timeout.
+
+The worker evicts the TenantDO, purges R2 (`tenants/<id>/`, paged — `list()`
+truncates at 1000 keys), deletes the `groveauth` identity, and emails the address
+on file.
+
+The identity is resolved **before** the sweep, while `engine.users.groveauth_id`
+still exists, and deleted only when the login owns no other blog — otherwise the
+person is locked out of a garden that is still theirs, and the response says
+which one. The email is only sent when the sweep was clean: telling somebody
+their account is gone while rows remain is the #1737 mistake in a medium they
+keep. Anything not done appears in `notDone` and is printed as a warning.
+
+Afterwards it prints the summary, warns about leftovers or failures, and probes
+the site. A `302` to `/verify` means the Turnstile gate answered rather than the
+tenant — see #1734.
+
+**The probe asks an origin, and that origin defaults to production.** `SITE_ORIGIN`
+on the ops worker is a template whose only variable part is `{subdomain}`. Unset,
+it is `https://{subdomain}.grove.place/` — the question a removal has to answer,
+because "still serving through the edge cache" is the bug this step exists for.
+The dev stack sets it to `http://localhost:5173/?subdomain={subdomain}`, so a
+local removal probes the local site instead of looking for a fixture that was
+never in the production zone. A template without `{subdomain}` is refused
+outright; probing one fixed host would confirm a site nobody asked about.
+
+When the origin is not production, the summary says so in as many words. That is
+the point: **a green local run proves the local site is clear, a beta run proves
+beta, and only a production run proves production.** Read which one you did
+before you tell anyone their grove is gone.
 
 ### Email Test Commands (`gw email`)
 
@@ -1542,10 +1646,6 @@ id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
 name = "groveauth"
 id = "45eae4c7-8ae7-4078-9218-8e1677a4360f"
 
-[databases.clearing]
-name = "daily-clearing-db"
-id = "1fb94ac6-53c6-49d6-9388-a6f585f86196"
-
 [databases.amber]
 name = "amber"
 id = "f688021b-a986-495a-94bb-352354768a22"
@@ -1943,49 +2043,6 @@ gw mcp serve
 
 ---
 
-## Integration with grove-find
-
-> **Note:** grove-find has been rewritten as a Python CLI (`tools/grove-find/`).
-> The bash version (`grove-find.sh`) is archived at `archive/grove-find-bash/`.
-> Use `uv run --project tools/grove-find gf --agent <command>` instead.
-
-The `gw` CLI integrates with the grove-find toolkit. These shell aliases are available locally:
-
-```bash
-# Shell aliases (local dev only — not available in remote/web sessions)
-
-# ─── Cloudflare Shortcuts ───
-gwd                    # Alias for: gw db
-gwq "sql"              # Quick query: gw db query "sql"
-gwt                    # Tables: gw db tables
-gwc tenant             # Cache purge: gw cache purge --tenant
-gws                    # Status: gw status
-
-# ─── Git Shortcuts ───
-gwgs                   # Git status: gw git status
-gwgl                   # Git log: gw git log
-gwgd                   # Git diff: gw git diff
-gwgc "msg"             # Git commit: gw git commit --write -m "msg"
-gwgp                   # Git push: gw git push --write
-gwgsave                # Quick save: gw git save --write
-gwgsync                # Sync with main: gw git sync --write
-
-# ─── GitHub Shortcuts ───
-gwpr                   # PR list: gw gh pr list
-gwprc                  # PR create: gw gh pr create --write
-gwprv 123              # PR view: gw gh pr view 123
-gwiss                  # Issue list: gw gh issue list
-gwissv 348             # Issue view: gw gh issue view 348
-
-# ─── Dev Shortcuts ───
-gwdev                  # Start dev: gw dev
-gwtest                 # Run tests: gw test
-gwbuild                # Build: gw build
-gwci                   # Run CI locally: gw ci
-```
-
----
-
 ## Directory Structure
 
 ```
@@ -2148,8 +2205,9 @@ tools/grove-wrap/
 
 ### Phase 6: Tenant Management & Email (Week 6)
 
-- [ ] `gw tenant create` - Interactive creation wizard
-- [ ] `gw tenant delete` - Safe deletion with CASCADE preview
+- [x] `gw tenant create` - From flags, for fixtures (#1710). Not a wizard:
+  a wizard that creates tenants is a signup UI with none of the gates.
+- [x] `gw tenant delete` - dry run with per-table counts, `--write` to remove
 - [ ] `gw email test` - Test email sending
 - [ ] `gw email status` - Email config check
 - [ ] `gw deploy` - Deployment helpers
@@ -2169,7 +2227,6 @@ tools/grove-wrap/
 
 - [ ] MCP server implementation
 - [ ] Agent mode safety restrictions
-- [ ] grove-find Python CLI integration (`gwq`, `gwc`, `gws`, etc.)
 - [ ] Claude Code settings documentation
 - [ ] Full test coverage
 
@@ -2356,7 +2413,6 @@ tools/grove-wrap/
 - **Issue #348**: Database safety layer integration (parent issue)
 - **Issue #527**: Cache management admin tool (CLI implementation)
 - **database-safety.ts**: TypeScript safety layer (pattern to port)
-- **tools/grove-find/**: Python CLI search toolkit (integration target)
 
 ---
 

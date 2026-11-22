@@ -25,9 +25,9 @@ Instrument each boundary. What goes in? What comes out? Where does the data chan
 ## Route Loading Issues
 
 ```bash
-gf --agent search "+server.ts"            # API routes
-gf --agent search "+page.server.ts"       # Page loads
-gf --agent search "export function POST"  # Specific method handler
+rg "+server.ts"            # API routes
+rg "+page.server.ts"       # Page loads
+rg "export function POST"  # Specific method handler
 ```
 
 Common causes:
@@ -39,10 +39,10 @@ Common causes:
 ## D1 Database Issues
 
 ```bash
-gf --agent search "CREATE TABLE"
-gf --agent search "ALTER TABLE"
-gf --agent search "platform.env.DB"
-gf --agent search "wrangler.toml"
+rg "CREATE TABLE"
+rg "ALTER TABLE"
+rg "platform.env.DB"
+rg "wrangler.toml"
 ```
 
 Common causes:
@@ -55,9 +55,9 @@ Common causes:
 ## KV Cache Issues
 
 ```bash
-gf --agent search "CACHE.get"
-gf --agent search "CACHE.put"
-gf --agent search "cache.delete"
+rg "CACHE.get"
+rg "CACHE.put"
+rg "cache.delete"
 ```
 
 Common causes:
@@ -70,9 +70,9 @@ Common causes:
 ## Auth / Session Issues
 
 ```bash
-gf --agent search "validateSession"
-gf --agent search "getSession"
-gf --agent func "requireAuth"
+rg "validateSession"
+rg "getSession"
+rg -n "(function|const|fn) getSession"
 ```
 
 Common causes:
@@ -85,10 +85,10 @@ Common causes:
 ## Build / Deploy Issues
 
 ```bash
-gf --agent search "svelte.config"
-gf --agent search "vite.config"
-gf --agent changed
-gf diff-summary
+rg "svelte.config"
+rg "vite.config"
+git diff --name-only
+git diff-summary
 ```
 
 Common causes:

@@ -86,7 +86,6 @@ const WAYSTONE_ARTICLE_SLUGS = [
 	"custom-fonts",
 	"what-is-rings",
 	"what-are-sparks",
-	"what-is-journey",
 	"what-is-gallery",
 	"what-are-curios",
 	"how-grove-protects-your-content",

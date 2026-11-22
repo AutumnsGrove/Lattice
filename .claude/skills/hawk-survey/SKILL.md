@@ -5,301 +5,214 @@ description: Comprehensive security auditor that surveys entire applications or 
 
 # Hawk Survey
 
-The hawk circles high above the grove, patient and unhurried, seeing the entire landscape at once. Every path a wanderer might walk. Every clearing where something could be exposed. Every shadow where something might hide. The hawk doesn't rummage through drawers like the Raccoon or harden individual walls like the Turtle — it surveys the _entire_ territory, building a complete picture of what's strong and what's vulnerable. Only when it has seen everything does it descend, landing beside the grove keeper with a full assessment: here is what I found, here is what it means, here is what to do about it.
+```
+CIRCLE → DESCEND → ASSESS → REPORT → RETURN
+```
 
-The hawk is an independent assessor. It doesn't fix what it finds during the survey — that comes later, as a separate pass. First the diagnosis, complete and honest. Then the treatment, methodical and thorough. Two circles: one to see, one to act.
+**IMPORTANT:** The Hawk does NOT fix things during its first pass. Circle 1 is assessment only — a complete report. Circle 2 (remediation) happens only after the findings are reviewed and approved. Never mix assessment and remediation in the same pass.
+
+**Pair with:** `turtle-harden` for hardening remediation, `raccoon-audit` for secrets, `spider-weave` for auth architecture, `beaver-build` for security regression tests.
 
 ## When to Activate
 
-- User says "full security audit" or "comprehensive security review"
-- User says "assess the security of..." or "security assessment"
-- User calls `/hawk-survey` or mentions hawk/survey/audit
-- Before a major release or launch (production readiness)
-- After a security incident (what else might be exposed?)
-- When onboarding a new codebase (what's the security posture?)
-- Periodic security review (quarterly, annually)
-- When the scope is bigger than a single feature — entire app, subsystem, or service
-- User says "pentest" or "threat model" or "security posture"
-- When gathering-security feels too implementation-focused and you need assessment first
-
-**IMPORTANT:** The Hawk does NOT fix things during its first pass. Circle 1 is assessment only — a complete report. Circle 2 (remediation) happens only after the grove keeper reviews and approves the findings. Never mix assessment and remediation in the same pass.
-
-**Pair with:** `turtle-harden` for remediation of hardening findings, `raccoon-audit` for secret rotation and cleanup, `spider-weave` for auth architecture fixes, `beaver-build` for security regression tests after remediation
-
----
-
-## The Survey
-
-```
-CIRCLE → DESCEND → ASSESS → REPORT → RETURN
-   ↓         ↓         ↓        ↓        ↓
- Threat    Map       Audit    Write    Fix
- Model    Attack    Against   Formal   (approved
- First    Surface   Checklist Report   findings)
-```
-
-### Phase 1: CIRCLE
-
-_The hawk rises on thermals, spiraling higher, until the entire grove spreads out below..._
-
-Before examining anything in detail, understand the system at altitude. What is this thing? What does it protect? Who threatens it? This phase produces a **threat model** that guides everything else.
-
-- Define the audit scope: target, boundary, environment, tech stack, access level
-- Identify all major subsystems (auth, routes, admin, APIs, storage, infra, integrations)
-- Apply STRIDE threat modeling to each major component — Spoofing, Tampering, Repudiation, Info Disclosure, Denial of Service, Elevation of Privilege
-- Map all trust boundaries where validation/auth must happen
-- Classify all data the system handles (CRITICAL → LOW)
-
-**Deep reference:** Load `references/threat-modeling.md` for the full STRIDE table, scope definition template, trust boundary checklist, data classification guide, and threat actor profiles.
-
----
-
-### Phase 2: DESCEND
-
-_The hawk folds its wings and drops, plunging toward the landscape it surveyed from above — now seeing every blade of grass..._
-
-Map the concrete attack surface. For every component identified in Phase 1, catalog the actual entry points, data flows, and security controls.
-
-- Inventory every route and endpoint: methods, auth requirements, tenant scoping, input types, risk level
-- Map the complete authentication and session architecture (including Heartwood/PKCE flow)
-- Document the authorization model for every protected resource — flag layout-only guards
-- Trace sensitive data through its full lifecycle: entry → processing → storage → retrieval → output
-- Catalog infrastructure (Workers, D1, R2, KV, service bindings, secrets) and their configurations
-- Audit the dependency surface with `pnpm audit` and review supply chain risks
-
-**Deep reference:** Load `references/attack-surface-mapping.md` for route inventory templates, auth flow diagrams, authorization pattern checklist, data flow tracing, infrastructure inventory tables, and discovery commands.
-
----
-
-### Phase 3: ASSESS
-
-_Sharp eyes fixed, the hawk examines every detail — nothing is too small to notice, nothing too well-hidden to find..._
-
-This is the core audit phase. Systematically evaluate the mapped attack surface against security standards across **15 audit domains**. For each domain: check every item, record findings with severity and evidence (file:line), mark PASS / FAIL / PARTIAL / NEEDS-VERIFICATION. Complete the full checklist — don't stop at the first finding.
-
-**The 15 Audit Domains:**
-
-1. **Authentication Security** — hashing, session management, OAuth/PKCE, JWT, brute-force protection
-2. **Authorization & Access Control** — default deny, IDOR, horizontal/vertical escalation, RBAC
-3. **Input Validation & Injection** — allowlists, parameterized queries, XSS prevention, path traversal
-4. **Data Protection** — TLS, secrets management, logging hygiene, PII minimization, GDPR
-5. **HTTP Security** — CSP, HSTS, CORS, cache control, security headers
-6. **CSRF Protection** — anti-CSRF tokens, SameSite cookies, SvelteKit `checkOrigin`
-7. **Session & Cookie Security** — HttpOnly, Secure, SameSite, scoping, expiry
-8. **File Upload / Storage Security** — magic bytes validation, R2 storage isolation via Amber SDK (FileManager, QuotaManager), quota bypass attempts, presigned URL generation, SVG/EXIF sanitization
-9. **Rate Limiting & Resource Controls** — auth endpoints, API limits, query bounds, body size
-10. **Multi-Tenant Isolation** _(Grove-specific)_ — tenant scoping on every GroveDatabase query via parameterized statements, R2/KV isolation via Amber key prefixes, cache keys include tenant ID, GroveContext properly initialized per-request
-11. **Infrastructure Abstraction** _(Grove-specific)_ — are GroveDatabase/GroveStorage/GroveKV/GroveServiceBus interfaces used correctly? Any bypass of Server SDK to raw D1/R2/KV? Type safety at boundaries via Rootwork (parseFormData, safeJsonParse, isRedirect/isHttpError)?
-12. **Cloudflare & Infrastructure** _(Grove-specific)_ — secrets, service bindings, WAF, env separation
-13. **Heartwood Auth Flow** _(Grove-specific)_ — PKCE correctness, token exchange, cookie domain
-14. **Exotic Attack Vectors** — prototype pollution, timing attacks, SSRF, cache poisoning, ReDoS
-15. **Dependency & Supply Chain** — `pnpm audit`, lock file, postinstall scripts, SRI hashes
-
-**Deep reference:** Load `references/audit-domains.md` for all 15 complete checklists with every line item.
-
----
-
-### Phase 4: REPORT
-
-_The hawk lands on the keeper's arm, calm and certain, and speaks everything it has seen..._
-
-Compile all findings into a single, comprehensive security report — the Hawk's primary deliverable.
-
-- Write an executive summary with overall risk rating and top 3 risks
-- Include the threat model from Phase 1 (STRIDE table, trust boundaries, data classification)
-- Document every finding with: severity, domain, location (file:line), confidence, OWASP category, description, evidence, impact, and remediation
-- Produce a domain scorecard across all 14 domains
-- List items requiring manual verification (can't confirm from code alone)
-- Provide a remediation priority timeline: immediate / short-term / medium-term / long-term
-- Acknowledge positive security practices observed
-
-**Report location:** `docs/security/hawk-report-[date].md`
-
-**Deep reference:** Load `references/report-template.md` for the complete report template, severity classification table, confidence rating guide, and OWASP Top 10 coverage map.
-
----
-
-### Phase 5: RETURN
-
-_The hawk circles once more — this time not to survey, but to strike. Each finding, methodically addressed..._
-
-This phase activates ONLY after the grove keeper has reviewed the report and approved remediation.
-
-- Confirm which findings to address now vs. defer vs. delegate to a specialist animal
-- Work through approved findings in priority order, one at a time — fix only, no new features
-- Run verification after each fix: tests, type-check, dependency audit
-- Update the report with remediation status for every finding (FIXED / DEFERRED / DELEGATED / ACCEPTED)
-- Document remaining risk for anything not remediated
-
-**Deep reference:** Load `references/remediation-guide.md` for routing table (which animal handles which findings), fix-verify workflow, handoff templates for turtle/raccoon/spider/beaver, and remediation summary format.
-
----
+- "Full security audit", "security assessment", "threat model", "pentest", "security posture"
+- Before a major release or launch
+- After a security incident — what else might be exposed?
+- Onboarding a new codebase
+- When the scope is bigger than one feature: an app, a subsystem, a service
+- When `gathering-security` is too implementation-focused and you need assessment first
 
 ## Reference Routing Table
 
-| Phase   | Reference                              | Load When                               |
+| Phase   | Reference                              | Load when                               |
 | ------- | -------------------------------------- | --------------------------------------- |
-| CIRCLE  | `references/threat-modeling.md`        | Always (threat model guides everything) |
-| DESCEND | `references/attack-surface-mapping.md` | Always (need to map before auditing)    |
-| ASSESS  | `references/audit-domains.md`          | Always (core of the assessment)         |
-| REPORT  | `references/report-template.md`        | When writing formal report              |
-| RETURN  | `references/remediation-guide.md`      | When planning remediation handoffs      |
+| CIRCLE  | `references/threat-modeling.md`        | Always — the threat model guides everything |
+| DESCEND | `references/attack-surface-mapping.md` | Always — map before auditing            |
+| ASSESS  | `references/audit-domains.md`          | Always — core of the assessment         |
+| REPORT  | `references/report-template.md`        | Writing the formal report               |
+| RETURN  | `references/remediation-guide.md`      | Planning remediation handoffs           |
+
+---
+
+## Phase 1: CIRCLE
+
+Understand the system at altitude before examining anything. What is this thing? What does it protect? Who threatens it? This produces the **threat model** that guides everything else.
+
+- Define scope: target, boundary, environment, tech stack, access level
+- Identify major subsystems (auth, routes, admin, APIs, storage, infra, integrations)
+- Apply STRIDE to each — Spoofing, Tampering, Repudiation, Info Disclosure, DoS, Elevation of Privilege
+- Map every trust boundary where validation or auth must happen
+- Classify the data handled (CRITICAL → LOW)
+
+`references/threat-modeling.md` — STRIDE table, scope template, trust boundary checklist, data classification, threat actor profiles.
+
+---
+
+## Phase 2: DESCEND
+
+Map the concrete attack surface: entry points, data flows, controls.
+
+- Inventory every route and endpoint: methods, auth requirements, tenant scoping, input types, risk
+- Map the authentication and session architecture, including the Heartwood/PKCE flow
+- Document the authorization model per protected resource — flag layout-only guards
+- Trace sensitive data: entry → processing → storage → retrieval → output
+- Catalog infrastructure (Workers, D1, R2, KV, service bindings, secrets) and its configuration
+- Audit the dependency surface with `pnpm audit`, review supply chain risk
+
+`references/attack-surface-mapping.md` — route inventory templates, auth flow diagrams, authorization checklist, data flow tracing, infrastructure tables, discovery commands.
+
+---
+
+## Phase 3: ASSESS
+
+The core audit. Evaluate the mapped surface across **15 domains**. For each item: check it, record findings with severity and evidence (file:line), mark PASS / FAIL / PARTIAL / NEEDS-VERIFICATION. Complete the whole checklist — don't stop at the first finding.
+
+1. **Authentication** — hashing, sessions, OAuth/PKCE, JWT, brute force
+2. **Authorization & Access Control** — default deny, IDOR, horizontal/vertical escalation, RBAC
+3. **Input Validation & Injection** — allowlists, parameterized queries, XSS, path traversal
+4. **Data Protection** — TLS, secrets, logging hygiene, PII minimisation, GDPR
+5. **HTTP Security** — CSP, HSTS, CORS, cache control, headers
+6. **CSRF** — tokens, SameSite cookies, SvelteKit `checkOrigin`
+7. **Session & Cookie Security** — HttpOnly, Secure, SameSite, scoping, expiry
+8. **File Upload / Storage** — magic bytes, R2 isolation via Amber (FileManager, QuotaManager), quota bypass, presigned URLs, SVG/EXIF sanitisation
+9. **Rate Limiting & Resource Controls** — auth endpoints, API limits, query bounds, body size
+10. **Multi-Tenant Isolation** _(Grove)_ — tenant scoping on every GroveDatabase query, R2/KV isolation via Amber key prefixes, tenant IDs in cache keys, GroveContext initialised per request
+11. **Infrastructure Abstraction** _(Grove)_ — GroveDatabase/GroveStorage/GroveKV/GroveServiceBus used correctly, no bypass to raw D1/R2/KV, Rootwork type safety at boundaries
+12. **Cloudflare & Infrastructure** _(Grove)_ — secrets, service bindings, WAF, environment separation
+13. **Heartwood Auth Flow** _(Grove)_ — PKCE correctness, token exchange, cookie domain
+14. **Exotic Vectors** — prototype pollution, timing attacks, SSRF, cache poisoning, ReDoS
+15. **Dependency & Supply Chain** — `pnpm audit`, lockfile, postinstall scripts, SRI
+
+`references/audit-domains.md` — all 15 checklists, every line item.
+
+---
+
+## Phase 4: REPORT
+
+One comprehensive report is the Hawk's primary deliverable.
+
+- Executive summary: overall risk rating and top 3 risks
+- The threat model from Phase 1 (STRIDE table, trust boundaries, data classification)
+- Every finding with severity, domain, location (file:line), confidence, OWASP category, description, evidence, impact, remediation
+- A domain scorecard
+- Items needing manual verification — what code alone cannot settle
+- Remediation timeline: immediate / short-term / medium-term / long-term
+- Positive security practices observed
+
+**Report location:** `docs/security/hawk-report-[date].md`
+
+`references/report-template.md` — report template, severity classification, confidence guide, OWASP coverage map.
+
+---
+
+## Phase 5: RETURN
+
+**Only after the report has been reviewed and remediation approved.**
+
+- Confirm what to fix now, defer, or delegate to a specialist
+- Work through approved findings in priority order — fix only, no new features
+- Verify after each fix: tests, type-check, dependency audit
+- Update every finding's status (FIXED / DEFERRED / DELEGATED / ACCEPTED)
+- Document remaining risk
+
+`references/remediation-guide.md` — routing table (which skill handles which finding), fix-verify workflow, handoff templates, summary format.
 
 ---
 
 ## Hawk Rules
 
-### Two Circles, Never One
+**Two circles, never one.** Assessment first, remediation second. Mixing them means fixing the first thing you find while something worse sits unexamined.
 
-The first circle is assessment. The second circle is remediation. Never mix them. Assessment must be complete and honest before any fixing begins. This prevents tunnel vision — fixing the first thing you find while missing something worse.
+**Altitude before depth.** Always build the threat model first. Otherwise hours go into low-risk corners while critical paths go unread.
 
-### Altitude Before Depth
+**Evidence, not opinion.** "The auth looks weak" is not a finding. "Session cookies lack HttpOnly at `hooks.server.ts:47`" is a finding.
 
-Always start with the threat model (Phase 1). Understanding _what matters_ prevents spending hours auditing low-risk areas while critical paths go unexamined. The hawk circles high first, then descends.
+**Severity honesty.** Rate by real impact, not theoretical worst case:
 
-### Evidence, Not Opinion
+| Severity     | Criteria                                                                                        |
+| ------------ | ----------------------------------------------------------------------------------------------- |
+| **CRITICAL** | Exploitable now; full compromise, data breach, or auth bypass with no extra access needed       |
+| **HIGH**     | Exploitable with conditions; significant data exposure or privilege escalation                  |
+| **MEDIUM**   | Specific conditions required, limited impact, or a defence-in-depth gap other layers still cover |
+| **LOW**      | Best-practice violation, hardening opportunity, minimal real-world impact                       |
+| **INFO**     | Observation, positive finding, or future recommendation                                         |
 
-Every finding needs evidence: a file path, a line number, a code snippet, a configuration excerpt. "The auth looks weak" is not a finding. "Session cookies lack HttpOnly flag at `hooks.server.ts:47`" is a finding.
+**Confidence ratings.** Be honest about what code review can settle:
 
-### Severity Honesty
-
-Rate findings by actual impact, not theoretical worst-case:
-
-| Severity     | Criteria                                                                                                           |
-| ------------ | ------------------------------------------------------------------------------------------------------------------ |
-| **CRITICAL** | Exploitable now, leads to full compromise, data breach, or auth bypass. No additional access needed.               |
-| **HIGH**     | Exploitable with some conditions, leads to significant data exposure or privilege escalation.                      |
-| **MEDIUM**   | Requires specific conditions to exploit, limited impact, or defense-in-depth gap where other layers still protect. |
-| **LOW**      | Minor issue, best practice violation, or hardening opportunity with minimal real-world impact.                     |
-| **INFO**     | Observation, positive finding, or recommendation for future improvement.                                           |
-
-### Confidence Ratings
-
-Be honest about what you can and cannot determine from code review:
-
-| Confidence | Meaning                                                                          |
-| ---------- | -------------------------------------------------------------------------------- |
-| **HIGH**   | Can confirm from code alone — the vulnerability or its absence is clear          |
-| **MEDIUM** | Likely based on code patterns, but runtime behavior could differ                 |
-| **LOW**    | Needs live testing, production config access, or runtime verification to confirm |
-
-### Communication
-
-Use raptor metaphors:
-
-- "Circling above..." (beginning threat model, surveying the landscape)
-- "Descending to examine..." (moving from threat model to attack surface mapping)
-- "Sharp eyes on..." (assessing a specific domain)
-- "Spotted..." (found a finding)
-- "The hawk has spoken." (report delivered)
-- "Returning to strike..." (beginning remediation)
-- "The grove is surveyed." (audit complete)
+| Confidence | Meaning                                                             |
+| ---------- | ------------------------------------------------------------------- |
+| **HIGH**   | Confirmable from code alone — the issue or its absence is clear      |
+| **MEDIUM** | Likely from code patterns, but runtime behaviour could differ        |
+| **LOW**    | Needs live testing, production config, or runtime verification       |
 
 ---
 
-## Anti-Patterns
+## Anti-patterns
 
-**The hawk does NOT:**
+The Hawk does NOT:
 
-- Fix things during assessment (two circles, never one)
-- Skip the threat model because "just check everything" (altitude before depth)
-- Report findings without evidence (every finding needs a file:line)
-- Inflate severity to seem thorough (honesty over impressiveness)
-- Claim certainty about things that need live verification (use confidence ratings)
-- Duplicate what Raccoon or Turtle do (the hawk assesses; they remediate)
-- Produce a report and disappear (remediation pass completes the cycle)
-- Ignore positive findings (acknowledge what's done well)
-- Rush through domains to finish faster (thoroughness is the hawk's nature)
-- Modify the threat model during remediation (if new threats emerge, note them for the next survey)
-
----
-
-## Example Survey
-
-**User:** "Run a full security audit on the Plant onboarding service"
-
-**Hawk flow:**
-
-1. **CIRCLE** — "Circling above Plant... STRIDE analysis shows: auth callback is the highest-risk component (Spoofing + Elevation). Payment flow handles Stripe tokens (Tampering + Info Disclosure). Onboarding creates new tenants (Elevation — can someone create a tenant they shouldn't?). Trust boundaries: Browser → SvelteKit → Heartwood (service binding) → D1. Data classification: payment tokens (CRITICAL), email/name (HIGH), onboarding progress (LOW)."
-
-2. **DESCEND** — "Descending to map the surface... 14 routes found, 6 API endpoints, 3 form actions. Auth callback at `/auth/callback/+server.ts` accepts code and state params. Payment endpoint at `/api/checkout/+server.ts` handles Stripe session creation. File upload at `/api/avatar/+server.ts` accepts images. Service bindings: AUTH (Heartwood), MAIN_DB (D1). R2 bucket: plant-uploads."
-
-3. **ASSESS** — "Sharp eyes on each domain...
-   - Auth: PKCE flow correct, but session cookie missing SameSite attribute (MEDIUM).
-   - Authorization: Onboarding steps don't verify sequential completion — user can skip to payment (HIGH).
-   - Input: Avatar upload validates extension but not magic bytes (MEDIUM).
-   - Multi-tenant: New tenant creation doesn't rate-limit — bulk account creation possible (HIGH).
-   - Infrastructure: wrangler.toml has a commented-out secret value (LOW).
-   - 23 total findings across 14 domains."
-
-4. **REPORT** — "Writing assessment to `docs/security/hawk-report-2026-02-06.md`... Overall risk: HIGH. 0 Critical, 3 High, 8 Medium, 7 Low, 5 Info. Top risks: (1) Onboarding step bypass, (2) Bulk account creation, (3) Avatar magic byte validation."
-
-5. **RETURN** — _(After grove keeper reviews)_ "Returning to strike... Fixing 3 High findings first. Step bypass: added sequential validation middleware. Rate limiting: added per-IP limit of 3 accounts per hour. Avatar: added magic byte validation. All fixes verified, tests passing. 8 Medium findings deferred to next sprint. The grove is surveyed."
+- fix things during assessment
+- skip the threat model to "just check everything"
+- report findings without a file:line
+- inflate severity to seem thorough
+- claim certainty where live verification is needed
+- duplicate Raccoon or Turtle — the Hawk assesses, they remediate
+- produce a report and disappear; the remediation pass completes the cycle
+- ignore positive findings
+- modify the threat model during remediation — note new threats for the next survey
 
 ---
 
-## Quick Decision Guide
+## Quick decision guide
 
-| Situation                         | Approach                                                     |
-| --------------------------------- | ------------------------------------------------------------ |
-| "Audit everything"                | Full CIRCLE→REPORT on entire application                     |
-| "Audit this subsystem"            | Full flow, but scope to the subsystem and its boundaries     |
-| "Quick security check"            | Use `turtle-harden` instead — Hawk is for comprehensive work |
-| "Find secrets"                    | Use `raccoon-audit` instead — that's the Raccoon's specialty |
-| "Harden this feature"             | Use `turtle-harden` instead — Hawk assesses, Turtle hardens  |
-| "We had a security incident"      | Full flow with extra focus on the compromised area           |
-| "Pre-launch review"               | Full flow — this is exactly what the Hawk is for             |
-| "Periodic security review"        | Full flow — compare against previous reports                 |
-| Found something during assessment | Log it as a finding, don't stop to fix it (two circles)      |
-| Can't assess from code alone      | Mark as NEEDS-VERIFICATION with confidence rating            |
+| Situation                         | Approach                                              |
+| --------------------------------- | ----------------------------------------------------- |
+| "Audit everything"                | Full CIRCLE→REPORT on the whole application           |
+| "Audit this subsystem"            | Full flow, scoped to the subsystem and its boundaries |
+| "Quick security check"            | `turtle-harden` instead — Hawk is comprehensive work  |
+| "Find secrets"                    | `raccoon-audit` — that's its specialty                |
+| "Harden this feature"             | `turtle-harden` — Hawk assesses, Turtle hardens       |
+| After an incident                 | Full flow, extra focus on the compromised area        |
+| Pre-launch / periodic review      | Full flow                                             |
+| Found something mid-assessment    | Log it as a finding, don't stop to fix it             |
+| Can't assess from code alone      | NEEDS-VERIFICATION with a confidence rating           |
 
----
+## Adapting to scope
 
-## Adapting to Scope
+**Full application:** all 15 domains, complete threat model, infrastructure included.
 
-**Full Application Audit:** All 15 domains, complete threat model, infrastructure audit included. Budget: thorough.
+**Subsystem:** relevant domains only, threat model scoped to subsystem boundaries, interfaces with adjacent systems flagged for a full audit.
 
-**Subsystem Audit:** Focus on relevant domains, scope threat model to subsystem boundaries, include interfaces with adjacent systems, flag cross-boundary concerns for full audit.
-
-**Post-Incident Audit:** Start with the compromised component, expand to everything it touches (blast radius), extra attention to the attack vector used, check for lateral movement paths, flag systemic issues that enabled the incident.
+**Post-incident:** start at the compromised component, expand along blast radius, weight the attack vector used, check lateral movement paths, flag systemic causes.
 
 ---
 
-## Integration with Other Skills
+## Integration with other skills
 
-**Before the Survey:**
+**Before:** `bloodhound-scout` to understand unfamiliar structure, `eagle-architect` for existing architecture docs.
 
-- `bloodhound-scout` — Understand unfamiliar codebase structure before auditing
-- `eagle-architect` — Review architecture docs/diagrams if they exist
+**After (remediation):** `turtle-harden` for hardening, `raccoon-audit` for secrets, `spider-weave` for auth architecture, `beaver-build` for regression tests, `bee-collect` for filing deferred findings as issues.
 
-**After the Report (for remediation):**
-
-- `turtle-harden` — For hardening findings (defense-in-depth gaps, header issues, input validation)
-- `raccoon-audit` — For secret findings (rotation, git history cleaning, pre-commit hooks)
-- `spider-weave` — For auth architecture findings (flow redesign, session management)
-- `beaver-build` — For writing security regression tests after fixes
-- `bee-collect` — For creating GitHub issues from deferred findings
-
-**The Hawk does NOT invoke other animals during assessment.** Assessment is independent. Remediation recommendations reference the right animal for each fix.
+The Hawk does not invoke other animals during assessment. Assessment is independent.
 
 ---
 
-## OWASP Top 10 (2021) Coverage
+## OWASP Top 10 (2021) coverage
 
-| OWASP Category                 | Hawk Domains                                  |
+| OWASP Category                 | Hawk domains                                  |
 | ------------------------------ | --------------------------------------------- |
 | A01: Broken Access Control     | D2 (Authorization), D10 (Multi-Tenant)        |
 | A02: Cryptographic Failures    | D4 (Data Protection), D1 (Auth)               |
 | A03: Injection                 | D3 (Input Validation)                         |
-| A04: Insecure Design           | Phase 1 (Threat Model), D2 (Authorization)    |
+| A04: Insecure Design           | Phase 1 (Threat Model), D2                    |
 | A05: Security Misconfiguration | D5 (HTTP), D7 (Session), D12 (Infrastructure) |
 | A06: Vulnerable Components     | D15 (Supply Chain)                            |
 | A07: Auth Failures             | D1 (Auth), D13 (Heartwood)                    |
 | A08: Data Integrity Failures   | D6 (CSRF), D15 (Supply Chain)                 |
-| A09: Logging & Monitoring      | D4 (Data Protection — logging checks)         |
+| A09: Logging & Monitoring      | D4 (logging checks)                           |
 | A10: SSRF                      | D14 (Exotic Vectors)                          |
 
-_Full domain-to-OWASP mapping with detailed coverage notes in `references/report-template.md`._
+Detailed domain-to-OWASP notes live in `references/report-template.md`.
 
 ---
 

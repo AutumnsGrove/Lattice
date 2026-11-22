@@ -1,245 +1,257 @@
 ---
 name: grove-account-deletion
-description: Delete a Grove tenant account via wrangler D1 commands. Use when the user wants to remove a test account, clean up after a walkthrough, or fully delete a user's data. Handles D1 CASCADE cleanup, R2 media purge, and Heartwood session invalidation.
+description: Remove a Grove tenant and everything keyed to it — content, uploads, subdomain, groveauth login identity — cite the right Acceptable Use Policy section in the notice email, and verify nothing was left behind. Use when deleting a test account, cleaning up after a walkthrough, or removing an account for spam, a link farm, or an automated signup.
 ---
 
 # Grove Account Deletion
 
-Safely delete a tenant account and all associated data from the Grove platform using wrangler CLI commands.
+Removing an account is the one operation where "the command returned success" and "it worked" are different things. The 2026-11 sweep removed nine spam tenants by hand — 61 statements against `grove-engine-db`, 44 against `grove-curios-db`, 14 against `groveauth`, and a 96-table scan just to find out where the rows were. Then it half-finished one of them by timing out.
+
+Everything below exists so nobody has to do that again.
 
 ## When to Activate
 
-- User says something like "delete Alice's account" or "Alice is done"
-- User mentions wanting to remove a test account
-- User asks to clean up after a walkthrough or demo
-- User explicitly calls `/grove-account-deletion`
-- User says "nuke that account" or "wipe their data"
+- "Delete Alice's account", "nuke that account", "clean up the fixture"
+- Removing a spam, link-farm, or automated account
+- A person asks to be deleted
+- Cleaning up after a demo or walkthrough
+- You are about to write a SQL sweep of tenant rows by hand — **stop and read this first**
 
----
-
-## The Pipeline
+## The Shape Of It
 
 ```
-Identify → Verify → Snapshot → Delete Tenant → Clean Orphans → Purge R2 → Verify
+Decide the citation → Dry run → Read the output → Say the reason out loud → --write → Verify → Report
 ```
 
-### Step 1: Identify the Tenant
-
-The user will provide a username (subdomain), email, or display name. Look them up:
+One command does the removal. It is a thin caller over `removeTenant()` in the engine, running inside the ops worker in a single invocation. Do not reimplement it.
 
 ```bash
-# By username/subdomain (most common)
-npx wrangler d1 execute grove-engine-db --remote --command="SELECT id, subdomain, display_name, email, plan, created_at FROM tenants WHERE subdomain = 'USERNAME';"
-
-# By email (if username unknown)
-npx wrangler d1 execute grove-engine-db --remote --command="SELECT id, subdomain, display_name, email, plan, created_at FROM tenants WHERE email = 'EMAIL';"
-
-# By display name (fuzzy match)
-npx wrangler d1 execute grove-engine-db --remote --command="SELECT id, subdomain, display_name, email, plan, created_at FROM tenants WHERE display_name LIKE '%NAME%';"
+export GROVE_OPS_ENDPOINT=https://grove-durable-objects.m7jv4v7npb.workers.dev
 ```
 
-**Run these from the project root** (`/Users/mini/Documents/Projects/Lattice`).
+## Step 1 — Pick the citation
 
-### Step 2: Confirm with the User
+`--policy` decides which rule the email names. Pick the one that actually describes what you found — this is what the person reads, and what they will check you against.
 
-Before deleting ANYTHING, show the user what you found and ask for explicit confirmation:
+| What you found                                                                                                                                | `--policy`  | Cited as                         |
+| --------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | -------------------------------- |
+| Account existed to place outbound links, doorway content, template posts at scale, guest-post placements                                      | `aup-1.4`   | §1.4 Spam and Malicious Content  |
+| Account pretending to be someone or something it is not                                                                                       | `aup-1.5`   | §1.5 Impersonation and Fraud     |
+| Automated/agent-operated account, or an extra account for a person or business that already has one, or an alias used to get around a removal | `aup-1.9`   | §1.9 One Account, One Person     |
+| The person asked to be deleted                                                                                                                | `requested` | _(no citation; different email)_ |
 
-```
-Found tenant:
-  ID:       abc-123-def
-  Username: alice
-  Name:     Alice Wonderland
-  Email:    alice@example.com
-  Plan:     seedling
-  Created:  2026-01-24
+`aup-1.4` is the default and the right answer most of the time.
 
-This will permanently delete:
-  - All blog posts and pages
-  - All media files (R2 storage)
-  - All sessions and settings
-  - Commerce data (orders, products, customers)
-  - Curio configurations (timeline, journey, gallery)
-  - Onboarding and billing records
+**An unknown value is a 400, not a fallback.** If you are reaching for a citation that is not in this table, the honest move is to write the section first (`docs/legal/acceptable-use-policy.md`) and add it to `libs/engine/src/lib/server/tenants/removal-policy.ts`. Never invent a number: the email would cite a rule nobody can find.
 
-Proceed with deletion?
-```
+`removal-policy.test.ts` reads the real AUP and fails when a cited section stops existing, so a rename shows up as a red test rather than a wrong email.
 
-**NEVER skip this confirmation step.** Even for test accounts.
-
-### Step 3: Pre-Deletion Snapshot (Optional but Recommended)
-
-For non-test accounts, capture a quick count of what's being deleted:
+## Step 2 — Dry run
 
 ```bash
-npx wrangler d1 execute grove-engine-db --remote --command="
-  SELECT
-    (SELECT COUNT(*) FROM posts WHERE tenant_id = 'TENANT_ID') as posts,
-    (SELECT COUNT(*) FROM pages WHERE tenant_id = 'TENANT_ID') as pages,
-    (SELECT COUNT(*) FROM media WHERE tenant_id = 'TENANT_ID') as media_files,
-    (SELECT COUNT(*) FROM sessions WHERE tenant_id = 'TENANT_ID') as sessions;
-"
+gw tenant delete <subdomain> --reason "<what you found>" --policy aup-1.4
 ```
 
-### Step 4: Delete the Tenant (CASCADE Handles 29 Tables)
+Prints per-table counts across engine, curios and observability, the identity plan, and touches nothing. Read it:
 
-This single DELETE cascades to: posts, pages, media records, tenant_settings, sessions, products, product_variants, customers, orders, order_line_items, subscriptions, connect_accounts, platform_billing, refunds, discount_codes, post_views, timeline_curio_config, timeline_summaries, timeline_activity, timeline_ai_usage, journey_curio_config, journey_snapshots, journey_summaries, journey_jobs, gallery_curio_config, gallery_images, gallery_tags, gallery_collections, git_dashboard_config.
+- `keep audit_log` is correct — the removal record outlives the tenant by design.
+- `groveauth identity: ba_session: 1, ba_user: 1` means there is a login to delete.
+- `⚠ Not swept: <db>` means a binding is missing. Do not proceed with `--write`; the removal would be partial by construction.
+
+## Step 3 — Say the reason out loud
+
+The `--reason` is **quoted verbatim in the email the person receives.** Write it for them, not for the changelog.
+
+| Don't          | Do                                                                                     |
+| -------------- | -------------------------------------------------------------------------------------- |
+| `spam`         | `18 posts to upsampler.com in one session, no personalisation`                         |
+| `link farm`    | `account existed only to link to karma.domains; one 42-word post, zero other activity` |
+| `test cleanup` | `deletion fixture from the #1710 round trip`                                           |
+
+It appears under `In our words:` in the email. Facts, not adjectives. No internal IDs, no table names, no issue numbers.
+
+## Step 4 — Do it
 
 ```bash
-npx wrangler d1 execute grove-engine-db --remote --command="DELETE FROM tenants WHERE id = 'TENANT_ID';"
+gw tenant delete <subdomain> --reason "<what you found>" --policy aup-1.4 --write
 ```
 
-### Step 5: Clean Up Orphaned Records
+What runs, in order: every registered table in curios and observability, then engine (children before parents), then the `tenants` row, then the TenantDO cache, then the groveauth identity, then the R2 objects, then the email.
 
-These tables don't CASCADE from tenants and need manual cleanup:
+## Step 5 — Read the output like you mean it
+
+```
+Removed emmareed.grove.place — 214 rows
+Identity: 6 rows
+R2 objects: 14
+Tenant row deleted: yes
+Cache evicted: yes
+Account holder notified: yes
+Audit recorded: yes
+```
+
+Anything other than that means it is not finished:
+
+| Line                                               | What it means                                                  | What to do                                                               |
+| -------------------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `Tenant row deleted: NO — subdomain still claimed` | An earlier statement failed, so the root was kept for a retry. | Fix the failure, run again. The tenant still resolves.                   |
+| `Cache evicted: NO — the site may still serve`     | The DO flush failed.                                           | `POST /tenant/flush/:subdomain` with the ops key, then re-check.         |
+| `Account holder notified: no`                      | No gateway configured, no address on file, or Zephyr refused.  | See below.                                                               |
+| `⚠ Leftovers — this removal is incomplete`         | Rows survived.                                                 | Do not report success. None of the no-carry-on cases apply.              |
+| `⚠ Statements that failed`                         | Constraints or missing tables.                                 | Read them; a constraint failure usually means registry ordering drifted. |
+
+**A removal with leftovers does not email the person.** That is deliberate: telling someone their account is gone while rows remain is the lie the person keeps.
+
+If the person was not told, that is part of the task, not a footnote. Check `ZEPHYR_API_KEY` and `ZEPHYR_URL` on the worker, check `tenants.email` is non-empty, then send the message by hand.
+
+### When the identity was kept
+
+```
+NOT deleted — the same login still owns another blog (secondgarden). Deleting it would lock the person out of a blog that is still theirs.
+```
+
+This is correct behaviour, not a failure. One login can own several blogs; removing one must not lock someone out of the other. Say so in your report.
+
+### The identity was already gone, or there never was one
+
+`identitiesDeleted: 0` with nothing in `notDone` means there was nothing to delete. That is fine. The email adapts — it does not claim the login was removed when it was not.
+
+## The email
+
+Built by `libs/engine/src/lib/server/tenants/removal-email.ts`. Sent as a raw Zephyr transactional message (`template: "raw"`, HTML + text).
+
+**Abuse removal** (`aup-*`):
+
+```
+Subject: Your Grove account was removed
+
+Hello,
+
+We've removed <subdomain>.grove.place and the account behind it.
+
+What we found: <one sentence, in plain language>
+The rule: §1.4 Spam and Malicious Content — https://grove.place/legal/acceptable-use#14-spam-and-malicious-content
+In our words: <the --reason, verbatim>
+
+What's gone:
+  • your blog at <subdomain>.grove.place
+  • its posts, pages, and settings
+  • the images and files you uploaded
+  • the subdomain itself, which anyone may now register
+  • the login you used to sign in, and any connected sign-in methods
+
+Backups clear on our usual 90-day clock, and then nothing recoverable remains.
+
+If we got this wrong — a shared network, a false positive, a site you didn't
+know was involved — reply to this email and tell us. A person reads it, and we
+have reversed removals before.
+
+We did not keep a copy of your writing, and we are not offering an export of
+content removed for this reason.
+
+— Grove
+   (hello@grove.place)
+```
+
+**Requested deletion** (`requested`):
+
+```
+Subject: Your Grove account has been deleted
+...
+As you asked, we've deleted <subdomain>.grove.place and the account behind it.
+Your note: <the --reason>
+(no citation, no "what we found")
+If you didn't ask for this, reply immediately. Backups live on a 90-day clock...
+```
+
+### The voice rules the email follows
+
+- **It is not a warning.** It arrives after the removal, on purpose. Notice before a link-farm takedown is notice to publish again before we finish.
+- **It is not a legal notice.** The citation is there so the person can check we are describing their account accurately; the rest talks like a person.
+- **Name the blog, not the schema.** "its posts, pages, and settings", never `platform_billing` or "rows".
+- **No export for an abuse removal.** Do not offer one; the phrase in the email exists so nobody promises it in a reply.
+- **One reader, at 2am.** `hello@grove.place` is the reply path, and a human reads it.
+- **Warm, plain, brief.** The house voice: a midnight tea shop, not a courtroom.
+
+If you change the email, change `removal-email.test.ts` — and if you add a citation, change `removal-policy.ts` and `removal-policy.test.ts` with it.
+
+## Step 6 — Verify from outside the command
 
 ```bash
-# Remove onboarding record (linked by username, not FK)
-npx wrangler d1 execute grove-engine-db --remote --command="DELETE FROM user_onboarding WHERE username = 'USERNAME';"
+# the tenant row is gone
+curl -s -o /dev/null -w "%{http_code}\n" https://<subdomain>.grove.place/
+# 302 → /verify means the Turnstile gate answered, not the tenant (#1734).
+# If it is still 200 after a DO flush, the removal did not take.
 
-# Remove email verification codes for that user (cascades from user_onboarding via FK, but verify)
-npx wrangler d1 execute grove-engine-db --remote --command="DELETE FROM email_verification_codes WHERE user_id IN (SELECT id FROM user_onboarding WHERE username = 'USERNAME');"
+# the identity is gone (only when the command said it deleted one)
+npx wrangler d1 execute groveauth --remote \
+  --command="SELECT count(*) FROM ba_user WHERE lower(email) = '<email>';"
 ```
 
-Clean up the legacy users table:
+Fresh-tenant round trip, when you want to prove the path works end to end:
 
 ```bash
-npx wrangler d1 execute grove-engine-db --remote --command="DELETE FROM users WHERE LOWER(email) = LOWER('USER_EMAIL') AND tenant_id = 'TENANT_ID';"
+# Use hello@grove.place as the owner address when you want to read the removal
+# email yourself — the notice goes to the address on file, not to support.
+gw tenant create --subdomain final-fixture --email hello@grove.place \
+  --plan seedling --created-at 20d --write
+gw tenant delete final-fixture --reason "round trip check" --policy aup-1.4 --write
 ```
 
-### Step 5b: Clean Heartwood Auth Records
+The email arrives at `hello@grove.place` with the reason quoted verbatim, the
+citation, and the reply path — which is also `hello@grove.place` (`SUPPORT_EMAIL`).
+Before running it, confirm the durable-objects worker has `ZEPHYR_API_KEY` and
+`ZEPHYR_URL` set; without a gateway the command refuses to claim it notified
+anyone and says so.
 
-**Critical:** Without this, the user will see "welcome back" messages when re-signing up because the Heartwood `ba_user` record still exists.
-
-```bash
-# Check if user has other tenants first
-npx wrangler d1 execute grove-engine-db --remote --command="SELECT id, subdomain FROM tenants WHERE email = 'USER_EMAIL';"
-
-# If no other tenants exist, clean Heartwood auth records:
-# Delete sessions
-npx wrangler d1 execute groveauth --remote --command="DELETE FROM ba_session WHERE user_id IN (SELECT id FROM ba_user WHERE email = 'USER_EMAIL');"
-
-# Delete OAuth account linkages (Google, etc.)
-npx wrangler d1 execute groveauth --remote --command="DELETE FROM ba_account WHERE user_id IN (SELECT id FROM ba_user WHERE email = 'USER_EMAIL');"
-
-# Delete verification records
-npx wrangler d1 execute groveauth --remote --command="DELETE FROM ba_verification WHERE identifier = 'USER_EMAIL';"
-
-# Delete the auth user record
-npx wrangler d1 execute groveauth --remote --command="DELETE FROM ba_user WHERE email = 'USER_EMAIL';"
-```
-
-### Step 6: Purge R2 Media (If Media Existed)
-
-R2 keys follow the pattern `{tenant_id}/{filename}`. The D1 `media` table records are already gone (CASCADE), but the actual R2 objects remain.
-
-```bash
-# List objects with tenant prefix
-npx wrangler r2 object list grove-media --prefix="TENANT_ID/" --remote
-
-# Delete each object (wrangler doesn't support bulk delete, so iterate)
-# For a small number of files:
-npx wrangler r2 object delete grove-media --remote "TENANT_ID/filename1.webp"
-npx wrangler r2 object delete grove-media --remote "TENANT_ID/filename2.webp"
-```
-
-**For many files**, generate a deletion script:
-
-```bash
-# List all keys, then delete in a loop
-npx wrangler r2 object list grove-media --prefix="TENANT_ID/" --remote 2>/dev/null | jq -r '.[] .key' | while read key; do
-  echo "Deleting: $key"
-  npx wrangler r2 object delete grove-media --remote "$key"
-done
-```
-
-**Skip this step** if the pre-deletion snapshot showed 0 media files.
-
-### Step 7: Post-Deletion Verification
-
-Confirm the tenant is fully gone:
-
-```bash
-# Verify tenant deleted
-npx wrangler d1 execute grove-engine-db --remote --command="SELECT COUNT(*) as remaining FROM tenants WHERE subdomain = 'USERNAME';"
-
-# Verify cascade worked (spot-check a few tables)
-npx wrangler d1 execute grove-engine-db --remote --command="
-  SELECT
-    (SELECT COUNT(*) FROM posts WHERE tenant_id = 'TENANT_ID') as posts,
-    (SELECT COUNT(*) FROM media WHERE tenant_id = 'TENANT_ID') as media,
-    (SELECT COUNT(*) FROM sessions WHERE tenant_id = 'TENANT_ID') as sessions;
-"
-
-# Verify onboarding cleaned
-npx wrangler d1 execute grove-engine-db --remote --command="SELECT COUNT(*) as remaining FROM user_onboarding WHERE username = 'USERNAME';"
-```
-
-### Step 8: Report
-
-Give the user a clean summary:
+## Step 7 — Report
 
 ```
-Tenant "alice" (Alice Wonderland) has been fully deleted.
+Removed "emmareed" (emma@upsampler.com).
 
-Cleaned up:
-  - Tenant record + 29 cascaded tables
-  - Onboarding record
-  - 3 R2 media files
-  - Email verification codes
+  Content      18 posts, 2 pages, 4 uploads
+  Identity     6 groveauth rows (login deleted)
+  Email        sent to emma@upsampler.com, citing §1.4
+  Audit        tenant_remove_started + tenant_remove
 
-The subdomain "alice.grove.place" is now available for reuse.
+Verified: no rows across engine/curios/observability, ba_user empty.
+The subdomain emmareed.grove.place is released.
 ```
 
----
+If anything was skipped, it goes in the report. A clean-looking report over an unfinished removal is worse than an ugly one.
 
-## Safety Rules
+## Hard Rules
 
-1. **Always confirm before deleting** - Even if the user seems sure, show them the tenant details first
-2. **Never delete by ID alone** - Always resolve to a human-readable identifier (subdomain/email) for confirmation
-3. **Check for active subscriptions** - Warn if `platform_billing.status = 'active'` or LemonSqueezy subscription exists
-4. **Test accounts are still accounts** - Same process, same confirmation, same verification
-5. **R2 is permanent** - Once R2 objects are deleted, they're gone. The D1 media records (which held the keys) are already cascaded away, so do R2 cleanup BEFORE losing track of what was stored
+1. **Never hand-write the sweep.** One registry, one code path. If the command cannot express something, extend `removeTenant()` — not a SQL script.
+2. **Dry run first, always.** `--write` is the only thing that destroys, and it should be a decision you made twice.
+3. **Never claim a removal that has leftovers or failures.** Say what is still there.
+4. **Never email someone whose removal was incomplete.** The code enforces this; do not work around it.
+5. **Never delete a login that still owns another blog.** The code checks; do not override it by hand.
+6. **Never invent a policy citation.** Write the section, then the citation.
+7. **Test fixtures are accounts.** Same reason, same citation, same email. `--policy requested` and `reason "deletion fixture"` is fine; skipping the checks is not.
+8. **One deletion per confirmation.** Confirm the subdomain, and only the subdomain, before `--write`.
 
----
+## What This Does Not Cover
 
-## Quick Mode (Test Accounts)
+- **Suspension** (reversible) — `gw tenant suspend <subdomain> --write`. Use it first when you might be wrong.
+- **Self-serve deletion** in Arbor — not built. Today this is an operator command.
+- **Billing.** Handled, and first. `removeTenant()` cancels the subscription through `cancelBilling` _before_ it deletes anything, because the cancellation finds the provider subscription through `platform_billing` — the rows the sweep destroys. The provider is **Stripe** (`platform_billing.provider_subscription_id`); the differently-named provider left in old docs is history, not a second integration. A tenant with no subscription says so ("no subscription on file") and the removal continues. A cancellation that _fails_ aborts the removal with nothing deleted — retry, or cancel by hand in the Stripe dashboard and run it again (#1745).
+- **Custom domains.** A BYOD domain keeps pointing at nothing; an Evergreen domain needs a transfer code before deletion.
+- **Whether the _site_ is gone.** It is asserted now, not assumed: after flushing the TenantDO the removal fetches `https://<subdomain>.grove.place/` and records a failed step unless it gets a 404, a 410, or a redirect. A 200 means the removal is incomplete and nobody is emailed — so a `--write` that ends with no failures means the site was actually asked, from outside (#1677).
 
-For accounts the user explicitly calls "test accounts" or accounts created in the current session:
+## Where The Pieces Live
 
-- Still confirm the username/email
-- Skip the pre-deletion snapshot
-- Skip R2 cleanup if no media was uploaded
-- Still verify deletion completed
+| What                        | Where                                                                   |
+| --------------------------- | ----------------------------------------------------------------------- |
+| Tenant table registry       | `libs/engine/src/lib/server/tenants/tenant-tables.ts`                   |
+| The removal itself          | `libs/engine/src/lib/server/tenants/remove-tenant.ts`                   |
+| Identity registry and sweep | `libs/engine/src/lib/server/tenants/groveauth-identity.ts`              |
+| Citation vocabulary         | `libs/engine/src/lib/server/tenants/removal-policy.ts`                  |
+| The email                   | `libs/engine/src/lib/server/tenants/removal-email.ts`                   |
+| Operator endpoint           | `services/durable-objects/src/index.ts` (`POST /tenant/remove`)         |
+| CLI                         | `tools/grove-wrap-go/cmd/tenant.go`                                     |
+| Policy                      | `docs/legal/acceptable-use-policy.md`, `docs/legal/terms-of-service.md` |
+| What people read            | `docs/help-center/articles/account-deletion.md`                         |
+| Operator runbook            | `docs/security/incident-response-runbook.md`                            |
 
----
-
-## Edge Cases
-
-### User has multiple tenants
-
-One email can own multiple subdomains. Only delete the specified tenant. Don't touch others.
-
-### Tenant not found
-
-If the subdomain/email doesn't match any tenant, tell the user. Don't guess.
-
-### Heartwood session cleanup
-
-Heartwood sessions are stored in KV, not D1. The D1 `sessions` table is for legacy/local sessions. Heartwood sessions will expire naturally (24h TTL). No manual cleanup needed unless urgency is specified.
-
-### LemonSqueezy subscription active
-
-If `user_onboarding.lemonsqueezy_subscription_id` is set, warn the user that they may need to cancel the subscription in the LemonSqueezy dashboard separately. D1 deletion doesn't cancel external billing.
-
----
-
-## Environment
-
-All commands run from the project root: `/Users/mini/Documents/Projects/Lattice`
-
-The database is: `grove-engine-db` (D1)
-The media bucket is: `grove-media` (R2)
-
----
-
-_A clean deletion is a kind goodbye. Leave no orphans behind._
+Migrations are applied by hand with `wrangler d1 execute --file`, never `migrations apply` — see #1692.

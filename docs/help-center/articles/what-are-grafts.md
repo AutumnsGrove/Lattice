@@ -23,7 +23,7 @@ Grafts is how Grove customizes features for individual blogs. It's why your neig
 
 Every platform faces a tension: build one experience for everyone, or let each user have something different. Most choose the former—it's simpler to maintain. But simpler isn't always better.
 
-Grove uses Grafts to split the difference. The core experience stays consistent. But specific features can be "grafted" onto individual trees. Want JXL image encoding? Graft it on. Ready to test a feature before it's official? You might be in the greenhouse.
+Grove uses Grafts to split the difference. The core experience stays consistent. But specific features can be "grafted" onto individual trees. Want a photo gallery? Graft it on. Ready to test a feature before it's official? You might be in the greenhouse.
 
 This isn't about plugins you install. [[Grafts]] are trusted configurations the [[wayfinder]] (that's Autumn) enables for specific [[your-grove|groves]]. It's [[your-garden|garden]]-level decision-making, not a marketplace.
 
@@ -32,7 +32,7 @@ This isn't about plugins you install. [[Grafts]] are trusted configurations the 
 Think of your blog as a tree with a healthy trunk and branches. Grafts add new branches—capabilities that grow alongside what's already there.
 
 **Feature grafts** — Individual features that can be enabled or disabled per-blog. Some examples:
-- Advanced image formats (JXL encoding)
+- Photo galleries and extra image formats
 - Beta features before general release
 - Tier-specific capabilities
 

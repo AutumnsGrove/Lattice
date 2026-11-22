@@ -23,7 +23,7 @@ If it has references/, read those too. Follow your skill's workflow exactly.
 ## Constraints
 - You MUST read your skill file first — it defines your workflow
 - {animal_specific_constraints}
-- Use `gw` for all git operations, `gf` for codebase search
+- Use `gw` for all git operations; semantic search for discovery, `rg`/`find`/`glob` for exact matches
 - Use Signpost error codes for all error paths
 - Auth errors NEVER reveal user existence ("Invalid credentials" — not "user not found")
 
@@ -62,13 +62,13 @@ Implement authentication for this security scope:
 - Auth errors NEVER reveal user existence
 - Sessions: HttpOnly, Secure, SameSite=Lax minimum
 - CSRF: tokens + SameSite cookies
-- Reference: AgentUsage/error_handling.md, AgentUsage/rootwork_type_safety.md
+- Reference: `CODE-STANDARDS.md` (Signpost errors, Rootwork type safety)
 
 ## Constraints
 - You MUST read your skill file first
 - Build ONLY what the security spec demands — no drive-by improvements
-- Follow existing patterns in the codebase (use `gf` to find them)
-- Use `gw` for all git operations, `gf` for codebase search
+- Follow existing patterns in the codebase (use semantic search to find them)
+- Use `gw` for all git operations; semantic search for discovery, `rg`/`find`/`glob` for exact matches
 
 ## Output Format
 AUTH MANIFEST:
@@ -122,7 +122,7 @@ Security scope: {security_scope_summary}
 - Focus on FINDING and FIXING — not on understanding why things were built this way
 - Fix what you find directly in the code
 - Flag anything that needs the Turtle's deeper attention
-- Use `gw` for all git operations, `gf` for codebase search
+- Use `gw` for all git operations; semantic search for discovery, `rg`/`find`/`glob` for exact matches
 
 ## Output Format
 AUDIT REPORT:
@@ -187,7 +187,7 @@ Harden the security of these files. You have NOT seen how they were built or aud
 - Do NOT assume prior animals did anything right — verify everything.
 - Fix what you find directly in the code.
 - If you find architectural security issues, flag them but don't restructure.
-- Use `gw` for all git operations, `gf` for codebase search
+- Use `gw` for all git operations; semantic search for discovery, `rg`/`find`/`glob` for exact matches
 
 ## Output Format
 HARDENING REPORT:

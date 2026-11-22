@@ -132,10 +132,10 @@ Verify each candidate in the codebase:
 **For "Likely Implemented" candidates:**
 
 ```bash
-# Grove Find — verify implementation exists
-gf --agent search "darkMode"          # Does the feature exist in code?
-gf --agent search "ThemeToggle"       # Find the component
-gf --agent func "toggleDarkMode"      # Find the function
+# Verify the implementation exists
+rg "darkMode"          # Does the feature exist in code?
+rg "ThemeToggle"       # Find the component
+rg -n "(function|const|fn) ThemeToggle"  # Find the function
 
 # Check git history for evidence
 git log --oneline --all --grep="dark mode" -10

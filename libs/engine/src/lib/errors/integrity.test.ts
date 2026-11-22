@@ -19,6 +19,7 @@ import { API_ERRORS } from "./api-errors";
 import { ARBOR_ERRORS } from "./arbor-errors";
 import { SITE_ERRORS } from "./site-errors";
 import { LINK_ERRORS } from "./link-errors";
+import { TENANT_ERRORS } from "./tenant-errors";
 // Plant errors can't be imported here (different package), but we test the pattern
 
 // =============================================================================
@@ -126,6 +127,10 @@ describe("Error Catalog Integrity", () => {
 	validateCatalog("LINK_ERRORS", LINK_ERRORS, "GROVE-LINK-");
 	validateNoDuplicateCodes("LINK_ERRORS", LINK_ERRORS);
 
+	// Engine Tenant Lifecycle Errors
+	validateCatalog("TENANT_ERRORS", TENANT_ERRORS, "GROVE-TENANT-");
+	validateNoDuplicateCodes("TENANT_ERRORS", TENANT_ERRORS);
+
 	// Cross-catalog uniqueness
 	describe("Cross-catalog code uniqueness", () => {
 		it("should have no duplicate codes across all catalogs", () => {
@@ -135,6 +140,7 @@ describe("Error Catalog Integrity", () => {
 			allCodes.push(...getAllCodes(ARBOR_ERRORS));
 			allCodes.push(...getAllCodes(SITE_ERRORS));
 			allCodes.push(...getAllCodes(LINK_ERRORS));
+			allCodes.push(...getAllCodes(TENANT_ERRORS));
 
 			const duplicates = allCodes.filter((code, index) => allCodes.indexOf(code) !== index);
 			expect(duplicates).toEqual([]);
@@ -174,6 +180,12 @@ describe("Error code format conventions", () => {
 	it("LINK_ERRORS codes should match GROVE-LINK-NNN pattern", () => {
 		for (const def of Object.values(LINK_ERRORS)) {
 			expect(def.code).toMatch(/^GROVE-LINK-\d{3}$/);
+		}
+	});
+
+	it("TENANT_ERRORS codes should match GROVE-TENANT-NNN pattern", () => {
+		for (const def of Object.values(TENANT_ERRORS)) {
+			expect(def.code).toMatch(/^GROVE-TENANT-\d{3}$/);
 		}
 	});
 });

@@ -26,6 +26,8 @@ import {
 	validateGroveSession,
 } from "@autumnsgrove/lattice/server";
 import { getUserByTenantId } from "@autumnsgrove/lattice/server/services/users";
+import { isSuspendedSubdomain } from "$lib/server/suspension";
+import { isValidSubdomain } from "@autumnsgrove/lattice/utils/subdomain";
 
 /**
  * Reserved subdomains that route to internal apps or have special handling.
@@ -226,18 +228,9 @@ interface TenantLookupResult extends TenantConfig {
 	id: string;
 }
 
-/**
- * Validate subdomain format before database lookup.
- * Prevents SQL injection and ensures subdomains follow RFC 1035 label rules.
- *
- * Valid: lowercase alphanumeric, hyphens (not at start/end), 1-63 chars
- * Invalid: uppercase, underscores, dots, special chars, leading/trailing hyphens
- */
-const SUBDOMAIN_PATTERN = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
-
-function isValidSubdomain(subdomain: string): boolean {
-	return SUBDOMAIN_PATTERN.test(subdomain);
-}
+// Subdomain validation lives in the engine (`utils/grove-url`) so the hook, the
+// ops worker and the CLI all describe the same rule. Valid: lowercase
+// alphanumeric and hyphens, 1-63 chars, no leading or trailing hyphen.
 
 /**
  * Check if a subdomain has an active username redirect (30-day hold).
@@ -309,12 +302,24 @@ async function getTenantConfig(
 					id?: string;
 				};
 
-				// TenantDO now caches tenant ID - no need for separate D1 query
-				if (config.id && config.subdomain) {
+				// TenantDO now caches tenant ID - no need for separate D1 query.
+				//
+				// `createdAt` was added with the link policy (#1682). A DO whose
+				// cache predates that deploy reports 0/undefined, which the policy
+				// reads as "unknown age" and therefore as young — that would noindex
+				// every established tenant until the SQLite entry went stale. A
+				// config without it falls through to D1 instead of being trusted.
+				if (config.id && config.subdomain && config.createdAt) {
 					return {
 						...config,
 						id: config.id,
 					};
+				}
+
+				if (config.id && config.subdomain) {
+					console.warn(
+						`[Hooks] TenantDO config for ${subdomain} has no createdAt; falling through to D1`,
+					);
 				}
 			}
 		} catch (err) {
@@ -326,7 +331,7 @@ async function getTenantConfig(
 	try {
 		const tenant = await db
 			.prepare(
-				"SELECT id, subdomain, display_name, email, theme, plan FROM tenants WHERE subdomain = ? AND active = 1",
+				"SELECT id, subdomain, display_name, email, theme, plan, created_at FROM tenants WHERE subdomain = ? AND active = 1",
 			)
 			.bind(subdomain)
 			.first<{
@@ -336,6 +341,7 @@ async function getTenantConfig(
 				email: string;
 				theme: string | null;
 				plan: string;
+				created_at: number | null;
 			}>();
 
 		if (!tenant) return null;
@@ -362,6 +368,7 @@ async function getTenantConfig(
 			theme: parsedTheme,
 			tier,
 			ownerId: tenant.email,
+			createdAt: Number(tenant.created_at ?? 0),
 			limits: getTierLimits(tier),
 		};
 	} catch (err) {
@@ -494,7 +501,10 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 	const isDemoModeActive = isDemoModeRequest(event.url, demoModeSecret, cookieHeader);
 	event.locals.isDemoMode = isDemoModeActive;
 
-	// Skip verification for excluded paths, embed crawlers, and demo mode
+	// Decide here whether this visitor needs the challenge, but do NOT redirect yet: the
+	// redirect is enforced after the tenant is resolved (see "enforce" below, #1734).
+	// Skipped for excluded paths, embed crawlers, and demo mode.
+	let needsChallenge = false;
 	if (
 		!shouldSkipTurnstile(event.url.pathname, event.request.headers.get("user-agent")) &&
 		!isDemoModeActive
@@ -508,12 +518,7 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 				verificationCookie ?? undefined,
 				secretKey,
 			);
-
-			if (!isVerified) {
-				// Redirect to verification page with return URL
-				const returnUrl = encodeURIComponent(event.url.pathname + event.url.search);
-				throw redirect(302, `/verify?return=${returnUrl}`);
-			}
+			needsChallenge = !isVerified;
 		}
 	}
 
@@ -525,8 +530,10 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 	// subdomain routing, saving ~100-300ms on tenant page loads.
 	const sessionCookie = extractSessionCookie(cookieHeader);
 
+	// A visitor who is about to be challenged gets no session lookup: they have not proved they
+	// are a person yet, and the gate should not be a way to make Grove do work.
 	const sessionAuthPromise =
-		sessionCookie && event.platform?.env?.AUTH
+		sessionCookie && !needsChallenge && event.platform?.env?.AUTH
 			? validateGroveSession(
 					event.platform.env.AUTH,
 					event.request,
@@ -595,8 +602,17 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 					`https://${redirectTarget}.grove.place${event.url.pathname}${event.url.search}`,
 				);
 			}
-			// Subdomain not registered or inactive
-			event.locals.context = { type: "not_found", subdomain };
+			// A suspended grove is not a missing one. The lookup above filters on
+			// `active = 1` on purpose and that must not change (#1677) — so ask the
+			// narrower question instead: does a row exist here that was switched off?
+			// Telling its owner their garden "doesn't exist yet" is the shape of #1720,
+			// and the page invites them to sign up again for a grove they still own.
+			if (await isSuspendedSubdomain(event.platform?.env?.DB, subdomain)) {
+				event.locals.context = { type: "suspended", subdomain };
+			} else {
+				// Subdomain not registered
+				event.locals.context = { type: "not_found", subdomain };
+			}
 		} else {
 			// Valid tenant - set context (config from TenantDO cache)
 			event.locals.context = {
@@ -608,10 +624,28 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 					theme: tenant.theme ? JSON.stringify(tenant.theme) : null,
 					ownerId: tenant.ownerId,
 					plan: tenant.tier || "seedling",
+					createdAt: tenant.createdAt,
 				},
 			};
 			event.locals.tenantId = tenant.id;
 		}
+	}
+
+	// =========================================================================
+	// TURNSTILE VERIFICATION — enforce (Shade)
+	// =========================================================================
+	// Enforced here, after the tenant is known, rather than before routing (#1734). A
+	// challenge is for people, and a subdomain with no active tenant has nothing to protect:
+	// it falls through to the not-found page (served as a real 404, see below). A subdomain
+	// that never existed and one that was suspended look the same from outside, on purpose.
+	// Do not move this back in front of the tenant lookup; hooks.server.test.ts pins the order.
+	if (
+		needsChallenge &&
+		event.locals.context.type !== "not_found" &&
+		event.locals.context.type !== "suspended"
+	) {
+		const returnUrl = encodeURIComponent(event.url.pathname + event.url.search);
+		throw redirect(302, `/verify?return=${returnUrl}`);
 	}
 
 	// =========================================================================
@@ -715,10 +749,10 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 	}
 
 	// =========================================================================
-	// DEV-ONLY: Simulated auth for Glimpse visual testing
+	// DEV-ONLY: Simulated auth for local visual testing
 	// =========================================================================
-	// Allows Glimpse to test authenticated pages without Heartwood running.
-	// Only works when ALL THREE conditions are met:
+	// Lets Playwright (tools/glimpse) screenshot authenticated pages without
+	// Heartwood running. Only works when ALL THREE conditions are met:
 	//   1. DEV_AUTH_ENABLED env var is truthy (never set in production wrangler.toml)
 	//   2. Host header is localhost/127.0.0.1 (defense-in-depth)
 	//   3. x-grove-dev-auth header carries a valid JSON user object
@@ -1010,7 +1044,7 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 	// Generate a per-request nonce for CSP script-src (replaces 'unsafe-inline')
 	const cspNonce = crypto.randomUUID().replace(/-/g, "");
 
-	const response = await resolve(event, {
+	let response = await resolve(event, {
 		transformPageChunk: ({ html }) => {
 			// Inject nonce into ALL script tags (theme-detection, hydration, data serialization)
 			// Must use global regex — String.replace() only hits the first match,
@@ -1018,6 +1052,21 @@ const aspenHandle: Handle = async ({ event, resolve }) => {
 			return html.replace(/<script(?=[\s>])/g, `<script nonce="${cspNonce}"`);
 		},
 	});
+
+	// A grove that does not exist is a 404, not a 200 page that says so (#1734). Only a page
+	// that rendered successfully is changed: JSON from an API route and any status a route
+	// chose for itself are left alone.
+	if (
+		(event.locals.context.type === "not_found" || event.locals.context.type === "suspended") &&
+		response.status === 200 &&
+		response.headers.get("content-type")?.includes("text/html")
+	) {
+		response = new Response(response.body, {
+			status: 404,
+			statusText: "Not Found",
+			headers: response.headers,
+		});
+	}
 
 	// Set CSRF token cookie — always refresh for authenticated users (session-bound)
 	// or set once for unauthenticated users

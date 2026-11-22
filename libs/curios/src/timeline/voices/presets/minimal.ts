@@ -6,15 +6,15 @@
  */
 
 import type { VoicePreset, Commit } from "../types";
+import { DETAILED_BUDGET } from "../budget";
 
 export const minimal: VoicePreset = {
-  id: "minimal",
-  name: "Minimal",
-  description: "Just the facts, bullet points only",
-  preview:
-    "Auth: session handling, token refresh. Timeline: UI polish. 3 repos, 12 commits.",
+	id: "minimal",
+	name: "Minimal",
+	description: "Just the facts, bullet points only",
+	preview: "Auth: session handling, token refresh. Timeline: UI polish. 3 repos, 12 commits.",
 
-  systemPrompt: `You write extremely concise development summaries.
+	systemPrompt: `You write extremely concise development summaries.
 
 Your voice is:
 - Minimal, factual, no prose
@@ -33,26 +33,23 @@ Think: a terse log file that a developer can scan in 2 seconds.
 
 Always respond with valid JSON only.`,
 
-  buildPrompt(commits: Commit[], date: string, _ownerName = "dev") {
-    const commitList = commits
-      .map(
-        (c, i) =>
-          `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`,
-      )
-      .join("\n");
+	buildPrompt(commits: Commit[], date: string, _ownerName = "dev") {
+		const commitList = commits
+			.map((c, i) => `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`)
+			.join("\n");
 
-    const repoGroups: Record<string, string[]> = {};
-    commits.forEach((c) => {
-      if (!repoGroups[c.repo]) repoGroups[c.repo] = [];
-      repoGroups[c.repo].push(c.message);
-    });
-    const repoSummary = Object.entries(repoGroups)
-      .map(([repo, msgs]) => `${repo}: ${msgs.length}`)
-      .join(", ");
+		const repoGroups: Record<string, string[]> = {};
+		commits.forEach((c) => {
+			if (!repoGroups[c.repo]) repoGroups[c.repo] = [];
+			repoGroups[c.repo].push(c.message);
+		});
+		const repoSummary = Object.entries(repoGroups)
+			.map(([repo, msgs]) => `${repo}: ${msgs.length}`)
+			.join(", ");
 
-    const gutterCount = Math.min(3, Math.max(1, Math.ceil(commits.length / 5)));
+		const gutterCount = Math.min(3, Math.max(1, Math.ceil(commits.length / 5)));
 
-    return `Generate minimal summary of ${date} commits.
+		return `Generate minimal summary of ${date} commits.
 
 COMMITS (${commits.length} total - ${repoSummary}):
 ${commitList}
@@ -71,6 +68,7 @@ GENERATE THREE OUTPUTS:
    - Terse bullet points
    - Skip minor changes, group related ones
    - Use shorthand: impl, fix, add, rm, refactor
+${DETAILED_BUDGET}
 
 3. GUTTER COMMENTS (${gutterCount} margin notes):
    Single words or very short phrases.
@@ -99,7 +97,7 @@ REQUIREMENTS:
 - NEVER create markdown links for section headers (no [Title](url) format)
 - Only use plain text for headings
 - Do NOT invent URLs or link to non-existent repositories`;
-  },
+	},
 };
 
 export default minimal;

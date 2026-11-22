@@ -152,7 +152,7 @@ export function createObservabilityCollector(env: ObservabilityEnv): Observabili
 						durationMs: r.durationMs,
 						error: r.error,
 					};
-					if (r.status === "error") errors.push(`${r.name}: ${r.error}`);
+					if (r.error) errors.push(`${r.name}: ${r.error}`);
 				} else {
 					errors.push(`aggregator: ${String(result.reason)}`);
 				}
@@ -182,7 +182,7 @@ export function createObservabilityCollector(env: ObservabilityEnv): Observabili
 			// =========================================================================
 			const hourOfDay = new Date().getUTCHours();
 			if (trigger === "cron" && hourOfDay === 0) {
-				await runRetentionCleanup(env.OBS_DB).catch((err) => {
+				await runRetentionCleanup(env.OBS_DB, env.DB).catch((err) => {
 					console.error("[Vista Collector] Retention cleanup failed:", err);
 					errors.push(`retention-cleanup: ${err instanceof Error ? err.message : String(err)}`);
 				});
@@ -410,29 +410,70 @@ function checkThreshold(value: number, operator: string, threshold: number): boo
 // 90-day Retention Cleanup
 // =============================================================================
 
+/** How long time-series and audit rows are kept. */
+export const RETENTION_DAYS = 90;
+
 /**
- * Delete metric rows older than 90 days from all time-series tables.
- * Runs on the daily cron invocation.
+ * A table subject to retention. `format` picks the cutoff comparison:
+ *   - "epoch"    integer unix-seconds column (observability_* tables)
+ *   - "datetime" TEXT column written by `datetime('now')` (petal_security_log)
  */
-async function runRetentionCleanup(db: D1Database): Promise<void> {
-	const cutoff = Math.floor(Date.now() / 1000) - 90 * 24 * 60 * 60;
+interface RetentionTarget {
+	db: D1Database;
+	table: string;
+	column: string;
+	format: "epoch" | "datetime";
+}
 
-	console.log(`[Vista Collector] Running 90-day retention cleanup (cutoff=${cutoff})`);
+/**
+ * Delete rows older than 90 days from all time-series tables.
+ * Runs on the daily cron invocation.
+ *
+ * Note the two databases: the observability_* tables live in OBS_DB, while
+ * petal_security_log lives in the main engine DB alongside the rest of Petal.
+ * Both D1 bindings arrive here explicitly so a missing table fails loudly
+ * instead of being silently skipped.
+ *
+ * `petal_ncmec_queue` is deliberately absent — migration 030_petal.sql marks it
+ * permanent for legal reasons, so those rows must never be pruned.
+ */
+export async function runRetentionCleanup(obsDb: D1Database, db?: D1Database): Promise<void> {
+	const cutoff = Math.floor(Date.now() / 1000) - RETENTION_DAYS * 24 * 60 * 60;
 
-	const tables = [
-		{ table: "observability_metrics", column: "recorded_at" },
-		{ table: "observability_health_checks", column: "checked_at" },
-		{ table: "observability_d1_stats", column: "recorded_at" },
-		{ table: "observability_r2_stats", column: "recorded_at" },
-		{ table: "observability_kv_stats", column: "recorded_at" },
-		{ table: "observability_do_stats", column: "recorded_at" },
-		{ table: "observability_collection_log", column: "started_at" },
+	console.log(
+		`[Vista Collector] Running ${RETENTION_DAYS}-day retention cleanup (cutoff=${cutoff})`,
+	);
+
+	const targets: RetentionTarget[] = [
+		{ db: obsDb, table: "observability_metrics", column: "recorded_at", format: "epoch" },
+		{ db: obsDb, table: "observability_health_checks", column: "checked_at", format: "epoch" },
+		{ db: obsDb, table: "observability_d1_stats", column: "recorded_at", format: "epoch" },
+		{ db: obsDb, table: "observability_r2_stats", column: "recorded_at", format: "epoch" },
+		{ db: obsDb, table: "observability_kv_stats", column: "recorded_at", format: "epoch" },
+		{ db: obsDb, table: "observability_do_stats", column: "recorded_at", format: "epoch" },
+		{ db: obsDb, table: "observability_collection_log", column: "started_at", format: "epoch" },
 	];
 
+	// petal_security_log grows unbounded otherwise: every image check writes a row,
+	// hashes only, no images retained. 90 days matches the observability window.
+	if (db) {
+		targets.push({
+			db,
+			table: "petal_security_log",
+			column: "timestamp",
+			format: "datetime",
+		});
+	}
+
 	await Promise.allSettled(
-		tables.map(async ({ table, column }) => {
-			const result = await db
-				.prepare(`DELETE FROM ${table} WHERE ${column} < ?`)
+		targets.map(async ({ db: targetDb, table, column, format }) => {
+			// datetime columns hold `YYYY-MM-DD HH:MM:SS` text, so the cutoff has to be
+			// rendered in the same shape before a lexicographic comparison is valid.
+			const whereClause =
+				format === "datetime" ? `${column} < datetime(?, 'unixepoch')` : `${column} < ?`;
+
+			const result = await targetDb
+				.prepare(`DELETE FROM ${table} WHERE ${whereClause}`)
 				.bind(cutoff)
 				.run()
 				.catch((err) => {

@@ -6,7 +6,6 @@
  * - EXIF stripping verification
  * - Filename sanitization
  * - Compression ratio calculations
- * - JXL support detection
  * - Full image processing pipeline
  *
  * Coverage Target: 80%+
@@ -20,7 +19,6 @@ import {
 	formatBytes,
 	compressionRatio,
 	formatName,
-	supportsJxlEncoding,
 	processImage,
 	type ImageFormat,
 	type ProcessedImageResult,
@@ -112,11 +110,6 @@ describe("sanitizeImageFilename", () => {
 		const result = sanitizeImageFilename("My Photo (1).jpg", "webp");
 		// Should match pattern: sanitized-name-timestamp.webp
 		expect(result).toMatch(/^my-photo-1-[a-z0-9]+\.webp$/);
-	});
-
-	it("uses jxl extension when specified", () => {
-		const result = sanitizeImageFilename("photo.png", "jxl");
-		expect(result).toMatch(/\.jxl$/);
 	});
 
 	it("uses webp extension when specified", () => {
@@ -213,7 +206,6 @@ describe("compressionRatio", () => {
 
 describe("formatName", () => {
 	it("returns human-readable format names", () => {
-		expect(formatName("jxl")).toBe("JPEG XL");
 		expect(formatName("webp")).toBe("WebP");
 		expect(formatName("gif")).toBe("GIF");
 		expect(formatName("original")).toBe("Original");
@@ -225,54 +217,11 @@ describe("formatName", () => {
 });
 
 // =============================================================================
-// JXL Support Detection Tests
-// =============================================================================
-
-describe("supportsJxlEncoding", () => {
-	it("returns boolean indicating JXL support", async () => {
-		// In test environment, WebAssembly should be available
-		const result = await supportsJxlEncoding();
-		expect(typeof result).toBe("boolean");
-	});
-
-	it("caches the result after first check", async () => {
-		const result1 = await supportsJxlEncoding();
-		const result2 = await supportsJxlEncoding();
-		expect(result1).toBe(result2);
-	});
-});
-
-// =============================================================================
 // Upload Validation Integration Tests
 // =============================================================================
 
 describe("Image Format Validation", () => {
-	describe("JXL Magic Bytes", () => {
-		it("validates JXL naked codestream signature", () => {
-			// JXL naked codestream starts with 0xFF 0x0A
-			const buffer = new Uint8Array([0xff, 0x0a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
-			expect(validateFileSignature(buffer, "image/jxl")).toBe(true);
-		});
-
-		it("validates JXL ISOBMFF container signature", () => {
-			// JXL container starts with box header
-			const buffer = new Uint8Array([
-				0x00, 0x00, 0x00, 0x0c, 0x4a, 0x58, 0x4c, 0x20, 0x00, 0x00, 0x00, 0x00,
-			]);
-			expect(validateFileSignature(buffer, "image/jxl")).toBe(true);
-		});
-
-		it("rejects invalid JXL signature", () => {
-			const buffer = new Uint8Array([0x89, 0x50, 0x4e, 0x47]); // PNG signature
-			expect(validateFileSignature(buffer, "image/jxl")).toBe(false);
-		});
-	});
-
 	describe("MIME Type Validation", () => {
-		it("accepts image/jxl MIME type", () => {
-			expect(isAllowedImageType("image/jxl")).toBe(true);
-		});
-
 		it("accepts standard image types", () => {
 			expect(isAllowedImageType("image/jpeg")).toBe(true);
 			expect(isAllowedImageType("image/png")).toBe(true);
@@ -388,12 +337,10 @@ describe("processImage", () => {
 			const resultAuto = await processImage(file, { format: "auto" });
 			const resultWebp = await processImage(file, { format: "webp" });
 			const resultOriginal = await processImage(file, { format: "original" });
-			const resultJxl = await processImage(file, { format: "jxl" });
 
 			expect(resultAuto.format).toBe("gif");
 			expect(resultWebp.format).toBe("gif");
 			expect(resultOriginal.format).toBe("gif");
-			expect(resultJxl.format).toBe("gif");
 		});
 	});
 

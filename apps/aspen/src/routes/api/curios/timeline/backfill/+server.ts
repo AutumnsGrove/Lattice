@@ -121,23 +121,13 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 		throwGroveError(400, API_ERRORS.FEATURE_DISABLED, "API");
 	}
 
-	// Get token using SecretsManager (preferred) with legacy fallback
+	// Get token using SecretsManager
 	const env = {
 		DB: db,
 		GROVE_KEK: platform?.env?.GROVE_KEK,
-		TOKEN_ENCRYPTION_KEY: platform?.env?.TOKEN_ENCRYPTION_KEY,
 	};
 
-	const githubResult = await getTimelineToken(
-		env,
-		tenantId,
-		TIMELINE_SECRET_KEYS.GITHUB_TOKEN,
-		config.github_token_encrypted,
-	);
-
-	if (githubResult.migrated) {
-		console.log(`[Timeline Backfill] Auto-migrated GitHub token to SecretsManager`);
-	}
+	const githubResult = await getTimelineToken(env, tenantId, TIMELINE_SECRET_KEYS.GITHUB_TOKEN);
 
 	const githubToken = githubResult.token;
 

@@ -23,8 +23,8 @@ This is Grove's elegant documentation style—meant for Wanderers of any experie
 
 **Not for:**
 
-- API references (use grove-documentation)
-- Technical specs (use grove-spec-writing)
+- API references (use owl-archive)
+- Technical specs (use swan-design)
 - Quick-reference guides
 
 ---
@@ -110,8 +110,6 @@ Present actual code snippets followed by clear explanation of their significance
 const pending = this.refreshInProgress.get(userId);
 if (pending) return pending;
 ```
-
-_If a refresh is already happening for this person, we wait for that one instead of starting another. One kitchen, one cook._
 
 ---
 
@@ -214,7 +212,6 @@ Or a poetic one-liner:
 ```markdown
 ---
 
-_Trust is built one verified request at a time._
 ```
 
 ---
@@ -265,8 +262,6 @@ export async function authGuard(request: Request): Promise<Response | null> {
   return null; // Continue to the page
 }
 ```
-
-_If you're not logged in, you go to login. If you are, you continue. Simple checkpoint logic._
 
 ---
 
@@ -383,7 +378,7 @@ Before finalizing any museum documentation:
 - [ ] Code blocks with explanatory context
 - [ ] No walls of text longer than 4-5 paragraphs
 
-### Voice (refer to grove-documentation)
+### Voice (refer to owl-archive)
 
 - [ ] No em-dashes
 - [ ] No corporate jargon
@@ -405,12 +400,12 @@ Before finalizing any museum documentation:
 ### Before Writing
 
 1. **walking-through-the-grove** — If the exhibit needs a name
-2. **grove-documentation** — Review voice guidelines, especially the "avoid" lists
+2. **owl-archive** — Review voice guidelines, especially the "avoid" lists
 
 ### While Writing
 
-3. **grove-spec-writing** — Borrow ASCII art techniques for diagrams
-4. **grove-documentation** — Check terminology (Wanderer, Rooted, etc.)
+3. **swan-design** — Borrow ASCII art techniques for diagrams
+4. **owl-archive** — Check terminology (Wanderer, Rooted, etc.)
 5. **GroveTerm components** — When exhibits include Grove terminology in UI, use `GroveTerm`, `GroveSwap`, or `GroveText` from `@autumnsgrove/lattice/ui` instead of hardcoding terms. New visitors see standard terms by default; Grove Mode users see the nature-themed vocabulary. Use `[[term]]` syntax in markdown content for auto-transformation via the rehype-groveterm plugin.
 
 ### After Writing
@@ -419,13 +414,6 @@ Before finalizing any museum documentation:
 6. Does the path feel logical? Would you want to explore further?
 
 ---
-
-## Example: A Complete Exhibit
-
-````markdown
-# The Session Exhibit
-
-> How Grove remembers who you are.
 
 ## What You're Looking At
 
@@ -447,8 +435,6 @@ const SESSION_COOKIE = "grove_session";
 const SESSION_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days
 ```
 ````
-
-_Seven days. Long enough to be convenient, short enough to stay secure._
 
 When you log in, we generate a random ID and store it in this cookie.
 The ID itself means nothing—it's just a key to look you up.
@@ -484,8 +470,6 @@ if (session.expiresAt < Date.now() + SESSION_DURATION / 2) {
   await extendSession(session.id);
 }
 ```
-
-_Active visitors stay. Abandoned sessions expire._
 
 ---
 

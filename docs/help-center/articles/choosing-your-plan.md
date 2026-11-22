@@ -3,7 +3,7 @@ title: Choosing Your Plan
 description: Understanding Grove's pricing tiers and features
 category: help
 section: getting-started
-lastUpdated: "2026-02-22"
+lastUpdated: '2026-11-13'
 keywords:
   - plan
   - pricing
@@ -53,7 +53,6 @@ Everything you need to start writing. No feature walls, no "upgrade to unlock ba
 - 3 curated themes (coming soon)
 - Unlimited comments on your blog
 - RSS feed
-- Share posts to Meadow
 
 ### Sapling (coming soon)
 

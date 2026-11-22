@@ -4,7 +4,7 @@
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
 	import { ArborSection } from "@autumnsgrove/lattice/ui/arbor";
-	import { metricIcons, featureIcons, phaseIcons } from "@autumnsgrove/prism/icons";
+	import { featureIcons, phaseIcons } from "@autumnsgrove/prism/icons";
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 	import { api } from "@autumnsgrove/lattice/utils";
 
@@ -92,28 +92,6 @@
 	backLabel="Settings"
 >
 	<div class="feature-list">
-		<!-- Rings (Analytics) -->
-		<a href="/arbor/analytics" class="feature-link">
-			<GlassCard variant="frosted" hoverable flush>
-				<div class="feature-body">
-					<div class="feature-icon">
-						<metricIcons.barChart class="icon" />
-					</div>
-					<div class="feature-content">
-						<div class="feature-title">
-							<GroveTerm interactive term="rings">Rings</GroveTerm>
-							<Waystone slug="what-is-rings" label="Learn about Rings analytics" />
-						</div>
-						<p class="feature-description">
-							Privacy-first analytics showing how <GroveTerm interactive term="wanderer"
-								>Wanderers</GroveTerm
-							> explore your Grove.
-						</p>
-					</div>
-				</div>
-			</GlassCard>
-		</a>
-
 		<!-- Reeds (Comments) -->
 		<a href="/arbor/reeds" class="feature-link">
 			<GlassCard variant="frosted" hoverable flush>

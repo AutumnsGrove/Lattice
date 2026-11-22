@@ -246,7 +246,9 @@ jobs:
             }
 
       - name: Close failure issue on recovery
-        if: success() && inputs.run-deploy && github.event_name == 'push'
+        # Not gated on `inputs.run-deploy`, matching _deploy-worker.yml: a
+        # green run is recovery whether or not a publish step exists.
+        if: success() && github.event_name == 'push'
         uses: actions/github-script@v8
         with:
           script: |

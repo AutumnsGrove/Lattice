@@ -15,11 +15,11 @@ import type {
 	CustomVoiceConfig,
 } from "./config";
 import { DEFAULT_OPENROUTER_MODEL } from "./config";
-import { createSecretsManager, type SecretsManager } from "./secrets-manager";
-import { safeDecryptToken } from "./encryption";
+import { createSecretsManager } from "@autumnsgrove/grove-crypto/secrets";
 import { fetchGitHubCommits, fetchCommitStats } from "./github";
 import { parseAIResponse } from "./response-parser";
 import { buildVoicedPrompt } from "./voices";
+import { SUMMARY_MAX_OUTPUT_TOKENS } from "@autumnsgrove/curios/timeline/voices";
 import {
 	getHistoricalContext,
 	detectTaskFromText,
@@ -54,9 +54,7 @@ export async function getEnabledTenants(curioDb: GroveDatabase): Promise<TenantC
         repos_include,
         repos_exclude,
         timezone,
-        owner_name,
-        github_token_encrypted,
-        openrouter_key_encrypted
+        owner_name
       FROM timeline_curio_config
       WHERE enabled = 1
     `,
@@ -99,43 +97,21 @@ export async function processTenantTimeline(
 			};
 		}
 
-		// 1. Get API tokens from envelope encryption system
-		const secrets = createSecretsManager(env.DB, env.GROVE_KEK);
+		// 1. Get API tokens from envelope encryption (tenant_secrets only)
+		const secrets = await createSecretsManager({ DB: env.DB, GROVE_KEK: env.GROVE_KEK });
 
-		if (!secrets) {
-			throw new Error("GROVE_KEK not configured - cannot decrypt tenant secrets");
-		}
-
-		// Fetch tokens from tenant_secrets table, falling back to the legacy
-		// encrypted column if tenant_secrets doesn't have them yet.
 		const [githubToken, openrouterKey] = await Promise.all([
-			resolveTenantToken(
-				secrets,
-				config.tenantId,
-				"timeline_github_token",
-				config.githubTokenEncrypted,
-				env.TOKEN_ENCRYPTION_KEY,
-				logPrefix,
-			),
-			resolveTenantToken(
-				secrets,
-				config.tenantId,
-				"timeline_openrouter_key",
-				config.openrouterKeyEncrypted,
-				env.TOKEN_ENCRYPTION_KEY,
-				logPrefix,
-			),
+			secrets.safeGetSecret(config.tenantId, "timeline_github_token"),
+			secrets.safeGetSecret(config.tenantId, "timeline_openrouter_key"),
 		]);
 
 		if (!githubToken) {
-			throw new Error(
-				"GitHub token not found in tenant_secrets or legacy column (key: timeline_github_token)",
-			);
+			throw new Error("GitHub token not found in tenant_secrets (key: timeline_github_token)");
 		}
 
 		if (!openrouterKey) {
 			throw new Error(
-				"OpenRouter API key not found in tenant_secrets or legacy column (key: timeline_openrouter_key)",
+				"OpenRouter API key not found in tenant_secrets (key: timeline_openrouter_key)",
 			);
 		}
 
@@ -215,6 +191,7 @@ export async function processTenantTimeline(
 		// A cron run only gets one shot — there's no user sitting there to hit
 		// "retry" if Lumen's whole fallback chain trips on a transient network
 		// blip. Retrying the entire chain (not just one model) absorbs that.
+		const maxTokens = SUMMARY_MAX_OUTPUT_TOKENS;
 		const aiResult = await withRetry(
 			() =>
 				lumen.run({
@@ -227,13 +204,13 @@ export async function processTenantTimeline(
 					options: {
 						model: config.openrouterModel || DEFAULT_OPENROUTER_MODEL,
 						tenantApiKey: openrouterKey,
-						// 2048 was too tight for the full brief+detailed+gutter JSON envelope
-						// on busier days — the model gets cut off mid-object, JSON.parse()
-						// throws, and parseAIResponse() silently swaps in the generic
-						// "got a bit tangled" fallback text instead of surfacing an error.
-						// Doubled again to 8192 as headroom for tenants with heavier days
-						// than we've tested against.
-						maxTokens: 8192,
+						// Shared with aspen's manual generate, next to DETAILED_BUDGET in
+						// libs/curios so the ceiling and the word budget that keeps it
+						// honest live in one place. Raising this alone never fixed a
+						// truncation — 2026-11-13 pinned exactly 8192 and still got cut
+						// off mid-JSON — and it has nothing to do with Lumen's *input*
+						// wall, which is a separate limit (see GH #1703).
+						maxTokens,
 						temperature: 0.7,
 					},
 				}),
@@ -241,7 +218,25 @@ export async function processTenantTimeline(
 		);
 
 		// 7. Parse AI response
+		//
+		// A truncated response is not a summary. parseAIResponse() hands back a
+		// generic fallback object on JSON.parse failure, and storing that used to
+		// happen silently: the row was written with the real commit_count, so the
+		// date looked generated and every later run skipped it. Fail loudly
+		// instead — Pulse records it, no row is written, and the retry can happen.
+		if (aiResult.usage.output >= maxTokens) {
+			throw new Error(
+				`AI response hit the ${maxTokens}-token ceiling (model=${aiResult.model}, output=${aiResult.usage.output}) and was truncated mid-JSON`,
+			);
+		}
+
 		const parsed = parseAIResponse(aiResult.content);
+
+		if (!parsed.success) {
+			throw new Error(
+				`AI response was not valid JSON (model=${aiResult.model}, output=${aiResult.usage.output} tokens, ${aiResult.content.length} chars)`,
+			);
+		}
 
 		// 8. Build context data for storage
 		const contextData = buildSummaryContextData(
@@ -466,42 +461,5 @@ function parseConfigRow(row: TenantConfigRow): TenantConfig {
 		reposExclude: safeParseJsonArray(row.repos_exclude),
 		timezone: row.timezone,
 		ownerName: row.owner_name,
-		githubTokenEncrypted: row.github_token_encrypted,
-		openrouterKeyEncrypted: row.openrouter_key_encrypted,
 	};
-}
-
-/**
- * Resolve a tenant token: try SecretsManager first, fall back to the legacy
- * encrypted column + TOKEN_ENCRYPTION_KEY, and auto-migrate on recovery.
- *
- * Mirrors getTimelineToken() in libs/curios/src/timeline/secrets.server.ts —
- * kept as a local copy since this worker uses its own read-only SecretsManager.
- */
-async function resolveTenantToken(
-	secrets: SecretsManager,
-	tenantId: string,
-	keyName: "timeline_github_token" | "timeline_openrouter_key",
-	legacyEncryptedValue: string | null,
-	tokenEncryptionKey: string | undefined,
-	logPrefix: string,
-): Promise<string | null> {
-	const fromSecretsManager = await secrets.safeGetSecret(tenantId, keyName);
-	if (fromSecretsManager) return fromSecretsManager;
-
-	if (!legacyEncryptedValue || !tokenEncryptionKey) return null;
-
-	const legacyToken = await safeDecryptToken(legacyEncryptedValue, tokenEncryptionKey);
-	if (!legacyToken) return null;
-
-	console.warn(`${logPrefix} Recovered ${keyName} from legacy column, migrating to tenant_secrets`);
-	try {
-		await secrets.setSecret(tenantId, keyName, legacyToken);
-	} catch (err) {
-		console.warn(
-			`${logPrefix} Failed to auto-migrate ${keyName}: ${err instanceof Error ? err.message : String(err)}`,
-		);
-	}
-
-	return legacyToken;
 }

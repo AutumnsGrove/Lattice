@@ -70,15 +70,13 @@ flowchart TB
     end
 
     subgraph libs["Libraries & Tools"]
-        VINEYARD["Vineyard<br/>Component docs"]
         TERRARIUM["Terrarium<br/>Showcase"]
         MIGRATOR["post-migrator<br/>Data migration"]
     end
 
-    subgraph tools["CLI Tools — Python/UV"]
+    subgraph tools["CLI Tools"]
         GW["gw<br/>Grove Wrap CLI"]
-        GF["gf<br/>Codebase search"]
-        GLIMPSE["glimpse<br/>Monitoring"]
+        GLIMPSE["glimpse<br/>Visual verification"]
     end
 
     ENGINE --> HEARTWOOD
@@ -631,7 +629,6 @@ mindmap
         Curios
             Timeline
             Gallery
-            Journey
             Reeds
             Fireside
         Grafts
@@ -661,7 +658,6 @@ flowchart TB
         direction LR
         TL["Timeline<br/><i>Blog + gutter annotations<br/>+ daily summaries</i>"]
         GL["Gallery<br/><i>Photo & media<br/>showcase</i>"]
-        JR["Journey<br/><i>Step-by-step<br/>guides</i>"]
         RD["Reeds<br/><i>Comment system<br/>nested replies</i>"]
         FS["Fireside<br/><i>Community<br/>conversations</i>"]
         WP["Wisp<br/><i>Dark mode +<br/>settings panel</i>"]
@@ -684,8 +680,8 @@ flowchart TB
         COMP["UI components"]
     end
 
-    TL & GL & JR & RD & FS --> DB
-    TL & GL & JR --> STORE
+    TL & GL & RD & FS --> DB
+    TL & GL --> STORE
     GP & GN & GU & GPH & GUP --> COMP
 
     style curios fill:#e8f5e9,stroke:#2d5a2d,stroke-width:2px
@@ -760,7 +756,7 @@ flowchart TD
 
     subgraph process["Processing"]
         OPT["Auto-optimize"]
-        FMT["Format conversion<br/>JPEG → WebP / JXL"]
+        FMT["Format conversion<br/>JPEG → WebP / AVIF"]
         HASH["IPFS content hash"]
         RESIZE["Responsive sizes"]
     end

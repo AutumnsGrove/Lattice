@@ -112,7 +112,7 @@ We use your information solely to:
 | Purpose | Data Used |
 |---------|-----------|
 | Provide the Service | Account info, content, session data |
-| Process payments | Billing info (via LemonSqueezy) |
+| Process payments | Billing info (via Stripe) |
 | Send important updates | Email address |
 | Improve the Service | Aggregated, anonymized usage data |
 | Prevent abuse | IP addresses, rate limiting data |

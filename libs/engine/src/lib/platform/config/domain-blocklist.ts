@@ -189,3 +189,21 @@ export const VALIDATION_CONFIG = {
 	patternDescription:
 		"Must start with a letter, contain only lowercase letters, numbers, and single hyphens",
 };
+
+// =============================================================================
+// Relationship to `reserved_usernames` (the D1 table)
+// =============================================================================
+//
+// This module and the `reserved_usernames` table are **not** mirrors of each
+// other, and the comments in 017_loam_blocklist.sql used to claim they were
+// (#1778). The split, settled 2026-11-22:
+//
+//   * **This list is the blocklist.** Every signup path calls
+//     `isUsernameBlocked()` first. Whatever is here applies everywhere, ships
+//     with a deploy, and cannot drift from the database.
+//   * **The table is operator extras.** A name added by hand (migration or
+//     console) to block something without shipping code. Nothing seeds it, so
+//     an empty table is normal.
+//
+// When the two disagree, this list wins — it is checked first. If a name
+// belongs to Grove's product vocabulary, it belongs here, not in the table.

@@ -110,8 +110,6 @@ export type KnownFlagId =
 	| "fireside_mode"
 	| "scribe_mode"
 	| "meadow_access"
-	| "jxl_encoding"
-	| "jxl_kill_switch"
 	| "my_feature"; // Add your new flag
 ```
 
@@ -239,7 +237,7 @@ INSERT OR IGNORE INTO feature_flags (
 **When NOT to use `greenhouse_only`:**
 
 - Safety gates (like `image_uploads_enabled`)
-- Infrastructure toggles (like `jxl_kill_switch`)
+- Infrastructure toggles (like `maintenance_mode`)
 - Features not ready for anyone yet (use `enabled=0` instead)
 
 ---
@@ -276,7 +274,7 @@ Feature flags are loaded ONCE at the admin layout level and cascaded to all chil
 | Cache TTL     | Use Case               | Example           |
 | ------------- | ---------------------- | ----------------- |
 | 60s (default) | Normal flags           | Most features     |
-| 0s (instant)  | Kill switches          | `jxl_kill_switch` |
+| 0s (instant)  | Kill switches          | `maintenance_mode` |
 | 300s          | Stable, rarely-changed | Tier gates        |
 
 To set custom TTL:

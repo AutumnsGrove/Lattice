@@ -4,7 +4,7 @@
  * Tests the POST /api/lumen/transcribe endpoint behavior.
  * Focus: Auth, validation, error handling, response shapes.
  *
- * @see /grove-testing for testing philosophy
+ * @see beaver-build (skill) for testing philosophy
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";

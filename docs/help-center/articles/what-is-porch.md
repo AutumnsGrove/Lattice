@@ -4,6 +4,7 @@ description: Grove's support system where you sit down and talk with the grove k
 category: help
 section: how-it-works
 lastUpdated: '2026-01-28'
+status: planned
 keywords:
   - porch
   - support

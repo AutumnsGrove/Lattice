@@ -16,7 +16,7 @@ import { createCloudflareContext } from "@autumnsgrove/infra/cloudflare";
 import type { GroveContext } from "@autumnsgrove/infra";
 import type { Env, GenerationResult } from "./config";
 import { getEnabledTenants, processTenantTimeline } from "./generator";
-import { createSecretsManager } from "./secrets-manager";
+import { createSecretsManager } from "@autumnsgrove/grove-crypto/secrets";
 
 function createContext(env: Env): GroveContext {
 	return createCloudflareContext({
@@ -220,44 +220,16 @@ export default {
 				// Check SecretsManager initialization
 				let secretsManagerOk = false;
 				let secretsManagerError: string | null = null;
-				const secrets = createSecretsManager(env.DB, env.GROVE_KEK);
-				if (secrets) {
+				let secrets: Awaited<ReturnType<typeof createSecretsManager>> | null = null;
+				try {
+					secrets = await createSecretsManager({ DB: env.DB, GROVE_KEK: env.GROVE_KEK });
 					secretsManagerOk = true;
-				} else {
+				} catch (err) {
 					secretsManagerError = kekPresent
-						? "SecretsManager creation failed despite KEK being present"
+						? `SecretsManager creation failed despite KEK being present: ${
+								err instanceof Error ? err.message : String(err)
+							}`
 						: "GROVE_KEK not configured — SecretsManager unavailable";
-				}
-
-				// Check legacy encrypted columns for each tenant
-				const legacyStatus: Record<
-					string,
-					{ hasLegacyGithub: boolean; hasLegacyOpenrouter: boolean }
-				> = {};
-				if (dbConnected) {
-					for (const t of enabledTenants) {
-						try {
-							const legacy = await ctx.db
-								.prepare(
-									`SELECT github_token_encrypted, openrouter_key_encrypted
-                 FROM timeline_curio_config WHERE tenant_id = ?`,
-								)
-								.bind(t.tenantId)
-								.first<{
-									github_token_encrypted: string | null;
-									openrouter_key_encrypted: string | null;
-								}>();
-							legacyStatus[t.tenantId] = {
-								hasLegacyGithub: !!legacy?.github_token_encrypted,
-								hasLegacyOpenrouter: !!legacy?.openrouter_key_encrypted,
-							};
-						} catch {
-							legacyStatus[t.tenantId] = {
-								hasLegacyGithub: false,
-								hasLegacyOpenrouter: false,
-							};
-						}
-					}
 				}
 
 				// For each tenant, check if their secrets exist in the tenant_secrets table
@@ -344,7 +316,6 @@ export default {
 					tenants: {
 						enabledCount: tenantCount,
 						configs: enabledTenants,
-						legacyTokens: legacyStatus,
 						secrets: tenantSecretStatus,
 					},
 				});

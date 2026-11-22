@@ -343,7 +343,7 @@ Implementation can wait. The groundwork is laid.
 | Full rollout | **Cultivate** | *"Ready to cultivate across all trees"* |
 | A/B test variants | **Cultivars** | *"Testing two cultivars"* |
 | Flag is active | **Took** | *"The graft took"* |
-| Feature available | **Grafted** | *"JXL is grafted onto your tree"* |
+| Feature available | **Grafted** | *"The gallery is grafted onto your tree"* |
 
 ### Time as Intention
 
@@ -398,8 +398,8 @@ Like **Vines** (external) and **Gutter** (internal), Grafts maintain a separatio
 ┌─────────────────────────────────────────────┐
 │              EXTERNAL (Users)               │
 │  "Your tree has three grafts: Timeline,    │
-│   Gallery, and JXL encoding. Want me to    │
-│   prune Gallery for now?"                   │
+│   Gallery, and Reeds. Want me to prune     │
+│   Gallery for now?"                         │
 ├─────────────────────────────────────────────┤
 │              INTERNAL (Code)                │
 │  isFeatureEnabled('graft:gallery', ...)    │

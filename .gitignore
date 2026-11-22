@@ -41,14 +41,12 @@ bun.lockb
 .dev.vars
 
 # Local databases (dev SQLite/D1 files — never commit)
-# Exception: grove_census.db is intentionally tracked as static data
 *.sqlite
 *.sqlite3
 *.db
 *.db-journal
 *.db-wal
 *.db-shm
-!apps/landing/static/data/grove_census.db
 
 # Test coverage
 **/coverage/
@@ -79,12 +77,9 @@ scripts/journey/output/
 .worktrees/
 .claude/worktrees/
 
-# Glimpse runtime artifacts
+# Visual verification screenshots (tools/glimpse)
 .glimpse/
 screenshots/
 .superset/config.json
-tools/index-viz/uv.lock
 
-# gf ask vector index (machine-specific, ~55MB binary)
-.grove/
 services/durable-objects/wrangler.local.toml

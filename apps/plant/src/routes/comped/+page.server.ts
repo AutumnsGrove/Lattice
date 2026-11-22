@@ -7,7 +7,9 @@
 
 import { redirect, error } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
-import { createTenant, getTenantForOnboarding } from "$lib/server/tenant";
+import { createTenant, getTenantForOnboarding, SignupBlockedError } from "$lib/server/tenant";
+import { PLANT_ERRORS } from "$lib/errors";
+import { isHumanVerified, turnstileEnv } from "$lib/server/human-check";
 import { CloudflareDatabase } from "@autumnsgrove/infra/cloudflare";
 
 interface CompedInvite {
@@ -79,7 +81,7 @@ export const actions: Actions = {
 	/**
 	 * Claim the comped invite and create the tenant
 	 */
-	claim: async ({ cookies, platform, request }) => {
+	claim: async ({ cookies, platform, request, url }) => {
 		const onboardingId = cookies.get("onboarding_id");
 		if (!onboardingId) {
 			throw error(401, "Session expired");
@@ -125,6 +127,14 @@ export const actions: Actions = {
 				success: true,
 				subdomain: existingTenant.subdomain,
 			};
+		}
+
+		// A comped invite is not a human check — no tenant until the challenge is
+		// solved, same as the paid and free paths (#1678).
+		if (
+			!(await isHumanVerified(cookies, turnstileEnv(platform).TURNSTILE_SECRET_KEY, url.origin))
+		) {
+			throw redirect(302, `/verify?returnTo=${encodeURIComponent("/comped")}`);
 		}
 
 		try {
@@ -194,6 +204,11 @@ export const actions: Actions = {
 				subdomain,
 			};
 		} catch (err) {
+			// A blocked identity is a decision, not a failure — see /api/select-plan.
+			if (err instanceof SignupBlockedError) {
+				throw error(403, PLANT_ERRORS.SIGNUP_IDENTITY_BLOCKED.userMessage);
+			}
+
 			console.error("[Comped] Error creating tenant:", err);
 			throw error(500, "Failed to create your blog. Please try again.");
 		}

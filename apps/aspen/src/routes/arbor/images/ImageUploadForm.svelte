@@ -10,7 +10,6 @@
 		processImage,
 		generateThumbnail,
 		extractDominantColor,
-		supportsJxlEncoding,
 		calculateFileHash,
 		formatBytes,
 		compressionRatio,
@@ -48,8 +47,8 @@
 
 	interface Props {
 		uploadsEnabled: boolean;
-		jxlFeatureEnabled: boolean;
-		jxlKillSwitchActive: boolean;
+		/** Where a suspended uploader asks for them to be turned on (#1626). */
+		uploadAccessUrl?: string | null;
 		copyFormat: string;
 		copiedItem: string | number | null;
 		onCopyFormatChange?: (format: string) => void;
@@ -59,8 +58,7 @@
 
 	let {
 		uploadsEnabled,
-		jxlFeatureEnabled,
-		jxlKillSwitchActive,
+		uploadAccessUrl = null,
 		copyFormat,
 		copiedItem,
 		onCopyFormatChange = () => {},
@@ -70,32 +68,15 @@
 
 	// Upload options
 	let quality = $state(80);
-	let imageFormat = $state<"auto" | "jxl" | "webp" | "original">("webp");
+	let imageFormat = $state<"webp" | "original">("webp");
 	let fullResolution = $state(false);
-	let jxlSupported = $state(false);
 	let useAiAnalysis = $state(false);
 	let showAdvanced = $state(false);
-
-	// Set initial format based on feature flag
-	let formatInitialized = false;
-	$effect(() => {
-		if (!formatInitialized && jxlFeatureEnabled) {
-			imageFormat = "auto";
-			formatInitialized = true;
-		}
-	});
 
 	// Upload state
 	let isDragging = $state(false);
 	let uploads = $state<UploadItem[]>([]);
 	let uploading = $state(false);
-
-	// Check JXL support on mount
-	$effect(() => {
-		(async () => {
-			jxlSupported = await supportsJxlEncoding();
-		})();
-	});
 
 	function handleDragOver(e: DragEvent) {
 		e.preventDefault();
@@ -287,7 +268,6 @@
 			if (processedBlob.type && processedBlob.type !== file.type) {
 				const extForMime: Record<string, string> = {
 					"image/webp": ".webp",
-					"image/jxl": ".jxl",
 					"image/gif": ".gif",
 					"image/jpeg": ".jpg",
 					"image/png": ".png",
@@ -396,11 +376,18 @@
 			<span class="banner-icon">~</span>
 			<div>
 				<p>
-					Your grove needs a little time to sprout before photo uploads are available. In the
-					meantime, you can use external image links in your posts with markdown:
+					Your grove needs a little time to sprout before photo uploads are available.
+					{#if uploadAccessUrl}
+						If you'd like them sooner,
+						<a href={uploadAccessUrl} target="_blank" rel="noopener" class="underline"
+							>ask me to turn them on</a
+						>.
+					{/if}
 				</p>
-				<code class="block mt-2 text-xs opacity-80"
-					>![description](https://your-image-url.jpg)</code
+				<p class="mt-2 text-xs opacity-80">
+					In the meantime you can link images from anywhere with markdown:
+				</p>
+				<code class="block mt-2 text-xs opacity-80">![description](https://your-image-url.jpg)</code
 				>
 				<p class="mt-2 text-xs opacity-70">
 					Free image hosting: <a
@@ -422,9 +409,9 @@
 	<Glass
 		variant="tint"
 		intensity="light"
-		class="drop-zone {isDragging ? 'dragging' : ''} {uploading
-			? 'uploading'
-			: ''} {!uploadsEnabled ? 'disabled' : ''}"
+		class="drop-zone {isDragging ? 'dragging' : ''} {uploading ? 'uploading' : ''} {!uploadsEnabled
+			? 'disabled'
+			: ''}"
 		role="button"
 		tabindex={0}
 		aria-label="Drop zone for image uploads"
@@ -535,22 +522,9 @@
 					<div class="format-control">
 						<label for="imageFormat">Output Format:</label>
 						<select id="imageFormat" bind:value={imageFormat}>
-							{#if jxlFeatureEnabled && !jxlKillSwitchActive}
-								<option value="auto">Auto (JXL → WebP fallback)</option>
-								<option value="jxl">JPEG XL only</option>
-							{/if}
 							<option value="webp">WebP only</option>
 							<option value="original">Keep original</option>
 						</select>
-						{#if jxlFeatureEnabled && !jxlKillSwitchActive}
-							{#if jxlSupported}
-								<span class="format-badge supported">JXL supported</span>
-							{:else}
-								<span class="format-badge unsupported">JXL unavailable</span>
-							{/if}
-						{:else if jxlKillSwitchActive}
-							<span class="format-badge unsupported">JXL disabled (emergency)</span>
-						{/if}
 					</div>
 
 					<label class="toggle-option">
@@ -667,11 +641,7 @@
 						<div class="upload-error-row">
 							<p class="upload-error">
 								{upload.error}
-								<Waystone
-									slug="image-upload-failures"
-									label="Troubleshoot upload issues"
-									inline
-								/>
+								<Waystone slug="image-upload-failures" label="Troubleshoot upload issues" inline />
 							</p>
 							{#if upload.originalFile}
 								<Button variant="secondary" size="sm" onclick={() => retryUpload(upload)}
@@ -970,23 +940,6 @@
 	:global(.dark) .format-control select {
 		background: rgba(255, 255, 255, 0.05);
 		border-color: rgba(255, 255, 255, 0.1);
-	}
-
-	.format-badge {
-		font-size: 0.7rem;
-		padding: 0.2rem 0.5rem;
-		border-radius: var(--border-radius-small);
-		font-weight: 500;
-	}
-
-	.format-badge.supported {
-		background: var(--status-success-bg);
-		color: var(--accent-success);
-	}
-
-	.format-badge.unsupported {
-		background: var(--status-warning-bg);
-		color: var(--color-text-muted);
 	}
 
 	.options-info {

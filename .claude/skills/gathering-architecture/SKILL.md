@@ -5,7 +5,7 @@ description: The drum sounds. Eagle, Crow, Swan, and Elephant gather for system 
 
 # Gathering Architecture 🌲🦅
 
-The drum echoes high in the canopy. The conductor stands below, orchestrating each animal's entrance. The Eagle soars in fresh air, seeing patterns without bias. The Crow arrives separately, challenging with no sympathy for the architect. The Swan receives a strengthened design, not a compromised one. The Elephant builds from a spec it trusts. Four isolated minds, four intentional models, one cathedral of code.
+_The conductor dispatches one subagent per animal, each with isolated context and an intentional model. It manages handoffs and gate checks — it never does the work itself._
 
 ## When to Summon
 
@@ -43,8 +43,6 @@ Spec     Eagle    Check     Crow    Check     Swan    Check   Elephant  Check   
 
 ### Phase 1: SUMMON
 
-_The drum sounds. The canopy rustles..._
-
 The conductor receives the architecture request and prepares the dispatch plan:
 
 **Clarify the System:**
@@ -73,8 +71,6 @@ The conductor receives the architecture request and prepares the dispatch plan:
 
 ### Phase 2: DESIGN (Eagle)
 
-_The conductor signals. The Eagle rises..._
-
 ```
 Agent(eagle, model: opus)
   Input:  system specification only
@@ -100,8 +96,6 @@ Dispatch an **opus subagent** to design the architecture. The Eagle receives ONL
 ---
 
 ### Phase 3: CHALLENGE (Crow)
-
-_The Crow perches. It tilts its head at what others won't question..._
 
 ```
 Agent(crow, model: sonnet)
@@ -135,8 +129,6 @@ Dispatch a **sonnet subagent** in Red Team mode against the Eagle's architecture
 
 ### Phase 4: SPECIFY (Swan)
 
-_The Swan glides. Elegance meets precision..._
-
 ```
 Agent(swan, model: opus)
   Input:  strengthened architecture (Eagle's doc + resolved Crow challenges)
@@ -162,8 +154,6 @@ Dispatch an **opus subagent** to write the detailed specification. The Swan rece
 ---
 
 ### Phase 5: BUILD (Elephant)
-
-_The ground trembles. The Elephant arrives..._
 
 ```
 Agent(elephant, model: opus)
@@ -204,8 +194,6 @@ Must compile and pass. If it fails, resume Elephant with the error.
 
 ### Phase 6: CHORUS
 
-_Dawn breaks. The architecture stands..._
-
 The conductor runs final verification and presents the summary:
 
 ```bash
@@ -245,21 +233,13 @@ The forest has a new landmark.
 
 ## Conductor Rules
 
-### Never Do Animal Work
+**Never Do Animal Work.** The conductor dispatches. It does not design, challenge, specify, or build.
 
-The conductor dispatches. It does not design, challenge, specify, or build.
+**Fresh Eyes Are a Feature.** Crow sees only the architecture document, not Eagle's reasoning. Elephant sees only Swan's spec, not the debate history. This isolation produces better results at every stage.
 
-### Fresh Eyes Are a Feature
+**Gate Every Transition.** Verify output between every animal. Architecture must be complete before challenge. Challenges must be resolved before specification. Spec must be complete before building.
 
-Crow sees only the architecture document, not Eagle's reasoning. Elephant sees only Swan's spec, not the debate history. This isolation produces better results at every stage.
-
-### Gate Every Transition
-
-Verify output between every animal. Architecture must be complete before challenge. Challenges must be resolved before specification. Spec must be complete before building.
-
-### Resume, Don't Restart
-
-If a gate check fails or Crow reveals fundamental design issues, **resume** the relevant agent. Don't spawn new ones.
+**Resume, Don't Restart.** If a gate check fails or Crow reveals fundamental design issues, **resume** the relevant agent. Don't spawn new ones.
 
 ---
 

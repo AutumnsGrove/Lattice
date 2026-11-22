@@ -10,26 +10,9 @@ assignees: ''
 <!-- What feature would you like to see? -->
 
 ## Component
-<!-- Which Grove component would this affect? -->
-- [ ] Heartwood (Auth)
-- [ ] Lattice (Core)
-- [ ] Plant (Signups)
-- [ ] Arbor (Admin Panel)
-- [ ] Clearing (Status)
-- [ ] Patina (Backups)
-- [ ] Mycelium (MCP)
-- [ ] Amber (Storage)
-- [ ] Ivy (Mail)
-- [ ] Foliage (Themes)
-- [ ] Curios (Tweaks)
-- [ ] Grafts (Flags)
-- [ ] Meadow (Social)
-- [ ] Forests (Communities)
-- [ ] Shade (AI Protection)
-- [ ] Lumen (AI Gateway)
-- [ ] Petal/Thorn (Content Moderation)
-- [ ] New Component
-- [ ] Multiple Components
+<!-- Which product does this land in? The list is in `.github/labels.yml`
+     under `group: component`. Name it in the title if you can, so it gets
+     labelled without anyone asking. -->
 
 ## Problem Statement
 <!-- What problem does this solve? Why do we need this? -->

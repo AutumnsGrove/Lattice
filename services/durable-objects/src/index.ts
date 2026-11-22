@@ -9,6 +9,31 @@
  */
 
 import { syncAllTenantGalleries } from "@autumnsgrove/lattice/server/services/gallery-sync";
+import {
+	createTenant,
+	describeTenantCreationPlan,
+	SignupBlockedError,
+} from "@autumnsgrove/lattice/server/tenants/create-tenant";
+import {
+	formatRemovalResult,
+	removeTenant,
+	type BillingCancellation,
+	type TenantRemovalResult,
+} from "@autumnsgrove/lattice/server/tenants/remove-tenant";
+import {
+	identityHasOtherTenants,
+	planIdentityRemoval,
+	removeIdentity,
+	resolveIdentity,
+	type IdentityCount,
+} from "@autumnsgrove/lattice/server/tenants/groveauth-identity";
+import { buildRemovalEmail } from "@autumnsgrove/lattice/server/tenants/removal-email";
+import {
+	resolveRemovalPolicy,
+	type RemovalPolicy,
+} from "@autumnsgrove/lattice/server/tenants/removal-policy";
+import { isValidSubdomain } from "@autumnsgrove/lattice/utils/subdomain";
+import { TIERS, type TierKey } from "@autumnsgrove/lattice/platform/config/tiers";
 
 // Export DO classes for Cloudflare to instantiate
 export { TenantDO } from "./TenantDO.js";
@@ -45,6 +70,45 @@ interface Env {
 	THRESHOLD: DurableObjectNamespace;
 	TENANTS: DurableObjectNamespace;
 	DB: D1Database;
+	/** Tenant rows also live in these two; the removal registry knows which. */
+	CURIO_DB: D1Database;
+	OBS_DB: D1Database;
+	/** `groveauth` — the Better Auth identity, deleted last in a removal. */
+	GROVEAUTH_DB: D1Database;
+	/** Email gateway (`grove-zephyr`), for the removal notice. */
+	ZEPHYR?: { fetch: typeof fetch };
+	ZEPHYR_URL?: string;
+	ZEPHYR_API_KEY?: string;
+	/**
+	 * BillingHub (`grove-billing-api`), for cancelling a subscription as part of a
+	 * removal (#1745). Service binding only — the API is not publicly reachable.
+	 */
+	BILLING?: { fetch: typeof fetch };
+	/**
+	 * Where the post-removal probe goes, as an injectable for tests (#1677).
+	 *
+	 * Production leaves this unset and the probe goes out over the public internet
+	 * to `https://<subdomain>.grove.place/`, which is the only question that
+	 * matters: not "did the cache clear?" but "does the site still answer?" A
+	 * service binding would skip the CDN and edge cache and answer a kinder
+	 * question than the one an operator is asking.
+	 */
+	SITE_FETCH?: { fetch: typeof fetch };
+	/**
+	 * Where the probe goes, with `{subdomain}` as the only variable part (#1762).
+	 *
+	 * Production leaves this unset and the probe asks the public origin, which is
+	 * the only question that matters: not "did the cache clear?" but "does the
+	 * site still answer?" Everywhere else the default is a lie. A local or beta
+	 * fixture probed against production finds no such subdomain, reports "gone",
+	 * and passes a step that was never tested.
+	 *
+	 * Local: `http://localhost:5173/?subdomain={subdomain}` — Aspen's dev server
+	 * reads the tenant from `?subdomain=` (or `x-subdomain`) on localhost.
+	 */
+	SITE_ORIGIN?: string;
+	/** Where a removed account holder can reply. Defaults to hello@grove.place. */
+	SUPPORT_EMAIL?: string;
 	IMAGES: R2Bucket;
 	/** Shared secret for operator-only endpoints (e.g. rate limit reset). Not exposed to any tenant-facing app. */
 	OPS_ADMIN_KEY?: string;
@@ -156,6 +220,753 @@ async function handleGetTenantDrafts(
 	});
 }
 
+/**
+ * POST /tenant/flush/:subdomain — operator-only cache eviction for one tenant.
+ *
+ * This is the 2am lever. A tenant that is deleted or suspended in D1 keeps
+ * serving its cached config from TenantDO (memory and DO SQLite, 1h TTL), so a
+ * removal performed with SQL or wrangler is cosmetic until the DO is told. The
+ * alternative is an authenticated platform-admin browser session, which is
+ * exactly what nobody has at 2am.
+ *
+ * The response distinguishes the three cases the operator actually cares about:
+ *   tenantExists: false          — no D1 row; the site is now dark (404)
+ *   tenantExists: true, inactive — suspended; still dark
+ *   tenantExists: true, active   — live again; this was a cache refresh, not a takedown
+ */
+async function handleTenantFlush(request: Request, env: Env, subdomain: string): Promise<Response> {
+	const authError = await checkOpsAuth(request, env);
+	if (authError) return authError;
+
+	if (!subdomain) {
+		return Response.json({ error: "bad_request", message: "Missing subdomain" }, { status: 400 });
+	}
+
+	const id = env.TENANTS.idFromName(`tenant:${subdomain}`);
+	const stub = env.TENANTS.get(id);
+	const res = await stub.fetch("https://tenant.internal/config/flush", {
+		method: "POST",
+		headers: { "X-Tenant-Subdomain": subdomain },
+	});
+
+	// Ask D1 directly rather than inferring from the flush alone, so the operator
+	// gets one unambiguous answer instead of a "flushed: true" that means nothing.
+	const row = await env.DB.prepare("SELECT active FROM tenants WHERE subdomain = ?")
+		.bind(subdomain)
+		.first<{ active: number }>();
+
+	return Response.json(
+		{
+			subdomain,
+			flushed: res.ok,
+			tenantExists: !!row,
+			tenantActive: row ? row.active === 1 : false,
+			config: await res.json().catch(() => null),
+		},
+		{ status: res.ok ? 200 : res.status },
+	);
+}
+
+/**
+ * POST /tenant/create — operator-only tenant creation.
+ *
+ * This is the verb that makes fixtures possible (#1710). Until it existed, the
+ * only way to make a tenant was to walk the real signup: OAuth, profile, plan,
+ * Turnstile, checkout. So every abuse fixture was made by a bot, and every
+ * removal test ran against whatever happened to be in production.
+ *
+ * It calls the *same* `createTenant()` Plant calls, imported from the engine —
+ * deliberately, because #1596 §B's criterion is that a fixture hands straight to
+ * `removeTenant()` with zero leftovers, which only means anything if fixtures
+ * are the same shape as real tenants.
+ *
+ * It skips Turnstile (#1678) and normally the identity deny list (#1681). That
+ * is the point, and it is why it is operator-only: bearer token, `--write`, no
+ * tenant-facing route, and one `audit_log` row per creation.
+ *
+ * Body: { subdomain, email, displayName, plan, accentColor?, createdAt?,
+ *         groveauthId?, onboardingId?, dryRun?, forceIdentity? }
+ */
+async function handleTenantCreate(request: Request, env: Env): Promise<Response> {
+	const authError = await checkOpsAuth(request, env);
+	if (authError) return authError;
+
+	const body = (await request.json().catch(() => null)) as {
+		subdomain?: string;
+		email?: string;
+		displayName?: string;
+		plan?: string;
+		accentColor?: string | null;
+		createdAt?: number | null;
+		groveauthId?: string | null;
+		onboardingId?: string | null;
+		dryRun?: boolean;
+		forceIdentity?: string | null;
+		actor?: string | null;
+	} | null;
+
+	if (!body?.subdomain || !body?.email || !body?.plan) {
+		return Response.json(
+			{ error: "bad_request", message: "subdomain, email and plan are required" },
+			{ status: 400 },
+		);
+	}
+
+	if (!isValidSubdomain(body.subdomain)) {
+		return Response.json(
+			{ error: "bad_request", message: `${body.subdomain} is not a valid subdomain` },
+			{ status: 400 },
+		);
+	}
+
+	if (!body.plan || !(body.plan in TIERS)) {
+		return Response.json(
+			{
+				error: "bad_request",
+				message: `plan must be one of ${Object.keys(TIERS).join(", ")}`,
+			},
+			{ status: 400 },
+		);
+	}
+
+	if (body.createdAt != null && (!Number.isInteger(body.createdAt) || body.createdAt <= 0)) {
+		return Response.json(
+			{ error: "bad_request", message: "createdAt must be a positive unix timestamp" },
+			{ status: 400 },
+		);
+	}
+
+	// Refuse rather than upsert. A second `create` for the same subdomain or
+	// address is a mistake by the operator, and the error should say which.
+	const existing = await env.DB.prepare(
+		`SELECT subdomain, email FROM tenants WHERE subdomain = ? OR email = ? LIMIT 1`,
+	)
+		.bind(body.subdomain, body.email)
+		.first<{ subdomain: string; email: string }>();
+
+	if (existing) {
+		const message =
+			existing.subdomain === body.subdomain
+				? `subdomain ${body.subdomain} already has a tenant`
+				: `email ${body.email} already belongs to ${existing.subdomain}`;
+		return Response.json(
+			{
+				error: "conflict",
+				message,
+				field: existing.subdomain === body.subdomain ? "subdomain" : "email",
+			},
+			{ status: 409 },
+		);
+	}
+
+	const dryRun = body.dryRun === true;
+
+	try {
+		const result = await createTenant(
+			env.DB,
+			{
+				username: body.subdomain,
+				displayName: body.displayName || body.subdomain,
+				email: body.email,
+				plan: body.plan as TierKey,
+				favoriteColor: body.accentColor ?? null,
+				onboardingId: body.onboardingId ?? null,
+				groveauthId: body.groveauthId ?? null,
+				createdAt: body.createdAt ?? null,
+				forceIdentityReason: body.forceIdentity ?? null,
+			},
+			{ dryRun },
+		);
+
+		if (!dryRun) {
+			await writeCreateAudit(env.DB, result.tenantId, body);
+		}
+
+		return Response.json(
+			{
+				subdomain: result.subdomain,
+				tenantId: result.tenantId,
+				written: !dryRun,
+				plan: result.plan.writes.length,
+				steps: describeTenantCreationPlan(result.plan),
+				identityBlockOverridden: result.plan.identityBlockOverridden,
+			},
+			{ status: dryRun ? 200 : 201 },
+		);
+	} catch (err) {
+		if (err instanceof SignupBlockedError) {
+			return Response.json(
+				{
+					error: "identity_blocked",
+					message: err.reason,
+					hint: "pass forceIdentity with a reason to override, and the reason lands in audit_log",
+				},
+				{ status: 409 },
+			);
+		}
+
+		console.error("[tenant/create] failed:", err);
+		return Response.json(
+			{ error: "create_failed", message: err instanceof Error ? err.message : String(err) },
+			{ status: 500 },
+		);
+	}
+}
+
+/**
+ * One audit row per creation, naming the operator and the override if there was
+ * one. Never fatal: the tenant exists either way, and throwing here would make
+ * the caller think it did not.
+ */
+async function writeCreateAudit(
+	db: D1Database,
+	tenantId: string,
+	body: {
+		subdomain?: string;
+		email?: string;
+		plan?: string;
+		actor?: string | null;
+		forceIdentity?: string | null;
+		createdAt?: number | null;
+	},
+): Promise<void> {
+	const details = JSON.stringify({
+		action: "tenant_create",
+		actor: body.actor || "gw",
+		subdomain: body.subdomain,
+		plan: body.plan,
+		createdAt: body.createdAt ?? null,
+		identityBlockOverridden: body.forceIdentity ?? null,
+	});
+
+	try {
+		await db
+			.prepare(
+				`INSERT INTO audit_log (id, tenant_id, category, action, details, user_email, created_at)
+				 VALUES (lower(hex(randomblob(16))), ?, 'admin', 'tenant_create', ?, ?, unixepoch())`,
+			)
+			.bind(tenantId, details, body.actor || "gw")
+			.run();
+	} catch (err) {
+		console.error("[tenant/create] Could not write tenant_create audit entry:", err);
+	}
+}
+
+/**
+ * The steps a removal did not take, in the words the response and the CLI use.
+ *
+ * An empty `notDone` is the good case, and it must mean "nothing was skipped",
+ * not "nobody filled in this field". An earlier version passed no-op callbacks,
+ * so `removeTenant` reported `notified: true` because a function resolved — and
+ * the summary printed "Account holder notified: yes" directly above a line
+ * saying nobody had been told (#1737). Silence is not success here.
+ */
+function notDone(input: {
+	result: TenantRemovalResult;
+	identityPlan: IdentityCount[];
+	otherTenants: string[];
+	removeIdentityToo: boolean;
+}): { identity?: string; email?: string; billing?: string } {
+	const notes: { identity?: string; email?: string; billing?: string } = {};
+	const identityRows = input.identityPlan.reduce((sum, row) => sum + row.rows, 0);
+
+	if (input.result.aborted) {
+		notes.billing = "the removal was abandoned before anything was deleted — see failures";
+		return notes;
+	}
+
+	if (!input.removeIdentityToo) {
+		const count = input.otherTenants.length;
+		notes.identity = `NOT deleted — the same login still owns ${
+			count === 1 ? "another blog" : `${count} other blogs`
+		} (${input.otherTenants.join(", ")}). Deleting it would lock the person out of a blog that is still theirs.`;
+	} else if (input.result.dryRun) {
+		if (identityRows > 0) {
+			notes.identity = `${identityRows} identity rows would be deleted (dry run) — see identityPlan`;
+		}
+	} else if (input.result.identitiesDeleted === 0 && identityRows > 0) {
+		notes.identity = "no identity rows deleted — see failures";
+	}
+
+	if (!input.result.dryRun && !input.result.notified) {
+		notes.email = input.result.failures.some((f) => f.table === "notification")
+			? "notification failed — the account holder has not been told. See failures."
+			: "no notification sent — the account holder has not been told";
+	}
+
+	return notes;
+}
+
+/**
+ * Cancel a removal's subscription, while the rows that locate it still exist.
+ *
+ * `billing-api`'s only cancellation path finds the provider subscription through
+ * `platform_billing` → `tenants` → `user_onboarding`, all of which the sweep
+ * deletes. So this runs first, and the pre-sweep lookup here serves the plan as
+ * well as the call (#1745).
+ *
+ * Three outcomes, deliberately distinguishable:
+ *
+ * - nothing to cancel — a Wanderer tier, or a subscription already cancelled.
+ *   The removal proceeds; `note` says so rather than leaving a blank line.
+ * - something to cancel and it worked — the row the sweep deletes is now dead.
+ * - something to cancel and it failed — a throw, which aborts the removal with
+ *   nothing deleted. A blog we could not stop charging for is a blog we keep.
+ */
+async function cancelSubscription(
+	env: Env,
+	tenant: { tenantId: string; subdomain: string },
+	context: { dryRun: boolean },
+): Promise<BillingCancellation> {
+	const row = await env.DB.prepare(
+		"SELECT provider_subscription_id, plan, status FROM platform_billing WHERE tenant_id = ? LIMIT 1",
+	)
+		.bind(tenant.tenantId)
+		.first<{
+			provider_subscription_id: string | null;
+			plan: string | null;
+			status: string | null;
+		}>();
+
+	if (!row?.provider_subscription_id) {
+		return { none: true, note: "no subscription on file — nothing to cancel" };
+	}
+	if (row.status === "cancelled") {
+		return {
+			none: true,
+			subscriptionId: row.provider_subscription_id,
+			plan: row.plan,
+			note: "subscription already cancelled",
+		};
+	}
+
+	if (context.dryRun) {
+		return {
+			subscriptionId: row.provider_subscription_id,
+			plan: row.plan,
+			cancelled: false,
+			note: "would cancel immediately",
+		};
+	}
+
+	// Checked here, not at the call site: a missing binding must only stop a
+	// removal that actually has money on it. A free tenant can still be removed
+	// from a worker that has no billing binding at all.
+	if (!env.BILLING) {
+		throw new Error(
+			"no BILLING service binding — cannot cancel the subscription, so the removal was abandoned",
+		);
+	}
+
+	const request = new Request("https://billing.internal/cancel", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify({
+			tenantId: tenant.tenantId,
+			// Deletion is not a period-end thing: the account is about to stop
+			// existing, so the subscription stops now.
+			immediately: true,
+			// The removal sends its own notice. A "your subscription is cancelled"
+			// mail followed thirty seconds later by "your account is gone" reads as
+			// two systems disagreeing about what happened.
+			notify: false,
+		}),
+	});
+
+	// Called as a method: a service binding's `fetch` needs its own `this`, and
+	// detaching it fails at runtime with "Illegal invocation" (#1740).
+	const res = await env.BILLING.fetch(request);
+	if (!res.ok) {
+		const detail = await res.text().catch(() => "");
+		throw new Error(
+			`billing-api responded ${res.status} ${res.statusText}${
+				detail ? ` — ${detail.slice(0, 200)}` : ""
+			}`,
+		);
+	}
+
+	// billing-api answers 200 for a subscription Stripe already considers gone
+	// (`alreadyCancelled`), which is the case a hand-cancel in the dashboard leaves
+	// behind. Saying "cancelled" there would be technically true and unhelpful.
+	const paid = (await res.json().catch(() => null)) as { alreadyCancelled?: boolean } | null;
+
+	return {
+		subscriptionId: row.provider_subscription_id,
+		plan: row.plan,
+		cancelled: true,
+		note: paid?.alreadyCancelled
+			? "was already cancelled at Stripe — nothing left to stop"
+			: "cancelled immediately",
+	};
+}
+
+/**
+ * The origin the probe asks about, with `{subdomain}` as its only variable part.
+ *
+ * Production is the default because production is the question: a deleted grove
+ * still serving through the edge cache is the bug (#1677), and only the public
+ * origin can answer it. But the same default is *wrong* in the dev stack and on
+ * beta — a fixture probed against production finds no such subdomain, reports
+ * "gone", and passes a step nobody tested (#1762).
+ */
+const DEFAULT_SITE_ORIGIN = "https://{subdomain}.grove.place/";
+
+function siteProbeUrl(env: Env, subdomain: string): string {
+	const template = env.SITE_ORIGIN?.trim() || DEFAULT_SITE_ORIGIN;
+
+	// A template with no placeholder would probe one fixed host for every tenant,
+	// which answers a question about nobody — the same smug success the check
+	// exists to prevent. Fail loudly instead of confirming a site that isn't the
+	// one being removed.
+	if (!template.includes("{subdomain}")) {
+		throw new Error(`SITE_ORIGIN must contain {subdomain} — got "${template}"`);
+	}
+
+	return template.replaceAll("{subdomain}", subdomain);
+}
+
+/** Whether the probe is asking about the real thing. */
+function probesProduction(env: Env): boolean {
+	return (env.SITE_ORIGIN?.trim() || DEFAULT_SITE_ORIGIN) === DEFAULT_SITE_ORIGIN;
+}
+
+/**
+ * Prove the site is gone, rather than trusting the flush (#1677).
+ *
+ * The flush clears the DO's memory and its own SQLite, and for two weeks after
+ * nine "removed" tenants it was the only evidence anyone had that they were
+ * gone — while all nine still answered 200 with the deleted account's name. So
+ * the last thing eviction does is ask the public internet.
+ *
+ * 404 is what Aspen serves for a subdomain with no active tenant, and it is a
+ * real 404 rather than a 200 page that says so (#1734). A redirect is also fine —
+ * an old subdomain pointed at another grove is not serving this one. A 2xx is the
+ * bug this issue is about, and an answer we cannot interpret (5xx, 403) is not a
+ * confirmation either, so both throw and `removeTenant` records a failed step.
+ */
+async function probeSiteGone(env: Env, subdomain: string): Promise<string> {
+	const url = siteProbeUrl(env, subdomain);
+	// Explicitly bound: a service binding's `fetch` needs its own `this`, and a
+	// detached one fails at runtime with "Illegal invocation" (#1740).
+	const fetchSite = env.SITE_FETCH ? env.SITE_FETCH.fetch.bind(env.SITE_FETCH) : fetch;
+
+	let res: Response;
+	try {
+		res = await fetchSite(
+			new Request(url, {
+				method: "GET",
+				redirect: "manual",
+				// An edge that will not answer is not a reason to hold a removal open.
+				signal: AbortSignal.timeout(10_000),
+			}),
+		);
+	} catch (err) {
+		throw new Error(
+			`could not confirm the site is gone — probing ${url} failed: ${
+				err instanceof Error ? err.message : String(err)
+			}`,
+		);
+	}
+
+	if (res.status === 404 || res.status === 410 || (res.status >= 300 && res.status < 400))
+		return url;
+
+	throw new Error(`the site is still serving — ${url} answered ${res.status}`);
+}
+
+/**
+ * POST /tenant/remove — operator-only permanent removal (#1596 §B).
+ *
+ * This exists because the sweep cannot be done well from a CLI. `removeTenant`
+ * counts and deletes across every registered table — 47 engine, 43 curios, 1
+ * observability — so driving it from Go would mean either reimplementing the
+ * registry (two sources of truth, and the fixture/real-tenant shapes diverge)
+ * or shelling out per statement, which times out mid-sweep and leaves exactly
+ * the half-removed tenant the `leftovers` check warns about. That is not
+ * hypothetical; it happened on 2026-11-17.
+ *
+ * One Worker invocation, three bindings, one implementation.
+ *
+ * `dryRun` defaults to **true**. A caller has to ask to destroy.
+ *
+ * Every step is wired: `evictCache` (the DO is right here), R2, the groveauth
+ * identity (bound as `GROVEAUTH_DB`) and the email (via `ZEPHYR`). A callback
+ * is only left out when this worker genuinely cannot do the work, and the
+ * response's `notDone` says which and why — a no-op callback resolves, so
+ * `removeTenant` would report it as done (#1737).
+ */
+async function handleTenantRemove(request: Request, env: Env): Promise<Response> {
+	const authError = await checkOpsAuth(request, env);
+	if (authError) return authError;
+
+	const body = (await request.json().catch(() => null)) as {
+		subdomain?: string;
+		email?: string | null;
+		reason?: string;
+		actor?: string | null;
+		/** Which rule the removal cites — see `removal-policy.ts`. */
+		policy?: string | null;
+		dryRun?: boolean;
+	} | null;
+
+	if (!body?.subdomain) {
+		return Response.json(
+			{ error: "bad_request", message: "subdomain is required" },
+			{ status: 400 },
+		);
+	}
+	if (!body.reason?.trim()) {
+		return Response.json(
+			{
+				error: "bad_request",
+				message: "reason is required — removeTenant keeps it as the audit trail",
+			},
+			{ status: 400 },
+		);
+	}
+
+	// An unknown citation is an error, not a default: an email that names the
+	// wrong rule is worse than one that names none.
+	let policy: RemovalPolicy;
+	try {
+		policy = resolveRemovalPolicy(body.policy);
+	} catch (err) {
+		return Response.json(
+			{
+				error: "bad_request",
+				message: err instanceof Error ? err.message : String(err),
+			},
+			{ status: 400 },
+		);
+	}
+
+	const row = await env.DB.prepare(
+		"SELECT id, subdomain, email FROM tenants WHERE subdomain = ? LIMIT 1",
+	)
+		.bind(body.subdomain)
+		.first<{ id: string; subdomain: string; email: string | null }>();
+
+	if (!row) {
+		return Response.json(
+			{ error: "not_found", message: `no tenant with subdomain ${body.subdomain}` },
+			{ status: 404 },
+		);
+	}
+
+	// An address override exists for a tenant row with no address on file. When the
+	// row *does* have one, a differing override is a typo away from deleting a
+	// stranger's login and emailing them about a removal of a blog they never had.
+	// `tenants.email` is the authority; the override only fills a gap.
+	const override = body.email?.trim() ?? "";
+	if (override && row.email && override.toLowerCase() !== row.email.trim().toLowerCase()) {
+		return Response.json(
+			{
+				error: "bad_request",
+				message: `email ${override} does not match the address on file for ${row.subdomain} (${row.email}) — refusing to touch an identity that may not be theirs`,
+			},
+			{ status: 400 },
+		);
+	}
+
+	const target = { tenantId: row.id, subdomain: row.subdomain, email: override || row.email };
+
+	// The email runs after the identity step, so this is filled in by the time it
+	// needs to say whether the login went with the blog. Saying "the login you
+	// used to sign in" when there was no identity to delete would be a lie in the
+	// one message the person keeps.
+	let identitiesRemoved = 0;
+
+	/** The URL the probe actually asked, so the response can say where it looked. */
+	let probedUrl: string | null = null;
+
+	try {
+		// The identity has to be resolved *now*, while `engine.users` still exists.
+		// The tenant sweep deletes that table, and `ba_user.tenant_id` is null for
+		// every account created before it was populated — afterwards there is no
+		// link left saying which login this blog belonged to.
+		//
+		// Inside the `try` on purpose: a missing binding or a schema difference in
+		// another environment is a structured 500, not an unhandled throw.
+		const linked = await env.DB.prepare(
+			"SELECT groveauth_id FROM users WHERE tenant_id = ? AND groveauth_id IS NOT NULL AND groveauth_id != ''",
+		)
+			.bind(row.id)
+			.all<{ groveauth_id: string }>();
+
+		const identity = await resolveIdentity(env.GROVEAUTH_DB, {
+			tenantId: row.id,
+			email: target.email,
+			knownUserIds: (linked.results ?? []).map((r) => r.groveauth_id),
+		});
+		const identityPlan = await planIdentityRemoval(env.GROVEAUTH_DB, identity);
+
+		// One login can own more than one blog. Removing `emmareed` must not lock
+		// someone out of a second garden that is still theirs, so the identity is
+		// deleted only when this tenant was its last. `ba_user.tenant_id` is a
+		// single column and cannot answer that alone — the engine database goes in
+		// with it.
+		const otherTenants = await identityHasOtherTenants(env.GROVEAUTH_DB, identity, row.id, env.DB);
+		const removeIdentityToo = otherTenants.length === 0;
+
+		const result = await removeTenant(
+			{ engine: env.DB, curios: env.CURIO_DB, observability: env.OBS_DB },
+			target,
+			{
+				reason: body.reason,
+				actor: body.actor || "gw",
+				dryRun: body.dryRun !== false,
+				deleteIdentity: removeIdentityToo
+					? async () => {
+							const outcome = await removeIdentity(env.GROVEAUTH_DB, identity);
+							// `removeTenant` reports a callback that threw as a failed step, which is
+							// exactly what a half-deleted identity is. Returning a count for a sweep
+							// that left rows behind would print "Identity: 3 rows" over a login that
+							// still works.
+							if (outcome.failures.length > 0 || outcome.leftovers.length > 0) {
+								const detail = [...outcome.failures.map((f) => `${f.table}: ${f.error}`)].concat(
+									outcome.leftovers.map((l) => `${l.table}: ${l.rows} rows left`),
+								);
+								throw new Error(detail.join("; "));
+							}
+							identitiesRemoved = outcome.deleted;
+							return outcome.deleted;
+						}
+					: undefined,
+				// Only wired when a gateway is configured. Falling back to the production
+				// URL would make a test (or a local run) send real mail to a real person
+				// whose account we just deleted.
+				notify:
+					env.ZEPHYR || env.ZEPHYR_URL
+						? async (tenant) => {
+								// No address, no email — but say so rather than reporting a notice that
+								// never left. `removeTenant` turns a throw here into a failed step.
+								if (!tenant.email) {
+									throw new Error("no email address on file for this tenant");
+								}
+
+								const email = buildRemovalEmail({
+									subdomain: tenant.subdomain,
+									reason: body.reason ?? "",
+									policy,
+									identityDeleted: identitiesRemoved > 0,
+									contact: env.SUPPORT_EMAIL || "hello@grove.place",
+								});
+
+								const zephyrUrl = env.ZEPHYR_URL || "https://grove-zephyr.m7jv4v7npb.workers.dev";
+								// Called as a method, not detached into a local: a service
+								// binding's `fetch` needs its own `this`, and `const f = env.ZEPHYR.fetch`
+								// fails at runtime with "Illegal invocation" — which is exactly
+								// what happened on the first production removal.
+								const sendRequest = new Request(`${zephyrUrl}/send`, {
+									method: "POST",
+									headers: {
+										"Content-Type": "application/json",
+										"X-API-Key": env.ZEPHYR_API_KEY || "",
+									},
+									body: JSON.stringify({
+										type: "transactional",
+										template: "raw",
+										to: tenant.email,
+										subject: email.subject,
+										html: email.html,
+										text: email.text,
+									}),
+								});
+
+								const res = env.ZEPHYR
+									? await env.ZEPHYR.fetch(sendRequest)
+									: await fetch(sendRequest);
+
+								if (!res.ok) {
+									throw new Error(`Zephyr responded ${res.status} ${res.statusText}`);
+								}
+							}
+						: undefined,
+				cancelBilling: (tenant, context) => cancelSubscription(env, tenant, context),
+				evictCache: async (tenant) => {
+					const id = env.TENANTS.idFromName(`tenant:${tenant.subdomain}`);
+					const stub = env.TENANTS.get(id);
+					const res = await stub.fetch("https://tenant.internal/config/flush", {
+						method: "POST",
+						headers: { "X-Tenant-Subdomain": tenant.subdomain },
+					});
+					// `fetch` resolves on 4xx/5xx, so an unchecked call reports the
+					// cache as evicted no matter what the DO said — and a tenant whose
+					// config is still cached keeps serving after "removal" (#1677).
+					// Throwing here makes removeTenant record it as a failure instead.
+					if (!res.ok) {
+						throw new Error(`flush returned ${res.status} ${res.statusText}`);
+					}
+
+					// The flush is done. Now check it from outside, because "the cache
+					// cleared" and "the site is gone" are different claims, and only the
+					// second one is the removal (#1677).
+					probedUrl = await probeSiteGone(env, tenant.subdomain);
+				},
+				deleteR2: async (tenant) => {
+					// R2 list() caps at 1000 keys per call and says so with
+					// `truncated`. Deleting one page and reporting success would leave
+					// the rest of a prolific tenant's uploads in the bucket, and the
+					// `leftovers` check only covers D1 — so nothing downstream would
+					// notice.
+					let deleted = 0;
+					let cursor: string | undefined;
+					do {
+						const page = await env.IMAGES.list({
+							prefix: `tenants/${tenant.tenantId}/`,
+							...(cursor ? { cursor } : {}),
+						});
+						await Promise.all(page.objects.map((object) => env.IMAGES.delete(object.key)));
+						deleted += page.objects.length;
+						cursor = page.truncated ? page.cursor : undefined;
+					} while (cursor);
+					return deleted;
+				},
+			},
+		);
+
+		// A green local or beta run proves the site behind *that* origin is gone, not
+		// grove.place. Say so where the operator reads the outcome, rather than in a
+		// log they scroll past (#1762).
+		const probeWarning =
+			probedUrl && !probesProduction(env)
+				? `\n\n⚠ Probed ${probedUrl} — not production. A green run here proves that origin is clear, not grove.place.`
+				: "";
+
+		return Response.json(
+			{
+				summary: `${formatRemovalResult(result)}${probeWarning}`,
+				...(probedUrl ? { probeOrigin: probedUrl } : {}),
+				dryRun: result.dryRun,
+				removed: result.plan.totalRows,
+				aborted: result.aborted,
+				billing: result.billing,
+				identityPlan: identityPlan.filter((row) => row.rows > 0),
+				identitiesDeleted: result.identitiesDeleted,
+				tenantRowDeleted: result.tenantRowDeleted,
+				cacheEvicted: result.cacheEvicted,
+				r2ObjectsDeleted: result.r2ObjectsDeleted,
+				leftovers: result.leftovers.map((t) => `${t.database}.${t.table}=${t.rows}`),
+				failures: result.failures.map((f) => `${f.database}.${f.table}: ${f.error}`),
+				auditRecorded: result.auditRecorded,
+				notDone: notDone({
+					result,
+					identityPlan,
+					otherTenants,
+					removeIdentityToo,
+				}),
+			},
+			{ status: result.dryRun ? 200 : 200 },
+		);
+	} catch (err) {
+		console.error("[tenant/remove] failed:", err);
+		return Response.json(
+			{ error: "remove_failed", message: err instanceof Error ? err.message : String(err) },
+			{ status: 500 },
+		);
+	}
+}
+
 export default {
 	/** Daily gallery_images reconcile so storage usage and quota never depend on a manual sync. */
 	async scheduled(_event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
@@ -184,6 +995,19 @@ export default {
 
 		if (url.pathname === "/threshold/reset" && request.method === "POST") {
 			return handleThresholdReset(request, env);
+		}
+
+		const flushMatch = url.pathname.match(/^\/tenant\/flush\/([^/]+)$/);
+		if (flushMatch && request.method === "POST") {
+			return handleTenantFlush(request, env, decodeURIComponent(flushMatch[1]));
+		}
+
+		if (url.pathname === "/tenant/create" && request.method === "POST") {
+			return handleTenantCreate(request, env);
+		}
+
+		if (url.pathname === "/tenant/remove" && request.method === "POST") {
+			return handleTenantRemove(request, env);
 		}
 
 		const draftsMatch = url.pathname.match(/^\/tenant-drafts\/([^/]+)(?:\/([^/]+))?$/);

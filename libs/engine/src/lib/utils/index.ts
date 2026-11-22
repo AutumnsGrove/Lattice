@@ -6,6 +6,9 @@
 // --- API ---
 export { getCSRFToken, apiRequest, api } from "./api";
 
+// --- Acquisition refs ---
+export { REF_PARAM, REF_MAX_LENGTH, sanitizeRef } from "./acquisition-ref";
+
 // --- Classnames ---
 export { cn } from "./cn";
 
@@ -147,7 +150,6 @@ export {
 
 // --- Image Processing (cross-module, backward compat) ---
 export {
-	supportsJxlEncoding,
 	isHeicFile,
 	isHeifByMagicBytes,
 	convertHeicToJpeg,

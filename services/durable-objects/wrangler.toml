@@ -62,6 +62,15 @@ class_name = "ThresholdDO"
 binding = "ZEPHYR"
 service = "grove-zephyr"
 
+# BillingHub (grove-billing-api) — cancelling a subscription as part of a removal
+# (#1745). A removal sweeps `platform_billing`, and that is the only table from
+# which the cancellation can find the provider subscription, so cancel has to
+# happen from here, before the sweep. The API has no public route: a missing
+# binding stops a removal that has money on it rather than letting it through.
+[[services]]
+binding = "BILLING"
+service = "grove-billing-api"
+
 # =============================================================================
 # KV Namespace - For caching and rate limiting (used by SentinelDO)
 # =============================================================================
@@ -76,6 +85,27 @@ id = "514e91e81cc44d128a82ec6f668303e4"
 binding = "DB"
 database_name = "grove-engine-db"
 database_id = "a6394da2-b7a6-48ce-b7fe-b1eb3e730e68"
+
+# Tenant removal sweeps three databases (#1596 §B). The registry knows which
+# tables live where, so the operator endpoint needs all three bindings — the
+# alternative is a CLI that shells out once per table and times out.
+[[d1_databases]]
+binding = "CURIO_DB"
+database_name = "grove-curios-db"
+database_id = "b03756ad-30d7-427a-9a1b-ec2f6478fcbd"
+
+[[d1_databases]]
+binding = "OBS_DB"
+database_name = "grove-observability-db"
+database_id = "59e70f9e-8f9c-4021-96e5-1e130e753766"
+
+# A removal is not finished until the login identity is gone (#1596 §B). This
+# is the same database Heartwood writes (`services/heartwood` binds it as DB);
+# the ops worker only ever deletes from it, never creates or reads for auth.
+[[d1_databases]]
+binding = "GROVEAUTH_DB"
+database_name = "groveauth"
+database_id = "45eae4c7-8ae7-4078-9218-8e1677a4360f"
 
 # =============================================================================
 # R2 Bucket - For reading user-uploaded images (included in export zips)

@@ -9,7 +9,14 @@
 
 import { PROVIDERS, calculateCost } from "../config.js";
 import { ProviderError, ProviderTimeoutError } from "../errors.js";
-import type { LumenMessage, LumenProviderName, LumenStreamChunk } from "../types.js";
+import type {
+	LumenFinishReason,
+	LumenMessage,
+	LumenToolCallDelta,
+	LumenProviderName,
+	LumenStreamChunk,
+	LumenToolCall,
+} from "../types.js";
 import type { LumenInferenceOptions, LumenProvider, LumenProviderResponse } from "./types.js";
 import { safeParseJson } from "../../../utils/json.js";
 
@@ -53,6 +60,13 @@ interface OpenRouterStreamChunk {
 		delta?: {
 			content?: string;
 			role?: string;
+			/** Fragmented: first has id + name, the rest are argument slices. */
+			tool_calls?: Array<{
+				index: number;
+				id?: string;
+				type?: string;
+				function?: { name?: string; arguments?: string };
+			}>;
 		};
 		finish_reason?: string | null;
 		index?: number;
@@ -308,6 +322,7 @@ export class OpenRouterProvider implements LumenProvider {
 					input: inputTokens,
 					output: outputTokens,
 					cost: calculateCost(model, inputTokens, outputTokens),
+					costSource: "catalog",
 				},
 				model: data.model ?? model,
 				raw: data,
@@ -319,6 +334,7 @@ export class OpenRouterProvider implements LumenProvider {
 						arguments: tc.function.arguments,
 					},
 				})),
+				finishReason: normalizeFinishReason(data.choices?.[0]?.finish_reason),
 			};
 		} catch (err) {
 			// Handle timeout
@@ -373,6 +389,10 @@ export class OpenRouterProvider implements LumenProvider {
 					max_tokens: options.maxTokens,
 					temperature: options.temperature,
 					stream: true,
+					...(options.providerOptions?.tools ? { tools: options.providerOptions.tools } : {}),
+					...(options.providerOptions?.toolChoice !== undefined
+						? { tool_choice: options.providerOptions.toolChoice }
+						: {}),
 				}),
 				signal: controller.signal,
 			});
@@ -392,6 +412,8 @@ export class OpenRouterProvider implements LumenProvider {
 			let totalContent = "";
 			let inputTokens = 0;
 			let outputTokens = 0;
+			// Arrives on the choice just before [DONE], so it has to be held.
+			let finishReason: LumenFinishReason | undefined;
 
 			// Safety limit to prevent infinite loops from malformed streams
 			// At ~100 tokens/chunk, 10000 iterations = ~1M tokens (well beyond any model limit)
@@ -406,11 +428,13 @@ export class OpenRouterProvider implements LumenProvider {
 					yield {
 						content: "",
 						done: true,
+						finishReason,
 						usage: {
 							input: inputTokens || this.estimateTokens(messages),
 							output:
 								outputTokens || this.estimateTokens([{ role: "assistant", content: totalContent }]),
 							cost: calculateCost(model, inputTokens, outputTokens),
+							costSource: "catalog",
 						},
 					};
 					break;
@@ -428,11 +452,31 @@ export class OpenRouterProvider implements LumenProvider {
 
 					try {
 						const chunk = JSON.parse(data) as OpenRouterStreamChunk;
-						const content = chunk.choices?.[0]?.delta?.content ?? "";
+						const choice = chunk.choices?.[0];
+						const content = choice?.delta?.content ?? "";
 
-						if (content) {
-							totalContent += content;
-							yield { content, done: false };
+						if (choice?.finish_reason) {
+							finishReason = normalizeFinishReason(choice.finish_reason);
+						}
+
+						const toolCallDeltas = choice?.delta?.tool_calls?.map((call) => {
+							const delta: LumenToolCallDelta = { index: call.index };
+							if (call.id) delta.id = call.id;
+							if (call.function?.name) delta.name = call.function.name;
+							if (call.function?.arguments) delta.argumentsDelta = call.function.arguments;
+							return delta;
+						});
+
+						if (content) totalContent += content;
+
+						// Yield when there is something to say. A chunk may carry text,
+						// fragments, or both.
+						if (content || toolCallDeltas?.length) {
+							yield {
+								content,
+								done: false,
+								...(toolCallDeltas?.length && { toolCallDeltas }),
+							};
 						}
 
 						// Capture usage if provided
@@ -667,40 +711,74 @@ Provide your safety assessment for User in the above conversation:
 	// ===========================================================================
 
 	/**
-	 * Format messages for OpenRouter API
+	 * Format messages for OpenRouter.
+	 *
+	 * The chat-completions shape carries a whole loop in one array: an assistant
+	 * turn with `tool_calls`, then one `tool` message per result carrying the
+	 * `tool_call_id` it answers. Providers reject a `tool` message whose id does
+	 * not appear in the preceding assistant turn, so both sides have to travel.
 	 */
 	private formatMessages(messages: LumenMessage[]): Array<{
 		role: string;
 		content:
 			| string
+			| null
 			| Array<{
 					type: string;
 					text?: string;
 					image_url?: { url: string; detail?: string };
 			  }>;
+		tool_calls?: LumenToolCall[];
+		tool_call_id?: string;
+		name?: string;
 	}> {
 		return messages.map((msg) => {
-			// Simple string content
-			if (typeof msg.content === "string") {
-				return { role: msg.role, content: msg.content };
+			const formatted: {
+				role: string;
+				content:
+					| string
+					| null
+					| Array<{
+							type: string;
+							text?: string;
+							image_url?: { url: string; detail?: string };
+					  }>;
+				tool_calls?: LumenToolCall[];
+				tool_call_id?: string;
+				name?: string;
+			} = {
+				role: msg.role,
+				content:
+					typeof msg.content === "string"
+						? msg.content
+						: msg.content.map((part) => {
+								if (part.type === "text") {
+									return { type: "text", text: part.text };
+								}
+								return {
+									type: "image_url",
+									image_url: {
+										url: part.image_url?.url ?? "",
+										detail: part.image_url?.detail ?? "auto",
+									},
+								};
+							}),
+			};
+
+			// An assistant turn that only called tools has no prose, and `null` is
+			// the content every OpenAI-shaped API documents for it. An empty string
+			// happens to work on OpenRouter and is rejected by stricter compatible
+			// servers, so send the shape the spec describes rather than the one that
+			// got through one test.
+			if (msg.role === "assistant" && msg.toolCalls?.length && formatted.content === "") {
+				formatted.content = null;
 			}
 
-			// Multimodal content (images)
-			return {
-				role: msg.role,
-				content: msg.content.map((part) => {
-					if (part.type === "text") {
-						return { type: "text", text: part.text };
-					}
-					return {
-						type: "image_url",
-						image_url: {
-							url: part.image_url?.url ?? "",
-							detail: part.image_url?.detail ?? "auto",
-						},
-					};
-				}),
-			};
+			if (msg.toolCalls?.length) formatted.tool_calls = msg.toolCalls;
+			if (msg.toolCallId) formatted.tool_call_id = msg.toolCallId;
+			if (msg.name) formatted.name = msg.name;
+
+			return formatted;
 		});
 	}
 
@@ -721,6 +799,32 @@ Provide your safety assessment for User in the above conversation:
 			}
 		}
 		return Math.ceil(chars / 4);
+	}
+}
+
+/**
+ * Map a provider's `finish_reason` onto the small set Lumen promises.
+ *
+ * OpenRouter passes through whatever the underlying model said — `stop`,
+ * `length`, `tool_calls`, `content_filter`, and occasionally provider-specific
+ * values like `eos` or `null`. A caller deciding whether to trust truncated
+ * tool arguments only needs the distinction that matters: did it run out of
+ * room, or did it finish. Everything unrecognized becomes `other` rather than
+ * being dropped, because "unknown" and "finished" must not look the same.
+ */
+export function normalizeFinishReason(
+	raw: string | null | undefined,
+): LumenFinishReason | undefined {
+	if (raw === null || raw === undefined) return undefined;
+
+	switch (raw) {
+		case "stop":
+		case "length":
+		case "tool_calls":
+		case "content_filter":
+			return raw;
+		default:
+			return "other";
 	}
 }
 

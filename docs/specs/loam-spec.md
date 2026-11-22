@@ -156,7 +156,7 @@ ivy, amber, bloom, mycelium, vista, pantry, nook, clearing, porch
 #### Route-Based Services
 
 ```
-shade, trails, vineyard, terrarium, weave
+shade, trails, terrarium, weave
 ```
 
 #### Internal Services

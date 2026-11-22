@@ -3,10 +3,12 @@ import {
 	getLatestPost,
 	processAnchorTags,
 	renderMarkdown,
+	applyLinkPolicy,
 	type GutterItem,
 } from "@autumnsgrove/grove-markdown";
 import { SITE_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import type { PageServerLoad } from "./$types.js";
+import { linkPolicyFromContext } from "$lib/server/link-policy";
 
 // Disable prerendering - latest post is fetched from D1 at runtime
 export const prerender = false;
@@ -109,6 +111,9 @@ export const load: PageServerLoad = async ({ platform, locals, setHeaders }) => 
 			}
 		}
 
+		// Outbound link policy for this tenant (#1682)
+		const linkPolicy = linkPolicyFromContext(locals.context);
+
 		// Generate HTML from markdown if not stored
 		let htmlContent = pageData.html_content;
 		if (
@@ -116,8 +121,12 @@ export const load: PageServerLoad = async ({ platform, locals, setHeaders }) => 
 			pageData.markdown_content &&
 			typeof pageData.markdown_content === "string"
 		) {
-			htmlContent = renderMarkdown(pageData.markdown_content);
+			htmlContent = renderMarkdown(pageData.markdown_content, {
+				linkPolicy: linkPolicy.policy,
+			});
 		}
+
+		htmlContent = applyLinkPolicy(htmlContent ?? "", linkPolicy.policy);
 
 		// Extract headers from HTML for table of contents
 		const headers = extractHeadersFromHtml(String(htmlContent || ""));

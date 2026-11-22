@@ -453,8 +453,11 @@ export const load = async ({ locals }) => {
 
 ### Font Validation & Upload
 
-- `validateWoff2(arrayBuffer)` — Magic byte check (`0x774F4632`) + 500KB max
-- `validateWoff(arrayBuffer)` — Fallback WOFF validation
+- `validateFont(arrayBuffer)` — Detects the format and validates it. Accepts WOFF2 and WOFF; recognises raw TTF, OTF and TTC only to reject them with a "convert to WOFF2" error
+- `validateWoff2(arrayBuffer)` / `validateWoff(arrayBuffer)` — Same checks when the format is already known. Both check, in order: 500KB max, signature, header length against file size, table directory bounds, required tables (`cmap`, `head`, `hhea`, `hmtx`, `maxp`, `name`, plus `glyf`+`loca` or `CFF`), then character coverage
+- Results are `FontValidationResult`: `valid`, `format`, `error` (the first message), `warnings`, and `errors[]` of `{ code, message, details? }`. Messages live in `FONT_ERRORS`
+- Character coverage reads the `cmap` and requires the digits 0–9 and the Latin alphabet in at least one case (`MIN_COVERAGE`). WOFF2 stores tables Brotli-compressed, so on a runtime without a Brotli `DecompressionStream` the WOFF2 coverage check is skipped and a warning is returned instead
+- Decompression is bounded by the sizes the font declares (`MAX_UNCOMPRESSED_FONT_SIZE`), so a crafted stream cannot expand without limit
 - `sanitizeFontName(name)` — Remove special characters for CSS safety
 - `uploadFontToR2(file, bucket, key)` — Upload to Cloudflare R2
 - `deleteFontFromR2(bucket, key)` — Cleanup

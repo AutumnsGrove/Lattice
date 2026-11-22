@@ -13,6 +13,7 @@ import { redirect, fail } from "@sveltejs/kit";
 import { dev } from "$app/environment";
 import type { Actions } from "./$types";
 import { logGroveError } from "@autumnsgrove/lattice/errors";
+import { clientIpHeaders } from "@autumnsgrove/lattice/server";
 import { validateRedirectUrl } from "$lib/redirect";
 import { LOGIN_ERRORS } from "$lib/errors";
 import {
@@ -21,6 +22,7 @@ import {
 	normalizeCode,
 	messageForSendFailure,
 	messageForVerifyFailure,
+	isRefusal,
 	statusForUpstreamFailure,
 } from "$lib/email-code";
 
@@ -81,7 +83,9 @@ function parseRawSetCookie(
  *
  * Service-binding requests carry no client IP of their own, so Better Auth's
  * per-IP rate limits would otherwise put every Wanderer in one shared bucket.
- * We forward the platform-derived address (never a client-supplied header).
+ * We forward the platform-derived address (never a client-supplied header),
+ * setting both `cf-connecting-ip` and `x-real-ip` — Cloudflare regenerates the
+ * first from the second on a Worker subrequest, so either one alone loses.
  */
 function postToHeartwood(
 	env: NonNullable<App.Platform["env"]>,
@@ -96,12 +100,55 @@ function postToHeartwood(
 		headers: {
 			"Content-Type": "application/json",
 			Origin: origin,
-			"cf-connecting-ip": clientIp,
-			"x-forwarded-for": clientIp,
+			...clientIpHeaders(clientIp),
 		},
 		body: JSON.stringify(body),
 		redirect: "manual",
 	});
+}
+
+/**
+ * Ask Heartwood whether the session we just issued is honoured at all.
+ *
+ * A ban is enforced when a session is *validated*, not when it is created, so a
+ * banned Wanderer signs in successfully and is then treated as signed out — the
+ * cookies exist and mean nothing. Login is the only place that can turn that
+ * into an answer instead of a loop (#1719).
+ *
+ * Returns `"banned"` only on a definite refusal; anything else (network, 5xx,
+ * a malformed body) returns null and the sign-in proceeds exactly as before.
+ */
+async function sessionRefusal(
+	env: NonNullable<App.Platform["env"]>,
+	cookieHeader: string,
+	clientIp: string,
+): Promise<"banned" | null> {
+	if (!cookieHeader) return null;
+
+	const authBaseUrl = env.GROVEAUTH_URL ?? DEFAULT_AUTH_URL;
+	try {
+		const response = await env.AUTH.fetch(`${authBaseUrl}/session/validate`, {
+			method: "POST",
+			headers: {
+				Cookie: cookieHeader,
+				"Content-Type": "application/json",
+				...clientIpHeaders(clientIp),
+			},
+			body: "{}",
+			redirect: "manual",
+		});
+		if (!response.ok) return null;
+		const body = (await response.json()) as { reason?: string };
+		return body.reason === "banned" ? "banned" : null;
+	} catch (err) {
+		logGroveError("Login", LOGIN_ERRORS.EMAIL_CODE_VERIFY_UNAVAILABLE, { cause: err });
+		return null;
+	}
+}
+
+/** The auth cookies this hub issues, as a Cookie header for Heartwood. */
+function authCookieHeader(cookies: { name: string; value: string }[]): string {
+	return cookies.map((c) => `${c.name}=${c.value}`).join("; ");
 }
 
 export const actions: Actions = {
@@ -143,8 +190,14 @@ export const actions: Actions = {
 		}
 
 		if (!response.ok) {
+			const status = statusForUpstreamFailure(response.status);
+			// A refusal is not a fault. It gets its own state, with a way to appeal,
+			// instead of "try again in a moment" for something that will never work (#1719).
+			if (isRefusal(response.status)) {
+				return fail(403, { state: "unavailable" as const, email });
+			}
 			logGroveError("Login", LOGIN_ERRORS.EMAIL_CODE_SEND_FAILED, { status: response.status });
-			return fail(statusForUpstreamFailure(response.status), {
+			return fail(status, {
 				step: "email" as const,
 				email,
 				error: messageForSendFailure(response.status),
@@ -206,11 +259,17 @@ export const actions: Actions = {
 		}
 
 		if (!response.ok) {
+			// Same refusal, second door: the account does not exist, and the hook that
+			// would have created it said no. Read the code first — Better Auth answers a
+			// burned-out code with a 403 too, and that is not a refusal.
 			let errorCode: string | undefined;
 			try {
 				errorCode = ((await response.json()) as { code?: string }).code;
 			} catch {
 				/* non-JSON error body — fall through to the generic message */
+			}
+			if (isRefusal(response.status, errorCode)) {
+				return fail(403, { state: "unavailable" as const, email });
 			}
 			return fail(statusForUpstreamFailure(response.status), {
 				step: "code" as const,
@@ -225,11 +284,37 @@ export const actions: Actions = {
 		// SvelteKit's default would encode them a second time and break the signature.
 		const cfHeaders = response.headers as unknown as { getAll?(name: string): string[] };
 		const setCookies = cfHeaders.getAll?.("set-cookie") ?? response.headers.getSetCookie();
+		const issued: { name: string; value: string; options: SetCookieOpts }[] = [];
 		for (const raw of setCookies) {
 			const parsed = parseRawSetCookie(raw);
 			if (parsed) {
 				cookies.set(parsed.name, parsed.value, { ...parsed.options, encode: (v) => v });
+				issued.push({ name: parsed.name, value: parsed.value, options: parsed.options });
 			}
+		}
+
+		// The cookies exist either way. Whether they *mean* anything is decided by
+		// validation, so ask before sending someone to a grove that will bounce them
+		// straight back here (#1719).
+		if (
+			(await sessionRefusal(platform.env, authCookieHeader(issued), getClientAddress())) ===
+			"banned"
+		) {
+			// Leave nothing behind: a cookie the hub refuses to honour is a cookie that
+			// makes the next sign-in look like it half-worked. The deletion has to carry
+			// the attributes the cookie was set with — a browser treats a different
+			// `domain` as a different cookie, so `{ path: "/" }` alone leaves the
+			// `domain=.grove.place` original exactly where it was.
+			for (const cookie of issued) {
+				const { path = "/", domain, secure, sameSite } = cookie.options;
+				cookies.delete(cookie.name, {
+					path,
+					...(domain ? { domain } : {}),
+					...(secure ? { secure } : {}),
+					...(sameSite ? { sameSite } : {}),
+				});
+			}
+			return fail(403, { state: "unavailable" as const, email });
 		}
 
 		throw redirect(302, `/callback?redirect=${encodeURIComponent(redirectTo)}`);
@@ -242,7 +327,7 @@ export const actions: Actions = {
 	 * sets the redirect cookie (now HttpOnly), forwards the oauth_state cookie
 	 * Better Auth generates, then redirects the browser to Google.
 	 */
-	google: async ({ request, cookies, platform, url }) => {
+	google: async ({ request, cookies, platform, url, getClientAddress }) => {
 		const formData = await request.formData();
 		const redirectTo = validateRedirectUrl(formData.get("redirect")?.toString(), dev);
 		// Relative URL — Heartwood resolves it against the login origin (login.grove.place).
@@ -275,8 +360,14 @@ export const actions: Actions = {
 				headers: {
 					"Content-Type": "application/json",
 					Origin: url.origin,
+					...clientIpHeaders(getClientAddress()),
 				},
-				body: JSON.stringify({ provider: "google", callbackURL }),
+				// Where Better Auth sends the browser when the OAuth round-trip fails.
+				// Without this it lands on Better Auth's own /error page, which is a
+				// different site with a different voice and no way to ask for help. A
+				// refused identity is the one OAuth failure worth naming (#1719), and
+				// `/callback` is the only place that knows which is which.
+				body: JSON.stringify({ provider: "google", callbackURL, errorCallbackURL: callbackURL }),
 				redirect: "manual",
 			});
 		} catch (fetchErr) {

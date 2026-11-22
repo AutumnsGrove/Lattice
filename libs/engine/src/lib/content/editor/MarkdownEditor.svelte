@@ -44,6 +44,7 @@
 		flags = {},
 		configuredCurios = [],
 		serverDraftSlug = null,
+		uploadAccessUrl = null,
 	}: Props = $props();
 
 	// Derived flags
@@ -692,6 +693,14 @@
 		</div>
 	{/if}
 
+	<!-- A gate refusal is not a bad file: give it a door instead of a toast (#1626) -->
+	{#if imageUpload.uploadGateBlocked && uploadAccessUrl}
+		<div class="upload-gate-hint">
+			Photo uploads are still sprouting for this grove. If you'd like them sooner,
+			<a href={uploadAccessUrl} target="_blank" rel="noopener">ask me to turn them on</a>.
+		</div>
+	{/if}
+
 	<!-- Draft restore prompt -->
 	{#if draftManager.draftRestorePrompt && draftManager.storedDraft}
 		<div class="draft-prompt">
@@ -887,6 +896,28 @@
 		border-top-color: var(--grove-accent-light);
 		border-radius: 50%;
 		animation: spin 0.8s linear infinite;
+	}
+
+	/* The gate's door, not a toast that fades (#1626) */
+	.upload-gate-hint {
+		position: absolute;
+		bottom: 0.75rem;
+		left: 50%;
+		transform: translateX(-50%);
+		max-width: min(90%, 32rem);
+		padding: 0.5rem 0.9rem;
+		background: var(--grove-accent-10);
+		border: 1px solid var(--grove-accent-30);
+		border-radius: 6px;
+		color: var(--grove-text);
+		font-size: 0.85rem;
+		text-align: center;
+		z-index: 98;
+	}
+
+	.upload-gate-hint a {
+		color: var(--grove-accent);
+		text-decoration: underline;
 	}
 	.upload-error-icon {
 		display: flex;

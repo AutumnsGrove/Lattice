@@ -122,6 +122,17 @@ export function scrubPii(text: string): ScrubResult {
 
 /**
  * Scrub PII from messages array
+ *
+ * Tool results are scrubbed like everything else — the data a tool returns is
+ * the writer's data, which is the entire reason the scrubber exists (decision 3
+ * on #1693). A tool that needs the model to reason about exact strings should
+ * hand it short handles instead; see the timeline's use of ids over commit
+ * messages.
+ *
+ * `toolCalls` on an assistant message are **not** scrubbed. They are the
+ * model's own output, and rewriting an argument would corrupt JSON the caller
+ * has to parse. The tool's result is where private data arrives, and that is
+ * what the next message carries.
  */
 export function scrubMessages(messages: LumenMessage[]): {
 	messages: LumenMessage[];
@@ -173,10 +184,29 @@ const VALID_TASKS: LumenTask[] = [
 	"image",
 	"code",
 	"transcription",
+	"agent",
 ];
 
-const MAX_INPUT_LENGTH = 100000; // 100KB max input
 const MAX_MESSAGES = 100; // Max messages in a conversation
+
+/**
+ * Maximum serialized input, in characters.
+ *
+ * This is a backstop, not a budget: it exists so one runaway caller cannot
+ * post a 40 MB prompt through the gateway, and it should sit far above what any
+ * real caller sends. 300k characters is roughly 75k tokens, which is the most
+ * that makes sense while Lumen picks a model without checking that model's
+ * context window — a bigger wall than that only moves the failure from a clear
+ * INVALID_INPUT here to an opaque provider error several steps later.
+ *
+ * Callers still own their own input budgets well under this line. The timeline
+ * summary keeps its commit list at 120k (COMMIT_LIST_BUDGET_CHARS in
+ * libs/curios) rather than spending the whole wall on one request.
+ *
+ * Was 100,000 until 2026-11-16, when a 183-commit day at ~116k characters was
+ * refused outright and silently cost the day's summary (GH #1703).
+ */
+const MAX_INPUT_LENGTH = 300_000;
 
 /**
  * Validate a Lumen request
@@ -217,6 +247,50 @@ export function validateRequest(request: LumenRequest): void {
 			"INVALID_INPUT",
 			{ task: request.task },
 		);
+	}
+
+	// Validate the tool-turn shape when the conversation contains one.
+	if (Array.isArray(request.input)) {
+		validateToolTurns(request.input, request.task);
+	}
+}
+
+/**
+ * Check that a tool conversation is shaped the way providers require.
+ *
+ * Every `tool` message must answer a `toolCalls` entry in the turn before it,
+ * and the ids have to match exactly. Providers enforce this, but they report it
+ * as a generic 400 several layers down, which is a miserable thing to debug
+ * from a loop that is already going wrong. Checking here names the problem.
+ */
+function validateToolTurns(messages: LumenMessage[], task: LumenTask): void {
+	let available = new Set<string>();
+
+	for (let i = 0; i < messages.length; i++) {
+		const message = messages[i];
+
+		if (message.role === "assistant") {
+			available = new Set((message.toolCalls ?? []).map((call) => call.id));
+			continue;
+		}
+
+		if (message.role !== "tool") continue;
+
+		if (!message.toolCallId) {
+			throw new LumenError(
+				`Message ${i} is a tool result with no toolCallId. It cannot be matched to the call it answers.`,
+				"INVALID_INPUT",
+				{ task },
+			);
+		}
+
+		if (!available.has(message.toolCallId)) {
+			throw new LumenError(
+				`Message ${i} answers tool call "${message.toolCallId}", which is not in the preceding assistant turn. Providers reject this; the id has to be carried through unchanged.`,
+				"INVALID_INPUT",
+				{ task },
+			);
+		}
 	}
 }
 

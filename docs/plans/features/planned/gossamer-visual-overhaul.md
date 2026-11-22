@@ -230,7 +230,7 @@ Phase 5 (Preset Tuning)         ← Final: tune all presets with new capabilitie
 **Each phase can be tested independently.** After each phase:
 1. `cd libs/gossamer && pnpm run build`
 2. `cd libs/engine && pnpm run package`
-3. Refresh `/vineyard` in the landing dev server
+3. Restart the landing dev server
 
 ---
 
@@ -253,7 +253,7 @@ Phase 5 (Preset Tuning)         ← Final: tune all presets with new capabilitie
 
 - **Unit tests (existing):** 85 tests in patterns, characters, animation, index — should still pass after Phases 1-4
 - **New unit tests:** Add tests for `domainWarpPattern()` output range, sparsity normalization math
-- **Visual testing:** Vineyard page at `/vineyard` with preset dropdown — cycle through all presets
+- **Visual testing:** the landing glass components with the preset dropdown — cycle through all presets
 - **Performance:** Monitor frame times via dev tools Performance tab — target <2ms per frame on the card-sized canvas
 
 ---

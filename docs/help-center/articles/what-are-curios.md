@@ -4,6 +4,7 @@ description: Grove's cabinet of wonders for guestbooks, shrines, and personal si
 category: help
 section: how-it-works
 lastUpdated: "2026-02-14"
+status: planned
 keywords:
   - curios
   - guestbook

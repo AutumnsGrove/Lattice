@@ -1,66 +1,9 @@
 /**
  * Client-side image processing utility
- * Handles JXL/WebP conversion, quality adjustment, EXIF stripping, and hash generation
+ * Handles WebP conversion, quality adjustment, EXIF stripping, and hash generation
  *
- * JPEG XL (JXL) is preferred when supported, with WebP as fallback.
  * Drawing to canvas automatically strips EXIF data including GPS for privacy.
  */
-
-// =============================================================================
-// JXL ENCODER (LAZY LOADED)
-// =============================================================================
-
-/**
- * Lazily loaded JXL encoder module
- * The @jsquash/jxl WASM module is ~800KB, so we only load it when needed
- */
-let jxlModule: typeof import("@jsquash/jxl") | null = null;
-
-/**
- * Get the JXL encoder, loading it on first use
- */
-async function getJxlEncoder(): Promise<typeof import("@jsquash/jxl")> {
-	if (!jxlModule) {
-		// Dynamic import with .catch() so bundlers (esbuild/Rollup) don't fail
-		// when @jsquash/jxl isn't installed. JXL is disabled in production
-		// until Firefox adds support.
-		jxlModule = await import("@jsquash/jxl").catch(() => null);
-		if (!jxlModule) throw new Error("JXL encoder not available");
-	}
-	return jxlModule;
-}
-
-/**
- * Check if the browser supports JXL encoding via WASM
- * Caches result after first check
- */
-let jxlSupportChecked = false;
-let jxlSupported = false;
-
-export async function supportsJxlEncoding(): Promise<boolean> {
-	if (jxlSupportChecked) {
-		return jxlSupported;
-	}
-
-	try {
-		// Check for WebAssembly support
-		if (typeof WebAssembly !== "object") {
-			jxlSupportChecked = true;
-			jxlSupported = false;
-			return false;
-		}
-
-		// Try to load the JXL encoder
-		await getJxlEncoder();
-		jxlSupportChecked = true;
-		jxlSupported = true;
-		return true;
-	} catch {
-		jxlSupportChecked = true;
-		jxlSupported = false;
-		return false;
-	}
-}
 
 // =============================================================================
 // HEIC DECODER (LAZY LOADED)
@@ -132,7 +75,7 @@ export async function isHeifByMagicBytes(file: File): Promise<boolean> {
 /**
  * Convert a HEIC/HEIF file to JPEG using the heic2any WASM decoder.
  * Quality is intentionally high (0.92) since this is an intermediate step —
- * the result will be re-encoded to JXL/WebP by the normal processing pipeline.
+ * the result will be re-encoded to WebP by the normal processing pipeline.
  */
 export async function convertHeicToJpeg(file: File): Promise<File> {
 	const heic2any = await getHeicDecoder();
@@ -299,27 +242,6 @@ function getMaxDimensionForQuality(quality: number): number {
 }
 
 /**
- * Get adaptive effort level based on device capabilities
- * Higher effort = better compression but slower encoding
- *
- * Mobile devices: effort 5 (faster, preserves battery)
- * Desktop: effort 7 (balanced, stays under 3s target)
- */
-function getAdaptiveEffort(): number {
-	// Detect mobile via user agent or screen size
-	const isMobile =
-		typeof navigator !== "undefined" &&
-		(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
-			(typeof window !== "undefined" && window.innerWidth < 768));
-
-	// Mobile gets lower effort for battery/performance
-	if (isMobile) return 5;
-
-	// Cap at 7 to stay under 3s encoding target
-	return 7;
-}
-
-/**
  * Convert canvas to WebP blob
  */
 function canvasToWebP(canvas: HTMLCanvasElement, quality: number): Promise<Blob> {
@@ -340,7 +262,7 @@ function canvasToWebP(canvas: HTMLCanvasElement, quality: number): Promise<Blob>
 // =============================================================================
 
 /** Output format for processed images */
-export type ImageFormat = "jxl" | "webp" | "gif" | "original";
+export type ImageFormat = "webp" | "gif" | "original";
 
 export interface ProcessedImageResult {
 	blob: Blob;
@@ -361,12 +283,11 @@ export interface ProcessImageOptions {
 	quality?: number;
 	/**
 	 * Output format preference
-	 * - 'auto': Use JXL if supported, fall back to WebP
-	 * - 'jxl': Force JXL (falls back to WebP if not supported)
+	 * - 'auto': WebP (kept for backward compatibility)
 	 * - 'webp': Force WebP
 	 * - 'original': Keep original format (only resizes, strips EXIF)
 	 */
-	format?: "auto" | "jxl" | "webp" | "original";
+	format?: "auto" | "webp" | "original";
 	/** Skip resizing (default false) */
 	fullResolution?: boolean;
 	/**
@@ -381,11 +302,9 @@ export interface ProcessImageOptions {
 // =============================================================================
 
 /**
- * Process an image: convert to JXL/WebP, adjust quality, strip EXIF
+ * Process an image: convert to WebP, adjust quality, strip EXIF
  *
  * Privacy: Drawing to canvas automatically strips all EXIF data including GPS.
- * The @jsquash/jxl encode() receives ImageData (pixel array), NOT the original
- * file buffer, so EXIF metadata is NOT passed to the encoder.
  */
 export async function processImage(
 	file: File,
@@ -494,46 +413,8 @@ export async function processImage(
 		};
 	}
 
-	// Determine target format
-	let targetFormat: "jxl" | "webp" = "webp";
-
-	if (formatPreference === "jxl" || formatPreference === "auto") {
-		const canUseJxl = await supportsJxlEncoding();
-		if (canUseJxl) {
-			targetFormat = "jxl";
-		}
-	}
-
-	// Encode to target format
-	let blob: Blob;
-	let actualFormat: ImageFormat = targetFormat;
-
-	if (targetFormat === "jxl") {
-		try {
-			const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
-			const effort = getAdaptiveEffort();
-
-			const { encode } = await getJxlEncoder();
-			const encoded = await encode(imageData, {
-				quality,
-				effort,
-				lossless: false,
-				progressive: true, // Better loading UX
-			});
-
-			blob = new Blob([encoded], { type: "image/jxl" });
-			actualFormat = "jxl";
-		} catch (error) {
-			// Fall back to WebP on JXL encoding failure
-			console.warn("JXL encoding failed, falling back to WebP:", error);
-			blob = await canvasToWebP(canvas, quality);
-			actualFormat = "webp";
-		}
-	} else {
-		// WebP via Canvas API
-		blob = await canvasToWebP(canvas, quality);
-		actualFormat = "webp";
-	}
+	// WebP via Canvas API
+	const blob = await canvasToWebP(canvas, quality);
 
 	return {
 		blob,
@@ -541,11 +422,7 @@ export async function processImage(
 		height: targetHeight,
 		originalSize,
 		processedSize: blob.size,
-		format: actualFormat,
-		reason:
-			actualFormat !== targetFormat
-				? `Fallback from ${targetFormat} to ${actualFormat}`
-				: undefined,
+		format: "webp",
 	};
 }
 
@@ -658,9 +535,9 @@ export function generateDatePath(): string {
  * Generate a clean filename from original name for image files
  *
  * @param originalName - Original filename
- * @param format - Target format ('jxl', 'webp', or undefined to keep original extension)
+ * @param format - Target format ('webp', or undefined to keep original extension)
  */
-export function sanitizeImageFilename(originalName: string, format?: "jxl" | "webp"): string {
+export function sanitizeImageFilename(originalName: string, format?: "webp"): string {
 	// Get base name without extension
 	const lastDot = originalName.lastIndexOf(".");
 	const baseName = lastDot > 0 ? originalName.substring(0, lastDot) : originalName;
@@ -711,8 +588,6 @@ export function compressionRatio(original: number, processed: number): string {
  */
 export function formatName(format: ImageFormat): string {
 	switch (format) {
-		case "jxl":
-			return "JPEG XL";
 		case "webp":
 			return "WebP";
 		case "gif":

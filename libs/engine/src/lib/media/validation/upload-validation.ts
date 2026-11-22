@@ -15,23 +15,22 @@ export const ALLOWED_IMAGE_TYPES = [
 	"image/png",
 	"image/gif",
 	"image/webp",
-	"image/jxl",
 	"image/avif",
 ] as const;
 
 export type AllowedImageType = (typeof ALLOWED_IMAGE_TYPES)[number];
 
 /** Allowed file extensions (lowercase) */
-export const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "gif", "webp", "jxl", "avif"] as const;
+export const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "gif", "webp", "avif"] as const;
 
 export type AllowedExtension = (typeof ALLOWED_EXTENSIONS)[number];
 
 /** HTML accept attribute value for file inputs */
 export const UPLOAD_ACCEPT_ATTR =
-	".jpg,.jpeg,.png,.gif,.webp,.jxl,.avif,.heic,.heif,image/jpeg,image/png,image/gif,image/webp,image/jxl,image/avif,image/heic,image/heif";
+	".jpg,.jpeg,.png,.gif,.webp,.avif,.heic,.heif,image/jpeg,image/png,image/gif,image/webp,image/avif,image/heic,image/heif";
 
 /** Human-readable list for error messages */
-export const ALLOWED_TYPES_DISPLAY = "JPG, PNG, GIF, WebP, JPEG XL, AVIF, or HEIC";
+export const ALLOWED_TYPES_DISPLAY = "JPG, PNG, GIF, WebP, AVIF, or HEIC";
 
 // ============================================================================
 // MIME to Extension Mapping
@@ -43,7 +42,6 @@ export const MIME_TO_EXTENSIONS: Record<AllowedImageType, string[]> = {
 	"image/png": ["png"],
 	"image/gif": ["gif"],
 	"image/webp": ["webp"],
-	"image/jxl": ["jxl"],
 	"image/avif": ["avif"],
 };
 
@@ -74,10 +72,6 @@ export const FILE_SIGNATURES: Record<AllowedImageType, number[][]> = {
 	// WebP: RIFF header (4 bytes) + size (4 bytes) + WEBP marker (4 bytes)
 	// We check bytes 0-3 for RIFF and bytes 8-11 for WEBP
 	"image/webp": [[0x52, 0x49, 0x46, 0x46]], // RIFF (validated with WEBP check below)
-	"image/jxl": [
-		[0xff, 0x0a], // JPEG XL naked codestream
-		[0x00, 0x00, 0x00, 0x0c, 0x4a, 0x58, 0x4c, 0x20], // JPEG XL container (ISOBMFF box)
-	],
 	// AVIF: ISOBMFF container — validated via ftyp box check in validateFileSignature()
 	// Placeholder entry required by Record<AllowedImageType, ...> type constraint
 	"image/avif": [],
@@ -201,7 +195,6 @@ export function validateImageFile(file: File): string | null {
  * Calculate the minimum header size needed for all signature validations.
  * This accounts for:
  * - PNG: 8 bytes
- * - JPEG XL container: 8 bytes
  * - GIF: 6 bytes
  * - WebP: 4 bytes header + 8 bytes to reach WEBP marker = 12 bytes total
  */
@@ -246,7 +239,7 @@ export async function validateImageFileDeep(file: File): Promise<string | null> 
 
 /**
  * MIME types that browsers can render via HTMLImageElement.
- * These can be processed client-side (resized, converted to WebP/JXL).
+ * These can be processed client-side (resized, converted to WebP).
  */
 export const BROWSER_RENDERABLE_TYPES = [
 	"image/jpeg",
@@ -390,6 +383,21 @@ export function getNonRenderableInfo(file: File): (typeof NON_RENDERABLE_FORMATS
 // ============================================================================
 
 /**
+ * Did the server refuse because uploads are not switched on for this tenant?
+ *
+ * One list of patterns, used by both the message mapper below and the editor's
+ * persistent hint — so "the gate said no" and "we said the gate said no" cannot
+ * drift apart. The server's 403 is `FEATURE_DISABLED`; the older flag path says
+ * "limited beta" / "not enabled" on the wire.
+ */
+export function isUploadGateError(serverMessage: string): boolean {
+	const msg = serverMessage.toLowerCase();
+	return (
+		msg.includes("feature_disabled") || msg.includes("limited beta") || msg.includes("not enabled")
+	);
+}
+
+/**
  * Map server error messages to actionable, human-friendly messages.
  * Both the MarkdownEditor and gallery page import this for consistent UX.
  *
@@ -400,11 +408,7 @@ export function getActionableUploadError(serverMessage: string): string {
 	const msg = serverMessage.toLowerCase();
 
 	// Feature flag disabled
-	if (
-		msg.includes("feature_disabled") ||
-		msg.includes("limited beta") ||
-		msg.includes("not enabled")
-	) {
+	if (isUploadGateError(msg)) {
 		return "Image uploads aren't available yet. This feature is being rolled out gradually.";
 	}
 
@@ -548,24 +552,6 @@ function detectMimeFromBytes(buffer: Uint8Array): AllowedImageType | null {
 		return "image/webp";
 	}
 
-	// JXL: naked codestream or ISOBMFF container
-	if (buffer.length >= 2 && buffer[0] === 0xff && buffer[1] === 0x0a) {
-		return "image/jxl";
-	}
-	if (
-		buffer.length >= 8 &&
-		buffer[0] === 0x00 &&
-		buffer[1] === 0x00 &&
-		buffer[2] === 0x00 &&
-		buffer[3] === 0x0c &&
-		buffer[4] === 0x4a &&
-		buffer[5] === 0x58 &&
-		buffer[6] === 0x4c &&
-		buffer[7] === 0x20
-	) {
-		return "image/jxl";
-	}
-
 	// AVIF: ISOBMFF ftyp box with avif/avis brand
 	if (buffer.length >= 12) {
 		const hasFtyp =
@@ -587,7 +573,6 @@ const CANONICAL_EXTENSION: Record<AllowedImageType, string> = {
 	"image/png": "png",
 	"image/gif": "gif",
 	"image/webp": "webp",
-	"image/jxl": "jxl",
 	"image/avif": "avif",
 };
 

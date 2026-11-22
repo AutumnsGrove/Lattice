@@ -21,8 +21,8 @@ vi.mock("./generator", () => ({
 	}),
 }));
 
-vi.mock("./secrets-manager", () => ({
-	createSecretsManager: vi.fn().mockReturnValue(null),
+vi.mock("@autumnsgrove/grove-crypto/secrets", () => ({
+	createSecretsManager: vi.fn().mockRejectedValue(new Error("GROVE_KEK not configured")),
 }));
 
 vi.mock("@autumnsgrove/infra/cloudflare", () => ({

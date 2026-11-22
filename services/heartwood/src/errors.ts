@@ -17,6 +17,7 @@
 // =============================================================================
 
 import type { GroveErrorDef } from "@autumnsgrove/lattice/errors";
+import { SIGNIN_REFUSAL_MESSAGE } from "@autumnsgrove/lattice/auth/signin-refusal";
 
 // =============================================================================
 // ERROR CATALOG
@@ -93,6 +94,24 @@ export const HW_SVC_ERRORS = {
 		category: "user" as const,
 		userMessage: "Too many sign-in codes were requested for this email. Please wait a few minutes.",
 		adminMessage: "Zephyr per-recipient verification rate limit hit for a sign-in code.",
+	},
+
+	SIGNUP_IDENTITY_BLOCKED: {
+		code: "HW-SVC-044",
+		category: "user" as const,
+		// This sentence is also the OAuth redirect's identifier — Better Auth keeps
+		// the message and drops the code on that path — so it lives in one shared
+		// place rather than being written down twice (#1719).
+		userMessage: SIGNIN_REFUSAL_MESSAGE,
+		adminMessage: "Signup rejected: identity matched a signup_blocks entry.",
+	},
+
+	SIGNUP_BLOCK_CHECK_FAILED: {
+		code: "HW-SVC-045",
+		category: "admin" as const,
+		userMessage: "",
+		adminMessage:
+			"signup_blocks could not be read; the signup was allowed. The deny list is not currently protecting anyone — check the table and the D1 binding.",
 	},
 
 	// ─────────────────────────────────────────────────────────────────────────

@@ -3,7 +3,7 @@ title: What are Waystones?
 description: Contextual help markers that explain Grove's terminology without leaving the page
 category: help
 section: how-it-works
-lastUpdated: '2026-02-06'
+lastUpdated: '2026-11-13'
 keywords:
   - waystone
   - waystones
@@ -22,7 +22,7 @@ Waystones are the little contextual help markers scattered across Grove. They gi
 
 ## Why they exist
 
-Grove uses a lot of its own language. Arbor, Meadow, Porch, Clearing, Shade — these aren't standard platform terms, and if you've never been here before, seeing something like "Meadow" in your admin panel is going to raise questions.
+Grove uses a lot of its own language. Arbor, Reeds, Porch, Clearing, Shade — these aren't standard platform terms, and if you've never been here before, seeing something like "Reeds" in your admin panel is going to raise questions.
 
 Waystones are how Grove speaks to you without making you go read a manual. Instead of dumping a glossary on you and hoping you memorize it, the explanations live right where the terms are. You see a word you don't recognize, you tap the Waystone, and now you know.
 

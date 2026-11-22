@@ -81,20 +81,13 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 		const env = {
 			DB: platform?.env?.DB as D1Database,
 			GROVE_KEK: platform?.env?.GROVE_KEK,
-			TOKEN_ENCRYPTION_KEY: platform?.env?.TOKEN_ENCRYPTION_KEY,
 		};
 
-		const hasGithub = await hasTimelineToken(
-			env,
-			tenantId,
-			TIMELINE_SECRET_KEYS.GITHUB_TOKEN,
-			config.github_token_encrypted as string | null,
-		);
+		const hasGithub = await hasTimelineToken(env, tenantId, TIMELINE_SECRET_KEYS.GITHUB_TOKEN);
 		const hasOpenrouter = await hasTimelineToken(
 			env,
 			tenantId,
 			TIMELINE_SECRET_KEYS.OPENROUTER_KEY,
-			config.openrouter_key_encrypted as string | null,
 		);
 
 		parsedConfig = {
@@ -224,12 +217,10 @@ export const actions: Actions = {
 			const env = {
 				DB: platform?.env?.DB as D1Database,
 				GROVE_KEK: platform?.env?.GROVE_KEK,
-				TOKEN_ENCRYPTION_KEY: platform?.env?.TOKEN_ENCRYPTION_KEY,
 			};
 
-			// Determine token values for legacy columns
-			// With SecretsManager: legacy columns get cleared (set to "")
-			// Without SecretsManager: legacy columns store encrypted value
+			// Tokens go to SecretsManager. The legacy columns are only ever
+			// cleared ("" -> NULL via CASE), never written with a ciphertext.
 			let githubTokenForDb: string | null = null;
 			let openrouterKeyForDb: string | null = null;
 
@@ -238,7 +229,7 @@ export const actions: Actions = {
 				await deleteTimelineToken(env, tenantId, TIMELINE_SECRET_KEYS.GITHUB_TOKEN);
 				githubTokenForDb = ""; // Triggers CASE NULL in SQL to clear legacy
 			} else if (githubToken?.trim()) {
-				// New token value - save via SecretsManager (preferred) or legacy
+				// New token value - save via SecretsManager, clear the legacy column
 				const rawToken = githubToken.trim();
 				const result = await setTimelineToken(
 					env,
@@ -246,8 +237,7 @@ export const actions: Actions = {
 					TIMELINE_SECRET_KEYS.GITHUB_TOKEN,
 					rawToken,
 				);
-				// If using SecretsManager, clear legacy column; otherwise store encrypted value
-				githubTokenForDb = result.legacyValue;
+				githubTokenForDb = "";
 				console.warn(`[Timeline Config] GitHub token saved via ${result.system}`);
 			}
 			// else: null/undefined/empty = preserve existing (COALESCE handles this)
@@ -257,7 +247,7 @@ export const actions: Actions = {
 				await deleteTimelineToken(env, tenantId, TIMELINE_SECRET_KEYS.OPENROUTER_KEY);
 				openrouterKeyForDb = "";
 			} else if (openrouterKey?.trim()) {
-				// New token value - save via SecretsManager (preferred) or legacy
+				// New token value - save via SecretsManager, clear the legacy column
 				const rawKey = openrouterKey.trim();
 				const result = await setTimelineToken(
 					env,
@@ -265,7 +255,7 @@ export const actions: Actions = {
 					TIMELINE_SECRET_KEYS.OPENROUTER_KEY,
 					rawKey,
 				);
-				openrouterKeyForDb = result.legacyValue;
+				openrouterKeyForDb = "";
 				console.warn(`[Timeline Config] OpenRouter key saved via ${result.system}`);
 			}
 

@@ -57,7 +57,7 @@ Each issue gets up to 3 labels:
 | `amber` | Images, CDN, R2 storage, JXL, media pipeline |
 | `clearing` | Status page, health monitoring, uptime |
 | `shade` | AI crawler protection, bot defense, rate limiting |
-| `plant` | Pricing, billing, LemonSqueezy, storefront, signup |
+| `plant` | Pricing, billing, signups, and the storefront |
 | `ivy` | Email, Resend, notifications, messaging |
 | `foliage` | Theming, design tokens, per-tenant customization |
 | `curio` | Museum exhibits, content display, guestbook |
@@ -212,21 +212,3 @@ If the user includes HOW to do something (not just WHAT), capture those details 
 - Don't add `priority-critical` unless the user explicitly says something is critical/urgent
 
 ---
-
-## Example
-
-**User says:**
-> ok so I need to: fix the broken image on the pricing page, add a dark mode toggle to the knowledge base, wire up the new health endpoint for blog-engine, and eventually we should think about adding RSS feeds to meadow
-
-**You create:**
-
-1. **"Fix broken image on pricing page"** — `plant`, `bug`
-2. **"Add dark mode toggle to knowledge base"** — `landing`, `enhancement`
-3. **"Wire health endpoint for blog-engine into Clearing"** — `clearing`, `feature`
-4. **"Add RSS feed support to Meadow"** — `meadow`, `feature`
-
-Each with proper Summary, Acceptance Criteria, and Context.
-
----
-
-*A clean backlog is a calm mind. Turn the chaos into clarity.*

@@ -33,8 +33,6 @@ Scent    Trail   Dive     Territory Knowledge
 
 ### Phase 1: SCENT
 
-_The nose twitches. Something's been here..._
-
 Establish what we're tracking:
 
 **The Starting Point:**
@@ -48,15 +46,15 @@ What scent do we have?
 
 **Search Strategy Selection:**
 
-Grove Find (`gf`) is the bloodhound's primary nose -- fast, agent-friendly, purpose-built:
+Discovery starts with semantic search; `rg` handles exact names and literals:
 
 ```bash
-# PRIMARY — Grove Find (the bloodhound's best tools)
-gf --agent search "functionName"   # Pick up the scent across the codebase
-gf --agent func "getUserById"      # Track down a function's definition
-gf --agent usage "UserProfile"     # Follow every trail this name leaves
-gf --agent class "PaymentService"  # Find where a class/component lives
-gf --agent impact "src/lib/auth.ts" # What trembles when this file changes?
+# PRIMARY — semantic search, then rg
+rg "functionName"   # Pick up the scent across the codebase
+rg -n "(function|const|fn) getUserById"  # Track down a function's definition
+rg -wn "UserProfile"     # Follow every trail this name leaves
+rg -n "class PaymentService"  # Find where a class/component lives
+rg -ln "from .*auth"     # What trembles when this file changes?
 
 # Git context — orient before tracking
 gw context                         # Where are we? Branch, recent changes, state
@@ -78,8 +76,6 @@ glob "**/api/**/*.ts"  # Just API routes
 ---
 
 ### Phase 2: TRACK
-
-_Paws pad softly, following the trail as it winds through the underbrush..._
 
 Follow connections systematically:
 
@@ -115,10 +111,10 @@ mysql.execute()
 **Reference Finding:**
 
 ```bash
-# Grove Find — the bloodhound's fastest nose
-gf --agent usage "getUserById"      # Who calls this function?
-gf --agent impact "src/lib/user.ts" # What depends on this file?
-gf --agent search "UserProfile"     # Where is this type used?
+# Discovery — semantic search first, rg for exact names
+rg -wn "getUserById"      # Who calls this function?
+rg -ln "from .*user"     # What depends on this file?
+rg "UserProfile"     # Where is this type used?
 
 # Finer-grained tracking (fallback)
 grep -r "from.*user" src/ --include="*.ts" -l
@@ -136,8 +132,6 @@ As you track, notice patterns:
 ---
 
 ### Phase 3: HUNT
-
-_The trail goes cold, but the bloodhound circles, finding it again in unexpected places..._
 
 Deep dive into the most important findings:
 
@@ -216,8 +210,6 @@ Look for:
 
 ### Phase 4: REPORT
 
-_The bloodhound returns, dropping a map at the hunter's feet..._
-
 Document findings for others (and your future self):
 
 **The Territory Map:**
@@ -285,8 +277,6 @@ password.utils.ts
 
 ### Phase 5: RETURN
 
-_The hunt is complete. The knowledge stays, ready for the next tracker..._
-
 Prepare for handoff:
 
 **Knowledge Transfer:**
@@ -347,26 +337,11 @@ Create quick access points:
 
 ## Bloodhound Rules
 
-### Persistence
+**Persistence.** Never lose the scent. If the trail goes cold, circle back. Check imports, exports, configuration files. The code is there—keep hunting.
 
-Never lose the scent. If the trail goes cold, circle back. Check imports, exports, configuration files. The code is there—keep hunting.
+**Method.** Track systematically. Don't jump around randomly. Follow the call graph, document as you go, build the map piece by piece.
 
-### Method
-
-Track systematically. Don't jump around randomly. Follow the call graph, document as you go, build the map piece by piece.
-
-### Detail
-
-Notice the small things. That inconsistent error message, the commented-out code, the TODO from six months ago. These are signposts.
-
-### Communication
-
-Use tracking metaphors:
-
-- "Picking up the scent..." (starting the search)
-- "Following the trail..." (tracing connections)
-- "The hunt goes deep..." (deep dive analysis)
-- "Dropping the map..." (documenting findings)
+**Detail.** Notice the small things. That inconsistent error message, the commented-out code, the TODO from six months ago. These are signposts.
 
 ---
 
@@ -379,24 +354,6 @@ Use tracking metaphors:
 - Assume code does what comments say (trust the code, not comments)
 - Forget to document (the hunt is wasted if knowledge dies)
 - Get distracted by side trails (stay focused on the target scent)
-
----
-
-## Example Scout
-
-**User:** "How does the payment system work?"
-
-**Bloodhound flow:**
-
-1. 🐕 **SCENT** — "Starting with 'payment' keyword, searching for components, services, API routes"
-
-2. 🐕 **TRACK** — "Found PaymentForm component → calls paymentService → uses Stripe SDK → webhooks in +server.ts"
-
-3. 🐕 **HUNT** — "Deep dive: error handling, idempotency keys, webhook signature verification, retry logic"
-
-4. 🐕 **REPORT** — "Complete flow map, 7 files involved, 2 inconsistent patterns found, 1 security recommendation"
-
-5. 🐕 **RETURN** — "Documentation in docs/payments/, bookmarked key files, suggested 3 improvements"
 
 ---
 

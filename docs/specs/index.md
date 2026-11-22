@@ -66,8 +66,6 @@ Core  Tools  Docs
 | **[Vista Observability](vista-observability.md)** | Observability dashboard implementation details | Active |
 | **[Vista LoadTest](vista-loadtest-spec.md)** | Load testing integration | Active |
 | **[Rings](rings-spec.md)** | Privacy-first analytics system | Active |
-| **[Vineyard](vineyard-spec.md)** | Component showcase and load test integration | Active |
-| **[Glimpse](glimpse-spec.md)** | Automated screenshot capture via Playwright | Active |
 
 ### Customization & Theming
 
@@ -153,7 +151,7 @@ Core  Tools  Docs
 | **[gw CLI](gw-cli-spec.md)** | GroveWrap infrastructure CLI for D1, KV, R2 | Active |
 | **[Seasons](seasons-spec.md)** | Semantic versioning and release workflow | Active |
 | ~~[Versioning](versioning-spec.md)~~ | ~~npm publishing workflow~~ | Deprecated (merged into Seasons) |
-| **[Testing](testing-spec.md)** | Testing strategy and infrastructure | Active |
+| **[Testing Strategy](testing-strategy-spec.md)** | Happy, bad, and sad suites against the real Cloudflare runtime | Active |
 | **[Clearing](clearing-spec.md)** | Data export and migration tools | Active |
 
 ---
@@ -221,7 +219,6 @@ Core  Tools  Docs
 ### Phase 2: Security & Scale (Current)
 - [x] Threshold rate limiting
 - [x] Sentinel load testing
-- [x] Vineyard integration
 - [x] Mycelium MCP server
 - [-] Heartwood authentication hardening
 - [-] Patina backup automation

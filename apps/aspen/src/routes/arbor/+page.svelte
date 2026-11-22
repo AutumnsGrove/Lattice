@@ -211,12 +211,6 @@
 				<featureIcons.image class="w-7 h-7 text-accent-muted" />
 				<span class="font-medium text-center text-sm">Upload Images</span>
 			</a>
-			<a href="/arbor/analytics" class="action-card glass-action">
-				<metricIcons.barChart class="w-7 h-7 text-accent-muted" />
-				<span class="font-medium text-center text-sm"
-					>View <GroveTerm interactive term="rings">Rings</GroveTerm></span
-				>
-			</a>
 			<a href="/arbor/curios" class="action-card glass-action">
 				<toolIcons.amphora class="w-7 h-7 text-accent-muted" />
 				<span class="font-medium text-center text-sm"

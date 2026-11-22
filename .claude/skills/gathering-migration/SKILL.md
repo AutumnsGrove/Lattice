@@ -5,7 +5,7 @@ description: The drum sounds. Bear and Bloodhound gather for safe migration. Use
 
 # Gathering Migration 🌲🐻🐕
 
-The drum echoes through the valleys. The conductor stands at the pass, orchestrating two very different strengths. The Bloodhound arrives first with fresh eyes — no assumptions about what's connected, just a nose for dependencies. Then the Bear wakes, receiving a map it didn't draw — no shortcuts, no "I already know where things are." Together they move mountains safely, each with isolated context, each trusting only what it verified itself.
+_The conductor dispatches one subagent per animal, each with isolated context and an intentional model. It manages handoffs and gate checks — it never does the work itself._
 
 ## When to Summon
 
@@ -42,8 +42,6 @@ Spec    Bloodhound  Check    Bear    Check    Final
 
 ### Phase 1: SUMMON
 
-_The drum sounds. The valley listens..._
-
 The conductor receives the migration request and prepares the dispatch plan:
 
 **Clarify the Migration:**
@@ -70,8 +68,6 @@ The conductor receives the migration request and prepares the dispatch plan:
 
 ### Phase 2: SCOUT (Bloodhound)
 
-_The conductor signals. The Bloodhound puts its nose to the ground..._
-
 ```
 Agent(bloodhound, model: haiku)
   Input:  migration specification only
@@ -96,8 +92,6 @@ Dispatch a **haiku subagent** to scout the codebase. The Bloodhound receives ONL
 ---
 
 ### Phase 3: MIGRATE (Bear)
-
-_The Bear wakes. It receives a map it didn't draw..._
 
 ```
 Agent(bear, model: opus)
@@ -130,8 +124,6 @@ Must compile and pass. If it fails, resume Bear with the error.
 ---
 
 ### Phase 4: VERIFY
-
-_The journey ends. The conductor confirms safe arrival..._
 
 **Validation Checklist:**
 
@@ -174,21 +166,13 @@ Everything found its new home.
 
 ## Conductor Rules
 
-### Never Do Animal Work
+**Never Do Animal Work.** The conductor dispatches. It does not scout dependencies or execute migrations.
 
-The conductor dispatches. It does not scout dependencies or execute migrations.
+**Fresh Eyes Are a Feature.** The Bear receives the territory map, not the Bloodhound's scouting process. It trusts the map but verifies what it finds during migration.
 
-### Fresh Eyes Are a Feature
+**Gate Every Transition.** Territory map must be complete before Bear starts. CI must pass after Bear finishes.
 
-The Bear receives the territory map, not the Bloodhound's scouting process. It trusts the map but verifies what it finds during migration.
-
-### Gate Every Transition
-
-Territory map must be complete before Bear starts. CI must pass after Bear finishes.
-
-### Resume, Don't Restart
-
-If a gate check fails, resume the failing agent. The Bear especially benefits from resumption — it has the migration context and can fix issues faster than starting fresh.
+**Resume, Don't Restart.** If a gate check fails, resume the failing agent. The Bear especially benefits from resumption — it has the migration context and can fix issues faster than starting fresh.
 
 ---
 

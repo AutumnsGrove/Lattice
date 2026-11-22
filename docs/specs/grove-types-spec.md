@@ -584,7 +584,7 @@ rg "export (interface|type) (SubscriptionTier|UserSubscription|TokenResponse)" -
 
 - **[Heartwood](heartwood-spec.md)** — Canonical auth types and subscription contracts
 - **[Lattice](lattice-spec.md)** — Core framework and engine exports
-- **[Testing](testing-spec.md)** — Test strategy (Zod schemas improve testability)
+- **[Testing](testing-strategy-spec.md)** — Test strategy (Zod schemas improve testability)
 - **[Warden](warden-spec.md)** — Existing Zod validation patterns (reference implementation)
 
 ## Related Documentation

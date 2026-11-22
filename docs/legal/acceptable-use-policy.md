@@ -2,13 +2,13 @@
 title: Acceptable Use Policy
 description: Rules for what content and behavior is allowed on Grove
 category: legal
-lastUpdated: '2026-01-16'
+lastUpdated: '2026-11-18'
 ---
 # Acceptable Use Policy
 
 **Grove Platform**
 **Effective Date:** January 11, 2026
-**Last Updated:** January 20, 2026
+**Last Updated:** November 18, 2026
 
 ---
 
@@ -58,6 +58,23 @@ Content that attacks, demeans, or incites violence against individuals or groups
 - Phishing attempts or deceptive practices
 - Automated abuse of the Service
 - Content designed to manipulate search rankings
+
+**Link schemes and SEO abuse.** Grove is a place for writers, not a place to
+buy search rankings. These are not allowed:
+
+- Accounts created primarily to place outbound links back to a third-party
+  domain
+- Doorway or landing content for a third-party domain — pages whose purpose is
+  to rank and pass a visitor onward, not to be read
+- Programmatic or template content published at scale
+- "Guest post"-style placements: writing published here on behalf of a site you
+  are promoting, in exchange for a link
+- Trading links, buying links, or any arrangement whose point is the link rather
+  than the writing
+
+The test is not whether a post contains a link. A writer linking to their own
+shop, a source they admire, or a friend's blog is the whole point of having a
+blog. The test is whether the link is why the account exists.
 
 ### 1.5 Impersonation and Fraud
 - Impersonating another person or organization
@@ -114,6 +131,18 @@ If AI tools contributed meaningfully to your content, you must disclose this. Us
 
 This cycle repeats. After accumulating **3 posting suspensions**, you will be permanently banned from posting.
 
+### 1.9 One Account, One Person
+
+An account belongs to one person or one business, and a person has to be behind
+it.
+
+- **One account per person or business.** If you run a studio or a collective under one roof, that is one account, not five.
+- **A human operates it.** No automated signups, no bots publishing on your behalf, no agents creating accounts on their own initiative. You are responsible for what your account does, including anything you point at it.
+- **Email aliases are the same address.** `you+blog@example.com` and `you+shop@example.com` are one inbox, so they are one person. Rotating aliases to get around a removal does not create a new person.
+- **Email verification is not a person check.** We may decline an email domain whose only real purpose is automated inbox access, and we may decline an address that is an alias of one already associated with a removed account.
+
+If you need a second account for a genuinely separate project, ask us first. We would rather say yes up front than find out later.
+
 ---
 
 ## 2. Content Requiring Warnings
@@ -165,7 +194,38 @@ Commercial promotion is allowed with the following restrictions:
 - Sponsored content must be labeled as such
 - Paid partnerships must be acknowledged
 
-### 3.2 Not Considered Promotional
+**Say when it's yours.** If you work for, own, or are compensated by the site
+you are linking to — or you are reviewing a product made by someone who pays you
+— say so in the post. A plain sentence is enough: *"I work at [company]; this is
+my product."*
+
+Undisclosed promotion of a product you represent counts as promotional content,
+whether or not money changes hands and whether or not you call it a review. A
+review that never mentions the relationship is not a review; it is an advert.
+
+### 3.2 Outbound Links and Search Engines
+
+Grove is a place for writers, not a place to place links.
+
+**What we do:**
+
+- Outbound links on **free-tier** blogs carry `nofollow` and are marked as
+  user-generated content, so they do not pass search ranking.
+- Outbound links on accounts **younger than 14 days** carry the same treatment,
+  whatever the plan. It lifts on its own; there is nothing to request.
+- A blog in its first two weeks is not indexed by search engines. That lifts on
+  its own too.
+
+**Why:** accounts created to place links are the single most common abuse we see.
+Rotating an email address costs nothing; a link that doesn't count costs the
+whole point of the account. Treating new links this way is cheaper and kinder
+than blocking every new signup, and it means a new writer can publish the moment
+they arrive.
+
+**What this does not affect:** your writing, your readers, your own domain, or
+internal links between your pages. Paid blogs older than two weeks are unchanged.
+
+### 3.3 Not Considered Promotional
 
 The following is generally not considered promotional:
 - Mentioning where you work in a personal context
@@ -248,6 +308,12 @@ We reserve the right to skip warnings and immediately suspend or terminate accou
 - Threats of violence
 - CSAM
 - Doxxing
+- Spam, link farms, and SEO abuse (§1.4)
+- Automated or agent-operated accounts, and extra accounts used to get around a removal (§1.9)
+
+When we act without warning, we email the address on file afterwards with the
+reason. Section 16.4 of the [Terms of Service](https://grove.place/legal/terms)
+describes exactly what a removal takes away.
 
 ### 5.3 Content Removal
 
@@ -302,6 +368,8 @@ We may update this policy as our community grows and evolves. Significant change
 | Harassment/doxxing | ❌ No | |
 | Illegal content | ❌ No | |
 | Spam/malware | ❌ No | |
+| Link farms / SEO abuse | ❌ No | Accounts created to place links, doorway content, guest-post placements |
+| Automated or agent-operated accounts | ❌ No | A person has to be behind the account (§1.9) |
 | Impersonation | ❌ No | |
 | Pornography | ❌ No | |
 | Political campaigning/fundraising | ❌ No | Personal expression allowed |

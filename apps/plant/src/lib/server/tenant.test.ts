@@ -1,8 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { createTenant, getTenantForOnboarding } from "./tenant";
+import { createTenant, getTenantForOnboarding, SignupBlockedError } from "./tenant";
 import type { CreateTenantInput } from "./tenant";
 
-function createMockD1(): { db: any; calls: Array<{ sql: string; bindings: any[] }> } {
+interface MockD1Options {
+	/** Rows returned by any `.all()` query — used for the signup_blocks deny list. */
+	blocks?: Array<Record<string, unknown>>;
+	/** When set, the deny list query throws, exercising the fail-open path. */
+	blockReadError?: string;
+}
+
+function createMockD1(options: MockD1Options = {}): {
+	db: any;
+	calls: Array<{ sql: string; bindings: any[] }>;
+} {
 	const calls: Array<{ sql: string; bindings: any[] }> = [];
 	const boundStatement = {
 		bind: vi.fn().mockImplementation((...args: any[]) => {
@@ -12,6 +22,10 @@ function createMockD1(): { db: any; calls: Array<{ sql: string; bindings: any[] 
 		}),
 		run: vi.fn().mockResolvedValue({ success: true }),
 		first: vi.fn().mockResolvedValue(null),
+		all: vi.fn().mockImplementation(async () => {
+			if (options.blockReadError) throw new Error(options.blockReadError);
+			return { results: options.blocks ?? [] };
+		}),
 	};
 	const db = {
 		prepare: vi.fn().mockImplementation((sql: string) => {
@@ -54,17 +68,23 @@ describe("createTenant", () => {
 		);
 	});
 
-	it("inserts into tenants table first", async () => {
+	it("inserts into the tenants table", async () => {
 		const { db, calls } = createMockD1();
 		await createTenant(db, makeInput());
-		expect(calls[0].sql).toContain("INSERT INTO tenants");
+		expect(calls.some((c) => c.sql.includes("INSERT INTO tenants"))).toBe(true);
+	});
+
+	it("checks the deny list before writing anything", async () => {
+		const { db, calls } = createMockD1();
+		await createTenant(db, makeInput());
+		expect(calls[0].sql).toContain("signup_blocks");
 	});
 
 	it("passes correct tenant data in INSERT", async () => {
 		const { db, calls } = createMockD1();
 		const input = makeInput();
 		await createTenant(db, input);
-		const tenantBindings = calls[0].bindings;
+		const tenantBindings = calls.find((c) => c.sql.includes("INSERT INTO tenants"))!.bindings;
 		expect(tenantBindings[1]).toBe("testuser");
 		expect(tenantBindings[2]).toBe("Test User");
 		expect(tenantBindings[3]).toBe("test@example.com");
@@ -75,14 +95,14 @@ describe("createTenant", () => {
 	it("uses default accent color when favoriteColor is null", async () => {
 		const { db, calls } = createMockD1();
 		await createTenant(db, makeInput({ favoriteColor: null }));
-		const tenantBindings = calls[0].bindings;
+		const tenantBindings = calls.find((c) => c.sql.includes("INSERT INTO tenants"))!.bindings;
 		expect(tenantBindings[5]).toBe("#16a34a");
 	});
 
 	it("uses default accent color when favoriteColor is undefined", async () => {
 		const { db, calls } = createMockD1();
 		await createTenant(db, makeInput({ favoriteColor: undefined }));
-		const tenantBindings = calls[0].bindings;
+		const tenantBindings = calls.find((c) => c.sql.includes("INSERT INTO tenants"))!.bindings;
 		expect(tenantBindings[5]).toBe("#16a34a");
 	});
 
@@ -158,12 +178,54 @@ describe("createTenant", () => {
 		expect(aboutCall).toBeDefined();
 	});
 
-	it("makes exactly 10 database calls", async () => {
+	it("makes exactly 11 database calls", async () => {
 		const { db, calls } = createMockD1();
 		await createTenant(db, makeInput());
-		// 1 tenant + 1 billing + 4 settings + 1 onboarding link + 1 users upsert query + 1 users upsert + 2 pages = 10
+		// 1 signup_blocks deny list + 1 tenant + 1 billing + 4 settings + 1 onboarding
+		// link + 1 users upsert query + 1 users upsert + 2 pages = 11
 		// (users upsert: SELECT groveauth_id + INSERT/ON CONFLICT)
-		expect(calls).toHaveLength(10);
+		expect(calls).toHaveLength(11);
+	});
+
+	describe("signup deny list", () => {
+		const blockRow = {
+			id: "blk-1",
+			kind: "domain",
+			value: "mail.grokbot.com",
+			reason: "agent mailbox",
+			created_by: "autumn",
+			created_at: 1,
+			expires_at: null,
+			source: "incident:2026-11-14",
+		};
+
+		it("refuses a blocked identity", async () => {
+			const { db } = createMockD1({ blocks: [blockRow] });
+			await expect(
+				createTenant(db, makeInput({ email: "maplecrest+ella@mail.grokbot.com" })),
+			).rejects.toThrow(SignupBlockedError);
+		});
+
+		it("writes nothing when blocked", async () => {
+			const { db, calls } = createMockD1({ blocks: [blockRow] });
+			await expect(
+				createTenant(db, makeInput({ email: "maplecrest+grace@mail.grokbot.com" })),
+			).rejects.toThrow(SignupBlockedError);
+			expect(calls.some((c) => c.sql.includes("INSERT INTO tenants"))).toBe(false);
+		});
+
+		it("allows an unblocked identity on a blocked provider's other domain", async () => {
+			const { db } = createMockD1({ blocks: [blockRow] });
+			const result = await createTenant(db, makeInput({ email: "autumn@grove.place" }));
+			expect(result.subdomain).toBe("testuser");
+		});
+
+		it("fails open when the deny list cannot be read", async () => {
+			// A broken deny list must not stop every writer — but it logs PLANT-047.
+			const { db } = createMockD1({ blockReadError: "no such table: signup_blocks" });
+			const result = await createTenant(db, makeInput());
+			expect(result.tenantId).toBeDefined();
+		});
 	});
 
 	it("normalizes email case before the users upsert (#1580)", async () => {
@@ -197,7 +259,7 @@ describe("createTenant", () => {
 			makeInput({ plan: "wanderer", providerCustomerId: null, providerSubscriptionId: null }),
 		);
 		expect(result.subdomain).toBe("testuser");
-		const tenantBindings = calls[0].bindings;
+		const tenantBindings = calls.find((c) => c.sql.includes("INSERT INTO tenants"))!.bindings;
 		expect(tenantBindings[4]).toBe("wanderer");
 	});
 
@@ -205,21 +267,21 @@ describe("createTenant", () => {
 		const { db, calls } = createMockD1();
 		const result = await createTenant(db, makeInput({ plan: "sapling" }));
 		expect(result.subdomain).toBe("testuser");
-		const tenantBindings = calls[0].bindings;
+		const tenantBindings = calls.find((c) => c.sql.includes("INSERT INTO tenants"))!.bindings;
 		expect(tenantBindings[4]).toBe("sapling");
 	});
 
 	it("works for oak plan", async () => {
 		const { db, calls } = createMockD1();
 		const result = await createTenant(db, makeInput({ plan: "oak" }));
-		const tenantBindings = calls[0].bindings;
+		const tenantBindings = calls.find((c) => c.sql.includes("INSERT INTO tenants"))!.bindings;
 		expect(tenantBindings[4]).toBe("oak");
 	});
 
 	it("works for evergreen plan", async () => {
 		const { db, calls } = createMockD1();
 		const result = await createTenant(db, makeInput({ plan: "evergreen" }));
-		const tenantBindings = calls[0].bindings;
+		const tenantBindings = calls.find((c) => c.sql.includes("INSERT INTO tenants"))!.bindings;
 		expect(tenantBindings[4]).toBe("evergreen");
 	});
 

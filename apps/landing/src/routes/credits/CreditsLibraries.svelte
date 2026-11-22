@@ -87,26 +87,6 @@
 						</a>
 
 						<a
-							href="https://github.com/jamsinclair/jSquash"
-							target="_blank"
-							rel="noopener noreferrer"
-							class="card p-4 hover:border-accent transition-colors group"
-						>
-							<div class="flex items-center justify-between">
-								<div>
-									<span
-										class="font-serif text-foreground group-hover:text-accent-muted transition-colors"
-										>@jsquash/jxl</span
-									>
-									<span class="text-foreground-subtle font-sans text-sm ml-2"
-										>— JPEG XL codec for modern image compression</span
-									>
-								</div>
-								<span class="text-foreground-faint text-xs font-sans">Apache 2.0</span>
-							</div>
-						</a>
-
-						<a
 							href="https://github.com/1904labs/dom-to-image-more"
 							target="_blank"
 							rel="noopener noreferrer"

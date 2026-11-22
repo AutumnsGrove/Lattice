@@ -1,78 +1,40 @@
 import type { PageServerLoad } from "./$types";
-import {
-	isFeatureEnabled,
-	getFeatureValue,
-	type FeatureFlagsEnv,
-} from "@autumnsgrove/lattice/platform/feature-flags";
+import { canUploadImages } from "@autumnsgrove/lattice/server/upload-gate";
+import { buildUploadAccessRequestUrl } from "@autumnsgrove/lattice/platform/config/porch";
 
 /**
- * Server-side data for the admin images page.
+ * Two things this page needs and the Arbor layout cannot know:
  *
- * Evaluates JXL feature flags and passes the config to the client.
- * This allows controlled rollout of JPEG XL encoding.
+ * 1. **Whether uploads are actually on.** The banner used to key off the
+ *    `image_uploads` graft alone, but the real gate is `image_uploads &&
+ *    !uploads_suspended` (`upload-gate.ts`), and `uploads_suspended` defaults to
+ *    true. A grove with the graft on and uploads suspended saw no banner at all
+ *    and just collected 403s (#1626). One answer, asked once, from the same
+ *    function the upload endpoint uses.
+ * 2. **Where to ask, if they are not.** There is now a next step instead of a
+ *    dead end, and it is built in exactly one place (`buildUploadAccessRequestUrl`)
+ *    so this banner, the gallery and the editor ask the same question.
  */
-export const load: PageServerLoad = async ({ platform, locals }) => {
-	// Default configuration (no flags, JXL disabled)
-	const defaultConfig = {
-		jxlEnabled: false,
-		jxlRolloutPercentage: 0,
-		jxlKillSwitchActive: false,
+export const load: PageServerLoad = async ({ locals, platform }) => {
+	const db = platform?.env?.DB;
+	const kv = platform?.env?.CACHE_KV;
+	const tenantId = locals.tenantId;
+
+	const flagsEnv = db && kv ? { DB: db, FLAGS_KV: kv } : null;
+	const gate =
+		flagsEnv && tenantId ? await canUploadImages(tenantId, locals.user?.id, flagsEnv) : null;
+
+	const tenant = locals.context.type === "tenant" ? locals.context.tenant : null;
+
+	return {
+		/** `null` when the gate could not be evaluated — leave the banner alone rather than lie. */
+		uploadsAllowed: gate ? gate.allowed : null,
+		uploadAccessUrl: tenant
+			? buildUploadAccessRequestUrl({
+					subdomain: tenant.subdomain,
+					name: locals.user?.name,
+					email: locals.user?.email,
+				})
+			: null,
 	};
-
-	// If no platform env or missing feature flag bindings, return defaults
-	if (!platform?.env?.DB || !platform?.env?.CACHE_KV) {
-		return {
-			jxl: defaultConfig,
-		};
-	}
-
-	// Cast env to feature flags env type (it has DB and CACHE_KV)
-	const flagsEnv = platform.env as unknown as FeatureFlagsEnv;
-
-	// Evaluation context - use tenant and user for percentage rollout
-	const context = {
-		tenantId: locals.tenantId,
-		userId: locals.user?.id,
-	};
-
-	try {
-		// Check kill switch first (if disabled, JXL is force-disabled)
-		const killSwitchEnabled = await isFeatureEnabled("jxl_kill_switch", context, flagsEnv);
-
-		// If kill switch is disabled (emergency mode), force WebP
-		if (!killSwitchEnabled) {
-			return {
-				jxl: {
-					jxlEnabled: false,
-					jxlRolloutPercentage: 0,
-					jxlKillSwitchActive: true, // Signal that kill switch is active
-				},
-			};
-		}
-
-		// Check main encoding flag
-		const jxlEnabled = await isFeatureEnabled("jxl_encoding", context, flagsEnv);
-
-		// Get rollout percentage (for gradual rollout)
-		const rolloutPercentage = await getFeatureValue<number>(
-			"jxl_rollout_percentage",
-			context,
-			flagsEnv,
-			0,
-		);
-
-		return {
-			jxl: {
-				jxlEnabled,
-				jxlRolloutPercentage: rolloutPercentage,
-				jxlKillSwitchActive: false,
-			},
-		};
-	} catch (error) {
-		// Log error but don't break the page - fall back to defaults
-		console.error("[Admin Images] Feature flag evaluation failed:", error);
-		return {
-			jxl: defaultConfig,
-		};
-	}
 };

@@ -3,7 +3,7 @@ title: Why Some Usernames Aren
 description: How Grove protects the community through username validation
 category: help
 section: account-billing
-lastUpdated: '2026-01-07'
+lastUpdated: '2026-11-13'
 keywords:
   - username
   - subdomain
@@ -32,7 +32,7 @@ We don't broadcast the full list (that would help bad actors), but here's what y
 
 ### Reserved for Grove services
 
-Grove has internal services that need specific subdomains. Names like `meadow`, `forage`, `status`, or `api` are reserved because they're part of how Grove works. Trying to claim `meadow.grove.place` when that's where our social feed lives wouldn't make sense.
+Grove has internal services that need specific subdomains. Names like `arbor`, `forage`, `status`, or `api` are reserved because they're part of how Grove works, and a handful more are held for services that don't exist yet—claiming `meadow.grove.place` today would only mean giving it up later.
 
 ### System and infrastructure terms
 

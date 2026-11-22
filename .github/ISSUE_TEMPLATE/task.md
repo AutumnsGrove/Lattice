@@ -10,28 +10,9 @@ assignees: ''
 <!-- What needs to be done? -->
 
 ## Component
-<!-- Which Grove component is involved? -->
-- [ ] Heartwood (Auth)
-- [ ] Lattice (Core)
-- [ ] Plant (Signups)
-- [ ] Arbor (Admin Panel)
-- [ ] Clearing (Status)
-- [ ] Patina (Backups)
-- [ ] Mycelium (MCP)
-- [ ] Amber (Storage)
-- [ ] Ivy (Mail)
-- [ ] Foliage (Themes)
-- [ ] Curios (Tweaks)
-- [ ] Grafts (Flags)
-- [ ] Meadow (Social)
-- [ ] Forests (Communities)
-- [ ] Shade (AI Protection)
-- [ ] Lumen (AI Gateway)
-- [ ] Petal/Thorn (Content Moderation)
-- [ ] Infrastructure/DevOps
-- [ ] Documentation
-- [ ] Testing
-- [ ] Other: 
+<!-- Which product does this land in? The list is in `.github/labels.yml`
+     under `group: component`. Name it in the title if you can, so it gets
+     labelled without anyone asking. -->
 
 ## Context
 <!-- Why are we doing this? What's the background? -->

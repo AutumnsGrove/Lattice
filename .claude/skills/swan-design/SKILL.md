@@ -130,6 +130,7 @@ Final review and release.
 | REFINE | `references/diagram-patterns.md` | Adding flow diagrams and UI mockups |
 | REFINE | `references/ears-format.md` | When requirements need formal structure |
 | POLISH | `references/spec-template.md` | Running the voice/structure checklist |
+| WRITE   | `references/spec-format.md`       | Structuring a spec — required sections, visuals, checklist |
 
 ---
 

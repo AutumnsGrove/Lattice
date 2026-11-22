@@ -15,6 +15,7 @@ import {
 	validateImageFile,
 	validateImageFileDeep,
 	getActionableUploadError,
+	isUploadGateError,
 	normalizeFileForUpload,
 } from "./upload-validation";
 
@@ -41,13 +42,6 @@ const WEBP_BYTES = new Uint8Array([
 	0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x57, 0x45, 0x42, 0x50,
 ]);
 
-// JXL codestream needs at least 8 bytes for buffer.length check (matches container signature length)
-const JXL_CODESTREAM_BYTES = new Uint8Array([0xff, 0x0a, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
-
-const JXL_CONTAINER_BYTES = new Uint8Array([
-	0x00, 0x00, 0x00, 0x0c, 0x4a, 0x58, 0x4c, 0x20, 0x00, 0x00, 0x00, 0x00,
-]);
-
 // ============================================================================
 // Constants Tests
 // ============================================================================
@@ -70,16 +64,12 @@ describe("upload-validation constants", () => {
 			expect(ALLOWED_IMAGE_TYPES).toContain("image/webp");
 		});
 
-		it("includes jxl", () => {
-			expect(ALLOWED_IMAGE_TYPES).toContain("image/jxl");
-		});
-
 		it("includes avif", () => {
 			expect(ALLOWED_IMAGE_TYPES).toContain("image/avif");
 		});
 
-		it("has 6 types total", () => {
-			expect(ALLOWED_IMAGE_TYPES).toHaveLength(6);
+		it("has 5 types total", () => {
+			expect(ALLOWED_IMAGE_TYPES).toHaveLength(5);
 		});
 	});
 
@@ -104,16 +94,12 @@ describe("upload-validation constants", () => {
 			expect(ALLOWED_EXTENSIONS).toContain("webp");
 		});
 
-		it("includes jxl", () => {
-			expect(ALLOWED_EXTENSIONS).toContain("jxl");
-		});
-
 		it("includes avif", () => {
 			expect(ALLOWED_EXTENSIONS).toContain("avif");
 		});
 
-		it("has 7 extensions total", () => {
-			expect(ALLOWED_EXTENSIONS).toHaveLength(7);
+		it("has 6 extensions total", () => {
+			expect(ALLOWED_EXTENSIONS).toHaveLength(6);
 		});
 	});
 
@@ -149,17 +135,6 @@ describe("upload-validation constants", () => {
 			expect(FILE_SIGNATURES["image/webp"]).toBeDefined();
 			expect(FILE_SIGNATURES["image/webp"][0]).toEqual([0x52, 0x49, 0x46, 0x46]);
 		});
-
-		it("contains JXL codestream signature [0xFF, 0x0A]", () => {
-			const jxlSigs = FILE_SIGNATURES["image/jxl"];
-			expect(jxlSigs).toBeDefined();
-			expect(jxlSigs.some((sig) => sig.join(",") === "255,10")).toBe(true);
-		});
-
-		it("contains JXL container signature", () => {
-			const jxlSigs = FILE_SIGNATURES["image/jxl"];
-			expect(jxlSigs.some((sig) => sig.join(",") === "0,0,0,12,74,88,76,32")).toBe(true);
-		});
 	});
 
 	describe("WEBP_MARKER", () => {
@@ -189,16 +164,12 @@ describe("upload-validation constants", () => {
 			expect(MIME_TO_EXTENSIONS["image/webp"]).toEqual(["webp"]);
 		});
 
-		it("maps image/jxl to jxl", () => {
-			expect(MIME_TO_EXTENSIONS["image/jxl"]).toEqual(["jxl"]);
-		});
-
 		it("maps image/avif to avif", () => {
 			expect(MIME_TO_EXTENSIONS["image/avif"]).toEqual(["avif"]);
 		});
 
-		it("has 6 mappings total", () => {
-			expect(Object.keys(MIME_TO_EXTENSIONS)).toHaveLength(6);
+		it("has 5 mappings total", () => {
+			expect(Object.keys(MIME_TO_EXTENSIONS)).toHaveLength(5);
 		});
 	});
 
@@ -208,7 +179,7 @@ describe("upload-validation constants", () => {
 			expect(ALLOWED_TYPES_DISPLAY).toContain("PNG");
 			expect(ALLOWED_TYPES_DISPLAY).toContain("GIF");
 			expect(ALLOWED_TYPES_DISPLAY).toContain("WebP");
-			expect(ALLOWED_TYPES_DISPLAY).toContain("JPEG XL");
+			expect(ALLOWED_TYPES_DISPLAY).toContain("AVIF");
 		});
 	});
 
@@ -219,7 +190,6 @@ describe("upload-validation constants", () => {
 			expect(UPLOAD_ACCEPT_ATTR).toContain(".png");
 			expect(UPLOAD_ACCEPT_ATTR).toContain(".gif");
 			expect(UPLOAD_ACCEPT_ATTR).toContain(".webp");
-			expect(UPLOAD_ACCEPT_ATTR).toContain(".jxl");
 		});
 
 		it("includes MIME type selectors", () => {
@@ -227,7 +197,6 @@ describe("upload-validation constants", () => {
 			expect(UPLOAD_ACCEPT_ATTR).toContain("image/png");
 			expect(UPLOAD_ACCEPT_ATTR).toContain("image/gif");
 			expect(UPLOAD_ACCEPT_ATTR).toContain("image/webp");
-			expect(UPLOAD_ACCEPT_ATTR).toContain("image/jxl");
 		});
 	});
 });
@@ -251,10 +220,6 @@ describe("isAllowedImageType", () => {
 
 	it("returns true for image/webp", () => {
 		expect(isAllowedImageType("image/webp")).toBe(true);
-	});
-
-	it("returns true for image/jxl", () => {
-		expect(isAllowedImageType("image/jxl")).toBe(true);
 	});
 
 	it("returns false for image/svg+xml", () => {
@@ -313,10 +278,6 @@ describe("isAllowedExtension", () => {
 
 	it("returns true for webp", () => {
 		expect(isAllowedExtension("webp")).toBe(true);
-	});
-
-	it("returns true for jxl", () => {
-		expect(isAllowedExtension("jxl")).toBe(true);
 	});
 
 	it("returns true for JPG (uppercase)", () => {
@@ -418,24 +379,6 @@ describe("extensionMatchesMimeType", () => {
 
 		it("WEBP matches image/webp (case-insensitive)", () => {
 			expect(extensionMatchesMimeType("WEBP", "image/webp")).toBe(true);
-		});
-
-		it("webp does not match image/jxl", () => {
-			expect(extensionMatchesMimeType("webp", "image/jxl")).toBe(false);
-		});
-	});
-
-	describe("JXL matching", () => {
-		it("jxl matches image/jxl", () => {
-			expect(extensionMatchesMimeType("jxl", "image/jxl")).toBe(true);
-		});
-
-		it("JXL matches image/jxl (case-insensitive)", () => {
-			expect(extensionMatchesMimeType("JXL", "image/jxl")).toBe(true);
-		});
-
-		it("jxl does not match image/jpeg", () => {
-			expect(extensionMatchesMimeType("jxl", "image/jpeg")).toBe(false);
 		});
 	});
 
@@ -600,29 +543,6 @@ describe("validateFileSignature - SECURITY CRITICAL", () => {
 		});
 	});
 
-	describe("JXL validation", () => {
-		it("accepts JXL codestream signature", () => {
-			expect(validateFileSignature(JXL_CODESTREAM_BYTES, "image/jxl")).toBe(true);
-		});
-
-		it("accepts JXL container signature", () => {
-			expect(validateFileSignature(JXL_CONTAINER_BYTES, "image/jxl")).toBe(true);
-		});
-
-		it("rejects JPEG bytes labeled as JXL", () => {
-			expect(validateFileSignature(JPEG_BYTES_JFIF, "image/jxl")).toBe(false);
-		});
-
-		it("rejects PNG bytes labeled as JXL", () => {
-			expect(validateFileSignature(PNG_BYTES, "image/jxl")).toBe(false);
-		});
-
-		it("rejects buffer too short", () => {
-			const shortBuffer = new Uint8Array([0xff]);
-			expect(validateFileSignature(shortBuffer, "image/jxl")).toBe(false);
-		});
-	});
-
 	describe("MIME spoofing detection", () => {
 		it("detects PNG masquerading as JPEG", () => {
 			expect(validateFileSignature(PNG_BYTES, "image/jpeg")).toBe(false);
@@ -671,10 +591,6 @@ describe("getFileExtension", () => {
 
 	it("extracts extension from image.webp", () => {
 		expect(getFileExtension("image.webp")).toBe("webp");
-	});
-
-	it("extracts extension from image.jxl", () => {
-		expect(getFileExtension("image.jxl")).toBe("jxl");
 	});
 
 	it("returns lowercase extension from IMAGE.PNG", () => {
@@ -762,11 +678,6 @@ describe("validateImageFile", () => {
 
 		it("returns null for valid WebP file", () => {
 			mockFile = new File([], "image.webp", { type: "image/webp" });
-			expect(validateImageFile(mockFile)).toBeNull();
-		});
-
-		it("returns null for valid JXL file", () => {
-			mockFile = new File([], "image.jxl", { type: "image/jxl" });
 			expect(validateImageFile(mockFile)).toBeNull();
 		});
 
@@ -880,13 +791,6 @@ describe("validateImageFile", () => {
 			expect(result).toContain("does not match file type");
 		});
 
-		it("returns error for JPEG extension with JXL MIME type", () => {
-			mockFile = new File([], "image.jpeg", { type: "image/jxl" });
-			const result = validateImageFile(mockFile);
-			expect(result).not.toBeNull();
-			expect(result).toContain("does not match file type");
-		});
-
 		it("allows JPG for JPEG MIME (jpg and jpeg both valid for image/jpeg)", () => {
 			mockFile = new File([], "image.jpg", { type: "image/jpeg" });
 			expect(validateImageFile(mockFile)).toBeNull();
@@ -933,22 +837,6 @@ describe("validateImageFileDeep - async deep validation", () => {
 	it("returns null for valid WebP file with correct magic bytes", async () => {
 		const fileData = new Blob([WEBP_BYTES]);
 		const mockFile = new File([fileData], "image.webp", { type: "image/webp" });
-
-		const result = await validateImageFileDeep(mockFile);
-		expect(result).toBeNull();
-	});
-
-	it("returns null for valid JXL codestream file", async () => {
-		const fileData = new Blob([JXL_CODESTREAM_BYTES]);
-		const mockFile = new File([fileData], "image.jxl", { type: "image/jxl" });
-
-		const result = await validateImageFileDeep(mockFile);
-		expect(result).toBeNull();
-	});
-
-	it("returns null for valid JXL container file", async () => {
-		const fileData = new Blob([JXL_CONTAINER_BYTES]);
-		const mockFile = new File([fileData], "image.jxl", { type: "image/jxl" });
 
 		const result = await validateImageFileDeep(mockFile);
 		expect(result).toBeNull();
@@ -1078,7 +966,6 @@ describe("getActionableUploadError", () => {
 			const result = getActionableUploadError("feature_disabled");
 			expect(result).toContain("aren't available yet");
 		});
-
 		it("maps 'limited beta' to rollout message", () => {
 			const result = getActionableUploadError("Image uploads are in limited beta");
 			expect(result).toContain("aren't available yet");
@@ -1317,5 +1204,27 @@ describe("normalizeFileForUpload", () => {
 		expect(result.needsHeicConversion).toBe(false);
 		expect(result.file.type).toBe("image/jpeg");
 		expect(result.file.name).toBe("iphone-photo.jpeg");
+	});
+});
+
+// ============================================================================
+// isUploadGateError — the editor's persistent hint keys off this (#1626)
+// ============================================================================
+
+describe("isUploadGateError", () => {
+	it("agrees with the message mapper, so the hint and the toast cannot drift", () => {
+		const gateMessages = ["feature_disabled", "Image uploads are in limited beta", "Not enabled"];
+
+		for (const message of gateMessages) {
+			expect(isUploadGateError(message)).toBe(true);
+			expect(getActionableUploadError(message)).toContain("aren't available yet");
+		}
+	});
+
+	it("does not mistake a bad file or a rate limit for the gate", () => {
+		// A retry fixes these; a Porch link would not.
+		expect(isUploadGateError("File is too large (12MB > 5MB)")).toBe(false);
+		expect(isUploadGateError("rate_limited: try again in 60s")).toBe(false);
+		expect(isUploadGateError("Failed to fetch")).toBe(false);
 	});
 });

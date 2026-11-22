@@ -65,7 +65,7 @@ You don't admire a lattice. You build on it, and watch what grows.
 | **Rich Text Editor** | Tiptap 3 (ProseMirror-based)                            |
 | **Content**          | Markdown via markdown-it + remark/rehype pipeline       |
 | **Email**            | React Email + Resend                                    |
-| **Media**            | Cloudflare R2 + JXL/WebP encoding (`@jsquash/jxl`)      |
+| **Media**            | Cloudflare R2 + WebP encoding (canvas)                  |
 | **Database**         | Cloudflare D1 (SQLite at the edge)                      |
 | **Cache/Sessions**   | Cloudflare KV                                           |
 | **Realtime**         | Cloudflare Durable Objects (via Loom)                   |
@@ -82,7 +82,6 @@ libs/
 ├── engine/          ← @autumnsgrove/lattice (this package)
 ├── gossamer/        ← imports from @autumnsgrove/lattice
 ├── foliage/         ← imports from @autumnsgrove/lattice
-├── vineyard/        ← imports from @autumnsgrove/lattice
 
 apps/
 ├── landing/         ← imports from @autumnsgrove/lattice
@@ -110,8 +109,8 @@ Consumer packages each have their own Cloudflare resources (D1, KV, R2) and depl
 Every package that imports from `@autumnsgrove/lattice` must add this to its `vite.config.ts`:
 
 ```ts
-optimizeDeps: { exclude: ['@jsquash/jxl'] },
-build: { rollupOptions: { external: ['@jsquash/jxl'] } }
+optimizeDeps: { exclude: ['workers-og'] },
+build: { rollupOptions: { external: ['workers-og'] } }
 ```
 
 Without it, Rollup fails with "IIFE output formats are not supported for code-splitting builds."
@@ -150,7 +149,6 @@ Lattice uses ~47 named export paths for tree-shaking. Each subsystem has its own
 	"./ui/styles": "grove.css (Tailwind base styles)",
 	"./ui/tailwind": "Tailwind preset",
 	"./ui/terrarium": "Terrarium-specific UI",
-	"./vineyard": "Vineyard components",
 	"./utils": "Client-side utility functions",
 	"./utils/*": "Individual utility modules",
 	"./auth": "Session management utilities",
@@ -689,7 +687,7 @@ import {
 } from "@autumnsgrove/lattice/platform/feature-flags";
 
 // Boolean check
-const enabled = await isFeatureEnabled("jxl_encoding", { tenantId }, env);
+const enabled = await isFeatureEnabled("photo_gallery", { tenantId }, env);
 
 // Typed value with default
 const maxUploads = await getFeatureValue("max_uploads", { tier }, env, 10);
@@ -791,7 +789,7 @@ await setTenantFlagOverride(db, tenantId, "dark_mode_default", true);
 import { getFeatureFlags, setFlagEnabled } from "@autumnsgrove/lattice/platform/feature-flags";
 
 const flags = await getFeatureFlags(db);
-await setFlagEnabled(db, kv, "jxl_encoding", true);
+await setFlagEnabled(db, kv, "photo_gallery", true);
 ```
 
 ---
@@ -869,13 +867,12 @@ Curio UI components live separately in `@autumnsgrove/lattice/ui/content/curios`
 libs/engine/src/lib/
 ├── curios/
 │   ├── timeline/       ← logic, AI integration, voice presets
-│   ├── journey/        ← logic, GitHub repo analysis
 │   ├── gallery/        ← logic
 │   ├── guestbook/      ← types, validation
 │   ├── hitcounter/     ← types, display styles
 │   ├── moodring/       ← types, mood palettes
 │   ├── nowplaying/     ← types, media integration
-│   └── ...22 total
+│   └── ...21 total
 ├── ui/components/content/curios/  ← Svelte display components
 └── curios/sanitize.ts             ← shared content sanitization
 ```
@@ -911,10 +908,6 @@ import {
 // Build a voiced prompt for the AI
 const prompt = buildVoicedPrompt(activity, getVoice("poetic"));
 ```
-
-**Journey**
-
-Repo growth visualization — language breakdowns and milestone snapshots over time.
 
 **Gallery** (`./curios/gallery`)
 
@@ -1119,8 +1112,8 @@ import { renderMarkdown, parseMarkdown } from "@autumnsgrove/lattice/utils";
 #### Image Processing
 
 ```typescript
-import { encodeAsJxl, convertToWebP, processHeic } from "@autumnsgrove/lattice/utils";
-// JXL encoding via @jsquash/jxl, WebP conversion, HEIC support
+import { processImage, generateThumbnail, convertHeicToJpeg } from "@autumnsgrove/lattice/utils";
+// WebP conversion (canvas), HEIC/HEIF decode, EXIF stripping
 ```
 
 #### Other Utilities
@@ -1288,7 +1281,7 @@ A snapshot of where each subsystem stands.
 | **Feature Flags**    | Live          | 6 rule types, Greenhouse management               |
 | **Grafts (Platform UI)** | Live      | Named grafts (feature flags), `KnownFlagId` union |
 | **Zephyr**           | In progress   | Email sending live; social broadcast building     |
-| **Curios (dev)**     | Live          | Timeline, Journey, Gallery                        |
+| **Curios (dev)**     | Live          | Timeline, Gallery                                 |
 | **Curios (visitor)** | In progress   | Types/logic ready; UI components in progress      |
 | **UI System**        | Live          | Full component library, 7 categories              |
 | **Email**            | Live          | React Email, sequences, render pipeline, Resend   |

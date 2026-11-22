@@ -10,9 +10,9 @@ export const goto = vi.fn(async (url: string, opts?: any) => {});
 export const invalidate = vi.fn(async (url?: string) => {});
 export const invalidateAll = vi.fn(async () => {});
 export const preloadData = vi.fn(async (url: string) => ({
-  type: "loaded" as const,
-  status: 200,
-  data: {},
+	type: "loaded" as const,
+	status: 200,
+	data: {},
 }));
 export const preloadCode = vi.fn(async (...urls: string[]) => {});
 export const beforeNavigate = vi.fn((callback: any) => {});

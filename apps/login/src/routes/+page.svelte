@@ -17,6 +17,8 @@
 	import { dev } from "$app/environment";
 	import { enhance } from "$app/forms";
 	import { validateRedirectUrl } from "$lib/redirect";
+	import { EMAIL_CODE_MESSAGES } from "$lib/email-code";
+	import { buildPorchUrl } from "@autumnsgrove/lattice/platform/config/porch";
 	import { Waystone } from "@autumnsgrove/lattice/ui";
 
 	let { form } = $props();
@@ -60,6 +62,27 @@
 	// All error sources funnel into one display slot.
 	// Priority: form action errors > callback URL errors
 	const displayError = $derived(form?.error ?? callbackError);
+
+	// "This account isn't available" — its own state, not a form error.
+	//
+	// Three things land here: a refused signup at code-send, a refused identity at
+	// verify (the account the hook would have created), and a sign-in that worked
+	// but whose session Heartwood will not honour because the account is banned.
+	// All three used to say "please try again in a moment", which is a loop (#1719).
+	const unavailable = $derived(
+		form?.state === "unavailable" || page.url.searchParams.get("unavailable") === "1",
+	);
+
+	// One place builds a Porch link (`buildPorchUrl`), so the appeal carries the
+	// email we already know and a subject a person can recognise.
+	const appealUrl = $derived(
+		buildPorchUrl({
+			category: "appeal",
+			subject: "Sign-in blocked",
+			message: "I tried to sign in at login.grove.place and was told the account isn't available.",
+			...(typeof form?.email === "string" && form.email ? { email: form.email } : {}),
+		}),
+	);
 </script>
 
 <svelte:head>
@@ -69,180 +92,200 @@
 <div class="w-full max-w-sm animate-fade-in">
 	<!-- Card -->
 	<div class="glass-grove rounded-2xl border border-default p-8 shadow-lg">
-		<!-- Header -->
-		<div class="text-center mb-8">
-			{#if codeStep}
-				<h1 class="text-2xl font-serif text-foreground">Check your email</h1>
-				<p class="mt-2 text-sm text-foreground-muted">
-					We sent a 6-digit code to <span class="text-foreground">{codeStep.email}</span>
+		{#if unavailable}
+			<!-- A refusal gets its own page, not a line above a form that will fail again.
+			     It says what it can (the account isn't available), what it will not say
+			     (which rule matched), and offers one next step: a person. -->
+			<div class="text-center mb-6">
+				<h1 class="text-2xl font-serif text-foreground">This account isn't available</h1>
+				<p class="mt-3 text-sm text-foreground-muted">
+					{EMAIL_CODE_MESSAGES.IDENTITY_UNAVAILABLE}
 				</p>
-			{:else}
-				<h1 class="text-2xl font-serif text-foreground">Welcome back, Wanderer</h1>
-				<p class="mt-2 text-sm text-foreground-muted">Sign in to continue to Grove</p>
-			{/if}
-		</div>
-
-		<!-- Error -->
-		{#if displayError}
-			<div
-				role="alert"
-				class="mb-6 p-3 rounded-lg bg-error/10 dark:bg-error/10 border border-error/30 dark:border-error/30 text-sm text-error dark:text-error text-center"
-			>
-				{displayError}
 			</div>
-		{/if}
 
-		{#if codeStep}
-			<!-- Email code, step 2 — enter the code we emailed -->
-			<form method="POST" action="?/verifyCode" use:enhance={enhanceEmail} class="space-y-4">
-				<input type="hidden" name="redirect" value={redirectTo} />
-				<input type="hidden" name="email" value={codeStep.email} />
-				<div>
-					<label for="code" class="block text-sm text-foreground-muted mb-2">Sign-in code</label>
-					<input
-						id="code"
-						name="code"
-						type="text"
-						inputmode="numeric"
-						autocomplete="one-time-code"
-						pattern="[0-9 \-]*"
-						maxlength="7"
-						required
-						disabled={anyLoading}
-						placeholder="123456"
-						class="input-field text-center text-xl tracking-widest font-mono"
-					/>
+			<a href={appealUrl} class="btn-primary w-full text-center">Ask someone</a>
+
+			<p class="mt-4 text-center text-xs text-foreground-subtle">
+				An appeal goes to a person at Grove, not a form. If you sign in with a different account,
+				you can
+				<a href="?redirect={encodeURIComponent(redirectTo)}" class="underline">start over</a>.
+			</p>
+		{:else}
+			<!-- Header -->
+			<div class="text-center mb-8">
+				{#if codeStep}
+					<h1 class="text-2xl font-serif text-foreground">Check your email</h1>
+					<p class="mt-2 text-sm text-foreground-muted">
+						We sent a 6-digit code to <span class="text-foreground">{codeStep.email}</span>
+					</p>
+				{:else}
+					<h1 class="text-2xl font-serif text-foreground">Welcome back, Wanderer</h1>
+					<p class="mt-2 text-sm text-foreground-muted">Sign in to continue to Grove</p>
+				{/if}
+			</div>
+
+			<!-- Error -->
+			{#if displayError}
+				<div
+					role="alert"
+					class="mb-6 p-3 rounded-lg bg-error/10 dark:bg-error/10 border border-error/30 dark:border-error/30 text-sm text-error dark:text-error text-center"
+				>
+					{displayError}
 				</div>
-				<button type="submit" disabled={anyLoading} class="btn-primary w-full">
-					{#if emailSubmitting}
-						<div class="spinner"></div>
-						<span>Checking...</span>
-					{:else}
-						<span>Sign in</span>
-					{/if}
-				</button>
-			</form>
+			{/if}
 
-			<!-- Resend / change email -->
-			<div class="mt-4 flex items-center justify-between text-sm">
-				<form method="POST" action="?/sendCode" use:enhance={enhanceEmail}>
+			{#if codeStep}
+				<!-- Email code, step 2 — enter the code we emailed -->
+				<form method="POST" action="?/verifyCode" use:enhance={enhanceEmail} class="space-y-4">
 					<input type="hidden" name="redirect" value={redirectTo} />
 					<input type="hidden" name="email" value={codeStep.email} />
-					<button
-						type="submit"
-						disabled={anyLoading}
-						class="underline text-foreground-muted hover:text-foreground"
-					>
-						Send a new code
+					<div>
+						<label for="code" class="block text-sm text-foreground-muted mb-2">Sign-in code</label>
+						<input
+							id="code"
+							name="code"
+							type="text"
+							inputmode="numeric"
+							autocomplete="one-time-code"
+							pattern="[0-9 \-]*"
+							maxlength="7"
+							required
+							disabled={anyLoading}
+							placeholder="123456"
+							class="input-field text-center text-xl tracking-widest font-mono"
+						/>
+					</div>
+					<button type="submit" disabled={anyLoading} class="btn-primary w-full">
+						{#if emailSubmitting}
+							<div class="spinner"></div>
+							<span>Checking...</span>
+						{:else}
+							<span>Sign in</span>
+						{/if}
 					</button>
 				</form>
-				<a
-					href="?redirect={encodeURIComponent(redirectTo)}"
-					class="underline text-foreground-muted hover:text-foreground">Use a different email</a
-				>
-			</div>
-		{:else}
-			<!-- Google — server-side form action, no JS required -->
-			<form
-				method="POST"
-				action="?/google"
-				use:enhance={() => {
-					googleSubmitting = true;
-					return async ({ update }) => {
-						googleSubmitting = false;
-						await update();
-					};
-				}}
-			>
-				<input type="hidden" name="redirect" value={redirectTo} />
-				<button type="submit" disabled={anyLoading} class="btn-auth">
-					{#if googleSubmitting}
-						<div class="spinner"></div>
-						<span>Redirecting...</span>
-					{:else}
-						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-							<path
-								d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-								fill="#4285F4"
-							/>
-							<path
-								d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-								fill="#34A853"
-							/>
-							<path
-								d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-								fill="#FBBC05"
-							/>
-							<path
-								d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-								fill="#EA4335"
-							/>
-						</svg>
-						<span>Continue with Google</span>
-					{/if}
-				</button>
-			</form>
 
-			<!-- Divider -->
-			<div class="my-6 flex items-center gap-3 text-xs text-foreground-subtle" aria-hidden="true">
-				<div class="h-px flex-1 bg-[var(--color-border)]"></div>
-				<span>or</span>
-				<div class="h-px flex-1 bg-[var(--color-border)]"></div>
-			</div>
-
-			<!-- Email code, step 1 — passwordless; signs in or signs up -->
-			<form method="POST" action="?/sendCode" use:enhance={enhanceEmail} class="space-y-4">
-				<input type="hidden" name="redirect" value={redirectTo} />
-				<div>
-					<label for="email" class="block text-sm text-foreground-muted mb-2">Email</label>
-					<input
-						id="email"
-						name="email"
-						type="email"
-						autocomplete="email"
-						required
-						disabled={anyLoading}
-						value={emailValue}
-						placeholder="you@example.com"
-						class="input-field"
-					/>
+				<!-- Resend / change email -->
+				<div class="mt-4 flex items-center justify-between text-sm">
+					<form method="POST" action="?/sendCode" use:enhance={enhanceEmail}>
+						<input type="hidden" name="redirect" value={redirectTo} />
+						<input type="hidden" name="email" value={codeStep.email} />
+						<button
+							type="submit"
+							disabled={anyLoading}
+							class="underline text-foreground-muted hover:text-foreground"
+						>
+							Send a new code
+						</button>
+					</form>
+					<a
+						href="?redirect={encodeURIComponent(redirectTo)}"
+						class="underline text-foreground-muted hover:text-foreground">Use a different email</a
+					>
 				</div>
-				<button type="submit" disabled={anyLoading} class="btn-auth">
-					{#if emailSubmitting}
-						<div class="spinner"></div>
-						<span>Sending code...</span>
-					{:else}
-						<span>Continue with email</span>
-					{/if}
-				</button>
-				<p class="text-xs text-foreground-subtle text-center">
-					No password needed. We'll email you a code — new here? That's all it takes to join.
-				</p>
-			</form>
-		{/if}
+			{:else}
+				<!-- Google — server-side form action, no JS required -->
+				<form
+					method="POST"
+					action="?/google"
+					use:enhance={() => {
+						googleSubmitting = true;
+						return async ({ update }) => {
+							googleSubmitting = false;
+							await update();
+						};
+					}}
+				>
+					<input type="hidden" name="redirect" value={redirectTo} />
+					<button type="submit" disabled={anyLoading} class="btn-auth">
+						{#if googleSubmitting}
+							<div class="spinner"></div>
+							<span>Redirecting...</span>
+						{:else}
+							<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+								<path
+									d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+									fill="#4285F4"
+								/>
+								<path
+									d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+									fill="#34A853"
+								/>
+								<path
+									d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+									fill="#FBBC05"
+								/>
+								<path
+									d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+									fill="#EA4335"
+								/>
+							</svg>
+							<span>Continue with Google</span>
+						{/if}
+					</button>
+				</form>
 
-		<!-- Footer -->
-		<p class="mt-6 text-center text-xs text-foreground-subtle">
-			By signing in, you agree to Grove's
-			<a
-				href="https://grove.place/knowledge/legal/terms-of-service"
-				class="underline hover:text-foreground-muted"
-				target="_blank"
-				rel="noopener noreferrer">Terms</a
-			>
-			and
-			<a
-				href="https://grove.place/knowledge/legal/privacy-policy"
-				class="underline hover:text-foreground-muted"
-				target="_blank"
-				rel="noopener noreferrer">Privacy Policy</a
-			>.
-			<Waystone
-				slug="understanding-your-privacy"
-				label="How we protect your data"
-				size="sm"
-				inline
-			/>
-		</p>
+				<!-- Divider -->
+				<div class="my-6 flex items-center gap-3 text-xs text-foreground-subtle" aria-hidden="true">
+					<div class="h-px flex-1 bg-[var(--color-border)]"></div>
+					<span>or</span>
+					<div class="h-px flex-1 bg-[var(--color-border)]"></div>
+				</div>
+
+				<!-- Email code, step 1 — passwordless; signs in or signs up -->
+				<form method="POST" action="?/sendCode" use:enhance={enhanceEmail} class="space-y-4">
+					<input type="hidden" name="redirect" value={redirectTo} />
+					<div>
+						<label for="email" class="block text-sm text-foreground-muted mb-2">Email</label>
+						<input
+							id="email"
+							name="email"
+							type="email"
+							autocomplete="email"
+							required
+							disabled={anyLoading}
+							value={emailValue}
+							placeholder="you@example.com"
+							class="input-field"
+						/>
+					</div>
+					<button type="submit" disabled={anyLoading} class="btn-auth">
+						{#if emailSubmitting}
+							<div class="spinner"></div>
+							<span>Sending code...</span>
+						{:else}
+							<span>Continue with email</span>
+						{/if}
+					</button>
+					<p class="text-xs text-foreground-subtle text-center">
+						No password needed. We'll email you a code — new here? That's all it takes to join.
+					</p>
+				</form>
+			{/if}
+
+			<!-- Footer -->
+			<p class="mt-6 text-center text-xs text-foreground-subtle">
+				By signing in, you agree to Grove's
+				<a
+					href="https://grove.place/knowledge/legal/terms-of-service"
+					class="underline hover:text-foreground-muted"
+					target="_blank"
+					rel="noopener noreferrer">Terms</a
+				>
+				and
+				<a
+					href="https://grove.place/knowledge/legal/privacy-policy"
+					class="underline hover:text-foreground-muted"
+					target="_blank"
+					rel="noopener noreferrer">Privacy Policy</a
+				>.
+				<Waystone
+					slug="understanding-your-privacy"
+					label="How we protect your data"
+					size="sm"
+					inline
+				/>
+			</p>
+		{/if}
 	</div>
 </div>

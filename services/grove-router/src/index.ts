@@ -21,6 +21,7 @@ export interface Env {
 	LINK?: Fetcher;
 	WARDEN?: Fetcher;
 	BILLING?: Fetcher;
+	CLEARING?: Fetcher;
 	ASPEN?: Fetcher;
 	ASPEN_BETA?: Fetcher;
 }
@@ -95,8 +96,9 @@ const SUBDOMAIN_ROUTES: Record<string, string | RouteTarget> = {
 	bloom: "grove-landing.m7jv4v7npb.workers.dev", // Bloom remote coding (coming soon)
 	vista: "grove-landing.m7jv4v7npb.workers.dev", // Vista monitoring (coming soon)
 	foliage: "grove-landing.m7jv4v7npb.workers.dev", // Foliage theming (coming soon)
-	status: "grove-clearing.pages.dev", // Clearing status page
-	clearing: "grove-clearing.pages.dev", // Clearing alias
+	// Status page — Clearing has been a Worker since #1191, not a Pages project
+	status: { origin: "grove-clearing.m7jv4v7npb.workers.dev", binding: "CLEARING" },
+	clearing: { origin: "grove-clearing.m7jv4v7npb.workers.dev", binding: "CLEARING" },
 	mc: "grove-landing.m7jv4v7npb.workers.dev", // Outpost Minecraft (coming soon)
 	search: "grove-landing.m7jv4v7npb.workers.dev", // Search (coming soon)
 	porch: "grove-landing.m7jv4v7npb.workers.dev", // Porch conversations (coming soon)

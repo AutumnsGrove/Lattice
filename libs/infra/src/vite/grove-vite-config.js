@@ -3,7 +3,7 @@ import { sveltekit } from "@sveltejs/kit/vite";
 /**
  * Creates a base Vite config for Grove SvelteKit apps.
  *
- * Includes: SvelteKit plugin, JXL externalization, Lucide SSR noExternal.
+ * Includes: SvelteKit plugin, Lucide SSR noExternal.
  * Pass overrides to extend (arrays are concatenated, objects deep-merged).
  *
  * @param {import('vite').UserConfig} overrides
@@ -12,14 +12,6 @@ import { sveltekit } from "@sveltejs/kit/vite";
 export function createGroveViteConfig(overrides = {}) {
 	const base = {
 		plugins: [sveltekit()],
-		optimizeDeps: {
-			exclude: ["@jsquash/jxl"],
-		},
-		build: {
-			rollupOptions: {
-				external: [/^@jsquash\//],
-			},
-		},
 		ssr: {
 			noExternal: ["@lucide/svelte", /^@autumnsgrove\//],
 		},

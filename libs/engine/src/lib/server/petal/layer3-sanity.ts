@@ -102,7 +102,6 @@ export async function runLayer3(
 	context: PetalContext,
 	options: {
 		ai?: Ai;
-		togetherApiKey?: string;
 		db?: D1Database;
 		userId?: string;
 		tenantId?: string;

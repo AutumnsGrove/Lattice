@@ -3,7 +3,7 @@ title: Writing Your First Post
 description: Learn how to write and publish your first blog post on Grove
 category: help
 section: getting-started
-lastUpdated: '2026-04-06'
+lastUpdated: '2026-11-13'
 keywords:
   - first post
   - writing
@@ -86,7 +86,6 @@ A few things that happen automatically:
 
 - It appears on your blog's homepage
 - It's added to your RSS feed (so subscribers see it)
-- If you've enabled Meadow, it may appear in the community feed
 
 That's it. You're a blogger now.
 

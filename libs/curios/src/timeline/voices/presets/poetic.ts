@@ -6,15 +6,16 @@
  */
 
 import type { VoicePreset, Commit } from "../types";
+import { DETAILED_BUDGET } from "../budget";
 
 export const poetic: VoicePreset = {
-  id: "poetic",
-  name: "Poetic",
-  description: "Lyrical and contemplative, finding beauty in the craft",
-  preview:
-    "In the quiet hours, code took shape like clay on a wheel. The auth flow, once tangled, now breathes.",
+	id: "poetic",
+	name: "Poetic",
+	description: "Lyrical and contemplative, finding beauty in the craft",
+	preview:
+		"In the quiet hours, code took shape like clay on a wheel. The auth flow, once tangled, now breathes.",
 
-  systemPrompt: `You write contemplative, poetic summaries of someone's coding day.
+	systemPrompt: `You write contemplative, poetic summaries of someone's coding day.
 
 Your voice is:
 - Lyrical and thoughtful
@@ -33,26 +34,23 @@ Think: a craftsperson reflecting on their day's work by firelight.
 
 Always respond with valid JSON only.`,
 
-  buildPrompt(commits: Commit[], date: string, ownerName = "the craftsperson") {
-    const commitList = commits
-      .map(
-        (c, i) =>
-          `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`,
-      )
-      .join("\n");
+	buildPrompt(commits: Commit[], date: string, ownerName = "the craftsperson") {
+		const commitList = commits
+			.map((c, i) => `${i + 1}. [${c.repo}] ${c.message} (+${c.additions}/-${c.deletions})`)
+			.join("\n");
 
-    const repoGroups: Record<string, string[]> = {};
-    commits.forEach((c) => {
-      if (!repoGroups[c.repo]) repoGroups[c.repo] = [];
-      repoGroups[c.repo].push(c.message);
-    });
-    const repoSummary = Object.entries(repoGroups)
-      .map(([repo, msgs]) => `${repo}: ${msgs.length} commits`)
-      .join(", ");
+		const repoGroups: Record<string, string[]> = {};
+		commits.forEach((c) => {
+			if (!repoGroups[c.repo]) repoGroups[c.repo] = [];
+			repoGroups[c.repo].push(c.message);
+		});
+		const repoSummary = Object.entries(repoGroups)
+			.map(([repo, msgs]) => `${repo}: ${msgs.length} commits`)
+			.join(", ");
 
-    const gutterCount = Math.min(5, Math.max(1, Math.ceil(commits.length / 3)));
+		const gutterCount = Math.min(5, Math.max(1, Math.ceil(commits.length / 3)));
 
-    return `Write a poetic reflection on ${ownerName}'s coding day on ${date}.
+		return `Write a poetic reflection on ${ownerName}'s coding day on ${date}.
 
 THE DAY'S WORK (${commits.length} commits across: ${repoSummary}):
 ${commitList}
@@ -71,6 +69,7 @@ GENERATE THREE OUTPUTS:
    - Bullet points with poetic sensibility
    - Find the story in each change
    - Brief but evocative descriptions
+${DETAILED_BUDGET}
 
 3. GUTTER COMMENTS (${gutterCount} margin notes):
    Contemplative asides (10 words max).
@@ -99,7 +98,7 @@ REQUIREMENTS:
 - NEVER create markdown links for section headers (no [Title](url) format)
 - Only use plain text for headings like "### ProjectName"
 - Do NOT invent URLs or link to non-existent repositories`;
-  },
+	},
 };
 
 export default poetic;

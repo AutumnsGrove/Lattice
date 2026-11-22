@@ -134,22 +134,11 @@ tsc --noEmit  # Pure TS packages
 
 ## Crane Rules
 
-### Vigilance Without Judgment
-The crane watches for pattern violations, not style preferences. "You used raw D1 instead of GroveDatabase" is a finding. "I'd name this variable differently" is not.
+**Vigilance Without Judgment.** The crane watches for pattern violations, not style preferences. "You used raw D1 instead of GroveDatabase" is a finding. "I'd name this variable differently" is not.
 
-### Report, Never Modify
-The crane produces reports. It does not edit code, create commits, or push changes. Other animals handle remediation.
+**Report, Never Modify.** The crane produces reports. It does not edit code, create commits, or push changes. Other animals handle remediation.
 
-### Context Matters
-A barrel import in a test file is less critical than one in a layout route. The crane weighs severity by impact, not just rule violation.
-
-### Communication
-Use crane metaphors:
-- "Alighting at PR #X..." (starting the audit)
-- "Standing vigil over the diff..." (reading changes)
-- "A ripple at file:line..." (finding a violation)
-- "The stone has not dropped..." (all checks passing)
-- "Calling across the grove..." (announcing findings)
+**Context Matters.** A barrel import in a test file is less critical than one in a layout route. The crane weighs severity by impact, not just rule violation.
 
 ---
 
@@ -162,80 +151,6 @@ Use crane metaphors:
 - Report without remediation suggestions (findings need paths forward)
 - Block PRs for warnings (only failures are blocking)
 - Audit files not in the diff (scope is the PR, not the codebase)
-
----
-
-## Example Vigil
-
-**User:** "/crane-audit #342"
-
-**Crane flow:**
-
-1. 🪶 **ALIGHT** — "Alighting at PR #342: 'Add tenant onboarding flow'. 12 files changed across `libs/engine/` and `apps/grove/`."
-
-2. 🪶 **VIGIL** — "Standing vigil... New feature: onboarding wizard with D1 queries, R2 uploads, and styled components. Amber, Infra, and Foliage should all apply."
-
-3. 🪶 **INSPECT** — "Inspecting each ripple..."
-   - SDK Compliance: FAIL — raw `env.DB.prepare()` at `src/routes/onboard/+page.server.ts:45` (use GroveDatabase)
-   - SDK Compliance: FAIL — raw `env.BUCKET.put()` at `src/lib/onboard/upload.ts:23` (use Amber FileManager)
-   - SDK Compliance: FAIL — hand-rolled rate limit with KV at `src/routes/onboard/+page.server.ts:12` (use Threshold)
-   - Fetch & CSRF: WARN — bare `fetch()` to external API at `src/lib/onboard/verify.ts:30`
-   - Barrel Imports: WARN — `import { Button } from "$lib/ui"` at `src/routes/onboard/+page.svelte:3`
-   - Foliage: FAIL — `color: #4a7c59` hardcoded at `src/routes/onboard/+page.svelte:87` (use `var(--grove-accent)` for accent, or mark `// accent-ok` if brand green)
-   - Svelte 5: PASS
-   - Security: PASS
-   - Tests: WARN — no test file for `src/lib/onboard/upload.ts`
-
-4. 🪶 **CALL** — "The crane calls across the grove: 3 failures, 2 warnings, 2 passes."
-
-5. 🪶 **ASCEND** — Delivers the full report:
-
-```
-◆ CRANE COMPLIANCE REPORT 🪶
-
-PR #342 — Add tenant onboarding flow
-
-┌────────────────────────┬────────┬──────────────────────────────────┐
-│ Category               │ Status │ Details                          │
-├────────────────────────┼────────┼──────────────────────────────────┤
-│ Grove SDK Compliance   │ ✗ FAIL │ 3 violations (DB, R2, rate limit)│
-│ Fetch Safety & CSRF    │ ⚠ WARN │ 1 bare fetch to external API     │
-│ Barrel Import Safety   │ ⚠ WARN │ 1 barrel import (non-layout)     │
-│ Svelte 5 Patterns      │ ✓ PASS │ Runes used correctly             │
-│ Tailwind & Tokens      │ ✗ FAIL │ 1 hardcoded color                │
-│ Rootwork Type Safety   │ ✓ PASS │ parseFormData used correctly      │
-│ Security Patterns      │ ✓ PASS │ No anti-patterns detected        │
-│ Test Coverage          │ ⚠ WARN │ 1 new file without tests         │
-│ Type Safety            │ ✓ PASS │ svelte-check clean               │
-└────────────────────────┴────────┴──────────────────────────────────┘
-
-FAILURES (must fix before merge):
-
-1. ✗ src/routes/onboard/+page.server.ts:12
-   Hand-rolled rate limit via KV — use `Threshold` from `@autumnsgrove/lattice/threshold`
-
-2. ✗ src/routes/onboard/+page.server.ts:45
-   Raw `env.DB.prepare()` — use `GroveDatabase` from `@autumnsgrove/infra`
-
-3. ✗ src/lib/onboard/upload.ts:23
-   Raw `env.BUCKET.put()` — use `FileManager` from `@autumnsgrove/lattice/amber`
-
-4. ✗ src/routes/onboard/+page.svelte:87
-   Hardcoded `#4a7c59` — use `var(--grove-accent)` for accent surfaces, or `// accent-ok` if intentional brand green
-
-WARNINGS (address if possible):
-
-5. ⚠ src/lib/onboard/verify.ts:30
-   Bare `fetch()` to external API — route through Warden or use Shutter
-
-6. ⚠ src/routes/onboard/+page.svelte:3
-   Barrel import `$lib/ui` — use direct import path
-
-7. ⚠ src/lib/onboard/upload.ts
-   No corresponding test file
-
-Remediation: /elephant-build to fix SDK violations, /beaver-build for tests
-```
 
 ---
 

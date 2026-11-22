@@ -92,10 +92,10 @@ This runbook provides step-by-step procedures for responding to security inciden
 ```bash
 # 1. Verify the report
 cd /home/user/Lattice
-gf --agent search "getVerifiedTenantId" | head -20
+rg "getVerifiedTenantId" | head -20
 
 # 2. Check recent auth changes
-gf --agent recent 7 | grep -E "(auth|session|tenant)"
+git log --oneline --since="7 days ago" | grep -E "(auth|session|tenant)"
 
 # 3. Review auth logs (if available)
 # Look for patterns of unauthorized access
@@ -115,19 +115,19 @@ gf --agent recent 7 | grep -E "(auth|session|tenant)"
 
 ```bash
 # 1. Check all auth-related code
-gf --agent search "locals.user" --type ts
+rg "locals.user" -t ts
 
 # 2. Review session validation logic
-gf --agent func "validateSession"
+rg -n "(function|const|fn) "validateSession""
 
 # 3. Check tenant isolation
-gf --agent search "getVerifiedTenantId" --context 5
+rg "getVerifiedTenantId" -C 5
 
 # 4. Examine recent commits
 gw git log --since="1 week ago" --grep="auth\|session\|tenant" --oneline
 
 # 5. Search for IDOR vulnerabilities
-gf --agent search "params.id" | grep -v "tenantId"
+rg "params.id" | grep -v "tenantId"
 ```
 
 ### Containment
@@ -198,10 +198,10 @@ pnpm test:landing
 ```bash
 # 1. Confirm the breach
 # Check if tenant isolation is actually broken
-gf --agent search "getTenantDb"
+rg "getTenantDb"
 
 # 2. Identify the leak vector
-gf --agent search "SELECT.*FROM" --type ts | grep -v "WHERE tenant_id"
+rg "SELECT.*FROM" -t ts | grep -v "WHERE tenant_id"
 
 # 3. If confirmed, immediately block the vulnerable endpoint
 # Add emergency rate limit or disable endpoint entirely
@@ -221,7 +221,7 @@ gf --agent search "SELECT.*FROM" --type ts | grep -v "WHERE tenant_id"
 
 ```bash
 # 1. Audit all database queries for tenant scoping
-gf --agent search "\.prepare\(" --type ts | head -50
+rg "\.prepare\(" -t ts | head -50
 
 # 2. Check R2 access patterns
 # Review object keys accessed - do they cross tenant boundaries?
@@ -230,7 +230,7 @@ gf --agent search "\.prepare\(" --type ts | head -50
 gw git log --since="2 weeks ago" -- "**/*db*" --oneline
 
 # 4. Search for IDOR vulnerabilities
-gf --agent search "params\.(id|slug)" --type ts
+rg "params\.(id|slug)" -t ts
 
 # 5. Check if attacker downloaded data
 # Review R2 bandwidth logs, D1 query volumes
@@ -315,7 +315,7 @@ Use template: "Data Breach Notification"
 # Add IP block rule or challenge rule
 
 # 4. If application-level DoS (expensive query), identify the endpoint
-gf --agent search "\.all\(\)" --type ts | head -20
+rg "\.all\(\)" -t ts | head -20
 # Look for queries without LIMIT clauses
 ```
 
@@ -332,10 +332,10 @@ gf --agent search "\.all\(\)" --type ts | head -20
 # Is it network-level (volumetric) or application-level (resource exhaustion)?
 
 # 2. For application-level, find the expensive operation
-gf --agent search "json\(\{" --context 3 | grep -A3 "all()"
+rg "json\(\{" -C 3 | grep -A3 "all()"
 
 # 3. Check for missing rate limits
-gf --agent search "checkRateLimit" --type ts
+rg "checkRateLimit" -t ts
 
 # 4. Review recent performance changes
 gw git log --since="1 week ago" -- "**/*server*" --oneline
@@ -441,8 +441,8 @@ gw git log --all -S "sk_live_" --source --full-history
 # Review third-party service logs (Stripe events, etc.)
 
 # 4. Are there other secrets in the same location?
-gf --agent search "process\.env" --type ts | head -30
-gf --agent search "API_KEY\|SECRET\|PASSWORD" --type ts
+rg "process\.env" -t ts | head -30
+rg "API_KEY\|SECRET\|PASSWORD" -t ts
 
 # 5. Check for additional secret leaks
 gw git log --all -p | grep -E "(sk_|pk_|api_key|password|secret)" | head -50
@@ -504,6 +504,215 @@ pnpm test
 
 ---
 
+## Incident Type: Spam Tenant / Link Farm
+
+An account created to place outbound links or programmatic content on a fresh `*.grove.place` subdomain. See #1596 for the history and the observed operator signature.
+
+### Detection
+
+- A signup that publishes within minutes, in several languages, with zero engagement
+- `pulse_events` for the tenant shows only publish, then logout
+- An email domain that is either an agent mailbox provider (`mail.grokbot.com`) or the product being promoted
+- Googlebot crawling the subdomain hours after publish
+
+### Immediate Actions (0-5 minutes)
+
+```bash
+# 1. Take the site down, reversibly. Every tenant lookup filters on
+#    `active = 1`, and `gw tenant suspend` writes an audit_log row and probes
+#    the site for you afterwards.
+gw tenant suspend <subdomain> --write
+
+# 2. Evict the TenantDO. Without this the suspension is cosmetic: the DO serves
+#    its cached config for up to an hour, and rehydrates it from its own SQLite
+#    after memory eviction. See #1677.
+gw secret exec OPS_ADMIN_KEY --write -- bash -c \
+  'curl -sS -X POST -H "Authorization: Bearer $OPS_ADMIN_KEY" \
+   https://<durable-objects-worker>/tenant/flush/<subdomain>'
+
+# 3. Confirm it is actually gone — do not trust the column change alone
+curl -s -o /dev/null -w '%{http_code}\n' https://<subdomain>.grove.place/
+# expect 404; a 200 means the flush did not take
+
+# 4. Preserve evidence before anything is deleted: the posts, the outbound
+#    domains, the sibling accounts. Removal destroys the evidence (#1684).
+```
+
+The `/tenant/flush/:subdomain` response tells you which of three states you are in:
+
+| response | meaning |
+|---|---|
+| `tenantExists: false` | no D1 row — deleted; the site is now dark |
+| `tenantExists: true`, `tenantActive: false` | suspended; dark, and reversible |
+| `tenantExists: true`, `tenantActive: true` | still live — you flushed a cache, not a takedown |
+
+### Severity Assessment
+
+- **P2 (MEDIUM)** if: one tenant, free tier, no evidence of crawl
+- **P1 (HIGH)** if: crawled and indexed, or the same operator has several tenants
+- **P1 (HIGH)** if: a paid or comped tenant is involved (check `platform_billing`)
+
+### Practising this without a live incident
+
+Do not rehearse removal on a real writer's blog. Make a fixture:
+
+```bash
+export GROVE_OPS_ENDPOINT=https://grove-durable-objects.<account>.workers.dev
+
+gw tenant create --subdomain drift-fixture --email fixtures@grove.place \
+  --plan wanderer --created-at 2d --write
+
+# warm the TenantDO, then remove it and check for leftovers
+curl -s -o /dev/null https://drift-fixture.grove.place/
+```
+
+The fixture is made by the same `createTenant()` a real tenant is
+(`libs/engine/src/lib/server/tenants/create-tenant.ts`), so a sweep that leaves
+nothing behind on a fixture is evidence about real tenants too — which is what
+#1596 §B's criterion actually asks for. `--created-at 2d` also makes it young
+enough to exercise the `nofollow ugc` rule (#1682) on a live page.
+
+### Escalation
+
+Three switches, and they answer different questions. Knowing which one you moved
+is most of the job (#1722):
+
+| question | lever |
+| --- | --- |
+| is the site up? | `gw tenant suspend` / `gw tenant resume` — cheap, reversible, content untouched |
+| can the person sign in? | `gw account terminate` / `gw account unban` — the account, not the blog |
+| can that address sign up again? | `gw block add` / `gw block rm` — a deny list entry, which outlives the account |
+
+`gw account terminate <subdomain|email> --reason "..." [--expires 30d] --write`
+does all three in one audited step: suspend, ban (`ba_user.banned` + reason +
+expiry), revoke live sessions (`ba_session`, `refresh_tokens`,
+`user_sessions`), and block the normalized address with
+`source = terminate:<subdomain>`. Without `--write` it prints the plan and
+touches nothing.
+
+Lifting it is three decisions, not one: `gw account unban` for the ban,
+`gw tenant resume` for the site, `gw block rm` for the address. `resume` says so
+when the account is still banned rather than letting you find out at the login
+page.
+
+One bound worth knowing: Heartwood caches session data in KV for up to five
+minutes, so a banned session can still validate from cache for that long even
+after its rows are deleted. The ban is checked on every fresh lookup; the TTL is
+the window.
+
+Suspension is the reversible first move. Permanent removal is one command:
+
+```bash
+# prints per-table counts and who the login is; deletes nothing
+gw tenant delete <subdomain> --reason "link farm" --policy aup-1.4
+
+# destroys: every registered table across engine, curios and observability, then
+# the tenants row, then the TenantDO cache, then the login identity, then emails
+# the address on file
+gw tenant delete <subdomain> --reason "link farm" --policy aup-1.4 --write
+```
+
+`--policy` names the rule the removal cites, so the email can point at a section
+the person can read. `aup-1.4` (spam and link schemes) is the default;
+`aup-1.5` is impersonation, `aup-1.9` is an automated or extra account, and
+`requested` is a deletion the person asked for. The vocabulary lives in
+`libs/engine/src/lib/server/tenants/removal-policy.ts`, and a test reads
+`docs/legal/acceptable-use-policy.md` to make sure every section it cites still
+exists.
+
+**Billing is cancelled first, and it has to be.** `removeTenant()` cancels the
+Stripe subscription *before* the sweep, because the only cancellation path in the
+platform finds `provider_subscription_id` through `platform_billing` → `tenants` →
+`user_onboarding` — the rows the sweep deletes (#1745). A tenant with no
+subscription prints as much and the removal continues. A cancellation that fails
+**aborts the removal with nothing deleted**; the summary says `ABORTED`, so a
+non-zero retry is a retry, not a mystery. If billing-api itself is down, cancel in
+the Stripe dashboard and run the command again.
+
+The `--reason` is quoted verbatim in that email. Write it for the person who
+will read it at 2am, not for the changelog: "18 posts to upsampler.com in one
+session, no personalisation" beats "spam".
+
+**Do not hand-write the SQL.** The 2026-11-16 sweep took 61 statements against
+engine, 44 against curios and 14 against groveauth, and nothing joined them up.
+
+The command now does the identity and the email itself; it prints anything it
+could not do (`notDone` in the JSON, a warning in the summary) rather than
+leaving you to infer it. Three things it will still refuse or skip:
+
+- **A login that owns another blog.** Deleting the identity would lock the
+  person out of a blog that is still theirs. It says which tenant, and the
+  identity stays.
+- **An incomplete sweep.** It will not email "your account is gone" while rows
+  remain — that is the #1737 mistake in a medium the person keeps.
+- **A site that is still serving.** After flushing the TenantDO it asks
+  `https://<subdomain>.grove.place/` and requires a 404, a 410, or a redirect. A
+  200 is recorded as `the site is still serving` and blocks the email (#1677).
+  An answer it cannot interpret — a 5xx, a timeout, a 403 from the edge — is a
+  failure too: not-confirmed is not confirmed.
+
+The engine also exposes `removeTenant()` directly for anything the command cannot
+express:
+
+```ts
+// Always dry-run first. It prints per-table counts and touches nothing.
+const plan = await removeTenant(
+  { engine: env.DB, curios: env.CURIO_DB, observability: env.OBS_DB },
+  { tenantId, subdomain, email },
+  { reason: "link farm", actor: "you@grove.place" },   // dryRun defaults to true
+);
+
+// Then for real, passing the outside-the-database work explicitly so it is
+// visible in the diff whether it happened:
+const result = await removeTenant(dbs, target, {
+  reason: "link farm",
+  dryRun: false,
+  cancelBilling: cancelSubscription, // first, before any row is deleted — but
+                                     // only when the removal has a subscription
+  evictCache: evictTenantDO,        // or the site keeps serving (#1677)
+  deleteIdentity: deleteAuthIdentity, // see groveauth-identity.ts
+  deleteR2: deleteTenantObjects,
+  notify: emailAccountHolder,       // see removal-email.ts
+});
+
+if (result.aborted) {
+  // The subscription could not be cancelled, so nothing was deleted on purpose.
+}
+
+if (result.leftovers.length > 0 || result.failures.length > 0) {
+  // Incomplete. Nobody was emailed, and the summary says why.
+}
+```
+
+`removeTenant` reads one registry (`tenant-tables.ts`) covering 47 engine tables,
+43 curios tables and 1 observability table, including the six that use a column
+other than `tenant_id`. A table that is not registered fails the test, so a new
+one cannot be silently missed.
+
+The login identity has its own registry (`groveauth-identity.ts`) because it is
+keyed on the person rather than the blog: `ba_user` last, then the sessions,
+OAuth links, 2FA secrets, verification tokens, device codes, refresh tokens,
+legacy sessions, and anything else that still points at the id or the address.
+It resolves the identity **before** the tenant sweep deletes `engine.users`,
+which is where the `groveauth_id` link lives.
+
+It keeps the tenant's `audit_log` rows — the record of a removal has to outlive
+the tenant — and writes two of its own: `tenant_remove_started` with the plan
+counts *before* anything is deleted, and `tenant_remove` with the outcome after.
+Both hold counts, never content. A sweep that dies halfway leaves the first row,
+which is the difference between "a half-removed tenant" and "a half-removed
+tenant somebody can reconstruct".
+
+Deletes run curios → observability → engine, children before parents (the
+registry stores that order, and a test pins it), then the `tenants` row itself
+last. A statement that throws does not abort the sweep: it is collected into
+`failures`, re-counted into `leftovers`, and reported. Never trust a removal whose
+result mentions either.
+
+After acting: block the identity domain so the same operator cannot re-sign-up (#1681), and record the verdict so the scorer learns from it (#1684).
+
+---
+
 ## Incident Type: Privilege Escalation
 
 ### Detection
@@ -516,10 +725,10 @@ pnpm test
 
 ```bash
 # 1. Confirm the escalation
-gf --agent search "isWayfinder" --type ts
+rg "isWayfinder" -t ts
 
 # 2. Check if user manipulated role/permission check
-gf --agent search "locals\.user\.role" --context 5
+rg "locals\.user\.role" -C 5
 
 # 3. Immediately revoke elevated access
 # Force logout if user has unauthorized session
@@ -538,16 +747,16 @@ gf --agent search "locals\.user\.role" --context 5
 
 ```bash
 # 1. Review authorization checks
-gf --agent search "RequestHandler" --type ts | head -30
+rg "RequestHandler" -t ts | head -30
 
 # 2. Check if role is verified server-side
-gf --agent func "isWayfinder"
+rg -n "(function|const|fn) "isWayfinder""
 
 # 3. Examine recent changes to auth/authz logic
 gw git log --since="2 weeks ago" --grep="auth\|role\|permission" --oneline
 
 # 4. Search for client-side role checks (vulnerable)
-gf --agent search "user\.role" --context 3
+rg "user\.role" -C 3
 
 # 5. Check for confused deputy scenarios
 # Is authorization delegated to another service that can be tricked?
@@ -579,7 +788,7 @@ gf --agent search "user\.role" --context 3
 # Negative tests: regular user hitting admin endpoint
 
 # 3. Audit all privileged endpoints
-gf --agent search "arbor" --type ts
+rg "arbor" -t ts
 # Verify each has proper authorization
 
 # 4. Deploy and verify
@@ -648,7 +857,7 @@ cat node_modules/<package>/package.json
 cat node_modules/<package>/README.md
 
 # 2. Check where we use it
-gf --agent search "from '<package>'" --type ts
+rg "from '<package>'" -t ts
 
 # 3. Review postinstall scripts (common attack vector)
 grep -r "postinstall" node_modules/*/package.json | grep <package>
@@ -986,23 +1195,23 @@ gw git push --write
 
 ```
 ╔════════════════════════════════════════════════════════════╗
-║             GROVE INCIDENT RESPONSE QUICK REFERENCE         ║
+║             GROVE INCIDENT RESPONSE QUICK REFERENCE        ║
 ╠════════════════════════════════════════════════════════════╣
 ║ DETECT → CONTAIN → INVESTIGATE → RECOVER → COMMUNICATE     ║
 ╠════════════════════════════════════════════════════════════╣
-║ P0 CRITICAL → < 15 min     P1 HIGH → < 1 hour             ║
-║ P2 MEDIUM → < 4 hours      P3 LOW → < 24 hours            ║
+║ P0 CRITICAL → < 15 min     P1 HIGH → < 1 hour              ║
+║ P2 MEDIUM → < 4 hours      P3 LOW → < 24 hours             ║
 ╠════════════════════════════════════════════════════════════╣
 ║ First Actions (ANY incident):                              ║
 ║  1. Confirm it's real (not false positive)                 ║
-║  2. Assign severity (P0/P1/P2/P3)                         ║
+║  2. Assign severity (P0/P1/P2/P3)                          ║
 ║  3. Start incident log (timestamped notes)                 ║
 ║  4. Alert response team                                    ║
 ║  5. Preserve evidence (don't delete logs!)                 ║
 ╠════════════════════════════════════════════════════════════╣
 ║ Key Commands:                                              ║
-║  cd /home/user/Lattice                                 ║
-║  gf --agent search "pattern"      # Find code              ║
+║  cd /home/user/Lattice                                     ║
+║  rg "pattern"      # Find code                             ║
 ║  gw git log --since="1 week ago"  # Recent changes         ║
 ║  pnpm test                        # Verify fix             ║
 ╠════════════════════════════════════════════════════════════╣

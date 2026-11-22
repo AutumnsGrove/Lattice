@@ -35,8 +35,6 @@ Issue   Flow    Test     Test    rence
 
 ### Phase 1: FEEL
 
-_The mole presses its paw against the earth. Something trembles beneath..._
-
 **Reproduce the issue. Get it to fail on demand. No reproduction, no debugging.**
 
 **Reproduction checklist:**
@@ -56,20 +54,16 @@ _The mole presses its paw against the earth. Something trembles beneath..._
 
 ### Phase 2: DIG
 
-_The mole begins to dig. Not frantically — deliberately..._
-
 **Trace the data flow from entry to exit. Instrument the boundaries.**
 
 Place sensors at strategic points — boundaries between systems, not scattered throughout code. Use `[MOLE:LOCATION]` labels so you can find and remove them later.
 
 ```bash
-# Find the entry point
-gf --agent func "functionName"
-gf --agent search "POST /api/endpoint"
+rg "POST /api/endpoint"
 
 # Trace imports and impact
-gf --agent usage "ServiceName"
-gf --agent impact "src/lib/server/services/affected-file.ts"
+rg -wn "ServiceName"
+rg -ln "from .*affected-file"
 ```
 
 For Grove-specific debugging patterns (routes, D1, KV, auth, build), see `references/grove-debugging-patterns.md`.
@@ -81,8 +75,6 @@ For detailed instrumentation techniques, see `references/debugging-strategies.md
 ---
 
 ### Phase 3: TUNNEL
-
-_The mole chooses a direction. One tunnel. One hypothesis..._
 
 **Form hypotheses. Test ONE at a time. Binary search the problem space.**
 
@@ -108,8 +100,6 @@ Three failures in three different places = architectural problem, not isolated b
 
 ### Phase 4: SURFACE
 
-_The mole breaks through to daylight..._
-
 **Write a failing test that demonstrates the bug. Then fix the code. Then the test passes.**
 
 This order is mandatory:
@@ -131,8 +121,6 @@ gw ci --affected --fail-fast --diagnose
 
 ### Phase 5: SEAL
 
-_The mole packs the earth behind it, sealing the tunnel forever..._
-
 **Prevent recurrence.**
 
 1. **Regression test** — Already done in SURFACE. Lives permanently in CI.
@@ -141,15 +129,15 @@ _The mole packs the earth behind it, sealing the tunnel forever..._
 
 ```bash
 # If schema/query mismatch, check ALL queries
-gf --agent search "SELECT.*content.*FROM posts"
+rg "SELECT.*content.*FROM posts"
 # If missing tenant scope, check ALL tenant queries
-gf --agent search "FROM posts WHERE"  # Missing tenant_id?
+rg "FROM posts WHERE"  # Missing tenant_id?
 ```
 
 4. **Clean up** — Remove ALL `[MOLE:*]` debug logging. The mole seals its tunnels.
 
 ```bash
-gf --agent search "MOLE:"
+rg "MOLE:"
 ```
 
 **Output:** Sealed tunnel. Regression test. Root cause documented. Class-of-bug checked. Debug instrumentation removed.

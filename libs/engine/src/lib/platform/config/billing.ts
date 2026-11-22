@@ -1,3 +1,5 @@
+import { readViteEnv } from "../../utils/vite-env.js";
+
 /**
  * Billing URL Configuration — Single Source of Truth
  *
@@ -8,7 +10,9 @@
  * all requests to grove-billing-api via Cloudflare service binding.
  */
 
-export const BILLING_HUB_URL = import.meta.env.VITE_BILLING_URL ?? "https://billing.grove.place";
+// readViteEnv, not `import.meta.env.FOO`: this module is imported by the
+// durable-objects worker, which is bundled by wrangler and has no Vite.
+export const BILLING_HUB_URL = readViteEnv("VITE_BILLING_URL") ?? "https://billing.grove.place";
 
 /** Build a path on the billing hub. */
 export function billingPath(path: string): string {

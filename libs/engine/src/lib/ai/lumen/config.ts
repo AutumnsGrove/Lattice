@@ -10,7 +10,13 @@
  * ═══════════════════════════════════════════════════════════════════════════════
  */
 
-import type { LumenProviderConfig, LumenProviderName, LumenTask } from "./types.js";
+import type {
+	LumenProviderConfig,
+	LumenProviderName,
+	LumenTask,
+	LumenToolChoice,
+} from "./types.js";
+import { LumenError } from "./errors.js";
 import modelData from "../../data/lumen-models.json";
 
 // =============================================================================
@@ -169,7 +175,11 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
 			{ provider: "openrouter", model: MODELS.QWEN3_8_FLASH },
 			{ provider: "openrouter", model: MODELS.LLAMA_3_1_8B },
 		],
-		defaultMaxTokens: 1024,
+		// Also the ceiling the router falls back to when a caller's larger
+		// max_tokens is refused by the provider (router.ts, isMaxTokensRejection).
+		// 1024 was too tight for the timeline envelope — brief + detailed + gutter
+		// as valid JSON — so a downgraded request would have come back truncated.
+		defaultMaxTokens: 4096,
 		defaultTemperature: 0.3,
 		description: "Content summarization",
 	},
@@ -222,6 +232,22 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
 		defaultMaxTokens: 4096,
 		defaultTemperature: 0.1,
 		description: "Code generation and analysis",
+	},
+
+	// Agent loop step (DeepSeek V4.1 Flash)
+	//
+	// No fallback chain, on purpose. The router skips fallbacks whenever tools
+	// are present (`skipFallbacks = !!options.model || !!options.tools`), because
+	// tool schemas are model-specific — so a chain here could never run for the
+	// task it is defined for. Fallback for agent calls lives in the caller
+	// (Lyra decision 58), not in Lumen.
+	agent: {
+		primaryModel: MODELS.DEEPSEEK_V4_1_FLASH,
+		primaryProvider: "openrouter",
+		fallbackChain: [],
+		defaultMaxTokens: 4096,
+		defaultTemperature: 0.2,
+		description: "One step of an agent loop: a tool-using turn",
 	},
 
 	// Transcription (CF Whisper Turbo → Whisper → Whisper Tiny)
@@ -279,4 +305,109 @@ export function getModelsForProvider(provider: LumenProviderName): string[] {
 		}
 	}
 	return [...new Set(models)];
+}
+
+// =============================================================================
+// MODEL CAPABILITIES
+// =============================================================================
+
+/** The `tool_choice` shapes a model may accept. `"function"` is a forced call. */
+export type LumenToolChoiceMode = "auto" | "required" | "none" | "function";
+
+export interface ModelCapabilities {
+	/** The provider model ID this describes. */
+	id: string;
+	/**
+	 * Whether the model can call tools at all. Defaults to **false** when the
+	 * registry does not say — a model nobody has checked should not be handed a
+	 * tool schema and expected to understand it.
+	 */
+	supportsTools: boolean;
+	/**
+	 * The `tool_choice` values this model accepts. Absent means `["auto"]`:
+	 * many models can decide for themselves but refuse to be forced.
+	 */
+	acceptedToolChoices: LumenToolChoiceMode[];
+	/** Context window in tokens. Null when the concept does not apply (speech). */
+	contextWindow: number | null;
+}
+
+interface ModelEntry {
+	id: string;
+	supportsTools?: boolean;
+	toolChoice?: LumenToolChoiceMode[];
+	contextWindow?: number;
+}
+
+/**
+ * Model facts live in `lib/data/lumen-models.json` and nowhere else (Data
+ * Primacy). This is the only reader that turns them into capability answers.
+ */
+const CAPABILITIES_BY_ID = new Map<string, ModelCapabilities>(
+	(Object.values(modelData.models) as ModelEntry[]).map((model) => [
+		model.id,
+		{
+			id: model.id,
+			supportsTools: model.supportsTools ?? false,
+			acceptedToolChoices: model.toolChoice ?? ["auto"],
+			contextWindow: model.contextWindow ?? null,
+		},
+	]),
+);
+
+/**
+ * What a model can do, or null if it is not in the registry.
+ *
+ * Null is meaningful: an unregistered model ID is either a typo or a model
+ * added to a task without being added to the file, and both should be visible
+ * rather than silently treated as tool-capable.
+ */
+export function getModelCapabilities(model: string): ModelCapabilities | null {
+	return CAPABILITIES_BY_ID.get(model) ?? null;
+}
+
+/**
+ * Refuse a tool-using call that the chosen model cannot serve.
+ *
+ * The failure this exists for is quiet: a model that cannot call tools simply
+ * returns prose, the loop reads no calls, and the run ends having done nothing.
+ * Nothing errors, nothing logs, and the caller believes the model declined.
+ *
+ * @throws LumenError INVALID_INPUT when the model cannot take the tools at all,
+ *         or cannot accept the requested `tool_choice`
+ */
+export function assertToolSupport(
+	task: LumenTask,
+	model: string,
+	toolChoice?: LumenToolChoice,
+): void {
+	const capabilities = getModelCapabilities(model);
+
+	if (!capabilities) {
+		throw new LumenError(
+			`Model "${model}" is not in the registry, so its tool support is unknown. Add it to lib/data/lumen-models.json before using it for task "${task}".`,
+			"INVALID_INPUT",
+			{ task },
+		);
+	}
+
+	if (!capabilities.supportsTools) {
+		throw new LumenError(
+			`Model "${model}" cannot call tools, so it cannot serve task "${task}". Pick a model with supportsTools in lumen-models.json.`,
+			"INVALID_INPUT",
+			{ task },
+		);
+	}
+
+	if (toolChoice === undefined) return;
+
+	const mode: LumenToolChoiceMode = typeof toolChoice === "string" ? toolChoice : "function";
+
+	if (!capabilities.acceptedToolChoices.includes(mode)) {
+		throw new LumenError(
+			`Model "${model}" does not accept tool_choice "${mode}". It accepts: ${capabilities.acceptedToolChoices.join(", ")}.`,
+			"INVALID_INPUT",
+			{ task },
+		);
+	}
 }

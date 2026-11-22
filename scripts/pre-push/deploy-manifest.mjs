@@ -212,7 +212,7 @@ export function findWranglerConfigs(repoRoot = REPO_ROOT) {
 
 // ─── Drift detection ────────────────────────────────────────────────
 
-export function detectDrift(shims, wranglers) {
+export function detectDrift(shims, wranglers, repoRoot = REPO_ROOT) {
 	const shimPaths = new Set(shims.map((s) => s.path).filter(Boolean));
 	const wranglerDirs = new Set(wranglers.map((w) => w.dir));
 
@@ -224,7 +224,27 @@ export function detectDrift(shims, wranglers) {
 		.filter((w) => !shimPaths.has(w.dir))
 		.map((w) => ({ wrangler: w.path, dir: w.dir, name: w.name }));
 
-	return { missingWrangler, orphanedWrangler };
+	// A path trigger that no longer exists is the quiet failure: the shim still
+	// runs, still passes, and the worker it deploys is simply never rebuilt for
+	// the code that changed. deploy-lumen.yml kept `libs/engine/src/lib/lumen/**`
+	// long after the folder moved to `libs/engine/src/lib/ai/lumen/`, so the
+	// Lumen router shipped in #1704 needed a manual workflow_dispatch.
+	const stalePath = [];
+	for (const shim of shims) {
+		for (const pattern of shim.triggers?.paths ?? []) {
+			// Only `dir/**` triggers are checkable this way. Anything with a glob
+			// in the directory part, a leading `!`, or no trailing `/**` cannot be
+			// reduced to a directory to stat, so it is left to git at push time.
+			if (!pattern.endsWith("/**") || pattern.startsWith("!")) continue;
+			const dir = pattern.slice(0, -3);
+			if (dir.includes("*")) continue;
+			if (!existsSync(join(repoRoot, dir))) {
+				stalePath.push({ shim: shim.file, pattern, dir });
+			}
+		}
+	}
+
+	return { missingWrangler, orphanedWrangler, stalePath };
 }
 
 // ─── Affected filtering ─────────────────────────────────────────────
@@ -329,6 +349,13 @@ function main() {
 			}
 			hasIssues = true;
 		}
+		if (drift.stalePath.length > 0) {
+			console.error("❌ deploy shim path triggers pointing at directories that do not exist:");
+			for (const s of drift.stalePath) {
+				console.error(`   ${s.shim} → ${s.pattern} (${s.dir} is missing)`);
+			}
+			hasIssues = true;
+		}
 		if (!hasIssues)
 			console.log(
 				`✓ No drift — ${shims.length} shims matched against ${wranglers.length} wrangler.toml files`,
@@ -352,7 +379,8 @@ function main() {
 		console.log(`  ${s.service.padEnd(22)} ${s.kind.padEnd(7)} ${s.path || "(custom)"}${dx}`);
 	}
 	const drift = detectDrift(shims, wranglers);
-	const driftCount = drift.missingWrangler.length + drift.orphanedWrangler.length;
+	const driftCount =
+		drift.missingWrangler.length + drift.orphanedWrangler.length + drift.stalePath.length;
 	if (driftCount > 0) console.log(`\n⚠ ${driftCount} drift issues (run with --drift for details)`);
 }
 

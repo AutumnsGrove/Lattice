@@ -23,7 +23,7 @@ If it has references/, read those too. Follow your skill's workflow exactly.
 ## Constraints
 - You MUST read your skill file first — it defines your workflow
 - {animal_specific_constraints}
-- Use `gw` for all git operations, `gf` for codebase search
+- Use `gw` for all git operations; semantic search for discovery, `rg`/`find`/`glob` for exact matches
 - Use Signpost error codes for all error paths
 - Use Rootwork (parseFormData, safeJsonParse) at all trust boundaries
 
@@ -55,7 +55,7 @@ Scout the codebase to map the territory for this feature:
 
 ## Constraints
 - READ-ONLY. Do not create or modify any files.
-- Use `gf` commands for all codebase search.
+- Use semantic search for discovery, `rg`/`find`/`glob` for exact matches.
 - Focus on: existing patterns, files that will need changes, integration points, conventions.
 
 ## Output Format
@@ -102,7 +102,7 @@ Build this feature:
 - ALL catch blocks use isRedirect()/isHttpError() type guards
 - NO `as any` or unsafe casts at trust boundaries
 - Client feedback uses toast from @autumnsgrove/lattice/ui
-- Reference: AgentUsage/error_handling.md, AgentUsage/rootwork_type_safety.md
+- Reference: `CODE-STANDARDS.md` (Signpost errors, Rootwork type safety)
 
 ## Constraints
 - Build ONLY what the spec demands — no drive-by improvements

@@ -7,31 +7,6 @@
 
 					<div class="grid gap-3">
 						<a
-							href="https://codeberg.org/robida/human.json"
-							target="_blank"
-							rel="noopener noreferrer"
-							class="card p-4 hover:border-accent transition-colors group"
-						>
-							<div class="flex items-center justify-between">
-								<div>
-									<span
-										class="font-serif text-foreground group-hover:text-accent-muted transition-colors"
-										>human.json</span
-									>
-									<span class="text-foreground-subtle font-sans text-sm ml-2"
-										>— Human authorship assertion & web of trust</span
-									>
-								</div>
-							</div>
-							<p class="text-foreground-muted font-sans text-sm mt-2">
-								A lightweight protocol for humans to assert authorship of their website content and
-								vouch for the humanity of others. Wanderers can enable it in their settings to say
-								"a real person tends this garden" and build a decentralized trust network by
-								vouching for sites they believe in.
-							</p>
-						</a>
-
-						<a
 							href="https://www.w3.org/community/reports/tdmrep/CG-FINAL-tdmrep-20240510/"
 							target="_blank"
 							rel="noopener noreferrer"

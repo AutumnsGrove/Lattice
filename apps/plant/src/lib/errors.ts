@@ -144,6 +144,32 @@ export const PLANT_ERRORS = {
 		adminMessage: "Email format validation failed in normalizeEmail().",
 	},
 
+	SIGNUP_IDENTITY_BLOCKED: {
+		code: "PLANT-046",
+		category: "user" as const,
+		// Mirrors Heartwood's copy on purpose: naming the domain or the reason
+		// tells the operator exactly what to rotate next.
+		userMessage:
+			"We're not able to create an account with this email address. If you think that's a mistake, write to hello@grove.place.",
+		adminMessage: "Tenant creation rejected: identity matched a signup_blocks entry.",
+	},
+
+	TURNSTILE_NOT_CONFIGURED: {
+		code: "PLANT-048",
+		category: "admin" as const,
+		userMessage: "Verification isn't available right now. Please try again in a moment.",
+		adminMessage:
+			"TURNSTILE_SECRET_KEY is missing outside the dev stack, so signup verification cannot run.",
+	},
+
+	SIGNUP_BLOCK_CHECK_FAILED: {
+		code: "PLANT-047",
+		category: "admin" as const,
+		userMessage: "",
+		adminMessage:
+			"signup_blocks could not be read during tenant creation; the signup was allowed. The deny list is not protecting anyone — check the table and the D1 binding.",
+	},
+
 	// ─────────────────────────────────────────────────────────────────────────
 	// Internal Errors (080-099)
 	// ─────────────────────────────────────────────────────────────────────────

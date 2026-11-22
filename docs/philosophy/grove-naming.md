@@ -2,7 +2,7 @@
 title: The Grove Naming System
 description: The complete philosophy and naming system for the Grove ecosystem
 category: philosophy
-lastUpdated: "2026-02-04"
+lastUpdated: "2026-11-15"
 ---
 
 # The Grove Naming System
@@ -319,18 +319,6 @@ When you've been part of Grove long enough to put down real roots (12 months of 
 
 _A hundred years of home._
 
-### Vineyard
-
-**Component Showcase** · `grove.place/vineyard`
-**Standard:** Showcase
-**Waystone:** Grove's component showcase — a live gallery of every UI piece, nature asset, and design tool available in the platform.
-
-A vineyard is where vines are cultivated and their fruit displayed. Row upon row, each variety labeled, visitors invited to taste and admire.
-
-Vineyard is Grove's component showcase—where you see what's growing in the Lattice, what's ready for use, and what's coming into season. Every UI component, every nature asset, documented and demonstrated. It's where developers come to understand what's available.
-
-_See what's ready to harvest._
-
 ---
 
 ## Content & Community
@@ -546,7 +534,7 @@ _Independent tools that integrate with Grove_
 
 A graft is a branch joined onto rootstock—a deliberate act that makes one tree bear fruit no other can. Orchardists use grafts to create unique varieties: the cutting grows, becomes one with the tree, yet retains what makes it special.
 
-Grafts are per-tenant features that operators enable for specific trees. Not plugins users upload—trusted customizations the Wayfinder configures for particular groves. Want JXL encoding? Graft it on. Need a custom dashboard? Graft it on. Your tree, your grafts, your fruit.
+Grafts are per-tenant features that operators enable for specific trees. Not plugins users upload—trusted customizations the Wayfinder configures for particular groves. Want a photo gallery? Graft it on. Need a custom dashboard? Graft it on. Your tree, your grafts, your fruit.
 
 **The Three Layers:**
 
@@ -806,19 +794,6 @@ Press is Grove's image processing CLI. It takes your raw photos and presses them
 
 _Raw in. Ready out. Going to press._
 
-### Cairn
-
-**Documentation Browser & Agent Activity Viewer** · _Developer tool_
-**Package:** `tools/cairn/`
-**CLI:** `bun run cairn`
-**Standard:** Documentation Browser
-
-A cairn is a stack of stones built by travelers to mark a trail. Each person who passes through a place adds a stone — slowly, over time, the pile grows. When you're uncertain where to go next, you look for cairns. You follow the markers left by everyone who came before. The path becomes readable.
-
-Cairn is a local dev server that makes the entire project's knowledge browseable and searchable. Every spec written, every plan made, every agent conversation had: another stone on the pile. Cairn indexes all of it — markdown docs, skill definitions, Crush sessions, Claude Code conversation logs — and makes the whole trail visible at once. Search for anything. Follow a decision back through time. Browse the skill ecosystem. See which files the agents touched most.
-
-_Follow the cairns. Find your way._
-
 ### Vista
 
 **Infrastructure Observability** · `vista.grove.place`
@@ -891,6 +866,18 @@ Memories are entirely exportable. Download everything as a portable artifact (Ma
 
 _The forest remembers through its moss._
 
+### Lyra
+
+**Agent Core** · _Library, in its own repository_
+**Standard:** Agent Core
+**Waystone:** The layer that does Grove's background work. It takes a job, calls tools and models, and brings back a result, even if you were asleep.
+
+Lyra is the harp in the summer sky: a small constellation, easy to miss if you don't look up. Its brightest star, Vega, was the north star once and will be again.
+
+In Grove, Lyra is the agent core. Give it a job, a set of tools, and limits on how far it may go, and it runs the loop: ask Lumen, use a tool, read what came back, ask again. It stops when the job is done or the budget runs out. When it needs a Wanderer's answer, it parks the run and waits without spending anything, then picks up where it left off. Every run leaves a record of what it did and why, and Moss will give it memory. Lyra is also the name of the agent itself, the way Nova is both the harness and the thing you run.
+
+_A small constellation that does the work while the grove sleeps._
+
 ### Zephyr
 
 **Email Gateway** · _Internal service_
@@ -947,7 +934,6 @@ _In a forest full of harvesters, this grove stays shaded._
 | **Trails**     | Platform     | Personal roadmaps              | username.grove.place/trail      |
 | **Trace**      | Platform     | Inline feedback                | _(integrated)_                  |
 | **Centennial** | Platform     | 100-year preservation          | _(earned status)_               |
-| **Vineyard**   | Platform     | Component showcase             | grove.place/vineyard            |
 | **Flow**       | Content      | Writing sanctuary              | _(Arbor editor)_                |
 | **Terrarium**  | Content      | Creative canvas                | grove.place/terrarium           |
 | **Weave**      | Content      | Visual composition             | _(part of Terrarium)_           |
@@ -984,6 +970,7 @@ _In a forest full of harvesters, this grove stays shaded._
 | **Mycelium**   | Ops          | MCP server                     | mycelium.grove.place            |
 | **Lumen**      | Ops          | AI gateway                     | _(internal)_                    |
 | **Moss**       | Ops          | AI memory                      | _(module inside Lumen)_         |
+| **Lyra**       | Ops          | Agent core                     | _(library, own repo)_           |
 | **Zephyr**     | Ops          | Email gateway                  | _(internal)_                    |
 | **Shade**      | Ops          | AI content protection          | grove.place/shade               |
 
@@ -1042,10 +1029,10 @@ For development, debugging, and internal documentation, the `Grove[Thing]` namin
 | Mycelium        | GroveMCP        |
 | Lumen           | GroveLumen      |
 | Moss            | GroveMoss       |
+| Lyra            | GroveLyra       |
 | Zephyr          | GroveZephyr     |
 | Shade           | GroveShade      |
 | Etch            | GroveEtch       |
-| Vineyard        | GroveShowcase   |
 | Flow            | GroveFlow       |
 | Centennial      | GroveCentennial |
 | Petal           | GrovePetal      |
@@ -1231,5 +1218,5 @@ _A small mark that tells you everything._
 
 ---
 
-_Last updated: March 8, 2026 — Added Prism (color token vocabulary for Foliage)_
+_Last updated: November 15, 2026 — Added Lyra (agent core)_
 _Status: Placeholder names, pending launch_

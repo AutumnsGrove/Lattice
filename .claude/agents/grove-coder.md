@@ -198,7 +198,6 @@ When working in a worktree, ALL file paths include `.worktrees/<name>/`. If the 
 | engine | `libs/engine/` | Core framework (`@autumnsgrove/lattice/*`) |
 | prism | `libs/prism/` | Design tokens & icons (`@autumnsgrove/prism/*`) |
 | foliage | `libs/foliage/` | Theme system (`@autumnsgrove/foliage`) |
-| vineyard | `libs/vineyard/` | Component library (`@autumnsgrove/vineyard`) |
 | landing | `apps/landing/` | Marketing site |
 | aspen | `apps/aspen/` | Tenant dashboard |
 | plant | `apps/plant/` | Subscriptions |

@@ -10,6 +10,7 @@
 #   ./scripts/dev-stack.sh fast           Fast: skips builds, Aspen/Plant/Landing under `vite dev` (HMR)
 #   ./scripts/dev-stack.sh workers        Workers only (no SvelteKit apps)
 #   ./scripts/dev-stack.sh seed           Apply migrations + seed data only
+#   ./scripts/dev-stack.sh seed fake 8    Random faker tenant with 8 posts
 #   ./scripts/dev-stack.sh reset          Nuke local DBs and re-seed
 #   ./scripts/dev-stack.sh stop           Kill any running processes, free ports
 #
@@ -179,6 +180,7 @@ apply_migrations() {
 
 seed_data() {
     local profile="${1:-blog}"
+    local fake_posts="${2:-5}"
 
     log "Seeding data (profile: ${CYAN}$profile${RESET})..."
 
@@ -256,8 +258,23 @@ seed_data() {
         fresh)
             dim "  → Fresh (migrations only, no data)"
             ;;
+        fake)
+            # Random tenant via @faker-js/faker — proves the UI works with any
+            # data, not just the curated Midnight Bloom golden path. Writes through
+            # a temp file so a 100+ line SQL payload never goes near shell quoting.
+            local tmp_file
+            tmp_file="$(mktemp -t grove-fake-seed)"
+            dim "  → Random faker tenant (${fake_posts} posts)"
+            node scripts/db/generate-fake-seed.mjs --posts "$fake_posts" > "$tmp_file"
+            wrangler d1 execute grove-engine-db \
+                --local \
+                -c apps/aspen/wrangler.toml \
+                --file "$tmp_file" \
+                -y 2>&1 | tail -3
+            rm -f "$tmp_file"
+            ;;
         *)
-            err "Unknown profile: $profile (use: blog, empty, fresh)"
+            err "Unknown profile: $profile (use: blog, empty, fresh, fake)"
             exit 1
             ;;
     esac
@@ -408,6 +425,13 @@ write_local_do_config() {
     {
         cat "$src"
         printf '\n[[migrations]]\ntag = "local-sqlite"\nnew_sqlite_classes = [%s]\n' "$classes"
+        # The post-removal probe asks the public origin by default (#1762). Locally
+        # that finds no such subdomain — correctly, it never existed — and reports
+        # "gone", passing a step nobody tested. Point it at Aspen's dev server,
+        # which reads the tenant from ?subdomain= on localhost. This is only safe
+        # while the source config declares no [vars] table of its own, which
+        # wrangler would reject as a duplicate.
+        printf '\n[vars]\nSITE_ORIGIN = "http://localhost:5173/?subdomain={subdomain}"\n'
     } >"$dst"
 }
 
@@ -641,7 +665,7 @@ main() {
     case "$mode" in
         seed)
             apply_migrations
-            seed_data "${2:-blog}"
+            seed_data "${2:-blog}" "${3:-5}"
             ;;
         reset)
             reset_databases
@@ -733,6 +757,7 @@ main() {
             echo "  workers   Start workers only (no SvelteKit dev server)"
             echo "  stop      Kill any running dev-stack processes and free their ports"
             echo "  seed      Apply migrations + seed data, then exit"
+            echo "            profiles: blog (default), empty, fresh, fake [posts]"
             echo "  reset     Nuke local DBs, re-migrate, re-seed"
             exit 1
             ;;

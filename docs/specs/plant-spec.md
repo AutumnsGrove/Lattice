@@ -621,7 +621,6 @@ apps/plant/
 │   │   │   ├── email-templates.ts      # Payment receipt/failure templates
 │   │   │   ├── verification-email-template.ts  # Code email template
 │   │   │   ├── onboarding-helper.ts    # shouldSkipCheckout() utility
-│   │   │   └── free-account-limits.ts  # Wanderer tier enforcement
 │   │   └── ui/
 │   │       └── tier-icons.ts           # Icon mapping for plan cards
 │   └── routes/
@@ -657,7 +656,6 @@ apps/plant/
 | File | Type | Coverage |
 |------|------|---------|
 | `email-verification.test.ts` | Unit | Code generation, verification, rate limiting |
-| `free-account-limits.test.ts` | Unit | Wanderer tier feature limits |
 | `onboarding-helper.test.ts` | Unit | shouldSkipCheckout logic |
 
 ---

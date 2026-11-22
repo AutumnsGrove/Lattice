@@ -73,7 +73,7 @@ Prism defines the visual language for every Grove property. It covers five domai
 ### Non-Goals (Out of Scope)
 
 - Per-tenant theme composition logic (Foliage handles that)
-- Individual component APIs (Lattice/Vineyard handle that)
+- Individual component APIs (Lattice handles that)
 - Content layout patterns (each property defines its own)
 - 3D rendering or Three.js integration (v2 consideration)
 
@@ -719,7 +719,6 @@ This produces three levels of utility classes:
 - [ ] Consolidate engine token copy into Foliage re-export
 - [ ] Automated WCAG contrast validation in CI
 - [ ] Seasonal Prism variants (spring warmth, winter cool tint shifts)
-- [ ] Prism visualization page in Vineyard
 - [ ] Community theme guidelines for Prism extension
 - [ ] P3 wide-gamut color fallbacks for supported browsers
 - [ ] Seasonal creature expansion (summer, autumn birds)

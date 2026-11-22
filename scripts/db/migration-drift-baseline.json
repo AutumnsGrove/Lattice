@@ -1,0 +1,50 @@
+{
+	"_comment": [
+		"Divergence between migration history and a live database that has been looked at and accepted.",
+		"scripts/db/migration-drift.mjs treats anything here as known, and fails on anything else —",
+		"including an entry that has stopped diverging, so this list has to keep shrinking.",
+		"Every entry needs a reason. 'Probably fine' is not a reason."
+	],
+	"absentFromDb": {
+		"failed_attempts": "Heartwood's own SQLite owns this table (services/heartwood/src/db/schema.sql). The engine-database copy is a Drizzle schema with no reader.",
+		"idx_failed_attempts_email": "Same table — never in grove-engine-db.",
+		"idx_failed_attempts_locked": "Same table — never in grove-engine-db.",
+		"rate_limits": "ThresholdDO creates and uses this in its own Durable Object SQLite (schema() in services/durable-objects/src/ThresholdDO.ts). Not a D1 table.",
+		"idx_rate_limits_created": "Same table — Durable Object SQLite, not D1.",
+		"idx_rate_limits_ip": "Same table — Durable Object SQLite, not D1.",
+		"username_audit_log": "Referenced only by libs/engine/src/lib/server/db/schema/auth.ts. No query reads or writes it; the feature never shipped.",
+		"idx_username_audit_action": "Same table — unused.",
+		"idx_username_audit_actor": "Same table — unused.",
+		"idx_username_audit_created": "Same table — unused.",
+		"idx_username_audit_username": "Same table — unused.",
+		"git_dashboard_config": "Referenced only by the Drizzle schema (platform.ts). The dashboard that would have used it was cut.",
+		"lantern_friends": "No reference anywhere in the codebase. Dead table from a cut Lantern feature."
+	},
+	"extraInDb": {
+		"domain_search_jobs": "Created by apps/domains, which has no migrations/ directory — its schema was applied by hand. Not this repository's history to track.",
+		"domain_search_config": "Same — apps/domains, hand-applied.",
+		"domain_results": "Same — apps/domains, hand-applied.",
+		"idx_domain_jobs_status": "Same — apps/domains.",
+		"idx_domain_jobs_client": "Same — apps/domains.",
+		"idx_domain_jobs_created": "Same — apps/domains.",
+		"idx_domain_config_active": "Same — apps/domains.",
+		"idx_domain_results_job": "Same — apps/domains.",
+		"idx_domain_results_score": "Same — apps/domains.",
+		"idx_domain_results_status": "Same — apps/domains.",
+		"poll_votes": "Production's polls schema is newer than libs/engine/migrations/063_polls_curio.sql: the curios work moved on and production was patched in place. Nothing has ever written here (0 rows).",
+		"idx_poll_votes_poll": "Same — newer polls schema in production than in history.",
+		"idx_poll_votes_unique": "Same — newer polls schema in production than in history.",
+		"idx_polls_tenant": "Same — newer polls schema in production than in history."
+	},
+	"differs": {
+		"tenants": "production defaults plan to 'free' where history says 'seedling'. Fixing it needs a table rebuild, and tenants has 30 dependents whose ON DELETE CASCADE fires on the implicit DELETE — this is exactly the swap 116 must never run. Every writer names a plan explicitly, so the default is unreachable today.",
+		"users": "production carries a hand-applied UNIQUE on email that 107_fix_users_schema.sql does not create. Production is stricter; a fresh bootstrap allows duplicate emails. Aligning would need a rebuild plus a decision about case-insensitivity.",
+		"polls": "production is ahead of 063_polls_curio.sql (poll_type, results_visibility, is_pinned, close_date vs multiple_choice, show_results). The curios schema moved on without the engine file following, and the table has never been used."
+	},
+	"unreplayable": {
+		"001_magic_codes.sql": "apps/landing/migrations/0001_cdn.sql creates magic_codes first with a different shape, so this file's CREATE TABLE IF NOT EXISTS no-ops and its indexes fail. Pre-existing; only affects a from-empty replay.",
+		"005_multi_tenant.sql": "Same class: expects a sessions shape that an earlier landing migration created differently.",
+		"014_users.sql": "Same class: expects the engine's users shape, but landing's 0001_cdn.sql got there first.",
+		"107_fix_users_schema.sql": "Depends on a users column an earlier file did not create. Pre-existing."
+	}
+}

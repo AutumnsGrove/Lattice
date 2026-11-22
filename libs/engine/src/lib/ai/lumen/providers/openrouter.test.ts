@@ -265,6 +265,166 @@ describe("inference()", () => {
 		});
 	});
 
+	it("sends an assistant turn's tool_calls and the tool result's id back to the model", async () => {
+		const provider = new OpenRouterProvider("test-key");
+		(globalThis.fetch as any).mockResolvedValue(
+			createMockResponse({
+				choices: [{ message: { content: "done" }, finish_reason: "stop" }],
+				usage: { prompt_tokens: 30, completion_tokens: 5 },
+			}),
+		);
+
+		// The conversation a two-step loop sends on its second turn.
+		const conversation: LumenMessage[] = [
+			{ role: "system", content: "You are a helper." },
+			{ role: "user", content: "What is the weather?" },
+			{
+				role: "assistant",
+				content: "",
+				toolCalls: [
+					{
+						id: "call_abc",
+						type: "function",
+						function: { name: "weather", arguments: '{"city":"NYC"}' },
+					},
+				],
+			},
+			{ role: "tool", content: "18C and clear", toolCallId: "call_abc", name: "weather" },
+		];
+
+		await provider.inference("test/model", conversation, {
+			maxTokens: 100,
+			temperature: 0.7,
+		});
+
+		const body = JSON.parse((globalThis.fetch as any).mock.calls[0][1].body);
+
+		expect(body.messages[2]).toMatchObject({
+			role: "assistant",
+			tool_calls: [{ id: "call_abc", type: "function", function: { name: "weather" } }],
+		});
+		expect(body.messages[3]).toEqual({
+			role: "tool",
+			content: "18C and clear",
+			tool_call_id: "call_abc",
+			name: "weather",
+		});
+	});
+
+	it("sends null content for an assistant turn that only called tools", async () => {
+		const provider = new OpenRouterProvider("test-key");
+		(globalThis.fetch as any).mockResolvedValue(
+			createMockResponse({
+				choices: [{ message: { content: "done" } }],
+				usage: { prompt_tokens: 10, completion_tokens: 2 },
+			}),
+		);
+
+		await provider.inference(
+			"test/model",
+			[
+				{
+					role: "assistant",
+					content: "",
+					toolCalls: [{ id: "call_a", type: "function", function: { name: "t", arguments: "{}" } }],
+				},
+			],
+			{ maxTokens: 10, temperature: 0 },
+		);
+
+		const body = JSON.parse((globalThis.fetch as any).mock.calls[0][1].body);
+		// `null`, not `""` — the shape the spec documents for a tool-only turn.
+		expect(body.messages[0].content).toBeNull();
+	});
+
+	it("keeps prose content on an assistant turn that also called tools", async () => {
+		const provider = new OpenRouterProvider("test-key");
+		(globalThis.fetch as any).mockResolvedValue(
+			createMockResponse({
+				choices: [{ message: { content: "done" } }],
+				usage: { prompt_tokens: 10, completion_tokens: 2 },
+			}),
+		);
+
+		await provider.inference(
+			"test/model",
+			[
+				{
+					role: "assistant",
+					content: "Let me check that.",
+					toolCalls: [{ id: "call_b", type: "function", function: { name: "t", arguments: "{}" } }],
+				},
+			],
+			{ maxTokens: 10, temperature: 0 },
+		);
+
+		const body = JSON.parse((globalThis.fetch as any).mock.calls[0][1].body);
+		expect(body.messages[0].content).toBe("Let me check that.");
+	});
+
+	it("omits tool fields from ordinary messages", async () => {
+		const provider = new OpenRouterProvider("test-key");
+		(globalThis.fetch as any).mockResolvedValue(
+			createMockResponse({
+				choices: [{ message: { content: "hi" }, finish_reason: "stop" }],
+				usage: { prompt_tokens: 5, completion_tokens: 2 },
+			}),
+		);
+
+		await provider.inference("test/model", [{ role: "user", content: "hello" }], {
+			maxTokens: 10,
+			temperature: 0,
+		});
+
+		const body = JSON.parse((globalThis.fetch as any).mock.calls[0][1].body);
+		expect(body.messages[0]).toEqual({ role: "user", content: "hello" });
+	});
+
+	it("reports finish_reason as a normalized finishReason", async () => {
+		const provider = new OpenRouterProvider("test-key");
+
+		(globalThis.fetch as any).mockResolvedValue(
+			createMockResponse({
+				choices: [{ message: { content: '{"partial":' }, finish_reason: "length" }],
+				usage: { prompt_tokens: 100, completion_tokens: 50 },
+			}),
+		);
+
+		const result = await provider.inference("test/model", [{ role: "user", content: "go" }], {
+			maxTokens: 50,
+			temperature: 0,
+		});
+
+		// The timeline's "cut off mid-object" failure, now visible to the caller.
+		expect(result.finishReason).toBe("length");
+	});
+
+	it("normalizes unknown provider reasons to other rather than dropping them", async () => {
+		const provider = new OpenRouterProvider("test-key");
+
+		for (const [raw, expected] of [
+			["stop", "stop"],
+			["tool_calls", "tool_calls"],
+			["content_filter", "content_filter"],
+			["eos", "other"],
+			[undefined, undefined],
+		] as const) {
+			(globalThis.fetch as any).mockResolvedValue(
+				createMockResponse({
+					choices: [{ message: { content: "x" }, finish_reason: raw }],
+					usage: { prompt_tokens: 1, completion_tokens: 1 },
+				}),
+			);
+
+			const result = await provider.inference("test/model", [{ role: "user", content: "go" }], {
+				maxTokens: 10,
+				temperature: 0,
+			});
+
+			expect(result.finishReason).toBe(expected);
+		}
+	});
+
 	it("uses apiKeyOverride when provided", async () => {
 		const provider = new OpenRouterProvider("original-key");
 
@@ -498,6 +658,151 @@ describe("stream()", () => {
 		expect(contentChunks.map((c) => c.content).join("")).toBe("Hello world");
 		expect(finalChunk).toBeDefined();
 		expect(finalChunk!.usage).toBeDefined();
+	});
+
+	it("reassembles a tool call fragmented across SSE events", async () => {
+		const provider = new OpenRouterProvider("test-key");
+
+		// Shape recorded from OpenRouter: the id and name arrive first, then the
+		// JSON arguments a slice at a time, then finish_reason, then [DONE].
+		(globalThis.fetch as any).mockResolvedValue({
+			ok: true,
+			body: createSSEStream([
+				'data: {"choices":[{"delta":{"role":"assistant","content":""}}]}\n\n',
+				'data: {"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call_abc","type":"function","function":{"name":"get_weather","arguments":""}}]}}]}\n\n',
+				'data: {"choices":[{"delta":{"tool_calls":[{"index":0,"function":{"arguments":"{\\"ci"}}]}}]}\n\n',
+				'data: {"choices":[{"delta":{"tool_calls":[{"index":0,"function":{"arguments":"ty\\":\\"NYC\\"}"}}]}}]}\n\n',
+				'data: {"choices":[{"delta":{},"finish_reason":"tool_calls"}]}\n\n',
+				'data: {"choices":[],"usage":{"prompt_tokens":30,"completion_tokens":12}}\n\n',
+				"data: [DONE]\n\n",
+			]),
+		});
+
+		const chunks = [];
+		for await (const chunk of provider.stream(
+			"test/model",
+			[{ role: "user", content: "weather in NYC?" }] as LumenMessage[],
+			{
+				maxTokens: 200,
+				temperature: 0.2,
+				providerOptions: {
+					tools: [
+						{
+							type: "function",
+							function: { name: "get_weather", description: "d", parameters: {} },
+						},
+					],
+				},
+			},
+		)) {
+			chunks.push(chunk);
+		}
+
+		const deltas = chunks.flatMap((c) => c.toolCallDeltas ?? []);
+		expect(deltas.length).toBeGreaterThanOrEqual(3);
+
+		const finalChunk = chunks.find((c) => c.done)!;
+		expect(finalChunk.finishReason).toBe("tool_calls");
+	});
+
+	it("keeps parallel tool calls apart by index", async () => {
+		const provider = new OpenRouterProvider("test-key");
+
+		(globalThis.fetch as any).mockResolvedValue({
+			ok: true,
+			body: createSSEStream([
+				'data: {"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call_a","function":{"name":"one","arguments":"{}"}},{"index":1,"id":"call_b","function":{"name":"two","arguments":"{}"}}]}}]}\n\n',
+				"data: [DONE]\n\n",
+			]),
+		});
+
+		const chunks = [];
+		for await (const chunk of provider.stream(
+			"test/model",
+			[{ role: "user", content: "both" }] as LumenMessage[],
+			{ maxTokens: 100, temperature: 0 },
+		)) {
+			chunks.push(chunk);
+		}
+
+		const deltas = chunks.flatMap((c) => c.toolCallDeltas ?? []);
+		expect(deltas.map((d) => d.index)).toEqual([0, 1]);
+		expect(deltas.map((d) => d.id)).toEqual(["call_a", "call_b"]);
+	});
+
+	it("forwards tools and tool_choice in the streaming request body", async () => {
+		const provider = new OpenRouterProvider("test-key");
+
+		(globalThis.fetch as any).mockResolvedValue({
+			ok: true,
+			body: createSSEStream(["data: [DONE]\n\n"]),
+		});
+
+		const tools = [
+			{ type: "function" as const, function: { name: "t", description: "d", parameters: {} } },
+		];
+
+		for await (const _chunk of provider.stream(
+			"test/model",
+			[{ role: "user", content: "go" }] as LumenMessage[],
+			{
+				maxTokens: 10,
+				temperature: 0,
+				providerOptions: { tools, toolChoice: "required" },
+			},
+		)) {
+			void _chunk;
+		}
+
+		const body = JSON.parse((globalThis.fetch as any).mock.calls[0][1].body);
+		expect(body.tools).toHaveLength(1);
+		expect(body.tool_choice).toBe("required");
+		expect(body.stream).toBe(true);
+	});
+
+	it("omits tools from the body when none were given", async () => {
+		const provider = new OpenRouterProvider("test-key");
+
+		(globalThis.fetch as any).mockResolvedValue({
+			ok: true,
+			body: createSSEStream(["data: [DONE]\n\n"]),
+		});
+
+		for await (const _chunk of provider.stream(
+			"test/model",
+			[{ role: "user", content: "go" }] as LumenMessage[],
+			{ maxTokens: 10, temperature: 0 },
+		)) {
+			void _chunk;
+		}
+
+		const body = JSON.parse((globalThis.fetch as any).mock.calls[0][1].body);
+		expect(body).not.toHaveProperty("tools");
+		expect(body).not.toHaveProperty("tool_choice");
+	});
+
+	it("reports a stream cut off by the token limit", async () => {
+		const provider = new OpenRouterProvider("test-key");
+
+		(globalThis.fetch as any).mockResolvedValue({
+			ok: true,
+			body: createSSEStream([
+				'data: {"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call_x","function":{"name":"t","arguments":"{\\"ci"}}]}}]}\n\n',
+				'data: {"choices":[{"delta":{},"finish_reason":"length"}]}\n\n',
+				"data: [DONE]\n\n",
+			]),
+		});
+
+		const chunks = [];
+		for await (const chunk of provider.stream(
+			"test/model",
+			[{ role: "user", content: "go" }] as LumenMessage[],
+			{ maxTokens: 10, temperature: 0 },
+		)) {
+			chunks.push(chunk);
+		}
+
+		expect(chunks.find((c) => c.done)!.finishReason).toBe("length");
 	});
 
 	it("handles [DONE] sentinel correctly", async () => {

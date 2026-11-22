@@ -47,6 +47,17 @@ var rootHelpCategories = []ui.HelpCategory{
 		},
 	},
 	{
+		Title: "Tenants",
+		Icon:  "🌳",
+		Style: ui.SafeWriteStyle,
+		Commands: []ui.HelpCommand{
+			{Name: "tenant list", Desc: "Tenants with plan, activity and post counts"},
+			{Name: "tenant show", Desc: "Identity, content, storage and auth for one tenant"},
+			{Name: "tenant suspend", Desc: "Take a tenant offline (reversible)"},
+			{Name: "tenant resume", Desc: "Put a suspended tenant back online"},
+		},
+	},
+	{
 		Title: "Dev",
 		Icon:  "🔧",
 		Style: ui.SafeWriteStyle,

@@ -12,10 +12,10 @@
  * const flags = await getFeatureFlags(env);
  *
  * // Cultivate (enable globally)
- * await setFlagEnabled('jxl_encoding', true, env);
+ * await setFlagEnabled('image_uploads', true, env);
  *
  * // Prune (disable globally)
- * await setFlagEnabled('jxl_encoding', false, env);
+ * await setFlagEnabled('image_uploads', false, env);
  * ```
  */
 

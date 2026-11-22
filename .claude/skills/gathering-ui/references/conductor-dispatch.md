@@ -30,13 +30,13 @@ Design and build the UI for:
 - Support reduced motion (prefers-reduced-motion)
 - Mobile-responsive (test at 375px minimum)
 - Import components from @autumnsgrove/lattice — engine-first pattern
-- Reference: AGENT.md design standards section, AgentUsage/design_context.md
+- Reference: AGENT.md design standards section, `DESIGN.md`
 
 ## Constraints
 - You MUST read your skill file first
 - Build ONLY what the UI spec demands — no drive-by improvements
-- Follow existing component patterns (use `gf` to find them)
-- Use `gw` for all git operations, `gf` for codebase search
+- Follow existing component patterns (use semantic search to find them)
+- Use `gw` for all git operations; semantic search for discovery, `rg`/`find`/`glob` for exact matches
 
 ## Output Format
 UI MANIFEST:
@@ -90,7 +90,7 @@ Audit these UI files for accessibility. You have NOT seen how they were designed
 - You are INDEPENDENT. Test what's rendered, not what was intended.
 - Fix what you find directly in the Svelte components.
 - If a fix requires structural changes you can't make, flag it for the Chameleon.
-- Use `gw` for all git operations, `gf` for codebase search
+- Use `gw` for all git operations; semantic search for discovery, `rg`/`find`/`glob` for exact matches
 
 ## Output Format
 A11Y REPORT:

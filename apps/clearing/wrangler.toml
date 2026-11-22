@@ -55,6 +55,18 @@ id = "82d6537525d345f1981924bfd082248f"
 binding = "PULSE_COLLECTOR"
 service = "grove-pulse-collector"
 
+# Health check targets. The monitor reaches services it owns through bindings
+# rather than their public hostnames: a Worker subrequest back into the same
+# zone re-enters the Workers routes and comes back as 403/404, which was being
+# reported as an outage for a service that was never down.
+[[services]]
+binding = "ASPEN"
+service = "grove-aspen"
+
+[[services]]
+binding = "BILLING"
+service = "grove-billing"
+
 # Secrets (configured via wrangler secret put):
 # - SENTINEL_API_KEY: API key for Sentinel status updates
 # - ZEPHYR_API_KEY: API key for Zephyr email gateway (incident alerts)

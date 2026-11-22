@@ -18,13 +18,39 @@ export interface HealthCheckResult {
 	latencyMs: number;
 	httpStatus: number | null;
 	error: string | null;
+	/**
+	 * True when the only thing wrong was response time.
+	 *
+	 * A slow CF-to-CF round trip is a performance note, not an incident: the
+	 * service answered 200 with a valid body. Latency-only results may colour a
+	 * day and show the component as degraded, but they must never open a public
+	 * incident or page anyone.
+	 */
+	latencyDegraded?: boolean;
 	timestamp: string;
 }
 
 /**
- * Perform health check for a single component
+ * Bindings the monitor can use to reach components directly.
+ * Absent in tests and local dev, where the public URL is used instead.
  */
-export async function checkComponent(config: ComponentConfig): Promise<HealthCheckResult> {
+export interface CheckEnv {
+	ASPEN?: Fetcher;
+	BILLING?: Fetcher;
+}
+
+/**
+ * Perform health check for a single component
+ *
+ * Components that are ours are reached through their service binding when one
+ * is available. Fetching their public hostname from inside a Worker re-enters
+ * the zone's Workers routes and comes back as an edge error, which is not a
+ * statement about the service at all.
+ */
+export async function checkComponent(
+	config: ComponentConfig,
+	env?: CheckEnv,
+): Promise<HealthCheckResult> {
 	const startTime = Date.now();
 	const timestamp = new Date().toISOString();
 
@@ -33,7 +59,7 @@ export async function checkComponent(config: ComponentConfig): Promise<HealthChe
 	const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
 
 	try {
-		const response = await fetch(config.url, {
+		const request = new Request(config.url, {
 			method: config.method,
 			signal: controller.signal,
 			headers: {
@@ -41,6 +67,9 @@ export async function checkComponent(config: ComponentConfig): Promise<HealthChe
 				Accept: config.checkType === "deep" ? "application/json" : "*/*",
 			},
 		});
+
+		const binding = config.binding ? env?.[config.binding] : undefined;
+		const response = binding ? await binding.fetch(request) : await fetch(request);
 
 		clearTimeout(timeoutId);
 
@@ -93,6 +122,14 @@ async function evaluateDeepCheck(
 ): Promise<HealthCheckResult> {
 	// Non-2xx status = outage
 	if (!response.ok) {
+		// Log what the service actually said. The public incident message stays
+		// "HTTP 403" — internals don't belong on a status page — but without this
+		// an edge 403 was indistinguishable from the service refusing to answer.
+		const body = await response.text().catch(() => "");
+		console.error(
+			`[Clearing Monitor] ${config.name} health check returned HTTP ${response.status}: ${body.slice(0, 300)}`,
+		);
+
 		return {
 			componentId: config.id,
 			componentName: config.name,
@@ -229,6 +266,7 @@ function classifyByLatency(
 		latencyMs,
 		httpStatus,
 		error: null,
+		latencyDegraded: status !== ComponentStatus.OPERATIONAL,
 		timestamp,
 	};
 }
@@ -238,6 +276,7 @@ function classifyByLatency(
  */
 export async function checkAllComponents(
 	components: ComponentConfig[],
+	env?: CheckEnv,
 ): Promise<HealthCheckResult[]> {
-	return Promise.all(components.map(checkComponent));
+	return Promise.all(components.map((component) => checkComponent(component, env)));
 }

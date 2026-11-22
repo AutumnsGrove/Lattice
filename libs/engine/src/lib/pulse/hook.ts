@@ -15,6 +15,7 @@
 import type { Handle } from "@sveltejs/kit";
 import { initPulse, emitPulseEvent, flushPulse } from "./emitter.js";
 import { hashVisitor } from "./visitor.js";
+import { sanitizeRef } from "../utils/acquisition-ref.js";
 import type { PulseCollector } from "./types.js";
 
 export interface PulseHandleOptions {
@@ -74,6 +75,11 @@ export function pulseHandle(options: PulseHandleOptions): Handle {
 
 			const tenant_id = extractTenantId(event);
 
+			// Acquisition refs (?ref=card from a business card QR, #1426) ride along
+			// in metadata so scans are countable without a separate endpoint. See
+			// readAcquisitionRef for why this can quietly yield null.
+			const ref = readAcquisitionRef(event.url);
+
 			emitPulseEvent("page.viewed", {
 				route: event.route?.id ?? pathname,
 				method: event.request.method,
@@ -82,12 +88,32 @@ export function pulseHandle(options: PulseHandleOptions): Handle {
 				tenant_id,
 				visitor_hash,
 				app,
-				metadata: { ua: ua.slice(0, 200) },
+				metadata: ref ? { ua: ua.slice(0, 200), ref } : { ua: ua.slice(0, 200) },
 			});
 		}
 
 		return response;
 	};
+}
+
+/**
+ * Read the acquisition ref (?ref=card from a business card QR, #1426) off the
+ * request URL. The value is visitor-controlled, so it goes through the shared
+ * slug validator — an invalid ref is simply left out rather than stored.
+ *
+ * SvelteKit disables `url.search`/`url.searchParams` while prerendering and
+ * throws on access, which would turn every prerendered page into a 500. A
+ * prerendered page has no visitor to attribute a ref to, so a throw is treated
+ * as "no ref". Probing here rather than importing `$app/environment` keeps this
+ * module usable outside SvelteKit — the engine barrel is also bundled into
+ * plain Workers, where that virtual module does not resolve.
+ */
+function readAcquisitionRef(url: URL): string | null {
+	try {
+		return sanitizeRef(url.searchParams.get("ref"));
+	} catch {
+		return null;
+	}
 }
 
 /**

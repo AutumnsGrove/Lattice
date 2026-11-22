@@ -91,7 +91,7 @@ The `buildTracePath` utility in `$lib/utils/trace-path.ts` normalizes routes int
 |-------|--------|--------|
 | `/workshop` | none | `workshop` |
 | `/workshop` | `GlassCard` | `workshop:GlassCard` |
-| `/vineyard/charts` | none | `vineyard-charts` |
+| `/forest/charts` | none | `forest-charts` |
 | `/` | none | `home` |
 
 Validation (`validateTracePath`) enforces: alphanumeric characters, dashes, underscores, colons only. Length between 1 and 200 characters. Cannot start or end with special characters.

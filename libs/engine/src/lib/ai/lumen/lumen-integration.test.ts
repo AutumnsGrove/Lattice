@@ -17,7 +17,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { createLumenClient, LumenClient } from "./client.js";
-import { MODELS } from "./config.js";
+import { MODELS, getTaskConfig } from "./config.js";
 
 // =============================================================================
 // MOCK FETCH - THE ONLY BOUNDARY
@@ -243,7 +243,7 @@ describe("Integration: Timeline BYOK Path", () => {
 		const fetchCall = fetchMock.mock.calls[0];
 		const requestBody = JSON.parse(fetchCall[1].body);
 
-		expect(requestBody.max_tokens).toBe(1024); // summary default
+		expect(requestBody.max_tokens).toBe(getTaskConfig("summary").defaultMaxTokens);
 		expect(requestBody.temperature).toBe(0.3); // summary default (more deterministic)
 	});
 

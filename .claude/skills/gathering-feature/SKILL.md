@@ -5,7 +5,7 @@ description: The drum sounds. Eight animals gather — each a fresh subagent wit
 
 # Gathering Feature 🌲🐾
 
-The drum echoes through the forest. But this time, it's different. The conductor stands at the center of the clearing — not doing the work, but orchestrating it. Each animal arrives with fresh eyes, reads its own instructions, and works with full attention. No context fatigue. No phoning it in. No "the code documents itself." Eight animals, eight fresh minds, one feature built right.
+_The conductor dispatches one subagent per animal, each with isolated context and an intentional model. It manages handoffs and gate checks — it never does the work itself._
 
 ## When to Summon
 
@@ -46,8 +46,6 @@ Spec    Bloodhound  Check  Elephant  Check    Final Verification
 
 ### Phase 1: SUMMON
 
-_The drum sounds. The conductor steps into the clearing..._
-
 The conductor (this skill) receives the feature request and prepares the dispatch plan:
 
 - Clarify: What does this feature do? Which users benefit? What's in scope?
@@ -60,8 +58,6 @@ The conductor (this skill) receives the feature request and prepares the dispatc
 ---
 
 ### Phase 2: SCOUT (Bloodhound)
-
-_The conductor signals. The Bloodhound enters the forest..._
 
 ```
 Agent(bloodhound, model: haiku)
@@ -79,8 +75,6 @@ Dispatch a **haiku subagent** to scout the codebase. The Bloodhound receives ONL
 ---
 
 ### Phase 3: BUILD (Elephant)
-
-_The ground trembles. The Elephant arrives..._
 
 ```
 Agent(elephant, model: opus)
@@ -107,7 +101,7 @@ Each sub-elephant reads `elephant-build/SKILL.md` and works on its domain only.
 
 - Signpost error codes for all error paths (`buildErrorJson`, `throwGroveError`)
 - Rootwork type safety at boundaries (`parseFormData`, `safeJsonParse`)
-- Reference: `AgentUsage/error_handling.md`, `AgentUsage/rootwork_type_safety.md`
+- Reference: `CODE-STANDARDS.md` (Signpost errors, Rootwork type safety)
 
 **Handoff to conductor:** File list (every file created/modified), implementation summary (what was built, key decisions), any open questions.
 
@@ -116,8 +110,6 @@ Each sub-elephant reads `elephant-build/SKILL.md` and works on its domain only.
 ---
 
 ### Phase 4: HARDEN (Turtle)
-
-_The Turtle approaches slowly. It sees only what was built — not why..._
 
 ```
 Agent(turtle, model: opus)
@@ -145,8 +137,6 @@ Dispatch an **opus subagent** for security hardening. The Turtle receives ONLY t
 
 ### Phase 5: TEST (Beaver)
 
-_The Beaver surveys the stream. It doesn't know how the dam was built — only what it should hold..._
-
 ```
 Agent(beaver, model: sonnet)
   Input:  file list + feature spec (NOT implementation details)
@@ -170,8 +160,6 @@ Dispatch a **sonnet subagent** to write tests. The Beaver receives the file list
 ---
 
 ### Phase 6: AUDIT (Raccoon + Deer + Fox — PARALLEL)
-
-_Three animals enter the clearing at once. Each sees with different eyes..._
 
 Dispatch three subagents **simultaneously**:
 
@@ -204,8 +192,6 @@ Each animal works in isolation. They don't see each other's findings. The conduc
 
 ### Phase 7: DOCUMENT (Owl)
 
-_The Owl opens its eyes. It has heard everything — now it speaks..._
-
 ```
 Agent(owl, model: opus)
   Input:  FULL gathering summary (spec, territory map, file list,
@@ -231,8 +217,6 @@ Dispatch an **opus subagent** to write documentation. The Owl receives the FULL 
 
 ### Phase 8: CHORUS
 
-_Dawn breaks. The conductor raises their hands. The forest sings..._
-
 The conductor runs final verification and presents the summary:
 
 ```bash
@@ -243,26 +227,23 @@ gw ci --affected --fail-fast --diagnose
 
 **Component Audit Gate (for features with UI components):**
 
-Before page-level verification, audit every UI component built or modified by the Elephant in isolation using Showroom:
+Before page-level verification, check every UI component built or modified by the Elephant:
 
 ```bash
-# For each component built or modified:
-uv run --project tools/glimpse glimpse showroom \
-  libs/engine/src/lib/ui/components/[path-to-component].svelte
-
-# For new components, scaffold fixtures first:
-uv run --project tools/glimpse glimpse showroom \
-  libs/engine/src/lib/ui/components/[path-to-component].svelte --scaffold
+# There is no isolated component harness any more (Showroom was removed in #1654).
+# Capture the component where it actually renders, then check it by hand.
+bun run glimpse capture "http://localhost:5173/[page]" \
+  -S "[component selector]" --season autumn --theme dark
 ```
 
-All Showroom compliance violations must be resolved before proceeding. If violations are found, resume the Elephant with specific findings.
+Fix component-level problems before proceeding. If you find violations, resume the Elephant with specific findings.
 
 **Visual Verification (for features with UI):**
 
 ```bash
-uv run --project tools/glimpse glimpse matrix \
+bun run glimpse matrix \
   "http://localhost:5173/[feature-page]?subdomain=midnight-bloom" \
-  --seasons autumn,winter --themes light,dark --logs --auto
+  --seasons autumn,winter --themes light,dark --logs
 ```
 
 **Completion Report:**
@@ -289,7 +270,7 @@ GATE LOG
   After Test:     ✅ all tests pass
   After Audit:    ✅ findings resolved
   After Document: ✅ docs written (not stubs)
-  Showroom:       ✅ all components pass compliance audit
+  Components:     ✅ all checked against DESIGN.md
   Final CI:       ✅ gw ci --affected passes
 
 The forest grows. The feature lives.
@@ -299,36 +280,17 @@ The forest grows. The feature lives.
 
 ## Conductor Rules
 
-### Never Do Animal Work
+**Never Do Animal Work.** The conductor dispatches. It does not scout, build, harden, test, audit, or document. If you catch yourself writing code, stop — you should be dispatching a subagent.
 
-The conductor dispatches. It does not scout, build, harden, test, audit, or document. If you catch yourself writing code, stop — you should be dispatching a subagent.
+**Fresh Eyes Are a Feature.** Turtle and Beaver intentionally receive LESS context than the full history. Turtle doesn't see Elephant's reasoning (adversarial fresh eyes). Beaver doesn't see implementation details (behavioral testing). This isolation produces better results.
 
-### Fresh Eyes Are a Feature
+**Gate Every Transition.** Run verification between every animal. Don't let bad state cascade — catch it early.
 
-Turtle and Beaver intentionally receive LESS context than the full history. Turtle doesn't see Elephant's reasoning (adversarial fresh eyes). Beaver doesn't see implementation details (behavioral testing). This isolation produces better results.
+**Parallel When Possible.** Raccoon, Deer, and Fox run simultaneously. Three fresh agents, three different concerns, zero context sharing.
 
-### Gate Every Transition
+**Multi-Agent for Heavy Phases.** If Elephant would touch 15+ files across multiple packages, split into domain-focused sub-elephants. Each reads the skill, each handles its domain, then a wiring agent integrates.
 
-Run verification between every animal. Don't let bad state cascade — catch it early.
-
-### Parallel When Possible
-
-Raccoon, Deer, and Fox run simultaneously. Three fresh agents, three different concerns, zero context sharing.
-
-### Multi-Agent for Heavy Phases
-
-If Elephant would touch 15+ files across multiple packages, split into domain-focused sub-elephants. Each reads the skill, each handles its domain, then a wiring agent integrates.
-
-### Resume, Don't Restart
-
-If a gate check fails, **resume** the failing agent with the error context. Don't spawn a new one — the resumed agent has its prior work in context.
-
-### Communication
-
-- "The drum sounds..." (summoning)
-- "Dispatching [animal]..." (spawning subagent)
-- "Gate check: [result]..." (verifying between phases)
-- "The chorus rises..." (final verification)
+**Resume, Don't Restart.** If a gate check fails, **resume** the failing agent with the error context. Don't spawn a new one — the resumed agent has its prior work in context.
 
 ---
 

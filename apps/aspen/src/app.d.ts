@@ -118,7 +118,6 @@ declare global {
 				/** Zephyr email gateway URL */
 				ZEPHYR_URL?: string;
 				ALLOWED_ADMIN_EMAILS?: string;
-				TOKEN_ENCRYPTION_KEY?: string; // 256-bit key for encrypting API tokens in D1
 
 				// Cloudflare API for CDN cache purging
 				/** Cloudflare API token with zone:cache_purge permission */
@@ -133,9 +132,6 @@ declare global {
 
 				// Lumen AI Gateway (unified AI inference)
 				OPENROUTER_API_KEY?: string;
-
-				// Petal CSAM fallback provider (when Workers AI unavailable)
-				TOGETHER_API_KEY?: string;
 
 				// The Clearing (Status Page) API
 				CLEARING_API_URL?: string;
@@ -168,7 +164,7 @@ declare global {
 				/** Internal service key for worker-to-worker auth */
 				INTERNAL_SERVICE_KEY?: string;
 
-				/** Dev-only: enables simulated auth for Glimpse visual testing (never set in prod) */
+				/** Dev-only: enables simulated auth for local visual testing (never set in prod) */
 				DEV_AUTH_ENABLED?: string;
 			};
 			context: {
@@ -187,7 +183,16 @@ type AppContext =
 	| { type: "landing" }
 	| { type: "app"; app: string; routePrefix: string }
 	| { type: "tenant"; tenant: TenantInfo }
-	| { type: "not_found"; subdomain: string };
+	| { type: "not_found"; subdomain: string }
+	/**
+	 * A grove whose row exists but is switched off (`tenants.active = 0`).
+	 *
+	 * Carries the subdomain and nothing else — no theme, no config, no owner
+	 * detail. The distinction from `not_found` exists so the owner is not told
+	 * their garden never existed (#1720); the strict `active = 1` lookups that
+	 * keep a suspended site from serving are untouched (#1677).
+	 */
+	| { type: "suspended"; subdomain: string };
 
 /**
  * Tenant information from the database.
@@ -206,6 +211,8 @@ interface TenantInfo {
 	ownerId: string;
 	/** Subscription tier (free, seedling, sapling, oak, evergreen) */
 	plan: string;
+	/** `tenants.created_at` in unix seconds — drives the link/noindex policy (#1682). */
+	createdAt?: number;
 }
 
 export { AppContext, TenantInfo };

@@ -3,7 +3,7 @@ title: Known Limitations
 description: What Grove intentionally doesn't do
 category: help
 section: support-resources
-lastUpdated: '2025-12-24'
+lastUpdated: '2026-11-13'
 keywords:
   - limitations
   - features
@@ -41,9 +41,9 @@ Your analytics dashboard shows data with a deliberate delay. You won't see live 
 
 **What you get instead:** Aggregated insights updated periodically. Enough to understand what resonates, not enough to obsess over.
 
-## No visible vote counts (coming in Full Bloom)
+## No visible vote counts
 
-When Meadow launches in Full Bloom, votes will exist but the counts will be hidden. You'll be able to vote on posts, but you'll never see "142 upvotes" next to anything.
+There is no voting in Grove today, and there won't be a way for readers to rank your writing against someone else's. If a community feed ever arrives, voting there will keep its counts hidden—you could vote on a [[blooms|bloom]], but you'd never see "142 upvotes" next to anything.
 
 **Why:** Visible metrics gamify writing. People optimize for numbers instead of meaning. Hidden votes let you appreciate content without comparing it to everything else.
 

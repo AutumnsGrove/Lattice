@@ -23,17 +23,56 @@ export type LumenTask =
 	| "chat" // Conversational → DeepSeek V4.1 Flash (OpenRouter)
 	| "image" // Image analysis → Claude Haiku 5.5 via OpenRouter
 	| "code" // Code tasks → DeepSeek V4.1 Flash via OpenRouter
-	| "transcription"; // Voice-to-text → Whisper (CF Workers AI)
+	| "transcription" // Voice-to-text → Whisper (CF Workers AI)
+	/**
+	 * A step in an agent loop: a tool-using model that is expected to call
+	 * something rather than answer. Separate from `chat` because it needs its
+	 * own model (one that supports tools), its own quota line, and its own
+	 * Songbird context.
+	 *
+	 * Its quota is 0 on every tier until a real rule exists, so a caller has to
+	 * pass `skipQuota`. That is deliberate: a ten-step run would otherwise cost
+	 * ten requests against a limit meant for one answer.
+	 */
+	| "agent";
 
 // =============================================================================
 // MESSAGE TYPES
 // =============================================================================
 
-export type LumenMessageRole = "system" | "user" | "assistant";
+export type LumenMessageRole = "system" | "user" | "assistant" | "tool";
 
+/**
+ * One message in a conversation.
+ *
+ * A tool-using loop needs three shapes, not one:
+ *
+ * - `assistant` messages that carry the `toolCalls` the model made, so the
+ *   next request can show the model what it asked for;
+ * - `tool` messages that carry a result and the `toolCallId` it answers;
+ * - everything else, which is just role + content.
+ *
+ * Lumen does not run tools and does not run the loop. It carries both sides of
+ * the exchange faithfully and lets the caller decide what to do next.
+ */
 export interface LumenMessage {
 	role: LumenMessageRole;
 	content: string | LumenContentPart[];
+
+	/**
+	 * `assistant` only. The calls the model returned on this turn.
+	 *
+	 * Sending these back is what makes step two of a loop possible: a provider
+	 * rejects a `tool` message whose `toolCallId` does not match a call in the
+	 * preceding assistant turn.
+	 */
+	toolCalls?: LumenToolCall[];
+
+	/** `tool` only. Which assistant `toolCalls` entry this result answers. */
+	toolCallId?: string;
+
+	/** `tool` only. The tool's name, when a provider wants it alongside the id. */
+	name?: string;
 }
 
 export interface LumenContentPart {
@@ -121,6 +160,18 @@ export interface LumenRequestOptions {
 	metadata?: Record<string, unknown>;
 }
 
+/**
+ * Why the model stopped generating, normalized across providers.
+ *
+ * - `stop` — the model finished its thought
+ * - `length` — it hit the token ceiling. **The content may be half-written**, so
+ *   nothing derived from it (especially tool-call arguments) can be trusted
+ * - `tool_calls` — it is waiting for tool results
+ * - `content_filter` — a safety filter cut it off
+ * - `other` — a provider reason that does not fit the above
+ */
+export type LumenFinishReason = "stop" | "length" | "tool_calls" | "content_filter" | "other";
+
 export interface LumenResponse {
 	/** Generated content (may be empty string when model only returns tool calls) */
 	content: string;
@@ -129,8 +180,22 @@ export interface LumenResponse {
 	 * Tool calls returned by the model (only present when tools were provided).
 	 * Each call includes the function name and JSON-encoded arguments.
 	 * The caller is responsible for parsing arguments and executing the calls.
+	 *
+	 * When `finishReason` is `length`, these arguments may be truncated JSON.
+	 * A caller running a loop should discard the turn rather than parse it.
 	 */
 	toolCalls?: LumenToolCall[];
+
+	/**
+	 * Why the model stopped. Absent only when the provider did not report one;
+	 * OpenRouter always does. Treat absent as "unknown" rather than "finished".
+	 *
+	 * This exists because a reply cut off by the token ceiling can contain
+	 * half-written tool arguments, and running those is worse than retrying. The
+	 * timeline hit the same failure in plain text (see the "cut off mid-object"
+	 * note in workers/timeline-sync/src/generator.ts) before it could see it.
+	 */
+	finishReason?: LumenFinishReason;
 
 	/** Model that was used */
 	model: string;
@@ -148,6 +213,20 @@ export interface LumenResponse {
 	latency: number;
 }
 
+/**
+ * Where a cost figure came from.
+ *
+ * - `catalog` — Lumen's own model table (USD per million tokens). This is an
+ *   estimate of what the call *should* cost, not what anyone was billed.
+ * - `provider` — a figure the provider reported for this specific call.
+ *
+ * Nothing reports `provider` today: every adapter computes cost with
+ * `calculateCost()` from the registry. The distinction exists because a run
+ * record that stores a cost needs to say whether it is an invoice or a guess,
+ * and "we will add that later" is how a cost number becomes quietly trusted.
+ */
+export type LumenCostSource = "catalog" | "provider";
+
 export interface LumenUsage {
 	/** Input tokens consumed */
 	input: number;
@@ -157,11 +236,44 @@ export interface LumenUsage {
 
 	/** Estimated cost in USD */
 	cost: number;
+
+	/**
+	 * Where `cost` came from. Absent means unknown — treat it as an estimate,
+	 * never as a billed amount.
+	 */
+	costSource?: LumenCostSource;
 }
 
 // =============================================================================
 // STREAMING
 // =============================================================================
+
+/**
+ * One fragment of a tool call, as a streaming provider sends it.
+ *
+ * OpenRouter streams a call in pieces distributed across many events: the first
+ * fragment carries the `id` and function `name`, and every fragment after that
+ * carries a slice of the JSON arguments. Fragments from several parallel calls
+ * are interleaved, distinguished only by `index`.
+ *
+ * This is deliberately **not** `LumenToolCall`. A chunk is not a call: half of a
+ * call parsed as though it were complete is exactly the bug that produces a
+ * wrong side effect. Consumers collect deltas and call
+ * `assembleToolCallDeltas()` once the stream ends.
+ */
+export interface LumenToolCallDelta {
+	/** Which call this belongs to. Providers index from 0 within one response. */
+	index: number;
+
+	/** Present on the first fragment for an index. */
+	id?: string;
+
+	/** Tool name. Present on the first fragment, occasionally repeated. */
+	name?: string;
+
+	/** A slice of the JSON arguments. Concatenate in arrival order, per index. */
+	argumentsDelta?: string;
+}
 
 export interface LumenStreamChunk {
 	/** Partial content */
@@ -169,6 +281,22 @@ export interface LumenStreamChunk {
 
 	/** Whether this is the final chunk */
 	done: boolean;
+
+	/**
+	 * Tool-call fragments in this chunk, if any. Absent on text-only chunks.
+	 *
+	 * Empty-but-present is meaningful: a provider may open a tool call before it
+	 * has anything to put in it.
+	 */
+	toolCallDeltas?: LumenToolCallDelta[];
+
+	/**
+	 * Why generation stopped. Only on the final chunk.
+	 *
+	 * A stream that ends with `length` was cut off, so any tool-call fragments
+	 * collected from it are incomplete JSON and must not be run.
+	 */
+	finishReason?: LumenFinishReason;
 
 	/** Final usage stats (only on done=true) */
 	usage?: LumenUsage;

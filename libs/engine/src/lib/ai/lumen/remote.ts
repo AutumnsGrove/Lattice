@@ -11,6 +11,8 @@
 
 import { z } from "zod";
 import type {
+	LumenMessage,
+	LumenUsage,
 	LumenRequest,
 	LumenResponse,
 	LumenEmbeddingRequest,
@@ -23,6 +25,53 @@ import type {
 } from "./types.js";
 
 // =============================================================================
+// Wire format
+// =============================================================================
+
+/**
+ * Map a message onto the worker's wire shape.
+ *
+ * The worker API is snake_case (`tool_call_id`, `tool_calls`, `tenant_id`),
+ * while the engine types are camelCase. Without this, a tool turn would be sent
+ * with fields the worker schema does not know about, z.object strips them, and
+ * step two of a loop would arrive at the provider as a bare message with no id —
+ * a rejection several layers away from the mistake.
+ */
+function toWireMessage(message: LumenMessage): Record<string, unknown> {
+	const wire: Record<string, unknown> = {
+		role: message.role,
+		content: message.content,
+	};
+
+	if (message.toolCalls?.length) wire.tool_calls = message.toolCalls;
+	if (message.toolCallId) wire.tool_call_id = message.toolCallId;
+	if (message.name) wire.name = message.name;
+
+	return wire;
+}
+
+/**
+ * Map wire usage back onto the engine's shape.
+ *
+ * `cost_source` is snake_case on the wire. Dropping it here would make every
+ * cost at the caller look like a first-party figure, which is the opposite of
+ * what the field is for.
+ */
+function fromWireUsage(usage: {
+	input: number;
+	output: number;
+	cost: number;
+	cost_source?: "catalog" | "provider";
+}): LumenUsage {
+	return {
+		input: usage.input,
+		output: usage.output,
+		cost: usage.cost,
+		...(usage.cost_source && { costSource: usage.cost_source }),
+	};
+}
+
+// =============================================================================
 // Response Schemas (Rootwork: validate upstream responses at boundary)
 // =============================================================================
 
@@ -30,6 +79,7 @@ const UsageSchema = z.object({
 	input: z.number(),
 	output: z.number(),
 	cost: z.number(),
+	cost_source: z.enum(["catalog", "provider"]).optional(),
 });
 
 const ToolCallSchema = z.object({
@@ -41,6 +91,8 @@ const ToolCallSchema = z.object({
 	}),
 });
 
+const FinishReasonSchema = z.enum(["stop", "length", "tool_calls", "content_filter", "other"]);
+
 const InferenceDataSchema = z.object({
 	content: z.string(),
 	model: z.string(),
@@ -48,6 +100,7 @@ const InferenceDataSchema = z.object({
 	usage: UsageSchema,
 	cached: z.boolean().optional().default(false),
 	tool_calls: z.array(ToolCallSchema).optional(),
+	finish_reason: FinishReasonSchema.optional(),
 });
 
 const EmbedDataSchema = z.object({
@@ -148,7 +201,7 @@ export class RemoteLumenClient {
 	async run(request: LumenRequest, tier?: string): Promise<LumenResponse> {
 		const body = {
 			task: request.task,
-			input: request.input,
+			input: Array.isArray(request.input) ? request.input.map(toWireMessage) : request.input,
 			tenant_id: request.tenant,
 			tier,
 			options: request.options
@@ -192,10 +245,11 @@ export class RemoteLumenClient {
 			content: data.data.content,
 			model: data.data.model,
 			provider: data.data.provider as LumenResponse["provider"],
-			usage: data.data.usage,
+			usage: fromWireUsage(data.data.usage),
 			cached: data.data.cached,
 			latency: envelope.data.meta?.latencyMs ?? 0,
 			...(data.data.tool_calls && { toolCalls: data.data.tool_calls }),
+			...(data.data.finish_reason && { finishReason: data.data.finish_reason }),
 		};
 	}
 

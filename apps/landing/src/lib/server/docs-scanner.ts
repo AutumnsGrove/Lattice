@@ -169,6 +169,12 @@ function validateFrontmatter(
 		}
 	}
 
+	// Status is load-bearing: it decides whether an article renders a Planned badge,
+	// so a typo would silently read as "ordinary doc". Warn instead of staying quiet.
+	if (frontmatter.status && frontmatter.status !== "planned") {
+		warnings.push(`Unknown status "${frontmatter.status}" — only "planned" is rendered`);
+	}
+
 	// Date format validation
 	if (frontmatter.lastUpdated) {
 		const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
@@ -244,6 +250,8 @@ function parseDocFromFile(filePath: string, category: DocCategory): ScannedDoc |
 		if (frontmatter.related) doc.related = frontmatter.related;
 		if (frontmatter.keywords) doc.keywords = frontmatter.keywords;
 		if (frontmatter.order !== undefined) doc.order = frontmatter.order;
+		// Only "planned" changes how a doc renders (badge + note); other values are ignored
+		if (frontmatter.status === "planned") doc.status = "planned";
 
 		return doc;
 	} catch (error) {

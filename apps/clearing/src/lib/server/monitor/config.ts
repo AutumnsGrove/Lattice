@@ -16,6 +16,16 @@ export interface ComponentConfig {
 	checkType: "deep" | "shallow";
 	/** HTTP method to use */
 	method: "GET" | "HEAD";
+	/**
+	 * Service binding to reach the component through, when it is one of ours.
+	 *
+	 * A Worker subrequest to a hostname in the same zone re-enters the zone's
+	 * Workers routes; what comes back is a 403 or 404 from the edge, not the
+	 * service. The monitor used to report that as an outage — hence a status
+	 * page that cried wolf about services nobody had trouble using. Bindings
+	 * skip the edge entirely.
+	 */
+	binding?: "ASPEN" | "BILLING";
 }
 
 /**
@@ -31,6 +41,7 @@ export const COMPONENTS: ComponentConfig[] = [
 		url: "https://autumn.grove.place/api/health",
 		checkType: "deep",
 		method: "GET",
+		binding: "ASPEN",
 	},
 	{
 		id: "comp_cdn",
@@ -54,6 +65,7 @@ export const COMPONENTS: ComponentConfig[] = [
 		url: "https://billing.grove.place/api/health",
 		checkType: "deep",
 		method: "GET",
+		binding: "BILLING",
 	},
 	{
 		id: "comp_api",
@@ -61,6 +73,7 @@ export const COMPONENTS: ComponentConfig[] = [
 		url: "https://autumn.grove.place/api/health/api",
 		checkType: "deep",
 		method: "GET",
+		binding: "ASPEN",
 	},
 ];
 
@@ -95,6 +108,12 @@ export const INCIDENT_THRESHOLDS = {
  * Request timeout for health checks (ms)
  */
 export const REQUEST_TIMEOUT = 10000;
+
+/**
+ * How old the newest check may be before the page treats the monitor itself
+ * as down. Crons run every 5 minutes; three missed runs is more than jitter.
+ */
+export const STALE_AFTER_MINUTES = 15;
 
 /**
  * Email sender for alert notifications

@@ -856,7 +856,7 @@ Add `ref` parameter support to key landing pages:
 
 ```typescript
 // Track referrer on /hello page load
-// grove.place/hello?ref=card-front or ?ref=card-back
+// grove.place/hello?ref=card-back
 const ref = url.searchParams.get('ref') || 'direct';
 
 // Log to Vista
@@ -873,11 +873,10 @@ await fetch('https://vista-api.grove.place/track/acquisition', {
 
 #### 2. Business Card QR Tracking
 
-QR codes encode URLs with tracking parameters:
-- **Front QR:** `grove.place?ref=card-front`
+The business card carries one QR code, on the back, with a tracking parameter:
 - **Back QR:** `grove.place/hello?ref=card-back`
 
-This allows comparing which side of the card drives more engagement.
+The front of the card is design only. An earlier plan had a second QR (`grove.place?ref=card-front`) so the two sides could be compared; it was dropped to keep the card quiet. See `docs/marketing/business-card-spec.md`.
 
 #### 3. Signup Funnel
 
@@ -899,7 +898,7 @@ CREATE TABLE acquisition_events (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   event_type TEXT NOT NULL,           -- 'page_visit', 'email_signup', 'checkout_start', etc.
   page TEXT,                          -- '/hello', '/pricing', etc.
-  referrer TEXT,                      -- 'card-front', 'card-back', 'hacker-news', 'twitter', etc.
+  referrer TEXT,                      -- 'card-back', 'hacker-news', 'twitter', etc.
   utm_source TEXT,
   utm_medium TEXT,
   utm_campaign TEXT,
@@ -932,7 +931,7 @@ New page in Vista dashboard:
 
 - **Funnel Visualization** — Landing → Email → Plant → Checkout → Paid
 - **Referrer Breakdown** — Bar chart showing which sources drive traffic
-- **QR Code Effectiveness** — Card-front vs card-back comparison
+- **QR Code Effectiveness** — Business card (`card-back`) visits and conversion
 - **Conversion Rates** — By source and over time
 - **Daily/Weekly/Monthly Trends** — Line charts for each metric
 

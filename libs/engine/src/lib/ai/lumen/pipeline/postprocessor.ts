@@ -50,6 +50,10 @@ export function normalizeResponse(input: PostprocessInput): LumenResponse {
 				input.providerResponse.usage.input,
 				input.providerResponse.usage.output,
 			),
+		// Every adapter computes cost from the registry, so the default is the
+		// honest one. A provider that ever reports its own figure sets it and it
+		// survives to the caller.
+		costSource: input.providerResponse.usage.costSource ?? "catalog",
 	};
 
 	return {
@@ -61,6 +65,9 @@ export function normalizeResponse(input: PostprocessInput): LumenResponse {
 		latency,
 		...(input.providerResponse.toolCalls && {
 			toolCalls: input.providerResponse.toolCalls,
+		}),
+		...(input.providerResponse.finishReason && {
+			finishReason: input.providerResponse.finishReason,
 		}),
 	};
 }

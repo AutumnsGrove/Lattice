@@ -32,8 +32,6 @@ Above  Pattern   Boundaries  Plans    Implementation
 
 ### Phase 1: SOAR
 
-_The eagle spreads its wings and rises above the canopy..._
-
 Before designing anything, gain altitude. See the full context:
 
 **Understand the Territory:**
@@ -79,8 +77,6 @@ tags:
 ---
 
 ### Phase 2: SURVEY
-
-_Eyes sharpen. The eagle sees patterns invisible from the ground..._
 
 Analyze the landscape for architectural patterns:
 
@@ -138,8 +134,6 @@ User Action → API Gateway → Service → Database
 
 ### Phase 3: DESIGN
 
-_The eagle traces circles in the sky, defining territories..._
-
 Create the architectural blueprint:
 
 **Choose the Pattern:**
@@ -196,8 +190,6 @@ Document WHY, not just WHAT:
 ---
 
 ### Phase 4: BLUEPRINT
-
-_The eagle descends to mark the boundaries, leaving precise marks..._
 
 Document the architecture so others can build it:
 
@@ -257,8 +249,6 @@ Document the architecture so others can build it:
 
 ### Phase 5: BUILD
 
-_The eagle guides the builders, circling overhead to ensure the vision holds..._
-
 Guide implementation while maintaining architectural integrity:
 
 **Implementation Sequence:**
@@ -305,26 +295,11 @@ Architecture isn't static. Plan for:
 
 ## Eagle Rules
 
-### Vision
+**Vision.** See the whole before designing the parts. The eagle doesn't get lost in the trees because it never forgets the forest.
 
-See the whole before designing the parts. The eagle doesn't get lost in the trees because it never forgets the forest.
+**Boundaries.** Clear boundaries create freedom. When domains are well-defined, teams can move independently without stepping on each other.
 
-### Boundaries
-
-Clear boundaries create freedom. When domains are well-defined, teams can move independently without stepping on each other.
-
-### Pragmatism
-
-Perfect architecture implemented late loses to good architecture shipped on time. Start simple, add complexity only when needed.
-
-### Communication
-
-Use soaring metaphors:
-
-- "Rising above..." (gaining context)
-- "From this height..." (seeing patterns)
-- "Tracing circles..." (defining boundaries)
-- "The blueprint holds..." (architecture validated)
+**Pragmatism.** Perfect architecture implemented late loses to good architecture shipped on time. Start simple, add complexity only when needed.
 
 ---
 
@@ -337,24 +312,6 @@ Use soaring metaphors:
 - Ignore operational concerns (how will this be deployed/monitored?)
 - Skip documentation (architecture dies when it lives only in one head)
 - Build perfect systems that never ship (architecture serves product, not the reverse)
-
----
-
-## Example Architecture
-
-**User:** "Design the architecture for a notification system"
-
-**Eagle flow:**
-
-1. 🦅 **SOAR** — "System needs to send emails, push, SMS to millions of users. Constraints: must be reliable, retry failed sends, handle rate limits."
-
-2. 🦅 **SURVEY** — "Current system sends synchronously during request. This blocks and fails on provider outages. Need async queue, separate service."
-
-3. 🦅 **DESIGN** — "Event-driven: Core app emits events → Queue → Notification service → Providers. Separate channels per provider for isolation."
-
-4. 🦅 **BLUEPRINT** — Document: API contract for event publishing, queue schema, retry logic, monitoring dashboard, provider adapter interface
-
-5. 🦅 **BUILD** — Guide implementation: queue first, then service, then provider adapters, then client integration
 
 ---
 

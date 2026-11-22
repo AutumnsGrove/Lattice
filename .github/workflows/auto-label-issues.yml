@@ -1,350 +1,301 @@
 ---
 name: Auto-Label Issues
 
+# One model call, one vocabulary file, no regex.
+#
+# The vocabulary is .github/labels.yml. This workflow never names a label of
+# its own: add one there (group: type / component / pattern) and it becomes
+# available here with no change to this file. Change a `when` rule and the
+# labeler's judgement changes with it.
+#
+# Why this exists: the previous version had 34 regex rule blocks, matched body
+# text as well as titles, and labelled whatever it could find. It put
+# `pattern:threshold` on a NCMEC decision (#1625), `pattern:sentinel` on an
+# E2E test suite (#1479), and `ivy` on a Porch issue (#1626) — Ivy is shelved.
+# A regex cannot tell that a queue is not a rate limit. This can.
+#
+# Scope, deliberately narrow:
+#   - Fires when Autumn opens an issue, and only Autumn. Anyone else's issue
+#     keeps whatever a human gave it; the manual button is the way in.
+#   - Additive only. It never removes a label a human applied.
+#   - Not on `edited`: a title typo is not a reason to spend a model call, and
+#     two runs can disagree with each other. Edit the labels, or press run.
+
 "on":
   issues:
-    types: [opened, edited]
+    types: [opened]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Issue number to label
+        required: true
+
+concurrency:
+  group: auto-label-${{ github.event.issue.number || inputs.issue_number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
 
 jobs:
   label:
+    # The author gate. An issue body is untrusted input and this job can write
+    # labels; giving every stranger who opens an issue a shot at the prompt is
+    # not a trade worth making. Autumn's own issues are the 99% case.
+    #
+    # Claude files issues as her, so they are covered. Anyone else: Actions →
+    # Auto-Label Issues → Run workflow → issue number.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.issue.user.login == 'AutumnsGrove' &&
+      github.event.issue.pull_request == null)
     runs-on: ubuntu-latest
-    permissions:
-      issues: write
-      contents: read
-
     steps:
-      - name: Label by Grove component
-        uses: actions/github-script@v8
+      - name: Checkout
+        uses: actions/checkout@v5
         with:
-          script: |
-            const issue = context.payload.issue;
-            const title = issue.title.toLowerCase();
-            const body = (issue.body || '').toLowerCase();
+          fetch-depth: 1
+          persist-credentials: false
 
-            // --- Component Labels ---
-            // Two strategies based on name uniqueness:
-            //
-            // UNIQUE names (heartwood, lattice, foliage, mycelium, lumen,
-            //   patina, curio, arbor, petal): Safe to match anywhere
-            //   (title or body) since these words don't appear in normal
-            //   English.
-            //
-            // AMBIGUOUS names (clearing, shade, plant, amber, vine, ivy,
-            //   meadow, forests, graft): Only match the bare product name
-            //   in the TITLE. In the body, require specific compound
-            //   phrases that clearly refer to the Grove product, not the
-            //   common English word.
+      # The model may only choose from labels it was shown, and the guard
+      # checks against the same generated list. One source, two uses, no drift.
+      - name: Build the vocabulary
+        id: vocab
+        run: |
+          set -euo pipefail
+          # name → group, so the guard can enforce one label per group.
+          awk '
+            /^  - name:/ { name = $3 }
+            /^    group:/ { print name "\t" $2 }
+          ' .github/labels.yml > "$RUNNER_TEMP/labels.tsv"
 
-            // Unique product names - safe to match anywhere
-            const uniqueComponents = [
-              {
-                label: 'heartwood',
-                proper: /\bheartwood\b/,
-                titleFallback: /\b(oauth|session.?do|pkce|2fa)\b/
-              },
-              {
-                label: 'lattice',
-                proper: /\blattice\b/,
-                titleFallback: /\b(lattice|monorepo|multi.?tenant)\b/
-              },
-              {
-                label: 'foliage',
-                proper: /\bfoliage\b/,
-                titleFallback: /\b(theme engine|design tokens|per.tenant theming)\b/
-              },
-              {
-                label: 'mycelium',
-                proper: /\bmycelium\b/,
-                titleFallback: /\b(mcp server|mcp tool|model context protocol)\b/
-              },
-              {
-                label: 'lumen',
-                proper: /\blumen\b/,
-                titleFallback: /\b(ai gateway|llm routing|ai pipeline)\b/
-              },
-              {
-                label: 'patina',
-                proper: /\bpatina\b/,
-                titleFallback: /\b(automated backup|cold storage backup)\b/
-              },
-              {
-                label: 'curio',
-                proper: /\bcurios?\b/,
-                titleFallback: /\b(museum exhibit|cabinet of wonders|guestbook)\b/
-              },
-              {
-                label: 'arbor',
-                proper: /\barbor\b/,
-                titleFallback: /\b(admin panel|admin dashboard|admin interface)\b/
-              },
-              {
-                label: 'petal',
-                proper: /\bpetal\b/,
-                titleFallback: /\b(content moderation|csam|photodna|image moderation)\b/
-              },
-              {
-                label: 'landing',
-                proper: /\blanding site\b/,
-                titleFallback: /\b(grove\.place marketing|knowledge base|forest page)\b/
-              },
-            ];
+          # The only labels a machine may assign.
+          awk -F'\t' '$2 ~ /^(type|component|pattern)$/ { print $1 }' \
+            "$RUNNER_TEMP/labels.tsv" | sort -u > "$RUNNER_TEMP/allowed.txt"
 
-            // --- Pattern Labels ---
-            // Patterns are reusable architectural solutions. Match pattern
-            // names anywhere (title or body) since they're unique Grove
-            // terminology. Note: Uses github-script JavaScript API (safe),
-            // not shell interpolation.
-            const patterns = [
-              {
-                label: 'pattern:firefly',
-                pattern: /\bfirefly\b/,
-                fallback: /\b(ephemeral server|ignite.*fade|on.demand.*server)\b/
-              },
-              {
-                label: 'pattern:loom',
-                pattern: /\bloom\b/,
-                fallback: /\b(durable object|session.?do|tenant.?do|post.?do)\b/
-              },
-              {
-                label: 'pattern:prism',
-                pattern: /\bprism\b/,
-                fallback: /\b(glassmorphism|seasonal theme|design system layer)\b/
-              },
-              {
-                label: 'pattern:sentinel',
-                pattern: /\bsentinel\b/,
-                fallback: /\b(load test|scale validation|ramp.up test)\b/
-              },
-              {
-                label: 'pattern:songbird',
-                pattern: /\bsongbird\b/,
-                fallback: /\b(prompt injection|canary.*kestrel|three.layer defense)\b/
-              },
-              {
-                label: 'pattern:threshold',
-                pattern: /\bthreshold\b/,
-                fallback: /\b(rate limit|abuse prevention|graduated response)\b/
-              },
-            ];
+          count=$(wc -l < "$RUNNER_TEMP/allowed.txt" | tr -d ' ')
+          echo "count=$count" >> "$GITHUB_OUTPUT"
 
-            // Ambiguous product names - bare name only in title, specific
-            // phrases in body
+          # Fail loudly rather than quietly labelling nothing forever. This
+          # awk knows the manifest's shape; if the shape moves, fix it here.
+          if [ "$count" -lt 10 ]; then
+            echo "::error file=.github/labels.yml::Parsed only $count automation labels."
+            echo "::error::The manifest layout changed — update the awk in this workflow."
+            exit 1
+          fi
+          echo "Vocabulary: $count labels"
 
-            // Pre-declare long body-match patterns for line-length compliance
-            const shadeBody = new RegExp(
-              '\\b(shade layer|shade protection|shade defense|ai crawler' +
-              '|scraper protection|content protection|data harvesting' +
-              '|bot defense|seven.layer defense)\\b'
-            );
-            const clearingBody = new RegExp(
-              '\\b(clearing.monitor|clearing.phase|status page' +
-              '|uptime monitor|health.check endpoint' +
-              '|incident management|platform health)\\b'
-            );
-            const plantBody = new RegExp(
-              '\\b(plant onboarding|plant signup|plant deployment' +
-              '|signup flow|onboarding flow|lemonsqueezy|lemon.?squeezy' +
-              '|store verification|tenant onboarding)\\b'
-            );
-            const amberBody = new RegExp(
-              '\\b(amber storage|amber cdn|amber zip|r2 storage' +
-              '|image storage|cdn storage|jxl|jpeg.?xl|image.?pipeline)\\b'
-            );
-            const ivyBody = new RegExp(
-              '\\b(ivy mail|ivy email|grove\\.place email|email client' +
-              '|resend broadcast|email notification|privacy.first email)\\b'
-            );
-            const meadowBody =
-              /\b(meadow social|meadow feed|social feed|community feed|opt.in community)\b/;
-            const forestsBody =
-              /\b(forest page|community grove|themed communit|the prism|the terminal)\b/;
-            const vineBody = new RegExp(
-              '\\b(vine connection|margin note|gutter content' +
-              '|curator.s? note|content relationship)\\b'
-            );
-            const graftBody =
-              /\b(feature flag|graft control|per.tenant feature|grafts? admin|graft.* ui)\b/;
+      - name: Install pi
+        run: npm install --global @earendil-works/pi-coding-agent
 
-            const ambiguousComponents = [
-              {
-                label: 'shade',
-                titleMatch: /\bshade\b/,
-                bodyMatch: shadeBody,
-                titleFallback: /\b(ai crawler protection|scraper defense|content harvesting)\b/
-              },
-              {
-                label: 'clearing',
-                titleMatch: /\bclearing\b(?!\s+(up|out|away|the|things?))/,
-                bodyMatch: clearingBody,
-                titleFallback: /\b(status page|uptime monitor|platform health)\b/
-              },
-              {
-                label: 'plant',
-                titleMatch: /\bplant\b(?!\s+(a|the|some|more|trees?|based))/,
-                bodyMatch: plantBody,
-                titleFallback: /\b(signup flow|onboarding flow|tenant onboarding|lemonsqueezy)\b/
-              },
-              {
-                label: 'amber',
-                titleMatch: /\bamber\b/,
-                bodyMatch: amberBody,
-                titleFallback: /\b(r2 storage|cdn storage|image pipeline|jxl|jpeg.?xl)\b/
-              },
-              {
-                label: 'ivy',
-                titleMatch: /\bivy\b/,
-                bodyMatch: ivyBody,
-                titleFallback: /\b(email client|email notification|resend broadcast)\b/
-              },
-              {
-                label: 'meadow',
-                titleMatch: /\bmeadow\b/,
-                bodyMatch: meadowBody,
-                titleFallback: /\b(social feed|community feed)\b/
-              },
-              {
-                label: 'forests',
-                titleMatch: /\bforests?\b(?!\s+page)/,
-                bodyMatch: forestsBody,
-                titleFallback: /\b(forest page|community grove)\b/
-              },
-              {
-                label: 'vine',
-                titleMatch: /\bvines?\b/,
-                bodyMatch: vineBody,
-                titleFallback: /\b(margin note|curator.s? note|content relationship)\b/
-              },
-              {
-                label: 'graft',
-                titleMatch: /\bgrafts?\b/,
-                bodyMatch: graftBody,
-                titleFallback: /\b(feature flag|per.tenant feature)\b/
-              },
-            ];
-
-            // --- Type Labels (pick ONE, highest specificity wins) ---
-            // Only matches against the title to avoid false positives from
-            // body text.
-            const typesByPriority = [
-              {
-                label: 'security',
-                pattern: /\b(security|vulnerabilit|xss|csrf)\b/
-              },
-              {
-                label: 'bug',
-                pattern: /\[bug\]|\bbug\b/
-              },
-              {
-                label: 'feature',
-                pattern: /\[feat(ure)?\]|\bimplement\b/
-              },
-              {
-                label: 'enhancement',
-                pattern: /\b(enhance|improve|optimize|refactor)\b/
-              },
-              {
-                label: 'documentation',
-                pattern: /\b(docs?|documentation|guide)\b/
-              },
-            ];
-
-            // --- Priority Labels (pick ONE, highest wins) ---
-            // Only matches against the title.
-            const prioritiesByRank = [
-              {
-                label: 'priority-critical',
-                pattern: /\b(critical|urgent|blocker)\b/
-              },
-              {
-                label: 'priority-high',
-                pattern: /\b(high.?priority|important)\b/
-              },
-              {
-                label: 'priority-low',
-                pattern: /\b(low.?priority|nice.to.have|eventually|post.launch)\b/
-              },
-            ];
-
-            const labelsToAdd = new Set();
-
-            // Check unique components: proper nouns safe to match in
-            // title+body
-            for (const { label, proper, titleFallback } of uniqueComponents) {
-              if (proper.test(title) || proper.test(body)) {
-                labelsToAdd.add(label);
-              } else if (titleFallback.test(title)) {
-                labelsToAdd.add(label);
+      # OpenCode Go (not Zen — Go is the subscription for open coding models;
+      # Zen is the pay-per-request catalog). The models below all live on Go's
+      # OpenAI-compatible chat-completions endpoint, so pi reaches them through
+      # models.json rather than a login step. Pi is on Go's validated-client
+      # list and sends the x-opencode-session header Go asks for, which is why
+      # this works without a custom-header wrapper.
+      #
+      # The key is interpolated from the environment at request time; it is
+      # never written to disk.
+      #
+      # Only models whose Go endpoint is chat/completions can live in this
+      # provider entry. Go also serves some models on /responses and /messages
+      # (MiniMax, Qwen) — those need their own provider entry, not a new id here.
+      # glm-5.3-flash is the default because labelling costs about $0.0002 an
+      # issue and it retains nothing for zero days.
+      - name: Point pi at OpenCode Go
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.pi/agent"
+          cat > "$HOME/.pi/agent/models.json" <<'JSON'
+          {
+            "$schema": "https://pi.dev/schemas/models.schema.json",
+            "providers": {
+              "opencode-go": {
+                "baseUrl": "https://opencode.ai/zen/go/v1",
+                "api": "openai-completions",
+                "apiKey": "${OPENCODE_GO_API_KEY}",
+                "models": [
+                  { "id": "deepseek-v4.1-flash" },
+                  { "id": "glm-5.3-flash" },
+                  { "id": "glm-5.3" },
+                  { "id": "kimi-k3" },
+                  { "id": "deepseek-v4-pro" }
+                ]
               }
             }
+          }
+          JSON
 
-            // Check patterns: match pattern name or fallback phrases
-            // anywhere
-            for (const { label, pattern, fallback } of patterns) {
-              if (pattern.test(title) || pattern.test(body)) {
-                labelsToAdd.add(label);
-              } else if (fallback.test(title) || fallback.test(body)) {
-                labelsToAdd.add(label);
-              }
-            }
+      - name: Ask pi for labels
+        id: ask
+        env:
+          OPENCODE_GO_API_KEY: ${{ secrets.OPENCODE_GO_API_KEY }}
+          LABEL_MODEL: ${{ vars.LABEL_MODEL || 'glm-5.3-flash' }}
+          ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
 
-            // Check ambiguous components: bare name title-only, compound
-            // phrases in body
-            for (const { label, titleMatch, bodyMatch, titleFallback } of ambiguousComponents) {
-              if (titleMatch.test(title)) {
-                labelsToAdd.add(label);
-              } else if (bodyMatch.test(body)) {
-                labelsToAdd.add(label);
-              } else if (titleFallback.test(title)) {
-                labelsToAdd.add(label);
-              }
-            }
+          this_number="$ISSUE_NUMBER"
+          if [ -z "${this_number:-}" ]; then
+            echo "::error::No issue number. Pass one to the manual trigger."
+            exit 1
+          fi
 
-            // Cap component labels at 3 max
-            const componentLabels = [...labelsToAdd];
-            if (componentLabels.length > 3) {
-              // Keep only title-matched components
-              labelsToAdd.clear();
-              for (const { label, proper, titleFallback } of uniqueComponents) {
-                if (proper.test(title) || titleFallback.test(title)) {
-                  labelsToAdd.add(label);
-                }
-              }
-              for (const { label, titleMatch, titleFallback } of ambiguousComponents) {
-                if (titleMatch.test(title) || titleFallback.test(title)) {
-                  labelsToAdd.add(label);
-                }
-              }
-            }
+          # A repo variable that names a model this provider entry does not
+          # declare fails inside pi with something unreadable. Say it plainly.
+          if ! grep -q "\"id\": \"$LABEL_MODEL\"" "$HOME/.pi/agent/models.json"; then
+            echo "::error::LABEL_MODEL is '$LABEL_MODEL' — not declared by opencode-go."
+            declared=$(grep -o '\"id\": \"[^\"]*\"' "$HOME/.pi/agent/models.json" \
+              | cut -d'\"' -f4 | paste -sd' ' -)
+            echo "::error::Declared: $declared"
+            exit 1
+          fi
 
-            // Check types: pick the first (highest priority) match in
-            // title only
-            for (const { label, pattern } of typesByPriority) {
-              if (pattern.test(title)) {
-                labelsToAdd.add(label);
-                break; // Only one type label
-              }
-            }
+          # Re-fetch through the API so manual runs and opened runs take the
+          # same path, and so the body is the one stored, not a payload echo.
+          gh issue view "$this_number" --json title,body \
+            > "$RUNNER_TEMP/issue.json"
 
-            // Check priorities: pick the first (highest rank) match in
-            // title only
-            for (const { label, pattern } of prioritiesByRank) {
-              if (pattern.test(title)) {
-                labelsToAdd.add(label);
-                break; // Only one priority label
-              }
-            }
+          # Everything the model needs goes in the message. An @-reference is
+          # an argv form, not something to embed in a prompt string — the first
+          # version did that, and the model spent its turn trying to `cat` a
+          # filename it had not been given.
+          {
+            echo "## Vocabulary — .github/labels.yml"
+            echo
+            cat .github/labels.yml
+            echo
+            echo "## Issue under review"
+            echo
+            jq -r '"Title: " + .title + "\n\n" + (.body // "(no body)")' "$RUNNER_TEMP/issue.json"
+          } > "$RUNNER_TEMP/issue.md"
 
-            // Add labels if any were found
-            const labels = [...labelsToAdd];
-            if (labels.length > 0) {
-              await github.rest.issues.addLabels({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: issue.number,
-                labels
-              });
+          pi \
+            --print \
+            --no-session \
+            --no-tools \
+            --no-approve \
+            --no-context-files \
+            --no-extensions \
+            --no-skills \
+            --no-mcp \
+            --provider opencode-go \
+            --model "$LABEL_MODEL" \
+            --thinking low \
+            "You label GitHub issues for the Grove codebase.
 
-              console.log(`Added ${labels.length} labels: ${labels.join(', ')}`);
-            } else {
-              console.log('No labels matched for this issue.');
-            }
+          You have no tools and no filesystem. Do not attempt to read a file or
+          call one — everything you need is in this message, below.
+
+          ## Vocabulary
+          The label manifest is included below. Each label carries a \`when\`
+          line; that line is the rule, and the label's name is not evidence of
+          anything.
+
+          ## Your job
+          Read the issue below and choose the labels that apply.
+
+          Reply with JSON and nothing else — no prose, no code fence:
+          {\"labels\": [\"...\"], \"why\": \"one sentence\"}
+
+          ## Rules, in order of importance
+          1. Only labels whose \`group\` is type, component, or pattern. Never
+             size, priority, readiness, or machine — those are human calls.
+          2. At most one type, one component, one pattern. Fewer is fine.
+          3. A component label requires the product to be named in the title, or
+             the issue to be plainly about that product's own code. A word
+             appearing in the body is not enough — that is how a Porch issue got
+             labelled Ivy.
+          4. If nothing clearly applies, return an empty list. An unlabelled
+             issue is better than a wrong label, and it is always an acceptable
+             answer.
+          " < "$RUNNER_TEMP/issue.md" > "$RUNNER_TEMP/reply.txt" 2>"$RUNNER_TEMP/pi.err" \
+            || { echo "::error::pi failed to run — see the log."
+                 cat "$RUNNER_TEMP/pi.err"
+                 exit 1; }
+
+          # Models like to wrap JSON in a fence even when told not to.
+          sed -e '/^```/d' "$RUNNER_TEMP/reply.txt" \
+            | jq -c 'if type == "object" then . else error("not an object") end' \
+            > "$RUNNER_TEMP/reply.json" 2>/dev/null \
+            || { echo "::error::pi did not return usable JSON:"
+                 cat "$RUNNER_TEMP/reply.txt"
+                 exit 1; }
+
+          echo "Reply: $(cat "$RUNNER_TEMP/reply.json")"
+
+      # The model proposes; this decides. A prompt injection in an issue body
+      # can at most propose a name that is not in the vocabulary, and that name
+      # is dropped here.
+      - name: Apply the labels it can justify
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          proposed=$(jq -r '.labels[]? // empty' "$RUNNER_TEMP/reply.json")
+          why=$(jq -r '.why // ""' "$RUNNER_TEMP/reply.json")
+
+          # Groups already spoken for by an existing label — this is what stops
+          # a manual re-run stacking a second `type` on a deliberate one.
+          gh issue view "$ISSUE_NUMBER" --json labels \
+            | jq -r '.labels[].name' > "$RUNNER_TEMP/existing.txt"
+          used_groups=""
+          while read -r existing; do
+            [ -z "$existing" ] && continue
+            group=$(awk -F'\t' -v n="$existing" '$1 == n { print $2 }' "$RUNNER_TEMP/labels.tsv")
+            [ -n "$group" ] && used_groups="$used_groups $group"
+          done < "$RUNNER_TEMP/existing.txt"
+
+          kept=""
+          dropped=""
+          taken=""
+          for label in $proposed; do
+            if ! grep -Fxq -- "$label" "$RUNNER_TEMP/allowed.txt"; then
+              dropped="$dropped $label"
+              continue
+            fi
+            group=$(awk -F'\t' -v n="$label" '$1 == n { print $2 }' "$RUNNER_TEMP/labels.tsv")
+            case " $used_groups " in
+              *" $group "*)
+                taken="$taken $label"
+                continue
+                ;;
+            esac
+            kept="${kept:+$kept,}$label"
+            used_groups="$used_groups $group"
+          done
+
+          {
+            echo "## Issue #$ISSUE_NUMBER"
+            echo ""
+            echo "**Reasoning:** ${why:-(none given)}"
+            echo ""
+            if [ -n "$kept" ]; then
+              echo "**Applied:** \`$kept\`"
+            else
+              echo "**Applied:** nothing"
+            fi
+            if [ -n "$taken" ]; then
+              echo ""
+              echo "**Skipped (that group already has a label):** \`${taken# }\`"
+            fi
+            if [ -n "$dropped" ]; then
+              echo ""
+              echo "**Dropped (not in the manifest):** \`${dropped# }\`"
+            fi
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+          if [ -z "$kept" ]; then
+            echo "::notice::Nothing applied."
+            echo "::notice::proposed=[${proposed//$'\n'/ }]"
+            echo "::notice::skipped=[${taken# }] dropped=[${dropped# }]"
+            exit 0
+          fi
+
+          gh issue edit "$ISSUE_NUMBER" --add-label "$kept"
+          echo "Applied: $kept"

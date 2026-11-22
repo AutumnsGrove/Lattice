@@ -9,6 +9,13 @@
 **Overall Risk Rating:** MEDIUM
 **Branch:** 20 commits, 69 files changed, ~5000 lines added
 
+> **Correction — 2026-11-17 (#1683, #1691, #1692).** This report assessed code, not deployed state, and two of its claims did not survive contact with production:
+>
+> - **Free account IP limiting never ran.** `free_account_creation_log` does not exist in `grove-engine-db`, and both call sites swallowed every error. The limiter was deleted on 2026-11-17; identity-based counting is tracked in #1681.
+> - **Migration 053 is logged applied and was never applied.** `tenants.last_activity_at`, `tenants.reclamation_status` and `reclaimed_accounts` are all absent. `updateLastActivity()` has been writing to a non-existent column on every post save and image upload since February. Tracked in #1691 and #1692.
+>
+> The inline claims below are annotated rather than deleted, so the record of what was believed stays intact.
+
 ### Key Findings
 
 | Severity | Count |
@@ -43,7 +50,7 @@ This PR introduces:
 - **Wanderer tier**: Free plan with constrained limits (25 posts, 100 MB, 100 drafts)
 - **UpgradesGraft**: Engine graft module for cultivation (upgrade), tending (billing portal), and growth (status)
 - **Activity tracking**: Fire-and-forget `updateLastActivity()` for future inactivity reclamation
-- **Free account IP limiting**: 3 free accounts per IP per 30-day rolling window
+- **Free account IP limiting**: 3 free accounts per IP per 30-day rolling window — *removed 2026-11-17 (#1683): never deployed, never ran, deleted as dead code*
 - **Tier enforcement**: Post/draft limits in blooms API
 - **Migration 053**: New tables/columns for wanderer support
 
@@ -77,8 +84,8 @@ Request body (targetStage,        │  API route handlers (cultivate,
 Stripe webhooks                   │  Webhook signature verification
   (signature verified)            │
                                   │
-Free tier creation                │  IP rate limiting
-  (no card required)              │   → free_account_creation_log
+Free tier creation                │  (no abuse gate at signup)
+  (no card required)              │   — identity blocks tracked in #1681
                                   │
 Blooms POST                       │  Tier-based limits check
   (content creation)              │   → platform_billing plan lookup
@@ -94,7 +101,7 @@ Blooms POST                       │  Tier-based limits check
 | Provider customer ID | HIGH           | D1                              | Never exposed to client    |
 | Payment method info  | MEDIUM         | D1 (last4 + brand only)         | Filtered by growth API     |
 | Activity timestamps  | LOW            | D1 (tenants.last_activity_at)   | Tenant-scoped              |
-| IP addresses         | MEDIUM         | D1 (free_account_creation_log)  | 30-day rolling window      |
+| IP addresses         | MEDIUM         | *never stored* — table was never created        | ~~30-day rolling window~~ removed #1683 |
 | Reclamation status   | LOW            | D1 (tenants.reclamation_status) | Internal only              |
 
 ---
@@ -553,7 +560,7 @@ The migration adds:
 - `last_activity_at` column to tenants (nullable, safe)
 - `reclamation_status` column with 'active' default
 - `reclaimed_accounts` table with proper foreign key
-- `free_account_creation_log` with IP + timestamp indexes
+- ~~`free_account_creation_log` with IP + timestamp indexes~~ — **not in production**; the table was never created and the feature was deleted in #1683
 - Partial index for efficient reclamation cron queries
 
 All nullable columns have sensible defaults. No destructive changes.
@@ -646,7 +653,7 @@ The `/gathering-feature` skill calls for a full feature lifecycle: Bloodhound→
 | HAWK-010 | Billing PATCH ReferenceError | Call PATCH /api/billing with cancel action — should 500                          | HIGH       |
 | HAWK-011 | returnTo open redirect       | Send `returnTo: "https://evil.com"` to tend API — check Stripe portal return URL | HIGH       |
 | HAWK-012 | shedUrl field mismatch       | Click "Manage Billing" on arbor account page — should fail silently              | HIGH       |
-| N/A      | IP rate limit effectiveness  | Create 4+ free accounts from same IP within 30 days                              | MEDIUM     |
+| N/A      | ~~IP rate limit effectiveness~~ | **removed #1683** — the limiter was never deployed and is deleted | — |
 | N/A      | Tier limit enforcement       | Create 26 posts as wanderer tier — should be blocked                             | MEDIUM     |
 | N/A      | Activity tracking            | Check tenants.last_activity_at updates on API calls                              | MEDIUM     |
 

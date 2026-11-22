@@ -177,9 +177,13 @@ For AI-generated images only. Re-runs Layer 2 classification on output.
 
 | Provider | Model | Timeout | Role | ZDR |
 |----------|-------|---------|------|-----|
-| `workers_ai_llama4` | `@cf/meta/llama-4-scout-17b-16e-instruct` | 15s | Primary | Yes |
-| `workers_ai_llama3` | CF Llama 3.2 Vision | 10s | Fallback | Yes |
-| `together_ai` | `meta-llama/Llama-4-Scout-17B-16E-Instruct` | 20s | Tertiary | Yes |
+| `openrouter_haiku` | Claude Haiku 5.5 | 20s | Primary | No |
+| `openrouter_gemma` | Gemma 4 26B | 20s | Fallback | No |
+| `workers_ai_llama4` | Llama 4 Scout (Cloudflare Workers AI) | 15s | Final fallback | Yes |
+
+Models come from Lumen's registry; the source of truth is `PETAL_PROVIDERS` in
+`libs/engine/src/lib/platform/config/petal.ts`. OpenRouter and Cloudflare Workers AI are the
+only inference paths. Together.ai was retired as a direct provider in #1600.
 
 ### Circuit breaker (in-memory, per-isolate)
 

@@ -20,7 +20,7 @@ That's it. The script handles migrations, seeding, and starting everything in th
 
 ## Prerequisites
 
-- **Node.js 20+** and **pnpm** installed
+- **Node.js 22+** and **pnpm** installed (CI and `.nvmrc` pin 24)
 - **Google OAuth credentials** — needed if you want to test sign-in ([see Auth Setup](#auth-setup-google-oauth))
 - `services/heartwood/.dev.vars` — copy from `.dev.vars.example` and fill in your credentials
 

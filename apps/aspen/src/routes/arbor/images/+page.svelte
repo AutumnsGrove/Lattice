@@ -8,17 +8,19 @@
 		data,
 	}: {
 		data: {
-			jxl: { jxlEnabled: boolean; jxlRolloutPercentage: number; jxlKillSwitchActive: boolean };
 			grafts?: Record<string, boolean>;
+			/** From the page's own load — the real gate, not just the graft. */
+			uploadsAllowed?: boolean | null;
+			uploadAccessUrl?: string | null;
 		};
 	} = $props();
 
-	// Feature flag for image uploads (cascaded from Arbor layout flags)
-	const uploadsEnabled = $derived(data.grafts?.image_uploads ?? true);
-
-	// Feature flags from server (reactive to data changes)
-	const jxlFeatureEnabled = $derived(data.jxl?.jxlEnabled ?? false);
-	const jxlKillSwitchActive = $derived(data.jxl?.jxlKillSwitchActive ?? false);
+	// The graft says the feature exists; the gate says this grove may use it today,
+	// and `uploads_suspended` is what a new grove trips (#1626). Null means the
+	// gate could not be evaluated, so trust the graft rather than invent a banner.
+	const uploadsEnabled = $derived(
+		(data.grafts?.image_uploads ?? true) && (data.uploadsAllowed ?? true),
+	);
 
 	// Copy format preference - load from localStorage or default to 'url'
 	const COPY_FORMAT_STORAGE_KEY = "grove-copy-format";
@@ -66,8 +68,7 @@
 
 	<ImageUploadForm
 		{uploadsEnabled}
-		{jxlFeatureEnabled}
-		{jxlKillSwitchActive}
+		uploadAccessUrl={data.uploadAccessUrl ?? null}
 		{copyFormat}
 		{copiedItem}
 		onCopyFormatChange={(format) => (copyFormat = format)}

@@ -1,3 +1,92 @@
+# Handoff — Signup abuse hardening (2026-11-17)
+
+Start here next time. This slice is the cluster of issues about bot signups
+coming through the email path (#1677, #1678, #1679, #1680, #1681, #1682, #1683,
+#1684) plus two findings filed along the way (#1691, #1692).
+
+## #1596 closed — and what it actually took (2026-11-18)
+
+**#1596 is done and merged (#1738, with #1740 on top).** Three slices, in the end:
+
+1. **§A policy copy** — AUP §1.4 now names link schemes and SEO abuse, §3.1
+   requires disclosure, and a new §1.9 is *one account per person or business,
+   operated by a human*, aliases counted as one inbox. ToS §16.2 adds spam and
+   automated signup to the termination list with "we act first, then email";
+   new §16.4 describes what a removal takes away.
+2. **Identity deletion** — `groveauth-identity.ts`, keyed on the person rather
+   than the blog, with `ba_user` last. `GROVEAUTH_DB` is bound to the ops worker.
+3. **The notice** — `removal-email.ts` + `removal-policy.ts` (aup-1.4 / 1.5 /
+   1.9 / requested). A test reads the real AUP and fails if a cited section
+   stops existing.
+
+**The lesson worth keeping:** the first production removal worked and the email
+still failed — `const f = env.ZEPHYR.fetch` throws *Illegal invocation*, because
+a service binding's `fetch` needs its own `this`. The unit test could not see
+it: a `vi.fn` does not care about `this`. Verified live on a fixture after the
+fix — Zephyr logged `hello@grove.place`, `success: 1`, and the tenant left
+nothing behind.
+
+**Still not observable:** whether a removed site 404s. #1734 (Turnstile gate
+before tenant lookup) means an unknown and a suspended subdomain both answer
+`302 → /verify`.
+
+**New hard rule, in the skill and in `removeTenant`:** never email "your account
+is gone" while rows remain, and never delete the login when the sweep failed.
+Both are now enforced in code, not by the operator remembering.
+
+`gw` is released again: **v1.3.0** (`gw publish gw --bump minor`), first tag
+since v1.2.11 in March. The flow is `gw publish gw --bump <type> --dry-run`,
+then `--write`; CI cross-compiles four platforms and the annotated tag body
+becomes the changelog.
+
+## Shipped and merged
+
+| PR | what it closed |
+|---|---|
+| #1694 | **#1683** — deleted the per-IP free-account limiter. It never ran (`free_account_creation_log` does not exist in prod) and would not have caught the incident anyway: one operator, two accounts two hours apart, plus aliases in one inbox. Identity counting is #1681's job now. |
+| #1696 | **#1677 part 1+3** — `TenantDO.refreshConfig()` clears on a D1 miss, so a deleted or suspended tenant stops serving. Plus `POST /tenant/flush/:subdomain` behind `OPS_ADMIN_KEY`, and a "Spam Tenant / Link Farm" section in `docs/security/incident-response-runbook.md`. |
+| #1698 | **#1680** — `gw tenant list / show / suspend / resume`. `delete` was split out to #1596 §B. Suspend flips `tenants.active`, writes `audit_log`, then probes the site and prints the status code. |
+| #1699 | **#1681** — `signup_blocks` deny list keyed on normalized identity (lowercased, `+alias` dropped). Enforced at OTP send, at user creation (covers OAuth), and at `createTenant`. Managed with `gw block add|list|rm`. |
+| #1700 | **#1681 follow-up** — the block now actually reaches the client. Better Auth wraps `sendVerificationOTP` in `runInBackgroundOrAwait()`, which swallows throws and still answers `{"success":true}`; enforcement moved to a `hooks.before` middleware where it returns a real 403. |
+
+**Applied to production:** migration `123_signup_blocks.sql` on `grove-engine-db`, and two live blocks — `mail.grokbot.com` (`incident:2026-11-14`) and `upsampler.com` (`incident:2026-11-07`).
+
+## Shipped after that handoff (same day)
+
+| PR | what it closed |
+|---|---|
+| #1701 | **#1678** — Turnstile on Plant signup. `/verify` step, verify endpoint setting the shared `grove_verified` cookie, and every write path gated: `/profile` + `/plans` **form actions** (not just loads), `/checkout`, `/comped`, `/api/claim-comped`, `/api/save-profile`, `/api/select-plan`. First review caught that only loads were gated; second pass was clean. |
+| #1702 | **#1682** — nofollow for link spam. Free-tier and <14-day tenants render outbound links as `rel="nofollow ugc"`; young accounts also get `<meta robots="noindex">`. One helper decides (`libs/engine/security/link-policy`), one applies (`grove-markdown`'s `externalLinkRel`, which also de-duplicated four copies of the tabnabbing logic). `createdAt` now reaches the renderer via TenantDO config → hooks → `TenantInfo`. AUP §3.2 documents the rule. |
+
+**Verified in production:** a blocked address on the OTP endpoint returns `403` with the intended copy (both `mail.grokbot.com` and `upsampler.com`), confirming #1700's fix — the deny list reaches the client instead of answering `{"success":true}`.
+
+Also fixed in passing: `import("dompurify").then()` in both sanitizers had no `catch` and assumed `module.default` had `addHook`, so a misresolved module produced an unhandled rejection *after* every test passed (green report, non-zero exit). Guarded in both copies.
+
+## Open, in flight
+
+- **#1701** — `feat(plant): gate signup behind the Turnstile that was already configured` (#1678). Open PR, CI running at handoff time. Wires the configured-but-unused `TURNSTILE_SITE_KEY` into a `/verify` step, sets the same `grove_verified` cookie Aspen uses, and gates `/profile`, `/api/save-profile` and `/api/select-plan`. Known gaps are in the PR body: not tested against a real challenge, and `user_onboarding` rows are still created in `/auth/callback` before the gate.
+
+## Next, in the order agreed
+
+1. **#1682** — strip the SEO value: `rel="nofollow ugc"` (and maybe `noindex`) for young or free-tier tenants. The highest-leverage remaining item — it costs a spammer their payoff and survives email rotation. Needs `created_at`/age available to the renderer, which means adding a field to the cached `TenantDO` config (same cache as #1677). Two sanitizers exist: `libs/grove-markdown/src/utils/sanitize.ts` and `libs/engine/src/lib/utils/sanitize.ts` — one helper, not three templates.
+2. **#1596 §B** — the tenant-table registry + `removeTenant()`. Blocking #1677's last criterion (evict the DO as part of removal) and `gw tenant delete`.
+3. **#1684** — HawkAgent layer 1 only (deterministic signals + verdict table), after #1681's table exists and #1606's review queue.
+4. **#1679** — the client IP never reaches Heartwood. Not on the abuse critical path any more (nothing counts by IP after #1683), but every `ba_session.ip_address` is still one of two constants and every per-IP limiter is a global bucket.
+
+## Decisions made, so nobody re-litigates them
+
+- **Per-IP limiting is the wrong axis** — deleted, not fixed. Identity (email/domain) is what an operator cannot cheaply rotate.
+- **One narrow `signup_blocks` table**, not a polymorphic identity table. #1684 gets its own verdict table later, sharing `normalizeIdentity()`.
+- **Blocks are managed by CLI now**, Arbor UI arrives with #1684's review queue.
+- **Fail open, loudly** on a deny-list read error — a broken list must not lock every writer out, but it logs an admin error rather than hiding (the #1683 lesson).
+- **Migrations are applied by hand** with `wrangler d1 execute --file`, never `migrations apply` — see #1692.
+
+## Two findings that need their own issues
+
+- **#1692** — `d1_migrations` claims `053` and `116` are applied; production's schema says otherwise. 116 is the migration written to repair exactly that gap, and it is logged applied with the table unchanged. The ledger is not evidence.
+- **#1691** — 053's other half: `last_activity_at`, `reclamation_status`, `reclaimed_accounts` and the reclamation cron do not exist, while `updateLastActivity()` writes that column on every post save and image upload and swallows the error. Filed for later, per Autumn's call.
+- **Not filed yet:** the same Better Auth swallowing that #1700 fixed means `LOGIN_CODE_SEND_FAILED` and `LOGIN_CODE_RATE_LIMITED` never reach users either — the comment claiming "a delivery failure should reach the user" has been false. Worth an issue.
+
 # Handoff — Code review sweep, next slice (2026-09-08)
 
 Start here next time. The Plant local-dev/signup handoff from 2026-08-24 is

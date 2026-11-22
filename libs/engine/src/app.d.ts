@@ -106,16 +106,12 @@ declare global {
 				/** Zephyr email gateway URL */
 				ZEPHYR_URL?: string;
 				ALLOWED_ADMIN_EMAILS?: string;
-				TOKEN_ENCRYPTION_KEY?: string; // 256-bit key for encrypting API tokens in D1
 
 				// Workers AI binding (for Lumen/Petal image moderation)
 				AI?: Ai;
 
 				// Lumen AI Gateway (unified AI inference)
 				OPENROUTER_API_KEY?: string;
-
-				// Petal CSAM fallback provider (when Workers AI unavailable)
-				TOGETHER_API_KEY?: string;
 
 				// The Clearing (Status Page) API
 				CLEARING_API_URL?: string;
@@ -148,7 +144,7 @@ declare global {
 				/** Internal service key for worker-to-worker auth (reverie-exec → grove-lattice) */
 				INTERNAL_SERVICE_KEY?: string;
 
-				/** Enable Glimpse dev auth bypass (localhost only, never set in production) */
+				/** Enable local dev-auth bypass for visual testing (localhost only, never set in production) */
 				DEV_AUTH_ENABLED?: string;
 
 				/** Reverie Worker service binding (AI configuration pipeline) */

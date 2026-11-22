@@ -365,3 +365,112 @@ describe("Specialized Execution", () => {
 		});
 	});
 });
+
+// =============================================================================
+// MAX_TOKENS REJECTION
+// =============================================================================
+
+/**
+ * Models have very different maximum completion lengths. A caller asking for a
+ * generous ceiling (the timeline summary asks for 64k) must not lose the call to
+ * a provider that refuses `max_tokens` above its model's limit — and on the
+ * timeline path there is no fallback to catch it, because the caller named a
+ * model explicitly.
+ */
+describe("executeWithFallback - oversized max_tokens", () => {
+	const messages = [{ role: "user" as const, content: "Hello" }];
+
+	function rejectingProvider(message: string) {
+		const inference = vi
+			.fn()
+			.mockRejectedValueOnce(new ProviderError("openrouter", message, 400))
+			.mockResolvedValue({
+				content: "retried and fine",
+				usage: { input: 10, output: 5, cost: 0 },
+				model: "test/model",
+			});
+		return { inference } as unknown as LumenProvider & {
+			inference: typeof inference;
+		};
+	}
+
+	it("retries the same model at the task default instead of failing", async () => {
+		const provider = rejectingProvider("max_tokens is too large for this model");
+		const providers: ProviderRegistry = { openrouter: provider };
+
+		const result = await executeWithFallback("summary", messages, providers, {
+			model: MODELS.DEEPSEEK_V4_1_FLASH,
+			maxTokens: 64_000,
+		});
+
+		expect(result.response.content).toBe("retried and fine");
+		expect(provider.inference).toHaveBeenCalledTimes(2);
+		expect(provider.inference.mock.calls[1][2].maxTokens).toBe(
+			getTaskConfig("summary").defaultMaxTokens,
+		);
+	});
+
+	it("recognises the ways providers word it", async () => {
+		for (const message of [
+			"max_tokens must be less than 8192",
+			"This model's maximum context length is 32768 tokens",
+			"requested 64000 completion tokens, limit is 8192",
+			"too many tokens requested",
+		]) {
+			const provider = rejectingProvider(message);
+			const providers: ProviderRegistry = { openrouter: provider };
+			const result = await executeWithFallback("summary", messages, providers, {
+				model: MODELS.QWEN3_8_FLASH,
+				maxTokens: 64_000,
+			});
+			expect(result.response.content, message).toBe("retried and fine");
+		}
+	});
+
+	it("does not retry on an unrelated provider error", async () => {
+		const inference = vi
+			.fn()
+			.mockRejectedValue(new ProviderError("openrouter", "upstream is down", 503));
+		const providers: ProviderRegistry = {
+			openrouter: { inference } as unknown as LumenProvider,
+		};
+
+		await expect(
+			executeWithFallback("summary", messages, providers, {
+				model: MODELS.DEEPSEEK_V4_1_FLASH,
+				maxTokens: 64_000,
+			}),
+		).rejects.toThrow(/upstream is down/);
+		expect(inference).toHaveBeenCalledTimes(1);
+	});
+
+	it("does not retry when the ceiling is already the default", async () => {
+		const provider = rejectingProvider("max_tokens is too large for this model");
+		const providers: ProviderRegistry = { openrouter: provider };
+
+		await expect(
+			executeWithFallback("summary", messages, providers, {
+				model: MODELS.DEEPSEEK_V4_1_FLASH,
+				maxTokens: getTaskConfig("summary").defaultMaxTokens,
+			}),
+		).rejects.toThrow(/max_tokens/);
+		expect(provider.inference).toHaveBeenCalledTimes(1);
+	});
+
+	it("reports both attempts when the retry fails too", async () => {
+		const inference = vi
+			.fn()
+			.mockRejectedValue(new ProviderError("openrouter", "max_tokens too large", 400));
+		const providers: ProviderRegistry = {
+			openrouter: { inference } as unknown as LumenProvider,
+		};
+
+		await expect(
+			executeWithFallback("summary", messages, providers, {
+				model: MODELS.DEEPSEEK_V4_1_FLASH,
+				maxTokens: 64_000,
+			}),
+		).rejects.toThrow(/max_tokens retry/);
+		expect(inference).toHaveBeenCalledTimes(2);
+	});
+});
