@@ -15,6 +15,7 @@ import {
 	validateImageFile,
 	validateImageFileDeep,
 	getActionableUploadError,
+	isUploadGateError,
 	normalizeFileForUpload,
 } from "./upload-validation";
 
@@ -965,7 +966,6 @@ describe("getActionableUploadError", () => {
 			const result = getActionableUploadError("feature_disabled");
 			expect(result).toContain("aren't available yet");
 		});
-
 		it("maps 'limited beta' to rollout message", () => {
 			const result = getActionableUploadError("Image uploads are in limited beta");
 			expect(result).toContain("aren't available yet");
@@ -1204,5 +1204,27 @@ describe("normalizeFileForUpload", () => {
 		expect(result.needsHeicConversion).toBe(false);
 		expect(result.file.type).toBe("image/jpeg");
 		expect(result.file.name).toBe("iphone-photo.jpeg");
+	});
+});
+
+// ============================================================================
+// isUploadGateError — the editor's persistent hint keys off this (#1626)
+// ============================================================================
+
+describe("isUploadGateError", () => {
+	it("agrees with the message mapper, so the hint and the toast cannot drift", () => {
+		const gateMessages = ["feature_disabled", "Image uploads are in limited beta", "Not enabled"];
+
+		for (const message of gateMessages) {
+			expect(isUploadGateError(message)).toBe(true);
+			expect(getActionableUploadError(message)).toContain("aren't available yet");
+		}
+	});
+
+	it("does not mistake a bad file or a rate limit for the gate", () => {
+		// A retry fixes these; a Porch link would not.
+		expect(isUploadGateError("File is too large (12MB > 5MB)")).toBe(false);
+		expect(isUploadGateError("rate_limited: try again in 60s")).toBe(false);
+		expect(isUploadGateError("Failed to fetch")).toBe(false);
 	});
 });

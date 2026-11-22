@@ -3,6 +3,7 @@ import { apiRequest } from "$lib/utils/api";
 import {
 	getActionableUploadError,
 	isConvertibleFormat,
+	isUploadGateError,
 	normalizeFileForUpload,
 } from "$lib/media/validation/upload-validation";
 import { convertHeicToJpeg } from "$lib/media/processing/imageProcessor";
@@ -18,6 +19,13 @@ export function useImageUpload(options: ImageUploadOptions) {
 	let isUploading = $state(false);
 	let uploadProgress = $state("");
 	let uploadError: string | null = $state(null);
+	/**
+	 * The last failure was the upload gate, not a bad file.
+	 *
+	 * A toast that fades after eight seconds cannot hold a link, and "ask me to
+	 * turn them on" is the only useful next step a suspended uploader has (#1626).
+	 */
+	let uploadGateBlocked = $state(false);
 	let lastFailedFile: File | null = $state(null);
 
 	async function uploadImage(file: File) {
@@ -31,6 +39,7 @@ export function useImageUpload(options: ImageUploadOptions) {
 		isUploading = true;
 		uploadProgress = `Uploading ${file.name}...`;
 		uploadError = null;
+		uploadGateBlocked = false;
 		lastFailedFile = null;
 
 		try {
@@ -67,6 +76,7 @@ export function useImageUpload(options: ImageUploadOptions) {
 		} catch (err) {
 			const rawMessage = err instanceof Error ? err.message : String(err);
 			uploadError = getActionableUploadError(rawMessage);
+			uploadGateBlocked = isUploadGateError(rawMessage);
 			lastFailedFile = file;
 			toast.error(uploadError);
 			setTimeout(() => (uploadError = null), 8000);
@@ -161,6 +171,9 @@ export function useImageUpload(options: ImageUploadOptions) {
 		},
 		get uploadError() {
 			return uploadError;
+		},
+		get uploadGateBlocked() {
+			return uploadGateBlocked;
 		},
 		get lastFailedFile() {
 			return lastFailedFile;

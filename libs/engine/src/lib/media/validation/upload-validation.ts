@@ -383,6 +383,21 @@ export function getNonRenderableInfo(file: File): (typeof NON_RENDERABLE_FORMATS
 // ============================================================================
 
 /**
+ * Did the server refuse because uploads are not switched on for this tenant?
+ *
+ * One list of patterns, used by both the message mapper below and the editor's
+ * persistent hint — so "the gate said no" and "we said the gate said no" cannot
+ * drift apart. The server's 403 is `FEATURE_DISABLED`; the older flag path says
+ * "limited beta" / "not enabled" on the wire.
+ */
+export function isUploadGateError(serverMessage: string): boolean {
+	const msg = serverMessage.toLowerCase();
+	return (
+		msg.includes("feature_disabled") || msg.includes("limited beta") || msg.includes("not enabled")
+	);
+}
+
+/**
  * Map server error messages to actionable, human-friendly messages.
  * Both the MarkdownEditor and gallery page import this for consistent UX.
  *
@@ -393,11 +408,7 @@ export function getActionableUploadError(serverMessage: string): string {
 	const msg = serverMessage.toLowerCase();
 
 	// Feature flag disabled
-	if (
-		msg.includes("feature_disabled") ||
-		msg.includes("limited beta") ||
-		msg.includes("not enabled")
-	) {
+	if (isUploadGateError(msg)) {
 		return "Image uploads aren't available yet. This feature is being rolled out gradually.";
 	}
 

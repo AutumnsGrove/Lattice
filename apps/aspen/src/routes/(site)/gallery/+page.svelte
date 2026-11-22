@@ -136,11 +136,26 @@
 		{#if data.config.description}
 			<p class="gallery-description">{data.config.description}</p>
 		{/if}
-		<p class="image-count">{data.images.length} photos</p>
+		{#if !data.uploadsPending}
+			<p class="image-count">{data.images.length} photos</p>
+		{/if}
 	</header>
 
 	<!-- Gallery Content -->
-	{#if data.images.length === 0}
+	{#if data.uploadsPending}
+		<GlassCard variant="muted" class="empty-state">
+			<p>
+				Your grove needs a little time to sprout before photo uploads are available, so this gallery
+				is still empty.
+				{#if data.uploadAccessUrl}
+					If this is your grove and you'd like them sooner,
+					<a href={data.uploadAccessUrl} target="_blank" rel="noopener" class="ask-link"
+						>ask me to turn them on</a
+					>.
+				{/if}
+			</p>
+		</GlassCard>
+	{:else if data.images.length === 0}
 		<GlassCard variant="muted" class="empty-state">
 			<p>No images in the gallery yet.</p>
 		</GlassCard>
@@ -307,6 +322,11 @@
 		flex-direction: column;
 		align-items: center;
 		gap: 1rem;
+	}
+
+	.ask-link {
+		color: var(--grove-accent);
+		text-decoration: underline;
 	}
 
 	/* Mood Board Grid */

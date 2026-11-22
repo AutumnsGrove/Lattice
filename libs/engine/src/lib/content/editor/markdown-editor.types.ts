@@ -17,4 +17,9 @@ export interface MarkdownEditorProps {
 	flags?: FlagsRecord;
 	configuredCurios?: { slug: string; name: string; enabled: boolean }[];
 	serverDraftSlug?: string | null;
+	/**
+	 * Where to ask for photo uploads when the gate says no (#1626). Built by the
+	 * app, because only it knows the tenant; the editor just renders the door.
+	 */
+	uploadAccessUrl?: string | null;
 }

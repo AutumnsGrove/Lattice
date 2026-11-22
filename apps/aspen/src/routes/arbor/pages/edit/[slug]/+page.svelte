@@ -9,7 +9,10 @@
 	import { clickOutside } from "@autumnsgrove/lattice/actions/clickOutside";
 	import { navIcons, actionIcons } from "@autumnsgrove/prism/icons";
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
-	import { FONT_PRESETS, FONT_CATEGORY_LABELS } from "@autumnsgrove/lattice/platform/config/presets";
+	import {
+		FONT_PRESETS,
+		FONT_CATEGORY_LABELS,
+	} from "@autumnsgrove/lattice/platform/config/presets";
 
 	// Canonical font list — single source of truth, keeps this select in sync
 	// with the fonts actually loaded on the site (libs/engine/.../tokens/fonts.ts)
@@ -32,8 +35,14 @@
 
 	let {
 		data,
-	}: { data: { page: PageData; curios?: { slug: string; name: string; enabled: boolean }[] } } =
-		$props();
+	}: {
+		data: {
+			page: PageData;
+			curios?: { slug: string; name: string; enabled: boolean }[];
+			/** From the Arbor layout — the one Porch link an editor offers (#1626). */
+			uploadAccessUrl?: string | null;
+		};
+	} = $props();
 
 	/** System pages that cannot be deleted */
 	const PROTECTED_SLUGS = ["home", "about"];
@@ -462,6 +471,7 @@
 				onSave={handleSave}
 				draftKey="page-{slug}"
 				configuredCurios={data?.curios ?? []}
+				uploadAccessUrl={data.uploadAccessUrl ?? null}
 			/>
 		</main>
 	</div>

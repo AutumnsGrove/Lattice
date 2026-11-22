@@ -13,6 +13,7 @@
 import type { PageServerLoad } from "./$types";
 import { SITE_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import { canUploadImages } from "@autumnsgrove/lattice/server/upload-gate";
+import { buildUploadAccessRequestUrl } from "@autumnsgrove/lattice/platform/config/porch";
 import { type GalleryTagRecord } from "@autumnsgrove/curios/gallery";
 
 interface ImageRow {
@@ -88,7 +89,22 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 	]);
 
 	if (!uploadGate.allowed || !curioConfig?.enabled) {
-		throwGroveError(404, SITE_ERRORS.FEATURE_NOT_ENABLED, "Site");
+		// A grove whose owner switched the curio off is gone, and 404 is the honest
+		// answer. A grove that simply cannot upload yet is not gone — it is sprouting,
+		// and the visitor (or the owner, mid-setup) deserves to be told which (#1626).
+		if (!curioConfig?.enabled) {
+			throwGroveError(404, SITE_ERRORS.FEATURE_NOT_ENABLED, "Site");
+		}
+
+		return {
+			uploadsPending: true,
+			uploadAccessUrl:
+				locals.context.type === "tenant"
+					? buildUploadAccessRequestUrl({ subdomain: locals.context.tenant.subdomain })
+					: null,
+			images: [],
+			config: { title: "Gallery", description: null, ...GALLERY_DEFAULTS },
+		};
 	}
 
 	const cdnBaseUrl = (platform?.env?.CDN_BASE_URL as string) || "https://cdn.grove.place";
@@ -198,6 +214,8 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 	}));
 
 	return {
+		uploadsPending: false,
+		uploadAccessUrl: null,
 		images,
 		config: {
 			title,

@@ -16,6 +16,7 @@ import {
 	isPorchCategory,
 	porchCategoryLabel,
 	buildPorchUrl,
+	buildUploadAccessRequestUrl,
 	type PorchCategory,
 } from "./porch.js";
 
@@ -124,5 +125,45 @@ describe("buildPorchUrl", () => {
 			);
 			expect(isPorchCategory(url.searchParams.get("category"))).toBe(true);
 		}
+	});
+});
+
+describe("buildUploadAccessRequestUrl", () => {
+	it("lands in the uploads category, not account", () => {
+		// An upload question is not a login problem, and the person triaging it
+		// should not have to read the message to find that out (#1626).
+		const url = new URL(buildUploadAccessRequestUrl({ subdomain: "quietfern" }));
+		expect(url.searchParams.get("category")).toBe("uploads");
+		expect(isPorchCategory(url.searchParams.get("category"))).toBe(true);
+	});
+
+	it("names the grove in both the subject and the message", () => {
+		// The ticket has to be actionable without a reply asking "which grove?".
+		const url = new URL(buildUploadAccessRequestUrl({ subdomain: "quietfern" }));
+		expect(url.searchParams.get("subject")).toContain("quietfern");
+		expect(url.searchParams.get("message")).toContain("quietfern.grove.place");
+	});
+
+	it("carries the address and name when the caller knows them", () => {
+		const url = new URL(
+			buildUploadAccessRequestUrl({
+				subdomain: "quietfern",
+				name: "Fern",
+				email: "fern@example.com",
+			}),
+		);
+		expect(url.searchParams.get("email")).toBe("fern@example.com");
+		expect(url.searchParams.get("name")).toBe("Fern");
+	});
+
+	it("stays a single line, because it travels in a URL", () => {
+		const url = new URL(buildUploadAccessRequestUrl({ subdomain: "quietfern" }));
+		expect(url.searchParams.get("message")).not.toContain("\n");
+	});
+
+	it("survives a subdomain that needs encoding", () => {
+		const url = new URL(buildUploadAccessRequestUrl({ subdomain: "quiet & fern" }));
+		expect(url.searchParams.get("subject")).toContain("quiet & fern");
+		expect(url.search).toContain("%26");
 	});
 });

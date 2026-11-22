@@ -9,6 +9,9 @@
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 	import { api } from "@autumnsgrove/lattice/utils";
 
+	// From the Arbor layout — carries the one Porch link an editor offers (#1626)
+	let { data } = $props();
+
 	// Form state
 	let title = $state("");
 	let slug = $state("");
@@ -261,7 +264,7 @@
 			<h2 class="m-0 mb-4 text-xl text-foreground">
 				Content <span class="text-error">*</span>
 			</h2>
-			<MarkdownEditor bind:content />
+			<MarkdownEditor bind:content uploadAccessUrl={data.uploadAccessUrl ?? null} />
 		</GlassCard>
 	</div>
 </div>
