@@ -37,11 +37,19 @@ jobs:
         with:
           node-version: "24"
 
-      # The script shells out to `wrangler` and to `sqlite3` to replay history.
-      - name: Install wrangler and sqlite3
-        run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq sqlite3
-          pnpm add -g wrangler
+      # `wrangler` is a root devDependency, so installing the workspace is
+      # enough — and it pins the version the migrations were written against.
+      # node_modules/.bin goes on PATH because the drift script shells out to
+      # `wrangler` rather than importing it.
+      - name: Install workspace
+        run: pnpm install --frozen-lockfile
+
+      - name: Put wrangler on PATH
+        run: echo "$PWD/node_modules/.bin" >> "$GITHUB_PATH"
+
+      # sqlite3 replays the migration files into a scratch database.
+      - name: Install sqlite3
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq sqlite3
 
       - name: Check the ledger against production
         env:
