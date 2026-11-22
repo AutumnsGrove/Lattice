@@ -14,6 +14,7 @@ vi.mock("../db/queries.js", () => ({
 	getAllUsers: vi.fn(),
 	getAuditLogs: vi.fn(),
 	getAllClients: vi.fn(),
+	getTenantSignInMethods: vi.fn(),
 	checkRateLimit: vi.fn(),
 	// cookieAuth dependencies
 	isUserAdmin: vi.fn(),
@@ -62,6 +63,7 @@ import {
 	getAllUsers,
 	getAuditLogs,
 	getAllClients,
+	getTenantSignInMethods,
 	isUserAdmin,
 	isUserBanned,
 } from "../db/queries.js";
@@ -595,5 +597,86 @@ describe("GET /admin/clients", () => {
 		const json: any = (await res.json()) as any;
 		expect(json.pagination).toEqual({ limit: 5, offset: 10 });
 		expect(vi.mocked(getAllClients)).toHaveBeenCalledWith(expect.anything(), 5, 10);
+	});
+});
+
+describe("GET /admin/user-providers (#1739)", () => {
+	it("groups every linked method under its tenant, as Heartwood records it", async () => {
+		vi.mocked(getTenantSignInMethods).mockResolvedValue([
+			{ tenantId: "t1", providerId: "credential" },
+			{ tenantId: "t1", providerId: "google" },
+			{ tenantId: "t2", providerId: "credential" },
+		]);
+
+		const app = createApp();
+		const res = await app.request(
+			"/admin/user-providers",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
+
+		expect(res.status).toBe(200);
+		const json: any = (await res.json()) as any;
+		// Both methods for t1 — account linking means a list, not a scalar.
+		expect(json.providers.t1).toEqual(["credential", "google"]);
+		expect(json.providers.t2).toEqual(["credential"]);
+	});
+
+	it("returns an empty map when no tenant has a linked method", async () => {
+		// An empty object is a real answer; landing must be able to tell it
+		// apart from a failed lookup (which returns null there).
+		vi.mocked(getTenantSignInMethods).mockResolvedValue([]);
+
+		const app = createApp();
+		const res = await app.request(
+			"/admin/user-providers",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
+
+		expect(res.status).toBe(200);
+		expect(((await res.json()) as any).providers).toEqual({});
+	});
+
+	it("collapses a provider recorded twice for the same account", async () => {
+		// Re-auth after unlinking can leave two rows for one provider; the chip
+		// list should show "Google" once.
+		vi.mocked(getTenantSignInMethods).mockResolvedValue([
+			{ tenantId: "t1", providerId: "google" },
+			{ tenantId: "t1", providerId: "google" },
+		]);
+
+		const app = createApp();
+		const res = await app.request(
+			"/admin/user-providers",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
+
+		expect(((await res.json()) as any).providers.t1).toEqual(["google"]);
+	});
+
+	it("is admin-gated like every other route on this router", async () => {
+		vi.mocked(isUserAdmin).mockResolvedValue(false);
+
+		const app = createApp();
+		const res = await app.request("/admin/user-providers", { method: "GET" }, mockEnv);
+
+		expect(res.status).toBe(401);
+		expect(getTenantSignInMethods).not.toHaveBeenCalled();
+	});
+
+	it("fails as a 500 rather than returning a half-built map", async () => {
+		vi.mocked(getTenantSignInMethods).mockRejectedValue(new Error("D1 down"));
+
+		const app = createApp();
+		const res = await app.request(
+			"/admin/user-providers",
+			{ method: "GET", headers: adminHeaders() },
+			mockEnv,
+		);
+
+		expect(res.status).toBe(500);
+		expect(((await res.json()) as any).error).toBe("list_failed");
 	});
 });

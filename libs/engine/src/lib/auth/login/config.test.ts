@@ -17,6 +17,8 @@ import {
 	GROVEAUTH_URLS,
 	AUTH_COOKIE_NAMES,
 	AUTH_COOKIE_OPTIONS,
+	signInMethodChip,
+	signInMethodChips,
 } from "./config.js";
 
 describe("Login Graft Configuration", () => {
@@ -258,5 +260,59 @@ describe("Login Graft Configuration", () => {
 
 			expect(available).toEqual([]);
 		});
+	});
+});
+
+// ============================================================================
+// Linked sign-in methods — the admin tenant list's chips (#1739)
+// ============================================================================
+
+describe("signInMethodChip", () => {
+	it("names the email-code method for a person, never `credential`", () => {
+		// `credential` is Better Auth's internal id. An admin table is a person
+		// reading it, so the internal word must not survive the trip.
+		expect(signInMethodChip("credential").label).toBe("Email code");
+		expect(signInMethodChip("credential").label).not.toContain("credential");
+	});
+
+	it("names Google as Google", () => {
+		expect(signInMethodChip("google").label).toBe("Google");
+	});
+
+	it("marks a provider this registry has never heard of as Unknown, muted", () => {
+		// A brand-new provider should look like a gap in the registry, not like a
+		// tenant with no way in — and never render its raw id.
+		const chip = signInMethodChip("apple");
+		expect(chip.label).toBe("Unknown");
+		expect(chip.tone).toBe("muted");
+		expect(chip.id).toBe("apple");
+	});
+
+	it("keeps the id, so a caller can tell Unknown from unasked", () => {
+		expect(signInMethodChip("misskey").id).toBe("misskey");
+	});
+});
+
+describe("signInMethodChips", () => {
+	it("orders by the registry, not by when the method was linked", () => {
+		// Registry order keeps chip positions stable across refreshes, so a table
+		// scan does not have to re-learn them.
+		const chips = signInMethodChips(["credential", "google"]);
+		expect(chips.map((c) => c.label)).toEqual(["Google", "Email code"]);
+	});
+
+	it("collapses duplicates from re-auth", () => {
+		expect(signInMethodChips(["google", "google"]).map((c) => c.label)).toEqual(["Google"]);
+	});
+
+	it("puts unknown methods last", () => {
+		const chips = signInMethodChips(["apple", "google"]);
+		expect(chips.map((c) => c.label)).toEqual(["Google", "Unknown"]);
+	});
+
+	it("returns nothing for an account with no linked method", () => {
+		// An empty list is a real answer and must stay empty — `Unknown` is a span
+		// in a sentence, and "we asked and there is nothing" is a different claim.
+		expect(signInMethodChips([])).toEqual([]);
 	});
 });

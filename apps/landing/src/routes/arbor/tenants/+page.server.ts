@@ -39,7 +39,44 @@ interface TenantStats {
 	total_beta_posts: number;
 }
 
-export const load: PageServerLoad = async ({ parent, platform }) => {
+/**
+ * Ask Heartwood which sign-in methods each tenant can use (#1739).
+ *
+ * Returns `null` when the lookup could not be made at all — no binding, no
+ * cookie, an error, a non-200 — so the page can say "Unknown" instead of implying
+ * nobody can sign in. An empty object is a real answer: every tenant resolved and
+ * none of them has a linked method recorded.
+ */
+async function loadSignInMethods(
+	platform: App.Platform | undefined,
+	request: Request,
+): Promise<Record<string, string[]> | null> {
+	const auth = platform?.env?.AUTH;
+	if (!auth) return null;
+
+	const cookie = request.headers.get("cookie");
+	if (!cookie) return null;
+
+	try {
+		const response = await auth.fetch("https://login.grove.place/admin/user-providers", {
+			headers: { Cookie: cookie },
+		});
+
+		if (!response.ok) {
+			console.warn(`[Tenants] Sign-in method lookup returned ${response.status}`);
+			return null;
+		}
+
+		const body = (await response.json()) as { providers?: Record<string, string[]> };
+		return body.providers ?? null;
+	} catch (err) {
+		// Non-fatal by design: the table is the page, the chips are decoration.
+		console.warn("[Tenants] Sign-in method lookup failed:", err);
+		return null;
+	}
+}
+
+export const load: PageServerLoad = async ({ parent, platform, request }) => {
 	const parentData = await parent();
 	if (!parentData.isWayfinder) {
 		throw redirect(302, "/arbor");
@@ -92,8 +129,19 @@ export const load: PageServerLoad = async ({ parent, platform }) => {
 		storage_used: storageResult.ok ? (storageResult.byTenant.get(t.id) ?? 0) : null,
 	}));
 
+	// Sign-in methods come from Heartwood, which owns `ba_account` (#1739). Read
+	// live on every load rather than denormalised onto `tenants`: account linking
+	// means a tenant can hold several methods and the list changes when one is
+	// added, so a stored column would be a snapshot of the wrong day.
+	//
+	// Best-effort on purpose — a provider lookup that fails must never blank the
+	// tenant list. `null` says "we did not find out", which the page renders as
+	// `Unknown` rather than guessing that nobody can sign in.
+	const signInMethods = await loadSignInMethods(platform, request);
+
 	return {
 		tenants,
+		signInMethods,
 		stats: {
 			total: statsResult?.total || 0,
 			active: statsResult?.active || 0,

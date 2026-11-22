@@ -11,7 +11,13 @@ import { Hono } from "hono";
 import { safeParseJson } from "@autumnsgrove/lattice/utils";
 import { logGroveError } from "@autumnsgrove/lattice/errors";
 import type { Env } from "../types.js";
-import { getAdminStats, getAllUsers, getAuditLogs, getAllClients } from "../db/queries.js";
+import {
+	getAdminStats,
+	getAllUsers,
+	getAuditLogs,
+	getAllClients,
+	getTenantSignInMethods,
+} from "../db/queries.js";
 import { createDbSession } from "../db/session.js";
 import { adminRateLimiter } from "../middleware/rateLimit.js";
 import { adminCookieAuth } from "../middleware/cookieAuth.js";
@@ -186,6 +192,43 @@ admin.get("/clients", async (c) => {
 			cause: error,
 		});
 		return c.json({ error: "list_failed", error_description: "Failed to list clients" }, 500);
+	}
+});
+
+/**
+ * GET /admin/user-providers - Which sign-in methods each tenant can use (#1739)
+ *
+ * The tenants page has no way to ask this itself: `ba_account` lives in the
+ * Heartwood database, and binding another service's D1 from landing would couple
+ * it to a schema this service owns. One map, keyed by tenant id, resolved live on
+ * every request — account linking means a tenant can hold more than one method,
+ * and the list has to reflect what is true when the page is loaded.
+ *
+ * Providers are returned as Heartwood records them (`google`, `credential`).
+ * Turning those into words is the caller's job, from the shared registry — the
+ * display vocabulary lives in the engine so the login page and this list cannot
+ * drift apart.
+ */
+admin.get("/user-providers", async (c) => {
+	const db = createDbSession(c.env);
+
+	try {
+		const rows = await getTenantSignInMethods(db);
+
+		const providers: Record<string, string[]> = {};
+		for (const row of rows) {
+			const forTenant = (providers[row.tenantId] ??= []);
+			if (!forTenant.includes(row.providerId)) forTenant.push(row.providerId);
+		}
+
+		return c.json({ providers });
+	} catch (error) {
+		logGroveError("Heartwood", HW_SVC_ERRORS.INTERNAL_ERROR, {
+			path: "/admin/user-providers",
+			detail: "Failed to list tenant sign-in methods",
+			cause: error,
+		});
+		return c.json({ error: "list_failed", error_description: "Failed to list providers" }, 500);
 	}
 });
 
