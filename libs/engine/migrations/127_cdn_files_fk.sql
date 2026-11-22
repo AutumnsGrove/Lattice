@@ -32,8 +32,9 @@ CREATE TABLE cdn_files_new (
   FOREIGN KEY (uploaded_by) REFERENCES users(id)
 );
 
--- Explicit column list: the source table's column order is 0011_cdn.sql's, and
--- a positional copy is exactly the trap 116 documented.
+-- Explicit column list: the source table's column order comes from
+-- apps/landing/migrations/0001_cdn.sql, and a positional copy across a rebuild
+-- is exactly the trap 116 documented.
 INSERT INTO cdn_files_new (
   id, filename, original_filename, key, content_type, size_bytes,
   folder, alt_text, uploaded_by, created_at
