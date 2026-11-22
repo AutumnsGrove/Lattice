@@ -123,3 +123,16 @@ runs:
       shell: bash
       run: pnpm run package
       working-directory: libs/engine
+
+    # `svelte-kit sync` generates libs/engine/.svelte-kit/tsconfig.json, and
+    # libs/engine/tsconfig.json extends it. The cache above restores only `dist`,
+    # so on a cache hit the build is skipped and that generated file never
+    # exists — then Vite fails to parse the tsconfig in any job that touches
+    # engine source: `TSConfckParseError: failed to resolve "extends"`, before a
+    # single test runs (#1789, four test jobs). Sync alone is seconds and writes
+    # exactly the missing file, so run it whether the build ran or not.
+    - name: Sync engine types
+      if: inputs.build-engine == 'true'
+      shell: bash
+      run: pnpm exec svelte-kit sync
+      working-directory: libs/engine
