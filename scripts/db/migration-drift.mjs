@@ -27,6 +27,12 @@
  * Exits 1 when drift is found, so it can be used as a check. Nothing is
  * written to the remote database.
  *
+ * A note on replay fidelity: whether SQLite rewrites other tables' REFERENCES
+ * clauses when a migration renames a table depends on the build. A difference
+ * that appears on one machine and not another is therefore a defect in the
+ * migration history, not a difference of opinion — 126 and 127 exist because
+ * of exactly that. The CI runner's older SQLite is the more revealing one.
+ *
  * A note on the diff's noise floor: some "drift" is deliberate and permanent.
  * A table owned by a Durable Object's own SQLite, a Drizzle schema for a table
  * that lives in another database, and a table somebody hand-dropped all look
