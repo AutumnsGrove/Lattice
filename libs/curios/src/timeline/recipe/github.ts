@@ -43,7 +43,9 @@ const DEFAULT_MAX_THREAD_CHARS = 8_000;
 const MAX_COMMENT_CHARS = 1_500;
 
 export function createGitHubReader(options: GitHubReaderOptions): GitHubReader {
-	const given = options.fetch ?? (globalThis.fetch as FetchLike | undefined);
+	// Bound for the same reason as the day fetcher: a detached platform `fetch(...)`
+	// throws "Illegal invocation" under workerd.
+	const given = options.fetch ?? (globalThis.fetch?.bind(globalThis) as FetchLike | undefined);
 	if (typeof given !== "function") {
 		throw new Error("no fetch is available; pass one as `fetch`");
 	}
