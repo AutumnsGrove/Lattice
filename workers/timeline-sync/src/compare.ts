@@ -25,6 +25,7 @@ import { createLumenModelSlot } from "@autumnsgrove/lyra-lumen/lumen";
 import { buildComparisonPage, type NewDay, type OldDay } from "./compare-page";
 import type { Env } from "./config";
 import { getTenantConfig } from "./generator";
+import { createRunLogger, reportRunOutcome } from "./run-log";
 
 export interface CompareInput {
 	tenantId: string;
@@ -89,8 +90,22 @@ export async function compareDay(
 			pastDays: record.pastDays,
 			model,
 			modelName: config.openrouterModel,
+			// Follow the run in `wrangler tail`, and let a run that did not finish
+			// reach Pulse where errors are already looked at.
+			onEvent: createRunLogger({ tenantId: config.tenantId, date: input.date }),
 		},
 	);
+
+	await reportRunOutcome(env, {
+		tenantId: config.tenantId,
+		date: input.date,
+		runId: generated.runId,
+		status: generated.status,
+		turns: generated.turns,
+		cost: generated.usage.cost?.amount ?? 0,
+		error: generated.error?.message ?? null,
+		warnings: generated.warnings,
+	});
 
 	const next: NewDay = {
 		status: generated.status,
