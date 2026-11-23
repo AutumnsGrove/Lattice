@@ -16,5 +16,9 @@ WARDEN_API_KEY=your_warden_api_key_here
 # without this a local Lumen fails closed on every call (see
 # src/lib/client-factory.ts). Never set in a deployed environment, and never
 # named like the global credential Warden owns.
-# ./scripts/seed-lumen-key.sh fills this in from ~/.pi/agent/auth.json.
-DEV_OPENROUTER_API_KEY=sk-or-v1-local_only_do_not_deploy
+#
+# Left empty on purpose. A placeholder here would be non-empty, so it would
+# outrank Warden and every local call would fail with an opaque provider 401
+# instead of saying the key is missing. `./scripts/seed-lumen-key.sh` fills it
+# in from ~/.pi/agent/auth.json.
+DEV_OPENROUTER_API_KEY=

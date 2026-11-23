@@ -133,10 +133,19 @@ export function errorForResponse(
 		return error;
 	}
 
-	return errorForStatus(status, body, {
+	const fallback = errorForStatus(status, body, {
 		retryAfter: options.retryAfter ?? null,
 		now: options.now,
 	});
+
+	// A body that is not Lumen's envelope is somebody else's words — a proxy's, a
+	// load balancer's, an upstream's. Any of them may echo what the request carried,
+	// and the request carried the key. Redact before truncating, because truncation
+	// can cut a key in half and leave it unrecognisable to the scan that redacts.
+	return {
+		...fallback,
+		message: truncateMessage(redact(fallback.message, options.secret)),
+	};
 }
 
 /** Lumen's `{ success: false, error: { code, message } }`, when the body is one. */

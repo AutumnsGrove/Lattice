@@ -58,6 +58,21 @@ describe("errorForResponse", () => {
 		expect(error.message).toContain("[redacted]");
 	});
 
+	it("ERR04b redacts a key echoed by a body that is not Lumen's envelope", () => {
+		// A proxy 401 that repeats the credential it was given. This is the path that
+		// reaches `errorForStatus`, which knows nothing about secrets.
+		const key = "sk-or-v1-0123456789abcdef";
+		const error = errorForResponse(401, `Unauthorized: bad key ${key}`, {
+			now: NOW,
+			secret: key,
+		});
+
+		expect(error.code).toBe("permission_denied");
+		expect(error.retryable).toBe(false);
+		expect(error.message).not.toContain(key);
+		expect(error.message).toContain("[redacted]");
+	});
+
 	it("ERR05 truncates a long body", () => {
 		const error = errorForResponse(502, "x".repeat(5_000), { now: NOW });
 		expect(error.message.length).toBeLessThan(400);

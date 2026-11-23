@@ -131,9 +131,12 @@ preflight() {
 
     # Lumen fails closed with no provider key, and this stack runs no Warden, so a
     # missing key is every Lumen call failing rather than one feature degrading.
+    # Empty and a leftover placeholder are both "no key": either one is either
+    # nothing to send or something that fails a provider 401, and the point of the
+    # warning is that the failure is otherwise opaque.
     if [ -f workers/lumen/.dev.vars ] &&
-        ! grep -qE '^DEV_OPENROUTER_API_KEY=.+' workers/lumen/.dev.vars; then
-        warn "workers/lumen/.dev.vars has no DEV_OPENROUTER_API_KEY — Lumen will fail closed. Run ./scripts/seed-lumen-key.sh"
+        ! grep -qE '^DEV_OPENROUTER_API_KEY=sk-or-v1-[A-Za-z0-9_-]{20,}' workers/lumen/.dev.vars; then
+        warn "workers/lumen/.dev.vars has no usable DEV_OPENROUTER_API_KEY — Lumen will fail closed. Run ./scripts/seed-lumen-key.sh"
     fi
 
     if [ "$missing" -eq 1 ]; then
