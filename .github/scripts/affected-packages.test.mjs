@@ -94,6 +94,32 @@ test("content-only files: docs, tests, migrations, data", () => {
 	}
 });
 
+test("a svelte config without the SvelteKit dependency is not SvelteKit", () => {
+	// `libs/gossamer` is this case in the real workspace: a `svelte.config.js` for
+	// `svelte-package`, no `@sveltejs/kit`, and so no `svelte-kit` binary for the
+	// CI sync step to run. Found when the Lumen adapter made gossamer affected.
+	const root = workspace({
+		"libs/gossamer/package.json": {
+			name: "@autumnsgrove/gossamer",
+			scripts: { "test:run": "vitest run" },
+			devDependencies: { svelte: "^5.0.0" },
+		},
+		"libs/gossamer/svelte.config.js": "",
+		"libs/with-kit/package.json": {
+			name: "with-kit",
+			devDependencies: { "@sveltejs/kit": "^2.0.0" },
+		},
+		"libs/with-kit/svelte.config.js": "",
+	});
+	try {
+		const packages = discoverPackages(root);
+		assert.equal(packages.get("libs/gossamer").isSvelteKit, false);
+		assert.equal(packages.get("libs/with-kit").isSvelteKit, true);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
 test("structural files always cascade, even when they end in .json", () => {
 	for (const path of [
 		"libs/engine/package.json",

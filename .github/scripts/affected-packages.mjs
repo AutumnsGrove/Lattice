@@ -98,8 +98,22 @@ function describePackage(root, dir) {
 		deps,
 		typecheck,
 		hasTests: Boolean(scripts["test:run"] || scripts.test),
-		isSvelteKit: existsSync(join(abs, "svelte.config.js")),
+		// A config file alone does not make a package SvelteKit-capable: `libs/gossamer`
+		// has one and no `@sveltejs/kit`, so `pnpm exec svelte-kit sync` there is
+		// "Command svelte-kit not found". The sync step needs the binary, and the
+		// binary comes from the dependency, so that is what this asks.
+		isSvelteKit: existsSync(join(abs, "svelte.config.js")) && declaresKit(pkg),
 	};
+}
+
+/** Whether a package declares SvelteKit itself rather than inheriting it. */
+function declaresKit(pkg) {
+	for (const field of ["dependencies", "devDependencies", "peerDependencies"]) {
+		if (pkg[field] && Object.hasOwn(pkg[field], "@sveltejs/kit")) {
+			return true;
+		}
+	}
+	return false;
 }
 
 /** Every workspace package, keyed by its directory. */
