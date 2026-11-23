@@ -245,6 +245,25 @@ describe("createLumenModelSlot", () => {
 		expect(result.error.message).toContain("5ms");
 	});
 
+	it("SLT14b a body that stalls after the headers is abandoned at the deadline too", async () => {
+		// Headers, then nothing: the shape a deadline exists for, and the one the first
+		// version missed because the timer was cleared when `send` resolved.
+		const stalled = new Response(
+			new ReadableStream({
+				start() {
+					// Deliberately never enqueues and never closes.
+				},
+			}),
+			{ status: 200, headers: { "Content-Type": "application/json" } },
+		);
+		const { slot } = slotWith(async () => stalled, { deadlineMs: 5 });
+
+		const result = await slot.complete(request());
+		if (result.ok) throw new Error("expected a failure");
+
+		expect(result.error).toMatchObject({ code: "timeout", retryable: true });
+	});
+
 	it("SLT15 a 200 whose body is not the contract is a failure, not a crash", async () => {
 		const { slot } = slotWith(
 			new Response(JSON.stringify({ success: true, data: { content: "no usage" } }), {

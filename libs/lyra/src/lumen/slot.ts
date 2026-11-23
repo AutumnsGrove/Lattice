@@ -149,75 +149,105 @@ export function createLumenModelSlot(config: LumenModelSlotConfig = {}): ModelSl
 			const forward = (): void => deadline.abort();
 			request.signal.addEventListener("abort", forward, { once: true });
 
-			let response: Response;
+			// The deadline covers the body as well as the headers. A worker that sends
+			// headers and then stalls mid-body is exactly the failure a deadline is for,
+			// and the first version cleared the timer as soon as `send` resolved, so the
+			// turn hung there with a timer that had already fired.
 			try {
-				response = await send(url, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						...(config.apiKey ? { "X-API-Key": config.apiKey } : {}),
-					},
-					body: JSON.stringify(body),
-					signal: deadline.signal,
-				});
-			} catch (cause) {
-				// A stop we forwarded is a stop, not the network's fault.
+				let response: Response;
+				try {
+					response = await send(url, {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+							...(config.apiKey ? { "X-API-Key": config.apiKey } : {}),
+						},
+						body: JSON.stringify(body),
+						signal: deadline.signal,
+					});
+				} catch (cause) {
+					// A stop we forwarded is a stop, not the network's fault.
+					if (request.signal.aborted) {
+						return err(stoppedError(key));
+					}
+					return err(
+						deadline.signal.aborted
+							? {
+									code: "timeout",
+									message: redact(`Lumen did not answer within ${deadlineMs}ms`, key),
+									retryable: true,
+								}
+							: providerError(`Lumen could not be reached: ${describe(cause)}`, key),
+					);
+				}
+
+				// A body cut off by the deadline reads as empty, which is the same shape as
+				// one that arrived whole and said nothing.
+				//
+				// The race is not redundant with the signal: `fetch` rejects a body read when
+				// its signal aborts, but a transport that ignores the signal (a stub, a service
+				// binding with its own timeout) would leave this awaiting forever, and a
+				// deadline that only some transports honour is not a deadline.
+				const text = await Promise.race([
+					response.text().catch(() => ""),
+					new Promise<string>((resolve) => {
+						if (deadline.signal.aborted) {
+							resolve("");
+							return;
+						}
+						deadline.signal.addEventListener("abort", () => resolve(""), { once: true });
+					}),
+				]);
+
 				if (request.signal.aborted) {
 					return err(stoppedError(key));
 				}
-				return err(
-					deadline.signal.aborted
-						? {
-								code: "timeout",
-								message: redact(`Lumen did not answer within ${deadlineMs}ms`, key),
-								retryable: true,
-							}
-						: providerError(`Lumen could not be reached: ${describe(cause)}`, key),
-				);
+
+				if (deadline.signal.aborted && text === "") {
+					return err({
+						code: "timeout",
+						message: redact(`Lumen did not finish answering within ${deadlineMs}ms`, key),
+						retryable: true,
+					});
+				}
+
+				const envelope = parseEnvelope(text);
+
+				if (!response.ok || envelope?.success === false) {
+					return err(
+						errorForResponse(response.status, text, {
+							retryAfter: response.headers.get("Retry-After"),
+							now: now(),
+							secret: key,
+						}),
+					);
+				}
+
+				if (envelope === undefined) {
+					return err(
+						providerError(`Lumen answered ${response.status} with a body that is not JSON`, key),
+					);
+				}
+
+				const data = ReplyDataSchema.safeParse(envelope.data);
+				if (!data.success) {
+					return err(
+						providerError(
+							`Lumen's reply did not match the slot's contract: ${data.error.issues
+								.map((issue) => `${issue.path.join(".")}: ${issue.message}`)
+								.join("; ")}`,
+							key,
+						),
+					);
+				}
+
+				// The reply reaches Lyra with no key in it: `fromLumenReply` copies only
+				// what the contract names, and nothing here reads `options` back out.
+				return ok(fromLumenReply(data.data));
 			} finally {
 				clearTimeout(timer);
 				request.signal.removeEventListener("abort", forward);
 			}
-
-			const text = await response.text().catch(() => "");
-
-			if (request.signal.aborted) {
-				return err(stoppedError(key));
-			}
-
-			const envelope = parseEnvelope(text);
-
-			if (!response.ok || envelope?.success === false) {
-				return err(
-					errorForResponse(response.status, text, {
-						retryAfter: response.headers.get("Retry-After"),
-						now: now(),
-						secret: key,
-					}),
-				);
-			}
-
-			if (envelope === undefined) {
-				return err(
-					providerError(`Lumen answered ${response.status} with a body that is not JSON`, key),
-				);
-			}
-
-			const data = ReplyDataSchema.safeParse(envelope.data);
-			if (!data.success) {
-				return err(
-					providerError(
-						`Lumen's reply did not match the slot's contract: ${data.error.issues
-							.map((issue) => `${issue.path.join(".")}: ${issue.message}`)
-							.join("; ")}`,
-						key,
-					),
-				);
-			}
-
-			// The reply reaches Lyra with no key in it: `fromLumenReply` copies only
-			// what the contract names, and nothing here reads `options` back out.
-			return ok(fromLumenReply(data.data));
 		},
 	};
 }
