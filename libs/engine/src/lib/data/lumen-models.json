@@ -12,6 +12,18 @@
       "toolChoice": ["auto", "required", "none", "function"],
       "contextWindow": 128000
     },
+    "DEEPSEEK_V4_FLASH_0731": {
+      "id": "deepseek/deepseek-v4-flash-0731",
+      "name": "DeepSeek V4 Flash",
+      "category": "generation",
+      "provider": "openrouter",
+      "cost": { "input": 0.065, "output": 0.14 },
+      "quality": "high",
+      "speed": "fast",
+      "supportsTools": true,
+      "toolChoice": ["auto", "required", "none", "function"],
+      "contextWindow": 128000
+    },
     "QWEN3_8_FLASH": {
       "id": "qwen/qwen3.8-flash",
       "name": "Qwen3.8 Flash",
