@@ -1429,6 +1429,12 @@ importers:
         specifier: ^4.3.6
         version: 4.3.6
     devDependencies:
+      '@autumnsgrove/lyra':
+        specifier: ^0.3.1
+        version: 0.3.1
+      '@autumnsgrove/lyra-lumen':
+        specifier: workspace:*
+        version: link:../../libs/lyra
       '@cloudflare/vitest-pool-workers':
         specifier: ^0.13.3
         version: 0.13.5(@cloudflare/workers-types@4.20260414.1)(@vitest/runner@4.1.4)(@vitest/snapshot@4.1.4)(vitest@4.1.4)
@@ -1444,6 +1450,10 @@ importers:
       wrangler:
         specifier: ^4.126.0
         version: 4.126.0(@cloudflare/workers-types@4.20260414.1)
+
+      yaml:
+        specifier: ^2.8.1
+        version: 2.9.1
 
   workers/onboarding:
     dependencies:
@@ -1625,6 +1635,34 @@ importers:
       wrangler:
         specifier: ^4.126.0
         version: 4.126.0(@cloudflare/workers-types@4.20260414.1)
+
+  libs/lyra:
+    dependencies:
+      '@autumnsgrove/grove-crypto':
+        specifier: workspace:*
+        version: link:../grove-crypto
+      '@autumnsgrove/lattice':
+        specifier: workspace:*
+        version: link:../engine
+      '@autumnsgrove/lyra':
+        specifier: ^0.3.1
+        version: 0.3.1
+      zod:
+        specifier: ^4.3.6
+        version: 4.3.6
+    devDependencies:
+      '@cloudflare/workers-types':
+        specifier: ^4.20260317.1
+        version: 4.20260414.1
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.0
+        version: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0)(yaml@2.9.1))
+      yaml:
+        specifier: ^2.8.1
+        version: 2.9.1
 
 packages:
 
@@ -7369,7 +7407,12 @@ packages:
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
+  '@autumnsgrove/lyra@0.3.1':
+    resolution: {integrity: sha512-M57aNIxOe4o7xUzF0ORAws8pum8vHv0up7z1kq3L2bnxdH5eQwBCWKSSYD3gX5kWKG5brznBdoFS703jGpS9MA==}
+
 snapshots:
+
+  '@autumnsgrove/lyra@0.3.1': {}
 
   '@11ty/gray-matter@2.0.1':
     dependencies:
