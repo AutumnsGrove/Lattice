@@ -21,6 +21,8 @@ export interface DayRunStart {
 
 export interface DayRunFinish {
 	runId: string;
+	/** The run's owner. The update is scoped by it, so a wrong id cannot rewrite a row. */
+	tenantId: string;
 	/** How the run ended. `parked` still has a page: a limit is not a loss. */
 	status: "done" | "parked" | "failed";
 	turns: number;

@@ -125,6 +125,7 @@ describe("generateDay", () => {
 		expect(recorder.finished).toHaveLength(1);
 		expect(recorder.finished[0]).toMatchObject({
 			runId: "run-1",
+			tenantId: "tenant-1",
 			status: "done",
 			markdown: result.page.markdown,
 			gutter: [],

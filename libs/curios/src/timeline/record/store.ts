@@ -32,7 +32,7 @@ export function d1RunStore(db: D1Database): DayRunStore {
 					   SET status = ?, turns = ?, input_tokens = ?, output_tokens = ?,
 					       cost = ?, markdown = ?, gutter_content = ?, continuation_of = ?,
 					       error = ?, finished_at = strftime('%s', 'now')
-					 WHERE id = ?`,
+					 WHERE id = ? AND tenant_id = ?`,
 				)
 				.bind(
 					run.status,
@@ -45,6 +45,7 @@ export function d1RunStore(db: D1Database): DayRunStore {
 					run.continuationOf,
 					run.error,
 					run.runId,
+					run.tenantId,
 				)
 				.run();
 		},

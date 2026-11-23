@@ -55,6 +55,7 @@ const START = {
 
 const FINISH = {
 	runId: "run-1",
+	tenantId: "tenant-1",
 	status: "done" as const,
 	turns: 6,
 	inputTokens: 1_200,
@@ -92,6 +93,7 @@ describe("d1RunStore", () => {
 		await store.finish(FINISH);
 
 		expect(asked[0]?.sql).toContain("UPDATE timeline_runs");
+		expect(asked[0]?.sql).toContain("WHERE id = ? AND tenant_id = ?");
 		expect(asked[0]?.params).toEqual([
 			"done",
 			6,
@@ -103,6 +105,7 @@ describe("d1RunStore", () => {
 			"2026-11-19",
 			null,
 			"run-1",
+			"tenant-1",
 		]);
 	});
 

@@ -184,6 +184,7 @@ export async function generateDay(
 
 		await finishRun(deps.store, {
 			runId,
+			tenantId: input.tenantId,
 			status: result.reason,
 			turns: result.turns,
 			usage: result.usage,
@@ -208,6 +209,7 @@ export async function generateDay(
 		// saying the run is still going.
 		await finishRun(deps.store, {
 			runId,
+			tenantId: input.tenantId,
 			status: "failed",
 			turns: 0,
 			usage: NO_USAGE,
@@ -220,6 +222,7 @@ export async function generateDay(
 
 interface FinishRun {
 	runId: string;
+	tenantId: string;
 	status: "done" | "parked" | "failed";
 	turns: number;
 	usage: Usage;
@@ -230,6 +233,7 @@ interface FinishRun {
 function finishRun(store: DayRunStore, run: FinishRun): Promise<void> {
 	return store.finish({
 		runId: run.runId,
+		tenantId: run.tenantId,
 		status: run.status,
 		turns: run.turns,
 		inputTokens: run.usage.inputTokens,
