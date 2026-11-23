@@ -35,6 +35,12 @@ export interface TimelineVine {
 export interface TimelinePage {
 	projects: TimelineProject[];
 	vines: TimelineVine[];
+	/**
+	 * The headline: two or three sentences above the day, set by `set_brief`. The page
+	 * has always had two halves (`brief_summary` and `detailed_timeline`), and the
+	 * comparison is not like for like without it.
+	 */
+	brief: string | null;
 	/** Set by `mark_continuation`. Metadata: the stored day's page has no place for it. */
 	continuation: { day: string; text: string } | null;
 }
@@ -53,7 +59,7 @@ export interface TimelineState {
 }
 
 export function emptyPage(): TimelinePage {
-	return { projects: [], vines: [], continuation: null };
+	return { projects: [], vines: [], brief: null, continuation: null };
 }
 
 export function projectOf(state: TimelineState, repo: string): TimelineProject | undefined {

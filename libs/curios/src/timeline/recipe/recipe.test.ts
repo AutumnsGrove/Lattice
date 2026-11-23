@@ -28,12 +28,13 @@ describe("createTimelineRecipe", () => {
 		expect(instructions).toContain("start_project(repo)");
 		expect(instructions).toContain("add_line(project, text, cites)");
 		expect(instructions).toContain("add_vine(line, text)");
+		expect(instructions).toContain("set_brief(text)");
 		expect(instructions).toContain("get_diff(handle)");
 		expect(instructions).toContain("get_issue_thread(handle)");
 		expect(instructions).toContain("search_past_days(query)");
 		expect(instructions).toContain("finish(skipped)");
 		expect(instructions).toContain("Never type a commit hash");
-		expect(instructions).toContain("finish will refuse until the day is covered");
+		expect(instructions).toContain("finish will refuse until the page has a brief");
 	});
 
 	it("carries the tenant's voice and name", () => {

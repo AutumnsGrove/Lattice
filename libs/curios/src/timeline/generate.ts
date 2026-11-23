@@ -95,7 +95,7 @@ export interface GeneratedDay {
 	error: LyraError | null;
 }
 
-const NO_CHARS: SerializedPage = { markdown: "", gutter: [], continuation: null };
+const NO_CHARS: SerializedPage = { brief: null, markdown: "", gutter: [], continuation: null };
 const NO_USAGE: Usage = { inputTokens: 0, outputTokens: 0 };
 
 export async function generateDay(
@@ -239,6 +239,7 @@ function finishRun(store: DayRunStore, run: FinishRun): Promise<void> {
 		inputTokens: run.usage.inputTokens,
 		outputTokens: run.usage.outputTokens,
 		cost: run.usage.cost?.amount ?? 0,
+		brief: run.page.brief,
 		markdown: run.page.markdown,
 		gutter: run.page.gutter,
 		continuationOf: run.page.continuation?.day ?? null,

@@ -73,6 +73,12 @@ const LINE_INPUT = {
 	required: ["project", "text", "cites"],
 } as const;
 
+const BRIEF_INPUT = {
+	type: "object",
+	properties: { text: { type: "string", minLength: 1, maxLength: 1_000 } },
+	required: ["text"],
+} as const;
+
 const VINE_INPUT = {
 	type: "object",
 	properties: {
@@ -283,6 +289,27 @@ export function createTimelineTools(options: TimelineToolOptions): Tool[] {
 		});
 	}
 
+	/**
+	 * The page's other half. `brief_summary` has been on every stored day since the
+	 * first one, so a run that wrote only lines would produce a page the comparison
+	 * could not judge fairly.
+	 */
+	function setBrief(): Tool {
+		return defineTool({
+			name: "set_brief",
+			description:
+				"Write the day's headline: two or three sentences about what the day was. Call it after the lines, from the page you have written.",
+			parameters: BRIEF_INPUT,
+			safeToRepeat: true,
+			async execute() {
+				return { isError: false, content: "set the day's brief" };
+			},
+			apply(state: TimelineState, args) {
+				return { ...state, page: { ...state.page, brief: args.text } };
+			},
+		});
+	}
+
 	function markContinuation(): Tool {
 		return defineTool({
 			name: "mark_continuation",
@@ -404,6 +431,7 @@ export function createTimelineTools(options: TimelineToolOptions): Tool[] {
 		startProject(),
 		addLine(),
 		addVine(),
+		setBrief(),
 		markContinuation(),
 		getDiff(),
 		getIssueThread(),
@@ -418,6 +446,14 @@ export function createTimelineTools(options: TimelineToolOptions): Tool[] {
  * the check that keeps a day of only issue work from looking empty.
  */
 function doneCheck(state: TimelineState, skipped: readonly Skipped[]): DoneCheck {
+	if (state.page.brief === null) {
+		return {
+			ok: false,
+			message:
+				"the page needs a brief before it can finish; call set_brief with two or three sentences about the day",
+		};
+	}
+
 	for (const item of skipped) {
 		if (state.handles.target(item.handle) === undefined) {
 			return {

@@ -18,6 +18,8 @@ import type { GutterComment } from "../voices/types";
 import { coveredHandles, type TimelinePage, type TimelineState } from "./state";
 
 export interface SerializedPage {
+	/** The headline, in the shape `timeline_summaries.brief_summary` holds. */
+	brief: string | null;
 	/** The day's markdown, in the shape `timeline_summaries.detailed_timeline` holds. */
 	markdown: string;
 	/** The vines, in the shape `timeline_summaries.gutter_content` holds. */
@@ -40,7 +42,11 @@ export function describeState(state: TimelineState): string {
 	const { markdown } = serializePage(state.page);
 	const covered = coveredHandles(state);
 	const missing = state.handles.all().filter((handle) => !covered.has(handle));
-	const lines = [markdown.trim() === "" ? "(the page is empty)" : markdown];
+	const lines = [
+		state.page.brief === null ? "(no brief yet)" : `Brief: ${state.page.brief}`,
+		"",
+		markdown.trim() === "" ? "(the page is empty)" : markdown,
+	];
 	if (missing.length > 0) {
 		lines.push("", `Not covered yet: ${missing.join(", ")}`);
 	} else {
@@ -60,6 +66,7 @@ export function serializePage(page: TimelinePage): SerializedPage {
 	}
 
 	return {
+		brief: page.brief,
 		markdown: sections.join("\n\n"),
 		gutter: page.vines.map((vine) => ({
 			anchor: lineAnchor(vine.line),

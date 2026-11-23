@@ -13,6 +13,7 @@ import { createTimelineRecipe } from "./recipe";
 import { startState, createDay } from "./testing";
 
 const PAGE: TimelinePage = {
+	brief: "The vine can hang from a line now, and the marker is what does it.",
 	projects: [
 		{
 			repo: "Lattice",
@@ -63,6 +64,15 @@ describe("serializePage", () => {
 		]);
 	});
 
+	it("returns the brief beside the page rather than in it", () => {
+		const serialized = serializePage(PAGE);
+
+		expect(serialized.brief).toBe(
+			"The vine can hang from a line now, and the marker is what does it.",
+		);
+		expect(serialized.markdown).not.toContain("vine can hang");
+	});
+
 	it("returns the continuation as data instead of writing it into the page", () => {
 		const serialized = serializePage(PAGE);
 
@@ -85,6 +95,7 @@ describe("serializePage", () => {
 	it("writes an empty page for an empty one", () => {
 		const serialized = serializePage(emptyPage());
 
+		expect(serialized.brief).toBeNull();
 		expect(serialized.markdown).toBe("");
 		expect(serialized.gutter).toEqual([]);
 		expect(serialized.continuation).toBeNull();
@@ -103,6 +114,7 @@ describe("describeState", () => {
 
 		const text = describeState(state);
 
+		expect(text).toContain("(no brief yet)");
 		expect(text).toContain("(the page is empty)");
 		expect(text).toContain("Not covered yet: c1, c2, pr1, i1");
 	});

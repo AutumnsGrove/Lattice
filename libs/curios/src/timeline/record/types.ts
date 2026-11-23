@@ -29,6 +29,8 @@ export interface DayRunFinish {
 	inputTokens: number;
 	outputTokens: number;
 	cost: number;
+	/** The headline, in the shape the summary table already holds. */
+	brief: string | null;
 	/** The serialized page, in the shape the summary table already holds. */
 	markdown: string;
 	gutter: GutterComment[];
@@ -54,6 +56,7 @@ export interface DayRunRow {
 	input_tokens: number;
 	output_tokens: number;
 	cost: number;
+	brief: string | null;
 	markdown: string | null;
 	gutter_content: string | null;
 	continuation_of: string | null;
