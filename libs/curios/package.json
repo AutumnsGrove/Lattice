@@ -47,6 +47,10 @@
 			"types": "./src/timeline/recipe/index.ts",
 			"default": "./src/timeline/recipe/index.ts"
 		},
+		"./timeline/render": {
+			"types": "./src/timeline/render.ts",
+			"default": "./src/timeline/render.ts"
+		},
 		"./timeline/record": {
 			"types": "./src/timeline/record/index.ts",
 			"default": "./src/timeline/record/index.ts"

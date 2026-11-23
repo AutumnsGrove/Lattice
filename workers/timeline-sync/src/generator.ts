@@ -66,6 +66,39 @@ export async function getEnabledTenants(curioDb: GroveDatabase): Promise<TenantC
 }
 
 /**
+ * One tenant's configuration, whether or not it is enabled.
+ *
+ * The nightly run only asks for enabled tenants; the comparison (#1798) asks for a
+ * named one, which may be disabled while it is still being tried out.
+ */
+export async function getTenantConfig(
+	curioDb: GroveDatabase,
+	tenantId: string,
+): Promise<TenantConfig | null> {
+	const row = await curioDb
+		.prepare(
+			`SELECT
+        tenant_id,
+        github_username,
+        openrouter_model,
+        voice_preset,
+        custom_system_prompt,
+        custom_summary_instructions,
+        custom_gutter_style,
+        repos_include,
+        repos_exclude,
+        timezone,
+        owner_name
+      FROM timeline_curio_config
+      WHERE tenant_id = ?`,
+		)
+		.bind(tenantId)
+		.first<TenantConfigRow>();
+
+	return row === null || row === undefined ? null : parseConfigRow(row);
+}
+
+/**
  * Process timeline generation for a single tenant.
  * Isolated error handling so failures don't affect other tenants.
  */

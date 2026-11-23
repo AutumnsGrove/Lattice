@@ -1559,6 +1559,12 @@ importers:
       '@autumnsgrove/lattice':
         specifier: workspace:*
         version: link:../../libs/engine
+      '@autumnsgrove/lyra-lumen':
+        specifier: workspace:*
+        version: link:../../libs/lyra
+      markdown-it:
+        specifier: ^14.1.0
+        version: 14.1.1
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20260317.1
