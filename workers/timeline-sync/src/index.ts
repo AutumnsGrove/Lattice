@@ -16,6 +16,7 @@ import { createCloudflareContext } from "@autumnsgrove/infra/cloudflare";
 import type { GroveContext } from "@autumnsgrove/infra";
 import type { Env, GenerationResult } from "./config";
 import { getEnabledTenants, processTenantTimeline } from "./generator";
+import { compareDay } from "./compare";
 import { createSecretsManager } from "@autumnsgrove/grove-crypto/secrets";
 
 function createContext(env: Env): GroveContext {
@@ -92,7 +93,10 @@ export default {
 
 		const isGatedRoute =
 			request.method === "GET" &&
-			(url.pathname === "/" || url.pathname === "/tenants" || url.pathname === "/debug");
+			(url.pathname === "/" ||
+				url.pathname === "/tenants" ||
+				url.pathname === "/debug" ||
+				url.pathname === "/compare");
 
 		if (isGatedRoute) {
 			const authError = requireAdminAuth(request, env);
@@ -151,6 +155,51 @@ export default {
 						commitCount: r.commitCount,
 						error: r.error,
 					})),
+				});
+			} catch (err) {
+				return Response.json(
+					{
+						success: false,
+						error: err instanceof Error ? err.message : "Unknown error",
+					},
+					{ status: 500 },
+				);
+			}
+		}
+
+		// GET /compare?tenantId=<id>&date=YYYY-MM-DD — the new path beside the current one
+		// (#1798, slice 4). The old day is read from timeline_summaries rather than
+		// regenerated, so the comparison costs one run and the day she remembers is the
+		// day on the left. Add `&format=json` for the two pages as data.
+		if (request.method === "GET" && url.pathname === "/compare") {
+			const tenantId = url.searchParams.get("tenantId");
+			if (!tenantId) {
+				return Response.json({ success: false, error: "tenantId is required" }, { status: 400 });
+			}
+
+			const date = url.searchParams.get("date") || getYesterdayUTC();
+			if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+				return Response.json({ success: false, error: "date must be YYYY-MM-DD" }, { status: 400 });
+			}
+
+			try {
+				const compared = await compareDay(env, ctx, { tenantId, date });
+
+				if (url.searchParams.get("format") === "json") {
+					return Response.json({
+						success: true,
+						tenantId,
+						date,
+						runId: compared.runId,
+						status: compared.next.status,
+						old: compared.old,
+						next: compared.next,
+					});
+				}
+
+				return new Response(compared.html, {
+					status: 200,
+					headers: { "Content-Type": "text/html; charset=utf-8" },
 				});
 			} catch (err) {
 				return Response.json(
