@@ -11,3 +11,10 @@ LUMEN_API_KEY=your_lumen_api_key_here
 # Should match LUMEN_API_KEY configured in Warden's agent registry
 # Generate with: openssl rand -hex 32
 WARDEN_API_KEY=your_warden_api_key_here
+
+# A provider key for this machine only — the dev stack runs no Warden, so
+# without this a local Lumen fails closed on every call (see
+# src/lib/client-factory.ts). Never set in a deployed environment, and never
+# named like the global credential Warden owns.
+# ./scripts/seed-lumen-key.sh fills this in from ~/.pi/agent/auth.json.
+DEV_OPENROUTER_API_KEY=sk-or-v1-local_only_do_not_deploy
