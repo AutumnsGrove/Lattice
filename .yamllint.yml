@@ -2,8 +2,16 @@
 # yamllint configuration for Grove monorepo
 # Enforces consistent YAML formatting across GitHub Actions workflows
 # and other YAML files. Tuned for GitHub Actions idioms.
+# Vendored YAML is listed under `ignore` below, not restyled.
 
 extends: default
+
+# Files this repository must not restyle. `libs/lyra/scenarios/` is a verbatim copy of
+# Lyra's scenario files (`scenarios/README.md` says why), and the point of the copy is
+# that it is byte-identical to the original: reformatting it here would make the two
+# differ silently, and the scenario run is supposed to prove the same files work.
+ignore: |
+  libs/lyra/scenarios/
 
 rules:
   # Line length: 100 chars (matches Black formatter convention)

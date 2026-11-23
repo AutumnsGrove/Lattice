@@ -1,0 +1,16 @@
+name: a call that needs a person waits for one
+task: scenario-approval
+input: write the line, then finish
+tools:
+  - { name: write, behavior: ok, content: wrote one line, policy: ask }
+model:
+  - tool_calls: [{ id: c1, name: write, args: {} }]
+  - tool_calls: [{ id: c2, name: finish, args: {} }]
+expect_events:
+  - { type: run_start }
+  - { type: turn_end, turn: 1 }
+expect_record:
+  - { type: user_message, label: task }
+  - { type: assistant_message, finish_reason: tool_calls }
+  - { type: request, kind: approve, callId: c1, tool: write }
+  - { type: status, state: parked, reason: waiting_for_person }
