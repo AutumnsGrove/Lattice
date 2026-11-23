@@ -1559,6 +1559,9 @@ importers:
       '@autumnsgrove/lattice':
         specifier: workspace:*
         version: link:../../libs/engine
+      '@autumnsgrove/lyra':
+        specifier: ^0.3.1
+        version: 0.3.1
       '@autumnsgrove/lyra-lumen':
         specifier: workspace:*
         version: link:../../libs/lyra
