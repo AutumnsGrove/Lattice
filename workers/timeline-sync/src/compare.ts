@@ -65,6 +65,9 @@ export async function compareDay(
 	}
 
 	const model = createLumenModelSlot({
+		// The binding answers the request; the URL is what the slot builds the path
+		// onto, so it needs a base even though the service binding does the routing.
+		baseUrl: "https://grove-lumen",
 		fetcher: env.LUMEN,
 		apiKey: env.LUMEN_API_KEY,
 		tenantId: config.tenantId,
