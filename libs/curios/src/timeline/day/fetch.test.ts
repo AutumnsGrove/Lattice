@@ -307,6 +307,26 @@ describe("fetchTimelineDay", () => {
 		expect(day.warnings[0]?.message).toContain("stopped after 1 pages");
 	});
 
+	it("calls the platform fetch with the global as its receiver", async () => {
+		// workerd throws "Illegal invocation" for a detached `globalThis.fetch(...)`,
+		// which is exactly what a copied function reference is. This fake behaves the
+		// same way, so the regression cannot come back unnoticed.
+		const original = globalThis.fetch;
+		let receiver: unknown = "never called";
+		globalThis.fetch = function (this: unknown) {
+			receiver = this;
+			return Promise.resolve(Response.json([]));
+		} as unknown as typeof globalThis.fetch;
+
+		try {
+			await fetchTimelineDay({ ...DAY, repos: ["Lattice"] });
+		} finally {
+			globalThis.fetch = original;
+		}
+
+		expect(receiver).toBe(globalThis);
+	});
+
 	it("refuses a date that is not a calendar day", async () => {
 		await expect(
 			fetchTimelineDay({ ...DAY, date: "2026-02-31", fetch: fakeGitHub([]).fetch }),

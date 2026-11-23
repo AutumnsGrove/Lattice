@@ -176,7 +176,11 @@ interface Client {
 }
 
 function createClient(options: DayFetchOptions): Client {
-	const fetchImpl = options.fetch ?? (globalThis.fetch as FetchLike | undefined);
+	// `fetch` must be called with the global as its receiver. Under workerd, a
+	// detached `globalThis.fetch(...)` throws "Illegal invocation", so the platform
+	// function is bound rather than copied. Found by running the comparison route on
+	// a deployed worker, which no test could have told us.
+	const fetchImpl = options.fetch ?? (globalThis.fetch?.bind(globalThis) as FetchLike | undefined);
 	if (typeof fetchImpl !== "function") {
 		throw new Error("no fetch is available; pass one as `fetch`");
 	}

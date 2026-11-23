@@ -34,6 +34,24 @@ function fakeFetch(replies: { body: string; status?: number }[] | { error: Error
 const READER = { token: "secret-token", username: "autumn", userAgent: "test" };
 
 describe("createGitHubReader", () => {
+	it("calls the platform fetch with the global as its receiver", async () => {
+		const original = globalThis.fetch;
+		let receiver: unknown = "never called";
+		globalThis.fetch = function (this: unknown) {
+			receiver = this;
+			return Promise.resolve(new Response("diff --git a/x b/x"));
+		} as unknown as typeof globalThis.fetch;
+
+		try {
+			const reader = createGitHubReader({ token: "t", username: "autumn" });
+			await reader.diff({ kind: "commit", repo: "Lattice", sha: "abc1234" });
+		} finally {
+			globalThis.fetch = original;
+		}
+
+		expect(receiver).toBe(globalThis);
+	});
+
 	it("asks for a commit's diff with the diff media type and the token", async () => {
 		const wire = fakeFetch([{ body: "diff --git a/x b/x" }]);
 		const reader = createGitHubReader({ ...READER, fetch: wire.fetch });
