@@ -1,0 +1,159 @@
+/**
+ * Timeline Markdown Rendering
+ *
+ * Turns a stored day into HTML, with its vines (gutter comments) placed by
+ * anchor. Two anchor kinds are understood, both through `parseAnchor`:
+ *
+ * - `### ProjectName` — the legacy anchor. The vine renders in a group directly
+ *   under that `<h3>`. Stored days use only this one, so it keeps working.
+ * - `anchor:l3` — a line anchor. The markdown carries a `<!-- anchor:l3 -->`
+ *   marker, which the renderer turns into a zero-width span; the vine renders
+ *   immediately after it. Put the marker at the start of the line's text: the
+ *   vine floats into the left margin there (float rules mirrored from the
+ *   blog gutter, `.mobile-gutter-inline` in the engine's `styles/content.css`),
+ *   and the line's own words wrap beside it.
+ *
+ * A marker with no matching vine renders as nothing (it is a zero-width span),
+ * and a vine whose marker is missing is dropped rather than moved to a heading,
+ * so a stale anchor can never appear under the wrong project.
+ *
+ * SECURITY: this module renders model output, so it enables `html` on its
+ * markdown-it instance. Everything it returns has been through
+ * `sanitizeMarkdown`, which allows a fixed tag list — the same boundary
+ * `@autumnsgrove/grove-markdown` documents for the site's posts.
+ */
+
+import MarkdownIt from "markdown-it";
+import {
+	escapeHtml,
+	parseAnchor,
+	processAnchorTags,
+	sanitizeMarkdown,
+} from "@autumnsgrove/lattice/utils";
+
+export interface TimelineVine {
+	anchor: string;
+	content: string;
+	type?: string;
+}
+
+export interface RenderTimelineOptions {
+	/** The day's stored markdown (`timeline_summaries.detailed_timeline`). */
+	markdown: string;
+	/** The day's vines (`timeline_summaries.gutter_content`). */
+	gutterItems?: TimelineVine[];
+	/** Turns `### repo` into a link to that repo, when known. */
+	githubUsername?: string;
+}
+
+// Local instance: the timeline wants `breaks: true`, and `html` has to stay on
+// for the anchor markers to survive rendering (see the module doc).
+const timelineMd = new MarkdownIt({ html: true, linkify: true, breaks: true });
+
+const VINE_ICON =
+	'<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>';
+
+/** The zero-width span `processAnchorTags` emits for `<!-- anchor:name -->`. */
+function markerHtml(name: string): string {
+	return `<span class="anchor-marker" data-anchor="${escapeHtml(name)}"></span>`;
+}
+
+function vineHtml(item: TimelineVine, extraClass = ""): string {
+	const className = extraClass ? `inline-gutter-comment ${extraClass}` : "inline-gutter-comment";
+	return `<span class="${className}">${VINE_ICON}<span>${escapeHtml(item.content)}</span></span>`;
+}
+
+function groupVines(items: TimelineVine[], extraClass = ""): string {
+	return items.map((item) => vineHtml(item, extraClass)).join("");
+}
+
+/** Group vines by their exact anchor string, preserving first-seen order. */
+function groupByAnchor(items: TimelineVine[]): Map<string, TimelineVine[]> {
+	const grouped = new Map<string, TimelineVine[]>();
+	for (const item of items) {
+		const anchor = item.anchor?.trim() || "General";
+		const existing = grouped.get(anchor);
+		if (existing) {
+			existing.push(item);
+		} else {
+			grouped.set(anchor, [item]);
+		}
+	}
+	return grouped;
+}
+
+function escapeRegex(str: string): string {
+	return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Place a group under an `### ProjectName` heading, linked or plain.
+ * Returns the html unchanged when no such heading exists.
+ */
+function placeOnHeading(html: string, anchor: string, vines: string): string {
+	const headerName = anchor.replace(/^#+\s*/, "").trim();
+	const name = escapeRegex(headerName);
+
+	const linkPattern = new RegExp(`(<h3>\\s*<a[^>]*>\\s*${name}\\s*</a>\\s*</h3>)`, "i");
+	const plainPattern = new RegExp(`(<h3>\\s*${name}\\s*</h3>)`, "i");
+
+	if (linkPattern.test(html)) {
+		return html.replace(linkPattern, `$1\n<div class="header-gutter-group">${vines}</div>`);
+	}
+	if (plainPattern.test(html)) {
+		return html.replace(plainPattern, `$1\n<div class="header-gutter-group">${vines}</div>`);
+	}
+	return html;
+}
+
+/**
+ * Place a group directly after the first `<!-- anchor:name -->` marker.
+ * Returns the html unchanged when the marker is absent.
+ */
+function placeOnMarker(html: string, name: string, vines: string): string {
+	const marker = markerHtml(name);
+	const index = html.indexOf(marker);
+	if (index === -1) {
+		return html;
+	}
+	const end = index + marker.length;
+	return `${html.slice(0, end)}${vines}${html.slice(end)}`;
+}
+
+/**
+ * Render a day's markdown with its vines in place.
+ */
+export function renderTimelineHtml({
+	markdown,
+	gutterItems = [],
+	githubUsername = "",
+}: RenderTimelineOptions): string {
+	if (!markdown) {
+		return "";
+	}
+
+	// `### RepoName` becomes a link to that repo, when we know the owner.
+	let withRepoLinks = markdown;
+	if (githubUsername) {
+		withRepoLinks = markdown.replace(/^### (?!\[)(.+)$/gm, (match, repoName) => {
+			const cleanName = repoName.trim();
+			return `### [${cleanName}](https://github.com/${githubUsername}/${cleanName})`;
+		});
+	}
+
+	let html = sanitizeMarkdown(processAnchorTags(timelineMd.render(withRepoLinks)));
+
+	for (const [anchor, items] of groupByAnchor(gutterItems)) {
+		const parsed = parseAnchor(anchor);
+
+		if (parsed.type === "tag") {
+			html = placeOnMarker(html, String(parsed.value), groupVines(items, "line-vine"));
+		} else {
+			// Header anchors, and the unknown-format strings parseAnchor treats as
+			// headers for backwards compatibility.
+			html = placeOnHeading(html, anchor, groupVines(items));
+		}
+	}
+
+	return html;
+}
