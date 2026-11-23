@@ -10,30 +10,26 @@
 	 * - Pagination with "Load More"
 	 */
 
-	import MarkdownIt from "markdown-it";
-	import { sanitizeMarkdown } from "@autumnsgrove/lattice/utils";
-	import { escapeHtml } from "@autumnsgrove/lattice/utils/escape-html";
-
-	// Local instance with breaks: true for timeline rendering
-	const timelineMd = new MarkdownIt({ breaks: true, linkify: true });
-	import { metricIcons, actionIcons, navIcons, featureIcons, stateIcons, natureIcons } from "@autumnsgrove/prism/icons";
+	import { renderTimelineHtml, type TimelineVine } from "./render";
+	import {
+		metricIcons,
+		actionIcons,
+		navIcons,
+		featureIcons,
+		stateIcons,
+		natureIcons,
+	} from "@autumnsgrove/prism/icons";
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import GlassButton from "@autumnsgrove/lattice/ui/components/ui/GlassButton.svelte";
 	import Badge from "@autumnsgrove/lattice/ui/components/ui/Badge.svelte";
 	import Heatmap from "./Heatmap.svelte";
-
-	interface GutterItem {
-		anchor: string;
-		content: string;
-		type?: string;
-	}
 
 	interface Summary {
 		id: string;
 		summary_date: string;
 		brief_summary: string | null;
 		detailed_timeline: string | null;
-		gutter_content: GutterItem[] | null;
+		gutter_content: TimelineVine[] | null;
 		commit_count: number;
 		repos_active: string[];
 		total_additions: number;
@@ -80,8 +76,11 @@
 		if (renderedHtmlCache.has(cacheKey)) {
 			return renderedHtmlCache.get(cacheKey)!;
 		}
-		const gutterItems = summary.gutter_content ?? [];
-		const html = renderMarkdownWithGutter(summary.detailed_timeline ?? "", gutterItems);
+		const html = renderTimelineHtml({
+			markdown: summary.detailed_timeline ?? "",
+			gutterItems: summary.gutter_content ?? [],
+			githubUsername,
+		});
 		renderedHtmlCache.set(cacheKey, html);
 		return html;
 	}
@@ -142,76 +141,6 @@
 		if (!summary.focus_streak || summary.focus_streak < 2) return null;
 		const task = summary.detected_focus?.task || "focused work";
 		return `Day ${summary.focus_streak} of ${task}`;
-	}
-
-	/**
-	 * Get gutter items grouped by their anchor header
-	 */
-	function getGutterItemsByAnchor(gutterItems: GutterItem[]): Record<string, GutterItem[]> {
-		const grouped: Record<string, GutterItem[]> = {};
-		for (const item of gutterItems) {
-			const headerName = item.anchor?.replace(/^#+\s*/, "").trim() || "General";
-			if (!grouped[headerName]) {
-				grouped[headerName] = [];
-			}
-			grouped[headerName].push(item);
-		}
-		return grouped;
-	}
-
-	/**
-	 * Render markdown to HTML with repo links and inject gutter comments
-	 */
-	function renderMarkdownWithGutter(text: string, gutterItems: GutterItem[] = []): string {
-		if (!text) return "";
-
-		const gutterByHeader = getGutterItemsByAnchor(gutterItems);
-
-		// Convert ### RepoName headers to GitHub links (if username provided)
-		let withRepoLinks = text;
-		if (githubUsername) {
-			withRepoLinks = text.replace(/^### (?!\[)(.+)$/gm, (match, repoName) => {
-				const cleanName = repoName.trim();
-				return `### [${cleanName}](https://github.com/${githubUsername}/${cleanName})`;
-			});
-		}
-
-		// Parse to HTML and sanitize
-		let html = sanitizeMarkdown(timelineMd.render(withRepoLinks));
-
-		// Inject gutter comments after headers
-		for (const [headerName, items] of Object.entries(gutterByHeader)) {
-			const gutterHtml = items
-				.map(
-					(item) =>
-						`<div class="inline-gutter-comment"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg><span>${escapeHtml(item.content)}</span></div>`,
-				)
-				.join("");
-
-			const linkPattern = new RegExp(
-				`(<h3>\\s*<a[^>]*>\\s*${escapeRegex(headerName)}\\s*</a>\\s*</h3>)`,
-				"i",
-			);
-			const plainPattern = new RegExp(`(<h3>\\s*${escapeRegex(headerName)}\\s*</h3>)`, "i");
-
-			if (linkPattern.test(html)) {
-				html = html.replace(
-					linkPattern,
-					`$1\n<div class="header-gutter-group">${gutterHtml}</div>`,
-				);
-			} else if (plainPattern.test(html)) {
-				html = html.replace(
-					plainPattern,
-					`$1\n<div class="header-gutter-group">${gutterHtml}</div>`,
-				);
-			}
-		}
-
-		return html;
-	}
-
-	function escapeRegex(str: string): string {
-		return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 	}
 
 	function toggleCard(id: string): void {
@@ -628,6 +557,39 @@
 		color: var(--grove-accent);
 		opacity: 0.75;
 		margin-top: 0.15rem;
+	}
+	/* A vine anchored to a line floats into the left of the line, the way a bloom's
+	   gutter note does. Same width and breakpoints as `.mobile-gutter-inline` in the
+	   engine's styles/content.css, so the two read alike until the timeline can
+	   render the real GutterItem (structured lines, #1798). No negative margin: the
+	   line keeps its list marker, and the note starts where the text did. */
+	.markdown-content :global(.line-vine.inline-gutter-comment) {
+		display: flex;
+		float: left;
+		clear: left;
+		width: 38%;
+		max-width: 300px;
+		min-width: 160px;
+		margin: 0 1rem 0.5rem 0;
+	}
+	@media (max-width: 768px) {
+		.markdown-content :global(.line-vine.inline-gutter-comment) {
+			float: right;
+			clear: right;
+			width: 35%;
+			max-width: 250px;
+			min-width: 120px;
+			margin: 0 0 0.5rem 1rem;
+		}
+	}
+	@media (max-width: 400px) {
+		.markdown-content :global(.line-vine.inline-gutter-comment) {
+			float: none;
+			clear: none;
+			width: auto;
+			max-width: none;
+			margin: 0.5rem 0 0.75rem;
+		}
 	}
 
 	/* Detailed Timeline Markdown — glassmorphism container */
