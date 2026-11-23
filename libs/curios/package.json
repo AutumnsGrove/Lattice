@@ -39,6 +39,10 @@
 			"types": "./src/timeline/index.ts",
 			"default": "./src/timeline/index.ts"
 		},
+		"./timeline/day": {
+			"types": "./src/timeline/day/index.ts",
+			"default": "./src/timeline/day/index.ts"
+		},
 		"./timeline/secrets.server": {
 			"types": "./src/timeline/secrets.server.ts",
 			"default": "./src/timeline/secrets.server.ts"
