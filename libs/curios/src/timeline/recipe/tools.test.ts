@@ -201,6 +201,24 @@ describe("add_vine", () => {
 	});
 });
 
+describe("set_brief", () => {
+	it("writes the headline, and the last call wins", async () => {
+		const { recipe, state } = setup();
+
+		const first = await callTool(recipe, state, "set_brief", { text: "One busy day." }, "brief-1");
+		const second = await callTool(
+			recipe,
+			first.state,
+			"set_brief",
+			{ text: "One busy day, mostly on the timeline." },
+			"brief-2",
+		);
+
+		expect(first.outcome.isError).toBe(false);
+		expect(second.state.page.brief).toBe("One busy day, mostly on the timeline.");
+	});
+});
+
 describe("mark_continuation", () => {
 	it("refuses a malformed day, and this very day", async () => {
 		const { recipe, state } = setup();
@@ -317,12 +335,22 @@ describe("search_past_days", () => {
 });
 
 describe("finish", () => {
+	async function withBrief(
+		recipe: ReturnType<typeof createTimelineRecipe>,
+		state: TimelineState,
+	): Promise<TimelineState> {
+		const brief = await callTool(recipe, state, "set_brief", {
+			text: "Attached a vine to a line, and kept the run.",
+		});
+		return brief.state;
+	}
+
 	async function coverEverything(
 		recipe: ReturnType<typeof createTimelineRecipe>,
 		state: TimelineState,
 	): Promise<TimelineState> {
 		let current = await callTool(recipe, state, "start_project", { repo: "Lattice" });
-		let next = current.state;
+		let next = await withBrief(recipe, current.state);
 		for (const [index, cite] of ["c1", "c2", "pr1", "i1"].entries()) {
 			current = await callTool(
 				recipe,
@@ -336,6 +364,16 @@ describe("finish", () => {
 		return next;
 	}
 
+	it("refuses until the page has a brief", async () => {
+		const { recipe, state } = setup();
+
+		const refused = await callTool(recipe, state, "finish", {});
+
+		expect(refused.outcome.isError).toBe(true);
+		expect(refused.outcome.content).toContain("needs a brief");
+		expect(refused.outcome.content).toContain("set_brief");
+	});
+
 	it("refuses until every handle is covered, naming what is missing by kind", async () => {
 		const { recipe, state } = setup();
 		let current = await callTool(recipe, state, "start_project", { repo: "Lattice" });
@@ -346,8 +384,9 @@ describe("finish", () => {
 			{ project: "Lattice", text: "Attached a vine", cites: ["c1"] },
 			"line-1",
 		);
+		const withBriefState = await withBrief(recipe, current.state);
 
-		const refused = await callTool(recipe, current.state, "finish", {});
+		const refused = await callTool(recipe, withBriefState, "finish", {});
 
 		expect(refused.outcome.isError).toBe(true);
 		expect(refused.outcome.content).toBe(
@@ -391,8 +430,9 @@ describe("finish", () => {
 
 	it("accepts a day with nothing written, when everything is skipped", async () => {
 		const { recipe, state } = setup();
+		const briefed = await withBrief(recipe, state);
 
-		const result = await callTool(recipe, state, "finish", {
+		const result = await callTool(recipe, briefed, "finish", {
 			skipped: [
 				{ handle: "c1", reason: "one thread with c2" },
 				{ handle: "c2", reason: "one thread with c1" },

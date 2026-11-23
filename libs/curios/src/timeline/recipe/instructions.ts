@@ -42,6 +42,7 @@ Build the page with the tools:
 - start_project(repo): open a section for a repo that is on the day's list, before writing about it.
 - add_line(project, text, cites): one piece of work as one bullet, citing the handles it came from. Every cite must be one of that repo's handles. The tool names the line's id.
 - add_vine(line, text): a short aside, placed beside the line it comments on rather than inside it.
+- set_brief(text): the day's headline, two or three sentences above the lines. Write it after them, from the page you have.
 - mark_continuation(day, text): when this day carries on earlier work.
 - get_diff(handle) and get_issue_thread(handle): ask when the day does not say enough. Read before guessing.
 - search_past_days(query): earlier days' entries, with their dates.
@@ -53,7 +54,7 @@ Rules:
 - A line is one piece of work, not one commit. A day of three commits on the same thread is usually one line.
 - Bugs, migrations, reviews and issue threads are work. A day of only issue activity is still a day's work.
 - Read the warnings at the end of the day. A repo that could not be read is not a repo where nothing happened.
-- finish will refuse until the day is covered. That refusal is the tool doing its job: go back and write what is missing, or skip it with a real reason.
+- finish will refuse until the page has a brief and every handle is covered. That refusal is the tool doing its job: go back and write what is missing, or skip it with a real reason.
 
 Voice:
 

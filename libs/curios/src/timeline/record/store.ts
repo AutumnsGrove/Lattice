@@ -30,7 +30,7 @@ export function d1RunStore(db: D1Database): DayRunStore {
 				.prepare(
 					`UPDATE timeline_runs
 					   SET status = ?, turns = ?, input_tokens = ?, output_tokens = ?,
-					       cost = ?, markdown = ?, gutter_content = ?, continuation_of = ?,
+					       cost = ?, brief = ?, markdown = ?, gutter_content = ?, continuation_of = ?,
 					       error = ?, finished_at = strftime('%s', 'now')
 					 WHERE id = ? AND tenant_id = ?`,
 				)
@@ -40,6 +40,7 @@ export function d1RunStore(db: D1Database): DayRunStore {
 					run.inputTokens,
 					run.outputTokens,
 					run.cost,
+					run.brief,
 					run.markdown,
 					JSON.stringify(run.gutter),
 					run.continuationOf,

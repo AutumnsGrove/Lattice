@@ -96,7 +96,16 @@ const COVER_ALL: readonly ScriptedTurn[] = [
 			},
 		],
 	},
-	{ toolCalls: [{ id: "t8", name: "finish", args: {} }] },
+	{
+		toolCalls: [
+			{
+				id: "t8",
+				name: "set_brief",
+				args: { text: "A vine can hang from a line now, and the day fetcher landed." },
+			},
+		],
+	},
+	{ toolCalls: [{ id: "t9", name: "finish", args: {} }] },
 ];
 
 describe("the timeline recipe, end to end", () => {
@@ -119,6 +128,7 @@ describe("the timeline recipe, end to end", () => {
 		expect(serialized.gutter).toEqual([
 			{ anchor: "anchor:l1", type: "comment", content: "finally, the marker works" },
 		]);
+		expect(serialized.brief).toBe("A vine can hang from a line now, and the day fetcher landed.");
 	});
 
 	it("keeps going after finish refuses, and ends done once the day is covered", async () => {
@@ -147,7 +157,10 @@ describe("the timeline recipe, end to end", () => {
 					},
 				],
 			},
-			{ toolCalls: [{ id: "t5", name: "finish", args: {} }] },
+			{
+				toolCalls: [{ id: "t5", name: "set_brief", args: { text: "The rest of the day." } }],
+			},
+			{ toolCalls: [{ id: "t6", name: "finish", args: {} }] },
 		];
 
 		const { result, state } = await runDay(turns);

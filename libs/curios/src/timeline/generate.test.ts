@@ -96,7 +96,8 @@ const WRITE_THE_DAY: readonly ScriptedTurn[] = [
 			},
 		],
 	},
-	{ toolCalls: [{ id: "t3", name: "finish", args: {} }] },
+	{ toolCalls: [{ id: "t3", name: "set_brief", args: { text: "Attached a vine to a line." } }] },
+	{ toolCalls: [{ id: "t4", name: "finish", args: {} }] },
 ];
 
 describe("generateDay", () => {
@@ -123,10 +124,12 @@ describe("generateDay", () => {
 			},
 		]);
 		expect(recorder.finished).toHaveLength(1);
+		expect(result.page.brief).toBe("Attached a vine to a line.");
 		expect(recorder.finished[0]).toMatchObject({
 			runId: "run-1",
 			tenantId: "tenant-1",
 			status: "done",
+			brief: "Attached a vine to a line.",
 			markdown: result.page.markdown,
 			gutter: [],
 			continuationOf: null,
@@ -187,6 +190,7 @@ describe("generateDay", () => {
 		expect(recorder.finished[0]).toMatchObject({
 			status: "failed",
 			error: "the scripted model has no turn 1: the script has 0",
+			brief: null,
 			markdown: "",
 		});
 	});
