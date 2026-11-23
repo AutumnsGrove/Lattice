@@ -1,0 +1,58 @@
+{
+	"name": "@autumnsgrove/lyra-lumen",
+	"version": "0.1.0",
+	"description": "Lyra's Lumen adapter — a model slot over Grove's inference worker, a secrets slot over tenant secrets, and the fakes that keep both honest.",
+	"author": "AutumnsGrove",
+	"license": "AGPL-3.0-only",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/AutumnsGrove/Lattice.git",
+		"directory": "libs/lyra"
+	},
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./src/index.ts",
+			"default": "./src/index.ts"
+		},
+		"./lumen": {
+			"types": "./src/lumen/index.ts",
+			"default": "./src/lumen/index.ts"
+		},
+		"./secrets": {
+			"types": "./src/secrets/index.ts",
+			"default": "./src/secrets/index.ts"
+		},
+		"./testing": {
+			"types": "./src/testing/index.ts",
+			"default": "./src/testing/index.ts"
+		}
+	},
+	"files": [
+		"src"
+	],
+	"scripts": {
+		"check": "tsc --noEmit",
+		"test": "vitest",
+		"test:run": "vitest run"
+	},
+	"dependencies": {
+		"@autumnsgrove/grove-crypto": "workspace:*",
+		"@autumnsgrove/lattice": "workspace:*",
+		"@autumnsgrove/lyra": "^0.3.1",
+		"zod": "^4.3.6"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "^4.20260317.1",
+		"typescript": "^5.9.3",
+		"vitest": "^4.1.0",
+		"yaml": "^2.8.1"
+	},
+	"keywords": [
+		"grove",
+		"lyra",
+		"lumen",
+		"agent",
+		"adapter"
+	]
+}
