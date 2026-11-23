@@ -90,7 +90,9 @@ describe("database module", () => {
 			await addOffender(db, "newbad.com", "jailbreak_attempt", 0.9);
 
 			// Verify INSERT was called
-			const insertCall = db.prepare.mock.calls.find((call) => call[0].includes("INSERT"));
+			const insertCall = db.prepare.mock.calls.find((call: unknown[]) =>
+				String(call[0]).includes("INSERT"),
+			);
 			expect(insertCall).toBeDefined();
 		});
 
@@ -110,7 +112,9 @@ describe("database module", () => {
 			await addOffender(db, "bad.com", "instruction_override", 0.9);
 
 			// Verify UPDATE was called
-			const updateCall = db.prepare.mock.calls.find((call) => call[0].includes("UPDATE"));
+			const updateCall = db.prepare.mock.calls.find((call: unknown[]) =>
+				String(call[0]).includes("UPDATE"),
+			);
 			expect(updateCall).toBeDefined();
 		});
 
@@ -154,7 +158,7 @@ describe("database module", () => {
 			const lastBindCall = bindCalls[bindCalls.length - 1];
 			// injection_types should now have both types
 			const typesStr = lastBindCall.find(
-				(arg) => typeof arg === "string" && arg.includes("jailbreak"),
+				(arg: unknown) => typeof arg === "string" && arg.includes("jailbreak"),
 			);
 			expect(typesStr).toContain("instruction_override");
 			expect(typesStr).toContain("jailbreak_attempt");
@@ -178,7 +182,7 @@ describe("database module", () => {
 			const bindCalls = db._stmt.bind.mock.calls;
 			const lastBindCall = bindCalls[bindCalls.length - 1];
 			const typesStr = lastBindCall.find(
-				(arg) => typeof arg === "string" && arg.includes("jailbreak"),
+				(arg: unknown) => typeof arg === "string" && arg.includes("jailbreak"),
 			);
 			// Should only have one instance of jailbreak_attempt
 			const parsed = JSON.parse(typesStr);
@@ -364,7 +368,9 @@ describe("database module", () => {
 
 			await clearOffenders(db);
 
-			const deleteCall = db.prepare.mock.calls.find((call) => call[0].includes("DELETE"));
+			const deleteCall = db.prepare.mock.calls.find((call: unknown[]) =>
+				String(call[0]).includes("DELETE"),
+			);
 			expect(deleteCall).toBeDefined();
 			expect(deleteCall?.[0]).toContain("DELETE FROM offenders");
 		});
