@@ -611,6 +611,9 @@ importers:
       '@autumnsgrove/grove-errors':
         specifier: workspace:*
         version: link:../grove-errors
+      '@autumnsgrove/lyra':
+        specifier: ^0.3.1
+        version: 0.3.1
     devDependencies:
       '@autumnsgrove/lattice':
         specifier: workspace:*

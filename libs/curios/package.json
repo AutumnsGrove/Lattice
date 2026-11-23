@@ -43,6 +43,10 @@
 			"types": "./src/timeline/day/index.ts",
 			"default": "./src/timeline/day/index.ts"
 		},
+		"./timeline/recipe": {
+			"types": "./src/timeline/recipe/index.ts",
+			"default": "./src/timeline/recipe/index.ts"
+		},
 		"./timeline/secrets.server": {
 			"types": "./src/timeline/secrets.server.ts",
 			"default": "./src/timeline/secrets.server.ts"
@@ -82,7 +86,8 @@
 	},
 	"dependencies": {
 		"@autumnsgrove/grove-crypto": "workspace:*",
-		"@autumnsgrove/grove-errors": "workspace:*"
+		"@autumnsgrove/grove-errors": "workspace:*",
+		"@autumnsgrove/lyra": "^0.3.1"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20260317.1",
