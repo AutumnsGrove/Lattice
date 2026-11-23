@@ -135,12 +135,16 @@ let activeLinkPolicy: LinkPolicy = "standard";
 if (BROWSER) {
 	import("dompurify")
 		.then((module) => {
-			DOMPurify = module.default;
-
-			// See the note in libs/engine's copy: an environment that resolves the
-			// module without a DOMPurify instance must not produce an unhandled
-			// rejection at teardown.
-			if (typeof DOMPurify?.addHook !== "function") return;
+			// Assign only a real instance. In a Worker, `BROWSER` can be true (esm-env
+			// picks its browser entry) while the dynamic import resolves to something
+			// that is not an instance — a module namespace or a factory — and assigning
+			// it made `sanitizeMarkdown` call `DOMPurify.sanitize`, which is not a
+			// function. Leaving it null is what sends the call down the server-safe path.
+			const loaded = module.default;
+			if (typeof loaded?.sanitize !== "function" || typeof loaded.addHook !== "function") {
+				return;
+			}
+			DOMPurify = loaded;
 
 			DOMPurify.addHook("afterSanitizeAttributes", (node) => {
 				if (node.tagName === "A") {
