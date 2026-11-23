@@ -14,7 +14,15 @@
  * something that is not on the day.
  */
 
-import { createHandleTable, defineRecipe, type JsonObject } from "@autumnsgrove/lyra";
+import {
+	compileSchema,
+	createHandleTable,
+	defineRecipe,
+	validateValue,
+	type JsonObject,
+	type JsonValue,
+	type Validation,
+} from "@autumnsgrove/lyra";
 import { mintDayHandles } from "../day/handles";
 import { renderDay } from "../day/render";
 import type { TimelineDay } from "../day/types";
@@ -128,6 +136,17 @@ const DAY_INPUT: JsonObject = {
 	required: ["date", "timezone", "githubUsername", "repos", "commits", "pulls", "issues"],
 	additionalProperties: true,
 };
+
+/** Compiled once: a bad schema is a definition error, raised at load, not per run. */
+const DAY_SCHEMA = compileSchema(DAY_INPUT, "the timeline day");
+
+/**
+ * Check a day against the recipe's input schema. The runtime calls this before
+ * `setup` on a resume, and `generateDay` calls it before a run starts.
+ */
+export function checkDayInput(input: JsonValue): Validation<JsonValue> {
+	return validateValue(DAY_SCHEMA, input);
+}
 
 export function createTimelineRecipe(options: TimelineRecipeOptions) {
 	return defineRecipe({
