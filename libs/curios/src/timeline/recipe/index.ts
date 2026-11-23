@@ -12,6 +12,7 @@
  */
 
 export {
+	checkDayInput,
 	createTimelineRecipe,
 	DEFAULT_STEP_LIMIT,
 	TIMELINE_RECIPE_NAME,

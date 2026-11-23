@@ -47,6 +47,14 @@
 			"types": "./src/timeline/recipe/index.ts",
 			"default": "./src/timeline/recipe/index.ts"
 		},
+		"./timeline/record": {
+			"types": "./src/timeline/record/index.ts",
+			"default": "./src/timeline/record/index.ts"
+		},
+		"./timeline/generate": {
+			"types": "./src/timeline/generate.ts",
+			"default": "./src/timeline/generate.ts"
+		},
 		"./timeline/secrets.server": {
 			"types": "./src/timeline/secrets.server.ts",
 			"default": "./src/timeline/secrets.server.ts"
