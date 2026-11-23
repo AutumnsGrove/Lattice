@@ -88,7 +88,7 @@ describe("extraction module", () => {
 					}),
 				),
 			);
-			global.fetch = mockFetch;
+			globalThis.fetch = mockFetch;
 
 			const result = await extractContent("Page content goes here", "Extract something", "api-key");
 			expect(result.extracted).toBe("The extracted information");
@@ -102,7 +102,7 @@ describe("extraction module", () => {
 				.mockResolvedValue(
 					new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 }),
 				);
-			global.fetch = mockFetch;
+			globalThis.fetch = mockFetch;
 
 			await expect(extractContent("Page content", "Extract", "api-key")).rejects.toThrow();
 		});
@@ -122,7 +122,7 @@ describe("extraction module", () => {
 					}),
 				),
 			);
-			global.fetch = mockFetch;
+			globalThis.fetch = mockFetch;
 
 			await expect(extractContent("Page content", "Extract", "api-key")).rejects.toThrow(
 				"empty response",
@@ -138,7 +138,7 @@ describe("extraction module", () => {
 					}),
 				),
 			);
-			global.fetch = mockFetch;
+			globalThis.fetch = mockFetch;
 
 			await extractContent("content", "query", "api-key", "accurate");
 			const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
@@ -154,7 +154,7 @@ describe("extraction module", () => {
 					}),
 				),
 			);
-			global.fetch = mockFetch;
+			globalThis.fetch = mockFetch;
 
 			await extractContent("content", "query", "api-key");
 			const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
@@ -170,7 +170,7 @@ describe("extraction module", () => {
 					}),
 				),
 			);
-			global.fetch = mockFetch;
+			globalThis.fetch = mockFetch;
 
 			await extractContent("content", "query", "test-api-key");
 			const headers = mockFetch.mock.calls[0][1].headers;
@@ -186,7 +186,7 @@ describe("extraction module", () => {
 					}),
 				),
 			);
-			global.fetch = mockFetch;
+			globalThis.fetch = mockFetch;
 
 			const result = await extractContent("content", "query", "api-key");
 			// Prompt will be built from content and query

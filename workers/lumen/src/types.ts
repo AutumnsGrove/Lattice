@@ -36,6 +36,12 @@ export interface Env {
 	LUMEN_API_KEY: string;
 	/** Lumen's registered agent API key for Warden auth */
 	WARDEN_API_KEY: string;
+	/**
+	 * A provider key for the local dev stack only, set in `.dev.vars` and never in
+	 * a deployed environment. The dev stack runs no Warden, so without this a
+	 * local Lumen has no way to reach a provider at all.
+	 */
+	DEV_OPENROUTER_API_KEY?: string;
 }
 
 // =============================================================================

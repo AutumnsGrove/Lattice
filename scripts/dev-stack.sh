@@ -122,12 +122,22 @@ preflight() {
     fi
 
     # Check for .dev.vars files (warn but don't block)
-    local services=("apps/aspen" "apps/plant" "apps/landing" "services/heartwood" "services/zephyr" "services/durable-objects")
+    local services=("apps/aspen" "apps/plant" "apps/landing" "services/heartwood" "services/zephyr" "services/durable-objects" "workers/lumen")
     for svc in "${services[@]}"; do
         if [ ! -f "$svc/.dev.vars" ] && [ -f "$svc/.dev.vars.example" ]; then
             warn "Missing $svc/.dev.vars — copy from .dev.vars.example"
         fi
     done
+
+    # Lumen fails closed with no provider key, and this stack runs no Warden, so a
+    # missing key is every Lumen call failing rather than one feature degrading.
+    # Empty and a leftover placeholder are both "no key": either one is either
+    # nothing to send or something that fails a provider 401, and the point of the
+    # warning is that the failure is otherwise opaque.
+    if [ -f workers/lumen/.dev.vars ] &&
+        ! grep -qE '^DEV_OPENROUTER_API_KEY=sk-or-v1-[A-Za-z0-9_-]{20,}' workers/lumen/.dev.vars; then
+        warn "workers/lumen/.dev.vars has no usable DEV_OPENROUTER_API_KEY — Lumen will fail closed. Run ./scripts/seed-lumen-key.sh"
+    fi
 
     if [ "$missing" -eq 1 ]; then
         exit 1
@@ -440,6 +450,7 @@ start_workers() {
     log "Starting workers..."
     echo ""
     dim "  Heartwood: groveauth (port 8787) — separate process"
+    dim "  Lumen:     grove-lumen (port 8788) — separate process, needs a provider key"
     dim "  Primary:   grove-aspen (port 5173) + auxiliary grove-durable-objects, grove-zephyr"
     dim "  Landing:   grove-landing (port 5174) — separate process"
     dim "  Plant:     grove-plant (port 5175) — separate process"
@@ -475,6 +486,27 @@ start_workers() {
         exit 1
     fi
     log "Heartwood ready."
+
+    # Lumen — AI inference, so a local run can reach a model without a Warden.
+    # Shares Aspen's local state so its quota table is the same engine DB the
+    # apps read. It binds `grove-warden`, which the stack does not run: the service
+    # binding simply fails to resolve, and Lumen falls back to
+    # DEV_OPENROUTER_API_KEY from its .dev.vars (src/lib/client-factory.ts).
+    wrangler dev \
+        -c workers/lumen/wrangler.toml \
+        --port 8788 \
+        --inspector-port 9230 \
+        --persist-to apps/aspen/.wrangler/state \
+        2>&1 | sed "s/^/  ${DIM}[lumen]${RESET} /" &
+    LUMEN_PID=$!
+    PIDS+=("$LUMEN_PID")
+
+    log "Waiting for lumen (port 8788)..."
+    if ! wait_for_port 8788 "lumen"; then
+        warn "Lumen didn't start on 8788 — AI calls in the apps will fail, the rest of the stack continues"
+    else
+        log "Lumen ready. Callers need the LUMEN_API_KEY from workers/lumen/.dev.vars."
+    fi
 
     # Login hub — the page that hosts "Continue with email" (code sign-in).
     # Runs under `vite dev` (hot reload, no build step); its AUTH service

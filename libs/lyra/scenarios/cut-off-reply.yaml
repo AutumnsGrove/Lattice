@@ -1,0 +1,17 @@
+name: a reply cut off by the token limit runs none of its calls
+task: scenario-cut-off
+input: read the issue
+tools:
+  - { name: read, behavior: ok, content: the issue body }
+model:
+  - tool_calls: [{ id: c1, name: read, args: { number: 1 } }]
+    finish_reason: length
+    text: I was reading
+  - tool_calls: [{ id: c2, name: finish, args: {} }]
+expect_events:
+  - { type: tool_end, call_id: c1, is_error: true }
+  - { type: run_end, reason: done }
+expect_record:
+  - { type: assistant_message, finish_reason: length }
+  - { type: tool_message, toolCallId: c1, isError: true }
+  - { type: status, state: done }

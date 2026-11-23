@@ -1,0 +1,15 @@
+name: a run stopped during a tool parks as stopped
+task: scenario-abort
+input: read something slow
+tools:
+  - { name: read, behavior: slow, ms: 5000, content: the issue body }
+model:
+  - tool_calls: [{ id: c1, name: read, args: { number: 1 } }]
+    # run_start, turn_start, usage, message_end, tool_call, tool_start
+abort_after: 6
+expect_events:
+  - { type: tool_end, call_id: c1, is_error: true }
+  - { type: run_end, reason: parked, parked_reason: stopped }
+expect_record:
+  - { type: tool_message, toolCallId: c1, isError: true }
+  - { type: status, state: parked, reason: stopped }

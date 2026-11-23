@@ -7,11 +7,17 @@
  *
  * Credential resolution priority:
  * 1. tenantApiKey (BYOK — caller provides their own key)
- * 2. Warden /resolve (per-tenant → global, via service binding)
- * 3. Empty string (will fail downstream with clear error)
+ * 2. DEV_OPENROUTER_API_KEY (the local dev stack only — see below)
+ * 3. Warden /resolve (per-tenant → global, via service binding)
+ * 4. Empty string (will fail downstream with clear error)
  *
  * Fail-closed: if Warden resolution fails, no fallback to a direct key.
  * The whole point is that no worker except Warden touches raw API keys.
+ * The one exception is `DEV_OPENROUTER_API_KEY`, which exists because the dev
+ * stack runs no Warden: without it a local Lumen cannot answer a single call,
+ * and a stack that fails closed on every request teaches nobody anything. It
+ * has its own name so production can never satisfy it by accident — nothing
+ * sets it in a deployed environment, and `gw secret apply` has no such secret.
  *
  * The worker has its own AI binding for Cloudflare Workers AI (embeddings,
  * transcription, local moderation) — no Warden needed for CF-native services.
@@ -36,7 +42,12 @@ export async function createLumenClientForWorker(
 	// 1. BYOK: caller provides their own key
 	let openrouterApiKey = tenantApiKey || "";
 
-	// 2. Warden resolution (per-tenant → global)
+	// 2. Local dev only: `.dev.vars` on a developer's machine (see the file header).
+	if (!openrouterApiKey && env.DEV_OPENROUTER_API_KEY) {
+		openrouterApiKey = env.DEV_OPENROUTER_API_KEY;
+	}
+
+	// 3. Warden resolution (per-tenant → global)
 	if (!openrouterApiKey) {
 		const resolved = await resolveWardenCredential(
 			env.WARDEN,
@@ -49,7 +60,7 @@ export async function createLumenClientForWorker(
 		}
 	}
 
-	// 3. Empty string — will fail downstream with a clear provider error
+	// 4. Empty string — will fail downstream with a clear provider error
 	return createLumenClient({
 		openrouterApiKey,
 		ai: env.AI,

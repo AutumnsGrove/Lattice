@@ -39,7 +39,11 @@ Multi-config wrangler dev (port 5173):
 ├── grove-aspen             (primary — serves HTTP, owns port 5173)
 ├── grove-durable-objects   (auxiliary — Loom DOs)
 └── grove-zephyr            (auxiliary — email gateway)
+
+Lumen (port 8788)      ←  separate wrangler dev process, shares Aspen's state
 ```
+
+**Why Lumen is separate:** it is a worker with its own `wrangler.toml`, and it answers on its own port so a caller can reach it before any app does. It shares Aspen's local D1 (`--persist-to apps/aspen/.wrangler/state`), so its quota table is the same engine database the apps read. Its `grove-warden` binding does not resolve — the stack runs no Warden — and it does not need to: it reads `DEV_OPENROUTER_API_KEY` from `workers/lumen/.dev.vars` instead. Without that key it fails closed, which is what production wants and what an empty `.dev.vars` will do locally.
 
 **Why Heartwood is separate:** Heartwood has a `[[routes]]` `custom_domain` in its `wrangler.toml`. If it ran inside the multi-config group, wrangler would use its hostname as the primary `Host` header, breaking Aspen's routing. Running it as a separate process fixes this — wrangler's dev registry still lets service bindings find each other automatically.
 
@@ -64,6 +68,7 @@ Multi-config wrangler dev (port 5173):
 |---------|------|-------|
 | Aspen | 5173 | Primary worker — the blog frontend |
 | Heartwood | 8787 | Auth API (Google OAuth, email codes, session management) |
+| Lumen | 8788 | AI inference worker — `POST /inference`, `X-API-Key` from `workers/lumen/.dev.vars` |
 | Login hub | 5176 | `apps/login` under `vite dev` — hosts "Continue with email" |
 | Durable Objects | — | No dedicated port; reached via service binding |
 | Zephyr | — | No dedicated port; reached via service binding |
@@ -199,6 +204,18 @@ A few things genuinely need the cloud:
 | **Stripe webhooks** | Needs a public URL to receive events | Use [ngrok](https://ngrok.com/) or a Cloudflare Tunnel for billing flow testing |
 | **Email delivery** | Zephyr has no Resend key locally | Auth still completes; sign-in codes print in the Heartwood log (see [Email Code](#auth-setup-email-code)) |
 | **CDN fonts** | Loads from `cdn.grove.place` | Works fine, just slightly slower on first load |
+
+## Lumen's Provider Key, Locally
+
+The dev stack runs no Warden, and Lumen's credential chain is BYOK → Warden → fail closed. So a local Lumen has no provider key unless one is put in its own `.dev.vars`, and every AI call fails until one is.
+
+```bash
+./scripts/seed-lumen-key.sh          # reads the OpenRouter key from ~/.pi/agent/auth.json
+./scripts/dev-stack.sh               # Lumen now answers on 8788
+```
+
+The script writes `DEV_OPENROUTER_API_KEY` and generates a `LUMEN_API_KEY` on first run, into `workers/lumen/.dev.vars` (gitignored, mode 600). It prints neither value. The name carries `DEV_` because no deployed environment sets it — production resolves through Warden, as it always has, and `client-factory.ts` reads this variable only when nothing else answered.
+
 
 ---
 

@@ -1,0 +1,21 @@
+name: a happy three-step run
+task: scenario-happy
+input: read the issue, then finish
+tools:
+  - { name: read, behavior: ok, content: the issue body }
+model:
+  - tool_calls: [{ id: c1, name: read, args: { number: 1 } }]
+  - tool_calls: [{ id: c2, name: read, args: { number: 2 } }]
+  - tool_calls: [{ id: c3, name: finish, args: {} }]
+expect_events:
+  - { type: run_start }
+  - { type: tool_end, call_id: c1, is_error: false }
+  - { type: tool_end, call_id: c2, is_error: false }
+  - { type: tool_end, call_id: c3, is_error: false }
+  - { type: run_end, reason: done }
+expect_record:
+  - { type: user_message, label: task, text: "read the issue, then finish" }
+  - { type: status, state: running }
+  - { type: assistant_message, finish_reason: tool_calls }
+  - { type: tool_message, toolCallId: c1, isError: false, content: the issue body }
+  - { type: status, state: done }

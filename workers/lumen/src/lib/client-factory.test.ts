@@ -3,8 +3,9 @@
  *
  * Tests LumenClient creation and credential resolution priority:
  * 1. tenantApiKey (BYOK)
- * 2. Warden /resolve (per-tenant → global, via service binding)
- * 3. Empty string (no key available)
+ * 2. DEV_OPENROUTER_API_KEY (the local dev stack, which runs no Warden)
+ * 3. Warden /resolve (per-tenant → global, via service binding)
+ * 4. Empty string (no key available)
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
@@ -132,6 +133,26 @@ describe("createLumenClientForWorker", () => {
 			expect.objectContaining({
 				enabled: true,
 			}),
+		);
+	});
+
+	it("should use the local dev key when no tenant key is given", async () => {
+		const env = createMockEnv({ DEV_OPENROUTER_API_KEY: "dev-local-key" });
+		await createLumenClientForWorker(env);
+
+		// The dev stack runs no Warden, so asking it would only fail slowly.
+		expect(mockResolveWardenCredential).not.toHaveBeenCalled();
+		expect(mockCreateLumenClient).toHaveBeenCalledWith(
+			expect.objectContaining({ openrouterApiKey: "dev-local-key" }),
+		);
+	});
+
+	it("should let a tenant key win over the local dev key", async () => {
+		const env = createMockEnv({ DEV_OPENROUTER_API_KEY: "dev-local-key" });
+		await createLumenClientForWorker(env, "tenant-byok-key");
+
+		expect(mockCreateLumenClient).toHaveBeenCalledWith(
+			expect.objectContaining({ openrouterApiKey: "tenant-byok-key" }),
 		);
 	});
 

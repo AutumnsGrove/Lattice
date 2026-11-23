@@ -1,0 +1,14 @@
+name: arguments that are not JSON are refused without running the tool
+task: scenario-arguments
+input: read the issue
+tools:
+  - { name: read, behavior: ok, content: the issue body }
+model:
+  - tool_calls: [{ id: c1, name: read, args: "{oops" }]
+  - tool_calls: [{ id: c2, name: finish, args: {} }]
+expect_events:
+  - { type: tool_end, call_id: c1, is_error: true }
+  - { type: run_end, reason: done }
+expect_record:
+  - { type: tool_message, toolCallId: c1, isError: true }
+  - { type: status, state: done }

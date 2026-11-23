@@ -92,6 +92,7 @@ Packages that other packages import. Nothing here deploys on its own.
 | Thorn          | [libs/thorn](libs/thorn)                           | `@autumnsgrove/thorn`          | Content moderation SDK                                                                                   |
 | Grove Agent    | [libs/grove-agent](libs/grove-agent)               | `@autumnsgrove/grove-agent`    | Autonomous agent framework                                                                               |
 | Gossamer       | [libs/gossamer](libs/gossamer)                     | `@autumnsgrove/gossamer`       | ASCII visual effects — threads of light                                                                  |
+| Lyra           | [libs/lyra](libs/lyra)                             | `@autumnsgrove/lyra-lumen`     | Lyra on Grove: the Lumen model slot, tenant secrets, and the fakes that test them                        |
 | Shutter        | [libs/shutter/cloudflare](libs/shutter/cloudflare) | `@autumnsgrove/shutter`        | Web page summarisation over OpenRouter. The Python tree above it is the retired reference implementation |
 
 ### Tools
