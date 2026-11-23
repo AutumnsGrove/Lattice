@@ -101,6 +101,23 @@ describe("createPastDays", () => {
 		expect(asked[0]?.sql).toContain("ESCAPE '\\'");
 	});
 
+	it("leaves no angle bracket or comment markup in the snippet", async () => {
+		const { db } = fakeDb({
+			runs: [
+				{
+					date: "2026-11-20",
+					text: "### Lattice\n\n- <!-- <!-- anchor:l1 --> the vine landed <script>",
+				},
+			],
+		});
+
+		const found = await createPastDays(db, "tenant-1").search("vine");
+
+		expect(found[0]?.text).not.toContain("<");
+		expect(found[0]?.text).not.toContain(">");
+		expect(found[0]?.text).toContain("the vine landed");
+	});
+
 	it("says nothing when nothing matches", async () => {
 		const { db } = fakeDb({});
 

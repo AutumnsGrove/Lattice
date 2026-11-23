@@ -77,10 +77,16 @@ const SNIPPET_CHARS = 300;
 /**
  * The stretch of the day around the match, with the markdown stripped enough to read.
  * A day that matches at its start gives its opening, which is usually the point.
+ *
+ * No angle bracket survives, comment markup included. The snippet is model input and
+ * never rendered as HTML, so this is not a security boundary — but a one-pass regex
+ * over `<!--` can leave a `<!--` behind, and the scan that flagged it is right to say
+ * so. Dropping the characters outright is simpler than proving a strip is complete.
  */
 function snippet(text: string, query: string): string {
 	const plain = text
-		.replace(/<!--[^>]*-->/g, "")
+		.replace(/<!--[\s\S]*?-->/g, " ")
+		.replace(/[<>]/g, " ")
 		.replace(/^#{1,6}\s*/gm, "")
 		.replace(/^[-*]\s*/gm, "")
 		.replace(/\s+/g, " ")
