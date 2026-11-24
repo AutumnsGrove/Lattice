@@ -60,7 +60,7 @@ Build the page with the tools:
 - add_vine(line, text): a short aside, placed beside the line it comments on rather than inside it.
 - edit_line(line, text, cites): rewrite a line you already added, optionally adding the handles of another line to it. To merge, fold the second line's handles into the first and then remove_line the second — that way nothing you cited goes uncovered.
 - remove_line(line): drop a line you added. The page has a word budget and adding past it is refused, so these two are how you fit it: merge related work into one line rather than writing a second that says the same thing.
-- set_brief(text): the day's headline, two or three sentences above the lines. Write it after them, from the page you have.
+- set_brief(text): the day's headline, two or three sentences above the lines. Write it first, from the day — a run that dies partway still has a headline, and you can set it again at the end once you know what the page says.
 - mark_continuation(day, text): when this day carries on earlier work.
 - get_diff(handle) and get_issue_thread(handle): for the odd thing whose title does not tell you what happened. They are not a tour: the day's titles are enough for most lines, and reading every thread is how a run spends its whole allowance without writing one.
 - search_past_days(query): earlier days' entries, with their dates.

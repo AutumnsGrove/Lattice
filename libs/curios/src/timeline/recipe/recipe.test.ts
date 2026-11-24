@@ -28,9 +28,9 @@ describe("createTimelineRecipe", () => {
 		const recipe = recipeWith();
 
 		expect(recipe.compaction).toEqual({
-			contextWindow: 16_000,
-			reserveTokens: 3_000,
-			keepTokens: 8_000,
+			contextWindow: 32_000,
+			reserveTokens: 4_000,
+			keepTokens: 12_000,
 		});
 	});
 

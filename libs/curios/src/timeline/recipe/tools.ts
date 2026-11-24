@@ -442,7 +442,7 @@ export function createTimelineTools(options: TimelineToolOptions): Tool[] {
 		return defineTool({
 			name: "set_brief",
 			description:
-				"Write the day's headline: two or three sentences about what the day was. Call it after the lines, from the page you have written.",
+				"Write the day's headline: two or three sentences about what the day was. Call it early, from the day — a run that dies partway still has a headline — and again at the end if the page turned out different.",
 			parameters: BRIEF_INPUT,
 			safeToRepeat: true,
 			async execute() {
