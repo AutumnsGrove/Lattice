@@ -1,11 +1,23 @@
 {
   "models": {
+    "DEEPSEEK_V4_1_FLASH_1017": {
+      "id": "deepseek/deepseek-v4.1-flash-1017",
+      "name": "DeepSeek V4.1 Flash (1017)",
+      "category": "generation",
+      "provider": "openrouter",
+      "cost": { "input": 0.03, "output": 0.20 },
+      "quality": "high",
+      "speed": "fast",
+      "supportsTools": true,
+      "toolChoice": ["auto", "required", "none", "function"],
+      "contextWindow": 1048576
+    },
     "DEEPSEEK_V4_1_FLASH": {
       "id": "deepseek/deepseek-v4.1-flash",
       "name": "DeepSeek V4.1 Flash",
       "category": "generation",
       "provider": "openrouter",
-      "cost": { "input": 0.30, "output": 1.20 },
+      "cost": { "input": 0.051, "output": 0.203 },
       "quality": "highest",
       "speed": "fast",
       "supportsTools": true,
@@ -17,7 +29,7 @@
       "name": "DeepSeek V4 Flash",
       "category": "generation",
       "provider": "openrouter",
-      "cost": { "input": 0.065, "output": 0.14 },
+      "cost": { "input": 0.046, "output": 0.3 },
       "quality": "high",
       "speed": "fast",
       "supportsTools": true,

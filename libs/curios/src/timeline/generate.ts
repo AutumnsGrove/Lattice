@@ -174,6 +174,14 @@ export async function generateDay(
 			clock: systemClock(),
 			ids: systemIds(),
 			limits: recipe.limits,
+			// Everything the recipe decided about the run has to reach `runTask`, or the
+			// recipe's settings are decoration. Compaction missing here is why the first
+			// real runs re-sent their whole history every turn: 1.3 million input tokens
+			// for a thirty-one turn day, and eight cents for a page.
+			compaction: recipe.compaction,
+			stuck: recipe.stuck,
+			modelName: deps.modelName ?? undefined,
+			fallbackModel: recipe.fallbackModel,
 			tenant: input.tenantId,
 			recipe: { name: TIMELINE_RECIPE_NAME, version: TIMELINE_RECIPE_VERSION },
 			onEvent: deps.onEvent,

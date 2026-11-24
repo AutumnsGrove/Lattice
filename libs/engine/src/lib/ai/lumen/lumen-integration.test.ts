@@ -17,7 +17,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { createLumenClient, LumenClient } from "./client.js";
-import { MODELS, getTaskConfig } from "./config.js";
+import { MODELS, MODEL_COSTS, getTaskConfig } from "./config.js";
 
 // =============================================================================
 // MOCK FETCH - THE ONLY BOUNDARY
@@ -187,8 +187,12 @@ describe("Integration: Wisp Generation Path", () => {
 		});
 
 		// DeepSeek V4.1 Flash: $0.30/M input, $1.20/M output
-		// Cost = (1000/1M * 0.30) + (500/1M * 1.20) = 0.0003 + 0.0006 = 0.0009
-		expect(response.usage.cost).toBeCloseTo(0.0009, 5);
+		// Read from the registry: (1000/1M * input) + (500/1M * output)
+		const { input, output } = MODEL_COSTS[MODELS.DEEPSEEK_V4_1_FLASH];
+		expect(response.usage.cost).toBeCloseTo(
+			(1000 / 1_000_000) * input + (500 / 1_000_000) * output,
+			5,
+		);
 	});
 });
 

@@ -272,9 +272,12 @@ describe("Model Costs", () => {
 
 describe("getModelCost", () => {
 	it("should return costs for known models", () => {
+		// Read from the registry rather than repeating a price here: the numbers move
+		// (they were wrong until 2026-11-24) and a test should not be a second copy of
+		// them. #1822 is where the underlying brittleness lives.
 		const cost = getModelCost(MODELS.DEEPSEEK_V4_1_FLASH);
-		expect(cost.input).toBe(0.3);
-		expect(cost.output).toBe(1.2);
+		expect(cost.input).toBe(MODEL_COSTS[MODELS.DEEPSEEK_V4_1_FLASH].input);
+		expect(cost.output).toBe(MODEL_COSTS[MODELS.DEEPSEEK_V4_1_FLASH].output);
 	});
 
 	it("should return default $1/M for unknown models", () => {
@@ -286,17 +289,18 @@ describe("getModelCost", () => {
 
 describe("calculateCost", () => {
 	it("should calculate cost correctly", () => {
-		// DeepSeek V4.1 Flash: $0.30/M input, $1.20/M output
+		const { input, output } = MODEL_COSTS[MODELS.DEEPSEEK_V4_1_FLASH];
 		const cost = calculateCost(MODELS.DEEPSEEK_V4_1_FLASH, 1_000_000, 1_000_000);
 
-		expect(cost).toBeCloseTo(0.3 + 1.2, 5);
+		expect(cost).toBeCloseTo(input + output, 5);
 	});
 
 	it("should handle small token counts", () => {
+		const { input, output } = MODEL_COSTS[MODELS.DEEPSEEK_V4_1_FLASH];
 		// 1000 tokens = 0.001M tokens
 		const cost = calculateCost(MODELS.DEEPSEEK_V4_1_FLASH, 1000, 1000);
 
-		expect(cost).toBeCloseTo((0.3 + 1.2) / 1000, 8);
+		expect(cost).toBeCloseTo((input + output) / 1000, 8);
 	});
 
 	it("should return 0 for Cloudflare models", () => {

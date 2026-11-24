@@ -67,12 +67,19 @@ interface OpenRouterKeyResponse {
 // =============================================================================
 
 export const OPENROUTER_MODELS: Record<string, OpenRouterModel> = {
+	"deepseek/deepseek-v4.1-flash-1017": {
+		name: "DeepSeek V4.1 Flash (1017)",
+		quality: "high",
+		speed: "fast",
+		inputCostPer1M: 0.03,
+		outputCostPer1M: 0.2,
+	},
 	"deepseek/deepseek-v4-flash-0731": {
 		name: "DeepSeek V4 Flash",
 		quality: "high",
 		speed: "fast",
-		inputCostPer1M: 0.065,
-		outputCostPer1M: 0.14,
+		inputCostPer1M: 0.046,
+		outputCostPer1M: 0.3,
 	},
 	"deepseek/deepseek-v4-pro-0813": {
 		name: "DeepSeek V4 Pro",

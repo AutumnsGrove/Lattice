@@ -16,8 +16,15 @@
 import type { DayHandles } from "./handles";
 import type { DayActivity, TimelineDay } from "./types";
 
-/** How much of one commit message the model reads. Bodies can run long. */
-const MAX_COMMIT_CHARS = 300;
+/**
+ * How much of one commit message the model reads — the subject line, not the body.
+ *
+ * The day is the first message and is re-sent with every turn, so its length is the
+ * run's cost: 100 commits at 300 characters each is a quarter of a million characters
+ * across thirty turns. Bodies are what the old prompt's budget was written for; the
+ * subject is what a line is written from.
+ */
+const MAX_COMMIT_CHARS = 120;
 /** How much of a pull request or issue title is kept. */
 const MAX_TITLE_CHARS = 200;
 
@@ -58,7 +65,7 @@ export function renderDay(day: TimelineDay, handles: DayHandles): string {
 				const name = required(handles.commit(repo, commit.sha), "commit", commit.sha);
 				const merge = commit.merge ? "(merge) " : "";
 				lines.push(
-					`- ${name} ${commit.sha.slice(0, 7)} +${commit.additions}/-${commit.deletions} ${merge}${oneLine(commit.message, MAX_COMMIT_CHARS)}`,
+					`- ${name} ${commit.sha.slice(0, 7)} +${commit.additions}/-${commit.deletions} ${merge}${subjectOf(commit.message, MAX_COMMIT_CHARS)}`,
 				);
 			}
 		}
@@ -105,6 +112,13 @@ function withWarnings(body: string, day: TimelineDay): string {
 function activityText(activity: DayActivity[]): string {
 	const ordered = ACTIVITY_ORDER.filter((kind) => activity.includes(kind));
 	return ordered.length === 0 ? "touched" : ordered.join(", ");
+}
+
+/** The subject line of a commit: the first line that says something, bounded. */
+function subjectOf(message: string, max: number): string {
+	const first = message.split("\n").find((line) => line.trim().length > 0) ?? "";
+	const collapsed = first.replace(/\s+/g, " ").trim();
+	return collapsed.length > max ? `${collapsed.slice(0, max - 1)}…` : collapsed;
 }
 
 /** Collapse a message to one bounded line, so the day stays scannable. */

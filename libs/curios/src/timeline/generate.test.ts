@@ -9,7 +9,15 @@
 
 import { fakeClock, scriptedModel, type ScriptedTurn } from "@autumnsgrove/lyra/testkit";
 import { memoryStorage } from "@autumnsgrove/lyra/memory";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+// The real loop still runs; this only lets the test look at what it was handed.
+vi.mock("@autumnsgrove/lyra", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("@autumnsgrove/lyra")>();
+	return { ...actual, runTask: vi.fn<typeof actual.runTask>(actual.runTask) };
+});
+
+import { runTask } from "@autumnsgrove/lyra";
 import { generateDay, type GenerateDayDeps, type GenerateDayInput } from "./generate";
 import type { DayRunFinish, DayRunStart, DayRunStore } from "./record/types";
 
@@ -135,6 +143,22 @@ describe("generateDay", () => {
 			continuationOf: null,
 			error: null,
 		});
+	});
+
+	it("hands the recipe's own compaction and stuck settings to the loop", async () => {
+		// Not decoration: a run that never compacts re-sends its whole history every
+		// turn, which is how one day cost 1.3 million input tokens.
+		const recorder = recordingStore();
+		await generateDay(INPUT, deps(recorder.store, WRITE_THE_DAY));
+
+		const config = vi.mocked(runTask).mock.calls.at(-1)?.[0];
+		expect(config?.compaction).toEqual({
+			contextWindow: 16_000,
+			reserveTokens: 3_000,
+			keepTokens: 8_000,
+		});
+		expect(config?.stuck).toEqual({ reminders: 3 });
+		expect(config?.limits).toEqual({ steps: 40 });
 	});
 
 	it("keeps the run's record as the loop writes it", async () => {
