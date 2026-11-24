@@ -290,6 +290,12 @@ interface RequestContext {
 function requestBody(request: ModelRequest, context: RequestContext): Record<string, unknown> {
 	const { config, task, tenantApiKey } = context;
 	const tools = request.tools.map(toLumenTool);
+	// A compaction is answered by a summary, and a summary that runs out of allowance
+	// comes back empty rather than short.
+	const maxTokens =
+		request.purpose === "compaction"
+			? (config.compactionMaxTokens ?? DEFAULT_COMPACTION_MAX_TOKENS)
+			: config.maxTokens;
 
 	return {
 		task,
@@ -298,17 +304,7 @@ function requestBody(request: ModelRequest, context: RequestContext): Record<str
 		...(config.tier && { tier: config.tier }),
 		options: {
 			model: request.model ?? config.model,
-			// A compaction is answered by a summary, and a summary that runs out of
-			// allowance comes back empty rather than short.
-			...((request.purpose === "compaction"
-				? (config.compactionMaxTokens ?? DEFAULT_COMPACTION_MAX_TOKENS)
-				: config.maxTokens) !== undefined && {
-				max_tokens:
-					request.purpose === "compaction"
-						? (config.compactionMaxTokens ?? DEFAULT_COMPACTION_MAX_TOKENS)
-						: config.maxTokens,
-			}),
-			...(config.temperature !== undefined && { temperature: config.temperature }),
+			...(maxTokens !== undefined && { max_tokens: maxTokens }),
 			skip_quota: true,
 			// The key goes here and nowhere else: not in a header, not in metadata,
 			// not in anything a log or a record could hold.
