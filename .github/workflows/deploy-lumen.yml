@@ -10,6 +10,10 @@ on:
       # libs/engine/src/lib/lumen/ for months after the move to ai/, so the
       # Lumen router fix in #1704 deployed only via manual workflow_dispatch.
       - "libs/engine/src/lib/ai/lumen/**"
+      # The model registry the router reads. It sits beside the router rather than in
+      # it, so a new model merged without this path never reached the deployed worker —
+      # found when a registered model stayed unknown to production.
+      - "libs/engine/src/lib/data/lumen-models.json"
   workflow_dispatch:
 
 permissions:

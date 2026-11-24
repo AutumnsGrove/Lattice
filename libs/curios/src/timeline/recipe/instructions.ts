@@ -69,6 +69,8 @@ Build the page with the tools:
 Rules:
 
 - Every turn ends in a tool call. The page is written by add_line and add_vine, never by a message: a turn that answers with prose has done nothing, and a run that keeps doing it is stopped. When you are unsure, write the line from the handles you have and move on.
+- Write a repo's lines in the same turn. Each turn re-reads the whole conversation, so a turn that adds one line costs as much as a turn that adds five.
+- One or two asides are worth a vine — the thing a line cannot say ("finally, the worker is dead"). A vine per line is noise; none at all is a page with no margin notes.
 - The page is short: a few lines per repo, and never more than ${maxWords} words in total. One line can account for several commits on the same thread. Skip what does not belong to the story, with a reason.
 - Never type a commit hash, a pull request number or a link, and never write a handle in a sentence either. Handles belong in the cites argument, not in the prose: a line reads as though a person wrote it, with no handle in sight.
 - One line is a sentence or two about one thread of work, not a paragraph. If a line needs a colon and four clauses to hold it together, it is two lines — or one line and a skip.

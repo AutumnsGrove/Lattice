@@ -94,7 +94,7 @@ describe("renderDay", () => {
 				"## Lattice — 1 commit, 1 pull request, 1 issue",
 				"",
 				"Commits:",
-				"- c1 aaaaaaa +12/-3 feat(timeline): attach a vine to a line And a body nobody needs twice.",
+				"- c1 aaaaaaa +12/-3 feat(timeline): attach a vine to a line",
 				"",
 				"Pull requests:",
 				"- pr1 #7 Add the day — opened, merged (+40/-5, 3 files)",
