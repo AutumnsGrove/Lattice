@@ -24,6 +24,17 @@ import { fromLumenReply, toLumenMessages, toLumenTool } from "./wire.js";
 /** However long a single turn is allowed to take before it is abandoned. */
 export const DEFAULT_DEADLINE_MS = 120_000;
 
+/**
+ * How many tokens a compaction summary may write.
+ *
+ * A summarising turn is the one place a reasoning model can spend its whole
+ * allowance thinking and answer with nothing, and an empty summary means a
+ * compaction that failed — which parks the run. The history only grows as the run
+ * goes, so the last summary of a day is the one most likely to hit a ceiling:
+ * Lumen's `summary` task defaults to 4,096, which was not enough.
+ */
+export const DEFAULT_COMPACTION_MAX_TOKENS = 16_384;
+
 /** The task an ordinary agent turn runs as. A compaction asks a different question. */
 const DEFAULT_TASK: LumenTask = "agent";
 
@@ -54,6 +65,8 @@ export interface LumenModelSlotConfig {
 	/** A model override for every turn; `request.model` still wins. */
 	model?: string;
 	maxTokens?: number;
+	/** Overrides the summary's output allowance. */
+	compactionMaxTokens?: number;
 	temperature?: number;
 	deadlineMs?: number;
 	/** Overrides the model's own context window, for a model the registry lacks. */
@@ -285,7 +298,16 @@ function requestBody(request: ModelRequest, context: RequestContext): Record<str
 		...(config.tier && { tier: config.tier }),
 		options: {
 			model: request.model ?? config.model,
-			...(config.maxTokens !== undefined && { max_tokens: config.maxTokens }),
+			// A compaction is answered by a summary, and a summary that runs out of
+			// allowance comes back empty rather than short.
+			...((request.purpose === "compaction"
+				? (config.compactionMaxTokens ?? DEFAULT_COMPACTION_MAX_TOKENS)
+				: config.maxTokens) !== undefined && {
+				max_tokens:
+					request.purpose === "compaction"
+						? (config.compactionMaxTokens ?? DEFAULT_COMPACTION_MAX_TOKENS)
+						: config.maxTokens,
+			}),
 			...(config.temperature !== undefined && { temperature: config.temperature }),
 			skip_quota: true,
 			// The key goes here and nowhere else: not in a header, not in metadata,

@@ -659,10 +659,22 @@ function missingLine(state: TimelineState, id: string): string {
 	}`;
 }
 
-/** The words the page carries: the headline and the lines, which is what a reader reads. */
+/**
+ * The words the page's lines carry.
+ *
+ * The brief and the vines are left out on purpose. The budget exists to stop the
+ * day being a wall of bullets, and both of those were being squeezed out by it: a
+ * run that finished at 1,095 words never wrote its headline, and no run has written
+ * a vine at all. The headline is two sentences and a vine is an aside; they are the
+ * point, not the excess.
+ */
 function pageWords(state: TimelineState): number {
-	const parts = [state.page.brief ?? "", ...linesOf(state).map((line) => line.text)];
-	return parts.join(" ").trim().split(/\s+/).filter(Boolean).length;
+	return linesOf(state)
+		.map((line) => line.text)
+		.join(" ")
+		.trim()
+		.split(/\s+/)
+		.filter(Boolean).length;
 }
 
 /** The call key a tool stores in its details, so a repeated call adds nothing. */
