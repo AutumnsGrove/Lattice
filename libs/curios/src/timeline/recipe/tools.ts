@@ -81,6 +81,21 @@ const BRIEF_INPUT = {
 	required: ["text"],
 } as const;
 
+const EDIT_INPUT = {
+	type: "object",
+	properties: {
+		line: { type: "string", minLength: 1, maxLength: 20 },
+		text: { type: "string", minLength: 1, maxLength: 2_000 },
+	},
+	required: ["line", "text"],
+} as const;
+
+const REMOVE_INPUT = {
+	type: "object",
+	properties: { line: { type: "string", minLength: 1, maxLength: 20 } },
+	required: ["line"],
+} as const;
+
 const VINE_INPUT = {
 	type: "object",
 	properties: {
@@ -204,6 +219,14 @@ export function createTimelineTools(options: TimelineToolOptions): Tool[] {
 					}
 				}
 
+				const words = pageWords(state) + countWords(args.text);
+				if (words > maxWords) {
+					return {
+						isError: true,
+						content: `the page is ${pageWords(state)} words and adding that makes ${words}, past the ${maxWords}-word budget; merge it into an existing line with edit_line, remove a line, or finish and skip what is left`,
+					};
+				}
+
 				const id = `l${state.nextLine}`;
 				return {
 					isError: false,
@@ -287,6 +310,87 @@ export function createTimelineTools(options: TimelineToolOptions): Tool[] {
 						vines: [...state.page.vines, { line: args.line, text: args.text }],
 					},
 					applied: [...state.applied, key],
+				};
+			},
+		});
+	}
+
+	/**
+	 * Rewrite one line.
+	 *
+	 * Without this the budget is a trap: `finish` refuses a page that is too long and
+	 * tells the model to merge related work, so it needs a way to merge. The first run
+	 * that hit the budget added another line instead and stalled.
+	 */
+	function editLine(): Tool {
+		return defineTool({
+			name: "edit_line",
+			description:
+				"Rewrite a line you already added, to merge related work into it or tighten it. Use it when the page is over its word budget.",
+			parameters: EDIT_INPUT,
+			safeToRepeat: true,
+			async execute(args, ctx: ToolContext<TimelineState>) {
+				if (lineOf(ctx.state, args.line) === undefined) {
+					return { isError: true, content: missingLine(ctx.state, args.line) };
+				}
+				const words =
+					pageWords(ctx.state) -
+					countWords(lineOf(ctx.state, args.line)?.text ?? "") +
+					countWords(args.text);
+				if (words > maxWords) {
+					return {
+						isError: true,
+						content: `that leaves the page at ${words} words, past the ${maxWords}-word budget; cut more, or remove a line`,
+					};
+				}
+				return {
+					isError: false,
+					content: `rewrote ${args.line}`,
+					details: { line: args.line, text: args.text },
+				};
+			},
+			apply(state: TimelineState, args) {
+				return {
+					...state,
+					page: {
+						...state.page,
+						projects: state.page.projects.map((project) => ({
+							...project,
+							lines: project.lines.map((line) =>
+								line.id === args.line ? { ...line, text: args.text } : line,
+							),
+						})),
+					},
+				};
+			},
+		});
+	}
+
+	/** Drop a line entirely, and any vine that hung on it. */
+	function removeLine(): Tool {
+		return defineTool({
+			name: "remove_line",
+			description:
+				"Remove a line you added. Use it when the page is over its word budget, or when a line turned out not to belong.",
+			parameters: REMOVE_INPUT,
+			safeToRepeat: true,
+			async execute(args, ctx: ToolContext<TimelineState>) {
+				if (lineOf(ctx.state, args.line) === undefined) {
+					return { isError: true, content: missingLine(ctx.state, args.line) };
+				}
+				return { isError: false, content: `removed ${args.line}` };
+			},
+			apply(state: TimelineState, args) {
+				return {
+					...state,
+					page: {
+						...state.page,
+						projects: state.page.projects.map((project) => ({
+							...project,
+							lines: project.lines.filter((line) => line.id !== args.line),
+						})),
+						vines: state.page.vines.filter((vine) => vine.line !== args.line),
+					},
 				};
 			},
 		});
@@ -434,6 +538,8 @@ export function createTimelineTools(options: TimelineToolOptions): Tool[] {
 		startProject(),
 		addLine(),
 		addVine(),
+		editLine(),
+		removeLine(),
 		setBrief(),
 		markContinuation(),
 		getDiff(),
@@ -501,6 +607,19 @@ function doneCheck(state: TimelineState, skipped: readonly Skipped[], maxWords: 
 		return { ok: true };
 	}
 	return { ok: false, message: `${COVERAGE_PREFIX}${missing.join(", ")}` };
+}
+
+/** The words in one piece of text, counted the way the budget counts. */
+function countWords(text: string): number {
+	return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
+/** The refusal for a line id the page does not have, in one place. */
+function missingLine(state: TimelineState, id: string): string {
+	const lines = linesOf(state).map((line) => line.id);
+	return `there is no line "${id.slice(0, 20)}"; ${
+		lines.length === 0 ? "no lines are on the page yet" : `the lines are ${lines.join(", ")}`
+	}`;
 }
 
 /** The words the page carries: the headline and the lines, which is what a reader reads. */

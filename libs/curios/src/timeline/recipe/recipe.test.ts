@@ -45,6 +45,7 @@ describe("createTimelineRecipe", () => {
 		expect(instructions).toContain("add_line(project, text, cites)");
 		expect(instructions).toContain("add_vine(line, text)");
 		expect(instructions).toContain("set_brief(text)");
+		expect(instructions).toContain("edit_line(line, text) and remove_line(line)");
 		expect(instructions).toContain("get_diff(handle)");
 		expect(instructions).toContain("get_issue_thread(handle)");
 		expect(instructions).toContain("search_past_days(query)");
