@@ -428,6 +428,32 @@ describe("finish", () => {
 		});
 	});
 
+	it("refuses a page over its word budget, before it complains about coverage", async () => {
+		const { recipe, state } = setup();
+		const briefed = await withBrief(recipe, state);
+		// Each line is inside the per-line length cap; together they are not.
+		const line = "word ".repeat(200).trim();
+		const started = await callTool(recipe, briefed, "start_project", { repo: "Lattice" });
+		let current = started.state;
+		for (const [index, cite] of ["c1", "c2", "pr1", "i1"].entries()) {
+			const added = await callTool(
+				recipe,
+				current,
+				"add_line",
+				{ project: "Lattice", text: line, cites: [cite] },
+				`long-${index}`,
+			);
+			expect(added.outcome.isError).toBe(false);
+			current = added.state;
+		}
+
+		const refused = await callTool(recipe, current, "finish", {});
+
+		expect(refused.outcome.isError).toBe(true);
+		expect(refused.outcome.content).toContain("words and the budget is 800");
+		expect(refused.outcome.content).toContain("merge related work into one line");
+	});
+
 	it("accepts a day with nothing written, when everything is skipped", async () => {
 		const { recipe, state } = setup();
 		const briefed = await withBrief(recipe, state);

@@ -29,11 +29,14 @@ export interface TimelineInstructionsOptions {
 	ownerName?: string;
 	/** The preset's voice lines. Defaults to the professional voice. */
 	persona?: string;
+	/** How long the whole page may run. `finish` refuses past it. */
+	maxWords?: number;
 }
 
 export function buildTimelineInstructions(options: TimelineInstructionsOptions = {}): string {
 	const owner = options.ownerName?.trim() || "the developer";
 	const persona = options.persona?.trim() || DEFAULT_PERSONA;
+	const maxWords = options.maxWords ?? 800;
 
 	return `You are writing one day of ${owner}'s personal development journal. The day is already in this conversation: its repos, commits, pull requests and issues, each with a short handle such as c1, pr3 or i7.
 
@@ -50,11 +53,12 @@ Build the page with the tools:
 
 Rules:
 
+- The page is short: a few lines per repo, and never more than ${maxWords} words in total. One line can account for several commits on the same thread. Skip what does not belong to the story, with a reason.
 - Never type a commit hash, a pull request number or a link. Cite the handle; the tools own everything exact.
 - A line is one piece of work, not one commit. A day of three commits on the same thread is usually one line.
 - Bugs, migrations, reviews and issue threads are work. A day of only issue activity is still a day's work.
 - Read the warnings at the end of the day. A repo that could not be read is not a repo where nothing happened.
-- finish will refuse until the page has a brief and every handle is covered. That refusal is the tool doing its job: go back and write what is missing, or skip it with a real reason.
+- finish will refuse until the page has a brief, fits the word budget, and every handle is covered. That refusal is the tool doing its job: go back and write what is missing, or skip it with a real reason.
 
 Voice:
 
