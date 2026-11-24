@@ -27,7 +27,7 @@ import { mintDayHandles } from "../day/handles";
 import { renderDay } from "../day/render";
 import type { TimelineDay } from "../day/types";
 import type { GitHubReader } from "./github";
-import { buildTimelineInstructions } from "./instructions";
+import { buildTimelineInstructions, DEFAULT_PAGE_WORDS } from "./instructions";
 import { emptyPage, type TimelineState } from "./state";
 import { createTimelineTools, type PastDays } from "./tools";
 
@@ -52,8 +52,8 @@ export const COMPACTION_WINDOW = {
 	keepTokens: 8_000,
 } as const;
 
-/** How long a page may run before `finish` refuses it. */
-export const DEFAULT_PAGE_WORDS = 800;
+/** Re-exported so the public surface keeps one name for the budget. */
+export { DEFAULT_PAGE_WORDS };
 
 export interface TimelineRecipeOptions {
 	/** Answers the two GitHub tools. Holds the token; never enters the run's state. */

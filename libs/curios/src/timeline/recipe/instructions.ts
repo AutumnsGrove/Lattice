@@ -14,6 +14,19 @@
  * duplication, and it belongs with the change that resolves the tenant's voice.
  */
 
+/**
+ * How long a page may run before the tools refuse to grow it.
+ *
+ * 800 was the middle of the range chosen for the comparison, and the 2026-11-21 run
+ * showed the squeeze: 100 commits, 19 pull requests and 21 issues across five repos
+ * covered in 766 words, then three edits that could not cut below 825 and a parked
+ * run. 1,100 is still well under the 1,600 an uncapped run wrote.
+ *
+ * It lives here, beside the instructions that state it, because the tools and the
+ * recipe both read it and neither owns it.
+ */
+export const DEFAULT_PAGE_WORDS = 1_100;
+
 /** The professional preset's voice, used when the caller names none. */
 export const DEFAULT_PERSONA = `You write daily development summaries for a personal coding journal.
 
@@ -36,7 +49,7 @@ export interface TimelineInstructionsOptions {
 export function buildTimelineInstructions(options: TimelineInstructionsOptions = {}): string {
 	const owner = options.ownerName?.trim() || "the developer";
 	const persona = options.persona?.trim() || DEFAULT_PERSONA;
-	const maxWords = options.maxWords ?? 800;
+	const maxWords = options.maxWords ?? DEFAULT_PAGE_WORDS;
 
 	return `You are writing one day of ${owner}'s personal development journal. The day is already in this conversation: its repos, commits, pull requests and issues, each with a short handle such as c1, pr3 or i7.
 
@@ -57,7 +70,8 @@ Rules:
 
 - Every turn ends in a tool call. The page is written by add_line and add_vine, never by a message: a turn that answers with prose has done nothing, and a run that keeps doing it is stopped. When you are unsure, write the line from the handles you have and move on.
 - The page is short: a few lines per repo, and never more than ${maxWords} words in total. One line can account for several commits on the same thread. Skip what does not belong to the story, with a reason.
-- Never type a commit hash, a pull request number or a link. Cite the handle; the tools own everything exact.
+- Never type a commit hash, a pull request number or a link, and never write a handle in a sentence either. Handles belong in the cites argument, not in the prose: a line reads as though a person wrote it, with no handle in sight.
+- One line is a sentence or two about one thread of work, not a paragraph. If a line needs a colon and four clauses to hold it together, it is two lines — or one line and a skip.
 - A line is one piece of work, not one commit. A day of three commits on the same thread is usually one line.
 - Bugs, migrations, reviews and issue threads are work. A day of only issue activity is still a day's work.
 - Read the warnings at the end of the day. A repo that could not be read is not a repo where nothing happened.
