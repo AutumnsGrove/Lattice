@@ -36,6 +36,25 @@ export const TIMELINE_RECIPE_VERSION = 1;
 /** Model turns before a run parks (Lyra decision 92). A normal day is well under it. */
 export const DEFAULT_STEP_LIMIT = 40;
 
+/**
+ * The window the run is compacted against, which is deliberately much smaller than
+ * the models' own.
+ *
+ * Lyra compacts when the history approaches the context window, and measures in
+ * tokens. Lumen refuses a request whose message array passes 100 items, and a day
+ * with many small tool calls reaches that long before 128k tokens — the first real
+ * run died at turn 12 on exactly that. Compacting against ~16k is what keeps the
+ * conversation's *shape*, not just its length, inside the protocol.
+ */
+export const COMPACTION_WINDOW = {
+	contextWindow: 16_000,
+	reserveTokens: 3_000,
+	keepTokens: 8_000,
+} as const;
+
+/** How long a page may run before `finish` refuses it. */
+export const DEFAULT_PAGE_WORDS = 800;
+
 export interface TimelineRecipeOptions {
 	/** Answers the two GitHub tools. Holds the token; never enters the run's state. */
 	reader: GitHubReader;
@@ -47,6 +66,8 @@ export interface TimelineRecipeOptions {
 	ownerName?: string;
 	/** Overrides the step limit. */
 	steps?: number;
+	/** Overrides the page's word budget. */
+	maxWords?: number;
 }
 
 /**
@@ -155,6 +176,7 @@ export function createTimelineRecipe(options: TimelineRecipeOptions) {
 		instructions: buildTimelineInstructions({
 			ownerName: options.ownerName,
 			persona: options.persona,
+			maxWords: options.maxWords ?? DEFAULT_PAGE_WORDS,
 		}),
 		input: DAY_INPUT,
 		setup: (input) => {
@@ -173,7 +195,12 @@ export function createTimelineRecipe(options: TimelineRecipeOptions) {
 			};
 			return { message: renderDay(day, handles), state };
 		},
-		tools: createTimelineTools({ reader: options.reader, pastDays: options.pastDays }),
+		tools: createTimelineTools({
+			reader: options.reader,
+			pastDays: options.pastDays,
+			maxWords: options.maxWords ?? DEFAULT_PAGE_WORDS,
+		}),
 		limits: { steps: options.steps ?? DEFAULT_STEP_LIMIT },
+		compaction: COMPACTION_WINDOW,
 	});
 }

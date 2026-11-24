@@ -22,6 +22,18 @@ describe("createTimelineRecipe", () => {
 		expect(recipeWith({ steps: 12 }).limits?.steps).toBe(12);
 	});
 
+	it("compacts against a window far below the model's own", () => {
+		// Lumen refuses a request past 100 messages, which a chatty day reaches long
+		// before 128k tokens. Compaction has to fire on volume, not just length.
+		const recipe = recipeWith();
+
+		expect(recipe.compaction).toEqual({
+			contextWindow: 16_000,
+			reserveTokens: 3_000,
+			keepTokens: 8_000,
+		});
+	});
+
 	it("tells the model the tools it has and the rules that matter", () => {
 		const { instructions } = recipeWith();
 
@@ -34,6 +46,7 @@ describe("createTimelineRecipe", () => {
 		expect(instructions).toContain("search_past_days(query)");
 		expect(instructions).toContain("finish(skipped)");
 		expect(instructions).toContain("Never type a commit hash");
+		expect(instructions).toContain("never more than 800 words in total");
 		expect(instructions).toContain("finish will refuse until the page has a brief");
 	});
 

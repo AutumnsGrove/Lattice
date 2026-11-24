@@ -50,6 +50,8 @@ export interface PastDays {
 export interface TimelineToolOptions {
 	reader: GitHubReader;
 	pastDays?: PastDays;
+	/** How long the page may run before `finish` refuses it. */
+	maxWords?: number;
 }
 
 const PROJECT_INPUT = {
@@ -121,6 +123,7 @@ function describeKind(kind: string): string {
 
 export function createTimelineTools(options: TimelineToolOptions): Tool[] {
 	const { reader, pastDays } = options;
+	const maxWords = options.maxWords ?? 800;
 
 	function startProject(): Tool {
 		return defineTool({
@@ -422,7 +425,7 @@ export function createTimelineTools(options: TimelineToolOptions): Tool[] {
 
 	function finish(): Tool {
 		return createFinishTool<TimelineState>({
-			check: (state, skipped) => doneCheck(state, skipped),
+			check: (state, skipped) => doneCheck(state, skipped, maxWords),
 		});
 	}
 
@@ -445,12 +448,20 @@ export function createTimelineTools(options: TimelineToolOptions): Tool[] {
  * skipped with a reason, and the message names what is missing by kind. This is
  * the check that keeps a day of only issue work from looking empty.
  */
-function doneCheck(state: TimelineState, skipped: readonly Skipped[]): DoneCheck {
+function doneCheck(state: TimelineState, skipped: readonly Skipped[], maxWords: number): DoneCheck {
 	if (state.page.brief === null) {
 		return {
 			ok: false,
 			message:
 				"the page needs a brief before it can finish; call set_brief with two or three sentences about the day",
+		};
+	}
+
+	const words = pageWords(state);
+	if (words > maxWords) {
+		return {
+			ok: false,
+			message: `the page is ${words} words and the budget is ${maxWords}; merge related work into one line, or skip what does not belong to the story`,
 		};
 	}
 
@@ -490,6 +501,12 @@ function doneCheck(state: TimelineState, skipped: readonly Skipped[]): DoneCheck
 		return { ok: true };
 	}
 	return { ok: false, message: `${COVERAGE_PREFIX}${missing.join(", ")}` };
+}
+
+/** The words the page carries: the headline and the lines, which is what a reader reads. */
+function pageWords(state: TimelineState): number {
+	const parts = [state.page.brief ?? "", ...linesOf(state).map((line) => line.text)];
+	return parts.join(" ").trim().split(/\s+/).filter(Boolean).length;
 }
 
 /** The call key a tool stores in its details, so a repeated call adds nothing. */
