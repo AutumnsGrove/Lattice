@@ -156,6 +156,9 @@ describe("generateDay", () => {
 			contextWindow: 16_000,
 			reserveTokens: 3_000,
 			keepTokens: 8_000,
+			// The summary is pinned to the run's own model: Lumen's `summary` task model
+			// answered with nothing once and parked the run.
+			model: "scripted/model",
 		});
 		expect(config?.stuck).toEqual({ reminders: 3 });
 		expect(config?.limits).toEqual({ steps: 40 });
