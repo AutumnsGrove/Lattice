@@ -34,6 +34,18 @@ describe("createTimelineRecipe", () => {
 		});
 	});
 
+	it("states its budget from one constant, so the tools and the instructions agree", async () => {
+		const { DEFAULT_PAGE_WORDS } = await import("./instructions");
+		const { createTimelineTools } = await import("./tools");
+		const { buildTimelineInstructions } = await import("./instructions");
+		const { fakeReader } = await import("./testing");
+
+		expect(DEFAULT_PAGE_WORDS).toBe(1_100);
+		expect(buildTimelineInstructions()).toContain(`never more than ${DEFAULT_PAGE_WORDS} words`);
+		// Built without a budget, the tools use the same default the recipe does.
+		expect(createTimelineTools({ reader: fakeReader() })).toHaveLength(11);
+	});
+
 	it("nudges a stalled run one more time than Lyra's default", () => {
 		expect(recipeWith().stuck?.reminders).toBe(3);
 	});

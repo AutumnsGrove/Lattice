@@ -27,7 +27,7 @@ import { mintDayHandles } from "../day/handles";
 import { renderDay } from "../day/render";
 import type { TimelineDay } from "../day/types";
 import type { GitHubReader } from "./github";
-import { buildTimelineInstructions } from "./instructions";
+import { buildTimelineInstructions, DEFAULT_PAGE_WORDS } from "./instructions";
 import { emptyPage, type TimelineState } from "./state";
 import { createTimelineTools, type PastDays } from "./tools";
 
@@ -52,16 +52,8 @@ export const COMPACTION_WINDOW = {
 	keepTokens: 8_000,
 } as const;
 
-/**
- * How long a page may run before the tools refuse to grow it.
- *
- * 800 was the middle of the range chosen for the comparison, and the
- * 2026-11-21 run showed the squeeze: 100 commits, 19 pull requests and 21 issues
- * across five repos covered in 766 words, then three edits that could not cut
- * below 825 and a parked run. 1,100 is still well under the 1,600 that an
- * uncapped run wrote, and leaves room to merge rather than clip.
- */
-export const DEFAULT_PAGE_WORDS = 1_100;
+/** Re-exported so the public surface keeps one name for the budget. */
+export { DEFAULT_PAGE_WORDS };
 
 export interface TimelineRecipeOptions {
 	/** Answers the two GitHub tools. Holds the token; never enters the run's state. */

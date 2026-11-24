@@ -14,6 +14,19 @@
  * duplication, and it belongs with the change that resolves the tenant's voice.
  */
 
+/**
+ * How long a page may run before the tools refuse to grow it.
+ *
+ * 800 was the middle of the range chosen for the comparison, and the 2026-11-21 run
+ * showed the squeeze: 100 commits, 19 pull requests and 21 issues across five repos
+ * covered in 766 words, then three edits that could not cut below 825 and a parked
+ * run. 1,100 is still well under the 1,600 an uncapped run wrote.
+ *
+ * It lives here, beside the instructions that state it, because the tools and the
+ * recipe both read it and neither owns it.
+ */
+export const DEFAULT_PAGE_WORDS = 1_100;
+
 /** The professional preset's voice, used when the caller names none. */
 export const DEFAULT_PERSONA = `You write daily development summaries for a personal coding journal.
 
@@ -36,7 +49,7 @@ export interface TimelineInstructionsOptions {
 export function buildTimelineInstructions(options: TimelineInstructionsOptions = {}): string {
 	const owner = options.ownerName?.trim() || "the developer";
 	const persona = options.persona?.trim() || DEFAULT_PERSONA;
-	const maxWords = options.maxWords ?? 800;
+	const maxWords = options.maxWords ?? DEFAULT_PAGE_WORDS;
 
 	return `You are writing one day of ${owner}'s personal development journal. The day is already in this conversation: its repos, commits, pull requests and issues, each with a short handle such as c1, pr3 or i7.
 

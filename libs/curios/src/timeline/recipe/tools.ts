@@ -23,6 +23,7 @@ import {
 	type ToolContext,
 } from "@autumnsgrove/lyra";
 import type { GitHubReader } from "./github";
+import { DEFAULT_PAGE_WORDS } from "./instructions";
 import { describeState } from "./serialize";
 import {
 	coveredHandles,
@@ -147,7 +148,7 @@ function describeKind(kind: string): string {
 
 export function createTimelineTools(options: TimelineToolOptions): Tool[] {
 	const { reader, pastDays } = options;
-	const maxWords = options.maxWords ?? 800;
+	const maxWords = options.maxWords ?? DEFAULT_PAGE_WORDS;
 
 	function startProject(): Tool {
 		return defineTool({
