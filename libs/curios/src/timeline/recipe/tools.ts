@@ -86,6 +86,15 @@ const EDIT_INPUT = {
 	properties: {
 		line: { type: "string", minLength: 1, maxLength: 20 },
 		text: { type: "string", minLength: 1, maxLength: 2_000 },
+		// The handles of a line being folded into this one. Without this, merging is
+		// impossible: remove_line drops the folded line's citations, and finish then
+		// reports them as uncovered, which pushes the model back to a separate line.
+		cites: {
+			type: "array",
+			items: { type: "string", minLength: 1, maxLength: 20 },
+			minItems: 1,
+			maxItems: 30,
+		},
 	},
 	required: ["line", "text"],
 } as const;
@@ -330,23 +339,41 @@ export function createTimelineTools(options: TimelineToolOptions): Tool[] {
 			parameters: EDIT_INPUT,
 			safeToRepeat: true,
 			async execute(args, ctx: ToolContext<TimelineState>) {
-				if (lineOf(ctx.state, args.line) === undefined) {
+				const line = lineOf(ctx.state, args.line);
+				if (line === undefined) {
 					return { isError: true, content: missingLine(ctx.state, args.line) };
 				}
-				const words =
-					pageWords(ctx.state) -
-					countWords(lineOf(ctx.state, args.line)?.text ?? "") +
-					countWords(args.text);
+
+				// A folded citation has to belong to the same repo, exactly like add_line's,
+				// or a merge would quietly credit the wrong project.
+				for (const cite of args.cites ?? []) {
+					const target = ctx.state.handles.target(cite);
+					if (target === undefined) {
+						return { isError: true, content: unknownHandle(ctx.state.table, cite) };
+					}
+					if (target.repo !== line.project) {
+						return {
+							isError: true,
+							content: `${cite} is ${describeKind(target.kind)} in ${target.repo}, not ${line.project}`,
+						};
+					}
+				}
+
+				const words = pageWords(ctx.state) - countWords(line.text) + countWords(args.text);
 				if (words > maxWords) {
 					return {
 						isError: true,
 						content: `that leaves the page at ${words} words, past the ${maxWords}-word budget; cut more, or remove a line`,
 					};
 				}
+				const folded = (args.cites ?? []).filter((cite) => !line.cites.includes(cite));
 				return {
 					isError: false,
-					content: `rewrote ${args.line}`,
-					details: { line: args.line, text: args.text },
+					content:
+						folded.length === 0
+							? `rewrote ${args.line}`
+							: `rewrote ${args.line}, now citing ${folded.join(", ")}`,
+					details: { line: args.line, text: args.text, cites: args.cites ?? [] },
 				};
 			},
 			apply(state: TimelineState, args) {
@@ -357,7 +384,16 @@ export function createTimelineTools(options: TimelineToolOptions): Tool[] {
 						projects: state.page.projects.map((project) => ({
 							...project,
 							lines: project.lines.map((line) =>
-								line.id === args.line ? { ...line, text: args.text } : line,
+								line.id === args.line
+									? {
+											...line,
+											text: args.text,
+											cites: [
+												...line.cites,
+												...(args.cites ?? []).filter((cite) => !line.cites.includes(cite)),
+											],
+										}
+									: line,
 							),
 						})),
 					},

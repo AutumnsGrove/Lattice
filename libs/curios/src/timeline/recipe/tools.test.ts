@@ -293,6 +293,76 @@ describe("fitting the page to its budget", () => {
 		expect(gone.state.page.vines).toEqual([]);
 	});
 
+	it("folds one line's citations into another, so a merge keeps the day covered", async () => {
+		const { recipe, state } = setup();
+		const started = await callTool(recipe, state, "start_project", { repo: "Lattice" });
+		const first = await callTool(
+			recipe,
+			started.state,
+			"add_line",
+			{ project: "Lattice", text: "The day fetcher landed.", cites: ["c1"] },
+			"line-1",
+		);
+		const second = await callTool(
+			recipe,
+			first.state,
+			"add_line",
+			{ project: "Lattice", text: "And the marker moved.", cites: ["c2"] },
+			"line-2",
+		);
+
+		// Merge: fold l2's handle into l1, then drop l2.
+		const merged = await callTool(recipe, second.state, "edit_line", {
+			line: "l1",
+			text: "The day fetcher landed and the marker moved.",
+			cites: ["c2"],
+		});
+		const removed = await callTool(recipe, merged.state, "remove_line", { line: "l2" });
+		const briefed = await callTool(recipe, removed.state, "set_brief", {
+			text: "A day of the fetcher.",
+		});
+		const covered = await callTool(
+			recipe,
+			briefed.state,
+			"add_line",
+			{ project: "Lattice", text: "The pull request merged.", cites: ["pr1"] },
+			"line-3",
+		);
+		const covered2 = await callTool(
+			recipe,
+			covered.state,
+			"add_line",
+			{ project: "Lattice", text: "Left a note on the issue.", cites: ["i1"] },
+			"line-4",
+		);
+
+		expect(merged.outcome.content).toBe("rewrote l1, now citing c2");
+		expect(removed.state.page.projects[0]?.lines).toHaveLength(1);
+		expect(removed.state.page.projects[0]?.lines[0]?.cites).toEqual(["c1", "c2"]);
+
+		const finished = await callTool(recipe, covered2.state, "finish", {});
+		expect(finished.outcome.isError).toBe(false);
+	});
+
+	it("refuses a folded citation from another repo", async () => {
+		const { recipe, state } = setup();
+		const started = await callTool(recipe, state, "start_project", { repo: "Lattice" });
+		const line = await callTool(recipe, started.state, "add_line", {
+			project: "Lattice",
+			text: "One thing.",
+			cites: ["c1"],
+		});
+
+		const refused = await callTool(recipe, line.state, "edit_line", {
+			line: "l1",
+			text: "One thing.",
+			cites: ["zz1"],
+		});
+
+		expect(refused.outcome.isError).toBe(true);
+		expect(refused.outcome.content).toContain('there is no handle "zz1"');
+	});
+
 	it("refuses an edit to a line that does not exist", async () => {
 		const { recipe, state } = setup();
 
