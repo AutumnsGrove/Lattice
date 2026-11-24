@@ -202,5 +202,8 @@ export function createTimelineRecipe(options: TimelineRecipeOptions) {
 		}),
 		limits: { steps: options.steps ?? DEFAULT_STEP_LIMIT },
 		compaction: COMPACTION_WINDOW,
+		// Two nudges is Lyra's default. A day this size gives a weaker model one more
+		// chance to get back to writing tools after it answers with prose.
+		stuck: { reminders: 3 },
 	});
 }

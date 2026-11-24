@@ -145,6 +145,7 @@ export async function compareDay(
 			tenantId: config.tenantId,
 			date: input.date,
 			githubUsername: config.githubUsername,
+			voice: config.voicePreset,
 			old,
 			next,
 		}),

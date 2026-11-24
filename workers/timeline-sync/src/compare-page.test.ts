@@ -40,6 +40,7 @@ const PAGE = {
 	tenantId: "midnight-bloom",
 	date: "2026-11-21",
 	githubUsername: "autumn",
+	voice: "casual",
 };
 
 describe("buildComparisonPage", () => {
@@ -118,6 +119,6 @@ describe("buildComparisonPage", () => {
 
 		expect(html).toContain("$0.0120");
 		expect(html).toContain("$0.0310");
-		expect(html).toContain("professional voice");
+		expect(html).toContain("casual voice");
 	});
 });

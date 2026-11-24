@@ -34,6 +34,10 @@ describe("createTimelineRecipe", () => {
 		});
 	});
 
+	it("nudges a stalled run one more time than Lyra's default", () => {
+		expect(recipeWith().stuck?.reminders).toBe(3);
+	});
+
 	it("tells the model the tools it has and the rules that matter", () => {
 		const { instructions } = recipeWith();
 
@@ -47,6 +51,8 @@ describe("createTimelineRecipe", () => {
 		expect(instructions).toContain("finish(skipped)");
 		expect(instructions).toContain("Never type a commit hash");
 		expect(instructions).toContain("never more than 800 words in total");
+		expect(instructions).toContain("Every turn ends in a tool call");
+		expect(instructions).toContain("They are not a tour");
 		expect(instructions).toContain("finish will refuse until the page has a brief");
 	});
 
