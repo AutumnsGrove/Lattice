@@ -42,14 +42,28 @@ export const DEFAULT_STEP_LIMIT = 40;
  *
  * Lyra compacts when the history approaches the context window, and measures in
  * tokens. Lumen refuses a request whose message array passes 100 items, and a day
- * with many small tool calls reaches that long before 128k tokens — the first real
- * run died at turn 12 on exactly that. Compacting against ~16k is what keeps the
- * conversation's *shape*, not just its length, inside the protocol.
+ * with many small tool calls reaches that long before 1M tokens — the first real run
+ * died at turn 12 on exactly that. Compacting keeps the conversation's *shape*, not
+ * just its length, inside the protocol.
+ *
+ * **The model's own window is not the number to use.** DeepSeek's is 1M, and setting
+ * 1M here would mean compaction never fires — which is the run that cost 8.6 cents,
+ * re-sending its whole history 31 times. Two reasons this stays small:
+ *
+ * 1. It is a *proxy for message count*. Lumen caps a request at 100 messages (#1817),
+ *    and a turn is two or three of them, so ~30 turns is the real ceiling. A
+ *    token-based compactor has to be pointed somewhere below that.
+ * 2. It is a *cost* choice. Every turn re-sends the conversation, so the same output
+ *    from a 32k history costs a third of what it costs from a 90k one.
+ *
+ * 16k was too tight in practice: the day plus what a cut keeps still came to more
+ * than the window, and a run failed with "compacting cannot make it fit" before it
+ * wrote its headline. 32k leaves room for both while messages stay well under the cap.
  */
 export const COMPACTION_WINDOW = {
-	contextWindow: 16_000,
-	reserveTokens: 3_000,
-	keepTokens: 8_000,
+	contextWindow: 32_000,
+	reserveTokens: 4_000,
+	keepTokens: 12_000,
 } as const;
 
 /** Re-exported so the public surface keeps one name for the budget. */

@@ -153,9 +153,9 @@ describe("generateDay", () => {
 
 		const config = vi.mocked(runTask).mock.calls.at(-1)?.[0];
 		expect(config?.compaction).toEqual({
-			contextWindow: 16_000,
-			reserveTokens: 3_000,
-			keepTokens: 8_000,
+			contextWindow: 32_000,
+			reserveTokens: 4_000,
+			keepTokens: 12_000,
 			// The summary is pinned to the run's own model: Lumen's `summary` task model
 			// answered with nothing once and parked the run.
 			model: "scripted/model",
