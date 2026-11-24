@@ -131,10 +131,23 @@ const ToolChoiceSchema = z.union([
 	}),
 ]);
 
+/**
+ * The most messages one request may carry.
+ *
+ * An agent loop grows by tool calls — one assistant message and one result per call —
+ * so a run with a tool per line of work reaches a few hundred messages long before it
+ * is anywhere near a model's context window. The old cap of 100 was a bare number with
+ * no reason recorded, and it forced the timeline's recipe to guess a small compaction
+ * window as a proxy for it (a guess that mis-fired twice). The bound stays because an
+ * unbounded array is a memory promise nobody can keep; 400 is a shape a real run can
+ * reach without being a denial-of-service.
+ */
+export const MAX_REQUEST_MESSAGES = 400;
+
 /** POST /inference request body */
 export const InferenceRequestSchema = z.object({
 	task: LumenTaskSchema,
-	input: z.union([z.string().max(102400), z.array(MessageSchema).min(1).max(100)]),
+	input: z.union([z.string().max(102400), z.array(MessageSchema).min(1).max(MAX_REQUEST_MESSAGES)]),
 	tenant_id: z.string().optional(),
 	tier: z.enum(["wanderer", "seedling", "sapling", "oak", "evergreen"]).optional(),
 	options: z

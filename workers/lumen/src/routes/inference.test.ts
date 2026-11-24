@@ -60,6 +60,54 @@ function postRaw(body: string) {
 	});
 }
 
+describe("the request's message allowance", () => {
+	function body(messages: number) {
+		return {
+			task: "agent",
+			input: Array.from({ length: messages }, (_, index) => ({
+				role: index % 2 === 0 ? "user" : "assistant",
+				content: `message ${index}`,
+			})),
+		};
+	}
+
+	it("accepts a conversation an agent loop can actually produce", async () => {
+		// 300 messages is ~100 tool calls with their results: ordinary for a recipe that
+		// asks for one tool per line of work, and refused by the old cap of 100.
+		mockRun.mockResolvedValue({
+			content: "fine",
+			model: "deepseek/v3",
+			provider: "openrouter",
+			usage: { input: 1, output: 1, cost: 0 },
+		});
+		const response = await createApp().request(
+			"/inference",
+			{
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(body(300)),
+			},
+			mockEnv,
+		);
+
+		expect(response.status).toBe(200);
+	});
+
+	it("still refuses a conversation nobody could need", async () => {
+		const response = await createApp().request(
+			"/inference",
+			{
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(body(401)),
+			},
+			mockEnv,
+		);
+
+		expect(response.status).toBe(400);
+	});
+});
+
 describe("POST /inference", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
