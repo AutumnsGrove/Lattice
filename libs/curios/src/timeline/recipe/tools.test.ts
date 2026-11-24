@@ -223,19 +223,21 @@ describe("fitting the page to its budget", () => {
 	}
 
 	it("refuses a line that would take the page past the budget, and says how to fit it", async () => {
-		const { recipe, state } = setup();
-		const two = await threeHundredWordLines(recipe, state);
+		// The default budget is over a thousand words now, so this pins its own.
+		const reader = fakeReader();
+		const recipe = createTimelineRecipe({ reader, maxWords: 650 });
+		const two = await threeHundredWordLines(recipe, startState(recipe));
 
 		const refused = await callTool(
 			recipe,
 			two,
 			"add_line",
-			{ project: "Lattice", text: "word ".repeat(300).trim(), cites: ["pr1"] },
+			{ project: "Lattice", text: "word ".repeat(100).trim(), cites: ["pr1"] },
 			"line-2",
 		);
 
 		expect(refused.outcome.isError).toBe(true);
-		expect(refused.outcome.content).toContain("past the 800-word budget");
+		expect(refused.outcome.content).toContain("past the 650-word budget");
 		expect(refused.outcome.content).toContain("edit_line");
 		// The page did not grow.
 		expect(refused.state.page.projects[0]?.lines).toHaveLength(2);

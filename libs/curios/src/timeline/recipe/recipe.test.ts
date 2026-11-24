@@ -52,8 +52,10 @@ describe("createTimelineRecipe", () => {
 		expect(instructions).toContain("search_past_days(query)");
 		expect(instructions).toContain("finish(skipped)");
 		expect(instructions).toContain("Never type a commit hash");
-		expect(instructions).toContain("never more than 800 words in total");
+		expect(instructions).toContain("never more than 1100 words in total");
 		expect(instructions).toContain("Every turn ends in a tool call");
+		expect(instructions).toContain("never write a handle in a sentence");
+		expect(instructions).toContain("not a paragraph");
 		expect(instructions).toContain("They are not a tour");
 		expect(instructions).toContain("finish will refuse until the page has a brief");
 	});

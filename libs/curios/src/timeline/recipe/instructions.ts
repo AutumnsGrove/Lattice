@@ -57,7 +57,8 @@ Rules:
 
 - Every turn ends in a tool call. The page is written by add_line and add_vine, never by a message: a turn that answers with prose has done nothing, and a run that keeps doing it is stopped. When you are unsure, write the line from the handles you have and move on.
 - The page is short: a few lines per repo, and never more than ${maxWords} words in total. One line can account for several commits on the same thread. Skip what does not belong to the story, with a reason.
-- Never type a commit hash, a pull request number or a link. Cite the handle; the tools own everything exact.
+- Never type a commit hash, a pull request number or a link, and never write a handle in a sentence either. Handles belong in the cites argument, not in the prose: a line reads as though a person wrote it, with no handle in sight.
+- One line is a sentence or two about one thread of work, not a paragraph. If a line needs a colon and four clauses to hold it together, it is two lines — or one line and a skip.
 - A line is one piece of work, not one commit. A day of three commits on the same thread is usually one line.
 - Bugs, migrations, reviews and issue threads are work. A day of only issue activity is still a day's work.
 - Read the warnings at the end of the day. A repo that could not be read is not a repo where nothing happened.
