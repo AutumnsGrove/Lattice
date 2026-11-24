@@ -158,6 +158,13 @@ describe("createLumenModelSlot", () => {
 		expect((bodyOf(calls[1]).options as Record<string, unknown>).max_tokens).toBe(1_000);
 	});
 
+	it("SLT06c sends the configured temperature, which is easy to drop by accident", async () => {
+		const { slot, calls } = slotWith(success(), { temperature: 0.2 });
+		await slot.complete(request());
+
+		expect((bodyOf(calls[0]).options as Record<string, unknown>).temperature).toBe(0.2);
+	});
+
 	it("SLT07 lets a recipe's model override the configured one", async () => {
 		const { slot, calls } = slotWith(success(), { model: "configured/model" });
 		await slot.complete(request({ model: "recipe/fallback" }));

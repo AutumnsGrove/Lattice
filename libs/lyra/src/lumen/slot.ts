@@ -305,6 +305,7 @@ function requestBody(request: ModelRequest, context: RequestContext): Record<str
 		options: {
 			model: request.model ?? config.model,
 			...(maxTokens !== undefined && { max_tokens: maxTokens }),
+			...(config.temperature !== undefined && { temperature: config.temperature }),
 			skip_quota: true,
 			// The key goes here and nowhere else: not in a header, not in metadata,
 			// not in anything a log or a record could hold.
