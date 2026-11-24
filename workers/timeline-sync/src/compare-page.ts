@@ -40,12 +40,14 @@ export interface ComparisonPageInput {
 	tenantId: string;
 	date: string;
 	githubUsername: string;
+	/** The tenant's preset, which the new side is written in. */
+	voice: string | null;
 	old: OldDay | null;
 	next: NewDay;
 }
 
 export function buildComparisonPage(input: ComparisonPageInput): string {
-	const { tenantId, date, githubUsername, old, next } = input;
+	const { tenantId, date, githubUsername, voice, old, next } = input;
 
 	return `<!doctype html>
 <html lang="en">
@@ -71,7 +73,7 @@ export function buildComparisonPage(input: ComparisonPageInput): string {
 
 		<section>
 			<h2>The new path <span>Lyra, with tools</span></h2>
-			${renderNew(next, githubUsername)}
+			${renderNew(next, githubUsername, voice)}
 		</section>
 	</div>
 </main>
@@ -99,7 +101,7 @@ function renderOld(old: OldDay, githubUsername: string): string {
 </article>`;
 }
 
-function renderNew(next: NewDay, githubUsername: string): string {
+function renderNew(next: NewDay, githubUsername: string, voice: string | null): string {
 	if (next.status === "empty") {
 		return `<p class="missing">Nothing happened on any repo that day, so no run was made. The current path stores a day with no commits the same way: nothing at all.</p>`;
 	}
@@ -111,7 +113,7 @@ function renderNew(next: NewDay, githubUsername: string): string {
 	});
 	const stats = [
 		`${next.turns} turn${next.turns === 1 ? "" : "s"}`,
-		"professional voice",
+		voice === null ? null : `${escapeHtml(voice)} voice`,
 		next.cost > 0 ? `$${next.cost.toFixed(4)}` : null,
 		next.status === "done" ? null : escapeHtml(next.status),
 	].filter((part) => part !== null);
