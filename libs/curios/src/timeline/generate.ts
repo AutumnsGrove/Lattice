@@ -178,7 +178,14 @@ export async function generateDay(
 			// recipe's settings are decoration. Compaction missing here is why the first
 			// real runs re-sent their whole history every turn: 1.3 million input tokens
 			// for a thirty-one turn day, and eight cents for a page.
-			compaction: recipe.compaction,
+			// The summary runs as Lumen's `summary` task, which picks its own model from the
+			// task registry. That model answered with nothing on 2026-11-21 and parked the
+			// run, so the summary is pinned to the model this run is otherwise using —
+			// which has already proven it can write.
+			compaction:
+				recipe.compaction === undefined
+					? undefined
+					: { ...recipe.compaction, model: deps.modelName ?? recipe.compaction.model },
 			stuck: recipe.stuck,
 			modelName: deps.modelName ?? undefined,
 			fallbackModel: recipe.fallbackModel,
