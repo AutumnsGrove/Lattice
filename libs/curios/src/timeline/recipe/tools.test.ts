@@ -601,30 +601,38 @@ describe("finish", () => {
 		});
 	});
 
-	it("still refuses a page an unguarded addition pushed over the budget", async () => {
-		// add_line and edit_line refuse to cross the budget; the brief does not, so the
-		// check on finish is the backstop that catches a page already over it.
+	it("counts the lines, not the brief or the vines", async () => {
+		// The budget exists to stop a wall of bullets. A run that filled its lines hit
+		// the wall and never wrote its headline; none has ever written a vine. So the
+		// headline and the asides are outside the count.
 		const reader = fakeReader();
-		const recipe = createTimelineRecipe({ reader, maxWords: 10 });
+		const recipe = createTimelineRecipe({ reader, maxWords: 20 });
 		const started = await callTool(recipe, startState(recipe), "start_project", {
 			repo: "Lattice",
 		});
-		const line = await callTool(
-			recipe,
-			started.state,
-			"add_line",
-			{ project: "Lattice", text: "one two three four five", cites: ["c1"] },
-			"line-1",
-		);
-		const briefed = await callTool(recipe, line.state, "set_brief", {
-			text: "a b c d e f g",
+		const five = "one two three four five";
+		let current = started;
+		for (const [index, cite] of ["c1", "c2", "pr1", "i1"].entries()) {
+			current = await callTool(
+				recipe,
+				current.state,
+				"add_line",
+				{ project: "Lattice", text: five, cites: [cite] },
+				`line-${index}`,
+			);
+			expect(current.outcome.isError).toBe(false);
+		}
+		const withVine = await callTool(recipe, current.state, "add_vine", {
+			line: "l1",
+			text: "an aside that says what the line cannot",
+		});
+		const withBrief = await callTool(recipe, withVine.state, "set_brief", {
+			text: "A day of five-word lines, and a headline that is longer than any of them.",
 		});
 
-		const refused = await callTool(recipe, briefed.state, "finish", {});
+		const finished = await callTool(recipe, withBrief.state, "finish", {});
 
-		expect(refused.outcome.isError).toBe(true);
-		expect(refused.outcome.content).toContain("12 words and the budget is 10");
-		expect(refused.outcome.content).toContain("merge related work into one line");
+		expect(finished.outcome.isError).toBe(false);
 	});
 
 	it("accepts a day with nothing written, when everything is skipped", async () => {
