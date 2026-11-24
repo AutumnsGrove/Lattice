@@ -201,6 +201,177 @@ describe("add_vine", () => {
 	});
 });
 
+describe("fitting the page to its budget", () => {
+	async function threeHundredWordLines(
+		recipe: ReturnType<typeof createTimelineRecipe>,
+		state: TimelineState,
+	) {
+		const line = "word ".repeat(300).trim();
+		let current = await callTool(recipe, state, "start_project", { repo: "Lattice" });
+		current = await callTool(recipe, current.state, "set_brief", { text: "A long day." });
+		for (const [index, cite] of ["c1", "c2"].entries()) {
+			current = await callTool(
+				recipe,
+				current.state,
+				"add_line",
+				{ project: "Lattice", text: line, cites: [cite] },
+				`line-${index}`,
+			);
+			expect(current.outcome.isError).toBe(false);
+		}
+		return current.state;
+	}
+
+	it("refuses a line that would take the page past the budget, and says how to fit it", async () => {
+		const { recipe, state } = setup();
+		const two = await threeHundredWordLines(recipe, state);
+
+		const refused = await callTool(
+			recipe,
+			two,
+			"add_line",
+			{ project: "Lattice", text: "word ".repeat(300).trim(), cites: ["pr1"] },
+			"line-2",
+		);
+
+		expect(refused.outcome.isError).toBe(true);
+		expect(refused.outcome.content).toContain("past the 800-word budget");
+		expect(refused.outcome.content).toContain("edit_line");
+		// The page did not grow.
+		expect(refused.state.page.projects[0]?.lines).toHaveLength(2);
+	});
+
+	it("lets a too-long line be rewritten shorter", async () => {
+		// A page that is inside the budget, whose line can still grow past it. The
+		// per-line length cap is 2,000 characters, so the budget here is what an edit
+		// can cross (~380 words is 1,899 characters).
+		const reader = fakeReader();
+		const recipe = createTimelineRecipe({ reader, maxWords: 550 });
+		const line = "word ".repeat(250).trim();
+		let current = await callTool(recipe, startState(recipe), "start_project", { repo: "Lattice" });
+		for (const [index, cite] of ["c1", "c2"].entries()) {
+			current = await callTool(
+				recipe,
+				current.state,
+				"add_line",
+				{ project: "Lattice", text: line, cites: [cite] },
+				`line-${index}`,
+			);
+			expect(current.outcome.isError).toBe(false);
+		}
+
+		const longer = await callTool(recipe, current.state, "edit_line", {
+			line: "l1",
+			text: "word ".repeat(380).trim(),
+		});
+		expect(longer.outcome.isError).toBe(true);
+		expect(longer.outcome.content).toContain("past the 550-word budget");
+
+		const shorter = await callTool(recipe, current.state, "edit_line", {
+			line: "l1",
+			text: "One thread, told once.",
+		});
+		expect(shorter.outcome.isError).toBe(false);
+		expect(shorter.state.page.projects[0]?.lines[0]?.text).toBe("One thread, told once.");
+	});
+
+	it("removes a line and the vine that hung on it", async () => {
+		const { recipe, state } = setup();
+		const two = await threeHundredWordLines(recipe, state);
+		const withVine = await callTool(recipe, two, "add_vine", {
+			line: "l2",
+			text: "an aside",
+		});
+
+		const removed = await callTool(recipe, withVine.state, "remove_line", { line: "l1" });
+
+		expect(removed.outcome.isError).toBe(false);
+		expect(removed.state.page.projects[0]?.lines.map((line) => line.id)).toEqual(["l2"]);
+		expect(removed.state.page.vines).toEqual([{ line: "l2", text: "an aside" }]);
+
+		const gone = await callTool(recipe, removed.state, "remove_line", { line: "l2" });
+		expect(gone.state.page.vines).toEqual([]);
+	});
+
+	it("folds one line's citations into another, so a merge keeps the day covered", async () => {
+		const { recipe, state } = setup();
+		const started = await callTool(recipe, state, "start_project", { repo: "Lattice" });
+		const first = await callTool(
+			recipe,
+			started.state,
+			"add_line",
+			{ project: "Lattice", text: "The day fetcher landed.", cites: ["c1"] },
+			"line-1",
+		);
+		const second = await callTool(
+			recipe,
+			first.state,
+			"add_line",
+			{ project: "Lattice", text: "And the marker moved.", cites: ["c2"] },
+			"line-2",
+		);
+
+		// Merge: fold l2's handle into l1, then drop l2.
+		const merged = await callTool(recipe, second.state, "edit_line", {
+			line: "l1",
+			text: "The day fetcher landed and the marker moved.",
+			cites: ["c2"],
+		});
+		const removed = await callTool(recipe, merged.state, "remove_line", { line: "l2" });
+		const briefed = await callTool(recipe, removed.state, "set_brief", {
+			text: "A day of the fetcher.",
+		});
+		const covered = await callTool(
+			recipe,
+			briefed.state,
+			"add_line",
+			{ project: "Lattice", text: "The pull request merged.", cites: ["pr1"] },
+			"line-3",
+		);
+		const covered2 = await callTool(
+			recipe,
+			covered.state,
+			"add_line",
+			{ project: "Lattice", text: "Left a note on the issue.", cites: ["i1"] },
+			"line-4",
+		);
+
+		expect(merged.outcome.content).toBe("rewrote l1, now citing c2");
+		expect(removed.state.page.projects[0]?.lines).toHaveLength(1);
+		expect(removed.state.page.projects[0]?.lines[0]?.cites).toEqual(["c1", "c2"]);
+
+		const finished = await callTool(recipe, covered2.state, "finish", {});
+		expect(finished.outcome.isError).toBe(false);
+	});
+
+	it("refuses a folded citation from another repo", async () => {
+		const { recipe, state } = setup();
+		const started = await callTool(recipe, state, "start_project", { repo: "Lattice" });
+		const line = await callTool(recipe, started.state, "add_line", {
+			project: "Lattice",
+			text: "One thing.",
+			cites: ["c1"],
+		});
+
+		const refused = await callTool(recipe, line.state, "edit_line", {
+			line: "l1",
+			text: "One thing.",
+			cites: ["zz1"],
+		});
+
+		expect(refused.outcome.isError).toBe(true);
+		expect(refused.outcome.content).toContain('there is no handle "zz1"');
+	});
+
+	it("refuses an edit to a line that does not exist", async () => {
+		const { recipe, state } = setup();
+
+		const refused = await callTool(recipe, state, "edit_line", { line: "l9", text: "nothing" });
+
+		expect(refused.outcome.content).toBe('there is no line "l9"; no lines are on the page yet');
+	});
+});
+
 describe("set_brief", () => {
 	it("writes the headline, and the last call wins", async () => {
 		const { recipe, state } = setup();
@@ -428,29 +599,29 @@ describe("finish", () => {
 		});
 	});
 
-	it("refuses a page over its word budget, before it complains about coverage", async () => {
-		const { recipe, state } = setup();
-		const briefed = await withBrief(recipe, state);
-		// Each line is inside the per-line length cap; together they are not.
-		const line = "word ".repeat(200).trim();
-		const started = await callTool(recipe, briefed, "start_project", { repo: "Lattice" });
-		let current = started.state;
-		for (const [index, cite] of ["c1", "c2", "pr1", "i1"].entries()) {
-			const added = await callTool(
-				recipe,
-				current,
-				"add_line",
-				{ project: "Lattice", text: line, cites: [cite] },
-				`long-${index}`,
-			);
-			expect(added.outcome.isError).toBe(false);
-			current = added.state;
-		}
+	it("still refuses a page an unguarded addition pushed over the budget", async () => {
+		// add_line and edit_line refuse to cross the budget; the brief does not, so the
+		// check on finish is the backstop that catches a page already over it.
+		const reader = fakeReader();
+		const recipe = createTimelineRecipe({ reader, maxWords: 10 });
+		const started = await callTool(recipe, startState(recipe), "start_project", {
+			repo: "Lattice",
+		});
+		const line = await callTool(
+			recipe,
+			started.state,
+			"add_line",
+			{ project: "Lattice", text: "one two three four five", cites: ["c1"] },
+			"line-1",
+		);
+		const briefed = await callTool(recipe, line.state, "set_brief", {
+			text: "a b c d e f g",
+		});
 
-		const refused = await callTool(recipe, current, "finish", {});
+		const refused = await callTool(recipe, briefed.state, "finish", {});
 
 		expect(refused.outcome.isError).toBe(true);
-		expect(refused.outcome.content).toContain("words and the budget is 800");
+		expect(refused.outcome.content).toContain("12 words and the budget is 10");
 		expect(refused.outcome.content).toContain("merge related work into one line");
 	});
 
