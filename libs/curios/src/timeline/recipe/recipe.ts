@@ -27,7 +27,7 @@ import { mintDayHandles } from "../day/handles";
 import { renderDay } from "../day/render";
 import type { TimelineDay } from "../day/types";
 import type { GitHubReader } from "./github";
-import { buildTimelineInstructions, DEFAULT_PAGE_WORDS } from "./instructions";
+import { buildTimelineInstructions, pageWordsForDay } from "./instructions";
 import { emptyPage, type TimelineState } from "./state";
 import { createTimelineTools, type PastDays } from "./tools";
 
@@ -67,7 +67,12 @@ export const COMPACTION_WINDOW = {
 } as const;
 
 /** Re-exported so the public surface keeps one name for the budget. */
-export { DEFAULT_PAGE_WORDS };
+export {
+	DEFAULT_PAGE_WORDS,
+	PAGE_WORDS_CEILING,
+	PAGE_WORDS_PER_REPO,
+	pageWordsForDay,
+} from "./instructions";
 
 export interface TimelineRecipeOptions {
 	/** Answers the two GitHub tools. Holds the token; never enters the run's state. */
@@ -82,6 +87,15 @@ export interface TimelineRecipeOptions {
 	steps?: number;
 	/** Overrides the page's word budget. */
 	maxWords?: number;
+	/**
+	 * The repos the day touched, so the budget can follow the work.
+	 *
+	 * A day of nine repos does not fit in a one-repo allowance, and the model finds
+	 * that out by thrashing against the budget instead of writing the day (#1798).
+	 * Ignored when `maxWords` is given, which is what the tests and the comparison
+	 * use to pin a number.
+	 */
+	repos?: readonly string[];
 }
 
 /**
@@ -184,13 +198,15 @@ export function checkDayInput(input: JsonValue): Validation<JsonValue> {
 }
 
 export function createTimelineRecipe(options: TimelineRecipeOptions) {
+	const maxWords = options.maxWords ?? pageWordsForDay(options.repos?.length ?? 1);
+
 	return defineRecipe({
 		name: TIMELINE_RECIPE_NAME,
 		version: TIMELINE_RECIPE_VERSION,
 		instructions: buildTimelineInstructions({
 			ownerName: options.ownerName,
 			persona: options.persona,
-			maxWords: options.maxWords ?? DEFAULT_PAGE_WORDS,
+			maxWords,
 		}),
 		input: DAY_INPUT,
 		setup: (input) => {
@@ -212,7 +228,7 @@ export function createTimelineRecipe(options: TimelineRecipeOptions) {
 		tools: createTimelineTools({
 			reader: options.reader,
 			pastDays: options.pastDays,
-			maxWords: options.maxWords ?? DEFAULT_PAGE_WORDS,
+			maxWords,
 		}),
 		limits: { steps: options.steps ?? DEFAULT_STEP_LIMIT },
 		compaction: COMPACTION_WINDOW,

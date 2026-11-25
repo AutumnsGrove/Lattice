@@ -34,6 +34,32 @@ describe("createTimelineRecipe", () => {
 		});
 	});
 
+	it("gives a busy day a longer page than a quiet one", async () => {
+		const { pageWordsForDay, DEFAULT_PAGE_WORDS, PAGE_WORDS_CEILING, PAGE_WORDS_PER_REPO } =
+			await import("./instructions");
+
+		expect(pageWordsForDay(1)).toBe(DEFAULT_PAGE_WORDS);
+		expect(pageWordsForDay(2)).toBe(DEFAULT_PAGE_WORDS + PAGE_WORDS_PER_REPO);
+		expect(pageWordsForDay(0)).toBe(DEFAULT_PAGE_WORDS);
+		// A day that touched everything in the forest is still one page.
+		expect(pageWordsForDay(30)).toBe(PAGE_WORDS_CEILING);
+
+		// The 2026-11-22 day: nine repos, 261 commits. It parked after spending half
+		// its steps fighting a one-repo allowance.
+		expect(pageWordsForDay(9)).toBeGreaterThan(DEFAULT_PAGE_WORDS);
+	});
+
+	it("tells the model the budget its day actually has", async () => {
+		const { pageWordsForDay } = await import("./instructions");
+		const nineRepos = recipeWith({ repos: ["a", "b", "c", "d", "e", "f", "g", "h", "i"] });
+
+		expect(nineRepos.instructions).toContain(`never more than ${pageWordsForDay(9)} words`);
+		// And a caller that pins a number still gets that number.
+		expect(recipeWith({ repos: ["a", "b"], maxWords: 900 }).instructions).toContain(
+			"never more than 900 words",
+		);
+	});
+
 	it("states its budget from one constant, so the tools and the instructions agree", async () => {
 		const { DEFAULT_PAGE_WORDS } = await import("./instructions");
 		const { createTimelineTools } = await import("./tools");

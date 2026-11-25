@@ -173,6 +173,10 @@ export async function generateDay(
 		persona: input.persona ?? undefined,
 		ownerName: input.ownerName ?? undefined,
 		steps: deps.steps,
+		// The budget follows the day: a nine-repo day gets a longer page than a
+		// one-repo day, because otherwise the model spends its steps fitting the work
+		// into a limit that was never about the work (#1798).
+		repos: day.repos,
 	});
 
 	try {
