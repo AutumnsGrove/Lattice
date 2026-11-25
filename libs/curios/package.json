@@ -59,6 +59,10 @@
 			"types": "./src/timeline/generate.ts",
 			"default": "./src/timeline/generate.ts"
 		},
+		"./timeline/summary": {
+			"types": "./src/timeline/summary.ts",
+			"default": "./src/timeline/summary.ts"
+		},
 		"./timeline/secrets.server": {
 			"types": "./src/timeline/secrets.server.ts",
 			"default": "./src/timeline/secrets.server.ts"

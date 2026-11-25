@@ -88,6 +88,13 @@ export interface GeneratedDay {
 	day: TimelineDay;
 	status: RunEndReason | "empty";
 	page: SerializedPage;
+	/**
+	 * The model that answered, which is not always the one that was asked: Lumen's
+	 * fallback chain can move a turn to another provider, and a day attributed to
+	 * the wrong model is a day the cost log lies about. `null` when nothing
+	 * answered.
+	 */
+	model: string | null;
 	turns: number;
 	usage: Usage;
 	/** Anything that went wrong around the run: a broken day, a failed write. */
@@ -120,6 +127,7 @@ export async function generateDay(
 			day,
 			status: "empty",
 			page: NO_CHARS,
+			model: null,
 			turns: 0,
 			usage: NO_USAGE,
 			warnings: [],
@@ -129,6 +137,15 @@ export async function generateDay(
 
 	const runId = deps.runId ?? systemIds().next("day_");
 	const warnings: string[] = [];
+
+	// What actually answered, as opposed to what was asked. Lyra reports the model on
+	// each reply but not on the run that ends, so the answer is read as it arrives —
+	// from turns, never from compaction's own summary call, whose model is a choice
+	// about summarising rather than the one the day was written by.
+	let answered: string | null = null;
+	const model = recordAnsweringModel(deps.model, (name) => {
+		answered = name;
+	});
 
 	try {
 		await deps.store.start({
@@ -169,7 +186,7 @@ export async function generateDay(
 			inputCheck: checkDayInput,
 			system: recipe.instructions,
 			tools: recipe.tools,
-			model: deps.model,
+			model,
 			storage: deps.storage(runId),
 			clock: systemClock(),
 			ids: systemIds(),
@@ -214,6 +231,7 @@ export async function generateDay(
 			day,
 			status: result.reason,
 			page,
+			model: answered,
 			turns: result.turns,
 			usage: result.usage,
 			warnings,
@@ -264,4 +282,28 @@ function finishRun(store: DayRunStore, run: FinishRun): Promise<void> {
 
 function reasonOf(error: unknown): string {
 	return error instanceof Error ? error.message : String(error);
+}
+
+/**
+ * The same slot, with each answering model reported as it arrives.
+ *
+ * A run's total usage says how much a day cost and not who charged it. Lumen's
+ * fallback chain can answer a turn with a model nobody asked for, so a page
+ * attributed to the requested name would put the cost on the wrong entry. The
+ * model is on every reply and on no run, hence the tap.
+ *
+ * Compaction's own summary call is ignored on purpose: it asks about the run
+ * rather than continuing it, so its model is a summarising choice, not the voice
+ * the day was written in.
+ */
+function recordAnsweringModel(slot: ModelSlot, seen: (name: string) => void): ModelSlot {
+	return {
+		async complete(request) {
+			const reply = await slot.complete(request);
+			if (reply.ok && request.purpose !== "compaction") {
+				seen(reply.value.model);
+			}
+			return reply;
+		},
+	};
 }

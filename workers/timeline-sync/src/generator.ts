@@ -1,35 +1,26 @@
 /**
  * Timeline Generator
  *
- * Core per-tenant processing logic for generating timeline summaries.
- * Orchestrates the full flow: decrypt tokens → fetch commits → AI → store.
+ * One tenant, one day. The day itself is `generateDay` from
+ * `@autumnsgrove/curios/timeline/generate` — this file is only what the worker
+ * knows that a library cannot: which tenant is enabled, where their tokens live,
+ * which model slot to build, and where the page goes afterwards.
+ *
+ * It used to do the fetching, prompting, parsing and storing itself, as a second
+ * copy of the Arbor route (#1798, decision 61). The cutover retired that copy; the
+ * old prompt path lives in git history, and the page now comes from the recipe.
  */
 
 import type { GroveContext, GroveDatabase } from "@autumnsgrove/infra";
-import type {
-	Env,
-	TenantConfig,
-	TenantConfigRow,
-	Commit,
-	GenerationResult,
-	CustomVoiceConfig,
-} from "./config";
-import { DEFAULT_OPENROUTER_MODEL } from "./config";
+import type { Env, TenantConfig, TenantConfigRow, GenerationResult } from "./config";
 import { createSecretsManager } from "@autumnsgrove/grove-crypto/secrets";
-import { fetchGitHubCommits, fetchCommitStats } from "./github";
-import { parseAIResponse } from "./response-parser";
-import { buildVoicedPrompt } from "./voices";
-import { SUMMARY_MAX_OUTPUT_TOKENS } from "@autumnsgrove/curios/timeline/voices";
-import {
-	getHistoricalContext,
-	detectTaskFromText,
-	detectContinuation,
-	formatHistoricalContextForPrompt,
-	formatContinuationForPrompt,
-	buildSummaryContextData,
-} from "./context";
-import { RemoteLumenClient } from "@autumnsgrove/lattice/ai/lumen";
+import { generateDay } from "@autumnsgrove/curios/timeline/generate";
+import { d1DayRun } from "@autumnsgrove/curios/timeline/record";
+import { writeDaySummary } from "@autumnsgrove/curios/timeline/summary";
+import { resolvePersona } from "@autumnsgrove/curios/timeline/voices";
+import { createLumenModelSlot } from "@autumnsgrove/lyra-lumen/lumen";
 import { initPulse, emitPulseEvent, flushPulse } from "@autumnsgrove/lattice/pulse";
+import { createRunLogger, reportRunOutcome } from "./run-log";
 
 // =============================================================================
 // Public API
@@ -111,11 +102,13 @@ export async function processTenantTimeline(
 	const logPrefix = `[${config.tenantId}]`;
 
 	try {
-		// 0. Check if summary already exists (skip regeneration)
+		// 0. A day that has already been written is not rewritten. The check is for the
+		// row, not for `commit_count > 0`: a day whose work was a merged pull request
+		// has no commits of its own and is still a finished day.
 		const existing = await ctx.db
 			.prepare(
 				`SELECT 1 FROM timeline_summaries
-       WHERE tenant_id = ? AND summary_date = ? AND commit_count > 0`,
+       WHERE tenant_id = ? AND summary_date = ?`,
 			)
 			.bind(config.tenantId, targetDate)
 			.first();
@@ -130,7 +123,7 @@ export async function processTenantTimeline(
 			};
 		}
 
-		// 1. Get API tokens from envelope encryption (tenant_secrets only)
+		// 1. The tenant's own keys, from envelope encryption (tenant_secrets only)
 		const secrets = await createSecretsManager({ DB: env.DB, GROVE_KEK: env.GROVE_KEK });
 
 		const [githubToken, openrouterKey] = await Promise.all([
@@ -148,12 +141,63 @@ export async function processTenantTimeline(
 			);
 		}
 
-		// 2. Fetch GitHub commits
-		console.log(`${logPrefix} Fetching commits for ${targetDate}...`);
-		const commits = await fetchGitHubCommits(config, githubToken, targetDate, ctx.db);
+		// 2. The model, through the Lumen service binding — the same pipeline the
+		// nightly run has always used: PII scrub, quota, fallback.
+		const model = createLumenModelSlot({
+			// The binding answers the request; the URL is what the slot builds the path
+			// onto, so it needs a base even though the binding does the routing.
+			baseUrl: "https://grove-lumen",
+			fetcher: env.LUMEN,
+			apiKey: env.LUMEN_API_KEY,
+			tenantId: config.tenantId,
+			tenantApiKey: openrouterKey,
+			model: config.openrouterModel,
+		});
 
-		if (commits.length === 0) {
-			console.log(`${logPrefix} No commits for ${targetDate}, skipping`);
+		// 3. The day. Lyra retries a failed model call itself, which is why the worker
+		// no longer wraps the provider in its own retry loop.
+		console.log(`${logPrefix} Writing ${targetDate} with ${config.openrouterModel}...`);
+		const record = d1DayRun(env.CURIO_DB, config.tenantId);
+		const generated = await generateDay(
+			{
+				tenantId: config.tenantId,
+				date: targetDate,
+				timezone: config.timezone,
+				githubUsername: config.githubUsername,
+				githubToken,
+				include: config.reposInclude,
+				exclude: config.reposExclude,
+				ownerName: config.ownerName,
+				persona: resolvePersona({
+					preset: config.voicePreset,
+					custom:
+						config.voicePreset === "custom"
+							? {
+									systemPrompt: config.customSystemPrompt ?? undefined,
+									summaryInstructions: config.customSummaryInstructions ?? undefined,
+									gutterStyle: config.customGutterStyle ?? undefined,
+								}
+							: null,
+				}),
+			},
+			{
+				store: record.store,
+				storage: record.storage,
+				pastDays: record.pastDays,
+				model,
+				modelName: config.openrouterModel,
+				// Follow it in `wrangler tail`. A run that does not finish reaches Pulse
+				// below, where errors are already looked at.
+				onEvent: createRunLogger({ tenantId: config.tenantId, date: targetDate }),
+			},
+		);
+
+		for (const warning of generated.warnings) {
+			console.warn(`${logPrefix} ${warning}`);
+		}
+
+		if (generated.status === "empty") {
+			console.log(`${logPrefix} No activity for ${targetDate}, nothing to write`);
 			return {
 				success: true,
 				tenantId: config.tenantId,
@@ -162,248 +206,56 @@ export async function processTenantTimeline(
 			};
 		}
 
-		console.log(`${logPrefix} Found ${commits.length} commits`);
-
-		// 3. Enrich commits with stats
-		await fetchCommitStats(commits, config.githubUsername, githubToken);
-
-		// 4. Get historical context
-		const repos = [...new Set(commits.map((c) => c.repo))];
-		const historicalContext = await getHistoricalContext(ctx.db, config.tenantId, targetDate);
-
-		// Pre-detect task type for continuation detection
-		const commitText = commits.map((c) => c.message).join(" ");
-		const preDetectedTask = detectTaskFromText(commitText);
-
-		// Check for multi-day continuation
-		const continuation = detectContinuation(historicalContext, preDetectedTask);
-
-		// Build prompt context
-		let promptContext: {
-			historicalContext?: string;
-			continuationNote?: string;
-		} | null = null;
-		if (historicalContext.length > 0 || continuation) {
-			promptContext = {
-				historicalContext: formatHistoricalContextForPrompt(historicalContext),
-				continuationNote: formatContinuationForPrompt(continuation),
-			};
+		if (generated.status === "failed") {
+			// A failed run has no page worth storing, and a stored page would stop the
+			// next run from trying again. The catch below reports it to Pulse.
+			throw new Error(generated.error?.message ?? "the run ended failed");
 		}
 
-		console.log(
-			`${logPrefix} Context: task=${preDetectedTask || "none"}, continuation=${continuation?.startDate || "none"}, history=${historicalContext.length} days`,
-		);
+		if (generated.status === "parked") {
+			// Parked means a limit was reached, not that the page is worthless, so the
+			// page is stored — but it is a night worth seeing, so it goes to Pulse.
+			await reportRunOutcome(env, {
+				tenantId: config.tenantId,
+				date: targetDate,
+				runId: generated.runId,
+				status: generated.status,
+				turns: generated.turns,
+				cost: generated.usage.cost?.amount ?? 0,
+				error: generated.error?.message ?? null,
+				warnings: generated.warnings,
+			});
+		}
 
-		// 5. Build voiced prompt
-		const customConfig: CustomVoiceConfig | null =
-			config.voicePreset === "custom"
-				? {
-						systemPrompt: config.customSystemPrompt ?? undefined,
-						summaryInstructions: config.customSummaryInstructions ?? undefined,
-						gutterStyle: config.customGutterStyle ?? undefined,
-					}
-				: null;
-
-		const { systemPrompt, userPrompt } = buildVoicedPrompt(
-			config.voicePreset,
-			commits,
-			targetDate,
-			config.ownerName ?? "the developer",
-			customConfig,
-			promptContext,
-		);
-
-		// 6. Call Lumen (via service binding — full pipeline: PII scrub, quota, fallback)
-		console.log(`${logPrefix} Calling Lumen (${config.openrouterModel})...`);
-		const lumen = new RemoteLumenClient({
-			baseUrl: "https://grove-lumen",
-			apiKey: env.LUMEN_API_KEY,
-			fetcher: env.LUMEN,
+		// 4. Store the day where the site already reads it: the summary, its heatmap
+		// row and the usage row, in one batch.
+		await writeDaySummary(env.CURIO_DB, {
+			tenantId: config.tenantId,
+			date: targetDate,
+			day: generated.day,
+			page: generated.page,
+			// The model that answered, not the one that was asked: Lumen's fallback
+			// chain can move a turn, and a day charged to the wrong model is a lie
+			// the usage table keeps forever.
+			model: generated.model ?? config.openrouterModel,
+			voice: config.voicePreset,
+			usage: {
+				inputTokens: generated.usage.inputTokens,
+				outputTokens: generated.usage.outputTokens,
+				cost: generated.usage.cost?.amount ?? 0,
+			},
 		});
 
-		// A cron run only gets one shot — there's no user sitting there to hit
-		// "retry" if Lumen's whole fallback chain trips on a transient network
-		// blip. Retrying the entire chain (not just one model) absorbs that.
-		const maxTokens = SUMMARY_MAX_OUTPUT_TOKENS;
-		const aiResult = await withRetry(
-			() =>
-				lumen.run({
-					task: "summary",
-					input: [
-						{ role: "system", content: systemPrompt },
-						{ role: "user", content: userPrompt },
-					],
-					tenant: config.tenantId,
-					options: {
-						model: config.openrouterModel || DEFAULT_OPENROUTER_MODEL,
-						tenantApiKey: openrouterKey,
-						// Shared with aspen's manual generate, next to DETAILED_BUDGET in
-						// libs/curios so the ceiling and the word budget that keeps it
-						// honest live in one place. Raising this alone never fixed a
-						// truncation — 2026-11-13 pinned exactly 8192 and still got cut
-						// off mid-JSON — and it has nothing to do with Lumen's *input*
-						// wall, which is a separate limit (see GH #1703).
-						maxTokens,
-						temperature: 0.7,
-					},
-				}),
-			{ attempts: 3, delayMs: 3000, logPrefix },
-		);
-
-		// 7. Parse AI response
-		//
-		// A truncated response is not a summary. parseAIResponse() hands back a
-		// generic fallback object on JSON.parse failure, and storing that used to
-		// happen silently: the row was written with the real commit_count, so the
-		// date looked generated and every later run skipped it. Fail loudly
-		// instead — Pulse records it, no row is written, and the retry can happen.
-		if (aiResult.usage.output >= maxTokens) {
-			throw new Error(
-				`AI response hit the ${maxTokens}-token ceiling (model=${aiResult.model}, output=${aiResult.usage.output}) and was truncated mid-JSON`,
-			);
-		}
-
-		const parsed = parseAIResponse(aiResult.content);
-
-		if (!parsed.success) {
-			throw new Error(
-				`AI response was not valid JSON (model=${aiResult.model}, output=${aiResult.usage.output} tokens, ${aiResult.content.length} chars)`,
-			);
-		}
-
-		// 8. Build context data for storage
-		const contextData = buildSummaryContextData(
-			{ brief: parsed.brief, detailed: parsed.detailed },
-			commits,
-			targetDate,
-			historicalContext,
-			preDetectedTask,
-		);
-
-		// 9. Calculate stats
-		const totalAdditions = commits.reduce((sum, c) => sum + (c.additions ?? 0), 0);
-		const totalDeletions = commits.reduce((sum, c) => sum + (c.deletions ?? 0), 0);
-
-		// 10. Store to database (parallel writes for performance)
-		const summaryId = `${config.tenantId}-${targetDate}`;
-
-		await Promise.all([
-			// Store summary (curio table)
-			ctx.db
-				.prepare(
-					`INSERT INTO timeline_summaries (
-          id,
-          tenant_id,
-          summary_date,
-          brief_summary,
-          detailed_timeline,
-          gutter_content,
-          commit_count,
-          repos_active,
-          total_additions,
-          total_deletions,
-          ai_model,
-          voice_preset,
-          context_brief,
-          detected_focus,
-          continuation_of,
-          focus_streak,
-          created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, strftime('%s', 'now'))
-        ON CONFLICT(tenant_id, summary_date) DO UPDATE SET
-          brief_summary = excluded.brief_summary,
-          detailed_timeline = excluded.detailed_timeline,
-          gutter_content = excluded.gutter_content,
-          commit_count = excluded.commit_count,
-          repos_active = excluded.repos_active,
-          total_additions = excluded.total_additions,
-          total_deletions = excluded.total_deletions,
-          ai_model = excluded.ai_model,
-          voice_preset = excluded.voice_preset,
-          context_brief = excluded.context_brief,
-          detected_focus = excluded.detected_focus,
-          continuation_of = excluded.continuation_of,
-          focus_streak = excluded.focus_streak,
-          created_at = strftime('%s', 'now')`,
-				)
-				.bind(
-					summaryId,
-					config.tenantId,
-					targetDate,
-					parsed.brief,
-					parsed.detailed,
-					JSON.stringify(parsed.gutter),
-					commits.length,
-					JSON.stringify(repos),
-					totalAdditions,
-					totalDeletions,
-					aiResult.model,
-					config.voicePreset,
-					JSON.stringify(contextData.contextBrief),
-					contextData.detectedFocus ? JSON.stringify(contextData.detectedFocus) : null,
-					contextData.continuationOf,
-					contextData.focusStreak,
-				)
-				.run(),
-
-			// Update activity table (curio table)
-			ctx.db
-				.prepare(
-					`INSERT INTO timeline_activity (
-          tenant_id,
-          activity_date,
-          commit_count,
-          repos_active,
-          lines_added,
-          lines_deleted
-        ) VALUES (?, ?, ?, ?, ?, ?)
-        ON CONFLICT(tenant_id, activity_date) DO UPDATE SET
-          commit_count = excluded.commit_count,
-          repos_active = excluded.repos_active,
-          lines_added = excluded.lines_added,
-          lines_deleted = excluded.lines_deleted`,
-				)
-				.bind(
-					config.tenantId,
-					targetDate,
-					commits.length,
-					JSON.stringify(repos),
-					totalAdditions,
-					totalDeletions,
-				)
-				.run(),
-
-			// Log AI usage (curio table)
-			ctx.db
-				.prepare(
-					`INSERT INTO timeline_ai_usage (
-          tenant_id,
-          used_at,
-          model,
-          input_tokens,
-          output_tokens,
-          cost_usd
-        ) VALUES (?, strftime('%s', 'now'), ?, ?, ?, ?)`,
-				)
-				.bind(
-					config.tenantId,
-					aiResult.model,
-					aiResult.usage.input,
-					aiResult.usage.output,
-					aiResult.usage.cost,
-				)
-				.run(),
-		]);
-
 		console.log(
-			`${logPrefix} Generated summary: ${commits.length} commits, ${totalAdditions}+ ${totalDeletions}-`,
+			`${logPrefix} Wrote ${targetDate}: ${generated.day.commits.length} commits, ` +
+				`${generated.turns} turns, $${(generated.usage.cost?.amount ?? 0).toFixed(4)}`,
 		);
 
 		return {
 			success: true,
 			tenantId: config.tenantId,
 			date: targetDate,
-			commitCount: commits.length,
+			commitCount: generated.day.commits.length,
 		};
 	} catch (err) {
 		const errorMessage = err instanceof Error ? err.message : String(err);
@@ -431,34 +283,6 @@ export async function processTenantTimeline(
 			error: errorMessage,
 		};
 	}
-}
-
-/**
- * Retry a fallible async operation with a fixed delay between attempts.
- * Used for the Lumen call, whose own internal fallback chain can still trip
- * entirely on a transient network blip — a cron run gets one shot, with no
- * user around to manually retry.
- */
-async function withRetry<T>(
-	fn: () => Promise<T>,
-	options: { attempts: number; delayMs: number; logPrefix: string },
-): Promise<T> {
-	let lastError: unknown;
-	for (let attempt = 1; attempt <= options.attempts; attempt++) {
-		try {
-			return await fn();
-		} catch (err) {
-			lastError = err;
-			if (attempt < options.attempts) {
-				console.warn(
-					`${options.logPrefix} Attempt ${attempt}/${options.attempts} failed, retrying in ${options.delayMs}ms:`,
-					err instanceof Error ? err.message : String(err),
-				);
-				await new Promise((resolve) => setTimeout(resolve, options.delayMs));
-			}
-		}
-	}
-	throw lastError;
 }
 
 // =============================================================================
