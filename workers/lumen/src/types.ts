@@ -6,6 +6,7 @@
  */
 
 import type { GroveContext } from "@autumnsgrove/infra";
+import { MAX_REQUEST_MESSAGES } from "@autumnsgrove/lattice/ai/lumen/pipeline/preprocessor";
 import type { LumenMessage } from "@autumnsgrove/lattice/ai/lumen/types";
 import { z } from "zod";
 
@@ -134,15 +135,13 @@ const ToolChoiceSchema = z.union([
 /**
  * The most messages one request may carry.
  *
- * An agent loop grows by tool calls — one assistant message and one result per call —
- * so a run with a tool per line of work reaches a few hundred messages long before it
- * is anywhere near a model's context window. The old cap of 100 was a bare number with
- * no reason recorded, and it forced the timeline's recipe to guess a small compaction
- * window as a proxy for it (a guess that mis-fired twice). The bound stays because an
- * unbounded array is a memory promise nobody can keep; 400 is a shape a real run can
- * reach without being a denial-of-service.
+ * Re-exported from the engine rather than declared here. It was 400 in this file
+ * and still 100 in the pipeline behind it, so the wire schema accepted a
+ * conversation the pipeline then refused with `INVALID_INPUT` — a 300-message
+ * test passed because the client was mocked, and the cap that actually refused
+ * the request was invisible to it (#1817).
  */
-export const MAX_REQUEST_MESSAGES = 400;
+export { MAX_REQUEST_MESSAGES };
 
 /** POST /inference request body */
 export const InferenceRequestSchema = z.object({

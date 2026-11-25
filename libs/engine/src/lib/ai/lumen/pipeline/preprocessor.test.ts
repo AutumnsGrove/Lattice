@@ -7,6 +7,7 @@
 
 import { describe, it, expect } from "vitest";
 import {
+	MAX_REQUEST_MESSAGES,
 	scrubPii,
 	scrubMessages,
 	validateRequest,
@@ -308,13 +309,35 @@ describe("Request Validation", () => {
 		);
 	});
 
+	it("should accept a busy agent conversation", () => {
+		// A tool call is two messages (the call and its result), so 300 messages is
+		// ~150 tool calls: an ordinary day for the timeline recipe, and refused by the
+		// cap of 100 that this check carried until #1817. The point of the number is
+		// that it is far above what a context window reaches first.
+		const busyAgentRun = Array(300)
+			.fill(null)
+			.map(() => ({ role: "user" as const, content: "test" }));
+
+		expect(() => validateRequest({ task: "agent", input: busyAgentRun })).not.toThrow();
+	});
+
 	it("should reject too many messages", () => {
-		const tooManyMessages = Array(101)
+		const tooManyMessages = Array(MAX_REQUEST_MESSAGES + 1)
 			.fill(null)
 			.map(() => ({ role: "user" as const, content: "test" }));
 
 		expect(() => validateRequest({ task: "chat", input: tooManyMessages })).toThrow(
 			"Too many messages",
+		);
+	});
+
+	it("names the cap it enforced, so a client can act on it", () => {
+		const tooManyMessages = Array(MAX_REQUEST_MESSAGES + 1)
+			.fill(null)
+			.map(() => ({ role: "user" as const, content: "test" }));
+
+		expect(() => validateRequest({ task: "chat", input: tooManyMessages })).toThrow(
+			`Maximum: ${MAX_REQUEST_MESSAGES}`,
 		);
 	});
 });

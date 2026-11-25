@@ -24,6 +24,16 @@ export default defineConfig({
 	// package.json "exports" for workspace packages in the worker pool).
 	resolve: {
 		alias: {
+			// The worker's wire schema imports `MAX_REQUEST_MESSAGES` from the engine so
+			// the number has one home (#1817). The narrow module, not the barrel: the
+			// barrel reaches `client.ts`, which imports `$lib/server/encryption.js` and
+			// cannot load here. Without the alias the import resolves to a `dist` that is
+			// stale whenever the engine has not been rebuilt, and the constant arrived
+			// undefined — zod then threw inside `safeParse` and every request test failed.
+			"@autumnsgrove/lattice/ai/lumen/pipeline/preprocessor": path.join(
+				engineSrc,
+				"ai/lumen/pipeline/preprocessor.ts",
+			),
 			"@autumnsgrove/lattice/platform/threshold/hono": path.join(
 				engineSrc,
 				"platform/threshold/adapters/hono.ts",
