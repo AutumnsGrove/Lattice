@@ -207,6 +207,7 @@ export {
 // =============================================================================
 
 export {
+	MAX_REQUEST_MESSAGES,
 	scrubPii,
 	scrubMessages,
 	validateRequest,

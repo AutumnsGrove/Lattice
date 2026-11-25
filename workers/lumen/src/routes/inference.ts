@@ -10,7 +10,12 @@
 
 import { Hono } from "hono";
 import type { Env, LumenWorkerResponse } from "../types";
-import { InferenceRequestSchema, toLumenMessages, toWireUsage } from "../types";
+import {
+	InferenceRequestSchema,
+	MAX_REQUEST_MESSAGES,
+	toLumenMessages,
+	toWireUsage,
+} from "../types";
 import type { AuthVariables } from "../auth/middleware";
 import { createLumenClientForWorker } from "../lib/client-factory";
 import { buildErrorResponse } from "../lib/errors";
@@ -93,7 +98,13 @@ inference.post("/", async (c) => {
 				latencyMs: Date.now() - startTime,
 			},
 		};
-		return c.json(response);
+		// The cap is a fact about this endpoint, so it goes on the answer rather than
+		// in a README (#1817). A client loop that reads it can size its own compaction
+		// from the protocol instead of guessing a number, discovering the wall in
+		// production, and mistaking it for a model limit.
+		return c.json(response, 200, {
+			"X-Lumen-Max-Messages": String(MAX_REQUEST_MESSAGES),
+		});
 	} catch (err) {
 		const { body, status } = buildErrorResponse(err, req.task, startTime);
 		return c.json(body, status as 500);
