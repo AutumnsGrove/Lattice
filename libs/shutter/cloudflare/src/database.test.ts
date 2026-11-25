@@ -135,8 +135,11 @@ describe("database module", () => {
 
 			const bindCalls = db._stmt.bind.mock.calls;
 			const lastBindCall = bindCalls[bindCalls.length - 1];
-			// New count should be 3
-			expect(lastBindCall[0]).toContain(3);
+			// The UPDATE binds (last_seen, detection_count, types, avg, max, domain),
+			// so the count is the second value. This asserted on `[0]` — the ISO
+			// timestamp — and passed only on the clock readings that happened to
+			// contain a "3", which is how it failed on 2026-11-25T18:29Z.
+			expect(lastBindCall[1]).toBe(3);
 		});
 
 		it("adds new injection type to array", async () => {

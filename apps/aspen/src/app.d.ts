@@ -133,6 +133,12 @@ declare global {
 				// Lumen AI Gateway (unified AI inference)
 				OPENROUTER_API_KEY?: string;
 
+				/** Lumen service binding - the timeline recipe's model slot posts here */
+				LUMEN?: Fetcher;
+
+				/** The caller key Lumen accepts (X-API-Key), never a provider's key */
+				LUMEN_API_KEY?: string;
+
 				// The Clearing (Status Page) API
 				CLEARING_API_URL?: string;
 				CLEARING_API_KEY?: string;

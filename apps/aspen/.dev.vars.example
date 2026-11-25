@@ -25,3 +25,8 @@ GROVE_KEK=your_64_character_hex_key_here
 
 # Resend API key (for email features — optional for most local dev)
 # RESEND_API_KEY=re_your_resend_key_here
+
+# Lumen caller key (timeline day generation posts to the Lumen worker)
+# Same value as LUMEN_API_KEY in workers/lumen/.dev.vars — the dev stack runs
+# Lumen on :8788, and the LUMEN service binding in wrangler.toml finds it there.
+LUMEN_API_KEY=copy_from_workers_lumen_dev_vars
