@@ -108,6 +108,16 @@ service = "groveauth"
 binding = "ZEPHYR"
 service = "grove-zephyr"
 
+# =============================================================================
+# Lumen Service Binding (AI inference - timeline day generation)
+# =============================================================================
+# The timeline curio's recipe drives a tool loop through Lyra, and Lyra's only
+# model slot is Lumen's `/inference` contract. Reaching it through the binding
+# (rather than a public URL) keeps the request inside the account.
+[[services]]
+binding = "LUMEN"
+service = "grove-lumen"
+
 # Pulse Collector Service Binding (product observability)
 [[services]]
 binding = "PULSE_COLLECTOR"
@@ -224,6 +234,10 @@ service = "groveauth"
 [[env.beta.services]]
 binding = "ZEPHYR"
 service = "grove-zephyr"
+
+[[env.beta.services]]
+binding = "LUMEN"
+service = "grove-lumen"
 
 [[env.beta.services]]
 binding = "PULSE_COLLECTOR"
