@@ -15,7 +15,8 @@
  */
 
 /**
- * How long a page may run before the tools refuse to grow it.
+ * How long a page may run before the tools refuse to grow it, for a day that only
+ * touched one repo.
  *
  * 800 was the middle of the range chosen for the comparison, and the 2026-11-21 run
  * showed the squeeze: 100 commits, 19 pull requests and 21 issues across five repos
@@ -26,6 +27,30 @@
  * recipe both read it and neither owns it.
  */
 export const DEFAULT_PAGE_WORDS = 1_100;
+
+/** What each repo past the first adds to the page's allowance. */
+export const PAGE_WORDS_PER_REPO = 150;
+
+/** A day touching thirty repos is still one page, not an essay. */
+export const PAGE_WORDS_CEILING = 2_000;
+
+/**
+ * The page's allowance for a day of this size.
+ *
+ * A flat 1,100 was wrong in a way only a big day shows: on 2026-11-22 (261 commits,
+ * nine repos) the model wrote 1,078 words, then spent half its forty steps fighting
+ * the budget — add a line, too long, remove another, try again — and parked with the
+ * day's last repo still unwritten. Thirty lines across nine repos do not fit in
+ * 1,100 words, and no amount of merging makes them.
+ *
+ * So the allowance follows the work: one repo's page is still 1,100, each further
+ * repo adds 150, and a day that touched everything in the forest stops at 2,000
+ * rather than turning into a report.
+ */
+export function pageWordsForDay(repoCount: number): number {
+	const extras = Math.max(0, Math.floor(repoCount) - 1);
+	return Math.min(DEFAULT_PAGE_WORDS + extras * PAGE_WORDS_PER_REPO, PAGE_WORDS_CEILING);
+}
 
 /** The professional preset's voice, used when the caller names none. */
 export const DEFAULT_PERSONA = `You write daily development summaries for a personal coding journal.

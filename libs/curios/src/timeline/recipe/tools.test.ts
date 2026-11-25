@@ -243,6 +243,33 @@ describe("fitting the page to its budget", () => {
 		expect(refused.state.page.projects[0]?.lines).toHaveLength(2);
 	});
 
+	it("lets a nine-repo day write a page a one-repo day could not", async () => {
+		// 1,100 words was the whole allowance when 2026-11-22 parked: nine repos, and
+		// the model spent its steps trimming instead of writing. The budget now follows
+		// the day, and this is the same page allowed on both.
+		const reader = fakeReader();
+		const quiet = createTimelineRecipe({ reader, repos: ["Lattice"] });
+		const busy = createTimelineRecipe({
+			reader,
+			repos: ["a", "b", "c", "d", "e", "f", "g", "h", "Lattice"],
+		});
+
+		const page = "word ".repeat(300).trim();
+		let busyState = await callTool(busy, startState(busy), "start_project", { repo: "Lattice" });
+		let quietState = await callTool(quiet, startState(quiet), "start_project", { repo: "Lattice" });
+
+		for (const [index, cite] of ["c1", "c2", "pr1", "i1"].entries()) {
+			const args = { project: "Lattice", text: page, cites: [cite] };
+			busyState = await callTool(busy, busyState.state, "add_line", args, `busy-${index}`);
+			quietState = await callTool(quiet, quietState.state, "add_line", args, `quiet-${index}`);
+		}
+
+		// 1,200 words: inside the nine-repo allowance, past the one-repo one.
+		expect(busyState.outcome.isError).toBe(false);
+		expect(quietState.outcome.isError).toBe(true);
+		expect(quietState.outcome.content).toContain("past the 1100-word budget");
+	});
+
 	it("lets a too-long line be rewritten shorter", async () => {
 		// A page that is inside the budget, whose line can still grow past it. The
 		// per-line length cap is 2,000 characters, so the budget here is what an edit
