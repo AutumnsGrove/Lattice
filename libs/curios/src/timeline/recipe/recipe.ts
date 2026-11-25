@@ -27,7 +27,7 @@ import { mintDayHandles } from "../day/handles";
 import { renderDay } from "../day/render";
 import type { TimelineDay } from "../day/types";
 import type { GitHubReader } from "./github";
-import { buildTimelineInstructions, DEFAULT_PAGE_WORDS, pageWordsForDay } from "./instructions";
+import { buildTimelineInstructions, pageWordsForDay } from "./instructions";
 import { emptyPage, type TimelineState } from "./state";
 import { createTimelineTools, type PastDays } from "./tools";
 
