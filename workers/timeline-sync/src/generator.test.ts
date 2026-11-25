@@ -149,6 +149,7 @@ function generated(overrides: Record<string, unknown> = {}) {
 		day: DAY,
 		status: "done",
 		page: PAGE,
+		model: "deepseek/deepseek-v4.1-flash-1017",
 		turns: 14,
 		usage: { inputTokens: 169_000, outputTokens: 13_000, cost: { amount: 0.0076 } },
 		warnings: [],
@@ -262,6 +263,31 @@ describe("processTenantTimeline", () => {
 			usage: { inputTokens: 169_000, outputTokens: 13_000, cost: 0.0076 },
 		});
 		expect(result).toMatchObject({ success: true, commitCount: 1 });
+	});
+
+	it("charges the day to the model that answered, not the one it asked", async () => {
+		// A fallback turn is still a bill. The usage row is the only place the
+		// timeline records one, so it has to name the model that wrote the page.
+		generateDayMock.mockResolvedValue(generated({ model: "anthropic/claude-haiku-fallback" }));
+		await processTenantTimeline(config(), "2026-11-21", env(), ctx() as never);
+
+		expect(writeDaySummaryMock).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({
+				model: "anthropic/claude-haiku-fallback",
+				usage: expect.objectContaining({ cost: 0.0076 }),
+			}),
+		);
+	});
+
+	it("falls back to the configured model when the run could not say", async () => {
+		generateDayMock.mockResolvedValue(generated({ model: null }));
+		await processTenantTimeline(config(), "2026-11-21", env(), ctx() as never);
+
+		expect(writeDaySummaryMock).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ model: "deepseek/deepseek-v4.1-flash-1017" }),
+		);
 	});
 
 	it("writes nothing for a day with no activity", async () => {

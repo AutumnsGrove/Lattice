@@ -180,6 +180,27 @@ describe("generateDay", () => {
 		expect(result.status).toBe("done");
 	});
 
+	it("reports the model that answered, not the one that was asked for", async () => {
+		// Lumen's fallback chain can answer a turn with a model nobody configured.
+		// The page is then attributed to the fallback, because that is who charged.
+		const recorder = recordingStore();
+		const result = await generateDay(
+			INPUT,
+			deps(recorder.store, WRITE_THE_DAY, {
+				model: scriptedModel(WRITE_THE_DAY, {
+					clock: fakeClock(),
+					model: "deepseek/deepseek-v4.1-flash-1017",
+				}),
+				modelName: "deepseek/deepseek-v4.1-flash-0719",
+			}),
+		);
+
+		expect(result.model).toBe("deepseek/deepseek-v4.1-flash-1017");
+		// The record still says what the run asked for: the request is a fact, and
+		// the answer belongs to the reply.
+		expect(recorder.started[0]?.model).toBe("deepseek/deepseek-v4.1-flash-0719");
+	});
+
 	it("writes no run at all for a day with nothing on it", async () => {
 		const recorder = recordingStore();
 		const result = await generateDay(

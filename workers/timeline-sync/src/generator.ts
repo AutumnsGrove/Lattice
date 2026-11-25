@@ -234,7 +234,10 @@ export async function processTenantTimeline(
 			date: targetDate,
 			day: generated.day,
 			page: generated.page,
-			model: config.openrouterModel,
+			// The model that answered, not the one that was asked: Lumen's fallback
+			// chain can move a turn, and a day charged to the wrong model is a lie
+			// the usage table keeps forever.
+			model: generated.model ?? config.openrouterModel,
 			voice: config.voicePreset,
 			usage: {
 				inputTokens: generated.usage.inputTokens,

@@ -32,7 +32,7 @@ export interface DaySummaryInput {
 	day: TimelineDay;
 	/** The serialized page: the headline, the markdown, the vines. */
 	page: SerializedPage;
-	/** The model the day was asked for. */
+	/** The model that answered the day, which a fallback can change. */
 	model: string;
 	/** The tenant's voice preset id, as stored on the config row. */
 	voice: string;
