@@ -1,327 +1,342 @@
 /**
- * Tests for processTenantTimeline's resilience behavior
+ * The nightly run, after the cutover (#1798, slice 5).
  *
- * Covers:
- * - Retry: the Lumen call gets retried on failure, not given up on immediately
- * - Retry: succeeds if a later attempt succeeds
- * - Pulse: a failed generation reports to Pulse for durable visibility
- * - Pulse: a successful generation never reports anything
- *
- * Everything upstream of the Lumen call (tokens, GitHub commits, prompt
- * building) is mocked to a fixed happy path — this file is only exercising
- * the retry/observability behavior around the Lumen call itself.
+ * The worker no longer fetches, prompts, parses or stores a day itself — it calls
+ * `generateDay` and then `writeDaySummary`. What is left to test is exactly the
+ * part that is still the worker's: which tenant keys it reads, whether a finished
+ * day is left alone, what a quiet day does, and what happens when the run did not
+ * finish. The page's own content is curios' business and is tested there.
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Env, TenantConfig } from "./config";
 
-const { runMock, emitPulseEventMock, flushPulseMock, initPulseMock, parseMock } = vi.hoisted(
-	() => ({
-		runMock: vi.fn(),
-		emitPulseEventMock: vi.fn(),
-		flushPulseMock: vi.fn().mockResolvedValue(undefined),
-		initPulseMock: vi.fn(),
-		parseMock: vi.fn(),
-	}),
-);
-
-vi.mock("@autumnsgrove/lattice/ai/lumen", () => ({
-	// mockImplementation needs a real (constructible) function, not an arrow
-	// function, since generator.ts calls `new RemoteLumenClient(...)`.
-	RemoteLumenClient: vi.fn().mockImplementation(function (this: { run: typeof runMock }) {
-		this.run = runMock;
+const {
+	generateDayMock,
+	writeDaySummaryMock,
+	reportRunOutcomeMock,
+	createRunLoggerMock,
+	initPulseMock,
+	emitPulseEventMock,
+	flushPulseMock,
+	resolvePersonaMock,
+	createLumenModelSlotMock,
+	safeGetSecretMock,
+	d1DayRunMock,
+} = vi.hoisted(() => ({
+	generateDayMock: vi.fn(),
+	writeDaySummaryMock: vi.fn(),
+	reportRunOutcomeMock: vi.fn().mockResolvedValue(undefined),
+	createRunLoggerMock: vi.fn().mockReturnValue(() => undefined),
+	initPulseMock: vi.fn(),
+	emitPulseEventMock: vi.fn(),
+	flushPulseMock: vi.fn().mockResolvedValue(undefined),
+	resolvePersonaMock: vi.fn().mockReturnValue("write like a person"),
+	createLumenModelSlotMock: vi.fn().mockReturnValue({ name: "slot" }),
+	safeGetSecretMock: vi.fn(),
+	d1DayRunMock: vi.fn().mockReturnValue({
+		store: { name: "store" },
+		storage: () => ({ name: "storage" }),
+		pastDays: { search: async () => [] },
 	}),
 }));
 
+vi.mock("@autumnsgrove/curios/timeline/generate", () => ({ generateDay: generateDayMock }));
+vi.mock("@autumnsgrove/curios/timeline/summary", () => ({
+	writeDaySummary: writeDaySummaryMock,
+}));
+vi.mock("@autumnsgrove/curios/timeline/record", () => ({ d1DayRun: d1DayRunMock }));
+vi.mock("@autumnsgrove/curios/timeline/voices", () => ({ resolvePersona: resolvePersonaMock }));
+vi.mock("@autumnsgrove/lyra-lumen/lumen", () => ({
+	createLumenModelSlot: createLumenModelSlotMock,
+}));
 vi.mock("@autumnsgrove/lattice/pulse", () => ({
 	initPulse: initPulseMock,
 	emitPulseEvent: emitPulseEventMock,
 	flushPulse: flushPulseMock,
 }));
-
 vi.mock("@autumnsgrove/grove-crypto/secrets", () => ({
-	createSecretsManager: vi.fn().mockResolvedValue({
-		safeGetSecret: vi.fn().mockResolvedValue("secret-token"),
-		setSecret: vi.fn().mockResolvedValue(undefined),
-	}),
+	createSecretsManager: vi.fn().mockResolvedValue({ safeGetSecret: safeGetSecretMock }),
+}));
+vi.mock("./run-log", () => ({
+	createRunLogger: createRunLoggerMock,
+	reportRunOutcome: reportRunOutcomeMock,
 }));
 
-vi.mock("./github", () => ({
-	fetchGitHubCommits: vi.fn().mockResolvedValue([
-		{
-			sha: "abc123",
-			repo: "test-repo",
-			message: "Test commit",
-			timestamp: "2026-03-11T10:00:00Z",
-			additions: 5,
-			deletions: 2,
-		},
-	]),
-	fetchCommitStats: vi.fn().mockResolvedValue(undefined),
-}));
-
-vi.mock("./response-parser", () => ({
-	parseAIResponse: parseMock,
-}));
-
-vi.mock("./voices", () => ({
-	buildVoicedPrompt: vi.fn().mockReturnValue({
-		systemPrompt: "system",
-		userPrompt: "user",
-	}),
-}));
-
-vi.mock("./context", () => ({
-	getHistoricalContext: vi.fn().mockResolvedValue([]),
-	detectTaskFromText: vi.fn().mockReturnValue(null),
-	detectContinuation: vi.fn().mockReturnValue(null),
-	formatHistoricalContextForPrompt: vi.fn().mockReturnValue(""),
-	formatContinuationForPrompt: vi.fn().mockReturnValue(""),
-	buildSummaryContextData: vi.fn().mockReturnValue({
-		contextBrief: {},
-		detectedFocus: null,
-		continuationOf: null,
-		focusStreak: 0,
-	}),
-}));
-
-import { SUMMARY_MAX_OUTPUT_TOKENS } from "@autumnsgrove/curios/timeline/voices";
 import { processTenantTimeline } from "./generator";
 
 // =============================================================================
-// Mock Helpers
+// Fixtures
 // =============================================================================
 
-function createMockConfig(overrides: Partial<TenantConfig> = {}): TenantConfig {
+function config(overrides: Partial<TenantConfig> = {}): TenantConfig {
 	return {
 		tenantId: "tenant-1",
-		githubUsername: "testuser",
-		openrouterModel: "anthropic/claude-3.5-haiku",
-		voicePreset: "professional",
+		githubUsername: "AutumnsGrove",
+		openrouterModel: "deepseek/deepseek-v4.1-flash-1017",
+		voicePreset: "casual",
 		customSystemPrompt: null,
 		customSummaryInstructions: null,
 		customGutterStyle: null,
-		reposInclude: null,
+		reposInclude: ["Lattice"],
 		reposExclude: null,
-		timezone: "UTC",
-		ownerName: null,
+		timezone: "America/New_York",
+		ownerName: "Autumn",
 		...overrides,
 	};
 }
 
-function createMockEnv(): Env {
+function env(): Env {
 	return {
 		DB: {} as D1Database,
 		CURIO_DB: {} as D1Database,
 		GROVE_KEK: "a".repeat(64),
-		LUMEN_API_KEY: "test-lumen-api-key",
+		LUMEN_API_KEY: "lumen-key",
 		LUMEN: { fetch: vi.fn() },
 		PULSE: { fetch: vi.fn() },
-		TIMELINE_ADMIN_KEY: "test-admin-key",
+		TIMELINE_ADMIN_KEY: "admin-key",
 	};
 }
 
-function createMockCtx() {
-	const noExistingRow = { first: vi.fn().mockResolvedValue(null) };
+interface CtxOptions {
+	/** A summary row for the day is already there. */
+	exists?: boolean;
+}
+
+function ctx({ exists = false }: CtxOptions = {}) {
 	const stmt = {
 		bind: vi.fn().mockReturnThis(),
-		first: vi.fn().mockResolvedValue(null),
+		first: vi.fn().mockResolvedValue(exists ? { 1: 1 } : null),
 		run: vi.fn().mockResolvedValue({ success: true }),
 		all: vi.fn().mockResolvedValue({ results: [] }),
 	};
-	return { db: { prepare: vi.fn().mockReturnValue(stmt) } } as any;
+	return { db: { prepare: vi.fn().mockReturnValue(stmt) } } as never as {
+		db: { prepare: ReturnType<typeof vi.fn> };
+	};
 }
 
-/**
- * True if any prepared statement wrote a summary row. A written row carries a
- * real commit_count, so the date reads as generated and every later run skips
- * it — the exact shape of the 2026-11-13 bug.
- */
-function writtenSummaryRows(ctx: any): boolean {
-	return ctx.db.prepare.mock.calls.some((call: unknown[]) =>
-		String(call[0]).includes("INSERT INTO timeline_summaries"),
-	);
-}
+const DAY = {
+	date: "2026-11-21",
+	timezone: "America/New_York",
+	githubUsername: "AutumnsGrove",
+	repos: ["Lattice"],
+	commits: [
+		{
+			repo: "Lattice",
+			sha: "a".repeat(40),
+			message: "feat: one",
+			authorDate: "2026-11-21T12:00:00Z",
+			additions: 30,
+			deletions: 4,
+			merge: false,
+		},
+	],
+	pulls: [],
+	issues: [],
+	warnings: [],
+};
 
-const successfulParseResult = {
-	success: true,
-	brief: "Brief summary",
-	detailed: "Detailed timeline",
+const PAGE = {
+	brief: "One fix, one merge.",
+	markdown: "### Lattice\n\n- <!-- anchor:l1 -->the line",
 	gutter: [],
+	continuation: null,
 };
 
-const successfulLumenResult = {
-	content: JSON.stringify({
-		brief: "A day of small fixes and one stubborn parser.",
-		detailed: "## Projects\n\n### Lattice\n- Tightened the response parser",
-		gutter: [{ anchor: "### Lattice", type: "comment", content: "about time" }],
-	}),
-	model: "anthropic/claude-3.5-haiku",
-	usage: { input: 100, output: 50, cost: 0.001 },
-};
+function generated(overrides: Record<string, unknown> = {}) {
+	return {
+		runId: "day_1",
+		day: DAY,
+		status: "done",
+		page: PAGE,
+		turns: 14,
+		usage: { inputTokens: 169_000, outputTokens: 13_000, cost: { amount: 0.0076 } },
+		warnings: [],
+		error: null,
+		...overrides,
+	};
+}
 
-describe("processTenantTimeline resilience", () => {
-	beforeEach(() => {
-		vi.clearAllMocks();
-		parseMock.mockReturnValue(successfulParseResult);
+beforeEach(() => {
+	vi.clearAllMocks();
+	safeGetSecretMock.mockResolvedValue("secret-token");
+	generateDayMock.mockResolvedValue(generated());
+	writeDaySummaryMock.mockResolvedValue(undefined);
+});
+
+// =============================================================================
+// Tests
+// =============================================================================
+
+describe("processTenantTimeline", () => {
+	it("leaves a day that is already written alone", async () => {
+		const c = ctx({ exists: true });
+		const result = await processTenantTimeline(config(), "2026-11-21", env(), c as never);
+
+		expect(result.success).toBe(true);
+		expect(generateDayMock).not.toHaveBeenCalled();
+		expect(writeDaySummaryMock).not.toHaveBeenCalled();
 	});
 
-	describe("retry", () => {
-		it("succeeds without retrying when Lumen succeeds on the first attempt", async () => {
-			runMock.mockResolvedValueOnce(successfulLumenResult);
+	it("asks generateDay for the tenant's own day", async () => {
+		const e = env();
+		const c = ctx();
+		await processTenantTimeline(config(), "2026-11-21", e, c as never);
 
-			const result = await processTenantTimeline(
-				createMockConfig(),
-				"2026-03-11",
-				createMockEnv(),
-				createMockCtx(),
-			);
-
-			expect(result.success).toBe(true);
-			expect(runMock).toHaveBeenCalledTimes(1);
-			expect(emitPulseEventMock).not.toHaveBeenCalled();
+		expect(generateDayMock).toHaveBeenCalledTimes(1);
+		const [input, deps] = generateDayMock.mock.calls[0] as [
+			Record<string, unknown>,
+			Record<string, unknown>,
+		];
+		expect(input).toMatchObject({
+			tenantId: "tenant-1",
+			date: "2026-11-21",
+			timezone: "America/New_York",
+			githubUsername: "AutumnsGrove",
+			githubToken: "secret-token",
+			include: ["Lattice"],
+			exclude: null,
+			ownerName: "Autumn",
+			persona: "write like a person",
 		});
-
-		it("retries and succeeds if a later attempt works", async () => {
-			runMock
-				.mockRejectedValueOnce(new Error("Provider openrouter timed out after 60000ms"))
-				.mockResolvedValueOnce(successfulLumenResult);
-
-			const result = await processTenantTimeline(
-				createMockConfig(),
-				"2026-03-11",
-				createMockEnv(),
-				createMockCtx(),
-			);
-
-			expect(result.success).toBe(true);
-			expect(runMock).toHaveBeenCalledTimes(2);
-			expect(emitPulseEventMock).not.toHaveBeenCalled();
-		}, 10000);
-
-		it("gives up and reports failure after exhausting all retry attempts", async () => {
-			runMock.mockRejectedValue(new Error("Provider openrouter timed out after 60000ms"));
-
-			const result = await processTenantTimeline(
-				createMockConfig(),
-				"2026-03-11",
-				createMockEnv(),
-				createMockCtx(),
-			);
-
-			expect(result.success).toBe(false);
-			expect(result.error).toContain("timed out");
-			// 3 total attempts: 1 initial + 2 retries
-			expect(runMock).toHaveBeenCalledTimes(3);
-		}, 15000);
-	});
-
-	describe("unusable AI responses", () => {
-		it("fails instead of storing the generic fallback on truncated output", async () => {
-			// 2026-11-13: the response pinned exactly maxTokens and got cut off
-			// mid-JSON. It used to be stored as a real summary with the real
-			// commit count, which then blocked every future run for that date.
-			runMock.mockResolvedValue({
-				...successfulLumenResult,
-				content: '{"brief": "Some work happened today. The summary got a bit',
-				usage: { input: 7753, output: SUMMARY_MAX_OUTPUT_TOKENS, cost: 0.015945 },
-			});
-			parseMock.mockReturnValue({ ...successfulParseResult, success: false });
-
-			const ctx = createMockCtx();
-			const result = await processTenantTimeline(
-				createMockConfig(),
-				"2026-11-13",
-				createMockEnv(),
-				ctx,
-			);
-
-			expect(result.success).toBe(false);
-			expect(result.error).toContain("ceiling");
-			expect(emitPulseEventMock).toHaveBeenCalledWith(
-				"error.server",
-				expect.objectContaining({
-					metadata: expect.objectContaining({ date: "2026-11-13" }),
-				}),
-			);
-			// Nothing may be written — a written row would freeze the date.
-			expect(writtenSummaryRows(ctx)).toBe(false);
-		}, 15000);
-
-		it("fails when the response parses to non-JSON under the token ceiling", async () => {
-			runMock.mockResolvedValueOnce({
-				...successfulLumenResult,
-				content: "Sure! Here is your summary",
-			});
-			parseMock.mockReturnValue({ ...successfulParseResult, success: false });
-
-			const ctx = createMockCtx();
-			const result = await processTenantTimeline(
-				createMockConfig(),
-				"2026-11-13",
-				createMockEnv(),
-				ctx,
-			);
-
-			expect(result.success).toBe(false);
-			expect(result.error).toContain("not valid JSON");
-			expect(writtenSummaryRows(ctx)).toBe(false);
-		}, 15000);
-	});
-
-	describe("Pulse reporting", () => {
-		it("reports to Pulse when generation ultimately fails", async () => {
-			runMock.mockRejectedValue(new Error("Provider openrouter timed out after 60000ms"));
-
-			await processTenantTimeline(
-				createMockConfig({ tenantId: "tenant-abc" }),
-				"2026-03-11",
-				createMockEnv(),
-				createMockCtx(),
-			);
-
-			expect(initPulseMock).toHaveBeenCalled();
-			expect(emitPulseEventMock).toHaveBeenCalledWith(
-				"error.server",
-				expect.objectContaining({
-					app: "timeline-sync",
-					tenant_id: "tenant-abc",
-					metadata: expect.objectContaining({
-						date: "2026-03-11",
-						message: expect.stringContaining("timed out"),
-					}),
-				}),
-			);
-			expect(flushPulseMock).toHaveBeenCalled();
-		}, 15000);
-
-		it("never reports to Pulse on success", async () => {
-			runMock.mockResolvedValueOnce(successfulLumenResult);
-
-			await processTenantTimeline(
-				createMockConfig(),
-				"2026-03-11",
-				createMockEnv(),
-				createMockCtx(),
-			);
-
-			expect(emitPulseEventMock).not.toHaveBeenCalled();
-			expect(flushPulseMock).not.toHaveBeenCalled();
+		// The record goes with the day, or `search_past_days` answers nothing.
+		expect(deps).toMatchObject({
+			store: { name: "store" },
+			pastDays: { search: expect.any(Function) },
+			modelName: "deepseek/deepseek-v4.1-flash-1017",
 		});
+		expect(typeof deps.onEvent).toBe("function");
+		// The ID goes to the slot: a slot without one asks Lumen who is calling.
+		expect(createLumenModelSlotMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				tenantId: "tenant-1",
+				tenantApiKey: "secret-token",
+				model: "deepseek/deepseek-v4.1-flash-1017",
+				baseUrl: "https://grove-lumen",
+			}),
+		);
+	});
 
-		it("doesn't let a Pulse reporting failure mask the original error", async () => {
-			runMock.mockRejectedValue(new Error("Provider openrouter timed out after 60000ms"));
-			flushPulseMock.mockRejectedValueOnce(new Error("pulse-collector unreachable"));
+	it("resolves the tenant's voice into the persona the recipe writes with", async () => {
+		await processTenantTimeline(config(), "2026-11-21", env(), ctx() as never);
 
-			const result = await processTenantTimeline(
-				createMockConfig(),
-				"2026-03-11",
-				createMockEnv(),
-				createMockCtx(),
-			);
+		expect(resolvePersonaMock).toHaveBeenCalledWith({ preset: "casual", custom: null });
+	});
 
-			expect(result.success).toBe(false);
-			expect(result.error).toContain("timed out");
-		}, 15000);
+	it("passes a custom voice's own prompts through", async () => {
+		await processTenantTimeline(
+			config({
+				voicePreset: "custom",
+				customSystemPrompt: "write like a lighthouse keeper",
+				customSummaryInstructions: "short lines",
+				customGutterStyle: "dry",
+			}),
+			"2026-11-21",
+			env(),
+			ctx() as never,
+		);
+
+		expect(resolvePersonaMock).toHaveBeenCalledWith({
+			preset: "custom",
+			custom: {
+				systemPrompt: "write like a lighthouse keeper",
+				summaryInstructions: "short lines",
+				gutterStyle: "dry",
+			},
+		});
+	});
+
+	it("writes the day where the site reads it", async () => {
+		const e = env();
+		const c = ctx();
+		const result = await processTenantTimeline(config(), "2026-11-21", e, c as never);
+
+		expect(writeDaySummaryMock).toHaveBeenCalledTimes(1);
+		expect(writeDaySummaryMock).toHaveBeenCalledWith(e.CURIO_DB, {
+			tenantId: "tenant-1",
+			date: "2026-11-21",
+			day: DAY,
+			page: PAGE,
+			model: "deepseek/deepseek-v4.1-flash-1017",
+			voice: "casual",
+			usage: { inputTokens: 169_000, outputTokens: 13_000, cost: 0.0076 },
+		});
+		expect(result).toMatchObject({ success: true, commitCount: 1 });
+	});
+
+	it("writes nothing for a day with no activity", async () => {
+		generateDayMock.mockResolvedValue(
+			generated({ status: "empty", runId: null, turns: 0, page: { ...PAGE, brief: null } }),
+		);
+		const result = await processTenantTimeline(config(), "2026-11-21", env(), ctx() as never);
+
+		expect(result).toMatchObject({ success: true, commitCount: 0 });
+		expect(writeDaySummaryMock).not.toHaveBeenCalled();
+	});
+
+	it("stores a parked run's page but reports it to Pulse", async () => {
+		generateDayMock.mockResolvedValue(
+			generated({
+				status: "parked",
+				error: { code: "step_limit", message: "hit the step limit" },
+			}),
+		);
+		const e = env();
+		const result = await processTenantTimeline(config(), "2026-11-21", e, ctx() as never);
+
+		// A limit is not a loss: the page that exists is worth keeping.
+		expect(writeDaySummaryMock).toHaveBeenCalledTimes(1);
+		expect(reportRunOutcomeMock).toHaveBeenCalledWith(
+			e,
+			expect.objectContaining({ status: "parked", turns: 14, cost: 0.0076 }),
+		);
+		expect(result.success).toBe(true);
+	});
+
+	it("fails without writing a page when the run failed", async () => {
+		generateDayMock.mockResolvedValue(
+			generated({
+				status: "failed",
+				error: { code: "provider_error", message: "provider said no" },
+			}),
+		);
+		const result = await processTenantTimeline(config(), "2026-11-21", env(), ctx() as never);
+
+		expect(writeDaySummaryMock).not.toHaveBeenCalled();
+		expect(result).toMatchObject({ success: false, error: "provider said no" });
+	});
+
+	it("reports a failed night to Pulse", async () => {
+		generateDayMock.mockRejectedValue(new Error("GitHub said 502"));
+		const result = await processTenantTimeline(config(), "2026-11-21", env(), ctx() as never);
+
+		expect(result).toMatchObject({ success: false, error: "GitHub said 502" });
+		expect(emitPulseEventMock).toHaveBeenCalledWith(
+			"error.server",
+			expect.objectContaining({ app: "timeline-sync", tenant_id: "tenant-1" }),
+		);
+		expect(flushPulseMock).toHaveBeenCalled();
+	});
+
+	it("fails the tenant when the GitHub token is missing", async () => {
+		safeGetSecretMock.mockImplementation(async (_tenant: string, key: string) =>
+			key === "timeline_github_token" ? null : "openrouter-key",
+		);
+		const result = await processTenantTimeline(config(), "2026-11-21", env(), ctx() as never);
+
+		expect(result.success).toBe(false);
+		expect(result.error).toContain("timeline_github_token");
+		expect(generateDayMock).not.toHaveBeenCalled();
+	});
+
+	it("doesn't let a Pulse failure mask the original error", async () => {
+		generateDayMock.mockRejectedValue(new Error("the real problem"));
+		emitPulseEventMock.mockImplementation(() => {
+			throw new Error("pulse is down");
+		});
+		const result = await processTenantTimeline(config(), "2026-11-21", env(), ctx() as never);
+
+		expect(result).toMatchObject({ success: false, error: "the real problem" });
+		emitPulseEventMock.mockReset();
 	});
 });

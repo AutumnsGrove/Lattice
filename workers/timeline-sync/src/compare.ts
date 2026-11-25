@@ -18,7 +18,7 @@
 
 import { generateDay } from "@autumnsgrove/curios/timeline/generate";
 import { d1DayRun } from "@autumnsgrove/curios/timeline/record";
-import { buildCustomVoice, getVoice } from "@autumnsgrove/curios/timeline/voices";
+import { resolvePersona } from "@autumnsgrove/curios/timeline/voices";
 import type { TimelineVine } from "@autumnsgrove/curios/timeline/render";
 import { createSecretsManager } from "@autumnsgrove/grove-crypto/secrets";
 import type { GroveContext } from "@autumnsgrove/infra";
@@ -76,17 +76,19 @@ export async function compareDay(
 		model: config.openrouterModel,
 	});
 
-	// The tenant's own voice, so the comparison is like for like. A custom preset's
-	// persona is the prompt they configured; anything unknown falls back to the
-	// professional voice inside `getVoice`.
-	const persona =
-		config.voicePreset === "custom"
-			? buildCustomVoice({
-					systemPrompt: config.customSystemPrompt ?? undefined,
-					summaryInstructions: config.customSummaryInstructions ?? undefined,
-					gutterStyle: config.customGutterStyle ?? undefined,
-				}).persona
-			: getVoice(config.voicePreset).persona;
+	// The tenant's own voice, so the comparison is like for like. This is the same
+	// resolution the nightly run does, so a custom voice means one thing in both.
+	const persona = resolvePersona({
+		preset: config.voicePreset,
+		custom:
+			config.voicePreset === "custom"
+				? {
+						systemPrompt: config.customSystemPrompt ?? undefined,
+						summaryInstructions: config.customSummaryInstructions ?? undefined,
+						gutterStyle: config.customGutterStyle ?? undefined,
+					}
+				: null,
+	});
 
 	const record = d1DayRun(env.CURIO_DB, config.tenantId);
 	const generated = await generateDay(
