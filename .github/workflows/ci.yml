@@ -298,6 +298,14 @@ jobs:
 
       - name: Run linters
         id: lint
+        # `shell: bash` is the fix, not decoration. GitHub's *default* shell on
+        # Linux is `bash -e {0}` — no pipefail — so this step's exit status was
+        # `tee`'s, which is always 0. `steps.lint.outcome` could never be
+        # `failure`, which made the two steps below dead code and reported a red
+        # lint as green on every PR. The `bash` shell is
+        # `bash --noprofile --norc -eo pipefail`, so the pipeline now fails when
+        # the linters do.
+        shell: bash
         run: |
           pnpm lint 2>&1 | tee /tmp/lint-output.txt
         continue-on-error: true
