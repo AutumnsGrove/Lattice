@@ -1,7 +1,9 @@
 # Grove Timeline Sync
 # Automated nightly timeline summary generation for all enabled tenants
 #
-# Cron schedule: Daily at 1 AM UTC (after midnight activity settles)
+# Cron schedule: Daily at 9 AM UTC. Late enough that the previous day has
+# finished in every tenant's own timezone (latest local time is ~22:00 in
+# NZDT), so the date the run asks for is a day that is actually over (#1832).
 # Each tenant generates their own summary using their own OpenRouter API key
 
 name = "grove-timeline-sync"
@@ -12,7 +14,7 @@ compatibility_date = "2025-12-01"
 # Cron Triggers
 # =============================================================================
 [triggers]
-crons = ["0 1 * * *"]  # Daily at 1 AM UTC
+crons = ["0 9 * * *"]  # Daily at 9 AM UTC — see src/date.ts
 
 # =============================================================================
 # D1 Database - Same database as engine
