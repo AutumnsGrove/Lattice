@@ -12,10 +12,13 @@
  *   1. Files that can only be data — docs, tests, migrations, JSON, images —
  *      revalidate their own package. They do not cascade to every consumer,
  *      because no consumer's types can change because a value did.
- *   2. Only changes to genuinely global inputs (the lockfile, the workspace
- *      manifest, the shared tsconfig, the engine's term manifest) invalidate
- *      every package. A data file that happens to live under `scripts/` is not
- *      one of those.
+ *   2. Only changes to genuinely global inputs (the workspace manifest, the
+ *      shared tsconfig, the engine's term manifest) invalidate every package.
+ *      A data file that happens to live under `scripts/` is not one of those.
+ *   3. A lockfile change is only as wide as the importers it touched. Two
+ *      packages gaining a dependency does not revalidate the other twenty-five
+ *      — unless a `packages:`/`snapshots:` entry moved, which is a genuinely
+ *      shared resolution and still invalidates everything (#1795).
  *
  * Usage:
  *   node affected-packages.mjs <base-ref>
@@ -160,10 +163,11 @@ export function buildDependents(packages) {
 // ─── What a changed file means ──────────────────────────────────────
 
 // Changes to these invalidate the whole workspace: they are build inputs for
-// every package, not content for one of them.
+// every package, not content for one of them. `pnpm-lock.yaml` is deliberately
+// absent — it is global only when a shared resolution moved, so it is scoped by
+// importer instead (see `diffLockfile` below).
 const GLOBAL_FILES = new Set([
 	"package.json",
-	"pnpm-lock.yaml",
 	"pnpm-workspace.yaml",
 	"tsconfig.base.json",
 	// libs/engine's `prepackage` step regenerates the term manifest from this
@@ -216,6 +220,88 @@ export function fileToPackage(file, packages) {
 	return match;
 }
 
+// ─── Lockfile scope ─────────────────────────────────────────────────
+
+const LOCKFILE = "pnpm-lock.yaml";
+
+/**
+ * Split a pnpm lockfile into its `importers:` section and everything else.
+ *
+ * Both halves matter and they mean different things: `importers:` records what
+ * each workspace package asked for, so a change inside one entry is scoped to
+ * that package. Anything outside it — `packages:`, `snapshots:`, `settings:`,
+ * `overrides:` — is a resolution every importer shares, which is the only way a
+ * lockfile change is genuinely global (#1795).
+ *
+ * Returns null when the text has no recognisable `importers:` section, which is
+ * the cue for every caller to fall back to "this could be anything".
+ */
+export function splitLockfile(text) {
+	const lines = text.split("\n");
+	const start = lines.findIndex((line) => /^importers:\s*$/.test(line));
+	if (start === -1) return null;
+
+	const importers = new Map();
+	let current = null;
+	let end = lines.length;
+
+	for (let i = start + 1; i < lines.length; i++) {
+		const line = lines[i];
+		if (line.trim() === "") continue;
+		// Back to column 0: the importers section closed (e.g. `packages:`).
+		if (!/^\s/.test(line)) {
+			end = i;
+			break;
+		}
+		// An importer key sits at two-space indent: `  apps/aspen:` — optionally
+		// quoted, and usually followed by a blank line and its nested entries.
+		const key = /^ {2}(?:'([^']+)'|"([^"]+)"|([^:\s][^:]*)):\s*(?:#.*)?$/.exec(line);
+		if (key) {
+			current = (key[1] ?? key[2] ?? key[3]).trim();
+			importers.set(current, []);
+			continue;
+		}
+		if (current) importers.get(current).push(line);
+	}
+
+	if (importers.size === 0) return null;
+
+	// Everything that is not part of an importer entry: before the section,
+	// after it, and the section header itself.
+	const shared = [...lines.slice(0, start), ...lines.slice(end)].join("\n");
+
+	return { importers, shared };
+}
+
+/**
+ * What a lockfile change actually touched.
+ *
+ * `sharedChanged` is the conservative answer: a resolution every package sees
+ * moved, or the file could not be read/parsed, so nothing narrower is safe.
+ * Otherwise `changedImporters` lists the workspace directories whose own
+ * dependency block moved, and the caller cascades from those.
+ */
+export function diffLockfile(before, after) {
+	const oldSide = before == null ? null : splitLockfile(before);
+	const newSide = after == null ? null : splitLockfile(after);
+
+	// Added, deleted, or unrecognisable: assume the worst rather than ship a
+	// broken install with green checks.
+	if (!oldSide || !newSide) return { sharedChanged: true, changedImporters: [] };
+	if (oldSide.shared !== newSide.shared) return { sharedChanged: true, changedImporters: [] };
+
+	const changed = new Set();
+	for (const [dir, body] of newSide.importers) {
+		const previous = oldSide.importers.get(dir);
+		if (!previous || previous.join("\n") !== body.join("\n")) changed.add(dir);
+	}
+	for (const dir of oldSide.importers.keys()) {
+		if (!newSide.importers.has(dir)) changed.add(dir);
+	}
+
+	return { sharedChanged: false, changedImporters: [...changed].sort() };
+}
+
 // ─── Scope flags for path-gating whole jobs ─────────────────────────
 /**
  * Booleans for jobs that are useful only for some kinds of change.
@@ -235,12 +321,12 @@ export function classifyScope(entries) {
 	);
 
 	return {
-		engine: touched(/^libs\/engine\//) || files.some((f) => GLOBAL_FILES.has(f)),
+		engine: touched(/^libs\/engine\//) || files.some((f) => GLOBAL_FILES.has(f) || f === LOCKFILE),
 		ui: touched(/\.(svelte|css)$/),
 		tooling:
 			touched(/^(\.github|tools|scripts)\//) ||
 			touched(/(^|\/)README/) ||
-			files.some((f) => GLOBAL_FILES.has(f)) ||
+			files.some((f) => GLOBAL_FILES.has(f) || f === LOCKFILE) ||
 			structure,
 		structure,
 	};
@@ -251,17 +337,34 @@ export function classifyScope(entries) {
 /**
  * Pure core of the detector: given changed files (and their git status),
  * return the affected set and the matrices CI needs.
+ *
+ * `lockfile` carries the result of `diffLockfile` when the caller could read
+ * both sides. Omitting it while `pnpm-lock.yaml` is in the diff keeps the old,
+ * safe behaviour: everything is affected.
  */
-export function detectAffected({ entries, packages, root = REPO_ROOT }) {
+export function detectAffected({ entries, packages, root = REPO_ROOT, lockfile }) {
 	const files = entries.map((e) => e.path);
+	const lockfileChanged = files.includes(LOCKFILE);
+	const lockfileScoped =
+		lockfileChanged && lockfile && !lockfile.sharedChanged && lockfile.changedImporters;
 
-	const runAll = files.some((f) => GLOBAL_FILES.has(f));
+	// Importers that no longer map onto a package (the root `.` importer, a
+	// package that moved) cannot be scoped to anyone, so they are shared.
+	const unscopable = lockfileScoped && lockfile.changedImporters.some((dir) => !packages.has(dir));
 
-	// Every changed file revalidates the package that owns it.
+	const runAll =
+		files.some((f) => GLOBAL_FILES.has(f)) || (lockfileChanged && (!lockfileScoped || unscopable));
+
+	// Every changed file revalidates the package that owns it. A changed
+	// lockfile importer is a structural change to that package: its own
+	// dependencies moved, so its types can move with them.
 	const directlyChanged = new Set();
 	for (const file of files) {
 		const dir = fileToPackage(file, packages);
 		if (dir) directlyChanged.add(dir);
+	}
+	if (lockfileScoped && !unscopable) {
+		for (const dir of lockfile.changedImporters) directlyChanged.add(dir);
 	}
 
 	// Only structural changes cascade to consumers.
@@ -270,6 +373,9 @@ export function detectAffected({ entries, packages, root = REPO_ROOT }) {
 		if (isContentOnly(file)) continue;
 		const dir = fileToPackage(file, packages);
 		if (dir) cascadeSources.add(dir);
+	}
+	if (lockfileScoped && !unscopable) {
+		for (const dir of lockfile.changedImporters) cascadeSources.add(dir);
 	}
 
 	const dependents = buildDependents(packages);
@@ -367,10 +473,58 @@ export function getChangedEntries(baseRef) {
 
 // ─── CLI ────────────────────────────────────────────────────────────
 
+/** The lockfile as it stood at a ref, or null when it cannot be read. */
+function lockfileAt(ref) {
+	try {
+		return execSync(`git show ${ref}:${LOCKFILE}`, {
+			encoding: "utf8",
+			cwd: REPO_ROOT,
+			maxBuffer: 256 * 1024 * 1024,
+			stdio: ["ignore", "pipe", "ignore"],
+		});
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * Both sides of the lockfile for the diff being measured.
+ *
+ * The three-dot diff `getChangedEntries` uses compares against the merge base,
+ * so the lockfile has to be read from that same commit — reading `baseRef`
+ * would fold in every dependency change `main` picked up since the branch was
+ * cut and widen the scope for no reason.
+ */
+export function readLockfilePair(baseRef) {
+	let mergeBase = baseRef;
+	try {
+		mergeBase = execSync(`git merge-base ${baseRef} HEAD`, {
+			encoding: "utf8",
+			cwd: REPO_ROOT,
+			stdio: ["ignore", "pipe", "ignore"],
+		}).trim();
+	} catch {
+		// Not a commit, or not fetched: `baseRef` itself is the best we have.
+	}
+
+	const path = join(REPO_ROOT, LOCKFILE);
+	return {
+		before: lockfileAt(mergeBase),
+		after: existsSync(path) ? readFileSync(path, "utf8") : null,
+	};
+}
+
 function main() {
 	const baseRef = process.argv[2] || "main";
 	const entries = getChangedEntries(baseRef);
 	const packages = discoverPackages(REPO_ROOT);
+
+	// Only pay for reading a ~1MB lockfile twice when it is actually in the diff.
+	let lockfile;
+	if (entries.some((e) => e.path === LOCKFILE)) {
+		const { before, after } = readLockfilePair(baseRef);
+		lockfile = diffLockfile(before, after);
+	}
 
 	const result =
 		entries.length === 0
@@ -384,7 +538,7 @@ function main() {
 					typecheckMatrix: [],
 					scope: { engine: false, ui: false, tooling: false, structure: false },
 				}
-			: detectAffected({ entries, packages, root: REPO_ROOT });
+			: detectAffected({ entries, packages, root: REPO_ROOT, lockfile });
 
 	console.log(JSON.stringify(result));
 }
