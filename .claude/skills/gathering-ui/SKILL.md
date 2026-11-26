@@ -78,7 +78,7 @@ Dispatch a **sonnet subagent** to design and build the UI. The Chameleon receive
 
 **Handoff to conductor:** File list (every file created/modified), component summary (what was built, glass variants used, seasonal elements).
 
-**Gate check:** Run `gw dev ci --affected --fail-fast` — must compile. If build fails, resume Chameleon.
+**Gate check:** Run the VERIFICATION.md's self-verification protocol — must compile. If build fails, resume Chameleon.
 
 ---
 
@@ -104,7 +104,7 @@ Dispatch a **sonnet subagent** to audit accessibility. The Deer receives ONLY th
 
 **Handoff to conductor:** Accessibility report (violations found, fixes applied, WCAG level achieved), updated file list.
 
-**Gate check:** Run `gw dev ci --affected --fail-fast` — must still compile after a11y fixes.
+**Gate check:** Run the VERIFICATION.md's self-verification protocol — must still compile after a11y fixes.
 
 ---
 
@@ -185,7 +185,7 @@ GATE LOG
   After Deer:      ✅ compiles clean, a11y verified
   Iterations:      [N iterations / none needed]
   Visual:          ✅ Glimpse matrix captured and reviewed
-  Final CI:        ✅ gw dev ci --affected passes
+  Final CI:        ✅ verification protocol clean
 
 ACCESSIBILITY
   Keyboard nav: ✅
