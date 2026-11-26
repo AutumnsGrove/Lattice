@@ -8,21 +8,41 @@
 
 **After making ANY code changes, you MUST verify your work before committing.** Do not commit broken code.
 
+Four steps. They are the same ones CI runs, in the same order, and they name real scripts — not a wrapper, because there is not one (`gw dev` is still a stub; see the note below).
+
 ```bash
-# Step 1: Ensure dependencies are in sync
+# Step 1 — dependencies in sync. Always pnpm: bun install writes bun.lock and
+# the two lockfiles drift.
 pnpm install
 
-# Step 2: Run affected-only CI
-gw dev ci --affected --fail-fast --diagnose
+# Step 2 — ask what this change actually touched. This is the same detector CI
+# uses, so "affected" means one thing in both places, and each entry carries the
+# command that package wants run.
+node .github/scripts/affected-packages.mjs origin/main \
+  | jq '{testMatrix, typecheckMatrix}'
+
+# Step 3 — run those commands, from inside each package. They are the package's
+# own scripts, not a convention imposed from outside.
+cd apps/aspen && pnpm run check
+cd apps/aspen && pnpm test:run
+
+# Step 4 — the one repo-wide gate any file can break, so it always runs.
+pnpm lint
 ```
 
-**When verification fails:** Read diagnostics, fix errors, re-run, repeat until clean, THEN commit.
+Read the output of step 2 before running anything: a change to `libs/engine/src/lib/index.ts` or to a workspace manifest fans out to every package, and that is the detector being honest rather than something to work around. A change to one worker's source usually comes back with one or two entries.
+
+**The pre-push hook does part of this for you, and no more than that.** `scripts/pre-push/validate.mjs` runs the lockfile sync check, deploy manifest drift, a typecheck and a svelte-check for packages whose own directory changed, and a wrangler dry-run when a Cloudflare token is present. It builds shared libs only when their sources moved. That is the mechanical subset — it does not run tests, and it deliberately does not fan out to every consumer. A green hook is not a green step 3.
+
+**When verification fails:** Read the diagnostics, fix, re-run, repeat until clean, THEN commit.
 
 **When to run:** After completing code changes (before commit), after PR review feedback (before push), after multi-file refactoring.
 
 **When to skip:** Documentation-only changes (.md files only), configuration-only changes.
 
 **This is non-negotiable.** Every workflow must end with verification before commit.
+
+> **Why this section names scripts instead of `gw dev ci --affected`.** It used to, and the command never existed: `gw dev --help` says "to be built in Phase 3", and `--affected` was never added. Following the protocol produced `unknown flag: --affected`, and the obvious next move was to guess at what was meant — which is how verification quietly becomes "whatever the agent did instead" (#1794). When `gw dev ci` does land it should read `.github/scripts/affected-packages.mjs` too, so all three agree; until then the protocol and CI share the script directly rather than agreeing by convention.
 
 ---
 
