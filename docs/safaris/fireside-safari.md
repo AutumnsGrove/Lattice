@@ -428,3 +428,110 @@ ceiling than their provider gives them, are a **Lumen setting** — filed as #18
 
 - [ ] session + message tables in the tenant DB
 - [ ] `wisp_requests` gains a tenant column, or is joined through the session
+
+## 3. The Old Trail Map
+
+**Character**: A careful surveyor's notebook that only ever mapped one valley. Every mark in it
+is accurate, and every mark is about a pure function — none of them has ever seen a request, a
+model, or a failure. What it really proves is how much of Fireside's behaviour was decided before
+anyone ran it.
+
+### Safari findings: What exists today
+
+`fireside.test.ts`, 490 lines, **9 describes, 34 tests, zero mocks** — everything it touches is a
+pure function from `fireside.ts`. That is why it survived junk-drawering intact.
+
+- [x] **`hashString`** — deterministic, non-negative, and `""` is exactly `0`
+- [x] **`selectStarterPrompt`** — same user + same day = same prompt; 30 days yield more than one;
+      empty string and unicode do not throw
+- [x] **`estimateTokens`** — 4 chars/token, rounds up, `""` is 0, documented 100-char case
+- [x] **`estimateConversationTokens`** — sums **both** roles (a distinction the draft gate then
+      narrows)
+- [x] **`isConversationTooLong`** — both sides of the 120k boundary
+- [x] **`canDraft`** — the real guardrail, and it is tested properly: empty, wisp-only, two user
+      messages, three messages *without* substance, three messages *with* it, and the one that
+      matters most — **wisp's own words never count toward the gate**
+- [x] **`generateConversationId`** — timestamp prefix is real, 100/concurrent are unique, format
+- [x] **`isValidConversationId`** — the security test of the era: SQL injection, `<script>`,
+      `javascript:`, path traversal, unicode, spaces, wrong separator, all four length bounds
+- [x] **`generateMessageId`** — UUID v4 shape, uniqueness
+- [ ] **Nothing tests the service.** No test that a request to "write it for me" gets redirected,
+      that user text is delimited, that the draft prompt carries `secureUserContent`, that replies
+      are capped at 150 tokens, that the draft's JSON fallback fires, or that the marker is
+      returned. The 272 lines that actually decide what the fire says are untested.
+- [ ] **Nothing tests the route.** 401, 403 from the plan gate, 429 from Threshold, 503 without a
+      key, invalid `action`, malformed body — all unasserted.
+- [ ] **Two of these functions are about to disappear.** Once the server mints session ids
+      (Stop 2, §2), `generateConversationId` and `isValidConversationId` have no caller. Their
+      tests get deleted with them, not ported — and the security instinct behind the regex moves
+      to the route, where the id is now looked up rather than parsed.
+- [ ] **Some assertions are honest about being weak** — *"this could theoretically fail"*,
+      *"we're mainly testing that the function runs without error"*. Fine as written; noted so
+      nobody mistakes them for a guarantee.
+- [ ] **The missing boundary:** exactly 3 user messages and exactly 150 tokens sits between the
+      two `canDraft` cases but is never asserted on its own. One test, one line.
+
+### Design spec (safari-approved)
+
+**Core decision:** the pure suite is good and nearly all of it ports. The tests that never existed
+are the ones that matter now, and they have a shape the repo only just acquired — the
+**happy / bad / sad** suites from #1765, running in the real workerd harness (#1766) against real
+D1, KV and R2.
+
+#### 1. Port the pure suite almost verbatim
+
+`fireside.test.ts` moves with the module. Two edits:
+
+- delete `generateConversationId` / `isValidConversationId` tests
+- add the missing boundary: 3 messages, exactly `MIN_TOKENS_FOR_DRAFT`, `canDraft` → `true`
+
+Rename the describes if the module moves, but keep the tests: they are the only part of this
+feature that has ever been honest about its edges.
+
+#### 2. Assert prompt *properties*, never prompt prose
+
+The reply and draft prompts are the feature, and copy-editing them should not break a suite. So:
+
+- [ ] user text is wrapped in the delimiters, and `secureUserContent` is called around it
+- [ ] the reply turn passes `maxTokens: 150`, temperature `0.7`; the draft `2000` / `0.3`
+- [ ] a prompt containing "write this for me" still carries the redirect rule (assert the rule is
+      present by a stable marker comment in the prompt builder, not by matching a paragraph)
+
+No snapshot of the prompt body. If the words change, the tests should not care — only that the
+constraints travel with them.
+
+#### 3. The suites that never existed (route, in the workers harness)
+
+**happy**
+
+- [ ] start → three turns → draft → accept: a session row, message rows for every turn, a draft,
+      and `fireside_assisted = 1` on the post
+- [ ] a second session for the same tenant gets its own id and does not see the first's messages
+
+**bad**
+
+- [ ] no session → `401`
+- [ ] another tenant's session id → `404`, never `403`
+- [ ] a body carrying a fabricated `conversation` array → **ignored** (history comes from the DB)
+- [ ] malformed body → `400` with the Grove error code
+- [ ] no AI key set → `400` naming Settings → AI (the #1856 message)
+- [ ] plan gate refuses → `403`, fail-open when the gate itself errors
+
+**sad**
+
+- [ ] the model answers with nothing → Lyra retries, then reports (`#1847`'s behaviour, asserted here)
+- [ ] the draft comes back as garbage → fallback content + "formatting may be a bit rough"
+- [ ] Lumen unavailable → `503` with a message a writer can act on, not a stack
+- [ ] a session resumed after a crash mid-turn still has every accepted message
+- [ ] draft requested after two messages → refused with the existing "we're just getting started" copy
+- [ ] compaction fires on a long conversation and the run still finishes (the 32k window)
+
+#### 4. One test for the rule that has no exceptions
+
+- [ ] **the reply path never writes prose**: the turn's output is returned as a chat message and
+      nothing else; only the draft step produces a post body. Assert by checking no post row is
+      created by any turn route — the guardrail as a database assertion, not a prompt sentence.
+
+#### Migration needs
+
+None. This stop contributes test files and two deletions.
