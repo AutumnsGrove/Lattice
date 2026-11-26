@@ -5,7 +5,7 @@
       "name": "DeepSeek V4.1 Flash (1017)",
       "category": "generation",
       "provider": "openrouter",
-      "cost": { "input": 0.03, "output": 0.20 },
+      "cost": { "input": 0.15, "output": 0.6 },
       "quality": "high",
       "speed": "fast",
       "supportsTools": true,
@@ -17,24 +17,24 @@
       "name": "DeepSeek V4.1 Flash",
       "category": "generation",
       "provider": "openrouter",
-      "cost": { "input": 0.051, "output": 0.203 },
+      "cost": { "input": 0.0507, "output": 0.2028 },
       "quality": "highest",
       "speed": "fast",
       "supportsTools": true,
       "toolChoice": ["auto", "required", "none", "function"],
-      "contextWindow": 128000
+      "contextWindow": 1048576
     },
     "DEEPSEEK_V4_FLASH_0731": {
       "id": "deepseek/deepseek-v4-flash-0731",
       "name": "DeepSeek V4 Flash",
       "category": "generation",
       "provider": "openrouter",
-      "cost": { "input": 0.046, "output": 0.3 },
+      "cost": { "input": 0.0456, "output": 0.3 },
       "quality": "high",
       "speed": "fast",
       "supportsTools": true,
       "toolChoice": ["auto", "required", "none", "function"],
-      "contextWindow": 128000
+      "contextWindow": 1048576
     },
     "QWEN3_8_FLASH": {
       "id": "qwen/qwen3.8-flash",
@@ -46,62 +46,62 @@
       "speed": "fast",
       "supportsTools": true,
       "toolChoice": ["auto", "required", "none", "function"],
-      "contextWindow": 128000
+      "contextWindow": 1000000
     },
     "LLAMA_3_1_8B": {
       "id": "meta-llama/llama-3.1-8b-instruct",
       "name": "Llama 3.1 8B",
       "category": "generation",
       "provider": "openrouter",
-      "cost": { "input": 0.02, "output": 0.04 },
+      "cost": { "input": 0.05, "output": 0.08 },
       "quality": "good",
       "speed": "fastest",
       "supportsTools": true,
       "toolChoice": ["auto", "required", "none", "function"],
-      "contextWindow": 128000
+      "contextWindow": 131072
     },
     "KIMI_K2_7_CODE": {
       "id": "moonshotai/kimi-k2.7-code",
       "name": "Kimi K2.7 Code",
       "category": "generation",
       "provider": "openrouter",
-      "cost": { "input": 0.60, "output": 3.50 },
+      "cost": { "input": 0.6, "output": 3 },
       "quality": "high",
       "speed": "fast",
       "supportsTools": true,
       "toolChoice": ["auto", "required", "none", "function"],
-      "contextWindow": 256000
+      "contextWindow": 262144
     },
     "CLAUDE_HAIKU_55": {
       "id": "anthropic/claude-haiku-5.5",
       "name": "Claude Haiku 5.5",
       "category": "vision",
       "provider": "openrouter",
-      "cost": { "input": 0.10, "output": 0.50 },
+      "cost": { "input": 0.1, "output": 0.5 },
       "quality": "highest",
       "speed": "fast",
       "supportsTools": true,
       "toolChoice": ["auto", "required", "none", "function"],
-      "contextWindow": 200000
+      "contextWindow": 1000000
     },
     "GEMMA_4_26B": {
       "id": "google/gemma-4-26b-a4b-it",
       "name": "Gemma 4 26B A4B",
       "category": "vision",
       "provider": "openrouter",
-      "cost": { "input": 0.08, "output": 0.10 },
+      "cost": { "input": 0.0765, "output": 0.255 },
       "quality": "high",
       "speed": "fast",
       "supportsTools": true,
       "toolChoice": ["auto", "required", "none", "function"],
-      "contextWindow": 131072
+      "contextWindow": 262144
     },
     "GPT_OSS_SAFEGUARD": {
       "id": "openai/gpt-oss-safeguard-20b",
       "name": "GPT-oss Safeguard 20B",
       "category": "moderation",
       "provider": "openrouter",
-      "cost": { "input": 0.075, "output": 0.30 },
+      "cost": { "input": 0.075, "output": 0.3 },
       "quality": "high",
       "speed": "fast",
       "supportsTools": false,
@@ -116,7 +116,7 @@
       "quality": "high",
       "speed": "fast",
       "supportsTools": false,
-      "contextWindow": 131072
+      "contextWindow": 163840
     },
     "PPLX_EMBED_0_6B": {
       "id": "perplexity/pplx-embed-v1-0.6b",
