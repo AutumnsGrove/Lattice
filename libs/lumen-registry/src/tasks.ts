@@ -73,18 +73,22 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
 		description: "Content safety classification",
 	},
 
-	// Text Generation (DeepSeek V4.1 Flash → DeepSeek V4 Pro → GPT-OSS 120B)
+	// Text Generation (DeepSeek V4.1 Flash → Claude Haiku 5.5 → GPT-OSS 120B)
 	//
 	// The fallback is a model of the same class as the primary, not a cheaper
 	// one. A chain that answers with something the task cannot use is not a
 	// safety net: Llama 3.1 8B cannot hold a detailed-section format or a JSON
 	// envelope, and both 8B-class models carry smaller completion ceilings —
 	// the rejection the router's one-time retry exists for (#1707).
+	//
+	// Haiku 5.5 first, then GPT-OSS 120B: the first link costs about twice the
+	// primary and keeps a 1M window, the second is roughly cost parity. DeepSeek
+	// V4 Pro was the alternative and is 22x the primary's output price.
 	generation: {
 		primaryModel: MODELS.DEEPSEEK_V4_1_FLASH,
 		primaryProvider: "openrouter",
 		fallbackChain: [
-			{ provider: "openrouter", model: MODELS.DEEPSEEK_V4_PRO_0813 },
+			{ provider: "openrouter", model: MODELS.CLAUDE_HAIKU_55 },
 			{ provider: "openrouter", model: MODELS.GPT_OSS_120B },
 		],
 		defaultMaxTokens: 2048,
@@ -92,7 +96,7 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
 		description: "General text generation",
 	},
 
-	// Summarization (DeepSeek V4.1 Flash → DeepSeek V4 Pro → GPT-OSS 120B)
+	// Summarization (DeepSeek V4.1 Flash → Claude Haiku 5.5 → GPT-OSS 120B)
 	//
 	// The timeline's day is a parsed envelope with heading and gutter anchors
 	// that have to match each other, so a downgraded model does not produce a
@@ -101,7 +105,7 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
 		primaryModel: MODELS.DEEPSEEK_V4_1_FLASH,
 		primaryProvider: "openrouter",
 		fallbackChain: [
-			{ provider: "openrouter", model: MODELS.DEEPSEEK_V4_PRO_0813 },
+			{ provider: "openrouter", model: MODELS.CLAUDE_HAIKU_55 },
 			{ provider: "openrouter", model: MODELS.GPT_OSS_120B },
 		],
 		// Also the ceiling the router falls back to when a caller's larger
@@ -124,12 +128,15 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
 		description: "Text embeddings for semantic search",
 	},
 
-	// Chat/Conversational (DeepSeek V4.1 Flash → MiniMax M3 → GPT-OSS 120B)
+	// Chat/Conversational (DeepSeek V4.1 Flash → Claude Haiku 5.5 → GPT-OSS 120B)
+	//
+	// The same chain as summary and generation: one decision for the generative
+	// tasks is easier to reason about than three that drift apart.
 	chat: {
 		primaryModel: MODELS.DEEPSEEK_V4_1_FLASH,
 		primaryProvider: "openrouter",
 		fallbackChain: [
-			{ provider: "openrouter", model: MODELS.MINIMAX_M3 },
+			{ provider: "openrouter", model: MODELS.CLAUDE_HAIKU_55 },
 			{ provider: "openrouter", model: MODELS.GPT_OSS_120B },
 		],
 		defaultMaxTokens: 4096,
@@ -150,13 +157,17 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
 		description: "Image analysis and description",
 	},
 
-	// Code Tasks (DeepSeek V4.1 Flash → Claude Haiku 5.5 → Kimi K2.7 Code)
+	// Code Tasks (DeepSeek V4.1 Flash → Claude Haiku 5.5 → GPT-OSS 120B)
+	//
+	// The same chain as the other generative tasks. Kimi K2.7 Code was the
+	// second fallback and was capable — it is dropped for one chain rather than
+	// four that have to be kept in step.
 	code: {
 		primaryModel: MODELS.DEEPSEEK_V4_1_FLASH,
 		primaryProvider: "openrouter",
 		fallbackChain: [
 			{ provider: "openrouter", model: MODELS.CLAUDE_HAIKU_55 },
-			{ provider: "openrouter", model: MODELS.KIMI_K2_7_CODE },
+			{ provider: "openrouter", model: MODELS.GPT_OSS_120B },
 		],
 		defaultMaxTokens: 4096,
 		defaultTemperature: 0.1,

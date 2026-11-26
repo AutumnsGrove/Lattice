@@ -181,10 +181,15 @@ describe("Task-Specific Configuration", () => {
 				}
 			}
 
-			// Generation and summary answer the same shape of request, so they agree.
-			expect(TASK_REGISTRY.generation.fallbackChain.map((f) => f.model)).toEqual(
-				TASK_REGISTRY.summary.fallbackChain.map((f) => f.model),
-			);
+			// One chain for the generative tasks, so they cannot drift apart: chat and
+			// code answer the same shape of request as generation and summary.
+			const chain = TASK_REGISTRY.generation.fallbackChain.map((f) => f.model);
+			for (const task of ["summary", "chat", "code"] as const) {
+				expect(
+					TASK_REGISTRY[task].fallbackChain.map((f) => f.model),
+					`${task} chain`,
+				).toEqual(chain);
+			}
 		});
 	});
 
