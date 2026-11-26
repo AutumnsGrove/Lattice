@@ -76,12 +76,30 @@ function compare(previous: Catalog, next: Catalog): string[] {
 	return changes;
 }
 
+/**
+ * What `--check` reports.
+ *
+ * 0 — the snapshot matches. 1 — prices or windows have moved (the weekly job
+ * opens an issue for this). 2 — the check could not run at all: no network, an
+ * error response, or a model OpenRouter has delisted. Those are a different
+ * thing from drift, and filing them as "prices moved" would be a lie in the
+ * issue tracker.
+ */
+const EXIT_DRIFT = 1;
+const EXIT_COULD_NOT_CHECK = 2;
+
 async function main(): Promise<number> {
 	const check = process.argv.includes("--check");
 	const registry = readJson<Registry>(REGISTRY_PATH);
 	const ids = openRouterIds(registry);
 
-	const live = parseCatalog(await fetchLive(), ids, new Date().toISOString());
+	let live: Catalog;
+	try {
+		live = parseCatalog(await fetchLive(), ids, new Date().toISOString());
+	} catch (error) {
+		console.error(error instanceof Error ? error.message : String(error));
+		return EXIT_COULD_NOT_CHECK;
+	}
 
 	if (!check) {
 		writeJson(CATALOG_PATH, live);

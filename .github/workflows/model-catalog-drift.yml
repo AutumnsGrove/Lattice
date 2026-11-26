@@ -43,6 +43,9 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       # Exit 1 with a readable list of what moved; the tree is not touched.
+      # Exit 2 means the check could not run at all (no network, an error
+      # response, a delisted model) — a different thing from drift, and not
+      # something to file as "prices have moved".
       #
       # `shell: bash` is load-bearing, not decoration: GitHub's default shell on
       # Linux is `bash -e {0}` — no pipefail — so the step's status would be
@@ -52,10 +55,21 @@ jobs:
         id: check
         shell: bash
         continue-on-error: true
-        run: pnpm models:refresh --check 2>&1 | tee /tmp/catalog-drift.txt
+        run: |
+          set -o pipefail
+          pnpm models:refresh --check 2>&1 | tee /tmp/catalog-drift.txt
+          echo "exit=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+
+      # Drift is what the issue is for. Anything else fails the job instead of
+      # claiming the prices moved.
+      - name: The check could not run
+        if: steps.check.outcome == 'failure' && steps.check.outputs.exit != '1'
+        run: |
+          echo "The catalog check did not complete (exit ${{ steps.check.outputs.exit }})."
+          exit 1
 
       - name: Open or update the drift issue
-        if: steps.check.outcome == 'failure'
+        if: steps.check.outcome == 'failure' && steps.check.outputs.exit == '1'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
