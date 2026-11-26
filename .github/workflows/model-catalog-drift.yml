@@ -43,8 +43,14 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       # Exit 1 with a readable list of what moved; the tree is not touched.
+      #
+      # `shell: bash` is load-bearing, not decoration: GitHub's default shell on
+      # Linux is `bash -e {0}` — no pipefail — so the step's status would be
+      # `tee`'s, always 0, and the issue below would never open. The same bug sat
+      # in ci.yml's lint step until #1841.
       - name: Ask OpenRouter what the prices are now
         id: check
+        shell: bash
         continue-on-error: true
         run: pnpm models:refresh --check 2>&1 | tee /tmp/catalog-drift.txt
 
