@@ -73,26 +73,36 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
 		description: "Content safety classification",
 	},
 
-	// Text Generation (DeepSeek V4.1 Flash → Qwen3.8 Flash → Llama 3.1 8B)
+	// Text Generation (DeepSeek V4.1 Flash → DeepSeek V4 Pro → GPT-OSS 120B)
+	//
+	// The fallback is a model of the same class as the primary, not a cheaper
+	// one. A chain that answers with something the task cannot use is not a
+	// safety net: Llama 3.1 8B cannot hold a detailed-section format or a JSON
+	// envelope, and both 8B-class models carry smaller completion ceilings —
+	// the rejection the router's one-time retry exists for (#1707).
 	generation: {
 		primaryModel: MODELS.DEEPSEEK_V4_1_FLASH,
 		primaryProvider: "openrouter",
 		fallbackChain: [
-			{ provider: "openrouter", model: MODELS.QWEN3_8_FLASH },
-			{ provider: "openrouter", model: MODELS.LLAMA_3_1_8B },
+			{ provider: "openrouter", model: MODELS.DEEPSEEK_V4_PRO_0813 },
+			{ provider: "openrouter", model: MODELS.GPT_OSS_120B },
 		],
 		defaultMaxTokens: 2048,
 		defaultTemperature: 0.7,
 		description: "General text generation",
 	},
 
-	// Summarization (DeepSeek V4.1 Flash → Qwen3.8 Flash → Llama 3.1 8B)
+	// Summarization (DeepSeek V4.1 Flash → DeepSeek V4 Pro → GPT-OSS 120B)
+	//
+	// The timeline's day is a parsed envelope with heading and gutter anchors
+	// that have to match each other, so a downgraded model does not produce a
+	// worse summary — it produces an unusable one (#1707).
 	summary: {
 		primaryModel: MODELS.DEEPSEEK_V4_1_FLASH,
 		primaryProvider: "openrouter",
 		fallbackChain: [
-			{ provider: "openrouter", model: MODELS.QWEN3_8_FLASH },
-			{ provider: "openrouter", model: MODELS.LLAMA_3_1_8B },
+			{ provider: "openrouter", model: MODELS.DEEPSEEK_V4_PRO_0813 },
+			{ provider: "openrouter", model: MODELS.GPT_OSS_120B },
 		],
 		// Also the ceiling the router falls back to when a caller's larger
 		// max_tokens is refused by the provider (router.ts, isMaxTokensRejection).
@@ -114,13 +124,13 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
 		description: "Text embeddings for semantic search",
 	},
 
-	// Chat/Conversational (DeepSeek V4.1 Flash → Qwen3.8 Flash → Llama 3.1 8B)
+	// Chat/Conversational (DeepSeek V4.1 Flash → MiniMax M3 → GPT-OSS 120B)
 	chat: {
 		primaryModel: MODELS.DEEPSEEK_V4_1_FLASH,
 		primaryProvider: "openrouter",
 		fallbackChain: [
-			{ provider: "openrouter", model: MODELS.QWEN3_8_FLASH },
-			{ provider: "openrouter", model: MODELS.LLAMA_3_1_8B },
+			{ provider: "openrouter", model: MODELS.MINIMAX_M3 },
+			{ provider: "openrouter", model: MODELS.GPT_OSS_120B },
 		],
 		defaultMaxTokens: 4096,
 		defaultTemperature: 0.8,

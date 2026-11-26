@@ -1,11 +1,12 @@
 {
 	"source": "https://openrouter.ai/api/v1/models",
-	"fetchedAt": "2026-11-26T19:51:48.341Z",
+	"fetchedAt": "2026-11-26T19:59:17.128Z",
 	"models": {
 		"anthropic/claude-haiku-4.5": {
 			"id": "anthropic/claude-haiku-4.5",
 			"name": "Anthropic: Claude Haiku 4.5",
 			"contextWindow": 200000,
+			"maxOutputTokens": 64000,
 			"pricing": {
 				"input": 1,
 				"output": 5
@@ -16,6 +17,7 @@
 			"id": "anthropic/claude-haiku-5.5",
 			"name": "Anthropic: Claude Haiku 5.5",
 			"contextWindow": 1000000,
+			"maxOutputTokens": 128000,
 			"pricing": {
 				"input": 0.1,
 				"output": 0.5
@@ -26,6 +28,7 @@
 			"id": "deepseek/deepseek-v3.2",
 			"name": "DeepSeek: DeepSeek V3.2",
 			"contextWindow": 163840,
+			"maxOutputTokens": 147456,
 			"pricing": {
 				"input": 0.26,
 				"output": 0.38
@@ -36,6 +39,7 @@
 			"id": "deepseek/deepseek-v4-flash-0731",
 			"name": "DeepSeek: DeepSeek V4 Flash 0731",
 			"contextWindow": 1048576,
+			"maxOutputTokens": 943718,
 			"pricing": {
 				"input": 0.0456,
 				"output": 0.3
@@ -46,6 +50,7 @@
 			"id": "deepseek/deepseek-v4-pro-0813",
 			"name": "DeepSeek: DeepSeek V4 Pro 0813",
 			"contextWindow": 1048576,
+			"maxOutputTokens": 943718,
 			"pricing": {
 				"input": 0.111,
 				"output": 4.44
@@ -56,6 +61,7 @@
 			"id": "deepseek/deepseek-v4.1-flash",
 			"name": "DeepSeek: DeepSeek V4.1 Flash",
 			"contextWindow": 1048576,
+			"maxOutputTokens": 393216,
 			"pricing": {
 				"input": 0.0507,
 				"output": 0.2028
@@ -66,6 +72,7 @@
 			"id": "deepseek/deepseek-v4.1-flash-1017",
 			"name": "DeepSeek: DeepSeek V4.1 Flash 1017",
 			"contextWindow": 1048576,
+			"maxOutputTokens": 393216,
 			"pricing": {
 				"input": 0.15,
 				"output": 0.6
@@ -76,6 +83,7 @@
 			"id": "google/gemma-4-26b-a4b-it",
 			"name": "Google: Gemma 4 26B A4B ",
 			"contextWindow": 262144,
+			"maxOutputTokens": 235929,
 			"pricing": {
 				"input": 0.0765,
 				"output": 0.255
@@ -86,6 +94,7 @@
 			"id": "meta-llama/llama-3.1-8b-instruct",
 			"name": "Meta: Llama 3.1 8B Instruct",
 			"contextWindow": 131072,
+			"maxOutputTokens": 117964,
 			"pricing": {
 				"input": 0.05,
 				"output": 0.08
@@ -96,6 +105,7 @@
 			"id": "meta-llama/llama-3.2-3b-instruct",
 			"name": "Meta: Llama 3.2 3B Instruct",
 			"contextWindow": 131072,
+			"maxOutputTokens": 117964,
 			"pricing": {
 				"input": 0.05,
 				"output": 0.33
@@ -106,6 +116,7 @@
 			"id": "meta-llama/llama-guard-4-12b",
 			"name": "Meta: Llama Guard 4 12B",
 			"contextWindow": 163840,
+			"maxOutputTokens": 16384,
 			"pricing": {
 				"input": 0.18,
 				"output": 0.18
@@ -116,6 +127,7 @@
 			"id": "minimax/minimax-m3",
 			"name": "MiniMax: MiniMax M3",
 			"contextWindow": 1048576,
+			"maxOutputTokens": 512000,
 			"pricing": {
 				"input": 0.3,
 				"output": 1.2
@@ -126,6 +138,7 @@
 			"id": "moonshotai/kimi-k2.7-code",
 			"name": "MoonshotAI: Kimi K2.7 Code",
 			"contextWindow": 262144,
+			"maxOutputTokens": 235929,
 			"pricing": {
 				"input": 0.6,
 				"output": 3
@@ -136,6 +149,7 @@
 			"id": "openai/gpt-oss-120b",
 			"name": "OpenAI: gpt-oss-120b",
 			"contextWindow": 131072,
+			"maxOutputTokens": 117964,
 			"pricing": {
 				"input": 0.05,
 				"output": 0.25
@@ -146,6 +160,7 @@
 			"id": "openai/gpt-oss-safeguard-20b",
 			"name": "OpenAI: gpt-oss-safeguard-20b",
 			"contextWindow": 131072,
+			"maxOutputTokens": 65536,
 			"pricing": {
 				"input": 0.075,
 				"output": 0.3
@@ -156,6 +171,7 @@
 			"id": "qwen/qwen3.8-flash",
 			"name": "Qwen: Qwen3.8 Flash",
 			"contextWindow": 1000000,
+			"maxOutputTokens": 131072,
 			"pricing": {
 				"input": 0.15,
 				"output": 0.47

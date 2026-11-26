@@ -35,6 +35,13 @@ export interface ModelFacts {
 	name: string;
 	/** Null when the provider does not publish one (transcription models). */
 	contextWindow: number | null;
+	/**
+	 * The longest completion the routed provider will return, null when it does
+	 * not say. A request whose `max_tokens` is over this is refused outright
+	 * rather than clamped, which is why the router reads it before sending
+	 * (#1707).
+	 */
+	maxOutputTokens: number | null;
 	pricing: ModelPricing;
 	/**
 	 * True when the provider prices by input length or by time of day, so the
@@ -60,6 +67,7 @@ export interface RegistryModel {
 	category?: string;
 	cost: ModelPricing;
 	contextWindow?: number | null;
+	maxOutputTokens?: number | null;
 }
 
 export interface Registry {
@@ -79,6 +87,7 @@ interface OpenRouterModel {
 	id: string;
 	name?: string;
 	context_length?: number | null;
+	top_provider?: { context_length?: number | null; max_completion_tokens?: number | null } | null;
 	pricing?: {
 		prompt?: string;
 		completion?: string;
@@ -121,6 +130,7 @@ export function parseCatalog(payload: unknown, ids: string[], fetchedAt: string)
 			id,
 			name: model.name ?? id,
 			contextWindow: model.context_length ?? null,
+			maxOutputTokens: model.top_provider?.max_completion_tokens ?? null,
 			pricing: {
 				input: perMillion(model.pricing?.prompt),
 				output: perMillion(model.pricing?.completion),
@@ -207,6 +217,16 @@ export function findDrift(registry: Registry, catalog: Catalog): Drift[] {
 				catalog: String(facts.contextWindow),
 			});
 		}
+
+		if (facts.maxOutputTokens !== null && model.maxOutputTokens !== facts.maxOutputTokens) {
+			drift.push({
+				name,
+				id: model.id,
+				field: "maxOutputTokens",
+				registry: String(model.maxOutputTokens ?? "unset"),
+				catalog: String(facts.maxOutputTokens),
+			});
+		}
 	}
 
 	return drift;
@@ -226,6 +246,7 @@ export function applyCatalog(registry: Registry, catalog: Catalog): Registry {
 						...model,
 						cost: { ...facts.pricing },
 						...(facts.contextWindow !== null && { contextWindow: facts.contextWindow }),
+						...(facts.maxOutputTokens !== null && { maxOutputTokens: facts.maxOutputTokens }),
 					};
 	}
 
