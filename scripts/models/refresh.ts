@@ -15,7 +15,14 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { CATALOG_URL, openRouterIds, parseCatalog } from "../../libs/lumen-registry/src/catalog.js";
+import {
+	CATALOG_URL,
+	endpointsUrl,
+	missingFromList,
+	openRouterIds,
+	parseCatalog,
+	parseEndpointFacts,
+} from "../../libs/lumen-registry/src/catalog.js";
 import type { Catalog, Registry } from "../../libs/lumen-registry/src/catalog.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -34,14 +41,14 @@ function readJson<T>(path: string): T {
 	return JSON.parse(readFileSync(path, "utf8")) as T;
 }
 
-async function fetchLive(): Promise<unknown> {
-	const response = await fetch(CATALOG_URL, {
+async function fetchJson(url: string): Promise<unknown> {
+	const response = await fetch(url, {
 		headers: { Accept: "application/json" },
 		signal: AbortSignal.timeout(TIMEOUT_MS),
 	});
 
 	if (!response.ok) {
-		throw new Error(`OpenRouter answered ${response.status} ${response.statusText}`);
+		throw new Error(`${url} answered ${response.status} ${response.statusText}`);
 	}
 
 	return response.json();
@@ -95,7 +102,15 @@ async function main(): Promise<number> {
 
 	let live: Catalog;
 	try {
-		live = parseCatalog(await fetchLive(), ids, new Date().toISOString());
+		const fetchedAt = new Date().toISOString();
+		const payload = await fetchJson(CATALOG_URL);
+		live = parseCatalog(payload, ids, fetchedAt, { missing: "skip" });
+
+		// Embeddings are carried by OpenRouter but not listed by the model list, so
+		// each one is asked about directly.
+		for (const id of missingFromList(payload, ids)) {
+			live.models[id] = parseEndpointFacts(id, await fetchJson(endpointsUrl(id)));
+		}
 	} catch (error) {
 		console.error(error instanceof Error ? error.message : String(error));
 		return EXIT_COULD_NOT_CHECK;

@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
 import catalogData from "./data/catalog.json";
 import registryData from "./data/models.json";
-import { applyCatalog, findDrift, formatRegistryJson, parseCatalog } from "./catalog.js";
+import {
+	applyCatalog,
+	findDrift,
+	formatRegistryJson,
+	missingFromList,
+	parseCatalog,
+	parseEndpointFacts,
+} from "./catalog.js";
 import type { Catalog, Registry } from "./catalog.js";
 
 /** A slice of OpenRouter's response shape, prices as per-token strings. */
@@ -93,6 +100,19 @@ describe("parseCatalog", () => {
 		expect(catalog.models["anthropic/claude-haiku-5.5"].tiered).toBe(true);
 	});
 
+	it("can skip the ids the list does not carry", () => {
+		const catalog = parseCatalog(
+			payload(),
+			["deepseek/deepseek-v4.1-flash", "baai/bge-m3"],
+			fetchedAt,
+			{
+				missing: "skip",
+			},
+		);
+
+		expect(Object.keys(catalog.models)).toEqual(["deepseek/deepseek-v4.1-flash"]);
+	});
+
 	it("refuses a model OpenRouter no longer lists", () => {
 		expect(() => parseCatalog(payload(), ["deepseek/removed-model"], fetchedAt)).toThrow(
 			/OpenRouter no longer lists deepseek\/removed-model/,
@@ -168,12 +188,26 @@ describe("findDrift", () => {
 		]);
 	});
 
-	it("leaves providers the catalog does not cover alone", () => {
-		// Cloudflare models are priced by the provider's own allowance, and
-		// embeddings are not in OpenRouter's model list at all, so neither can be
-		// compared against it.
+	it("leaves a provider the catalog does not cover alone", () => {
+		// Cloudflare models are priced by the provider's own allowance, so there is
+		// nothing to compare them against.
 		expect(findDrift({ models: { LOCAL: registry().models.LOCAL } }, catalog)).toEqual([]);
-		expect(findDrift({ models: { EMBED: registry().models.EMBED } }, catalog)).toEqual([]);
+	});
+
+	it("reports an embedding with no catalog entry too", () => {
+		// Embeddings are covered now — from each model's own endpoints response — so a
+		// missing entry is drift, not an exemption.
+		const drift = findDrift({ models: { EMBED: registry().models.EMBED } }, catalog);
+
+		expect(drift).toEqual([
+			{
+				name: "EMBED",
+				id: "baai/bge-m3",
+				field: "catalog entry",
+				registry: "missing",
+				catalog: "—",
+			},
+		]);
 	});
 });
 
@@ -240,10 +274,59 @@ describe("the committed files", () => {
 	it("cover every OpenRouter model the registry routes, and nothing else", () => {
 		const registry2 = registryData as Registry;
 		const routed = Object.values(registry2.models)
-			.filter((model) => model.provider === "openrouter" && model.category !== "embedding")
+			.filter((model) => model.provider === "openrouter")
 			.map((model) => model.id)
 			.sort();
 
 		expect(Object.keys((catalogData as Catalog).models).sort()).toEqual(routed);
+	});
+});
+
+describe("models the list endpoint does not carry", () => {
+	/** A slice of `/models/{id}/endpoints`: one id, several providers. */
+	function endpointsPayload(): unknown {
+		return {
+			data: {
+				id: "baai/bge-m3",
+				name: "BAAI: bge-m3",
+				endpoints: [
+					{
+						provider_name: "Parasail",
+						context_length: 8194,
+						max_completion_tokens: 7374,
+						pricing: { prompt: "0.00000001", completion: "0" },
+					},
+					{
+						provider_name: "DeepInfra",
+						context_length: 8192,
+						max_completion_tokens: 7372,
+						pricing: { prompt: "0.00000002", completion: "0" },
+					},
+				],
+			},
+		};
+	}
+
+	it("finds the ids the list omits", () => {
+		const missing = missingFromList(payload(), ["deepseek/deepseek-v4.1-flash", "baai/bge-m3"]);
+
+		expect(missing).toEqual(["baai/bge-m3"]);
+	});
+
+	it("takes the smallest window and the highest price across providers", () => {
+		// Never claim more context than every provider offers, never under-report what
+		// a run cost: both wrong directions are invisible afterwards.
+		const facts = parseEndpointFacts("baai/bge-m3", endpointsPayload());
+
+		expect(facts.contextWindow).toBe(8192);
+		expect(facts.pricing).toEqual({ input: 0.02, output: 0 });
+		// An embedding has no completion to limit.
+		expect(facts.maxOutputTokens).toBeNull();
+	});
+
+	it("refuses a model OpenRouter has dropped", () => {
+		expect(() => parseEndpointFacts("baai/bge-m3", { data: { endpoints: [] } })).toThrow(
+			/no longer lists baai\/bge-m3/,
+		);
 	});
 });

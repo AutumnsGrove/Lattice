@@ -112,7 +112,12 @@ function perMillion(perToken: string | undefined): number {
  * what Grove routes, not a copy of the catalog. A model OpenRouter lists and we
  * do not use is somebody else's maintenance burden.
  */
-export function parseCatalog(payload: unknown, ids: string[], fetchedAt: string): Catalog {
+export function parseCatalog(
+	payload: unknown,
+	ids: string[],
+	fetchedAt: string,
+	options: { missing?: "throw" | "skip" } = {},
+): Catalog {
 	const data = (payload as { data?: OpenRouterModel[] })?.data;
 	if (!Array.isArray(data)) {
 		throw new Error(`OpenRouter's response has no data array`);
@@ -124,7 +129,12 @@ export function parseCatalog(payload: unknown, ids: string[], fetchedAt: string)
 	for (const id of [...ids].sort()) {
 		const model = byId.get(id);
 		if (model === undefined) {
-			throw new Error(`OpenRouter no longer lists ${id}`);
+			// A chat model that disappears is worth stopping for. An embedding is
+			// simply not in this endpoint, and the caller fetches it separately.
+			if ((options.missing ?? "throw") === "throw") {
+				throw new Error(`OpenRouter no longer lists ${id}`);
+			}
+			continue;
 		}
 		models[id] = {
 			id,
@@ -143,15 +153,15 @@ export function parseCatalog(payload: unknown, ids: string[], fetchedAt: string)
 }
 
 /**
- * Whether OpenRouter's model list can price this model.
+ * Whether OpenRouter can price this model.
  *
- * Embeddings are served but not listed: `/api/v1/models` carries chat models,
- * so `perplexity/pplx-embed-v1-0.6b` and `baai/bge-m3` are absent however they
- * are routed. Their prices stay hand-written, and the guard says so by
- * skipping them rather than calling them missing.
+ * Every model Grove routes through OpenRouter, embeddings included. The list
+ * endpoint (`/api/v1/models`) omits embeddings, so `models:refresh` fills those
+ * from each model's own `/models/{id}/endpoints` response — they are carried by
+ * OpenRouter, just not in the list.
  */
 function catalogCovers(model: RegistryModel): boolean {
-	return model.provider === "openrouter" && model.category !== "embedding";
+	return model.provider === "openrouter";
 }
 
 /** The models the overlay routes through OpenRouter, which is what the catalog covers. */
@@ -230,6 +240,71 @@ export function findDrift(registry: Registry, catalog: Catalog): Drift[] {
 	}
 
 	return drift;
+}
+
+/** The ids the list endpoint does not carry (embeddings, today). */
+export function missingFromList(payload: unknown, ids: string[]): string[] {
+	const data = (payload as { data?: OpenRouterModel[] })?.data;
+	if (!Array.isArray(data)) {
+		throw new Error(`OpenRouter's response has no data array`);
+	}
+	const listed = new Set(data.map((model) => model.id));
+	return ids.filter((id) => !listed.has(id));
+}
+
+/** Where one model's own pricing and limits live. */
+export function endpointsUrl(id: string): string {
+	return `${CATALOG_URL}/${id}/endpoints`;
+}
+
+interface OpenRouterEndpoint {
+	provider_name?: string;
+	context_length?: number | null;
+	max_completion_tokens?: number | null;
+	pricing?: { prompt?: string; completion?: string };
+}
+
+/**
+ * The facts for a model the list endpoint does not carry, from its own
+ * endpoints response.
+ *
+ * OpenRouter may route one id to several providers with different windows and
+ * prices, so this takes the conservative pair: the **smallest** context window
+ * (never claim more than every provider offers) and the **highest** input price
+ * (never under-report a run's cost). A completion ceiling is not recorded —
+ * an embedding has no completion to limit.
+ */
+export function parseEndpointFacts(id: string, payload: unknown): ModelFacts {
+	const data = (payload as { data?: { name?: string; endpoints?: OpenRouterEndpoint[] } })?.data;
+	const endpoints = data?.endpoints;
+
+	if (!Array.isArray(endpoints) || endpoints.length === 0) {
+		throw new Error(`OpenRouter no longer lists ${id}: its endpoints response is empty`);
+	}
+
+	const windows = endpoints
+		.map((endpoint) => endpoint.context_length)
+		.filter((value): value is number => typeof value === "number");
+	const inputPrices = endpoints
+		.map((endpoint) => endpoint.pricing?.prompt)
+		.filter((value): value is string => typeof value === "string")
+		.map((value) => perMillion(value));
+	const outputPrices = endpoints
+		.map((endpoint) => endpoint.pricing?.completion)
+		.filter((value): value is string => typeof value === "string")
+		.map((value) => perMillion(value));
+
+	return {
+		id,
+		name: data?.name ?? id,
+		contextWindow: windows.length > 0 ? Math.min(...windows) : null,
+		maxOutputTokens: null,
+		pricing: {
+			input: inputPrices.length > 0 ? Math.max(...inputPrices) : 0,
+			output: outputPrices.length > 0 ? Math.max(...outputPrices) : 0,
+		},
+		tiered: false,
+	};
 }
 
 /** The overlay with its catalog-backed fields filled in from `catalog`. */

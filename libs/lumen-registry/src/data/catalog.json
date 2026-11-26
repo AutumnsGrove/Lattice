@@ -1,6 +1,6 @@
 {
 	"source": "https://openrouter.ai/api/v1/models",
-	"fetchedAt": "2026-11-26T19:59:17.128Z",
+	"fetchedAt": "2026-11-26T21:13:33.409Z",
 	"models": {
 		"anthropic/claude-haiku-4.5": {
 			"id": "anthropic/claude-haiku-4.5",
@@ -175,6 +175,28 @@
 			"pricing": {
 				"input": 0.15,
 				"output": 0.47
+			},
+			"tiered": false
+		},
+		"perplexity/pplx-embed-v1-0.6b": {
+			"id": "perplexity/pplx-embed-v1-0.6b",
+			"name": "Perplexity: Embed V1 0.6B",
+			"contextWindow": 32000,
+			"maxOutputTokens": null,
+			"pricing": {
+				"input": 0.004,
+				"output": 0
+			},
+			"tiered": false
+		},
+		"baai/bge-m3": {
+			"id": "baai/bge-m3",
+			"name": "BAAI: bge-m3",
+			"contextWindow": 8192,
+			"maxOutputTokens": null,
+			"pricing": {
+				"input": 0.01,
+				"output": 0
 			},
 			"tiered": false
 		}

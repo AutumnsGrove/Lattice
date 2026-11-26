@@ -72,7 +72,7 @@ describe("Task Routing", () => {
 			const result = routeTask("generation", providers);
 
 			expect(result.provider).toBe("openrouter");
-			expect(result.model).toBe(MODELS.DEEPSEEK_V4_1_FLASH);
+			expect(result.model).toBe(MODELS.DEEPSEEK_V4_1_FLASH_1017);
 		});
 
 		it("should use first available fallback when primary unavailable", () => {

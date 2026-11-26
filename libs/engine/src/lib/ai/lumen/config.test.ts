@@ -163,10 +163,12 @@ describe("Task Registry", () => {
 
 describe("Task-Specific Configuration", () => {
 	describe("Generation Tasks", () => {
-		it("should use DeepSeek V4.1 Flash as primary", () => {
-			expect(TASK_REGISTRY.generation.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH);
-			expect(TASK_REGISTRY.summary.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH);
-			expect(TASK_REGISTRY.chat.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH);
+		it("should use the newest DeepSeek V4.1 Flash snapshot as primary", () => {
+			// 1017 is the newer snapshot (17 Oct) of the same family; the unversioned
+			// id is the older base model and stays only as a cheap moderation fallback.
+			expect(TASK_REGISTRY.generation.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH_1017);
+			expect(TASK_REGISTRY.summary.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH_1017);
+			expect(TASK_REGISTRY.chat.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH_1017);
 		});
 
 		it("falls back to models of the same class, not to the cheap ones (#1707)", () => {
@@ -255,7 +257,7 @@ describe("Task-Specific Configuration", () => {
 
 	describe("Code Task", () => {
 		it("should use DeepSeek as primary", () => {
-			expect(TASK_REGISTRY.code.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH);
+			expect(TASK_REGISTRY.code.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH_1017);
 		});
 
 		it("should use very low temperature for accuracy", () => {
@@ -348,7 +350,7 @@ describe("getTaskConfig", () => {
 	it("should return correct config for task", () => {
 		const config = getTaskConfig("generation");
 
-		expect(config.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH);
+		expect(config.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH_1017);
 		expect(config.primaryProvider).toBe("openrouter");
 	});
 });
@@ -357,7 +359,7 @@ describe("getModelsForProvider", () => {
 	it("should return all OpenRouter models", () => {
 		const models = getModelsForProvider("openrouter");
 
-		expect(models).toContain(MODELS.DEEPSEEK_V4_1_FLASH);
+		expect(models).toContain(MODELS.DEEPSEEK_V4_1_FLASH_1017);
 		expect(models).toContain(MODELS.CLAUDE_HAIKU_55);
 		expect(models).toContain(MODELS.GPT_OSS_SAFEGUARD);
 		expect(models).toContain(MODELS.LLAMAGUARD_4);

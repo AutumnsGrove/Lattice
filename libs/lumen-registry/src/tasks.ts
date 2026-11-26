@@ -73,7 +73,7 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
 		description: "Content safety classification",
 	},
 
-	// Text Generation (DeepSeek V4.1 Flash → Claude Haiku 5.5 → GPT-OSS 120B)
+	// Text Generation (DeepSeek V4.1 Flash 1017 → Claude Haiku 5.5 → GPT-OSS 120B)
 	//
 	// The fallback is a model of the same class as the primary, not a cheaper
 	// one. A chain that answers with something the task cannot use is not a
@@ -85,7 +85,7 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
 	// primary and keeps a 1M window, the second is roughly cost parity. DeepSeek
 	// V4 Pro was the alternative and is 22x the primary's output price.
 	generation: {
-		primaryModel: MODELS.DEEPSEEK_V4_1_FLASH,
+		primaryModel: MODELS.DEEPSEEK_V4_1_FLASH_1017,
 		primaryProvider: "openrouter",
 		fallbackChain: [
 			{ provider: "openrouter", model: MODELS.CLAUDE_HAIKU_55 },
@@ -102,7 +102,7 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
 	// that have to match each other, so a downgraded model does not produce a
 	// worse summary — it produces an unusable one (#1707).
 	summary: {
-		primaryModel: MODELS.DEEPSEEK_V4_1_FLASH,
+		primaryModel: MODELS.DEEPSEEK_V4_1_FLASH_1017,
 		primaryProvider: "openrouter",
 		fallbackChain: [
 			{ provider: "openrouter", model: MODELS.CLAUDE_HAIKU_55 },
@@ -133,7 +133,7 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
 	// The same chain as summary and generation: one decision for the generative
 	// tasks is easier to reason about than three that drift apart.
 	chat: {
-		primaryModel: MODELS.DEEPSEEK_V4_1_FLASH,
+		primaryModel: MODELS.DEEPSEEK_V4_1_FLASH_1017,
 		primaryProvider: "openrouter",
 		fallbackChain: [
 			{ provider: "openrouter", model: MODELS.CLAUDE_HAIKU_55 },
@@ -163,7 +163,7 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
 	// second fallback and was capable — it is dropped for one chain rather than
 	// four that have to be kept in step.
 	code: {
-		primaryModel: MODELS.DEEPSEEK_V4_1_FLASH,
+		primaryModel: MODELS.DEEPSEEK_V4_1_FLASH_1017,
 		primaryProvider: "openrouter",
 		fallbackChain: [
 			{ provider: "openrouter", model: MODELS.CLAUDE_HAIKU_55 },
@@ -182,7 +182,7 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
 	// task it is defined for. Fallback for agent calls lives in the caller
 	// (Lyra decision 58), not in Lumen.
 	agent: {
-		primaryModel: MODELS.DEEPSEEK_V4_1_FLASH,
+		primaryModel: MODELS.DEEPSEEK_V4_1_FLASH_1017,
 		primaryProvider: "openrouter",
 		fallbackChain: [],
 		// A reasoning model spends this allowance thinking before it writes a word, and
