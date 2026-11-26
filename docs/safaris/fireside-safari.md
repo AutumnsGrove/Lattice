@@ -1147,22 +1147,77 @@ Autumn's ruling at Stop 2 holds: it is the Wanderer's key, and the ceiling is th
 account. `limits.cost`, `limits.tokens` and `limits.timeMs` are all left unset. A per-user spending
 limit, if it ever exists, is a Lumen setting (#1867) — not a per-feature number.
 
-#### 5. Two runs, two recipes, or one recipe twice
+#### 5. The draft is a **tool**, and Lyra already has the primitive
 
-The reply turn and the draft step are different tasks with different finish conditions, so:
+Autumn's call, and it changes the shape for the better: *"what if we gave it a tool that is the
+final draft? I've done this with an agent before and we have a confirm step for it."*
 
-- **`fireside-turn`** — tools on, `steps = 2*3+2`, `reminders: 0`, answer in prose
-- **`fireside-draft`** — **no tools**, one step, JSON out (`{title, content}`), temperature 0.3,
-  the existing prompt and fallback
+Lyra ships exactly that, twice, and they answer different questions:
 
-Keeping them separate means the draft cannot wander into tool calls and the reply cannot
-accidentally produce a post body. It also means Stop 3's "no prose from the turn path" assertion
-has a structural reason to hold rather than a hopeful one.
+| Primitive | What it is | Fits here? |
+| --- | --- | --- |
+| **`createProposeTool`** (decisions 50, 52, 53) | *"A finished run's result, for a person to decide later."* The args carry a **schema-validated payload** plus evidence; a payload the schema refuses never becomes a proposal, and the model is told what was wrong so it corrects itself **inside the loop** | **Yes.** This is the draft |
+| **`policy: "ask"`** (decisions 34, 35, 85) | A run **parks mid-flight**, saves a request in the record, and resumes when a person answers | No. Nothing the draft run does needs to interrupt itself — the draft is finished when it is proposed, and the writer confirms afterwards |
+
+So the draft run ends by calling `propose_draft({ title, body, ... })`:
+
+- **The schema replaces the JSON parse.** The old prompt asked for JSON and fell back to raw text
+  with *"the formatting may be a bit rough"*. A `propose` payload is validated where the model's
+  turn crosses into the run, so garbage never becomes a draft and the model gets a correction
+  instead of the writer getting a warning
+- **The draft run keeps its tools.** It can `read_draft` *while* assembling, which is what makes
+  "I arrived with fragments" work — the old no-tools draft step could only see the conversation
+- **The confirm step is structural, not a UI afterthought.** The run finishes with a proposal;
+  the drawer shows it; accepting calls `POST /api/fireside/[id]/accept`. Nothing is applied to the
+  post by the model
+- **The transcript gets a real event.** "Wisp proposed a draft, the writer accepted it" is a row
+  the footer can show honestly (Stop 8)
+
+The rule from Stop 2 survives in a sharper form: **one tool assembles prose, and it stops and
+asks.** Everything else reads.
+
+#### 6. The tool set, deliberately small
+
+The candidate list ran to a dozen, which is the shape of a feature that has not decided what it is.
+The bar for a tool is that **the model cannot say the thing correctly without it** — that is the
+timeline's own rule (`tools.ts`: the model never types a repo name, a hash, a link or an anchor).
+
+| Tool | Run | Risk | Payload bound | Why |
+| --- | --- | --- | --- | --- |
+| `read_draft` | turn + draft | reads | first ~400 words + "the post continues; ask about a section" | mid-post Fireside is half the feature; without it Wisp is guessing |
+| `read_my_recent_posts` | turn + draft | reads | 2–3 titles + first ~80 words each | so Wisp *hears* the voice instead of being told to have one |
+| `propose_draft` | draft only | proposes | schema: `title` (≤120 chars), `body` (≤ the draft's token budget) | the only writer of prose, and it stops and asks |
+
+**Rejected, with reasons:**
+
+- `suggest_title` — the draft proposal already carries a title. Two ways to propose one is one too
+  many.
+- `ask_writer` / mid-run approval — the whole feature is a conversation; a run that parks to ask
+  a question is the chat asking the chat.
+- `remember(name, value)` — a session scratchpad is genuinely attractive for long conversations and
+  genuinely invisible in the transcript. Not v1.
+- `insert_into_editor` / `write_post` — the model never writes to the post. Accept is a person's
+  action, outside the run.
+- `search_my_posts(query)` — the better version of "hear my voice" for a long archive, and the
+  obvious v1.1 once there are enough posts to search. Not both in v1.
+- `read_site_settings` / voice preset — this belongs in the **instructions**, not a tool. A tool
+  call to learn something the recipe already knows is a wasted step.
+
+Two tools that read, one that proposes. That is the whole surface.
+
+#### 6b. Two runs
+
+- **`fireside-turn`** — `read_draft`, `read_my_recent_posts`, `steps = 2*2+2 = 6`,
+  `stuck.reminders: 0` (prose is the finish), `sameFailure: 2`
+- **`fireside-draft`** — the same two readers plus `propose_draft`,
+  `steps = 2*3+2 = 8`, no nudges
 
 #### Recipe fixes
 
 - [ ] `createFiresideTurnRecipe` / `createFiresideDraftRecipe`, following the timeline's file layout
       (instructions, tools, state, serialize) so both features read the same way
+- [ ] `propose_draft` built with `createProposeTool`, payload schema `{ title, body }`, with the
+      draft's own word budget enforced by the schema rather than by a sentence in a prompt
 - [ ] `limits.steps` derived from `tools.length`; no `DEFAULT_STEP_LIMIT` constant
 - [ ] `stuck: { reminders: 0, sameFailure: 2 }` on the turn recipe; none needed on the draft
 - [ ] `compaction` computed from the model's context (policy cap ~128k), `keepTokens` = window/3
