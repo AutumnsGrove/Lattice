@@ -113,7 +113,7 @@ jobs:
         working-directory: ${{ matrix.package }}
 
       - name: Run tests
-        run: pnpm test:run
+        run: ${{ matrix.command }}
         working-directory: ${{ matrix.package }}
 
   # Type check only affected packages

@@ -61,9 +61,51 @@ const CHECK_OVERRIDES = {
 };
 
 /**
+ * Whether a script is a single run rather than a watcher.
+ *
+ * A bare `vitest` (or `jest`, `mocha`, `ava`) sits and waits for file changes on
+ * a CI runner, where nothing ever changes, until the job times out — a red check
+ * with no verdict in it. The runner only leaves when the command names a mode
+ * that exits, so that is what this looks for (#1796).
+ *
+ * A command with no watcher-capable runner in it at all — `tsc --noEmit`,
+ * `node --test`, `playwright test` — already exits, and is left alone.
+ */
+export function isOneShot(command) {
+	const WATCHERS = /(?:^|[\s/])(?:vitest|jest|mocha|ava|tap)(?=$|[\s/])/;
+	const WATCH_FLAGS = /(?:^|\s)(?:-w|--watch|--watchAll|--ui)(?=$|[\s=])/;
+	const ONCE_MODES = /(?:^|\s)(?:run|--run|--runInBand|--ci|--single-run)(?=$|\s)/;
+
+	const watcher = WATCHERS.exec(command);
+	if (!watcher) return true;
+
+	// Only the runner's own arguments decide. `npm run build && vitest` must not
+	// be read as `vitest run` because a `run` appears earlier on the line.
+	const args = command.slice(watcher.index + watcher[0].length);
+	if (WATCH_FLAGS.test(args)) return false;
+	return ONCE_MODES.test(args);
+}
+
+/**
+ * The command that runs a package's tests in CI, or null if it has no runnable
+ * suite.
+ *
+ * `test:run` first, because that name already means "the one CI runs". Falling
+ * back to `test` is only safe when that script cannot watch — the mismatch
+ * between a detector admitting a package on `test` and the job running
+ * `test:run` is what let `libs/gossamer` and `libs/shutter/cloudflare` carry
+ * suites CI could never run.
+ */
+export function testCommandFor(scripts) {
+	if (scripts["test:run"]) return "pnpm test:run";
+	if (scripts.test && isOneShot(scripts.test)) return "pnpm test";
+	return null;
+}
+
+/**
  * A package directory turned into the metadata the matrix needs.
  * Commands are derived from the package's own scripts so there is exactly one
- * source of truth for "how do I check this package".
+ * source of truth for "how do I check this package" and "how do I test it".
  */
 function describePackage(root, dir) {
 	const abs = join(root, dir);
@@ -78,6 +120,7 @@ function describePackage(root, dir) {
 	}
 
 	const scripts = pkg.scripts || {};
+	const testCommand = testCommandFor(scripts);
 	const deps = {
 		...pkg.peerDependencies,
 		...pkg.devDependencies,
@@ -100,7 +143,8 @@ function describePackage(root, dir) {
 		scripts,
 		deps,
 		typecheck,
-		hasTests: Boolean(scripts["test:run"] || scripts.test),
+		testCommand,
+		hasTests: testCommand !== null,
 		// A config file alone does not make a package SvelteKit-capable: `libs/gossamer`
 		// has one and no `@sveltejs/kit`, so `pnpm exec svelte-kit sync` there is
 		// "Command svelte-kit not found". The sync step needs the binary, and the
@@ -416,7 +460,12 @@ export function detectAffected({ entries, packages, root = REPO_ROOT, lockfile }
 		const name = dir.split("/").pop();
 
 		if (pkg.hasTests) {
-			testMatrix.push({ package: dir, name, isSvelteKit: pkg.isSvelteKit });
+			testMatrix.push({
+				package: dir,
+				name,
+				command: pkg.testCommand,
+				isSvelteKit: pkg.isSvelteKit,
+			});
 		}
 
 		if (pkg.typecheck) {
