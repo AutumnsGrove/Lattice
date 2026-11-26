@@ -195,6 +195,30 @@
 			</GlassCard>
 		</a>
 
+		<!-- AI Card -->
+		<a href="/arbor/settings/ai" class="card-link">
+			<GlassCard variant="frosted" hoverable flush class="h-full flex flex-col">
+				<div class="card-body">
+					<div class="card-header">
+						<phaseIcons.sparkles class="card-icon" />
+						<h2 class="card-title">AI</h2>
+					</div>
+					<div class="card-status">
+						{#if data.aiKeySource === "settings"}
+							<span class="status-line">Key saved — every AI feature uses it</span>
+						{:else if data.aiKeySource === "timeline"}
+							<span class="status-line">Using your timeline key</span>
+							<span class="status-line subtle">Save one here to take over</span>
+						{:else}
+							<span class="status-line">No key yet</span>
+							<span class="status-line subtle">AI features run on your own OpenRouter key</span>
+						{/if}
+					</div>
+					<span class="card-action">{data.aiKeySource ? "Manage" : "Add a key"} &rarr;</span>
+				</div>
+			</GlassCard>
+		</a>
+
 		<!-- Features Card -->
 		<a href="/arbor/settings/features" class="card-link">
 			<GlassCard variant="frosted" hoverable flush class="h-full flex flex-col">

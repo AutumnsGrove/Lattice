@@ -55,10 +55,13 @@ export const MISSING_AI_KEY_MESSAGE =
  */
 export type SecretReader = (name: string) => Promise<string | undefined>;
 
+/** Which name answered. `settings` is canonical, `timeline` is the legacy fallback. */
+export type AiOpenRouterKeySource = "settings" | "timeline";
+
 /** A key, and which name answered — so a log line can say where it came from. */
 export interface AiOpenRouterKey {
 	key: string;
-	source: "settings" | "timeline";
+	source: AiOpenRouterKeySource;
 }
 
 /**
@@ -77,6 +80,24 @@ export async function resolveOpenRouterKey(
 	const legacy = clean(await read(AI_SECRETS.legacyOpenRouterKey));
 	if (legacy) return { key: legacy, source: "timeline" };
 
+	return undefined;
+}
+
+/** Asks whether a secret exists, without decrypting it. */
+export type SecretPresenceReader = (name: string) => Promise<boolean>;
+
+/**
+ * Which name holds the key, without reading it.
+ *
+ * The settings page needs to say "saved" or "not set" and nothing else — a page
+ * that could decrypt a key to check on it would be a page that could leak one.
+ * Same order as `resolveOpenRouterKey`, so the two cannot disagree.
+ */
+export async function hasOpenRouterKey(
+	has: SecretPresenceReader,
+): Promise<AiOpenRouterKeySource | undefined> {
+	if (await has(AI_SECRETS.openRouterKey)) return "settings";
+	if (await has(AI_SECRETS.legacyOpenRouterKey)) return "timeline";
 	return undefined;
 }
 
