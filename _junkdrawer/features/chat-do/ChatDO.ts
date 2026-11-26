@@ -27,7 +27,6 @@ import {
 // ============================================================================
 
 /** ChatDO has no local state — all data lives in D1. */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ChatState {
 	initialized: boolean;
 }

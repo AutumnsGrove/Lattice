@@ -4,7 +4,11 @@ import type { RequestHandler } from "./$types";
 import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
 import { validFontIds } from "@autumnsgrove/lattice/ui/tokens/fonts";
 import { ALL_SEASONS } from "@autumnsgrove/lattice/ui/types/season";
-import { FONT_SCALE, parseFontScale } from "@autumnsgrove/lattice/platform/config/presets";
+import {
+	FONT_SCALE,
+	parseFontScale,
+	parseCssColor,
+} from "@autumnsgrove/lattice/platform/config/presets";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 
 export const prerender = false;
@@ -88,16 +92,15 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 			}
 		}
 
-		// Validate color settings (hex format)
+		// Validate color settings. `parseCssColor` is the same check the layout uses
+		// at render time, so the write path and the render path cannot disagree
+		// about what a colour is.
 		if (setting_key === "accent_color" || setting_key === "vine_color") {
 			// vine_color allows empty string to clear (falls back to accent)
 			if (setting_key === "vine_color" && setting_value === "") {
 				// Will be handled as a delete below
-			} else {
-				const hexColorRegex = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{4}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/;
-				if (!hexColorRegex.test(setting_value)) {
-					throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
-				}
+			} else if (parseCssColor(setting_value) === null) {
+				throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API");
 			}
 		}
 

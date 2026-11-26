@@ -123,7 +123,6 @@
 		title?: string;
 		description?: string;
 		/** Optional icon component rendered beside the title (Svelte 5 Component or Lucide @lucide/svelte icons) */
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		icon?: Component<any>;
 		/** Additional CSS classes for the icon (overrides default text-muted-foreground) */
 		iconClass?: string;
@@ -323,11 +322,13 @@
 		surface: "hover:bg-white/100 dark:hover:bg-cream-200/95 hover:shadow-md hover:border-default",
 		tint: "hover:bg-white/70 dark:hover:bg-cream-200/55 hover:shadow-md hover:border-foreground-subtle/30",
 		card: "hover:bg-white/90 dark:hover:bg-cream-300/50 hover:shadow-lg hover:border-foreground-subtle/30",
-		frosted: "hover:bg-white/95 dark:hover:bg-cream-300/60 hover:shadow-lg hover:border-foreground-subtle/30",
+		frosted:
+			"hover:bg-white/95 dark:hover:bg-cream-300/60 hover:shadow-lg hover:border-foreground-subtle/30",
 		accent:
 			"hover:bg-accent/30 dark:hover:bg-cream-200/35 hover:shadow-lg hover:shadow-accent/10 hover:border-accent/40",
 		overlay: "hover:bg-black/60 dark:hover:bg-black/70 hover:shadow-2xl",
-		muted: "hover:bg-white/70 dark:hover:bg-cream-300/40 hover:shadow-md hover:border-foreground-subtle/30",
+		muted:
+			"hover:bg-white/70 dark:hover:bg-cream-300/40 hover:shadow-md hover:border-foreground-subtle/30",
 		dark: "hover:bg-bark-900/50 dark:hover:bg-cream-50/60 hover:shadow-xl hover:border-bark-600/40",
 	};
 

@@ -136,11 +136,6 @@
 			"svelte": "./dist/components/admin/*.svelte",
 			"default": "./dist/components/admin/*.svelte"
 		},
-		"./components/custom/*.svelte": {
-			"types": "./dist/components/custom/*.svelte.d.ts",
-			"svelte": "./dist/components/custom/*.svelte",
-			"default": "./dist/components/custom/*.svelte"
-		},
 		"./components/reeds/*.svelte": {
 			"types": "./dist/components/reeds/*.svelte.d.ts",
 			"svelte": "./dist/components/reeds/*.svelte",
