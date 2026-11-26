@@ -214,11 +214,6 @@ export async function waitForCacheKey(key: string, attempts = 20): Promise<boole
 	return false;
 }
 
-export async function clearGardenCache(tenantId: string, slug?: string): Promise<void> {
-	await env.CACHE_KV.delete(CACHE_KEYS.list(tenantId));
-	if (slug) await env.CACHE_KV.delete(CACHE_KEYS.post(tenantId, slug));
-}
-
 export type ServiceName = "auth" | "zephyr" | "lumen" | "pulse";
 
 export interface StubRoute {

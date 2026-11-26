@@ -1,15 +1,7 @@
 import { evictDurableObject } from "cloudflare:test";
 import { env } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
-import {
-	CACHE_KEYS,
-	TENANTS,
-	clearGardenCache,
-	createTenant,
-	page,
-	tenantIdFor,
-	waitForCacheKey,
-} from "./harness";
+import { CACHE_KEYS, TENANTS, createTenant, page, tenantIdFor, waitForCacheKey } from "./harness";
 
 /**
  * The pages a stranger sees: home, the listing, a post, about, and a 404.
