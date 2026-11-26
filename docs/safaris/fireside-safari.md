@@ -535,3 +535,150 @@ constraints travel with them.
 #### Migration needs
 
 None. This stop contributes test files and two deletions.
+
+## 4. The Field Notes
+
+**Character**: A writer's field journal from a country that has since been re-surveyed. The
+philosophy is still the best thing in the territory — the voice samples in it are exactly right —
+but a third of it now describes a Grove that does not exist: one where conversations are never
+stored, where inference is Grove's cost, and where the model vendor list is a shopping list.
+
+### Safari findings: What exists today
+
+`docs/specs/wisp-spec.md`, 1,163 lines. Fireside is a **section inside the Wisp spec** (lines
+229–836) — which is itself the old hierarchy. Wisp, grammar, tone and readability are one
+feature; this is another.
+
+**Thriving — the parts to carry across word for word:**
+
+- [x] **The philosophy table** (`AI is a TOOL, Never a Writer`): allowed = fixes, analysis,
+      scoring, suggestions, feedback; forbidden = "write a post about X", "expand this",
+      autocomplete, full sentences, brainstorming. Still the north star.
+- [x] **The voice samples.** The mid-conversation mockup is not filler — it is the tone spec:
+      *"Ooh, what feels different about it?"* … *"That makes total sense. Resonance vs proximity.
+      That's a really clear way to put it. What makes those connections feel fragile to you?"*
+      Short, curious, reflecting the writer's own phrase back. Nothing in the code enforces that;
+      the mockup is the only place it is written down.
+- [x] **The twelve starter prompts** — shipped verbatim in `fireside.ts`.
+- [x] **The hard refusals table**, with five redirections that are already good copy:
+      *"I can't write for you, but I'd love to hear what you think about X"*, *"Your voice is the
+      whole point. What do you actually want to say?"*, *"This is your space. What do you think?"*
+- [x] **The soft constraints**: 3 messages + 150 tokens, input/output ratio, no opinion
+      injection, no padding. All four survive, and three of them are still only sentences.
+- [x] **Security**: strip control and zero-width characters, 2,000-char message cap, reject
+      whitespace-only, delimiters around user text, per-conversation message ceiling.
+- [x] **The accessibility table** — keyboard map (`Tab`, `Enter`, `Escape`, `Cmd/Ctrl+Shift+F`,
+      arrows), `role="log"` + `aria-live="polite"`, "Wisp says: …" announcements, `role="alert"`
+      for errors, ASCII-vs-emoji on small screens, `aria-hidden` on decoration.
+- [x] **The database additions** — what shipped as migration 027 is what the spec asked for.
+
+**No longer true — five places the spec speaks for a project that moved:**
+
+1. **Privacy: "conversations are never stored."** The spec is explicit — client state, then
+   `sessionStorage`, optional KV with a 15-minute TTL and immediate deletion, *"all conversation
+   data purged"* after publish. The decision now is the opposite: **history lives in the tenant
+   DB** (yours, at least for now), and a transcript can be published. That is not a tweak; the
+   section gets rewritten, and the *promise* changes with it — from *"we never keep it"* to
+   *"we keep it in your grove, and you decide who sees it"*. **Flagged for the Privacy Policy**,
+   which currently makes the stronger claim.
+2. **Cost: a Grove-paid service with a $5 cap and a 10/hour limit**, plus an analysis cost table
+   ($0.01–$0.15/month). All obsolete: BYOK, no cap, no quota. The spec never estimated a
+   *session* at all — and the repo's only measured datapoint is the timeline's day (14 turns,
+      169k input, $0.0076). A fireside session is far smaller; the honest line is "well under a cent
+   on a cheap model, ten to twenty times that on a frontier one", to be replaced by a measured
+   number once a session has run.
+3. **Model strategy: DeepSeek V3.2 via Fireworks/Cerebras/Groq with a Kimi/Llama fallback.**
+   The registry (#1849, #1850) is now the truth about models, prices and fallbacks. This section
+   is a historical artefact, and keeping it invites someone to trust it.
+4. **The API**: `POST /api/grove/wisp/fireside` with an `action` field, and errors shaped
+   `{ error: true, code: "rate_limit" | "generation_blocked" | … }`. The route is gone and the
+   error envelope is `{ error, error_code }`. **But the error vocabulary is better than the
+   code's** — `generation_blocked` with a `redirectPrompt`, `session_expired`, `content_too_long`
+   — and should be carried into the new route rather than lost.
+5. **Guardrail detection: "client-side keyword pre-flight + server-side intent classification."**
+   **Never built** — nothing in the junk-drawn code mentions intent, pre-flight or
+   `generation_blocked`. It was a good instinct in 2025 and a worse one now: a keyword filter
+   cannot catch *"help me say this better"*, and a classifier call on every turn doubles the cost
+   of a conversation to police a rule the model is already given. Safari-approved: keep the
+   redirect as an instruction (and test it), drop the pre-flight, and if a real classifier is ever
+   wanted, it runs **once, at the draft step**, where it is cheap and where the consequence lives.
+
+**One promise this spec made that the code never kept:** the marker's *server-side enforcement*.
+The spec sketches re-appending `*~ written fireside with Wisp ~*` on write and refusing to clear
+`fireside_assisted`. Neither exists; `fireside_assisted` is written as `0` at two call sites and
+read by nothing. The promise was right, and it is Stop 8's to keep.
+
+### Design spec (safari-approved)
+
+**Core decision:** this becomes **its own spec** — `docs/specs/fireside-spec.md` — and what it
+keeps from here are the *sentences*, not the *architecture*. The Wisp spec keeps grammar, tone and
+readability and loses its Fireside section.
+
+#### 1. The shape of the new document
+
+| Section | Source | Change |
+| --- | --- | --- |
+| What this is | the philosophy table | keep, verbatim |
+| The voice | the mid-conversation mockup | promote to its own section — it is the tone spec |
+| What it won't do | the hard refusals table | keep the five redirections word for word |
+| When it opens its mouth | the soft constraints | keep; `canDraft` is still 3 + 150 |
+| Where the conversation lives | *new* | tenant DB, retention, delete, transcript opt-in |
+| What it costs | *new* | BYOK, no cap, a measured number once it runs |
+| How it is built | Stop 2's routes + Stop 5's tables | replaces the old API and DB sections |
+| Where it appears | Stop 6 | one button, one overlay, one shortcut |
+| What readers see | Stop 8 | the transcript, opt-in, and the marker's enforcement |
+| How it is tested | Stop 3's suites | happy / bad / sad, real runtime, no mocks |
+| What we overturned | *new* | the four decisions above, with the reason each changed |
+
+#### 2. The privacy section, rewritten honestly
+
+> **Your conversation is yours.** It is kept in your grove's own database so you can come back to
+> it, and so a post can show its own receipts if you choose. It is never used to train a model,
+> never read by a person at Grove, and never shown to anyone unless you publish the transcript.
+> You can delete a session at any time, and deleting a post deletes its session.
+
+Four promises there, and each one needs a mechanism before it is written down: retention
+(unfinished sessions expire — 30 days is the starting guess), deletion (session delete + post
+delete cascade), access (no admin route reads message bodies; say it out loud), and the transcript
+(off by default).
+
+#### 3. The "what we overturned" appendix
+
+Written most seriously of anything in the document, because a future reader will otherwise
+"restore" the old decisions in good faith:
+
+- **client-only storage → tenant DB.** Why: #1317 asked for resume and got "use sessionStorage";
+  the writer's own history is worth keeping, and a transcript is only possible if the conversation
+  exists. What was lost: the absolute "we never store it" claim, replaced by a narrower one that
+  has to hold up.
+- **Grove-paid + $5 cap → BYOK, no cap.** Why: inference became the Wanderer's key. What was
+  lost: nothing but a guard that was never enforced.
+- **pinned model list → registry.** Why: prices and models move; a spec that names them rots.
+- **intent classification → instruction + test.** Why: it was never built, and it costs a call
+  per turn to police a rule the model already has.
+
+#### Spec fixes
+
+- [ ] Create `docs/specs/fireside-spec.md`; delete Fireside from `wisp-spec.md` (leave a pointer)
+- [ ] Promote the mid-conversation mockup to a "voice" section, and copy its lines into the reply
+      prompt's examples
+- [ ] Keep the five refusal redirections verbatim
+- [ ] Rewrite privacy: retention window, deletion path, no-admin-read, transcript default off —
+      each with its mechanism
+- [ ] Replace the cost table with BYOK + a measured session cost (measure after the first run)
+- [ ] Delete the model/provider section; point at the registry
+- [ ] Replace the API section with the six routes and the Grove error envelope, keeping the old
+      error *vocabulary* (`generation_blocked` + `redirectPrompt`, `session_expired`,
+      `content_too_long`)
+- [ ] Drop the client pre-flight and intent classification; state the redirect is an instruction
+      and name the test that proves it
+- [ ] Keep the accessibility table; add the transcript page to it
+- [ ] Add the "what we overturned" appendix
+- [ ] Flag the Privacy Policy line for review in the issue, not a comment in the spec
+
+#### Kept exactly as-is
+
+- [x] the philosophy table, the twelve starter prompts, the five refusals
+- [x] `canDraft` (3 messages, 150 tokens) and the input/output ratio rule
+- [x] delimiters, control-character stripping, 2,000-char cap, whitespace rejection
+- [x] the accessibility keyboard map and screen-reader announcements
