@@ -164,6 +164,52 @@ jobs:
         run: ${{ matrix.command }}
         working-directory: ${{ matrix.package }}
 
+  # One full journey in a real browser. Kept apart from the test matrix: it
+  # builds the app, seeds a database and boots a worker before the first
+  # assertion, so it costs minutes and only earns them when Aspen changed.
+  e2e:
+    name: "E2E: aspen journey"
+    needs: detect
+    if: >-
+      needs.detect.outputs.run-all == 'true' ||
+      contains(needs.detect.outputs.affected, 'apps/aspen')
+    runs-on: ubuntu-latest
+    env:
+      DEMO_MODE_SECRET: e2e-demo-secret
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup workspace
+        uses: ./.github/actions/grove-setup
+        with:
+          build-engine: "true"
+          # The e2e build imports gossamer through the engine's dist.
+          build-gossamer: "true"
+
+      - name: Sync SvelteKit
+        run: pnpm exec svelte-kit sync
+        working-directory: apps/aspen
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+        working-directory: apps/aspen
+
+      - name: Run the journey
+        run: pnpm test:e2e
+        working-directory: apps/aspen
+
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aspen-e2e-results
+          path: |
+            apps/aspen/.e2e-results
+            apps/aspen/playwright-report
+          retention-days: 7
+
   # Type check only affected packages
   typecheck:
     name: "Check: ${{ matrix.name }}"
