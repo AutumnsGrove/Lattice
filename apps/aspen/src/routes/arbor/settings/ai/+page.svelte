@@ -97,7 +97,9 @@
 </ArborSection>
 
 <style>
-	.ai-card {
+	/* Classes handed to a component are not visible to Svelte's CSS pruning, so
+	   they are global the way `.card-icon` is on the settings hub. */
+	:global(.ai-card) {
 		padding: 1.5rem;
 		max-width: 44rem;
 	}
@@ -115,7 +117,7 @@
 		margin: 0;
 	}
 
-	.section-icon {
+	:global(.section-icon) {
 		width: 1.1rem;
 		height: 1.1rem;
 		color: var(--color-text-muted);
