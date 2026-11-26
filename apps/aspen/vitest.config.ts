@@ -52,6 +52,9 @@ export default defineConfig({
 								GROVEAUTH_URL: "https://auth.grove.place",
 								ZEPHYR_URL: "https://zephyr.internal",
 								CLEARING_API_URL: "https://status.grove.place",
+								// Test-only KEK: 64 hex chars, the shape SecretsManager
+								// validates. Every test tenant gets its DEK wrapped with it.
+								GROVE_KEK: "0123456789abcdef".repeat(4),
 							},
 							d1Databases: ["DB", "CURIO_DB"],
 							// `STUB_CONTROL` must be declared by name, not just listed: the
