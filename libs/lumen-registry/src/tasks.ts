@@ -148,10 +148,7 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
 	image: {
 		primaryModel: MODELS.CLAUDE_HAIKU_55,
 		primaryProvider: "openrouter",
-		fallbackChain: [
-			{ provider: "openrouter", model: MODELS.GEMMA_4_26B },
-			{ provider: "cloudflare-ai", model: MODELS.CF_LLAMA4_SCOUT },
-		],
+		fallbackChain: [{ provider: "cloudflare-ai", model: MODELS.CF_LLAMA4_SCOUT }],
 		defaultMaxTokens: 1024,
 		defaultTemperature: 0.2,
 		description: "Image analysis and description",

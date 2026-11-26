@@ -16,12 +16,9 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
-	CATALOG_URL,
 	endpointsUrl,
-	missingFromList,
 	openRouterIds,
-	parseCatalog,
-	parseEndpointFacts,
+	parseModelFacts,
 } from "../../libs/lumen-registry/src/catalog.js";
 import type { Catalog, Registry } from "../../libs/lumen-registry/src/catalog.js";
 
@@ -102,15 +99,14 @@ async function main(): Promise<number> {
 
 	let live: Catalog;
 	try {
-		const fetchedAt = new Date().toISOString();
-		const payload = await fetchJson(CATALOG_URL);
-		live = parseCatalog(payload, ids, fetchedAt, { missing: "skip" });
-
-		// Embeddings are carried by OpenRouter but not listed by the model list, so
-		// each one is asked about directly.
-		for (const id of missingFromList(payload, ids)) {
-			live.models[id] = parseEndpointFacts(id, await fetchJson(endpointsUrl(id)));
+		// One request per model, from the endpoint that carries its providers: the
+		// model *list* publishes one price per model, usually the owner's, which is
+		// not what OpenRouter routes a request to.
+		const models: Catalog["models"] = {};
+		for (const id of ids) {
+			models[id] = parseModelFacts(id, await fetchJson(endpointsUrl(id)));
 		}
+		live = { source: endpointsUrl("{id}"), fetchedAt: new Date().toISOString(), models };
 	} catch (error) {
 		console.error(error instanceof Error ? error.message : String(error));
 		return EXIT_COULD_NOT_CHECK;

@@ -158,10 +158,10 @@ export interface PickableModel {
  * The model a picker starts on: the timeline's default, and the one the
  * "recommended" badge marks.
  */
-export const DEFAULT_OPENROUTER_MODEL = MODELS.DEEPSEEK_V4_FLASH_0731;
+export const DEFAULT_OPENROUTER_MODEL = MODELS.DEEPSEEK_V4_1_FLASH_1017;
 
 /**
- * Models a person may choose between: OpenRouter's generative ones, cheapest
+ * Models a person may choose between: the three the `picker` flag marks, cheapest
  * first so the cost of a choice is visible.
  */
 export function listPickableModels(): PickableModel[] {

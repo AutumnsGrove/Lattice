@@ -48,14 +48,13 @@ describe("Provider Configuration", () => {
 describe("Model Definitions", () => {
 	it("should have all required OpenRouter models", () => {
 		// Generation
+		expect(MODELS.DEEPSEEK_V4_1_FLASH_1017).toContain("deepseek");
 		expect(MODELS.DEEPSEEK_V4_1_FLASH).toContain("deepseek");
 		expect(MODELS.QWEN3_8_FLASH).toContain("qwen");
-		expect(MODELS.LLAMA_3_1_8B).toContain("llama");
-		expect(MODELS.KIMI_K2_7_CODE).toContain("kimi");
+		expect(MODELS.GPT_OSS_120B).toContain("gpt-oss");
 
 		// Vision
 		expect(MODELS.CLAUDE_HAIKU_55).toContain("claude");
-		expect(MODELS.GEMMA_4_26B).toContain("gemma");
 
 		// Moderation
 		expect(MODELS.GPT_OSS_SAFEGUARD).toContain("gpt-oss-safeguard");
@@ -66,10 +65,12 @@ describe("Model Definitions", () => {
 		expect(MODELS.BGE_M3).toContain("bge");
 	});
 
-	it("should have Cloudflare fallback models", () => {
-		expect(MODELS.CF_SHIELDGEMMA).toContain("@");
-		expect(MODELS.CF_BGE_BASE).toContain("@cf/");
-		expect(MODELS.CF_LLAMAGUARD_3).toContain("@cf/");
+	it("keeps only the Cloudflare models something still uses", () => {
+		// Vision fallback and speech-to-text: the moderation and embedding models are
+		// gone, along with the second-hand AMD/µA availability that made them a poor
+		// thing to depend on.
+		expect(MODELS.CF_LLAMA4_SCOUT).toContain("@cf/");
+		expect(MODELS.CF_WHISPER_TURBO).toContain("@cf/");
 	});
 
 	it("should use proper model ID format", () => {
@@ -78,7 +79,7 @@ describe("Model Definitions", () => {
 		expect(MODELS.CLAUDE_HAIKU_55).toMatch(/^[a-z-]+\/[a-z0-9.-]+$/i);
 
 		// Cloudflare models: @cf/ or @hf/ prefix
-		expect(MODELS.CF_BGE_BASE).toMatch(/^@(cf|hf)\//);
+		expect(MODELS.CF_LLAMA4_SCOUT).toMatch(/^@(cf|hf)\//);
 	});
 });
 
@@ -245,9 +246,11 @@ describe("Task-Specific Configuration", () => {
 			expect(TASK_REGISTRY.image.primaryModel).toBe(MODELS.CLAUDE_HAIKU_55);
 		});
 
-		it("should have Gemma 4 as fallback", () => {
+		it("should fall back to the Cloudflare vision model", () => {
+			// Gemma was the second fallback and is no longer in the registry; Scout is
+			// the only other vision model left, and it is free.
 			const fallbacks = TASK_REGISTRY.image.fallbackChain;
-			expect(fallbacks.some((f) => f.model === MODELS.GEMMA_4_26B)).toBe(true);
+			expect(fallbacks.map((f) => f.model)).toEqual([MODELS.CF_LLAMA4_SCOUT]);
 		});
 
 		it("should use low temperature for accurate descriptions", () => {
@@ -280,18 +283,17 @@ describe("Model Costs", () => {
 	});
 
 	it("should have Cloudflare models at zero cost", () => {
-		expect(MODEL_COSTS[MODELS.CF_SHIELDGEMMA].input).toBe(0);
-		expect(MODEL_COSTS[MODELS.CF_BGE_BASE].input).toBe(0);
-		expect(MODEL_COSTS[MODELS.CF_LLAMAGUARD_3].input).toBe(0);
+		expect(MODEL_COSTS[MODELS.CF_LLAMA4_SCOUT].input).toBe(0);
+		expect(MODEL_COSTS[MODELS.CF_WHISPER_TURBO].input).toBe(0);
 	});
 
-	it("should have reasonable cost ratios", () => {
-		// The last-resort fallback should be the cheapest paid model
-		const deepseekCost = MODEL_COSTS[MODELS.DEEPSEEK_V4_1_FLASH];
-		const llamaCost = MODEL_COSTS[MODELS.LLAMA_3_1_8B];
+	it("prices a run from the cheapest provider, not the model owner's list price", () => {
+		// 1017 is listed at $0.15/$0.60 and served from $0.04/$0.10; the catalog takes
+		// the endpoints' cheapest pair, and this pins that it did.
+		const flash = MODEL_COSTS[MODELS.DEEPSEEK_V4_1_FLASH_1017];
 
-		expect(llamaCost.input).toBeLessThan(deepseekCost.input);
-		expect(llamaCost.output).toBeLessThan(deepseekCost.output);
+		expect(flash.input).toBeLessThan(0.1);
+		expect(flash.output).toBeLessThan(0.3);
 	});
 });
 
@@ -337,7 +339,7 @@ describe("calculateCost", () => {
 	});
 
 	it("should return 0 for Cloudflare models", () => {
-		const cost = calculateCost(MODELS.CF_BGE_BASE, 1_000_000, 0);
+		const cost = calculateCost(MODELS.CF_LLAMA4_SCOUT, 1_000_000, 0);
 		expect(cost).toBe(0);
 	});
 });

@@ -361,18 +361,11 @@ export class CloudflareAIProvider implements LumenProvider {
 	// ===========================================================================
 
 	async healthCheck(): Promise<boolean> {
-		try {
-			// Simple embedding test
-			await this.ai.run(
-				MODELS.CF_BGE_BASE as Parameters<Ai["run"]>[0],
-				{
-					text: ["health check"],
-				} as AiTextEmbeddingsInput,
-			);
-			return true;
-		} catch {
-			return false;
-		}
+		// The binding, not a model, is what goes missing. This used to run a BGE
+		// embedding as a probe, but that model is not in the registry any more —
+		// and a probe that needs a model agreement the deployment may not have
+		// reports the provider as down for the wrong reason.
+		return typeof this.ai?.run === "function";
 	}
 
 	// ===========================================================================

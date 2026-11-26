@@ -222,7 +222,7 @@ export interface OpenRouterResponse {
 export const MODEL_TIERS: Record<string, string> = {
 	fast: MODELS.GPT_OSS_120B, // Cerebras ~2000 tok/s
 	accurate: MODELS.DEEPSEEK_V3_2,
-	research: MODELS.DEEPSEEK_V4_PRO_0813,
+	research: MODELS.DEEPSEEK_V4_1_FLASH_1017,
 	code: MODELS.MINIMAX_M3,
 };
 

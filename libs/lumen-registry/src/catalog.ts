@@ -8,19 +8,19 @@
  *
  * So there are two files now:
  *
- * - `src/data/catalog.json` — facts, pinned from OpenRouter's own list by
- *   `pnpm models:refresh`. Committed, so a deploy is reproducible and a check
- *   needs no network.
+ * - `src/data/catalog.json` — facts, pinned from OpenRouter by `pnpm
+ *   models:refresh`. Committed, so a deploy is reproducible and a check needs no
+ *   network.
  * - `src/data/models.json` — the Grove overlay. Still hand-written, because it
- *   is the part that is a decision: which model a task uses, which providers
- *   are approved, what quality label a picker shows. Its `cost` and
- *   `contextWindow` are filled in from the catalog by `pnpm models:sync`.
+ *   is the part that is a decision: which model a task uses, which providers are
+ *   approved, what quality label a picker shows. Its `cost`, `contextWindow` and
+ *   `maxOutputTokens` are filled in from the catalog by `pnpm models:sync`.
  *
  * `pnpm models:check` fails when the two disagree, and the engine's own test
  * suite asserts the same thing, so CI notices when only the data file changes.
  */
 
-/** The OpenRouter endpoint the facts come from. */
+/** OpenRouter's model API. One model's facts live under `/{id}/endpoints`. */
 export const CATALOG_URL = "https://openrouter.ai/api/v1/models";
 
 /** One model's prices, per million tokens, in USD. */
@@ -33,21 +33,20 @@ export interface ModelPricing {
 export interface ModelFacts {
 	id: string;
 	name: string;
-	/** Null when the provider does not publish one (transcription models). */
+	/** Null when no provider publishes one (transcription models). */
 	contextWindow: number | null;
 	/**
-	 * The longest completion the routed provider will return, null when it does
-	 * not say. A request whose `max_tokens` is over this is refused outright
-	 * rather than clamped, which is why the router reads it before sending
-	 * (#1707).
+	 * The longest completion any provider will return, null when none says. A
+	 * request whose `max_tokens` is over a provider's limit is refused rather
+	 * than clamped, which is why the router reads this before sending (#1707).
 	 */
 	maxOutputTokens: number | null;
 	pricing: ModelPricing;
 	/**
-	 * True when the provider prices by input length or by time of day, so the
-	 * base price above is only the first tier. Recorded rather than modelled:
-	 * a single number cannot express a tier, and pretending it can is how a
-	 * reported cost goes wrong.
+	 * True when a provider prices by input length or by time of day, so the base
+	 * price above is only the first tier. Recorded rather than modelled: a single
+	 * number cannot express a tier, and pretending it can is how a reported cost
+	 * goes wrong.
 	 */
 	tiered: boolean;
 }
@@ -83,14 +82,14 @@ export interface Drift {
 	catalog: string;
 }
 
-interface OpenRouterModel {
-	id: string;
-	name?: string;
+interface OpenRouterEndpoint {
+	provider_name?: string;
 	context_length?: number | null;
-	top_provider?: { context_length?: number | null; max_completion_tokens?: number | null } | null;
+	max_completion_tokens?: number | null;
 	pricing?: {
 		prompt?: string;
 		completion?: string;
+		/** Present when a provider prices by input length or time of day. */
 		overrides?: unknown[];
 	};
 }
@@ -106,59 +105,10 @@ function perMillion(perToken: string | undefined): number {
 }
 
 /**
- * Pick the facts for `ids` out of OpenRouter's response.
- *
- * Only the models the registry names are kept: this is a pinned snapshot of
- * what Grove routes, not a copy of the catalog. A model OpenRouter lists and we
- * do not use is somebody else's maintenance burden.
- */
-export function parseCatalog(
-	payload: unknown,
-	ids: string[],
-	fetchedAt: string,
-	options: { missing?: "throw" | "skip" } = {},
-): Catalog {
-	const data = (payload as { data?: OpenRouterModel[] })?.data;
-	if (!Array.isArray(data)) {
-		throw new Error(`OpenRouter's response has no data array`);
-	}
-
-	const byId = new Map(data.map((model) => [model.id, model]));
-	const models: Record<string, ModelFacts> = {};
-
-	for (const id of [...ids].sort()) {
-		const model = byId.get(id);
-		if (model === undefined) {
-			// A chat model that disappears is worth stopping for. An embedding is
-			// simply not in this endpoint, and the caller fetches it separately.
-			if ((options.missing ?? "throw") === "throw") {
-				throw new Error(`OpenRouter no longer lists ${id}`);
-			}
-			continue;
-		}
-		models[id] = {
-			id,
-			name: model.name ?? id,
-			contextWindow: model.context_length ?? null,
-			maxOutputTokens: model.top_provider?.max_completion_tokens ?? null,
-			pricing: {
-				input: perMillion(model.pricing?.prompt),
-				output: perMillion(model.pricing?.completion),
-			},
-			tiered: (model.pricing?.overrides?.length ?? 0) > 0,
-		};
-	}
-
-	return { source: CATALOG_URL, fetchedAt, models };
-}
-
-/**
  * Whether OpenRouter can price this model.
  *
- * Every model Grove routes through OpenRouter, embeddings included. The list
- * endpoint (`/api/v1/models`) omits embeddings, so `models:refresh` fills those
- * from each model's own `/models/{id}/endpoints` response — they are carried by
- * OpenRouter, just not in the list.
+ * Every model Grove routes through OpenRouter, embeddings included — they are
+ * carried by OpenRouter, just absent from the model *list*.
  */
 function catalogCovers(model: RegistryModel): boolean {
 	return model.provider === "openrouter";
@@ -171,8 +121,74 @@ export function openRouterIds(registry: Registry): string[] {
 		.map((model) => model.id);
 }
 
+/** Where one model's own pricing and limits live. */
+export function endpointsUrl(id: string): string {
+	return `${CATALOG_URL}/${id}/endpoints`;
+}
+
 function money(value: number): string {
 	return `$${value.toFixed(6).replace(/0+$/, "").replace(/\.$/, "")}/M`;
+}
+
+/**
+ * A model's facts, from its own `/models/{id}/endpoints` response.
+ *
+ * Not from `/api/v1/models`: that list carries one price per model — usually the
+ * model owner's — while OpenRouter may route the same id to dozens of providers
+ * at very different prices. `deepseek-v4.1-flash-1017` is listed at $0.15/$0.60
+ * and served from $0.04/$0.10, so the list made every run look several times
+ * more expensive than it was.
+ *
+ * The choices, and why:
+ *
+ * - **Price**: the cheapest published pair, output compared first because output
+ *   is the expensive axis, and both numbers from the *same* provider — mixing
+ *   one provider's lowest input with another's lowest output would describe a
+ *   price nobody offers.
+ * - **Context window and completion ceiling**: the largest any provider offers.
+ *   OpenRouter filters providers by what the request needs, so the number to
+ *   compare against is the model's, not the weakest provider's.
+ * - **Tiered**: true if any provider prices by input length or time of day. One
+ *   number cannot express a tier; the flag says so rather than pretending.
+ *
+ * A model with no endpoints is one OpenRouter has dropped, which is worth
+ * stopping for.
+ */
+export function parseModelFacts(id: string, payload: unknown): ModelFacts {
+	const data = (
+		payload as {
+			data?: { id?: string; name?: string; endpoints?: OpenRouterEndpoint[] };
+		}
+	)?.data;
+	const endpoints = data?.endpoints;
+
+	if (!Array.isArray(endpoints) || endpoints.length === 0) {
+		throw new Error(`OpenRouter no longer lists ${id}: its endpoints response is empty`);
+	}
+
+	const priced = endpoints
+		.filter((endpoint) => typeof endpoint.pricing?.completion === "string")
+		.map((endpoint) => ({
+			input: perMillion(endpoint.pricing?.prompt),
+			output: perMillion(endpoint.pricing?.completion),
+		}))
+		.sort((a, b) => a.output - b.output || a.input - b.input);
+
+	const windows = endpoints
+		.map((endpoint) => endpoint.context_length)
+		.filter((value): value is number => typeof value === "number");
+	const ceilings = endpoints
+		.map((endpoint) => endpoint.max_completion_tokens)
+		.filter((value): value is number => typeof value === "number");
+
+	return {
+		id,
+		name: data?.name ?? id,
+		contextWindow: windows.length > 0 ? Math.max(...windows) : null,
+		maxOutputTokens: ceilings.length > 0 ? Math.max(...ceilings) : null,
+		pricing: priced[0] ?? { input: 0, output: 0 },
+		tiered: endpoints.some((endpoint) => (endpoint.pricing?.overrides?.length ?? 0) > 0),
+	};
 }
 
 /**
@@ -242,71 +258,6 @@ export function findDrift(registry: Registry, catalog: Catalog): Drift[] {
 	return drift;
 }
 
-/** The ids the list endpoint does not carry (embeddings, today). */
-export function missingFromList(payload: unknown, ids: string[]): string[] {
-	const data = (payload as { data?: OpenRouterModel[] })?.data;
-	if (!Array.isArray(data)) {
-		throw new Error(`OpenRouter's response has no data array`);
-	}
-	const listed = new Set(data.map((model) => model.id));
-	return ids.filter((id) => !listed.has(id));
-}
-
-/** Where one model's own pricing and limits live. */
-export function endpointsUrl(id: string): string {
-	return `${CATALOG_URL}/${id}/endpoints`;
-}
-
-interface OpenRouterEndpoint {
-	provider_name?: string;
-	context_length?: number | null;
-	max_completion_tokens?: number | null;
-	pricing?: { prompt?: string; completion?: string };
-}
-
-/**
- * The facts for a model the list endpoint does not carry, from its own
- * endpoints response.
- *
- * OpenRouter may route one id to several providers with different windows and
- * prices, so this takes the conservative pair: the **smallest** context window
- * (never claim more than every provider offers) and the **highest** input price
- * (never under-report a run's cost). A completion ceiling is not recorded —
- * an embedding has no completion to limit.
- */
-export function parseEndpointFacts(id: string, payload: unknown): ModelFacts {
-	const data = (payload as { data?: { name?: string; endpoints?: OpenRouterEndpoint[] } })?.data;
-	const endpoints = data?.endpoints;
-
-	if (!Array.isArray(endpoints) || endpoints.length === 0) {
-		throw new Error(`OpenRouter no longer lists ${id}: its endpoints response is empty`);
-	}
-
-	const windows = endpoints
-		.map((endpoint) => endpoint.context_length)
-		.filter((value): value is number => typeof value === "number");
-	const inputPrices = endpoints
-		.map((endpoint) => endpoint.pricing?.prompt)
-		.filter((value): value is string => typeof value === "string")
-		.map((value) => perMillion(value));
-	const outputPrices = endpoints
-		.map((endpoint) => endpoint.pricing?.completion)
-		.filter((value): value is string => typeof value === "string")
-		.map((value) => perMillion(value));
-
-	return {
-		id,
-		name: data?.name ?? id,
-		contextWindow: windows.length > 0 ? Math.min(...windows) : null,
-		maxOutputTokens: null,
-		pricing: {
-			input: inputPrices.length > 0 ? Math.max(...inputPrices) : 0,
-			output: outputPrices.length > 0 ? Math.max(...outputPrices) : 0,
-		},
-		tiered: false,
-	};
-}
-
 /** The overlay with its catalog-backed fields filled in from `catalog`. */
 export function applyCatalog(registry: Registry, catalog: Catalog): Registry {
 	const models: Record<string, RegistryModel> = {};
@@ -332,7 +283,7 @@ export function applyCatalog(registry: Registry, catalog: Catalog): Registry {
  * The overlay, in the style a person wrote it in: two-space indent, with `cost`
  * and `toolChoice` kept on one line.
  *
- * `models:sync` changes two numbers per model. Re-serializing the whole file
+ * `models:sync` changes a few numbers per model. Re-serializing the whole file
  * would reformat every line and bury those numbers in the diff, which is the
  * opposite of what a reviewer needs when the change is "this price is wrong".
  */

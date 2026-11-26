@@ -23,7 +23,7 @@ describe("extraction module", () => {
 		});
 
 		it("returns research tier model", () => {
-			expect(getModelForTier("research")).toBe(MODELS.DEEPSEEK_V4_PRO_0813);
+			expect(getModelForTier("research")).toBe(MODELS.DEEPSEEK_V4_1_FLASH_1017);
 		});
 
 		it("returns code tier model", () => {
