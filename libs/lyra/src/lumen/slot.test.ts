@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { ModelRequest } from "@autumnsgrove/lyra";
 import { createLumenModelSlot } from "./slot.js";
+import { getModelCapabilities, getTaskConfig } from "@autumnsgrove/lattice/ai/lumen/config";
 
 const KEY = "sk-or-v1-0123456789abcdef0123456789abcdef";
 
@@ -126,8 +127,12 @@ describe("createLumenModelSlot", () => {
 
 	it("SLT04 takes the context window from the model's own flags", () => {
 		const { slot } = slotWith(success());
-		// The agent task's default, from lumen-models.json.
-		expect(slot.contextWindow).toBe(128_000);
+		// Read from the registry rather than typed here: the window is a fact the
+		// catalog keeps true, and a test that repeats the number is a second copy
+		// that goes stale (#1822 — it did, 128k against a real 1,048,576).
+		expect(slot.contextWindow).toBe(
+			getModelCapabilities(getTaskConfig("agent").primaryModel)?.contextWindow,
+		);
 	});
 
 	it("SLT05 says nothing about a window it does not know", () => {
