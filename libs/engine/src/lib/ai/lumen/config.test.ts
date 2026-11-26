@@ -138,6 +138,14 @@ describe("Task Registry", () => {
 		expect(TASK_REGISTRY.agent.defaultMaxTokens).toBeGreaterThan(0);
 	});
 
+	it("gives the agent task room to think before it answers (#1831)", () => {
+		// A reasoning model that runs out of allowance mid-thought answers 200 with an
+		// empty message, and the timeline's day is ~42k characters of setup. The
+		// summary task needed 16,384 for the same reason; 4096 was the ceiling that
+		// produced empty turns four times in a row.
+		expect(TASK_REGISTRY.agent.defaultMaxTokens).toBeGreaterThanOrEqual(16_384);
+	});
+
 	it("should have fallback chains for reliability", () => {
 		for (const task of allTasks) {
 			const config = TASK_REGISTRY[task];

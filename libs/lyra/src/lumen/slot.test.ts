@@ -297,6 +297,56 @@ describe("createLumenModelSlot", () => {
 		expect(result.error.message).toContain("did not match");
 	});
 
+	it("SLT17 an empty reply is a retryable failure, not a finished turn (#1831)", async () => {
+		// A reasoning model that spends its whole allowance thinking answers 200 with
+		// `content: ""`. Lyra used to read that as "stopped without finishing" and
+		// spend its reminders on a model that could not act on advice, then park the
+		// run; as a retryable failure the next attempt actually happens.
+		const { slot, calls } = slotWith(
+			success({ content: "", tool_calls: [], finish_reason: "length" }),
+		);
+
+		const result = await slot.complete(request());
+		if (result.ok) throw new Error("expected a failure");
+
+		expect(result.error).toMatchObject({ code: "provider_error", retryable: true });
+		// The finish reason is the signature that says which ceiling was hit.
+		expect(result.error.message).toContain("finish_reason: length");
+		expect(calls).toHaveLength(1);
+	});
+
+	it("SLT17b a whitespace-only reply counts as empty", async () => {
+		const { slot } = slotWith(success({ content: "  \n\t ", tool_calls: [] }));
+
+		const result = await slot.complete(request());
+		if (result.ok) throw new Error("expected a failure");
+
+		expect(result.error).toMatchObject({ code: "provider_error", retryable: true });
+	});
+
+	it("SLT17c a reply with no text but a tool call is a normal turn", async () => {
+		// The model said nothing in words because the call was the answer.
+		const { slot } = slotWith(
+			success({
+				content: "",
+				finish_reason: "tool_calls",
+				tool_calls: [
+					{
+						id: "call_1",
+						type: "function",
+						function: { name: "add_line", arguments: '{"text":"a line"}' },
+					},
+				],
+			}),
+		);
+
+		const result = await slot.complete(request());
+		if (!result.ok) throw new Error("expected a reply");
+
+		expect(result.value.toolCalls).toHaveLength(1);
+		expect(result.value.text).toBe("");
+	});
+
 	it("SLT16 a body that is not JSON at all is a failure, not a crash", async () => {
 		const { slot } = slotWith(new Response("<html>gateway</html>", { status: 200 }));
 

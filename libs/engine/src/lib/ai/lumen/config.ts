@@ -245,7 +245,11 @@ export const TASK_REGISTRY: Record<LumenTask, TaskConfig> = {
 		primaryModel: MODELS.DEEPSEEK_V4_1_FLASH,
 		primaryProvider: "openrouter",
 		fallbackChain: [],
-		defaultMaxTokens: 4096,
+		// A reasoning model spends this allowance thinking before it writes a word, and
+		// a turn that runs out mid-thought comes back as a successful reply with no
+		// text (#1831). The same ceiling fixed compaction for the same reason; 4096 was
+		// too small for a 42k-character day, which is what the timeline sends.
+		defaultMaxTokens: 16_384,
 		defaultTemperature: 0.2,
 		description: "One step of an agent loop: a tool-using turn",
 	},
