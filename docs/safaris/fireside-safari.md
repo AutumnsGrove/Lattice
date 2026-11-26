@@ -1190,8 +1190,8 @@ timeline's own rule (`tools.ts`: the model never types a repo name, a hash, a li
 
 **Rejected, with reasons:**
 
-- `suggest_title` — the draft proposal already carries a title. Two ways to propose one is one too
-  many.
+- `suggest_title` — see §6a. The *conversation* about a title needs no tool, and the proposal
+  already carries one.
 - `ask_writer` / mid-run approval — the whole feature is a conversation; a run that parks to ask
   a question is the chat asking the chat.
 - `remember(name, value)` — a session scratchpad is genuinely attractive for long conversations and
@@ -1205,10 +1205,31 @@ timeline's own rule (`tools.ts`: the model never types a repo name, a hash, a li
 
 Two tools that read, one that proposes. That is the whole surface.
 
+#### 6a. Working on the title is a conversation, not a tool
+
+Autumn's note at the campfire: *"what if in the chat session I go 'ok let's now work on the title'
+and we go through it there."* Yes — and that already works, which is the point. Prose costs
+nothing to produce, so "give me three titles for this feeling" is a perfectly ordinary reply in the
+turn run. The tool was never what made titles possible.
+
+The only thing a `set_title` tool would add is **persisting the chosen title** so the draft step
+does not re-guess it. Three ways to carry that, cheapest first:
+
+| Carrier | Cost | Verdict |
+| --- | --- | --- |
+| The draft proposal's own `title` field, **editable in the preview before accept** | none — the field already exists | **v1** |
+| A session field the *client* sets when the writer confirms in the preview | one column, no new tool | v1 if the preview needs to survive a reload mid-decision |
+| `set_title` as a model-called tool that writes session state | a tool, a schema, a chip in the drawer, and a write the model performs on its own | not v1 — the model proposing words is fine; the model *recording decisions* is a different permission |
+
+So: titles get talked about freely, the proposal carries one, and the writer edits it where they
+already edit everything else. If a long title negotiation later feels lossy, the middle row is the
+answer, not the bottom one.
+
 #### 6b. Two runs
 
-- **`fireside-turn`** — `read_draft`, `read_my_recent_posts`, `steps = 2*2+2 = 6`,
-  `stuck.reminders: 0` (prose is the finish), `sameFailure: 2`
+- **`fireside-turn`** — **`read_draft` only**, `steps = 2*1+2 = 4`,
+  `stuck.reminders: 0` (prose is the finish), `sameFailure: 2`. Autumn's ruling: replies stay
+  cheap, and the archive-reading work belongs to the step that is assembling the words
 - **`fireside-draft`** — the same two readers plus `propose_draft`,
   `steps = 2*3+2 = 8`, no nudges
 
