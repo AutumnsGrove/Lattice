@@ -1,0 +1,106 @@
+{
+	"source": "https://openrouter.ai/api/v1/models",
+	"fetchedAt": "2026-11-26T19:40:21.225Z",
+	"models": {
+		"anthropic/claude-haiku-5.5": {
+			"id": "anthropic/claude-haiku-5.5",
+			"name": "Anthropic: Claude Haiku 5.5",
+			"contextWindow": 1000000,
+			"pricing": {
+				"input": 0.1,
+				"output": 0.5
+			},
+			"tiered": true
+		},
+		"deepseek/deepseek-v4-flash-0731": {
+			"id": "deepseek/deepseek-v4-flash-0731",
+			"name": "DeepSeek: DeepSeek V4 Flash 0731",
+			"contextWindow": 1048576,
+			"pricing": {
+				"input": 0.0456,
+				"output": 0.3
+			},
+			"tiered": false
+		},
+		"deepseek/deepseek-v4.1-flash": {
+			"id": "deepseek/deepseek-v4.1-flash",
+			"name": "DeepSeek: DeepSeek V4.1 Flash",
+			"contextWindow": 1048576,
+			"pricing": {
+				"input": 0.0507,
+				"output": 0.2028
+			},
+			"tiered": false
+		},
+		"deepseek/deepseek-v4.1-flash-1017": {
+			"id": "deepseek/deepseek-v4.1-flash-1017",
+			"name": "DeepSeek: DeepSeek V4.1 Flash 1017",
+			"contextWindow": 1048576,
+			"pricing": {
+				"input": 0.15,
+				"output": 0.6
+			},
+			"tiered": true
+		},
+		"google/gemma-4-26b-a4b-it": {
+			"id": "google/gemma-4-26b-a4b-it",
+			"name": "Google: Gemma 4 26B A4B ",
+			"contextWindow": 262144,
+			"pricing": {
+				"input": 0.0765,
+				"output": 0.255
+			},
+			"tiered": false
+		},
+		"meta-llama/llama-3.1-8b-instruct": {
+			"id": "meta-llama/llama-3.1-8b-instruct",
+			"name": "Meta: Llama 3.1 8B Instruct",
+			"contextWindow": 131072,
+			"pricing": {
+				"input": 0.05,
+				"output": 0.08
+			},
+			"tiered": false
+		},
+		"meta-llama/llama-guard-4-12b": {
+			"id": "meta-llama/llama-guard-4-12b",
+			"name": "Meta: Llama Guard 4 12B",
+			"contextWindow": 163840,
+			"pricing": {
+				"input": 0.18,
+				"output": 0.18
+			},
+			"tiered": false
+		},
+		"moonshotai/kimi-k2.7-code": {
+			"id": "moonshotai/kimi-k2.7-code",
+			"name": "MoonshotAI: Kimi K2.7 Code",
+			"contextWindow": 262144,
+			"pricing": {
+				"input": 0.6,
+				"output": 3
+			},
+			"tiered": false
+		},
+		"openai/gpt-oss-safeguard-20b": {
+			"id": "openai/gpt-oss-safeguard-20b",
+			"name": "OpenAI: gpt-oss-safeguard-20b",
+			"contextWindow": 131072,
+			"pricing": {
+				"input": 0.075,
+				"output": 0.3
+			},
+			"tiered": false
+		},
+		"qwen/qwen3.8-flash": {
+			"id": "qwen/qwen3.8-flash",
+			"name": "Qwen: Qwen3.8 Flash",
+			"contextWindow": 1000000,
+			"pricing": {
+				"input": 0.15,
+				"output": 0.47
+			},
+			"tiered": false
+		}
+	}
+}
