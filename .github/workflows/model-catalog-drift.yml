@@ -48,28 +48,34 @@ jobs:
       # something to file as "prices have moved".
       #
       # `shell: bash` is load-bearing, not decoration: GitHub's default shell on
-      # Linux is `bash -e {0}` — no pipefail — so the step's status would be
-      # `tee`'s, always 0, and the issue below would never open. The same bug sat
-      # in ci.yml's lint step until #1841.
+      # Linux is `bash -e {0}` — no pipefail — so the pipeline's status would be
+      # `tee`'s, always 0, and real drift would look like a clean check. The same
+      # bug sat in ci.yml's lint step until #1841.
+      #
+      # `set +e` is load-bearing for the other half: with `-e` on, a failing
+      # `pnpm` aborts the script before the exit code is written, `outputs.exit`
+      # stays empty, and every later condition reads it as neither 0 nor 1.
       - name: Ask OpenRouter what the prices are now
         id: check
         shell: bash
-        continue-on-error: true
         run: |
-          set -o pipefail
+          set +e
           pnpm models:refresh --check 2>&1 | tee /tmp/catalog-drift.txt
-          echo "exit=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+          code=${PIPESTATUS[0]}
+          echo "exit=$code" >> "$GITHUB_OUTPUT"
+          exit 0
 
-      # Drift is what the issue is for. Anything else fails the job instead of
-      # claiming the prices moved.
+      # 2 means the check could not run at all — a network failure, an error
+      # response, a delisted model. That is not "prices moved", and filing it as
+      # such would put a lie in the tracker.
       - name: The check could not run
-        if: steps.check.outcome == 'failure' && steps.check.outputs.exit != '1'
+        if: steps.check.outputs.exit != '0' && steps.check.outputs.exit != '1'
         run: |
           echo "The catalog check did not complete (exit ${{ steps.check.outputs.exit }})."
           exit 1
 
       - name: Open or update the drift issue
-        if: steps.check.outcome == 'failure' && steps.check.outputs.exit == '1'
+        if: steps.check.outputs.exit == '1'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -99,3 +105,11 @@ jobs:
             gh issue create --title "$TITLE" --label lumen --label tech-debt \
               --body-file /tmp/catalog-issue.md
           fi
+
+      # The issue is the artifact; the red run is the reminder. Same shape as
+      # migration-drift: a check that found something fails.
+      - name: Fail the run so the drift is visible
+        if: steps.check.outputs.exit == '1'
+        run: |
+          echo "Model prices have moved at OpenRouter. See the issue filed above."
+          exit 1
