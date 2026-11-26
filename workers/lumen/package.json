@@ -2,7 +2,7 @@
 	"name": "grove-lumen",
 	"version": "0.1.0",
 	"private": true,
-	"description": "AI inference gateway \u2014 unified pipeline with PII scrubbing, quota, and fallback chains",
+	"description": "AI inference gateway — unified pipeline with PII scrubbing, quota, and fallback chains",
 	"type": "module",
 	"scripts": {
 		"dev": "wrangler dev",
@@ -20,7 +20,7 @@
 	"devDependencies": {
 		"@autumnsgrove/lyra": "^0.3.1",
 		"@autumnsgrove/lyra-lumen": "workspace:*",
-		"@cloudflare/vitest-pool-workers": "^0.13.3",
+		"@cloudflare/vitest-plugin": "^1.9.2",
 		"@cloudflare/workers-types": "^4.20260317.1",
 		"typescript": "^5.9.3",
 		"vitest": "^4.1.0",

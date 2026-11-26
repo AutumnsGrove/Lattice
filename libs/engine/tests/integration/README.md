@@ -31,12 +31,12 @@ tests/integration/
 import { createMockRequestEvent } from "../helpers/index.js";
 
 const event = createMockRequestEvent({
-  url: "https://tenant.grove.place/admin/posts?/create",
-  method: "POST",
-  locals: {
-    user: { id: "user-1", email: "test@grove.place", name: "Test" },
-    tenantId: "tenant-1",
-  },
+	url: "https://tenant.grove.place/admin/posts?/create",
+	method: "POST",
+	locals: {
+		user: { id: "user-1", email: "test@grove.place", name: "Test" },
+		tenantId: "tenant-1",
+	},
 });
 ```
 
@@ -49,19 +49,16 @@ import { createMockD1, seedMockD1 } from "../helpers/index.js";
 
 const db = createMockD1();
 seedMockD1(db, "posts", [
-  {
-    id: 1,
-    tenant_id: "t1",
-    slug: "hello",
-    title: "Hello World",
-    created_at: Date.now(),
-  },
+	{
+		id: 1,
+		tenant_id: "t1",
+		slug: "hello",
+		title: "Hello World",
+		created_at: Date.now(),
+	},
 ]);
 
-const result = await db
-  .prepare("SELECT * FROM posts WHERE tenant_id = ?")
-  .bind("t1")
-  .all();
+const result = await db.prepare("SELECT * FROM posts WHERE tenant_id = ?").bind("t1").all();
 ```
 
 ### Use Factories
@@ -83,7 +80,7 @@ The mock D1 supports common patterns but not all SQL features:
 
 **NOT supported:** OR, LIKE, IN, JOINs, subqueries, GROUP BY, upserts, aggregate functions
 
-If your test needs advanced SQL, use Miniflare via `@cloudflare/vitest-pool-workers` instead.
+If your test needs advanced SQL, use Miniflare via `@cloudflare/vitest-plugin` instead.
 
 ## Test Isolation
 
@@ -99,7 +96,7 @@ Mock at boundaries, test real logic:
 ```ts
 // Mock external dependencies (boundaries)
 vi.mock("$lib/utils/csrf.js", () => ({
-  validateCSRF: vi.fn(() => true),
+	validateCSRF: vi.fn(() => true),
 }));
 
 // Test real business logic (no mocking)
