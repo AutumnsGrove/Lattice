@@ -60,7 +60,89 @@ describe("line anchors", () => {
 
 		expect(html).toContain("one");
 		expect(html).toContain("two");
-		expect(html.match(/line-vine/g)?.length).toBe(2);
+		expect(html.match(/class="inline-gutter-comment line-vine"/g)?.length).toBe(2);
+	});
+
+	it("puts the note under the line's words when the marker comes first", () => {
+		// The recipe writes the marker at the start of the text, so inserting the
+		// note beside the marker would put it in front of the sentence it comments
+		// on. It belongs at the end of the bullet (#1826).
+		const html = renderTimelineHtml({
+			markdown: "### repo\n- <!-- anchor:l1 -->Wrote the day.",
+			gutterItems: [vine("anchor:l1", "finally")],
+		});
+
+		const words = html.indexOf("Wrote the day");
+		const note = html.indexOf("finally");
+		const itemEnd = html.indexOf("</li>", note);
+
+		expect(words).toBeGreaterThan(-1);
+		expect(note).toBeGreaterThan(words);
+		expect(itemEnd).toBeGreaterThan(note);
+	});
+
+	it("gives a line's notes one block, stacked, in page order", () => {
+		const html = renderTimelineHtml({
+			markdown: day,
+			gutterItems: [vine("anchor:l1", "first note"), vine("anchor:l1", "second note")],
+		});
+
+		// One wrapper per line, so two notes cannot sit side by side and lose which
+		// line they belong to.
+		expect(html.match(/class="line-vine-block"/g)?.length).toBe(1);
+		expect(html.indexOf("first note")).toBeLessThan(html.indexOf("second note"));
+	});
+
+	it("does not float the note beside the line", () => {
+		const html = renderTimelineHtml({ markdown: day, gutterItems: [vine("anchor:l2", "a note")] });
+
+		// The block wrapper is what makes it a row of its own; a bare inline span
+		// would go back to sitting against the words.
+		expect(html).toContain('class="line-vine-block"');
+		expect(html).toContain("line-vine");
+	});
+
+	it("keeps a paragraph's note with the paragraph, not with a later bullet", () => {
+		// Only looking for the next `</li>` would attach this note to the bullet
+		// below the paragraph — a line it does not belong to.
+		const html = renderTimelineHtml({
+			markdown: "### repo\n\nA paragraph <!-- anchor:l1 -->with a note.\n\n- a bullet",
+			gutterItems: [vine("anchor:l1", "paragraph note")],
+		});
+
+		const note = html.indexOf("paragraph note");
+		// Under the paragraph it comments on, and above the list that follows.
+		expect(note).toBeGreaterThan(html.indexOf("</p>"));
+		expect(note).toBeLessThan(html.indexOf("<ul"));
+	});
+
+	it("gives a parent line its note above its sub-bullets", () => {
+		const html = renderTimelineHtml({
+			markdown: "### repo\n- parent <!-- anchor:l1 -->\n  - child",
+			gutterItems: [vine("anchor:l1", "parent note")],
+		});
+
+		const note = html.indexOf("parent note");
+		expect(note).toBeGreaterThan(html.indexOf("parent"));
+		// Above the nested list, not at the end of the child's item.
+		const nestedList = html.indexOf("<ul", html.indexOf("parent") + 1);
+		expect(nestedList).toBeGreaterThan(-1);
+		expect(note).toBeLessThan(nestedList);
+	});
+
+	it("gives a sub-bullet its own note inside the sub-bullet", () => {
+		const html = renderTimelineHtml({
+			markdown: "### repo\n- parent\n  - child <!-- anchor:l2 -->",
+			gutterItems: [vine("anchor:l2", "child note")],
+		});
+
+		const note = html.indexOf("child note");
+		const child = html.indexOf("child");
+		expect(note).toBeGreaterThan(child);
+		// The child's own `</li>` is the nearest one after the note.
+		expect(html.indexOf("</li>", note)).toBeGreaterThan(note);
+		// And the parent item is still open after it, so the note did not escape.
+		expect(html.lastIndexOf("</li>", note)).toBeLessThan(note);
 	});
 
 	it("drops a vine whose marker is not in the day", () => {

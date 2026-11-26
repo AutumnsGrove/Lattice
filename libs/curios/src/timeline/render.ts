@@ -7,11 +7,12 @@
  * - `### ProjectName` — the legacy anchor. The vine renders in a group directly
  *   under that `<h3>`. Stored days use only this one, so it keeps working.
  * - `anchor:l3` — a line anchor. The markdown carries a `<!-- anchor:l3 -->`
- *   marker, which the renderer turns into a zero-width span; the vine renders
- *   immediately after it. Put the marker at the start of the line's text: the
- *   vine floats into the left margin there (float rules mirrored from the
- *   blog gutter, `.mobile-gutter-inline` in the engine's `styles/content.css`),
- *   and the line's own words wrap beside it.
+ *   marker, which the renderer turns into a zero-width span; the vine becomes
+ *   its own indented row under the bullet that holds the marker. It is not
+ *   floated beside the line: a timeline bullet is a short `<li>`, so a floated
+ *   note had nothing to push against and read as if the sentence continued
+ *   into it (#1826). The block goes at the end of the list item, because the
+ *   marker is written at the start of the line's own words.
  *
  * A marker with no matching vine renders as nothing (it is a zero-width span),
  * and a vine whose marker is missing is dropped rather than moved to a heading,
@@ -67,6 +68,16 @@ function groupVines(items: TimelineVine[], extraClass = ""): string {
 	return items.map((item) => vineHtml(item, extraClass)).join("");
 }
 
+/**
+ * A line's vines as one row under the line.
+ *
+ * One wrapper for the whole line, so two notes on the same line stack instead
+ * of sitting side by side and losing which line they belong to.
+ */
+function lineVineBlock(items: TimelineVine[]): string {
+	return `<div class="line-vine-block">${groupVines(items, "line-vine")}</div>`;
+}
+
 /** Group vines by their exact anchor string, preserving first-seen order. */
 function groupByAnchor(items: TimelineVine[]): Map<string, TimelineVine[]> {
 	const grouped = new Map<string, TimelineVine[]>();
@@ -107,7 +118,45 @@ function placeOnHeading(html: string, anchor: string, vines: string): string {
 }
 
 /**
- * Place a group directly after the first `<!-- anchor:name -->` marker.
+ * Where a line's vines go: the end of the list item that holds the marker.
+ *
+ * The marker sits at the start of the line's own words, so inserting beside it
+ * would put the note in front of the sentence it comments on. The item's end is
+ * the first of these after the marker — whichever comes first:
+ *
+ * - `</li>` — the item itself closes.
+ * - `<ul` / `<ol` — a nested list starts, and the note belongs to the parent
+ *   line, above its sub-bullets rather than after them.
+ *
+ * `null` means the marker is not inside a list item at all (a paragraph, in a
+ * day written before the bullet format). The note then goes after that
+ * paragraph: a block element inside a `<p>` would break the paragraph in the
+ * browser, and the note would land in the middle of its own sentence.
+ *
+ * Only looking for the next `</li>` is not enough: a paragraph marker followed
+ * by any list would attach its note to whichever bullet came next, and a parent
+ * with a nested list would attach it to the child's `</li>`.
+ */
+function endOfListItem(html: string, from: number): number | null {
+	const openItem = html.lastIndexOf("<li", from);
+	const closedItem = html.lastIndexOf("</li>", from);
+
+	// Not inside an item: no item opened, or the last one had already closed.
+	if (openItem === -1 || openItem < closedItem) {
+		return null;
+	}
+
+	const candidates = ["</li>", "<ul", "<ol"]
+		.map((closer) => html.indexOf(closer, from))
+		.filter((at) => at !== -1);
+
+	return candidates.length === 0 ? null : Math.min(...candidates);
+}
+
+/**
+ * Place a group at the end of the list item that holds the marker, so the vine
+ * sits under the line's own words rather than in front of them.
+ *
  * Returns the html unchanged when the marker is absent.
  */
 function placeOnMarker(html: string, name: string, vines: string): string {
@@ -116,8 +165,13 @@ function placeOnMarker(html: string, name: string, vines: string): string {
 	if (index === -1) {
 		return html;
 	}
-	const end = index + marker.length;
-	return `${html.slice(0, end)}${vines}${html.slice(end)}`;
+
+	const paragraphEnd = html.indexOf("</p>", index);
+	const at =
+		endOfListItem(html, index) ??
+		(paragraphEnd === -1 ? index + marker.length : paragraphEnd + "</p>".length);
+
+	return `${html.slice(0, at)}${vines}${html.slice(at)}`;
 }
 
 /**
@@ -147,7 +201,7 @@ export function renderTimelineHtml({
 		const parsed = parseAnchor(anchor);
 
 		if (parsed.type === "tag") {
-			html = placeOnMarker(html, String(parsed.value), groupVines(items, "line-vine"));
+			html = placeOnMarker(html, String(parsed.value), lineVineBlock(items));
 		} else {
 			// Header anchors, and the unknown-format strings parseAnchor treats as
 			// headers for backwards compatibility.
