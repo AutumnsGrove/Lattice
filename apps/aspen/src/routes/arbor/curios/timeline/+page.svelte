@@ -39,6 +39,7 @@
 
 	import { saveTokenIndividually as saveTokenApi } from "./timeline-api";
 	import TimelineBackfillSection from "./TimelineBackfillSection.svelte";
+	import TimezonePicker from "./TimezonePicker.svelte";
 	import TimelineGenerateSection from "./TimelineGenerateSection.svelte";
 
 	const { data, form }: { data: PageData; form: ActionData } = $props();
@@ -91,26 +92,8 @@
 	let openrouterKeySaving = $state(false);
 	let openrouterKeyResult = $state<{ ok: boolean; message: string } | null>(null);
 
-	// Common timezones
-	const timezones = [
-		{ value: "America/New_York", label: "Eastern Time (US)" },
-		{ value: "America/Chicago", label: "Central Time (US)" },
-		{ value: "America/Denver", label: "Mountain Time (US)" },
-		{ value: "America/Los_Angeles", label: "Pacific Time (US)" },
-		{ value: "America/Phoenix", label: "Arizona (US)" },
-		{ value: "Europe/London", label: "London (UK)" },
-		{ value: "Europe/Paris", label: "Paris (France)" },
-		{ value: "Europe/Berlin", label: "Berlin (Germany)" },
-		{ value: "Asia/Tokyo", label: "Tokyo (Japan)" },
-		{ value: "Asia/Shanghai", label: "Shanghai (China)" },
-		{ value: "Australia/Sydney", label: "Sydney (Australia)" },
-		{ value: "Pacific/Auckland", label: "Auckland (New Zealand)" },
-	];
-
 	// Check if using custom voice
 	const isCustomVoice = $derived(voicePreset === "custom");
-
-
 
 	async function saveTokenIndividually(type: "github" | "openrouter") {
 		const value = type === "github" ? githubToken : openrouterKey;
@@ -251,12 +234,7 @@
 
 			<div class="field-group">
 				<label for="timezone" class="field-label">Timezone</label>
-				<select id="timezone" name="timezone" bind:value={timezone} class="field-select">
-					{#each timezones as tz}
-						<option value={tz.value}>{tz.label}</option>
-					{/each}
-				</select>
-				<p class="field-help">Summaries are generated based on your local midnight.</p>
+				<TimezonePicker bind:value={timezone} saved={data.config?.timezoneIsSaved ?? false} />
 			</div>
 		</GlassCard>
 

@@ -103,6 +103,9 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 			timezone: config.timezone as string,
 			ownerName: config.owner_name as string | null,
 			updatedAt: config.updated_at as number,
+			// A row exists, so the zone below is one she chose (or the column default
+			// on first save) rather than a placeholder for the picker to overwrite.
+			timezoneIsSaved: Boolean(config.timezone),
 			// Check both SecretsManager and legacy columns for token presence
 			hasGithubToken: hasGithub,
 			hasOpenrouterKey: hasOpenrouter,
@@ -119,6 +122,7 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 			reposInclude: null,
 			reposExclude: null,
 			ownerName: null,
+			timezoneIsSaved: false,
 			hasGithubToken: false,
 			hasOpenrouterKey: false,
 		},
