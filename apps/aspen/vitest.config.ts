@@ -54,7 +54,15 @@ export default defineConfig({
 								CLEARING_API_URL: "https://status.grove.place",
 							},
 							d1Databases: ["DB", "CURIO_DB"],
-							kvNamespaces: ["CACHE_KV", "FLAGS_KV", "STUB_CONTROL"],
+							// `STUB_CONTROL` must be declared by name, not just listed: the
+							// stubbed service workers bind the same namespace id, and a
+							// list entry would give the app a *different* store — tests
+							// would write control values nothing reads.
+							kvNamespaces: {
+								CACHE_KV: "cache-kv",
+								FLAGS_KV: "flags-kv",
+								STUB_CONTROL: "stub-control",
+							},
 							r2Buckets: ["IMAGES", "IMAGES_SOURCE", "EXPORTS_BUCKET"],
 							// Loom's Durable Objects keep their state in DO SQLite storage
 							// (`state.storage.sql`). Without `useSQLite` the first
@@ -96,6 +104,11 @@ export default defineConfig({
 				],
 				test: {
 					name: "routes",
+					// This plugin version has no per-test storage isolation (the
+					// `isolatedStorage` option the older pool-workers had is gone), so
+					// a row one test writes is still there in the next one. Suites that
+					// need a modified tenant create their own with `createTenant()`
+					// rather than editing a seeded row.
 					include: ["test/**/*.test.ts"],
 					globalSetup: ["./test/global-setup.ts"],
 					setupFiles: ["./test/setup-d1.ts"],
