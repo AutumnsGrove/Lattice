@@ -60,7 +60,46 @@ describe("line anchors", () => {
 
 		expect(html).toContain("one");
 		expect(html).toContain("two");
-		expect(html.match(/line-vine/g)?.length).toBe(2);
+		expect(html.match(/class="inline-gutter-comment line-vine"/g)?.length).toBe(2);
+	});
+
+	it("puts the note under the line's words when the marker comes first", () => {
+		// The recipe writes the marker at the start of the text, so inserting the
+		// note beside the marker would put it in front of the sentence it comments
+		// on. It belongs at the end of the bullet (#1826).
+		const html = renderTimelineHtml({
+			markdown: "### repo\n- <!-- anchor:l1 -->Wrote the day.",
+			gutterItems: [vine("anchor:l1", "finally")],
+		});
+
+		const words = html.indexOf("Wrote the day");
+		const note = html.indexOf("finally");
+		const itemEnd = html.indexOf("</li>", note);
+
+		expect(words).toBeGreaterThan(-1);
+		expect(note).toBeGreaterThan(words);
+		expect(itemEnd).toBeGreaterThan(note);
+	});
+
+	it("gives a line's notes one block, stacked, in page order", () => {
+		const html = renderTimelineHtml({
+			markdown: day,
+			gutterItems: [vine("anchor:l1", "first note"), vine("anchor:l1", "second note")],
+		});
+
+		// One wrapper per line, so two notes cannot sit side by side and lose which
+		// line they belong to.
+		expect(html.match(/class="line-vine-block"/g)?.length).toBe(1);
+		expect(html.indexOf("first note")).toBeLessThan(html.indexOf("second note"));
+	});
+
+	it("does not float the note beside the line", () => {
+		const html = renderTimelineHtml({ markdown: day, gutterItems: [vine("anchor:l2", "a note")] });
+
+		// The block wrapper is what makes it a row of its own; a bare inline span
+		// would go back to sitting against the words.
+		expect(html).toContain('class="line-vine-block"');
+		expect(html).toContain("line-vine");
 	});
 
 	it("drops a vine whose marker is not in the day", () => {

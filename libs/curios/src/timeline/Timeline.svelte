@@ -558,38 +558,21 @@
 		opacity: 0.75;
 		margin-top: 0.15rem;
 	}
-	/* A vine anchored to a line floats into the left of the line, the way a bloom's
-	   gutter note does. Same width and breakpoints as `.mobile-gutter-inline` in the
-	   engine's styles/content.css, so the two read alike until the timeline can
-	   render the real GutterItem (structured lines, #1798). No negative margin: the
-	   line keeps its list marker, and the note starts where the text did. */
-	.markdown-content :global(.line-vine.inline-gutter-comment) {
+	/* A line's vine is its own row under the bullet, the way a footnote reads.
+	   It used to float beside the line, mirroring the blog's gutter — but a
+	   timeline bullet is a short `<li>`, so the float had nothing to push
+	   against: the note sat against the words with no gap and read as if the
+	   sentence continued into it (#1826). One row per line, and its notes stack
+	   rather than share the row, so two comments cannot read as one. */
+	.markdown-content :global(.line-vine-block) {
 		display: flex;
-		float: left;
-		clear: left;
-		width: 38%;
-		max-width: 300px;
-		min-width: 160px;
-		margin: 0 1rem 0.5rem 0;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.35rem;
+		margin: 0.45rem 0 0.25rem;
 	}
-	@media (max-width: 768px) {
-		.markdown-content :global(.line-vine.inline-gutter-comment) {
-			float: right;
-			clear: right;
-			width: 35%;
-			max-width: 250px;
-			min-width: 120px;
-			margin: 0 0 0.5rem 1rem;
-		}
-	}
-	@media (max-width: 400px) {
-		.markdown-content :global(.line-vine.inline-gutter-comment) {
-			float: none;
-			clear: none;
-			width: auto;
-			max-width: none;
-			margin: 0.5rem 0 0.75rem;
-		}
+	.markdown-content :global(.line-vine-block .inline-gutter-comment) {
+		max-width: min(100%, 62ch);
 	}
 
 	/* Detailed Timeline Markdown — glassmorphism container */
