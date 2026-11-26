@@ -1,6 +1,6 @@
 import { applyD1Migrations } from "cloudflare:test";
 import { env } from "cloudflare:workers";
-import { beforeAll, inject } from "vitest";
+import { afterEach, beforeAll, inject } from "vitest";
 import { splitSqlStatements } from "./sql";
 
 /**
@@ -20,3 +20,14 @@ beforeAll(async () => {
 		}
 	}
 }, 120_000);
+
+/**
+ * Stub state is shared by every test in the run, so a test that made Heartwood
+ * unreachable would leave it that way for the next file. Each test starts from
+ * the stubs' honest defaults.
+ */
+afterEach(async () => {
+	for (const service of ["auth", "zephyr", "lumen", "pulse"]) {
+		await env.STUB_CONTROL.delete(service);
+	}
+});

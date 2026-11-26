@@ -110,6 +110,10 @@ export default defineConfig({
 					// need a modified tenant create their own with `createTenant()`
 					// rather than editing a seeded row.
 					include: ["test/**/*.test.ts"],
+					// One Miniflare instance, shared bindings. Parallel files would
+					// race on the same rows and on the stub control keys, so they run
+					// in turn and each file resets what it touched.
+					fileParallelism: false,
 					globalSetup: ["./test/global-setup.ts"],
 					setupFiles: ["./test/setup-d1.ts"],
 				},
