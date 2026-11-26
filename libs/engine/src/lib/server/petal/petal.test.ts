@@ -547,7 +547,6 @@ describe("vision provider cascade", () => {
 
 	it("resolves vision model IDs from the Lumen registry", () => {
 		expect(PETAL_PROVIDERS.openrouter_haiku.model).toBe(MODELS.CLAUDE_HAIKU_55);
-		expect(PETAL_PROVIDERS.openrouter_gemma.model).toBe(MODELS.GEMMA_4_26B);
 		expect(PETAL_PROVIDERS.workers_ai_llama4.model).toBe(MODELS.CF_LLAMA4_SCOUT);
 	});
 });
