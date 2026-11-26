@@ -83,9 +83,7 @@ AUTH MANIFEST:
 
 **Gate check after return:**
 
-```bash
-gw dev ci --affected --fail-fast
-```
+Run the VERIFICATION.md's self-verification protocol (affected typechecks, affected tests, `pnpm lint`).
 
 Must compile. If it fails, resume the Spider agent with the error.
 
@@ -138,9 +136,7 @@ AUDIT REPORT:
 
 **Gate check after return:**
 
-```bash
-gw dev ci --affected --fail-fast
-```
+Run the VERIFICATION.md's self-verification protocol (affected typechecks, affected tests, `pnpm lint`).
 
 Must still compile after audit fixes.
 
@@ -204,9 +200,7 @@ HARDENING REPORT:
 
 **Gate check after return:**
 
-```bash
-gw dev ci --affected --fail-fast
-```
+Run the VERIFICATION.md's self-verification protocol (affected typechecks, affected tests, `pnpm lint`).
 
 Must still compile after hardening.
 

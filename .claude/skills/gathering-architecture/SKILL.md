@@ -185,7 +185,9 @@ Dispatch an **opus subagent** to build the architectural foundation. The Elephan
 
 ```bash
 pnpm install
-gw dev ci --affected --fail-fast --diagnose
+node .github/scripts/affected-packages.mjs origin/main \
+  | jq '{testMatrix, typecheckMatrix}'
+# then run what it prints, and pnpm lint
 ```
 
 Must compile and pass. If it fails, resume Elephant with the error.
@@ -196,9 +198,7 @@ Must compile and pass. If it fails, resume Elephant with the error.
 
 The conductor runs final verification and presents the summary:
 
-```bash
-gw dev ci --affected --fail-fast --diagnose
-```
+Run the VERIFICATION.md's self-verification protocol (affected typechecks, affected tests, `pnpm lint`).
 
 **Completion Report:**
 
@@ -218,7 +218,7 @@ GATE LOG
   After Crow:     ✅ challenges resolved, design strengthened
   After Swan:     ✅ specification complete with all sections
   After Elephant: ✅ compiles clean, foundation tested
-  Final CI:       ✅ gw dev ci --affected passes
+  Final CI:       ✅ verification protocol clean
 
 ARTIFACTS
   Architecture: [doc path]

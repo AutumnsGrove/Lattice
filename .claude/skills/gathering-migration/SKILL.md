@@ -116,7 +116,9 @@ Dispatch an **opus subagent** to execute the migration. The Bear receives the sp
 
 ```bash
 pnpm install
-gw dev ci --affected --fail-fast --diagnose
+node .github/scripts/affected-packages.mjs origin/main \
+  | jq '{testMatrix, typecheckMatrix}'
+# then run what it prints, and pnpm lint
 ```
 
 Must compile and pass. If it fails, resume Bear with the error.
@@ -133,7 +135,7 @@ Must compile and pass. If it fails, resume Bear with the error.
 - [ ] Bear: Original state preserved (branch, backup, or snapshot)
 - [ ] Bear: Item counts match (source vs destination)
 - [ ] Bear: Integrity checks pass (references resolve, imports work, no orphans)
-- [ ] Bear: Tests pass (`gw dev ci --affected`)
+- [ ] Bear: Tests pass (affected tests, per the verification protocol)
 - [ ] Bear: Rollback path documented
 
 **Completion Report:**
@@ -150,7 +152,7 @@ DISPATCH LOG
 GATE LOG
   After Bloodhound: ✅ territory map complete
   After Bear:       ✅ compiles clean, migration verified
-  Final CI:         ✅ gw dev ci --affected passes
+  Final CI:         ✅ verification protocol clean
 
 MIGRATION RESULTS
   Items migrated: [count]

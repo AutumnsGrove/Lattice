@@ -114,7 +114,9 @@ MIGRATION REPORT:
 
 ```bash
 pnpm install
-gw dev ci --affected --fail-fast --diagnose
+node .github/scripts/affected-packages.mjs origin/main \
+  | jq '{testMatrix, typecheckMatrix}'
+# then run what it prints, and pnpm lint
 ```
 
 Must compile and pass. Count validation must show source = migrated + skipped.
