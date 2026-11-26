@@ -1,0 +1,45 @@
+{
+	"name": "@autumnsgrove/lumen-registry",
+	"version": "0.1.0",
+	"description": "Grove's model registry — model IDs, prices, capabilities, and which model serves which task.",
+	"author": "AutumnsGrove",
+	"license": "AGPL-3.0-only",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/AutumnsGrove/Lattice.git",
+		"directory": "libs/lumen-registry"
+	},
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./src/index.ts",
+			"default": "./src/index.ts"
+		},
+		"./catalog": {
+			"types": "./src/catalog.ts",
+			"default": "./src/catalog.ts"
+		}
+	},
+	"files": [
+		"src"
+	],
+	"scripts": {
+		"check": "tsc --noEmit",
+		"test": "vitest",
+		"test:run": "vitest run"
+	},
+	"devDependencies": {
+		"typescript": "^5.9.3",
+		"vitest": "^4.1.0"
+	},
+	"keywords": [
+		"grove",
+		"lumen",
+		"models",
+		"registry"
+	],
+	"publishConfig": {
+		"access": "public",
+		"registry": "https://registry.npmjs.org"
+	}
+}

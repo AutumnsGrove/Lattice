@@ -9,23 +9,19 @@
  * The snapshot is committed so a deploy is reproducible and the check needs no
  * network. This script is the only thing that talks to OpenRouter; the rules
  * about what the catalog means live in the engine, next to the data
- * (`libs/engine/src/lib/ai/lumen/model-catalog.ts`).
+ * (`libs/lumen-registry/src/catalog.ts`).
  */
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import {
-	CATALOG_URL,
-	openRouterIds,
-	parseCatalog,
-} from "../../libs/engine/src/lib/ai/lumen/model-catalog.js";
-import type { Catalog, Registry } from "../../libs/engine/src/lib/ai/lumen/model-catalog.js";
+import { CATALOG_URL, openRouterIds, parseCatalog } from "../../libs/lumen-registry/src/catalog.js";
+import type { Catalog, Registry } from "../../libs/lumen-registry/src/catalog.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const DATA = resolve(HERE, "../../libs/engine/src/lib/data");
-const CATALOG_PATH = join(DATA, "model-catalog.json");
-const REGISTRY_PATH = join(DATA, "lumen-models.json");
+const DATA = resolve(HERE, "../../libs/lumen-registry/src/data");
+const CATALOG_PATH = join(DATA, "catalog.json");
+const REGISTRY_PATH = join(DATA, "models.json");
 
 const TIMEOUT_MS = 30_000;
 
@@ -89,8 +85,8 @@ async function main(): Promise<number> {
 
 	if (!check) {
 		writeJson(CATALOG_PATH, live);
-		console.log(`Wrote ${ids.length} models to model-catalog.json, fetched ${live.fetchedAt}.`);
-		console.log("Run `pnpm models:sync` to carry the prices into lumen-models.json.");
+		console.log(`Wrote ${ids.length} models to catalog.json, fetched ${live.fetchedAt}.`);
+		console.log("Run `pnpm models:sync` to carry the prices into models.json.");
 		return 0;
 	}
 

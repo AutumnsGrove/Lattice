@@ -44,7 +44,8 @@
 		"models:refresh": "tsx scripts/models/refresh.ts",
 		"models:sync": "tsx scripts/models/sync.ts",
 		"models:check": "tsx scripts/models/check.ts",
-		"labels:sync": "pnpm --filter @grove/labels run sync"
+		"labels:sync": "pnpm --filter @grove/labels run sync",
+		"models:ids": "tsx scripts/models/check-ids.ts"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.0.0",

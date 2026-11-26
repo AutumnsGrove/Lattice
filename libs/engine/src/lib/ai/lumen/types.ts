@@ -12,29 +12,13 @@
 // =============================================================================
 
 /**
- * Task types that map to optimal providers.
- * Each task has a primary provider and fallback chain configured in config.ts.
+ * Tasks and providers are the registry's vocabulary, not Lumen's: a worker that
+ * only needs to know which model serves "summary" should not import the gateway
+ * to find out (#1602). Re-exported here so every existing import keeps working.
  */
-export type LumenTask =
-	| "moderation" // Content safety → GPT-oss Safeguard (OpenRouter)
-	| "generation" // Text generation → DeepSeek V4.1 Flash (OpenRouter)
-	| "summary" // Summarization → DeepSeek V4.1 Flash (OpenRouter)
-	| "embedding" // Vector embeddings → Perplexity Embed (OpenRouter)
-	| "chat" // Conversational → DeepSeek V4.1 Flash (OpenRouter)
-	| "image" // Image analysis → Claude Haiku 5.5 via OpenRouter
-	| "code" // Code tasks → DeepSeek V4.1 Flash via OpenRouter
-	| "transcription" // Voice-to-text → Whisper (CF Workers AI)
-	/**
-	 * A step in an agent loop: a tool-using model that is expected to call
-	 * something rather than answer. Separate from `chat` because it needs its
-	 * own model (one that supports tools), its own quota line, and its own
-	 * Songbird context.
-	 *
-	 * Its quota is 0 on every tier until a real rule exists, so a caller has to
-	 * pass `skipQuota`. That is deliberate: a ten-step run would otherwise cost
-	 * ten requests against a limit meant for one answer.
-	 */
-	| "agent";
+import type { LumenProviderName, LumenTask } from "@autumnsgrove/lumen-registry";
+
+export type { LumenProviderName, LumenTask };
 
 // =============================================================================
 // MESSAGE TYPES
@@ -305,12 +289,6 @@ export interface LumenStreamChunk {
 // =============================================================================
 // PROVIDER TYPES
 // =============================================================================
-
-/**
- * Available provider names.
- * Currently: OpenRouter (universal) and Cloudflare AI (local moderation/embeddings)
- */
-export type LumenProviderName = "openrouter" | "cloudflare-ai";
 
 export interface LumenProviderConfig {
 	/** Human-readable name */
