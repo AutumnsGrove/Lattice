@@ -33,7 +33,7 @@
 		"test:router": "pnpm --filter grove-router test:run",
 		"test:shell": "bats scripts/repo/tests/",
 		"email:preview": "NODE_PATH=libs/engine/node_modules bun run scripts/email/preview.tsx",
-		"lint": "oxlint . && eslint .",
+		"lint": "oxlint . && eslint . && pnpm models:ids",
 		"lint:strict": "oxlint --deny-warnings && eslint .",
 		"lint:fix": "eslint . --fix",
 		"format": "prettier --write .",
