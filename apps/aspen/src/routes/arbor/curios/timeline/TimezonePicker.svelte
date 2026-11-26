@@ -150,13 +150,16 @@
 				?.querySelector<HTMLElement>(`[data-index="${activeIndex}"]`)
 				?.scrollIntoView({ block: "nearest" });
 		} else if (event.key === "Enter") {
+			// Never let Enter reach the form: the box sits inside the config form's
+			// `?/save` action, so an unhandled Enter saves every other field while the
+			// person was only picking a zone.
+			event.preventDefault();
 			if (!open) {
 				open = true;
 				return;
 			}
 			const zone = filtered[activeIndex];
 			if (zone) {
-				event.preventDefault();
 				choose(zone);
 			}
 		} else if (event.key === "Escape") {
@@ -165,6 +168,9 @@
 		}
 	}
 </script>
+
+<!-- The visible box is a search field, so the value the form posts travels here. -->
+<input type="hidden" name="timezone" {value} />
 
 <div class="timezone-picker">
 	<div class="zone-field">
