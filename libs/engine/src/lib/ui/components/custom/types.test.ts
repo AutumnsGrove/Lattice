@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { isValidIcon, DEFAULT_SCROLL_OFFSET } from "../../ui/components/custom/types.js";
+import { isValidIcon, DEFAULT_SCROLL_OFFSET } from "./types.js";
 
 describe("TOC Types", () => {
 	describe("DEFAULT_SCROLL_OFFSET", () => {

@@ -1,13 +1,13 @@
 // Main entry point for @autumnsgrove/lattice
 
 // Custom components
-export { default as ContentWithGutter } from "./components/custom/ContentWithGutter.svelte";
-export { default as GutterItem } from "./components/custom/GutterItem.svelte";
-export { default as LeftGutter } from "./components/custom/LeftGutter.svelte";
-export { default as TableOfContents } from "./components/custom/TableOfContents.svelte";
-export { default as MobileTOC } from "./components/custom/MobileTOC.svelte";
-export { default as CollapsibleSection } from "./components/custom/CollapsibleSection.svelte";
-export { default as CategoryNav } from "./components/custom/CategoryNav.svelte";
+export { default as ContentWithGutter } from "./ui/components/custom/ContentWithGutter.svelte";
+export { default as GutterItem } from "./ui/components/custom/GutterItem.svelte";
+export { default as LeftGutter } from "./ui/components/custom/LeftGutter.svelte";
+export { default as TableOfContents } from "./ui/components/custom/TableOfContents.svelte";
+export { default as MobileTOC } from "./ui/components/custom/MobileTOC.svelte";
+export { default as CollapsibleSection } from "./ui/components/custom/CollapsibleSection.svelte";
+export { default as CategoryNav } from "./ui/components/custom/CategoryNav.svelte";
 
 // TOC and CategoryNav types and constants
 export type {
@@ -18,8 +18,8 @@ export type {
 export { DEFAULT_SCROLL_OFFSET, isValidIcon } from "./ui/components/custom/types.js";
 
 // Admin components
-export { default as MarkdownEditor } from "./components/admin/MarkdownEditor.svelte";
-export { default as GutterManager } from "./components/admin/GutterManager.svelte";
+export { default as MarkdownEditor } from "./content/editor/MarkdownEditor.svelte";
+export { default as GutterManager } from "./content/editor/GutterManager.svelte";
 export { default as LumenAnalytics } from "./components/admin/LumenAnalytics.svelte";
 export { default as SafetyMonitoring } from "./components/admin/SafetyMonitoring.svelte";
 export { default as ZephyrAnalytics } from "./components/admin/ZephyrAnalytics.svelte";
