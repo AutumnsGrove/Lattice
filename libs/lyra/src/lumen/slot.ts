@@ -256,7 +256,25 @@ export function createLumenModelSlot(config: LumenModelSlotConfig = {}): ModelSl
 
 				// The reply reaches Lyra with no key in it: `fromLumenReply` copies only
 				// what the contract names, and nothing here reads `options` back out.
-				return ok(fromLumenReply(data.data));
+				const reply = fromLumenReply(data.data);
+
+				// A reply that says nothing and calls nothing is a failure, not an answer.
+				// A reasoning model can spend the whole output allowance thinking and come
+				// back 200 with `content: ""` — most often as `finish_reason: "length"`.
+				// Lyra reads that as "stopped without finishing" and spends its reminders on
+				// a model that cannot act on advice, then parks the run (#1831). Returning
+				// it as retryable is what makes the next attempt happen instead, for every
+				// recipe rather than this one.
+				if (reply.text.trim() === "" && reply.toolCalls.length === 0) {
+					return err(
+						providerError(
+							`the model answered with no text and no tool calls (finish_reason: ${reply.finishReason})`,
+							key,
+						),
+					);
+				}
+
+				return ok(reply);
 			} finally {
 				clearTimeout(timer);
 				request.signal.removeEventListener("abort", forward);
