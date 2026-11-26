@@ -1422,3 +1422,93 @@ shipping three near-identical drafts.
 #### Migration needs
 
 - [ ] None new — `fireside_assisted` exists (Stop 5), sessions carry the transcript flags
+
+## 9. The Fence
+
+**Character**: A fence with a real gate in it, not a rope across a path. Grove already built the
+thing this feature needs: a second deployment of the same worker, sharing the same database, reached
+by a different door. Fireside does not need a flag. It needs to walk through the door.
+
+### Safari findings: What exists today
+
+- [x] **`isBetaDeployment(locals, url)`** (`apps/aspen/src/lib/server/beta.ts`) — one function, two
+      signals: `locals.isBeta` set by `hooks.server.ts` when the host is `<tenant>-beta.grove.place`,
+      or `localhost` with `__GIT_BRANCH__ === "beta"` (baked at build by `vite.config.ts`)
+- [x] **It already gates behaviour, not just decoration**: `api/blooms/+server.ts:367` writes
+      `is_beta` on a post — the exact pattern this feature needs
+- [x] **The badge is site-wide**: `+layout.svelte` shows `BetaBadge` next to the title on the beta
+      host, so Fireside needs no badge of its own
+- [x] **A documented ship path**: land on `main` → merge `main` into `beta` → push → `deploy-aspen-beta`
+      redeploys `grove-aspen-beta`; grove-router dispatches `*-beta` subdomains to it
+- [ ] **Beta shares `grove-engine-db`, KV and R2 with production.** A migration applied for beta is a
+      migration applied to production data — additive is fine, but nothing beta-specific may assume
+      it is alone in the database
+- [ ] **Secrets are kept in parity by hand**, and `gw secret apply` with two `-w` targets silently
+      applies only to the last one
+- [ ] **The gate is not reachable from the test harness.** `apps/aspen/test/harness.ts` has no beta
+      override, and CI checks out a detached head, so `__GIT_BRANCH__` is empty — Stop 3's suites
+      would see the feature missing and fail for the wrong reason
+
+### Design spec (safari-approved)
+
+**Core decision:** the gate goes in **two** places — the button (cosmetic) and **the routes**
+(authoritative) — and the test build is told it is beta at build time, not given a runtime bypass.
+
+#### 1. Route-level gating, not just a hidden button
+
+A hidden button is not a gate. If `/api/fireside/*` is live on production, it is a beta feature with
+a public API, one `curl` from working.
+
+```ts
+// every /api/fireside/* handler
+if (!isBetaDeployment(locals, url)) throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
+```
+
+`404`, not `403`: the tenant-boundary rule from Stop 2 applies to a route that does not exist on
+this deployment either. Nothing to learn from the outside.
+
+The UI gate (`firesideEnabled: isBetaDeployment(locals, url)` in the page `load`) then decides
+whether the engine slot gets filled. Both are cheap; only one of them is the real fence.
+
+#### 2. The test build is beta, and says so at build time
+
+- `__GIT_BRANCH__` is a `define`, not a runtime env var — so the harness build passes
+  `__GIT_BRANCH__: "beta"` and every route behaves exactly as it will on the beta host
+- Production builds take the branch from git, which is never `beta` on a deployed worker
+- No `?beta=1` query, no cookie, no env flag that production could satisfy by accident — the rule
+  `DEV_OPENROUTER_API_KEY` already follows (a name that only a dev machine can set)
+
+#### 3. What lands where when this ships
+
+| Artefact | Where it deploys | Effect on production |
+| --- | --- | --- |
+| Migration 128 (2 tables, 1 column) | shared `grove-engine-db` | tables exist, empty, unread |
+| `/api/fireside/*` | `grove-aspen` and `grove-aspen-beta` | 404 on prod (gate), live on beta |
+| Recipe + tools (`apps/aspen/src/lib/server/fireside/`) | same | inert on prod |
+| Editor slot + drawer | same | slot not filled on prod |
+| Post-footer attribution + transcript | same | renders only when `fireside_assisted = 1`, which prod cannot set |
+| `webhook-cleanup` retention | one worker, no beta twin | deletes nothing until rows exist |
+
+**No new worker, no new binding, no new secret.** Fireside runs on D1 and the Lumen binding Aspen
+already has; the key comes from the tenant's own row (Stop 2). That is the whole reason this stop is
+short.
+
+#### 4. The ship checklist
+
+- [ ] Migration 128 applied to the shared D1 (additive only — verify with `wrangler d1 execute
+      --remote ... "SELECT name FROM sqlite_master WHERE name LIKE 'fireside%'"`)
+- [ ] `LUMEN` + `LUMEN_API_KEY` confirmed present on `grove-aspen-beta` — one `-w` per
+      `gw secret apply`, then `gw secret list | grep`, because the multi-target form lies
+- [ ] `wrangler deploy --env beta --dry-run` shows every binding, not just `ASSETS` (AGENT.md's rule)
+- [ ] Land on `main`, merge into `beta`, push, `gh workflow run deploy-aspen-beta.yml --ref beta`
+      if the path filter does not fire
+- [ ] Verify on `autumn-beta.grove.place`: button present, drawer opens, a real session, a draft, an
+      accept, the marker renders, the transcript toggles, the post page caches and purges correctly
+- [ ] Verify on `autumn.grove.place`: no button, and `curl -X POST /api/fireside` returns `404`
+
+#### 5. Promotion is a deletion
+
+When beta has been lived in and Fireside is ready for everyone, promoting it is not a flag flip: the
+`isBetaDeployment` checks come out of the routes and the page, and the next deploy serves it to
+everyone. One PR. That is the whole migration story for a beta-gated feature, and it is worth
+writing down now so nobody goes looking for a switch that was never built.
