@@ -105,7 +105,8 @@
       "supportsTools": true,
       "toolChoice": ["auto", "required", "none", "function"],
       "contextWindow": 1000000,
-      "maxOutputTokens": 128000
+      "maxOutputTokens": 128000,
+      "picker": true
     },
     "GPT_OSS_SAFEGUARD": {
       "id": "openai/gpt-oss-safeguard-20b",
