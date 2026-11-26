@@ -654,6 +654,124 @@ test("needsEngine is true only when an engine consumer is affected", () => {
 	}
 });
 
+// ─── Engine subpath scope (#1786) ───────────────────────────────────
+
+/**
+ * An engine that behaves like the real one: 144 subpath exports over one source
+ * tree, a root barrel that re-exports `ui` wholesale, and a `platform/config`
+ * barrel that re-exports its own files.
+ */
+const ENGINE_EXPORTS = {
+	".": { types: "./dist/index.d.ts", default: "./dist/index.js" },
+	"./ui/*": { default: "./dist/ui/*.js" },
+	"./ui/*.svelte": { default: "./dist/ui/*.svelte" },
+	"./platform/config": {
+		types: "./dist/platform/config/index.d.ts",
+		default: "./dist/platform/config/index.js",
+	},
+	"./platform/config/*": { default: "./dist/platform/config/*.js" },
+};
+
+function engineWorkspace(overrides = {}) {
+	const withEngine = (name) => ({
+		[`apps/${name}/package.json`]: {
+			name,
+			scripts: { check: "tsc" },
+			dependencies: { "@autumnsgrove/lattice": "workspace:*" },
+		},
+	});
+
+	return workspace({
+		"libs/engine/package.json": {
+			name: "@autumnsgrove/lattice",
+			scripts: { check: "svelte-check", "test:run": "vitest run" },
+			exports: ENGINE_EXPORTS,
+		},
+		"libs/engine/src/lib/index.ts": 'export * from "./ui/index";',
+		"libs/engine/src/lib/ui/index.ts": 'export * from "./GlassCard.svelte";',
+		"libs/engine/src/lib/ui/GlassCard.svelte": "<div />",
+		"libs/engine/src/lib/platform/config/index.ts": 'export * from "./tiers.js";',
+		"libs/engine/src/lib/platform/config/tiers.ts": "export const TIERS = {};",
+		"libs/engine/src/lib/private/helper.ts": "export const helper = 1;",
+
+		...withEngine("uses-config"),
+		"apps/uses-config/src/a.ts": 'import { TIERS } from "@autumnsgrove/lattice/platform/config";',
+		...withEngine("uses-root"),
+		"apps/uses-root/src/a.ts": 'import { GlassCard } from "@autumnsgrove/lattice";',
+
+		"services/unrelated/package.json": { name: "unrelated", scripts: { check: "tsc" } },
+		...overrides,
+	});
+}
+
+function detectEngineChange(path, overrides) {
+	const root = engineWorkspace(overrides);
+	try {
+		return detectAffected({
+			entries: files([path]),
+			packages: discoverPackages(root),
+			root,
+		});
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+}
+
+test("an engine helper reaches only the packages that import its subpath", () => {
+	// The whole point: `./platform/config` is an export, so its consumers are a
+	// subset of the workspace, not all 27 packages that depend on the engine.
+	const result = detectEngineChange("libs/engine/src/lib/platform/config/tiers.ts");
+	assert.deepEqual(result.affectedPackages, ["apps/uses-config", "libs/engine"]);
+	assert.equal(result.needsEngine, true);
+});
+
+test("an engine file the root barrel re-exports still reaches every consumer", () => {
+	// `index.ts` says `export * from "./ui/index"`, so a grep for GlassCard in the
+	// barrel finds nothing while every root-importing package can see it. Missing
+	// this would ship a broken import with green checks.
+	const result = detectEngineChange("libs/engine/src/lib/ui/GlassCard.svelte");
+	assert.deepEqual(result.affectedPackages, ["apps/uses-root", "libs/engine"]);
+});
+
+test("the root barrel reaches the root importers, and the manifest reaches everyone", () => {
+	// `index.ts` changes the shape of one export, `.`, so only the packages that
+	// import the root see a different surface. `package.json` can change how every
+	// subpath resolves, so it is the one that actually widens.
+	assert.deepEqual(detectEngineChange("libs/engine/src/lib/index.ts").affectedPackages, [
+		"apps/uses-root",
+		"libs/engine",
+	]);
+
+	assert.deepEqual(detectEngineChange("libs/engine/package.json").affectedPackages, [
+		"apps/uses-config",
+		"apps/uses-root",
+		"libs/engine",
+	]);
+});
+
+test("a file no export names revalidates nothing beyond the engine", () => {
+	// Nothing outside the engine can import it, so no consumer's types can move.
+	const result = detectEngineChange("libs/engine/src/lib/private/helper.ts");
+	assert.deepEqual(result.affectedPackages, ["libs/engine"]);
+});
+
+test("an unreadable exports map widens instead of narrowing", () => {
+	// Over-running costs time; under-running ships a broken import. A surface we
+	// cannot describe is a surface we must not narrow.
+	const result = detectEngineChange("libs/engine/src/lib/private/helper.ts", {
+		"libs/engine/package.json": {
+			name: "@autumnsgrove/lattice",
+			scripts: { check: "svelte-check" },
+		},
+	});
+	assert.deepEqual(result.affectedPackages, ["apps/uses-config", "apps/uses-root", "libs/engine"]);
+});
+
+test("an engine content change revalidates the engine and stops there", () => {
+	const result = detectEngineChange("libs/engine/README.md");
+	assert.deepEqual(result.affectedPackages, ["libs/engine"]);
+});
+
 // ─── Scope flags for gating whole jobs ───────────────────────────────
 
 test("scope: ui only when something can change a rendered colour", () => {
