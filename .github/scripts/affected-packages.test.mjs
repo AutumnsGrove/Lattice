@@ -654,6 +654,149 @@ test("needsEngine is true only when an engine consumer is affected", () => {
 	}
 });
 
+// ─── Engine subpath scope (#1786) ───────────────────────────────────
+
+/**
+ * An engine that behaves like the real one: 144 subpath exports over one source
+ * tree, a root barrel that re-exports `ui` wholesale, and a `platform/config`
+ * barrel that re-exports its own files.
+ */
+const ENGINE_EXPORTS = {
+	".": { types: "./dist/index.d.ts", default: "./dist/index.js" },
+	"./ui/*": { default: "./dist/ui/*.js" },
+	"./ui/*.svelte": { default: "./dist/ui/*.svelte" },
+	"./platform/config": {
+		types: "./dist/platform/config/index.d.ts",
+		default: "./dist/platform/config/index.js",
+	},
+	"./platform/config/*": { default: "./dist/platform/config/*.js" },
+	"./styles/tokens.css": { default: "./dist/styles/tokens.css" },
+	"./styles/*": { default: "./dist/styles/*" },
+};
+
+function engineWorkspace(overrides = {}) {
+	const withEngine = (name) => ({
+		[`apps/${name}/package.json`]: {
+			name,
+			scripts: { check: "tsc" },
+			dependencies: { "@autumnsgrove/lattice": "workspace:*" },
+		},
+	});
+
+	return workspace({
+		"libs/engine/package.json": {
+			name: "@autumnsgrove/lattice",
+			scripts: { check: "svelte-check", "test:run": "vitest run" },
+			exports: ENGINE_EXPORTS,
+		},
+		"libs/engine/src/lib/index.ts": 'export * from "./ui/index";',
+		"libs/engine/src/lib/ui/index.ts": 'export * from "./GlassCard.svelte";',
+		"libs/engine/src/lib/ui/GlassCard.svelte": "<div />",
+		"libs/engine/src/lib/platform/config/index.ts": 'export * from "./tiers.js";',
+		"libs/engine/src/lib/platform/config/tiers.ts": "export const TIERS = {};",
+		"libs/engine/src/lib/private/helper.ts": "export const helper = 1;",
+		"libs/engine/src/lib/styles/tokens.css": ":root { --grove: green; }",
+
+		...withEngine("uses-config"),
+		"apps/uses-config/src/a.ts": 'import { TIERS } from "@autumnsgrove/lattice/platform/config";',
+		...withEngine("uses-root"),
+		"apps/uses-root/src/a.ts": 'import { GlassCard } from "@autumnsgrove/lattice";',
+		...withEngine("uses-styles"),
+		// A stylesheet has no `from`. Both Aspen and Plant pull engine styles this
+		// way, so a scan that only reads `from` misses them entirely.
+		"apps/uses-styles/src/a.svelte":
+			'<script>\n\timport "@autumnsgrove/lattice/styles/tokens.css";\n</script>',
+
+		"services/unrelated/package.json": { name: "unrelated", scripts: { check: "tsc" } },
+		...overrides,
+	});
+}
+
+function detectEngineChange(path, overrides) {
+	const root = engineWorkspace(overrides);
+	try {
+		return detectAffected({
+			entries: files([path]),
+			packages: discoverPackages(root),
+			root,
+		});
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+}
+
+test("an engine helper reaches only the packages that import its subpath", () => {
+	// The whole point: `./platform/config` is an export, so its consumers are a
+	// subset of the workspace, not all 27 packages that depend on the engine.
+	const result = detectEngineChange("libs/engine/src/lib/platform/config/tiers.ts");
+	assert.deepEqual(result.affectedPackages, ["apps/uses-config", "libs/engine"]);
+	assert.equal(result.needsEngine, true);
+});
+
+test("an engine file the root barrel re-exports still reaches every consumer", () => {
+	// `index.ts` says `export * from "./ui/index"`, so a grep for GlassCard in the
+	// barrel finds nothing while every root-importing package can see it. Missing
+	// this would ship a broken import with green checks.
+	const result = detectEngineChange("libs/engine/src/lib/ui/GlassCard.svelte");
+	assert.deepEqual(result.affectedPackages, ["apps/uses-root", "libs/engine"]);
+});
+
+test("the root barrel reaches the root importers, and the manifest reaches everyone", () => {
+	// `index.ts` changes the shape of one export, `.`, so only the packages that
+	// import the root see a different surface. `package.json` can change how every
+	// subpath resolves, so it is the one that actually widens.
+	assert.deepEqual(detectEngineChange("libs/engine/src/lib/index.ts").affectedPackages, [
+		"apps/uses-root",
+		"libs/engine",
+	]);
+
+	assert.deepEqual(detectEngineChange("libs/engine/package.json").affectedPackages, [
+		"apps/uses-config",
+		"apps/uses-root",
+		"apps/uses-styles",
+		"libs/engine",
+	]);
+});
+
+test("a file no export names revalidates nothing beyond the engine", () => {
+	// Nothing outside the engine can import it, so no consumer's types can move.
+	const result = detectEngineChange("libs/engine/src/lib/private/helper.ts");
+	assert.deepEqual(result.affectedPackages, ["libs/engine"]);
+});
+
+test("a stylesheet imported for its side effect reaches its importer", () => {
+	// The regression a review caught on this PR: `import ".../tokens.css"` has no
+	// `from` clause, so a scan for `from ` marked nobody affected and a token
+	// change would have shipped with green checks.
+	const result = detectEngineChange("libs/engine/src/lib/styles/tokens.css");
+	assert.ok(
+		result.affectedPackages.includes("apps/uses-styles"),
+		`expected uses-styles, got ${result.affectedPackages.join(", ")}`,
+	);
+});
+
+test("an unreadable exports map widens instead of narrowing", () => {
+	// Over-running costs time; under-running ships a broken import. A surface we
+	// cannot describe is a surface we must not narrow.
+	const result = detectEngineChange("libs/engine/src/lib/private/helper.ts", {
+		"libs/engine/package.json": {
+			name: "@autumnsgrove/lattice",
+			scripts: { check: "svelte-check" },
+		},
+	});
+	assert.deepEqual(result.affectedPackages, [
+		"apps/uses-config",
+		"apps/uses-root",
+		"apps/uses-styles",
+		"libs/engine",
+	]);
+});
+
+test("an engine content change revalidates the engine and stops there", () => {
+	const result = detectEngineChange("libs/engine/README.md");
+	assert.deepEqual(result.affectedPackages, ["libs/engine"]);
+});
+
 // ─── Scope flags for gating whole jobs ───────────────────────────────
 
 test("scope: ui only when something can change a rendered colour", () => {
@@ -727,6 +870,36 @@ test("the real workspace discovers every package that has its own checks", () =>
 	// assertion together.
 	assert.equal(packages.get("services/email-render").typecheck, null);
 	assert.equal(packages.get("workers/paused").typecheck, null);
+});
+
+test("the real workspace flags the packages that side-effect-import engine styles", () => {
+	// Aspen and Plant both do `import '.../styles/tokens.css'` with no `from`, and
+	// they are the only two. This is the exact case a review caught on this PR: it
+	// looked like nothing was affected because nothing matched `from`.
+	const result = detectAffected({
+		entries: files(["libs/engine/src/lib/styles/tokens.css"]),
+		packages: discoverPackages(),
+	});
+
+	assert.ok(result.affectedPackages.includes("apps/aspen"), "aspen imports the tokens");
+	assert.ok(result.affectedPackages.includes("apps/plant"), "plant imports the tokens");
+	assert.ok(result.affectedPackages.includes("libs/engine"));
+});
+
+test("an engine type re-exported through `$lib` reaches that subpath's consumers", () => {
+	// The real-engine regression a review caught: `server/petal/types.ts` re-exports
+	// `$lib/types/petal`, so the alias is the difference between a public type and
+	// one classed as internal.
+	const result = detectAffected({
+		entries: files(["libs/engine/src/lib/types/petal.ts"]),
+		packages: discoverPackages(),
+	});
+
+	assert.ok(result.affectedPackages.includes("libs/engine"));
+	assert.ok(
+		result.affectedPackages.length > 1,
+		"a type change on a public subpath must reach at least one consumer",
+	);
 });
 
 test("every package in the real workspace gets a test command that will exit", () => {

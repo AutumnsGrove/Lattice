@@ -267,6 +267,12 @@ jobs:
       - name: Test the affected-package detector
         run: node --test .github/scripts/affected-packages.test.mjs
 
+      # How far an engine change fans out is decided by resolving the package's
+      # own `exports` map and re-export graph (#1786). Under-answering that ships
+      # a broken import with green checks, so it is tested like any other logic.
+      - name: Test the engine export resolver
+        run: node --test .github/scripts/engine-exports.test.mjs
+
       # README had meadow, terrarium and ivy in its tables for a year after they
       # were gone, and Aspen missing entirely (#1705). Cheaper to check than to
       # rediscover.

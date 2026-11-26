@@ -34,6 +34,12 @@ import { execSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import {
+	exposedBy,
+	importedSpecifiers,
+	loadEngineSurface,
+	specifierMatches,
+} from "./engine-exports.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..", "..");
@@ -380,6 +386,69 @@ export function classifyScope(entries) {
 // ─── The decision ───────────────────────────────────────────────────
 
 /**
+ * Which packages a set of changed engine files can actually reach.
+ *
+ * The engine is a library with 144 subpath exports over one source tree, so
+ * "something in the engine changed" is not the same question as "every consumer
+ * is affected". A helper under `src/lib/platform/config` is visible to the
+ * packages that import `lattice/platform/config` (or a file under it); a
+ * component the root barrel re-exports wholesale is visible to everyone.
+ *
+ * Returns null when the engine did not change, and a `global` scope when the
+ * change cannot be narrowed — the root barrel, `package.json`, a build config,
+ * or an `exports` map we could not read. Narrowing on a guess is the one
+ * failure mode that ships a broken import with green checks, so anything
+ * unattributable widens instead.
+ */
+function scopeEngineCascade({ entries, packages, root, engineDir, dependents }) {
+	if (!engineDir) return null;
+
+	const engineDependents = dependents.get(engineDir) || [];
+	const structural = entries
+		.filter((entry) => fileToPackage(entry.path, packages) === engineDir)
+		.map((entry) => entry.path)
+		.filter((file) => !isContentOnly(file));
+
+	// A README or a migration cannot move a type, so it reaches nobody. Answering
+	// that before reading the exports map keeps the cheap case cheap.
+	if (structural.length === 0) return { global: false, dependents: [] };
+
+	const surface = loadEngineSurface(root);
+	if (!surface) return { global: true, dependents: engineDependents };
+
+	const exposedKeys = new Set();
+	let global = false;
+	for (const file of structural) {
+		const exposed = exposedBy(surface, file);
+		// Nothing names it and nothing re-exports it: no consumer's types can move.
+		if (exposed.size === 0) continue;
+		// `*` is "could not be attributed" — package.json, a build config, a file
+		// outside `src/lib`. `.` is *not* that: it is one export key like any other,
+		// visible to the packages that import the root and to nobody else.
+		if (exposed.has("*")) {
+			global = true;
+			break;
+		}
+		for (const key of exposed) exposedKeys.add(key);
+	}
+
+	if (global) return { global: true, dependents: engineDependents };
+	if (exposedKeys.size === 0) return { global: false, dependents: [] };
+
+	const cache = new Map();
+	const reached = engineDependents.filter((dir) => {
+		for (const specifier of importedSpecifiers(root, dir, cache)) {
+			for (const key of exposedKeys) {
+				if (specifierMatches(specifier, key)) return true;
+			}
+		}
+		return false;
+	});
+
+	return { global: false, dependents: reached };
+}
+
+/**
  * Pure core of the detector: given changed files (and their git status),
  * return the affected set and the matrices CI needs.
  *
@@ -419,22 +488,36 @@ export function detectAffected({ entries, packages, root = REPO_ROOT, lockfile, 
 	}
 
 	// Only structural changes cascade to consumers.
+	const engineDir = [...packages.values()].find((p) => p.name === "@autumnsgrove/lattice")?.dir;
+	const dependents = buildDependents(packages);
+
+	// Engine caveats only the packages that can actually import what moved. Its
+	// 144 subpath exports are not one surface, and which one a file lands in is
+	// read from the package's own `exports` map rather than assumed (#1786).
+	const engineScope = runAll
+		? null
+		: scopeEngineCascade({ entries, packages, root, engineDir, dependents });
+
 	const cascadeSources = new Set();
 	for (const file of files) {
 		if (isContentOnly(file)) continue;
 		const dir = fileToPackage(file, packages);
-		if (dir) cascadeSources.add(dir);
+		// Engine's fan-out is decided per file in `scopeEngineCascade`. Queueing the
+		// directory here would put all 27 of its dependents back on the critical
+		// path for a change to one helper.
+		if (dir && dir !== engineDir) cascadeSources.add(dir);
 	}
 	if (lockfileScoped && !unscopable) {
 		for (const dir of lockfile.changedImporters) cascadeSources.add(dir);
 	}
 
-	const dependents = buildDependents(packages);
-
 	const affected = runAll ? new Set(packages.keys()) : new Set(directlyChanged);
 	if (!runAll) {
+		const engineDependents = engineScope?.dependents ?? [];
+		for (const dir of engineDependents) affected.add(dir);
+
 		const walked = new Set();
-		const queue = [...cascadeSources];
+		const queue = [...cascadeSources, ...engineDependents];
 		while (queue.length > 0) {
 			const dir = queue.shift();
 			if (walked.has(dir)) continue;
@@ -448,7 +531,6 @@ export function detectAffected({ entries, packages, root = REPO_ROOT, lockfile, 
 
 	// Engine is a library: any package that imports it needs its dist built
 	// before its own typecheck can resolve `@autumnsgrove/lattice`.
-	const engineDir = [...packages.values()].find((p) => p.name === "@autumnsgrove/lattice")?.dir;
 	const needsEngine =
 		runAll ||
 		(engineDir !== undefined &&
