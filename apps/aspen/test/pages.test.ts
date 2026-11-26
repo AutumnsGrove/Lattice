@@ -165,7 +165,7 @@ describe("reading pages", () => {
 			// and the listing another, so an unpublished post stays reachable at
 			// its slug for as long as the entry lives. Asserted rather than
 			// assumed — the day invalidation is added this test fails and should
-			// be rewritten to the new contract. Filed separately against the
+			// be rewritten to the new contract. Tracked as #1835, against the
 			// publish path, where a purge belongs.
 			const published = await page(`/garden/${POST.slug}`, {
 				tenant: TENANTS.midnightBloom,
