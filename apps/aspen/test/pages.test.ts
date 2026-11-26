@@ -161,13 +161,11 @@ describe("reading pages", () => {
 			expect(result.html).toContain(POST.body);
 		});
 
-		it("serves a drafted post from cache until its key is cleared", async () => {
-			// Drafting a post purges nothing: the post cache has a 15-minute TTL
-			// and the listing another, so an unpublished post stays reachable at
-			// its slug for as long as the entry lives. Asserted rather than
-			// assumed — the day invalidation is added this test fails and should
-			// be rewritten to the new contract. Tracked as #1835, against the
-			// publish path, where a purge belongs.
+		it("serves a cached post after the row changes behind the cache", async () => {
+			// The cache is only as fresh as its TTL: a row changed without going
+			// through the API is served as it was until the 15 minutes are up.
+			// The API paths do purge — `invalidatePostCaches` runs on update and
+			// delete — so this documents the cache, not a gap in publishing.
 			const tenant = await createTenant({
 				posts: [{ slug: "cache-me", title: "Read Me Once", body: "cached words" }],
 			});
