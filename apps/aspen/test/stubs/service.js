@@ -4,24 +4,33 @@
  * Service bindings point at other deployments. Booting Heartwood, Zephyr, and
  * Pulse for every Aspen test buys fidelity that belongs in their own suites, so
  * they are stubbed at the boundary — but a stub that only succeeds cannot test
- * a sad path, which is the whole point of the suites these feed.
+ * a sad path, which is the whole point of these suites.
  *
  * Tests choose the answer per service by writing to the shared `STUB_CONTROL`
- * KV namespace:
+ * KV namespace (see `setService` in `test/harness.ts`):
  *
- *     await setServiceMode("auth", "fail")   // 503 from every AUTH call
- *     await setServiceMode("auth", "ok")     // back to the default
+ *   await setService("auth", "fail")        // 503 from every call
+ *   await setService("auth", "error-500")   // 500 from every call
+ *   await setService("auth", {              // pin an endpoint's answer
+ *     "/session/validate": { body: { valid: true, user } },
+ *   })
+ *
+ * The value is either `"fail"`, `"error-500"`, or a map of path substring →
+ * `{ status?, body? }`. The longest matching substring wins. With no control
+ * value set, each service answers its own realistic default.
  *
  * Each stub worker knows which service it is via the `STUB_SERVICE` text binding.
  */
 export default {
 	/**
-	 * @param {Request} _request
+	 * @param {Request} request
 	 * @param {{ STUB_SERVICE: string, STUB_CONTROL: KVNamespace }} env
 	 */
-	async fetch(_request, env) {
+	async fetch(request, env) {
 		const service = env.STUB_SERVICE;
-		const mode = await env.STUB_CONTROL.get(service);
+		const path = new URL(request.url).pathname;
+		const control = await env.STUB_CONTROL.get(service);
+
 		/** @param {unknown} body @param {number} [status] */
 		const json = (body, status = 200) =>
 			new Response(JSON.stringify(body), {
@@ -29,38 +38,38 @@ export default {
 				headers: { "content-type": "application/json" },
 			});
 
-		if (mode === "fail") {
-			return json({ error: "stub_unavailable", service }, 503);
-		}
+		if (control === "fail") return json({ error: "stub_unavailable", service }, 503);
+		if (control === "error-500") return json({ error: "stub_internal_error", service }, 500);
 
-		if (mode === "error-500") {
-			return json({ error: "stub_internal_error", service }, 500);
-		}
-
-		// Any other value is a canned response body, so a suite can pin the exact
-		// payload a binding would have returned (`{"valid":true,...}`).
-		if (mode) {
+		if (control) {
+			/** @type {Record<string, { status?: number, body?: unknown }>} */
+			let routes;
 			try {
-				return json(JSON.parse(mode));
+				routes = JSON.parse(control);
 			} catch {
-				return json({ error: "stub_misconfigured", service, mode }, 500);
+				return json({ error: "stub_misconfigured", service, control }, 500);
 			}
+			const match = Object.keys(routes)
+				.filter((key) => path.includes(key))
+				.sort((a, b) => b.length - a.length)[0];
+			if (match) return json(routes[match].body ?? {}, routes[match].status ?? 200);
 		}
 
-		switch (service) {
-			case "auth":
-				// "No session" is the honest default: an unauthenticated request is
-				// what most tests start from. Tests that need a session set
-				// `mode` to a JSON session payload (see setServicePayload).
+		if (service === "auth") {
+			if (path.includes("/session/validate")) {
+				// "Nobody is signed in" is the honest default: that is where most
+				// tests start. A test that needs a session pins the payload.
 				return json({ valid: false });
-			case "zephyr":
-				return json({ id: "stub-email", success: true });
-			case "lumen":
-				return json({ text: "", usage: { input_tokens: 0, output_tokens: 0 } });
-			case "pulse":
-				return json({ accepted: true });
-			default:
-				return json({ ok: true, service });
+			}
+			if (path.includes("/session/list")) return json({ sessions: [] });
+			if (path.includes("/session/revoke-all")) return json({ revoked: 0 });
+			return json({ ok: true });
 		}
+		if (service === "zephyr") return json({ id: "stub-email", success: true });
+		if (service === "lumen") {
+			return json({ text: "", usage: { input_tokens: 0, output_tokens: 0 } });
+		}
+		if (service === "pulse") return json({ accepted: true });
+		return json({ ok: true, service });
 	},
 };

@@ -111,6 +111,85 @@ export async function json<T = unknown>(
 	return { status: response.status, body: body as T, headers: response.headers };
 }
 
+export interface TestPost {
+	slug: string;
+	title: string;
+	body?: string;
+	status?: "published" | "draft";
+}
+
+export interface TestTenantOptions {
+	/** Defaults to a unique `test-...` subdomain. */
+	subdomain?: string;
+	displayName?: string;
+	ownerEmail?: string;
+	active?: 0 | 1;
+	posts?: TestPost[];
+}
+
+/**
+ * Creates a tenant of this test's own.
+ *
+ * The pool has no per-test storage isolation: a row written by one test is still
+ * there in the next one. So a test that needs a *modified* tenant — suspended,
+ * empty, one post, a draft — makes one instead of editing a seeded row, and the
+ * seeded tenants stay exactly as `scripts/db/seed-*.sql` left them.
+ *
+ * Returns the subdomain to pass as `tenant:`.
+ */
+export async function createTenant(options: TestTenantOptions = {}): Promise<string> {
+	const id = `test-tenant-${crypto.randomUUID().slice(0, 8)}`;
+	const subdomain = options.subdomain ?? `test-${crypto.randomUUID().slice(0, 8)}`;
+	const now = Math.floor(Date.now() / 1000);
+
+	await env.DB.prepare(
+		`INSERT INTO tenants (id, subdomain, display_name, email, plan, theme, active, created_at, updated_at)
+		 VALUES (?, ?, ?, ?, 'seedling', 'default', ?, ?, ?)`,
+	)
+		.bind(
+			id,
+			subdomain,
+			options.displayName ?? "Test Grove",
+			options.ownerEmail ?? "owner@example.test",
+			options.active ?? 1,
+			now,
+			now,
+		)
+		.run();
+
+	for (const post of options.posts ?? []) {
+		await env.DB.prepare(
+			`INSERT INTO posts (id, tenant_id, slug, title, description, markdown_content, status, published_at, created_at, updated_at)
+			 VALUES (?, ?, ?, ?, '', ?, ?, ?, ?, ?)`,
+		)
+			.bind(
+				`${id}-${post.slug}`,
+				id,
+				post.slug,
+				post.title,
+				post.body ?? `Body of ${post.title}.`,
+				post.status ?? "published",
+				now,
+				now,
+				now,
+			)
+			.run();
+	}
+
+	return subdomain;
+}
+
+/**
+ * The tenant id for a subdomain, for tests that write through `env.DB`.
+ */
+export async function tenantIdFor(subdomain: string): Promise<string> {
+	const row = await env.DB.prepare("SELECT id FROM tenants WHERE subdomain = ?")
+		.bind(subdomain)
+		.first<{ id: string }>();
+	if (!row) throw new Error(`No tenant seeded for ${subdomain}`);
+	return row.id;
+}
+
 /**
  * The cache keys the reading pages use (see `routes/garden/**`).
  *
@@ -135,28 +214,75 @@ export async function waitForCacheKey(key: string, attempts = 20): Promise<boole
 	return false;
 }
 
-export async function clearGardenCache(tenantId: string, slug?: string): Promise<void> {
-	await env.CACHE_KV.delete(CACHE_KEYS.list(tenantId));
-	if (slug) await env.CACHE_KV.delete(CACHE_KEYS.post(tenantId, slug));
-}
-
 export type ServiceName = "auth" | "zephyr" | "lumen" | "pulse";
+
+export interface StubRoute {
+	status?: number;
+	body?: unknown;
+}
 
 /**
  * Chooses how a stubbed service binding answers for the rest of this test.
  *
- * `"fail"` → 503, `"error-500"` → 500, `"ok"`/nothing → the service's default,
- * any other string → that JSON body verbatim (so a suite can pin the exact
- * payload Heartwood or Zephyr would have returned).
+ * - `"ok"` (default) → clear the control value, so the service answers its
+ *   realistic default (an unauthenticated session, an accepted email, …)
+ * - `"fail"` → `503` from every call, as if the deployment were unreachable
+ * - `"error-500"` → `500` from every call
+ * - a map of path substring → `{ status?, body? }`, for pinning the exact
+ *   payload a specific endpoint should return. Longest match wins.
  */
 export async function setService(
 	service: ServiceName,
-	mode: "ok" | "fail" | "error-500" | Record<string, unknown> = "ok",
+	mode: "ok" | "fail" | "error-500" | Record<string, StubRoute> = "ok",
 ): Promise<void> {
-	const key = service === "pulse" ? "pulse" : service;
 	if (mode === "ok") {
-		await env.STUB_CONTROL.delete(key);
+		await env.STUB_CONTROL.delete(service);
 		return;
 	}
-	await env.STUB_CONTROL.put(key, typeof mode === "string" ? mode : JSON.stringify(mode));
+	await env.STUB_CONTROL.put(service, typeof mode === "string" ? mode : JSON.stringify(mode));
+}
+
+/** The shape Heartwood's `/session/validate` returns for a signed-in user. */
+export function sessionPayload(
+	overrides: Partial<{
+		id: string;
+		email: string;
+		name: string;
+		isAdmin: boolean;
+		valid: boolean;
+	}> = {},
+): Record<string, unknown> {
+	const { valid = true, ...user } = overrides;
+	return {
+		valid,
+		user: {
+			id: user.id ?? "user-example-owner",
+			email: user.email ?? "example@grove.place",
+			name: user.name ?? "Example Owner",
+			isAdmin: user.isAdmin ?? false,
+			avatarUrl: null,
+		},
+	};
+}
+
+/**
+ * Signs a test in: `AUTH` validates the cookie into this user.
+ *
+ * The session check is cached in the edge cache for 5 seconds keyed by the
+ * cookie's hash, so the same cookie in two tests would otherwise reuse the first
+ * answer. `sessionCookie()` makes a fresh one each time for that reason.
+ */
+export async function signIn(
+	cookie = sessionCookie(),
+	user: Parameters<typeof sessionPayload>[0] = {},
+): Promise<string> {
+	await setService("auth", {
+		"/session/validate": { body: sessionPayload(user) },
+	});
+	return `grove_session=${cookie}`;
+}
+
+/** A unique session cookie value, so no two tests share a cached validation. */
+export function sessionCookie(): string {
+	return `sess_${crypto.randomUUID().replace(/-/g, "")}`;
 }
