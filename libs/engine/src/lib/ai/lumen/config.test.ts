@@ -15,6 +15,7 @@ import {
 	getModelCost,
 	calculateCost,
 	getModelsForProvider,
+	getModelCapabilities,
 } from "./config.js";
 import type { LumenTask, LumenProviderName } from "./types.js";
 
@@ -168,13 +169,22 @@ describe("Task-Specific Configuration", () => {
 			expect(TASK_REGISTRY.chat.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH);
 		});
 
-		it("should have consistent fallback chain", () => {
-			const genFallbacks = TASK_REGISTRY.generation.fallbackChain;
-			const sumFallbacks = TASK_REGISTRY.summary.fallbackChain;
+		it("falls back to models of the same class, not to the cheap ones (#1707)", () => {
+			// A fallback is only useful if what it produces is still worth having.
+			// The 8B-class models could not hold a detailed-section format or a JSON
+			// envelope, so they are not fallbacks for a generative task — they are
+			// just cheaper ways to fail. Context window is the proxy for "class".
+			for (const task of ["generation", "summary", "chat"] as const) {
+				for (const fallback of TASK_REGISTRY[task].fallbackChain) {
+					const window = getModelCapabilities(fallback.model)?.contextWindow ?? 0;
+					expect(window, `${task} → ${fallback.model}`).toBeGreaterThanOrEqual(128_000);
+				}
+			}
 
-			// Generation and summary should have similar fallbacks
-			expect(genFallbacks.some((f) => f.model === MODELS.QWEN3_8_FLASH)).toBe(true);
-			expect(sumFallbacks.some((f) => f.model === MODELS.QWEN3_8_FLASH)).toBe(true);
+			// Generation and summary answer the same shape of request, so they agree.
+			expect(TASK_REGISTRY.generation.fallbackChain.map((f) => f.model)).toEqual(
+				TASK_REGISTRY.summary.fallbackChain.map((f) => f.model),
+			);
 		});
 	});
 

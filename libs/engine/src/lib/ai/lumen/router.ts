@@ -5,7 +5,7 @@
  * Handles fallback logic when providers fail.
  */
 
-import { getTaskConfig, type TaskConfig } from "./config.js";
+import { getModelCapabilities, getTaskConfig, type TaskConfig } from "./config.js";
 import { AllProvidersFailedError, LumenError } from "./errors.js";
 import type {
 	LumenMessage,
@@ -47,6 +47,18 @@ export interface ExecuteResult {
 
 	/** Model that was used */
 	model: string;
+
+	/**
+	 * True when the primary model did not answer and a fallback did.
+	 *
+	 * A downgraded answer looks like any other: same shape, same usage record,
+	 * a different model id nobody reads. This is the flag that makes it
+	 * attributable (#1707).
+	 */
+	usedFallback: boolean;
+
+	/** The model that was meant to answer, when a fallback answered instead. */
+	fallbackFrom?: string;
 
 	/** Tool calls from the model (propagated from provider response) */
 	toolCalls?: LumenToolCall[];
@@ -184,10 +196,29 @@ export async function executeWithFallback(
 		]);
 	}
 
+	// What the primary was supposed to be, so a fallback answer can say what it
+	// replaced.
+	const intendedModel = options.model ?? config.primaryModel;
+	const requestedMaxTokens = options.maxTokens ?? config.defaultMaxTokens;
+
 	// Try each provider in the chain
 	for (const { provider: providerName, model } of chain) {
 		const provider = providers[providerName];
 		if (!provider) continue;
+
+		// A model whose completion ceiling cannot fit the request would be refused
+		// by the provider, costing the call and — on a fallback — the whole answer.
+		// Skipping it turns "this chain cannot serve this request" into a clear
+		// attempt record rather than a 400 (#1707).
+		const ceiling = getModelCapabilities(model)?.maxOutputTokens;
+		if (ceiling != null && requestedMaxTokens > ceiling) {
+			attempts.push({
+				provider: providerName,
+				model,
+				error: `max_tokens=${requestedMaxTokens} is over this model's completion limit of ${ceiling}`,
+			});
+			continue;
+		}
 
 		// Build providerOptions to carry tool definitions through to the provider
 		const providerOptions: Record<string, unknown> | undefined = options.tools
@@ -198,8 +229,6 @@ export async function executeWithFallback(
 					}),
 				}
 			: undefined;
-
-		const requestedMaxTokens = options.maxTokens ?? config.defaultMaxTokens;
 
 		const inferenceOptions: LumenInferenceOptions = {
 			maxTokens: requestedMaxTokens,
@@ -212,10 +241,17 @@ export async function executeWithFallback(
 		try {
 			const response = await provider.inference(model, messages, inferenceOptions);
 
+			const usedFallback = model !== intendedModel;
+			if (usedFallback) {
+				console.warn(`[Lumen/Router] ${task} answered by fallback ${model} after ${intendedModel}`);
+			}
+
 			return {
 				response,
 				provider: providerName,
 				model,
+				usedFallback,
+				...(usedFallback && { fallbackFrom: intendedModel }),
 				toolCalls: response.toolCalls,
 			};
 		} catch (err) {
@@ -226,10 +262,7 @@ export async function executeWithFallback(
 			// timeline path, the day's summary) for a number nobody needed.
 			// One retry at the task default keeps the caller's intent and still
 			// produces output.
-			if (
-				requestedMaxTokens > config.defaultMaxTokens &&
-				isMaxTokensRejection(err)
-			) {
+			if (requestedMaxTokens > config.defaultMaxTokens && isMaxTokensRejection(err)) {
 				console.warn(
 					`[Lumen/Router] ${model} rejected max_tokens=${requestedMaxTokens}, retrying at ${config.defaultMaxTokens}`,
 				);
@@ -239,10 +272,13 @@ export async function executeWithFallback(
 						maxTokens: config.defaultMaxTokens,
 					});
 
+					const usedFallback = model !== intendedModel;
 					return {
 						response,
 						provider: providerName,
 						model,
+						usedFallback,
+						...(usedFallback && { fallbackFrom: intendedModel }),
 						toolCalls: response.toolCalls,
 					};
 				} catch (retryErr) {

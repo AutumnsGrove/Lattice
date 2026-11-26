@@ -377,6 +377,75 @@ describe("Specialized Execution", () => {
  * timeline path there is no fallback to catch it, because the caller named a
  * model explicitly.
  */
+describe("executeWithFallback - models that cannot fit the request (#1707)", () => {
+	const messages = [{ role: "user" as const, content: "Hello" }];
+
+	it("skips a candidate whose completion ceiling is too small instead of sending it", async () => {
+		// `generation`'s chain is DeepSeek V4.1 Flash → V4 Pro → GPT-OSS 120B, and
+		// GPT-OSS 120B tops out at 117,964 completion tokens. A caller asking for
+		// more than the primary and first fallback can serve must not cost a 400
+		// per link just to find that out.
+		const failing = vi
+			.fn()
+			.mockRejectedValue(new ProviderError("openrouter", "provider is down", 503));
+		const providers: ProviderRegistry = {
+			openrouter: { inference: failing } as unknown as LumenProvider,
+		};
+
+		await expect(
+			executeWithFallback("generation", messages, providers, { maxTokens: 900_000 }),
+		).rejects.toMatchObject({
+			attempts: expect.arrayContaining([
+				expect.objectContaining({
+					error: expect.stringContaining("completion limit"),
+				}),
+			]),
+		});
+	});
+
+	it("still sends a request the chain can serve", async () => {
+		const mockProvider = createMockProvider("openrouter");
+		const providers: ProviderRegistry = { openrouter: mockProvider };
+
+		await executeWithFallback("generation", messages, providers, { maxTokens: 4_096 });
+
+		expect(mockProvider.inference).toHaveBeenCalledTimes(1);
+	});
+
+	it("says when a fallback answered, so a downgrade is attributable", async () => {
+		let call = 0;
+		const flaky = {
+			inference: vi.fn().mockImplementation(async () => {
+				call += 1;
+				if (call === 1) {
+					throw new ProviderError("openrouter", "primary is down", 503);
+				}
+				return {
+					content: "answered by the fallback",
+					usage: { input: 10, output: 5, cost: 0 },
+					model: "fallback",
+				};
+			}),
+		} as unknown as LumenProvider;
+		const providers: ProviderRegistry = { openrouter: flaky };
+
+		const result = await executeWithFallback("generation", messages, providers);
+
+		expect(result.usedFallback).toBe(true);
+		expect(result.fallbackFrom).toBe(getTaskConfig("generation").primaryModel);
+		expect(result.model).toBe(getTaskConfig("generation").fallbackChain[0].model);
+	});
+
+	it("does not call a primary answer a fallback", async () => {
+		const providers: ProviderRegistry = { openrouter: createMockProvider("openrouter") };
+
+		const result = await executeWithFallback("generation", messages, providers);
+
+		expect(result.usedFallback).toBe(false);
+		expect(result.fallbackFrom).toBeUndefined();
+	});
+});
+
 describe("executeWithFallback - oversized max_tokens", () => {
 	const messages = [{ role: "user" as const, content: "Hello" }];
 
