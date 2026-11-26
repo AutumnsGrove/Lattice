@@ -20,6 +20,7 @@ import { getEnabledTenants, getTenantConfig, processTenantTimeline } from "./gen
 import { compareDay } from "./compare";
 import { yesterdayInZone } from "./date";
 import { createSecretsManager } from "@autumnsgrove/grove-crypto/secrets";
+import { AI_SECRETS, resolveOpenRouterKey } from "@autumnsgrove/lyra-lumen/secrets";
 
 function createContext(env: Env): GroveContext {
 	return createCloudflareContext({
@@ -314,8 +315,10 @@ export default {
 								.first<{ encrypted_dek: string | null }>();
 
 							// Check secret rows exist (without decrypting)
+							// Both AI key names: the canonical one Settings writes, and the
+							// timeline's older name (#1801). A tenant on either is ready.
 							const secretRows = await env.DB.prepare(
-								`SELECT key_name FROM tenant_secrets WHERE tenant_id = ? AND key_name IN ('timeline_github_token', 'timeline_openrouter_key')`,
+								`SELECT key_name FROM tenant_secrets WHERE tenant_id = ? AND key_name IN ('timeline_github_token', 'openrouter_api_key', 'timeline_openrouter_key')`,
 							)
 								.bind(t.tenantId)
 								.all<{ key_name: string }>();
@@ -333,7 +336,9 @@ export default {
 									/* decryption failed */
 								}
 								try {
-									const orKey = await secrets.safeGetSecret(t.tenantId, "timeline_openrouter_key");
+									const orKey = await resolveOpenRouterKey(
+										async (name) => (await secrets.safeGetSecret(t.tenantId, name)) ?? undefined,
+									);
 									canDecryptOpenrouter = !!orKey;
 								} catch {
 									/* decryption failed */
@@ -343,7 +348,9 @@ export default {
 							tenantSecretStatus.push({
 								tenantId: t.tenantId,
 								hasGithubSecret: secretKeys.has("timeline_github_token"),
-								hasOpenrouterSecret: secretKeys.has("timeline_openrouter_key"),
+								hasOpenrouterSecret:
+									secretKeys.has(AI_SECRETS.openRouterKey) ||
+									secretKeys.has(AI_SECRETS.legacyOpenRouterKey),
 								hasDEK: !!dekRow?.encrypted_dek,
 								canDecryptGithub,
 								canDecryptOpenrouter,
