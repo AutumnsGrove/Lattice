@@ -121,13 +121,13 @@ describe("hasOpenRouterKey", () => {
 		expect(await hasOpenRouterKey(none.has)).toBeUndefined();
 	});
 
-	it("KEY10 never reads a value to answer a question about presence", async () => {
-		// The page that calls this can say "saved" and nothing more. If the resolver
-		// ever needed the plaintext, this contract would have broken silently.
-		const read = vi.fn(async () => true);
+	it("KEY10 asks only which name is present, and never for the value", async () => {
+		// The page that calls this can say "saved" and nothing more. The reader's
+		// contract is a boolean, so there is no plaintext to leak even by accident.
+		const read: SecretPresenceReader = vi.fn<(name: string) => Promise<boolean>>(async () => true);
 		await hasOpenRouterKey(read);
 
+		expect(read).toHaveBeenCalledTimes(1);
 		expect(read).toHaveBeenCalledWith("openrouter_api_key");
-		expect(read.mock.calls.every(([name]) => typeof name === "string")).toBe(true);
 	});
 });
