@@ -121,6 +121,25 @@ export function fontScaleMultiplier(stored: string | undefined): number {
 }
 
 /**
+ * A colour as the shape a CSS custom property accepts, or null.
+ *
+ * The settings API validates on write, but a value reaches a `<style>` tag at
+ * render time and styling is where an unvalidated string becomes markup. This is
+ * the same check in one place, so the write path and the render path cannot
+ * drift — and so a row written before the check existed cannot inject.
+ */
+export function parseCssColor(value: unknown): string | null {
+	if (typeof value !== "string") return null;
+	const hex = value.trim();
+	return /^#(?:[0-9A-Fa-f]{3,4}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/.test(hex) ? hex : null;
+}
+
+/** `parseCssColor` with a fallback, for reading a stored setting at render time. */
+export function cssColor(value: unknown, fallback: string): string {
+	return parseCssColor(value) ?? fallback;
+}
+
+/**
  * Font presets - imported from the canonical source in fonts.ts
  * This ensures consistency across the entire application
  */
