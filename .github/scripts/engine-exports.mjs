@@ -19,12 +19,17 @@
  *      `@autumnsgrove/lattice` specifiers it actually uses — including the
  *      side-effect form a stylesheet is pulled in by, which has no `from`.
  *
- * Only re-exports are followed, not imports. An import cannot widen what a
- * consumer can name, and a file that is imported but not re-exported can only
- * change a value at runtime, never a type a consumer compiles against — and the
- * engine's `dist` is rebuilt for every affected run anyway. Following imports
- * would instead make the root barrel reach every helper in the tree, which is
- * the 27-packages-for-one-file behaviour this exists to stop.
+ * Only re-exports are followed *downwards*, from an export entry. Imports are
+ * followed *upwards*, one hop, via a reverse index: a module nothing re-exports
+ * is still public in a narrow way if a public file imports it, because a type
+ * declared there shows up in the emitted `.d.ts` as an un-nameable reference and
+ * its values change what the exported function returns. One hop is deliberate —
+ * following imports transitively from the root barrel reaches every helper in
+ * the tree, which is the 27-packages-for-one-file behaviour this exists to stop.
+ *
+ * Nothing here is guessed in the narrowing direction. A specifier that was meant
+ * to be local and could not be resolved marks the surface `partial`, and an
+ * unattributable file widens instead.
  */
 
 import { existsSync, readFileSync, readdirSync } from "node:fs";
@@ -43,6 +48,9 @@ const INDEX_FILES = ["index.ts", "index.tsx", "index.js", "index.svelte"];
 /** `export ... from "…"` — the only shape that makes a file public. */
 const REEXPORT_RE =
 	/export\s+(?:type\s+)?(?:\*(?:\s+as\s+[\w$]+)?|\{[^}]*\})\s*from\s*["']([^"']+)["']/g;
+
+/** Any specifier that pulls a file in, for the reverse reference index. */
+const IMPORT_RE = /(?:from\s*|import\s*\(\s*|import\s+)["']([^"']+)["']/g;
 
 /**
  * Every way a consumer can name an engine subpath.
@@ -100,8 +108,11 @@ function sourceEntryFor(root, targets) {
 		if (!target.startsWith("./dist/")) continue;
 		const bare = barePath(target.slice("./dist/".length));
 		const base = join(root, ENGINE_DIR, LIB_DIR, bare);
-		// An exact key can point straight at a component rather than a barrel.
-		if (bare.endsWith(".svelte") && existsSync(base)) return toRepo(root, base);
+		// The entry can be the file itself rather than a barrel under it: a
+		// stylesheet (`./styles/tokens.css`) or a component (`./ui/Foo.svelte`).
+		if (/\.\w+$/.test(bare) && existsSync(base) && !existsSync(base + "/index.ts")) {
+			return toRepo(root, base);
+		}
 		for (const ext of RESOLVE_EXTS) {
 			if (existsSync(base + ext)) return toRepo(root, base + ext);
 		}
@@ -133,31 +144,44 @@ function readSource(root, repoPath, cache) {
 }
 
 /**
- * Resolve a relative specifier from inside one source file to a repo-relative
+ * Resolve a re-export specifier from inside one source file to a repo-relative
  * path, trying the extensions the bundler would.
+ *
+ * Three answers, and the difference between the last two is load-bearing:
+ *
+ *   string    — resolved
+ *   undefined — a real package (`@autumnsgrove/grove-markdown`). Nothing inside
+ *               this source tree to follow, and nothing outside it to miss.
+ *   null      — meant to be local and could not be resolved, so a subpath's
+ *               public surface is larger than what we just walked.
  */
 function resolveSpecifier(root, fromRepoPath, specifier) {
-	if (!specifier.startsWith(".")) return null;
+	let target;
+	if (specifier.startsWith(".")) {
+		target = posix.normalize(posix.join(posix.dirname(fromRepoPath), specifier));
+	} else if (specifier === "$lib" || specifier.startsWith("$lib/")) {
+		// SvelteKit's built-in `$lib` alias, which points at the very tree being
+		// walked. `server/petal/types.ts` re-exports `$lib/types/petal`, so without
+		// this those types look internal when they are on a public subpath.
+		target = `${ENGINE_DIR}/${LIB_DIR}${specifier.slice("$lib".length)}`;
+	} else {
+		return undefined;
+	}
 
-	const fromDir = posix.dirname(fromRepoPath);
-	const joined = posix.normalize(posix.join(fromDir, specifier));
-	const base = join(root, joined);
+	const base = join(root, target);
 
 	// `./x.js` in source is usually `./x.ts` on disk — the specifier carries the
 	// emitted extension, not the authored one.
 	const candidates = [base];
 	if (/\.js$/.test(base)) candidates.push(base.replace(/\.js$/, ".ts"));
-	if (/\.js$/.test(base)) candidates.push(base.replace(/\.js$/, ".ts").replace(/\.ts$/, ".tsx"));
+	if (/\.js$/.test(base)) candidates.push(base.replace(/\.js$/, ".tsx"));
 
 	for (const candidate of candidates) {
-		for (const ext of [""].concat(RESOLVE_EXTS)) {
-			if (ext && !candidate.endsWith(".svelte") && existsSync(candidate + ext)) {
-				return toRepo(root, candidate + ext);
-			}
-			if (!ext && existsSync(candidate) && !candidate.endsWith("/")) {
-				const stat = existsSync(candidate) ? candidate : null;
-				if (stat && /\.(?:tsx?|jsx?|mjs|svelte)$/.test(stat)) return toRepo(root, stat);
-			}
+		if (existsSync(candidate) && /\.(?:tsx?|jsx?|mjs|svelte)$/.test(candidate)) {
+			return toRepo(root, candidate);
+		}
+		for (const ext of RESOLVE_EXTS) {
+			if (existsSync(candidate + ext)) return toRepo(root, candidate + ext);
 		}
 		for (const index of INDEX_FILES) {
 			const withIndex = join(candidate, index);
@@ -172,10 +196,15 @@ function resolveSpecifier(root, fromRepoPath, specifier) {
  * Every source file a subpath makes public, found by following re-exports from
  * its entry. A file only reachable by `import` is deliberately not included —
  * see the note at the top of this file.
+ *
+ * `partial` means the walk hit a specifier that was meant to be local and could
+ * not be resolved, so the real surface is larger than what was found. A guess in
+ * that direction under-cascades silently, so the caller widens instead.
  */
 function reexportClosure(root, entry, cache) {
 	const seen = new Set();
 	const queue = [entry];
+	let partial = false;
 
 	while (queue.length > 0) {
 		const current = queue.pop();
@@ -189,11 +218,74 @@ function reexportClosure(root, entry, cache) {
 		let match;
 		while ((match = REEXPORT_RE.exec(text)) !== null) {
 			const next = resolveSpecifier(root, current, match[1]);
-			if (next && !seen.has(next)) queue.push(next);
+			if (next === undefined) continue;
+			if (next === null) {
+				partial = true;
+				continue;
+			}
+			if (!seen.has(next)) queue.push(next);
 		}
 	}
 
-	return seen;
+	return { files: seen, partial };
+}
+
+/**
+ * The engine's own source files, repo-relative.
+ *
+ * Needed for the reverse pass below: whether one file reaches consumers can
+ * depend on which *other* files pull it in, and that is not knowable by walking
+ * forward from the exports map alone.
+ */
+function engineSources(root) {
+	const found = [];
+	const walk = (relDir) => {
+		let dirents;
+		try {
+			dirents = readdirSync(join(root, relDir), { withFileTypes: true });
+		} catch {
+			return;
+		}
+		for (const dirent of dirents) {
+			const rel = `${relDir}/${dirent.name}`;
+			if (dirent.isDirectory()) {
+				walk(rel);
+				continue;
+			}
+			if (/\.(?:tsx?|jsx?|mjs|svelte)$/.test(dirent.name)) found.push(rel);
+		}
+	};
+	walk(`${ENGINE_DIR}/${LIB_DIR}`);
+	return found;
+}
+
+/**
+ * Which files pull each file in, by import or re-export.
+ *
+ * An internal module is still public in a narrow sense: if a barrel that *is*
+ * exported imports it, a type declared there shows up in the emitted `.d.ts` as
+ * an un-nameable reference, and a value there can change what the exported
+ * function returns. Treating such a file as reaching nobody was wrong — the
+ * dependency runs backwards, so the index does too.
+ */
+function referenceIndex(root, cache) {
+	const referrers = new Map();
+
+	for (const file of engineSources(root)) {
+		const text = readSource(root, file, cache);
+		if (!text) continue;
+
+		IMPORT_RE.lastIndex = 0;
+		let match;
+		while ((match = IMPORT_RE.exec(text)) !== null) {
+			const target = resolveSpecifier(root, file, match[1]);
+			if (typeof target !== "string" || target === file) continue;
+			if (!referrers.has(target)) referrers.set(target, new Set());
+			referrers.get(target).add(file);
+		}
+	}
+
+	return referrers;
 }
 
 /**
@@ -216,6 +308,7 @@ export function loadEngineSurface(root) {
 	const cache = new Map();
 	const entries = new Map();
 	const wildcards = [];
+	let partial = false;
 
 	for (const [key, value] of Object.entries(exportsMap)) {
 		if (key.includes("*")) {
@@ -224,10 +317,16 @@ export function loadEngineSurface(root) {
 			continue;
 		}
 		const entry = sourceEntryFor(root, targetsOf(value));
-		if (entry) entries.set(key, { entry, closure: reexportClosure(root, entry, cache) });
+		// An exact subpath with no source here (the map outlived the directory) says
+		// nothing about any *other* file, so it is not uncertainty — just nothing to
+		// walk. `partial` is reserved for a surface we started walking and lost.
+		if (!entry) continue;
+		const closure = reexportClosure(root, entry, cache);
+		if (closure.partial) partial = true;
+		entries.set(key, { entry, closure: closure.files });
 	}
 
-	return { root, entries, wildcards };
+	return { root, entries, wildcards, partial, referrers: null, cache };
 }
 
 /** A source file as `src/lib`-relative, extension-less, for pattern matching. */
@@ -265,7 +364,39 @@ export function exposedBy(surface, repoPath) {
 		if (patterns.some((pattern) => pattern.test(libPath))) exposed.add(key);
 	}
 
+	if (exposed.size === 0) {
+		// Nothing names this file and no subpath addresses it. Before calling it
+		// internal, look the dependency the other way: if a file that *is* public
+		// imports it, its declarations can appear in that file's emitted `.d.ts` as
+		// an un-nameable reference, and its values can change what the public
+		// function returns. One hop outwards, not a full reverse walk — a second
+		// hop would put the whole engine back on the critical path.
+		for (const referrer of referrersOf(surface, repoPath)) {
+			const outward = libBare(referrer);
+			for (const [key, { closure }] of surface.entries) {
+				if (closure.has(referrer)) exposed.add(key);
+			}
+			if (outward !== null) {
+				for (const { key, patterns } of surface.wildcards) {
+					if (patterns.some((pattern) => pattern.test(outward))) exposed.add(key);
+				}
+			}
+		}
+	}
+
+	// Still nothing, but at least one subpath's surface is only partly known — the
+	// file could be in the part we could not follow. Widen rather than guess.
+	if (exposed.size === 0 && surface.partial) exposed.add("*");
+
 	return exposed;
+}
+
+/** Referrers of a file, building the index on first use. */
+function referrersOf(surface, repoPath) {
+	if (!surface.referrers) {
+		surface.referrers = referenceIndex(surface.root, surface.cache);
+	}
+	return surface.referrers.get(repoPath) ?? [];
 }
 
 /** Whether a consumer's import specifier (`./platform/config/x`) can reach an export key. */

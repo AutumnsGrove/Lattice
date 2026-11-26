@@ -886,6 +886,22 @@ test("the real workspace flags the packages that side-effect-import engine style
 	assert.ok(result.affectedPackages.includes("libs/engine"));
 });
 
+test("an engine type re-exported through `$lib` reaches that subpath's consumers", () => {
+	// The real-engine regression a review caught: `server/petal/types.ts` re-exports
+	// `$lib/types/petal`, so the alias is the difference between a public type and
+	// one classed as internal.
+	const result = detectAffected({
+		entries: files(["libs/engine/src/lib/types/petal.ts"]),
+		packages: discoverPackages(),
+	});
+
+	assert.ok(result.affectedPackages.includes("libs/engine"));
+	assert.ok(
+		result.affectedPackages.length > 1,
+		"a type change on a public subpath must reach at least one consumer",
+	);
+});
+
 test("every package in the real workspace gets a test command that will exit", () => {
 	// A job that hangs until the runner kills it is a red check with no verdict
 	// in it, which is worse than no check at all (#1796).

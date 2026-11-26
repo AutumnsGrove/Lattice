@@ -187,6 +187,77 @@ test("re-exports are followed, imports are not", () => {
 	});
 });
 
+test("a `$lib` re-export is followed, not treated as unresolvable", () => {
+	// The real engine does this: `server/petal/types.ts` says
+	// `export type { PetalCategory } from "$lib/types/petal"`. Dropping aliased
+	// re-exports made those types look internal while they sat on a public subpath,
+	// so a type change there reached no consumer at all.
+	const root = engineWorkspace({
+		"libs/engine/src/lib/types/petal.ts": "export type PetalCategory = string;",
+		"libs/engine/src/lib/server/petal/index.ts":
+			'export type { PetalCategory } from "$lib/types/petal";',
+	});
+	withSurface(root, (surface) => {
+		assert.deepEqual(exposed(surface, "libs/engine/src/lib/types/petal.ts"), ["./server/*"]);
+		assert.equal(surface.partial, false);
+	});
+});
+
+test("a local re-export that cannot be resolved marks the surface partial", () => {
+	// We started walking and lost the trail, so the real surface is larger than
+	// what we found. Guessing it is smaller is how a broken import ships green.
+	const root = engineWorkspace({
+		"libs/engine/src/lib/platform/config/index.ts":
+			'export * from "./tiers.js";\nexport * from "./gone.js";',
+	});
+	withSurface(root, (surface) => {
+		assert.equal(surface.partial, true);
+		// A file nothing names now widens instead of being called internal.
+		assert.deepEqual(exposed(surface, "libs/engine/src/lib/private/helper.ts"), ["*"]);
+	});
+});
+
+test("an exact subpath with no source here is not uncertainty", () => {
+	// `./payments` in the real map points at a directory that no longer exists.
+	// That says nothing about any other file, so it must not globalise the tree.
+	const root = engineWorkspace({
+		"libs/engine/package.json": {
+			name: "@autumnsgrove/lattice",
+			exports: { ...ENGINE_EXPORTS, "./gone": { default: "./dist/gone/index.js" } },
+		},
+	});
+	withSurface(root, (surface) => {
+		assert.equal(surface.partial, false);
+		assert.deepEqual(exposed(surface, "libs/engine/src/lib/private/helper.ts"), []);
+	});
+});
+
+test("an imported internal module inherits the exposure of its importer", () => {
+	// The dependency runs backwards here: a public barrel importing a private
+	// module puts that module's declarations in the barrel's emitted `.d.ts` as an
+	// un-nameable reference, so its types still reach consumers.
+	const root = engineWorkspace({
+		"libs/engine/src/lib/types/friend.ts": "export type Friend = { name: string };",
+		"libs/engine/src/lib/ui/FriendCard.svelte":
+			'<script lang="ts">import type { Friend } from "$lib/types/friend";</script>',
+		"libs/engine/src/lib/ui/index.ts":
+			'export * from "./GlassCard.svelte";\nexport * from "./FriendCard.svelte";',
+	});
+	withSurface(root, (surface) => {
+		const keys = exposed(surface, "libs/engine/src/lib/types/friend.ts");
+		assert.ok(keys.includes("."), `expected the root export, got ${keys.join(", ")}`);
+	});
+});
+
+test("a file imported by nothing public is still internal", () => {
+	const root = engineWorkspace({
+		"libs/engine/src/lib/orphan/helper.ts": "export const orphan = 1;",
+	});
+	withSurface(root, (surface) => {
+		assert.deepEqual(exposed(surface, "libs/engine/src/lib/orphan/helper.ts"), []);
+	});
+});
+
 // ─── Matching a specifier to an export key ──────────────────────────
 
 test("specifiers match exact keys, wildcards and the root export", () => {
