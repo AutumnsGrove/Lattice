@@ -19,6 +19,11 @@ import { d1DayRun } from "@autumnsgrove/curios/timeline/record";
 import { writeDaySummary } from "@autumnsgrove/curios/timeline/summary";
 import { resolvePersona } from "@autumnsgrove/curios/timeline/voices";
 import { createLumenModelSlot } from "@autumnsgrove/lyra-lumen/lumen";
+import {
+	MISSING_AI_KEY_MESSAGE,
+	resolveOpenRouterKey,
+	type SecretReader,
+} from "@autumnsgrove/lyra-lumen/secrets";
 import { initPulse, emitPulseEvent, flushPulse } from "@autumnsgrove/lattice/pulse";
 import { createRunLogger, reportRunOutcome } from "./run-log";
 
@@ -126,20 +131,22 @@ export async function processTenantTimeline(
 		// 1. The tenant's own keys, from envelope encryption (tenant_secrets only)
 		const secrets = await createSecretsManager({ DB: env.DB, GROVE_KEK: env.GROVE_KEK });
 
-		const [githubToken, openrouterKey] = await Promise.all([
-			secrets.safeGetSecret(config.tenantId, "timeline_github_token"),
-			secrets.safeGetSecret(config.tenantId, "timeline_openrouter_key"),
-		]);
+		// One AI key, canonical first — the same order Warden resolves (#1801).
+		const readSecret: SecretReader = async (name) =>
+			(await secrets.safeGetSecret(config.tenantId, name)) ?? undefined;
+
+		const githubToken = await secrets.safeGetSecret(config.tenantId, "timeline_github_token");
+		const openrouter = await resolveOpenRouterKey(readSecret);
 
 		if (!githubToken) {
 			throw new Error("GitHub token not found in tenant_secrets (key: timeline_github_token)");
 		}
 
-		if (!openrouterKey) {
-			throw new Error(
-				"OpenRouter API key not found in tenant_secrets (key: timeline_openrouter_key)",
-			);
+		if (!openrouter) {
+			throw new Error(MISSING_AI_KEY_MESSAGE);
 		}
+
+		const openrouterKey = openrouter.key;
 
 		// 2. The model, through the Lumen service binding — the same pipeline the
 		// nightly run has always used: PII scrub, quota, fallback.

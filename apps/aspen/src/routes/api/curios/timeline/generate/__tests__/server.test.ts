@@ -19,6 +19,7 @@ const {
 	resolvePersonaMock,
 	createLumenModelSlotMock,
 	getTimelineTokenMock,
+	resolveOpenRouterKeyMock,
 	d1DayRunMock,
 	thresholdCheckMock,
 } = vi.hoisted(() => ({
@@ -27,6 +28,7 @@ const {
 	resolvePersonaMock: vi.fn().mockReturnValue("write like a person"),
 	createLumenModelSlotMock: vi.fn().mockReturnValue({ name: "slot" }),
 	getTimelineTokenMock: vi.fn(),
+	resolveOpenRouterKeyMock: vi.fn(),
 	d1DayRunMock: vi.fn().mockReturnValue({
 		store: { name: "store" },
 		storage: () => ({ name: "storage" }),
@@ -81,6 +83,19 @@ vi.mock("@autumnsgrove/curios/timeline/voices", () => ({ resolvePersona: resolve
 vi.mock("@autumnsgrove/lyra-lumen/lumen", () => ({
 	createLumenModelSlot: createLumenModelSlotMock,
 }));
+
+// The route resolves the AI key through the shared order (#1801), so the test
+// replaces only the two lookups and keeps the real message and constants.
+vi.mock("@autumnsgrove/lyra-lumen/secrets", async () => {
+	const actual = await vi.importActual<typeof import("@autumnsgrove/lyra-lumen/secrets")>(
+		"@autumnsgrove/lyra-lumen/secrets",
+	);
+	return {
+		...actual,
+		createTenantSecretsSlot: vi.fn().mockReturnValue({ get: vi.fn() }),
+		resolveOpenRouterKey: resolveOpenRouterKeyMock,
+	};
+});
 
 import { POST } from "../+server.js";
 
@@ -195,6 +210,7 @@ function context(options: ContextOptions = {}) {
 beforeEach(() => {
 	vi.clearAllMocks();
 	getTimelineTokenMock.mockResolvedValue({ token: "secret-token", source: "encrypted" });
+	resolveOpenRouterKeyMock.mockResolvedValue({ key: "secret-token", source: "settings" });
 	generateDayMock.mockResolvedValue(generated());
 	writeDaySummaryMock.mockResolvedValue(undefined);
 	thresholdCheckMock.mockResolvedValue(null);
@@ -309,12 +325,33 @@ describe("POST /api/curios/timeline/generate", () => {
 		expect(result.body).toMatchObject({ success: false, error: "generation_failed" });
 	});
 
-	it("says a missing GitHub token in the shape the panel already handles", async () => {
-		getTimelineTokenMock.mockImplementation(async (_env: unknown, _tenant: string, key: string) =>
-			key === "timeline_github_token"
-				? { token: null, source: "none" }
-				: { token: "or", source: "x" },
+	it("says a missing AI key names Settings, rather than surfacing a provider 401", async () => {
+		resolveOpenRouterKeyMock.mockResolvedValue(undefined);
+		const ctx = context();
+		const result = (await POST(ctx as never)) as unknown as {
+			status: number;
+			body: Record<string, unknown>;
+		};
+
+		expect(result.status).toBe(400);
+		expect(result.body).toMatchObject({ success: false, error: "openrouter_key_missing" });
+		expect(String(result.body.message)).toContain("Settings");
+		expect(generateDayMock).not.toHaveBeenCalled();
+	});
+
+	it("accepts the timeline's own secret name through the shared resolver", async () => {
+		// The legacy name still answers, so shipping one key rotates nothing.
+		resolveOpenRouterKeyMock.mockResolvedValue({ key: "legacy-key", source: "timeline" });
+		const ctx = context();
+		await POST(ctx as never);
+
+		expect(createLumenModelSlotMock).toHaveBeenCalledWith(
+			expect.objectContaining({ tenantApiKey: "legacy-key" }),
 		);
+	});
+
+	it("says a missing GitHub token in the shape the panel already handles", async () => {
+		getTimelineTokenMock.mockResolvedValue({ token: null, source: "none" });
 		const ctx = context();
 		const result = (await POST(ctx as never)) as unknown as {
 			status: number;

@@ -20,6 +20,11 @@ import {
 	getTimelineToken,
 	TIMELINE_SECRET_KEYS,
 } from "@autumnsgrove/curios/timeline/secrets.server";
+import {
+	createTenantSecretsSlot,
+	MISSING_AI_KEY_MESSAGE,
+	resolveOpenRouterKey,
+} from "@autumnsgrove/lyra-lumen/secrets";
 import { generateDay } from "@autumnsgrove/curios/timeline/generate";
 import { d1DayRun } from "@autumnsgrove/curios/timeline/record";
 import { writeDaySummary } from "@autumnsgrove/curios/timeline/summary";
@@ -133,14 +138,20 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
 	const githubResult = await getTimelineToken(env, tenantId, TIMELINE_SECRET_KEYS.GITHUB_TOKEN);
 
-	const openrouterResult = await getTimelineToken(
-		env,
-		tenantId,
-		TIMELINE_SECRET_KEYS.OPENROUTER_KEY,
-	);
+	// One AI key for every feature (#1801): Settings first, the timeline's own
+	// name second. The KEK guard mirrors `getTimelineToken`'s, because the slot
+	// would otherwise throw on the first read instead of answering "not set".
+	const openrouter = env.GROVE_KEK
+		? await resolveOpenRouterKey(
+				createTenantSecretsSlot({ db, kek: env.GROVE_KEK, tenantId }).get,
+			).catch((err) => {
+				console.error("[Timeline Generate] AI key lookup failed:", err);
+				return undefined;
+			})
+		: undefined;
 
 	const githubToken = githubResult.token;
-	const openrouterKey = openrouterResult.token;
+	const openrouterKey = openrouter?.key;
 
 	if (!githubToken) {
 		console.error(
@@ -162,16 +173,15 @@ export const POST: RequestHandler = async ({ request, platform, locals }) => {
 
 	if (!openrouterKey) {
 		console.error(
-			`[Timeline Generate] OpenRouter key not found. Source attempted: ${openrouterResult.source}. GROVE_KEK present: ${!!platform?.env?.GROVE_KEK}`,
+			`[Timeline Generate] No AI key found. GROVE_KEK present: ${!!platform?.env?.GROVE_KEK}`,
 		);
 		return json(
 			{
 				success: false,
 				error: "openrouter_key_missing",
-				message:
-					"OpenRouter API key could not be retrieved. Check that it's saved in Timeline settings.",
+				message: MISSING_AI_KEY_MESSAGE,
 				debug: {
-					secretSource: openrouterResult.source,
+					secretSource: openrouter?.source ?? "none",
 					kekConfigured: !!platform?.env?.GROVE_KEK,
 				},
 			},

@@ -1,3 +1,4 @@
+import { readAiKeySource } from "$lib/server/ai-key";
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ locals, platform }) => {
@@ -41,5 +42,7 @@ export const load: PageServerLoad = async ({ locals, platform }) => {
 	return {
 		customBlazeCount,
 		curiosCount,
+		// Whether one AI key is set, for the card's status line (#1801).
+		aiKeySource: await readAiKeySource(env, locals.tenantId),
 	};
 };

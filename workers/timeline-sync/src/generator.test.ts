@@ -355,6 +355,31 @@ describe("processTenantTimeline", () => {
 		expect(generateDayMock).not.toHaveBeenCalled();
 	});
 
+	it("fails the tenant with a message that names Settings when no AI key is set", async () => {
+		safeGetSecretMock.mockImplementation(async (_tenant: string, key: string) =>
+			key === "timeline_github_token" ? "gh-token" : null,
+		);
+		const result = await processTenantTimeline(config(), "2026-11-21", env(), ctx() as never);
+
+		expect(result.success).toBe(false);
+		expect(result.error).toContain("Settings");
+		expect(createLumenModelSlotMock).not.toHaveBeenCalled();
+		expect(generateDayMock).not.toHaveBeenCalled();
+	});
+
+	it("uses the timeline's own secret name when Settings has not been set", async () => {
+		// The fallback is what makes this shippable without rotating anything.
+		safeGetSecretMock.mockImplementation(async (_tenant: string, key: string) => {
+			if (key === "timeline_github_token") return "gh-token";
+			return key === "timeline_openrouter_key" ? "legacy-key" : null;
+		});
+		await processTenantTimeline(config(), "2026-11-21", env(), ctx() as never);
+
+		expect(createLumenModelSlotMock).toHaveBeenCalledWith(
+			expect.objectContaining({ tenantApiKey: "legacy-key" }),
+		);
+	});
+
 	it("doesn't let a Pulse failure mask the original error", async () => {
 		generateDayMock.mockRejectedValue(new Error("the real problem"));
 		emitPulseEventMock.mockImplementation(() => {
