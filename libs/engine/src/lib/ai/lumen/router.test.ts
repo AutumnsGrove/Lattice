@@ -7,7 +7,7 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { routeTask, executeWithFallback, executeEmbedding, executeModeration } from "./router.js";
-import { getTaskConfig, MODELS } from "./config.js";
+import { getModelCapabilities, getTaskConfig, MODELS } from "./config.js";
 import { AllProvidersFailedError, ProviderError } from "./errors.js";
 import type { ProviderRegistry, LumenProvider } from "./providers/index.js";
 
@@ -380,27 +380,27 @@ describe("Specialized Execution", () => {
 describe("executeWithFallback - models that cannot fit the request (#1707)", () => {
 	const messages = [{ role: "user" as const, content: "Hello" }];
 
-	it("skips a candidate whose completion ceiling is too small instead of sending it", async () => {
-		// `generation`'s chain is DeepSeek V4.1 Flash → V4 Pro → GPT-OSS 120B, and
-		// GPT-OSS 120B tops out at 117,964 completion tokens. A caller asking for
-		// more than the primary and first fallback can serve must not cost a 400
-		// per link just to find that out.
-		const failing = vi
-			.fn()
-			.mockRejectedValue(new ProviderError("openrouter", "provider is down", 503));
-		const providers: ProviderRegistry = {
-			openrouter: { inference: failing } as unknown as LumenProvider,
-		};
+	it("clamps a request to the model's ceiling instead of sending it to be refused", async () => {
+		// gpt-oss-120b tops out at 117,964 completion tokens. A caller asking for
+		// 900,000 would be refused by the provider; clamping keeps the call and
+		// still produces output. Skipping the model instead would fail outright when
+		// every candidate is capped below the request (raised in review on #1851).
+		const provider = createMockProvider("openrouter");
+		const providers: ProviderRegistry = { openrouter: provider };
+		const ceiling = getModelCapabilities(MODELS.GPT_OSS_120B)?.maxOutputTokens;
 
-		await expect(
-			executeWithFallback("generation", messages, providers, { maxTokens: 900_000 }),
-		).rejects.toMatchObject({
-			attempts: expect.arrayContaining([
-				expect.objectContaining({
-					error: expect.stringContaining("completion limit"),
-				}),
-			]),
+		const result = await executeWithFallback("generation", messages, providers, {
+			model: MODELS.GPT_OSS_120B,
+			maxTokens: 900_000,
 		});
+
+		expect(result.response.content).toContain("openrouter");
+		expect(provider.inference).toHaveBeenCalledTimes(1);
+		expect(provider.inference).toHaveBeenCalledWith(
+			MODELS.GPT_OSS_120B,
+			expect.any(Array),
+			expect.objectContaining({ maxTokens: ceiling }),
+		);
 	});
 
 	it("still sends a request the chain can serve", async () => {

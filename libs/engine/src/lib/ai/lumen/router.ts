@@ -206,18 +206,19 @@ export async function executeWithFallback(
 		const provider = providers[providerName];
 		if (!provider) continue;
 
-		// A model whose completion ceiling cannot fit the request would be refused
-		// by the provider, costing the call and — on a fallback — the whole answer.
-		// Skipping it turns "this chain cannot serve this request" into a clear
-		// attempt record rather than a 400 (#1707).
+		// A caller's max_tokens is headroom, not a target, and a provider refuses a
+		// request above its model's ceiling rather than clamping it. Asking for the
+		// smaller of the two keeps the caller's intent and still produces output —
+		// skipping the model instead would fail the call outright when every
+		// candidate is capped below the request (#1707).
 		const ceiling = getModelCapabilities(model)?.maxOutputTokens;
+		const maxTokensForModel =
+			ceiling == null ? requestedMaxTokens : Math.min(requestedMaxTokens, ceiling);
+
 		if (ceiling != null && requestedMaxTokens > ceiling) {
-			attempts.push({
-				provider: providerName,
-				model,
-				error: `max_tokens=${requestedMaxTokens} is over this model's completion limit of ${ceiling}`,
-			});
-			continue;
+			console.warn(
+				`[Lumen/Router] ${model} caps completions at ${ceiling}; asking for ${ceiling}, not ${requestedMaxTokens}`,
+			);
 		}
 
 		// Build providerOptions to carry tool definitions through to the provider
@@ -231,7 +232,7 @@ export async function executeWithFallback(
 			: undefined;
 
 		const inferenceOptions: LumenInferenceOptions = {
-			maxTokens: requestedMaxTokens,
+			maxTokens: maxTokensForModel,
 			temperature: options.temperature ?? config.defaultTemperature,
 			timeoutMs: options.timeoutMs,
 			apiKeyOverride: options.apiKeyOverride,
