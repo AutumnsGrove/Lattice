@@ -1512,3 +1512,163 @@ When beta has been lived in and Fireside is ready for everyone, promoting it is 
 `isBetaDeployment` checks come out of the routes and the page, and the next deploy serves it to
 everyone. One PR. That is the whole migration story for a beta-gated feature, and it is worth
 writing down now so nobody goes looking for a switch that was never built.
+
+## 10. The River
+
+**Character**: The water everything downstream drinks from. Not a feature — the plumbing that
+decides whose money a fireside session spends and how the words reach Lumen at all. This is the one
+exhibit that was already thriving before the jeep left, because it was rebuilt this morning.
+
+### Safari findings: What exists today
+
+- [x] **`libs/lyra/src/secrets/ai-key.ts`** — `AI_SECRETS` spells the two names once;
+      `resolveOpenRouterKey()` asks `openrouter_api_key` first and `timeline_openrouter_key` second;
+      `hasOpenRouterKey()` answers presence without decrypting; `MISSING_AI_KEY_MESSAGE` names
+      Settings so a failure is a ten-second fix
+- [x] **Arbor → Settings → AI** — one password field, Save, Remove, a state badge, and a hub card
+      that says which of three states it is in. The key can never be read back
+- [x] **The timeline already reads through it** (app route, nightly worker, `/debug`), so the
+      resolver is proven by a feature that runs every day
+- [x] **Lumen's side**: BYOK first in `client-factory.ts`, then the dev-only key, then Warden, then
+      fail closed — and Lyra's `createLumenModelSlot` takes `tenantApiKey` as a value *or a function*,
+      so a call site can read it per call instead of holding it in an object
+- [x] **The policy**: ZDR providers only, even where they cost more; model choice belongs to the
+      registry (`deepseek/deepseek-v4.1-flash-1017` as the current default)
+- [ ] Nothing in Fireside's path exists yet — there is no route, no slot, no call
+- [ ] The old route read `platform.env.OPENROUTER_API_KEY`, a Grove-owned global. **That is the
+      mistake this stop exists to prevent from coming back**
+
+### Design spec (safari-approved)
+
+**Core decision:** Fireside spends the Wanderer's key, resolved through the shared resolver, and has
+no idea what a price is.
+
+#### 1. Who pays for what
+
+| What | Whose key | Guard |
+| --- | --- | --- |
+| Moderation (Thorn text, Petal images) | **Grove** | platform budget; it is a safety obligation |
+| Fireside turns and drafts | **the Wanderer's** | their provider account is the ceiling |
+| Timeline runs | the Wanderer's | same |
+
+No `cost`, `tokens` or `timeMs` limits (Stop 7). A per-user spending limit, if it is ever wanted, is
+a Lumen setting — filed as **#1867**.
+
+#### 2. The three lines of code that matter
+
+```ts
+const openrouter = await resolveOpenRouterKey(readTenantSecret);
+if (!openrouter) return 400 + MISSING_AI_KEY_MESSAGE;
+const model = createLumenModelSlot({
+  baseUrl: "https://grove-lumen", fetcher: env.LUMEN, apiKey: env.LUMEN_API_KEY,
+  tenantId, tenantApiKey: openrouter.key,
+});
+```
+
+Everything above the slot is Aspen's; everything below it is Lumen's. The `source` field
+(`settings` | `timeline`) is worth logging once per session — not the key, never the key — so a
+"why did it use that key" question has an answer.
+
+#### 3. What a session costs, honestly
+
+The repo has exactly one measured datapoint: a timeline day of 14 turns and 169k input tokens
+cost **$0.0076**. A fireside session is much smaller — 6–10 turns, each re-sending a history that
+stays under ~2k tokens (Stop 7 bounds the tools so it cannot balloon).
+
+So the honest statement is: **well under a cent on a cheap model, and ten to twenty times that on a
+frontier one.** The spec records that, and replaces it with a real number after the first measured
+session — not before.
+
+#### River fixes
+
+- [ ] The route resolves the tenant key; **never** `env.OPENROUTER_API_KEY`
+- [ ] A missing key returns the #1856 message, not a provider 401
+- [ ] Log the key's `source` once per session (never the value)
+- [ ] Local dev: the expected path is `DEV_OPENROUTER_API_KEY` in the dev stack, which Lumen reads
+      when no tenant key is set — no Warden locally
+- [ ] Record the first measured session cost in the spec once it exists
+
+---
+
+## Expedition Summary
+
+### By the numbers
+
+| Metric | Count |
+| --- | --- |
+| Stops | **10** |
+| Thriving 🟢 | 3 — the spec, the recipe, the key |
+| Growing 🟡 | 2 — the tests, the fence |
+| Wilting 🟠 | 2 — the component, the engine |
+| Barren 🔴 | 3 — the bones, the editor, the public surface |
+| Observations celebrated | **87** |
+| Fix items sketched | **163** |
+
+### Recommended trek order
+
+1. **Write the spec** — `docs/specs/fireside-spec.md`, from Stop 4's shape and the rulings at every
+   stop after it. Nothing else should start before this exists, because the old spec is actively
+   misleading.
+2. **The schema** — migration 128, `posts.fireside_assisted` + `fireside_session_id` in the Drizzle
+   schema. Unblocks everything, breaks nothing, and can land alone.
+3. **The recipes** — `fireside-turn` and `fireside-draft`, three tools, `propose_draft` via
+   `createProposeTool`. This is the feature's engine, and it can be built and tested against a fake
+   model slot before a single route exists.
+4. **The routes** — six REST routes, tenant-boundary `404`s, the beta gate on every one. Test in the
+   workers harness as they land (Stop 3's suites).
+5. **The marker and the transcript** — the derived attribution, the `<details>` disclosure, the
+   toggle in two places, cache invalidation.
+6. **The drawer and the editor slot** — *after* the UI design session Autumn asked for. The
+   structure is agreed; the surface is not.
+7. **Beta** — merge to `beta`, deploy, live in it. Promotion later is a deletion, not a flag.
+8. **The privacy docs** — #1868, in parallel with 5–7 rather than after, since the transcript is
+   what makes the policy text wrong.
+
+### Cross-cutting themes
+
+**Everything here was written when Wisp was the centre of Grove's AI.** The global key, the $5 cap,
+the 10/hour quota, the graft, the model vendor list — each is a fossil of "Grove pays for this and
+Wisp is where AI lives". Lumen changed the middle of that sentence and BYOK changed both ends.
+
+**Four promises without mechanisms.** The marker's server-side enforcement, the client pre-flight,
+the server intent classifier, and the cost cap were all specified, none shipped, and every one of
+them reads as done if you only read the spec. The bones stop found the same pattern in the schema:
+a column that is written and never read, in a table declared deprecated.
+
+**Two names for everything.** The key (`openrouter_api_key` vs `timeline_openrouter_key`), the
+session id (timestamp-random vs timestamp-uuid), the components (in `_junkdrawer` and in `dist`).
+Every fix in this safari was the same fix: one owner, one name, one direction.
+
+**The junk drawer is a lie detector.** `FiresideChat.svelte` still compiles, still has 490 lines of
+passing tests, and references CSS variables that stopped existing two design systems ago. Nothing
+reads it, so nothing fails.
+
+**The vibes travel; the files do not.** The philosophy table, the voice samples, the five refusals,
+the accessibility table — all of it survives word for word. The paths, the routes, the component
+names and the error shapes all get rewritten.
+
+### What this journal does not decide
+
+- **The UI surface.** Stop 6's structure is agreed; the drawer needs a visual design session where
+  Autumn can see it (her ruling at that stop).
+- **Per-message transcript sharing.** Full transcript now; selecting messages later is a better
+  answer and much more UI.
+- **The guardrail classifier.** If one is ever wanted, it is a decision model (#1853), not a chat
+  call per turn.
+- **The retention number.** 90 days for an unpublished session is a starting guess, not a decision.
+
+### Filed during the expedition
+
+| # | What |
+| --- | --- |
+| **#1856** | Settings: one AI key that every feature uses — **merged today**, and Stop 10 is its record |
+| **#1854** | Heartwood's browser tests never run |
+| **#1855** | A late cache write can re-cache an unpublished post |
+| **#1867** | Lumen: let a Wanderer set their own AI spending limit |
+| **#1868** | Privacy policy: cover the AI features that keep data |
+
+---
+
+_The fire dies to embers. Ten stops, 163 fixes sketched, 87 things worth keeping, and one feature
+that turns out to have been 80% right and 100% wired to a world that moved. Tomorrow the spec gets
+written and the animals go to work. Tonight was the drive — and it was a good one._ 🚙
