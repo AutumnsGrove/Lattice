@@ -1250,3 +1250,155 @@ answer, not the bottom one.
 
 - [ ] The timeline's own `COMPACTION_WINDOW` doc still justifies 32k with a 100-message cap that
       is now 400. Worth a follow-up of its own — its numbers may be costing quality for no reason
+
+## 8. The Clearing
+
+**Character**: The open ground after the post, where a reader stands and thinks about what they just
+read. This is where Autumn's transparency idea lives: not a badge that says an AI was involved, but
+*the receipts* — the actual conversation, so a reader can see how much of the work was the fire's
+and how much was the writer's. It is also the stop with the most open questions, and the one where
+being wrong is a privacy problem rather than a layout problem.
+
+### Safari findings: What exists today
+
+**"The footer" means two different things, and only one of them is right:**
+
+- [x] `libs/engine/src/lib/ui/components/chrome/Footer.svelte` is the **site** footer — resource,
+      connect and legal links, season art, the theme toggle. It renders on every page. A transcript
+      does not belong there
+- [x] The **post** footer is `apps/aspen/src/routes/garden/[slug]/+page.svelte` (550 lines): article
+      → tags → jump-to-comments → `ReedsThread`. That is the clearing
+
+**There is already a precedent for exactly this line**, which is the best news in the stop:
+
+- [x] `{#if data.post.spark_prompt}` renders `<p class="spark-attribution">` — *"Started with a
+      spark"* plus the prompt — at the end of the post header, above the comments
+- [x] It is small, italicised, honest, and unmistakably secondary. A fireside attribution in the
+      same place, in the same shape, is consistent rather than invented
+
+**And nothing reads the flag:**
+
+- [ ] `fireside_assisted` is written as `0` at creation and **never read** (Stop 5)
+- [ ] There is no marker in the stored markdown, and no code that would re-append one
+- [ ] `bloom-service.ts`'s update path builds `updateData` and never touches the column — so a PUT
+      preserves it *by accident*, not by rule
+- [x] The post page already loads the post, comments and comment settings in its `load`; a
+      transcript is one more query on the same keys
+- [x] Published content already goes through Thorn's `moderatePublishedContent` on publish
+- [x] Post pages are KV-cached (`garden:<tenant>:<slug>`, 300s) with a purge helper that both
+      update and delete already call — so a transcript toggle has a cache path to invalidate
+
+### Design spec (safari-approved)
+
+**Core decision:** the marker is **derived, not stored**, and the transcript is an **opt-in
+disclosure** that sits where the spark attribution already sits.
+
+#### 1. Delete the marker's string surgery entirely
+
+The old spec's plan was to append `*~ written fireside with Wisp ~*` to the markdown at publish and
+re-append it if someone removed it. That is a fight the database always wins: someone edits through
+the API, someone restores a backup, and the string comes back or doesn't.
+
+The flag is the truth; the marker is presentation:
+
+- `posts.fireside_assisted = 1` → the post footer renders the attribution
+- Nothing is appended to `markdown_content`; nothing needs re-appending
+- One enforcement rule, at the API boundary: **the flag cannot be cleared.**
+  `if (currentPost.fireside_assisted) updateData.fireside_assisted = 1`
+- The accept endpoint sets it: `POST /api/fireside/[id]/accept` → `fireside_assisted = 1`,
+  `sessions.post_id = <post>`
+
+An edit can no longer remove the marker by accident *or* on purpose, and the transcript can be
+turned off without the attribution lying about what happened.
+
+#### 2. Where it renders
+
+Inside the post header, immediately after the spark attribution, before the jump-to-comments badge:
+
+```
+… the article …
+──────────────────────────────────────────
+*~ written fireside with Wisp ~*          ← always, when the flag is set
+[ How this post was written ⌄ ]           ← only when the transcript is public
+──────────────────────────────────────────
+[ comments ]
+```
+
+- The attribution is a line, not a badge, matching `spark-attribution`
+- The disclosure is closed by default; opening it is the reader's choice, which keeps the post
+  readable for people who came for the writing
+- Inside: the conversation, the proposals, and the acceptance — in order, read-only, `role="log"`
+  not, because it is not live; plain `<ol>` with an `<h3>` per section
+
+#### 3. What readers see
+
+The honest version is **both sides, verbatim**: the writer's turns and Wisp's. That is what makes it
+receipts rather than a badge — the writer's own words are the proof the fire did not write them.
+
+But this is also **the writer's raw process**, which is a different kind of exposure from publishing
+a finished post: "I'm scared to publish this" was said in a private room. Hence the open question
+below, and hence:
+
+- **Off by default**, asked once at accept, in the drawer, in plain words
+- **The owner can turn it off later** from the post (when signed in) or from the editor's fireside
+  block — turning it off hides the transcript, keeps the attribution, and invalidates the cache
+- **Deleting the post** hides the transcript (Stop 5: `transcript_public = 0`, `post_id = NULL`)
+- **Deleting the session** removes the transcript with it
+
+#### 4. Draft proposals are counted, not reprinted
+
+The accepted draft *is the post* above. Reprinting it inside the transcript doubles the page and
+adds nothing. So each proposal renders as one line:
+
+> *Wisp proposed a draft — 1,240 words. The writer accepted this one.*
+
+The number of proposals is the interesting part ("it took four tries"), and it is visible without
+shipping three near-identical drafts.
+
+#### 5. Moderation and indexing
+
+- The transcript is published text on a public page, so it goes through the **same Thorn hook** as
+  the post body when the transcript is first made public — not a second moderation system
+- **Indexed**, deliberately: this is content the writer chose to publish, and hiding it from search
+  while showing it on the page would be theatre. The `<details>` still renders without JS
+- No new analytics. Whether readers open it is not our business
+
+#### 6. The query and the cache
+
+- The post `load` gains one query, only when `fireside_assisted = 1`: the session and its messages
+  for `post_id`, ordered by `seq`
+- It joins the existing cached payload, so a reader costs no extra round trip
+- Toggling visibility calls the existing `invalidatePostCaches` for that slug — the same path
+  update and delete already use
+
+### Still open — for the writer, not the safari
+
+1. **Content scope.** Full transcript (both sides, verbatim) is the honest default and the better
+   argument. *Receipts only* — Wisp's questions and the proposal counts, not the writer's messages —
+   protects the private-process part but weakens the proof. Both are defensible; one has to be
+   chosen, and it is a taste-and-risk call, not a technical one.
+2. **The toggle's home.** Post page while signed in, editor's fireside block, or Settings → AI.
+   Any of the three works; doing all three means three places to keep honest.
+3. **Retention vs permanence.** The transcript is a promise to a reader. If sessions expire at 90
+   days (Stop 5), a published transcript must not vanish underneath the post — so a session with a
+   published transcript is exempt from expiry, and dies with the post instead.
+
+#### Post page fixes
+
+- [ ] Attribution line after `spark-attribution`, rendered from `fireside_assisted`
+- [ ] `<details>` disclosure for the transcript, closed by default, server-rendered
+- [ ] Proposal lines with word counts, not reprinted drafts
+- [ ] No site-footer change — `chrome/Footer.svelte` is the wrong surface
+- [ ] One extra query in `load`, only when the flag is set, inside the cached payload
+- [ ] Owner-only toggle that purges the post cache
+
+#### API fixes
+
+- [ ] `updateData.fireside_assisted = 1` whenever the post already has it (never clearable)
+- [ ] `POST /api/fireside/[id]/accept` sets the flag, the post id and the timestamp
+- [ ] Transcript visibility change goes through the same route, and purges cache
+- [ ] Thorn's published-content hook covers the transcript when it is first made public
+
+#### Migration needs
+
+- [ ] None new — `fireside_assisted` exists (Stop 5), sessions carry the transcript flags
