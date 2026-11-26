@@ -656,7 +656,27 @@ Four promises there, and each one needs a mechanism before it is written down: r
 delete cascade), access (no admin route reads message bodies; say it out loud), and the transcript
 (off by default).
 
-#### 3. The "what we overturned" appendix
+#### 3. What Autumn ruled at this stop
+
+- **A privacy and legal review is its own piece of work** — filed as **#1868**. Every AI feature is
+  optional and opt-in, and **ZDR providers only, even where they cost more**: that is a commitment
+  to state, not a footnote about moderation.
+- **The cost section is entirely obsolete.** Delete it; BYOK, no caps.
+- **The model section is entirely obsolete.** The default is `deepseek/deepseek-v4.1-flash-1017`,
+  registered in the catalog the day this safari ran (#1849, #1850). Providers and fallbacks are
+  Lumen's business and are decided there — and since one model can be served by several providers,
+  the old "cascade to a different model" story may turn out to be a non-issue entirely. The spec
+  names a default and points at the registry; it does not list models.
+- **Carry the vibes, not the files.** Paths, route names, component names and error shapes from
+  2025 are all to be rewritten fresh. What travels is the philosophy, the voice, the refusals, the
+  accessibility table and the security rules.
+- **The classifier, if it is ever built, is a decision model.** #1853 files OpenRouter's
+  decision models (Jev and friends) as a Lumen surface — those answer *"is this a request for me
+  to write prose?"* with a probability for a fraction of a chat call. A full LLM call per turn to
+  police one rule is too expensive; a decision model at the draft step is not. Recorded as the
+  likely answer, not a build order.
+
+#### 4. The "what we overturned" appendix
 
 Written most seriously of anything in the document, because a future reader will otherwise
 "restore" the old decisions in good faith:
@@ -668,10 +688,11 @@ Written most seriously of anything in the document, because a future reader will
 - **Grove-paid + $5 cap → BYOK, no cap.** Why: inference became the Wanderer's key. What was
   lost: nothing but a guard that was never enforced.
 - **pinned model list → registry.** Why: prices and models move; a spec that names them rots.
-- **intent classification → instruction + test.** Why: it was never built, and it costs a call
-  per turn to police a rule the model already has.
+- **intent classification → instruction + test**, and later a **decision model** if a classifier
+  turns out to be needed (#1853). Why: it was never built, and a chat call per turn is too
+  expensive to police a rule the model already has.
 
-#### Spec fixes
+#### 5. Spec fixes
 
 - [ ] Create `docs/specs/fireside-spec.md`; delete Fireside from `wisp-spec.md` (leave a pointer)
 - [ ] Promote the mid-conversation mockup to a "voice" section, and copy its lines into the reply
@@ -696,3 +717,167 @@ Written most seriously of anything in the document, because a future reader will
 - [x] `canDraft` (3 messages, 150 tokens) and the input/output ratio rule
 - [x] delimiters, control-character stripping, 2,000-char cap, whitespace rejection
 - [x] the accessibility keyboard map and screen-reader announcements
+
+## 5. The Bones
+
+**Character**: A skeleton in the shape of a feature, buried before anyone decided whether it should
+be a bird or a fish. Two columns exist in production for a thing that never happened, one of them
+isn't in the schema as far as TypeScript is concerned, and the table they hang off has been
+officially declared dead. Nothing here is wrong. It is *unfinished in a way that reads as done*.
+
+### Safari findings: What exists today
+
+**`posts.fireside_assisted`** (migration 027, `INTEGER DEFAULT 0`, partial index on `= 1`):
+
+- [x] The column is real in the production DB, with an index that only covers the interesting rows
+- [x] The bugs API accepts and writes it (`api/blooms/+server.ts:37,362`)
+- [ ] **It is not in the Drizzle schema.** `content.ts` declares `posts` without it — so the typed
+      schema disagrees with the database, and every writer reaches past the types
+- [ ] **Nothing reads it.** Two call sites in `garden/new` write a literal `0`; no page, API or
+      footer ever asks whether a post was fireside-assisted
+- [ ] **The enforcement the spec described does not exist.** Re-appending the marker on write, and
+      refusing to clear the flag, were both specified and neither survived
+
+**`wisp_requests`** (migration 015, extended by 027):
+
+- [x] Sensible shape for a usage ledger: user, action, mode, model, provider, tokens, cost, slug
+- [x] Indexed for the three questions asked of it: per-user time, per-day cost, per-day volume
+- [x] `fireside_session_id` was added when sessions were only an idea
+- [ ] **The schema marks it deprecated**: *"Wisp has been removed. Table retained for prod data
+      integrity."*
+- [ ] **No live code writes it.** The only writers are junk-drawered
+- [ ] **No `tenant_id`** — it is a per-user ledger in a per-tenant world
+
+**The grafts** (`wisp_enabled` 092, `fireside_mode` / `scribe_mode` 040):
+
+- [x] Structured flags with rules, greenhouse-only, a Wayfinder override, all disabled in 113
+- [ ] `fireside_mode` is read by nothing except an engine integration test
+- [ ] The beta deployment is the gate now (`isBetaDeployment()`), so these are a second, unread
+      switch for the same decision
+
+**Where the data belongs** (verified, not assumed):
+
+- Posts, tenants and `tenant_secrets` live in **`grove-engine-db`**; posts cascade on tenant delete
+- Timeline and gallery config live in **`grove-curios-db`** (a different database)
+- `webhook-cleanup` already runs **daily at 03:00 UTC against the engine DB** — an existing owner
+  for retention, no new worker needed
+- New migrations start at **128** (127 is the newest today)
+
+### Design spec (safari-approved)
+
+**Core decision:** the conversation lives in the **engine DB**, next to the posts it becomes, in
+two new tables; `posts.fireside_assisted` is kept and finally taught to the schema; `wisp_requests`
+is left to rest in peace.
+
+#### 1. Why the engine DB and not a curio DB
+
+A fireside conversation exists to become a post. It must live in the same database as `posts` so
+that a tenant delete cascades, a post and its receipts are queried together, and there is no
+cross-database transaction to invent. Curio databases hold *config*; this is *content*.
+
+#### 2. `fireside_sessions`
+
+```sql
+CREATE TABLE fireside_sessions (
+  id            TEXT PRIMARY KEY,                    -- server-minted uuid
+  tenant_id     TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  user_id       TEXT NOT NULL,
+  status        TEXT NOT NULL DEFAULT 'open'
+                CHECK (status IN ('open','drafted','accepted','abandoned')),
+  post_id       TEXT,                                -- set on accept; NULLed if the post dies
+  turns         INTEGER NOT NULL DEFAULT 0,
+  input_tokens  INTEGER NOT NULL DEFAULT 0,
+  output_tokens INTEGER NOT NULL DEFAULT 0,
+  cost_usd      REAL NOT NULL DEFAULT 0,             -- estimated from the catalog, then recorded
+  model         TEXT,
+  transcript_public       INTEGER NOT NULL DEFAULT 0,
+  transcript_published_at INTEGER,
+  started_at    INTEGER NOT NULL DEFAULT (unixepoch()),
+  updated_at    INTEGER NOT NULL DEFAULT (unixepoch()),
+  expires_at    INTEGER                              -- retention; set on write, extended on activity
+);
+
+CREATE INDEX idx_fireside_sessions_tenant_updated
+  ON fireside_sessions(tenant_id, updated_at DESC);
+CREATE INDEX idx_fireside_sessions_open
+  ON fireside_sessions(tenant_id, user_id) WHERE status = 'open';
+```
+
+Decisions inside it:
+
+- **`post_id` is a plain column, not a foreign key.** Deleting a post must not silently erase the
+  conversation that made it; the session outlives the post, the transcript link is dropped, and
+  retention takes it later. One direction only — no `posts.fireside_session_id` to drift from it.
+- **Cost is on the session**, not resurrected in `wisp_requests`. A session's spend is the sum its
+  own row already knows; the usage page reads sessions when it wants conversation costs.
+- **`status` says what happened**, so "open" is a query (`WHERE status = 'open'`), not a guess from
+  timestamps — resume depends on this being cheap.
+- **`expires_at` rather than a policy in prose**: 90 days for a session nobody finished; accepted
+  sessions with a live post follow the post.
+
+#### 3. `fireside_messages`
+
+```sql
+CREATE TABLE fireside_messages (
+  id         TEXT PRIMARY KEY,
+  session_id TEXT NOT NULL REFERENCES fireside_sessions(id) ON DELETE CASCADE,
+  tenant_id  TEXT NOT NULL,                          -- denormalised: every query filters on it
+  role       TEXT NOT NULL CHECK (role IN ('user','wisp')),
+  kind       TEXT NOT NULL DEFAULT 'turn' CHECK (kind IN ('turn','draft')),
+  content    TEXT NOT NULL CHECK (length(content) <= 8000),
+  seq        INTEGER NOT NULL,
+  created_at INTEGER NOT NULL DEFAULT (unixepoch())
+);
+
+CREATE UNIQUE INDEX idx_fireside_messages_session_seq
+  ON fireside_messages(session_id, seq);
+```
+
+- **`seq` is the order**, not `created_at` — two messages in the same second are normal here and
+  ordering must not be a tiebreak question.
+- **`tenant_id` is duplicated on purpose.** Every read filters by tenant; making that a join is how
+  a tenant-boundary bug gets written six months from now.
+- **`kind = 'draft'`** stores the assembled draft before it is accepted, so going back to the chat
+  does not throw it away. The transcript decides what it shows; the table just remembers.
+- **8,000 chars**, not 2,000: the message cap is a route rule, and the column is a sanity bound
+  that should not fail a legitimate paste twice the size.
+
+#### 4. `posts`: keep the column, fix the schema
+
+- [ ] Add `firesideAssisted: integer("fireside_assisted").default(0)` to the `posts` table in
+      `content.ts` — the column exists in production and the types pretend it does not
+- [ ] No new column on `posts`. The session points at the post, not the other way around
+- [ ] `is_beta` (migration 118) is the precedent for how this is supposed to look: migration,
+      schema, written at creation, read at render
+
+#### 5. `wisp_requests`: let it rest
+
+- [ ] No new writers. The table keeps its production data and its `@deprecated` marker
+- [ ] `fireside_session_id` on it stays dormant; nothing new reads or writes it
+- [ ] The new spec says this out loud, because a table called `wisp_requests` sitting next to a
+      cost-bearing session is exactly the kind of thing someone "helpfully" starts writing to
+
+#### 6. The grafts stay off
+
+- [ ] Do not re-enable `fireside_mode` / `wisp_enabled` / `scribe_mode`. The gate is the beta
+      deployment (`isBetaDeployment()`), not a flag — two gates for one decision is how a feature
+      ships to everyone by accident
+- [ ] Leave the rows (they are the audit trail); leave the inert `tenant_settings` keys from 016
+
+#### 7. Retention is a cron, not a promise
+
+- [ ] `webhook-cleanup`'s daily 03:00 UTC run deletes messages then sessions past `expires_at`,
+      and logs the counts it purged
+- [ ] Deleting a session (`DELETE /api/fireside/[id]`) hard-deletes its messages by cascade
+- [ ] Deleting a tenant cascades both tables (the FK does it)
+- [ ] Deleting a post sets `post_id = NULL` and `transcript_public = 0`, and leaves the session
+- [ ] No admin route anywhere selects `fireside_messages.content` — say it in the spec, and let a
+      test fail if one appears
+
+#### Migration needs
+
+- [ ] `128_fireside_sessions.sql` — both tables, indexes, and the `posts` schema note (SQLite needs
+      no change for a column that already exists)
+- [ ] `content.ts` — `posts.firesideAssisted`
+- [ ] `platform.ts` — leave `wispRequests` deprecated and stop pretending it is a live ledger
+- [ ] Data migration: **none**. There are no conversations to migrate, which is the one mercy here
