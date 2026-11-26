@@ -1,5 +1,9 @@
 import "@testing-library/jest-dom/vitest";
 import { vi } from "vitest";
+// Hoisted like the `vi` import above: `vi.mock` factories run before module
+// initialisation, so the `readable` this factory closes over has to come from an
+// import rather than a `require()` inside the factory.
+import { readable } from "svelte/store";
 
 // Mock SvelteKit modules
 vi.mock("$app/navigation", () => ({
@@ -11,7 +15,6 @@ vi.mock("$app/navigation", () => ({
 }));
 
 vi.mock("$app/stores", () => {
-	const { readable } = require("svelte/store");
 	return {
 		page: readable({
 			url: new URL("http://localhost"),
