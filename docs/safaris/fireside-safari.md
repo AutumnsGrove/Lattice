@@ -473,20 +473,34 @@ pure function from `fireside.ts`. That is why it survived junk-drawering intact.
 
 ### Design spec (safari-approved)
 
-**Core decision:** the pure suite is good and nearly all of it ports. The tests that never existed
-are the ones that matter now, and they have a shape the repo only just acquired — the
-**happy / bad / sad** suites from #1765, running in the real workerd harness (#1766) against real
-D1, KV and R2.
+**Core decision:** the old suite is **inspiration, not a source**. Its *cases* are worth carrying;
+its file is not, because a modern suite has a shape this one predates — the **happy / bad / sad**
+describes from #1765, in the real workerd harness (#1766) against real D1, KV and R2, with
+`edge cases` and `error handling` retired as names.
 
-#### 1. Port the pure suite almost verbatim
+#### 1. Rewrite, don't port
 
-`fireside.test.ts` moves with the module. Two edits:
+The old file is 490 lines of node-pool unit tests with no request, no model and no failure in
+sight. The new suite runs in the workers harness and is organised by **who was wrong**:
 
-- delete `generateConversationId` / `isValidConversationId` tests
-- add the missing boundary: 3 messages, exactly `MIN_TOKENS_FOR_DRAFT`, `canDraft` → `true`
+- `happy` — the world works: a conversation happens, a draft comes out, the receipts are right
+- `bad` — the caller was wrong: 401, 403, 404, 400
+- `sad` — the caller was fine and the world was not: model silence, garbage JSON, Lumen down,
+  resumed sessions, an empty room
 
-Rename the describes if the module moves, but keep the tests: they are the only part of this
-feature that has ever been honest about its edges.
+`canDraft`'s cases (empty, wisp-only, two messages, three without substance, three with, and
+**wisp's words never count**) move across as *cases* — same inputs, same expectations, new
+harness, new file name. The starter-prompt rotation and the delimiter/`secureUserContent`
+assertions go with them.
+
+What does not come across:
+
+- `generateConversationId` / `isValidConversationId` — the server mints ids now (Stop 2, §2), so
+  there is nothing to validate by regex. The instinct moves to the route: an unknown or foreign
+  session is a `404`.
+- the self-admitted weak assertions (*"this could theoretically fail"*) — rewrite them to assert
+  something that cannot drift
+- anything that asserts a prompt's prose — see §2
 
 #### 2. Assert prompt *properties*, never prompt prose
 
