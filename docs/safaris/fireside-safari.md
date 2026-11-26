@@ -438,7 +438,7 @@ anyone ran it.
 
 ### Safari findings: What exists today
 
-`fireside.test.ts`, 490 lines, **9 describes, 34 tests, zero mocks** — everything it touches is a
+`fireside.test.ts`, 490 lines, **9 describes, 39 tests, zero mocks** — everything it touches is a
 pure function from `fireside.ts`. That is why it survived junk-drawering intact.
 
 - [x] **`hashString`** — deterministic, non-negative, and `""` is exactly `0`
