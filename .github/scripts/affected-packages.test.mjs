@@ -21,6 +21,8 @@ import {
 	classifyScope,
 	splitLockfile,
 	diffLockfile,
+	isOneShot,
+	testCommandFor,
 } from "./affected-packages.mjs";
 
 // ─── Fixtures ───────────────────────────────────────────────────────
@@ -475,6 +477,87 @@ test("fileToPackage prefers the longest matching directory", () => {
 	}
 });
 
+// ─── The test command (#1796) ──────────────────────────────────────
+
+// The detector used to admit a package on `test` and then have the job run
+// `test:run`, which is how `libs/gossamer` and `libs/shutter/cloudflare` kept
+// suites CI could never run. One script name is no longer the contract.
+test("test:run wins when a package has both scripts", () => {
+	assert.equal(testCommandFor({ "test:run": "vitest run", test: "vitest" }), "pnpm test:run");
+});
+
+test("a test script is used only when it cannot watch", () => {
+	assert.equal(testCommandFor({ test: "vitest run" }), "pnpm test");
+	assert.equal(testCommandFor({ test: "vitest" }), null);
+	assert.equal(testCommandFor({ test: "vitest --watch" }), null);
+});
+
+test("a package with no runnable suite stays out of the matrix", () => {
+	assert.equal(testCommandFor({}), null);
+	assert.equal(testCommandFor({ build: "tsc" }), null);
+	assert.equal(testCommandFor({ test: "vitest" }) !== null, false);
+});
+
+test("watchers and one-shot runners are told apart by the runner's own arguments", () => {
+	const oneShot = [
+		"vitest run",
+		"vitest run --coverage",
+		"vitest --run",
+		"jest --ci",
+		"jest --runInBand",
+		"cross-env NODE_ENV=test vitest run",
+		"c8 vitest run",
+		"node --test src/*.test.ts",
+		"tsx --test src/*.test.ts",
+		"playwright test",
+		"tsc --noEmit",
+	];
+	for (const command of oneShot) {
+		assert.equal(isOneShot(command), true, `${command} should be one-shot`);
+	}
+
+	const watching = [
+		"vitest",
+		"vitest --watch",
+		"vitest --ui",
+		"vitest -w",
+		"jest --watchAll",
+		"mocha --watch",
+		"vitest run --watch",
+		// A `run` earlier on the line does not make the runner one-shot.
+		"npm run build && vitest",
+	];
+	for (const command of watching) {
+		assert.equal(isOneShot(command), false, `${command} should not be run in CI`);
+	}
+});
+
+test("the test matrix carries the command, not a hardcoded script name", () => {
+	const root = standardWorkspace({
+		"workers/plain-vitest/package.json": {
+			name: "plain-vitest",
+			scripts: { test: "vitest run" },
+		},
+		"workers/bare-vitest/package.json": {
+			name: "bare-vitest",
+			scripts: { test: "vitest" },
+		},
+	});
+	try {
+		const result = detectAffected({
+			entries: files(["workers/plain-vitest/src/a.ts", "workers/bare-vitest/src/a.ts"]),
+			packages: discoverPackages(root),
+			root,
+		});
+
+		const byDir = Object.fromEntries(result.testMatrix.map((m) => [m.package, m.command]));
+		assert.equal(byDir["workers/plain-vitest"], "pnpm test");
+		assert.equal(byDir["workers/bare-vitest"], undefined, "a watcher must not enter the matrix");
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
 test("needsEngine is true only when an engine consumer is affected", () => {
 	const root = standardWorkspace();
 	try {
@@ -571,4 +654,21 @@ test("the real workspace discovers every package that has its own checks", () =>
 	// assertion together.
 	assert.equal(packages.get("services/email-render").typecheck, null);
 	assert.equal(packages.get("workers/paused").typecheck, null);
+});
+
+test("every package in the real workspace gets a test command that will exit", () => {
+	// A job that hangs until the runner kills it is a red check with no verdict
+	// in it, which is worse than no check at all (#1796).
+	const packages = discoverPackages();
+	let suites = 0;
+
+	for (const pkg of packages.values()) {
+		if (!pkg.hasTests) continue;
+		suites++;
+		const script = pkg.testCommand === "pnpm test:run" ? pkg.scripts["test:run"] : pkg.scripts.test;
+		assert.ok(script, `${pkg.dir} is in the matrix with no test script`);
+		assert.equal(isOneShot(script), true, `${pkg.dir} would not exit in CI: ${script}`);
+	}
+
+	assert.ok(suites > 0, "the workspace should have test suites");
 });
