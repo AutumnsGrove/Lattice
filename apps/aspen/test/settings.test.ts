@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
-import { TENANTS, createTenant, json, page, request, signIn, tenantIdFor } from "./harness";
+import { createTenant, json, page, request, signIn, tenantIdFor } from "./harness";
 
 /**
  * Settings and tenant secrets: the tenant-scoped writes that change how a grove
