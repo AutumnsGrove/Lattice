@@ -4,9 +4,19 @@
  * Task registry and model configurations.
  *
  * ═══════════════════════════════════════════════════════════════════════════════
- * MODEL UPDATES: To change models, update lumen-models.json in lib/data/.
- * Each task has a primary model and a fallback chain. OpenRouter model IDs
- * can be found at: https://openrouter.ai/models
+ * MODEL UPDATES: to change models, edit lumen-models.json in lib/data/.
+ * Each task has a primary model and a fallback chain.
+ *
+ * In that file, `cost` and `contextWindow` are facts, not choices: they come
+ * from `data/model-catalog.json`, a pinned snapshot of OpenRouter's own list.
+ *
+ *   pnpm models:refresh   re-pin the snapshot from OpenRouter
+ *   pnpm models:sync      carry prices and windows into lumen-models.json
+ *   pnpm models:check     fail when the two disagree (CI runs this)
+ *
+ * Everything else in the file — which model serves which task, quality and
+ * speed labels, tool support, context-free pricing decisions — stays
+ * hand-written, because it is a decision rather than a fact (#1822).
  * ═══════════════════════════════════════════════════════════════════════════════
  */
 

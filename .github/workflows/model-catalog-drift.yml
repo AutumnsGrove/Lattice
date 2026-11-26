@@ -1,0 +1,87 @@
+---
+name: Model Catalog Drift
+
+# Prices in the hand-typed registry were wrong in both directions, and one model
+# was missing entirely, for months — nothing compared them against the provider
+# until someone happened to look (#1822). The registry's numbers now come from a
+# pinned snapshot (`libs/engine/src/lib/data/model-catalog.json`) and CI fails
+# when the two disagree.
+#
+# This job is the other half: the snapshot itself is only right on the day it
+# was fetched. Weekly, it asks OpenRouter what the prices are now and opens (or
+# updates) one issue when they have moved, so a refresh is a prompt rather than
+# a discovery.
+
+on:
+  schedule:
+    # Mondays, 09:42 UTC — the same morning as the migration drift job, and
+    # after the weekend's deploys have settled.
+    - cron: "42 9 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  drift:
+    name: Snapshot vs OpenRouter
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      # `tsx` is a root devDependency, so installing the workspace is enough.
+      - name: Install workspace
+        run: pnpm install --frozen-lockfile
+
+      # Exit 1 with a readable list of what moved; the tree is not touched.
+      #
+      # `shell: bash` is load-bearing, not decoration: GitHub's default shell on
+      # Linux is `bash -e {0}` — no pipefail — so the step's status would be
+      # `tee`'s, always 0, and the issue below would never open. The same bug sat
+      # in ci.yml's lint step until #1841.
+      - name: Ask OpenRouter what the prices are now
+        id: check
+        shell: bash
+        continue-on-error: true
+        run: pnpm models:refresh --check 2>&1 | tee /tmp/catalog-drift.txt
+
+      - name: Open or update the drift issue
+        if: steps.check.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TITLE="Lumen: model prices at OpenRouter have moved"
+
+          {
+            echo "The weekly catalog check compared \`libs/engine/src/lib/data/model-catalog.json\`"
+            echo "with OpenRouter's live list and found a difference."
+            echo
+            echo '```'
+            cat /tmp/catalog-drift.txt
+            echo '```'
+            echo
+            echo "To take the new numbers: \`pnpm models:refresh && pnpm models:sync\`, then review"
+            echo "the diff — a price change changes every run's reported cost."
+            echo
+            echo "_Opened by .github/workflows/model-catalog-drift.yml._"
+          } > /tmp/catalog-issue.md
+
+          EXISTING=$(gh issue list --state open --label lumen --search "\"$TITLE\" in:title" \
+            --json number --jq '.[0].number // empty')
+
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --body-file /tmp/catalog-issue.md
+          else
+            gh issue create --title "$TITLE" --label lumen --label tech-debt \
+              --body-file /tmp/catalog-issue.md
+          fi

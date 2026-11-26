@@ -1,0 +1,276 @@
+/**
+ * The model catalog: what a model actually is, as opposed to what we decided
+ * about it.
+ *
+ * `libs/engine/src/lib/data/lumen-models.json` carries both, which is why it
+ * went wrong: prices and context windows change under us, and hand-typing them
+ * meant every timeline run's reported cost was wrong in both directions (#1822).
+ *
+ * So there are two files now:
+ *
+ * - `model-catalog.json` — facts, pinned from OpenRouter's own list by
+ *   `pnpm models:refresh`. Committed, so a deploy is reproducible and a check
+ *   needs no network.
+ * - `lumen-models.json` — the Grove overlay. Still hand-written, because it is
+ *   the part that is a decision: which model a task uses, which providers are
+ *   approved, what quality label a picker shows. Its `cost` and `contextWindow`
+ *   are filled in from the catalog by `pnpm models:sync`.
+ *
+ * `pnpm models:check` fails when the two disagree, and the engine's own test
+ * suite asserts the same thing, so CI notices when only the data file changes.
+ */
+
+/** The OpenRouter endpoint the facts come from. */
+export const CATALOG_URL = "https://openrouter.ai/api/v1/models";
+
+/** One model's prices, per million tokens, in USD. */
+export interface ModelPricing {
+	input: number;
+	output: number;
+}
+
+/** A model as the catalog knows it. */
+export interface ModelFacts {
+	id: string;
+	name: string;
+	/** Null when the provider does not publish one (transcription models). */
+	contextWindow: number | null;
+	pricing: ModelPricing;
+	/**
+	 * True when the provider prices by input length or by time of day, so the
+	 * base price above is only the first tier. Recorded rather than modelled:
+	 * a single number cannot express a tier, and pretending it can is how a
+	 * reported cost goes wrong.
+	 */
+	tiered: boolean;
+}
+
+/** The pinned snapshot, and the shape of what `models:refresh` writes. */
+export interface Catalog {
+	source: string;
+	fetchedAt: string;
+	models: Record<string, ModelFacts>;
+}
+
+/** The subset of the registry this module needs. */
+export interface RegistryModel {
+	id: string;
+	name: string;
+	provider: string;
+	category?: string;
+	cost: ModelPricing;
+	contextWindow?: number | null;
+}
+
+export interface Registry {
+	models: Record<string, RegistryModel>;
+}
+
+/** One disagreement between the overlay and the catalog. */
+export interface Drift {
+	name: string;
+	id: string;
+	field: string;
+	registry: string;
+	catalog: string;
+}
+
+interface OpenRouterModel {
+	id: string;
+	name?: string;
+	context_length?: number | null;
+	pricing?: {
+		prompt?: string;
+		completion?: string;
+		overrides?: unknown[];
+	};
+}
+
+/** Prices arrive per token as strings; Grove reports per million tokens. */
+function perMillion(perToken: string | undefined): number {
+	const value = Number(perToken ?? "");
+	if (!Number.isFinite(value)) {
+		return 0;
+	}
+	// Six places keeps sub-cent accuracy without leaving float tails behind.
+	return Math.round(value * 1_000_000 * 1e6) / 1e6;
+}
+
+/**
+ * Pick the facts for `ids` out of OpenRouter's response.
+ *
+ * Only the models the registry names are kept: this is a pinned snapshot of
+ * what Grove routes, not a copy of the catalog. A model OpenRouter lists and we
+ * do not use is somebody else's maintenance burden.
+ */
+export function parseCatalog(payload: unknown, ids: string[], fetchedAt: string): Catalog {
+	const data = (payload as { data?: OpenRouterModel[] })?.data;
+	if (!Array.isArray(data)) {
+		throw new Error(`OpenRouter's response has no data array`);
+	}
+
+	const byId = new Map(data.map((model) => [model.id, model]));
+	const models: Record<string, ModelFacts> = {};
+
+	for (const id of [...ids].sort()) {
+		const model = byId.get(id);
+		if (model === undefined) {
+			throw new Error(`OpenRouter no longer lists ${id}`);
+		}
+		models[id] = {
+			id,
+			name: model.name ?? id,
+			contextWindow: model.context_length ?? null,
+			pricing: {
+				input: perMillion(model.pricing?.prompt),
+				output: perMillion(model.pricing?.completion),
+			},
+			tiered: (model.pricing?.overrides?.length ?? 0) > 0,
+		};
+	}
+
+	return { source: CATALOG_URL, fetchedAt, models };
+}
+
+/**
+ * Whether OpenRouter's model list can price this model.
+ *
+ * Embeddings are served but not listed: `/api/v1/models` carries chat models,
+ * so `perplexity/pplx-embed-v1-0.6b` and `baai/bge-m3` are absent however they
+ * are routed. Their prices stay hand-written, and the guard says so by
+ * skipping them rather than calling them missing.
+ */
+function catalogCovers(model: RegistryModel): boolean {
+	return model.provider === "openrouter" && model.category !== "embedding";
+}
+
+/** The models the overlay routes through OpenRouter, which is what the catalog covers. */
+export function openRouterIds(registry: Registry): string[] {
+	return Object.values(registry.models)
+		.filter(catalogCovers)
+		.map((model) => model.id);
+}
+
+function money(value: number): string {
+	return `$${value.toFixed(6).replace(/0+$/, "").replace(/\.$/, "")}/M`;
+}
+
+/**
+ * Every place the overlay disagrees with the catalog.
+ *
+ * A model with no catalog entry is drift too: it cannot be priced from facts,
+ * which is how the wrong numbers got in.
+ */
+export function findDrift(registry: Registry, catalog: Catalog): Drift[] {
+	const drift: Drift[] = [];
+
+	for (const [name, model] of Object.entries(registry.models)) {
+		if (!catalogCovers(model)) {
+			continue;
+		}
+
+		const facts = catalog.models[model.id];
+		if (facts === undefined) {
+			drift.push({
+				name,
+				id: model.id,
+				field: "catalog entry",
+				registry: "missing",
+				catalog: "—",
+			});
+			continue;
+		}
+
+		const pairs: Array<[string, number, number]> = [
+			["cost.input", model.cost.input, facts.pricing.input],
+			["cost.output", model.cost.output, facts.pricing.output],
+		];
+
+		for (const [field, ours, theirs] of pairs) {
+			if (Math.abs(ours - theirs) > 1e-9) {
+				drift.push({
+					name,
+					id: model.id,
+					field,
+					registry: money(ours),
+					catalog: money(theirs),
+				});
+			}
+		}
+
+		if (facts.contextWindow !== null && model.contextWindow !== facts.contextWindow) {
+			drift.push({
+				name,
+				id: model.id,
+				field: "contextWindow",
+				registry: String(model.contextWindow ?? "unset"),
+				catalog: String(facts.contextWindow),
+			});
+		}
+	}
+
+	return drift;
+}
+
+/** The overlay with its catalog-backed fields filled in from `catalog`. */
+export function applyCatalog(registry: Registry, catalog: Catalog): Registry {
+	const models: Record<string, RegistryModel> = {};
+
+	for (const [name, model] of Object.entries(registry.models)) {
+		const facts = catalogCovers(model) ? catalog.models[model.id] : undefined;
+
+		models[name] =
+			facts === undefined
+				? model
+				: {
+						...model,
+						cost: { ...facts.pricing },
+						...(facts.contextWindow !== null && { contextWindow: facts.contextWindow }),
+					};
+	}
+
+	return { ...registry, models };
+}
+
+/**
+ * The overlay, in the style a person wrote it in: two-space indent, with `cost`
+ * and `toolChoice` kept on one line.
+ *
+ * `models:sync` changes two numbers per model. Re-serializing the whole file
+ * would reformat every line and bury those numbers in the diff, which is the
+ * opposite of what a reviewer needs when the change is "this price is wrong".
+ */
+export function formatRegistryJson(registry: Registry): string {
+	const text = JSON.stringify(registry, null, 2)
+		.replace(
+			/("cost": )\{\n\s+"input": ([0-9.e+-]+),\n\s+"output": ([0-9.e+-]+)\n\s+\}/g,
+			'$1{ "input": $2, "output": $3 }',
+		)
+		.replace(
+			/("toolChoice": )\[\n((?:\s+"[^"]*",?\n)+)\s+\]/g,
+			(_match, key: string, body: string) => {
+				const values = body
+					.split("\n")
+					.map((line) => line.trim().replace(/,$/, ""))
+					.filter((line) => line !== "");
+				return `${key}[${values.join(", ")}]`;
+			},
+		);
+
+	return `${text}\n`;
+}
+
+/** A drift report a person can read in a failing job or an issue body. */
+export function describeDrift(drift: Drift[]): string {
+	const lines = drift.map(
+		(item) =>
+			`- ${item.name} (${item.id}) ${item.field}: registry ${item.registry}, catalog ${item.catalog}`,
+	);
+	return [
+		`${drift.length} model ${drift.length === 1 ? "fact disagrees" : "facts disagree"} with the catalog:`,
+		"",
+		...lines,
+		"",
+		"Run `pnpm models:sync` to take the catalog's numbers, then review the diff.",
+	].join("\n");
+}

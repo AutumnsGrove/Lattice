@@ -305,10 +305,18 @@ describe("calculateCost", () => {
 
 	it("should handle small token counts", () => {
 		const { input, output } = MODEL_COSTS[MODELS.DEEPSEEK_V4_1_FLASH];
-		// 1000 tokens = 0.001M tokens
+		// 1000 tokens = 0.001M tokens. The assertion is the function's own contract
+		// (six decimals, so sub-cent costs do not carry float tails) rather than a
+		// higher precision than it promises — the price changed under this test when
+		// the catalog arrived (#1822) and the old tolerance was only "passing"
+		// because the two prices happened to sum to an exact 6-decimal figure.
+		const exact = (input + output) / 1000;
 		const cost = calculateCost(MODELS.DEEPSEEK_V4_1_FLASH, 1000, 1000);
 
-		expect(cost).toBeCloseTo((input + output) / 1000, 8);
+		// Within a rounding step of the exact figure, and holding no more than six
+		// decimals — which is what the function promises.
+		expect(Math.abs(cost - exact)).toBeLessThan(1e-6);
+		expect(Number(cost.toFixed(6))).toBe(cost);
 	});
 
 	it("should return 0 for Cloudflare models", () => {
