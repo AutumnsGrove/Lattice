@@ -784,7 +784,6 @@ CREATE TABLE fireside_sessions (
   user_id       TEXT NOT NULL,
   status        TEXT NOT NULL DEFAULT 'open'
                 CHECK (status IN ('open','drafted','accepted','abandoned')),
-  post_id       TEXT,                                -- set on accept; NULLed if the post dies
   turns         INTEGER NOT NULL DEFAULT 0,
   input_tokens  INTEGER NOT NULL DEFAULT 0,
   output_tokens INTEGER NOT NULL DEFAULT 0,
@@ -805,9 +804,17 @@ CREATE INDEX idx_fireside_sessions_open
 
 Decisions inside it:
 
-- **`post_id` is a plain column, not a foreign key.** Deleting a post must not silently erase the
-  conversation that made it; the session outlives the post, the transcript link is dropped, and
-  retention takes it later. One direction only — no `posts.fireside_session_id` to drift from it.
+- **The link lives on the post, not the session** (Autumn's correction at Stop 8): *"the transcript
+  will make more sense being attached directly to the post itself."* So `posts` gains
+  `fireside_session_id TEXT REFERENCES fireside_sessions(id) ON DELETE SET NULL` — one direction,
+  and the durable artefact owns the pointer:
+
+  | Event | What happens |
+  | --- | --- |
+  | session expires (never published) | `SET NULL` on the post, which keeps its attribution and loses a link to nothing |
+  | post is deleted | the session is untouched, and the transcript disappears with the page that showed it |
+  | session deleted deliberately | same as expiry: the post keeps `fireside_assisted`, the transcript is gone |
+  | tenant deleted | both tables cascade |
 - **Cost is on the session**, not resurrected in `wisp_requests`. A session's spend is the sum its
   own row already knows; the usage page reads sessions when it wants conversation costs.
 - **`status` says what happened**, so "open" is a query (`WHERE status = 'open'`), not a guess from
@@ -842,11 +849,12 @@ CREATE UNIQUE INDEX idx_fireside_messages_session_seq
 - **8,000 chars**, not 2,000: the message cap is a route rule, and the column is a sanity bound
   that should not fail a legitimate paste twice the size.
 
-#### 4. `posts`: keep the column, fix the schema
+#### 4. `posts`: fix the schema, and add the link
 
 - [ ] Add `firesideAssisted: integer("fireside_assisted").default(0)` to the `posts` table in
       `content.ts` — the column exists in production and the types pretend it does not
-- [ ] No new column on `posts`. The session points at the post, not the other way around
+- [ ] Add `firesideSessionId: text("fireside_session_id")` (migration 128) — the post owns the
+      pointer to its conversation, so a transcript cannot outlive the page that shows it
 - [ ] `is_beta` (migration 118) is the precedent for how this is supposed to look: migration,
       schema, written at creation, read at render
 
@@ -874,9 +882,11 @@ thing and fall back to mainline Aspen by walking through the other door.
 
 - [ ] `webhook-cleanup`'s daily 03:00 UTC run deletes messages then sessions past `expires_at`,
       and logs the counts it purged
+- [ ] **A session with a published transcript is exempt from expiry.** A published transcript is a
+      promise to a reader; it survives until the post it belongs to does
 - [ ] Deleting a session (`DELETE /api/fireside/[id]`) hard-deletes its messages by cascade
 - [ ] Deleting a tenant cascades both tables (the FK does it)
-- [ ] Deleting a post sets `post_id = NULL` and `transcript_public = 0`, and leaves the session
+- [ ] Deleting a post clears `posts.fireside_session_id` (the row is gone, the session is not)
 - [ ] No admin route anywhere selects `fireside_messages.content` — say it in the spec, and let a
       test fail if one appears
 
@@ -1340,10 +1350,12 @@ a finished post: "I'm scared to publish this" was said in a private room. Hence 
 below, and hence:
 
 - **Off by default**, asked once at accept, in the drawer, in plain words
-- **The owner can turn it off later** from the post (when signed in) or from the editor's fireside
-  block — turning it off hides the transcript, keeps the attribution, and invalidates the cache
-- **Deleting the post** hides the transcript (Stop 5: `transcript_public = 0`, `post_id = NULL`)
-- **Deleting the session** removes the transcript with it
+- **The owner turns it on or off from two places** (Autumn's ruling): the post itself when signed
+  in, and the editor's fireside block. **Not** Settings → AI — a key panel is not where a post's
+  disclosure belongs
+- **Turning it off** hides the transcript, keeps the attribution, and purges the post cache
+- **Deleting the post** takes the transcript with it (Stop 5: the post owns the link)
+- **A published transcript never expires.** Sessions expire only when nobody published one
 
 #### 4. Draft proposals are counted, not reprinted
 
@@ -1371,17 +1383,25 @@ shipping three near-identical drafts.
 - Toggling visibility calls the existing `invalidatePostCaches` for that slug — the same path
   update and delete already use
 
+### Decided at the campfire
+
+1. **Content scope: the full thing, for now.** Both sides, verbatim. Per-message selection
+   (*"message 1, 2 and 3 can be shared; not 4, 5 and 7"*) is the better long-term answer and a lot
+   more UI; it goes in the "later" column, not the spec.
+2. **Toggle home: the post page when signed in, and the editor's fireside block.** Two places, not
+   three.
+3. **Permanence: a published transcript persists**, exempt from session expiry, and dies with the
+   post it belongs to.
+
 ### Still open — for the writer, not the safari
 
 1. **Content scope.** Full transcript (both sides, verbatim) is the honest default and the better
    argument. *Receipts only* — Wisp's questions and the proposal counts, not the writer's messages —
    protects the private-process part but weakens the proof. Both are defensible; one has to be
    chosen, and it is a taste-and-risk call, not a technical one.
-2. **The toggle's home.** Post page while signed in, editor's fireside block, or Settings → AI.
-   Any of the three works; doing all three means three places to keep honest.
-3. **Retention vs permanence.** The transcript is a promise to a reader. If sessions expire at 90
-   days (Stop 5), a published transcript must not vanish underneath the post — so a session with a
-   published transcript is exempt from expiry, and dies with the post instead.
+2. **The transcript's `<details>` summary line** — *"How this post was written"* is a placeholder.
+   Worth a pass with the UI design session (Stop 6's open item), since it is the one sentence a
+   reader chooses to open.
 
 #### Post page fixes
 
