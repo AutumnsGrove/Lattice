@@ -932,6 +932,11 @@ invitation on it.
 
 ### Design spec (safari-approved)
 
+> **Not locked.** Autumn's call at the campfire: *"the actual mockup of the UI will need a design
+> session of its own — I can't see it, and I need to see it."* The structure below is agreed; the
+> surface is not. A visual design session comes before this stop is written into a spec, and the
+> session needs a rendered drawer to look at, not a description of one.
+
 **Core decision:** the fire is a **drawer over the editor**, opened by **one button that the engine
 offers a slot for and Aspen fills**, and accepting a draft never silently replaces words that are
 already there.
@@ -1028,3 +1033,144 @@ slot makes that a prop, not a fork, when the day comes.
 - Pages (`pages/*`) — see §6
 - A Fireside tab inside the old Wisp panel — the panel is junk-drawered and Wisp is a sibling
   feature, not a host (Stop 4)
+
+## 7. The Pride
+
+**Character**: The animal Fireside should be built like. The timeline's recipe is the first thing
+in this codebase that uses Lyra properly — a bounded loop, eight tools, a real budget, and numbers
+written down by someone who paid for the mistakes. Almost all of it transfers. Two of its constants
+do not, and Autumn called both before the jeep stopped.
+
+### Safari findings: What exists today
+
+`libs/curios/src/timeline/recipe/` (~2,000 lines across 12 files: `recipe.ts`, `tools.ts`,
+`instructions.ts`, `state.ts`, `github.ts`, `serialize.ts`, plus tests) and
+`libs/curios/src/timeline/generate.ts` (313).
+
+- [x] **A recipe, not a prompt**: `defineRecipe` with `setup` (renders the day and mints handles),
+      `tools` (eight), `system` (the voice), and `limits`
+- [x] **Tools have an `apply` step** so a resumed run replays saved results instead of re-calling
+      anything (decision 112) — a resume costs nothing and repeats nothing
+- [x] **The token lives in a closure, never in run state** (decision 51) — the GitHub reader holds
+      it, the model never sees it
+- [x] **`compaction` is wired into `runTask`, not just declared.** The comment says exactly what
+      happened without it: *"1.3 million input tokens for a thirty-one turn day, and eight cents
+      for a page"*
+- [x] **Real measurements**: 14 turns, 169k input / 13k output, **$0.0076** for a day
+- [ ] **`DEFAULT_STEP_LIMIT = 40`** — a constant, and Autumn's ruling: *"we can't lock it in at a
+      set amount of steps"*
+- [ ] **`COMPACTION_WINDOW = 32_000`** — sized for the timeline's tool-heavy day, and her ruling:
+      *"a bit low, it could be higher"*
+- [ ] **The 32k rationale has already expired.** Its doc comment justifies the number as *"a proxy
+      for message count — Lumen caps a request at 100 messages"*. That cap is **400** today
+      (`preprocessor.ts:206`), so the proxy argument is pointing at a number four times larger
+      than when it was written
+
+### What Lyra actually offers (read from the installed types)
+
+This is the part that changes the design, because the timeline only uses a third of it:
+
+- **Every limit is optional; none by default; reaching one *parks* rather than kills** (decisions
+  18, 22, LIM01). Available: `steps`, `tokens`, `timeMs`, `cost`. A parked run keeps its work and
+  can resume with a larger allowance.
+- **`toolResultBytes`** (decision 40): *"how much of one tool result the model may read before it
+  is cut"*, overridable per tool by `maxResultBytes`.
+- **`stuck`** (decision 25): on by default; `reminders` = how many nudges a model that stops
+  without finishing gets; `sameFailure` = how many identical tool failures in a row stop the run.
+- **`control`**: steers and follow-ups, read at the moments that keep the record paired.
+
+### Design spec (safari-approved)
+
+**Core decision:** build Fireside's recipe in the timeline's shape, take **no** limits from it,
+derive the step budget from the tool set, and size the compaction window to the model rather than
+to a number copied from another feature.
+
+#### 1. The step budget is derived, not declared
+
+A reply turn ends when the model **answers in prose with no tool call** — that is its finish
+condition, so steps are a runaway guard, not a budget. The guard should be the size of the work the
+run can legitimately do:
+
+```
+steps = 2 * tools.length + 2        // three tools → 8
+```
+
+- Two steps per tool covers one call and one retry after a failure
+- `+2` covers the opening turn and the final answer
+- Passed as `limits.steps`, overridable per call — **the formula lives in the recipe, the number
+  never does**
+- A run that reaches it **parks** (resumable), which is the correct outcome for a guard: visible,
+  not fatal
+- `stuck.reminders: 0` for the reply turn — the timeline nudges a model that answers with prose
+  instead of calling tools; here prose *is* the answer, and a nudge would be the loop arguing with
+  a correct finish. `sameFailure: 2` stays: two identical tool failures means the tool is broken,
+  not the model.
+
+#### 2. The window is the model's, not another feature's
+
+The insight that makes this easy: **a bigger compaction window costs nothing until it is reached.**
+The window is not a budget — the *history* is what costs, and the history is what it is. A low
+window makes a summary call fire earlier, throwing away detail and spending tokens to do it. So:
+
+```
+compaction = {
+  contextWindow: modelContext - outputReserve - systemPromptAllowance,   // capped by policy
+  reserveTokens: 4_000,
+  keepTokens:   window / 3,
+}
+```
+
+- **Not 32k.** For the default model (a 1M-context DeepSeek, per the registry) a window around
+  **128k** is a sane policy cap: far above any real fireside session, far below the point where a
+  single request would be unwieldy
+- **`keepTokens` scales with the window** (a third), because cutting a long conversation down to
+  the timeline's 12k would throw away the middle of it — exactly the detail a writer wants back
+- **Compaction should essentially never fire.** If it does, that is a signal about tool payloads,
+  not about the conversation
+
+#### 3. Bound the tools, not the conversation
+
+The thing that can actually inflate a fireside session is a tool returning a whole post:
+
+- [ ] `read_draft` returns **the first ~400 words plus a note** ("the post continues; ask about a
+      section"), not the full document
+- [ ] `read_my_recent_posts` returns **two or three short excerpts** with titles, never whole posts
+- [ ] `toolResultBytes` is set on the run as a backstop, with `maxResultBytes` on each tool as the
+      honest bound
+
+With those three, a 30-turn session stays around 6–10k tokens and the window is insurance rather
+than machinery.
+
+#### 4. No cost, token or time limits
+
+Autumn's ruling at Stop 2 holds: it is the Wanderer's key, and the ceiling is their provider
+account. `limits.cost`, `limits.tokens` and `limits.timeMs` are all left unset. A per-user spending
+limit, if it ever exists, is a Lumen setting (#1867) — not a per-feature number.
+
+#### 5. Two runs, two recipes, or one recipe twice
+
+The reply turn and the draft step are different tasks with different finish conditions, so:
+
+- **`fireside-turn`** — tools on, `steps = 2*3+2`, `reminders: 0`, answer in prose
+- **`fireside-draft`** — **no tools**, one step, JSON out (`{title, content}`), temperature 0.3,
+  the existing prompt and fallback
+
+Keeping them separate means the draft cannot wander into tool calls and the reply cannot
+accidentally produce a post body. It also means Stop 3's "no prose from the turn path" assertion
+has a structural reason to hold rather than a hopeful one.
+
+#### Recipe fixes
+
+- [ ] `createFiresideTurnRecipe` / `createFiresideDraftRecipe`, following the timeline's file layout
+      (instructions, tools, state, serialize) so both features read the same way
+- [ ] `limits.steps` derived from `tools.length`; no `DEFAULT_STEP_LIMIT` constant
+- [ ] `stuck: { reminders: 0, sameFailure: 2 }` on the turn recipe; none needed on the draft
+- [ ] `compaction` computed from the model's context (policy cap ~128k), `keepTokens` = window/3
+- [ ] `toolResultBytes` set on the run; `maxResultBytes` per tool
+- [ ] No `cost`/`tokens`/`timeMs` limits
+- [ ] The draft recipe has no tools and one step
+
+#### Notes for later (not this feature)
+
+- [ ] The timeline's own `COMPACTION_WINDOW` doc still justifies 32k with a 100-message cap that
+      is now 400. Worth a follow-up of its own — its numbers may be costing quality for no reason
