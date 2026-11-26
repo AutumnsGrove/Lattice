@@ -19,6 +19,8 @@ import {
 	fileToPackage,
 	isContentOnly,
 	classifyScope,
+	splitLockfile,
+	diffLockfile,
 } from "./affected-packages.mjs";
 
 // ─── Fixtures ───────────────────────────────────────────────────────
@@ -218,12 +220,7 @@ test("global inputs invalidate every package", () => {
 	const root = standardWorkspace();
 	try {
 		const packages = discoverPackages(root);
-		for (const path of [
-			"pnpm-lock.yaml",
-			"pnpm-workspace.yaml",
-			"tsconfig.base.json",
-			"package.json",
-		]) {
+		for (const path of ["pnpm-workspace.yaml", "tsconfig.base.json", "package.json"]) {
 			const result = detectAffected({ entries: files([path]), packages, root });
 			assert.equal(result.runAll, true, `${path} should run everything`);
 			assert.equal(
@@ -232,6 +229,157 @@ test("global inputs invalidate every package", () => {
 				`${path} should affect every package`,
 			);
 		}
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+// ─── Lockfile scope (#1795) ─────────────────────────────────────────
+
+/** A pnpm lockfile with the given importers and shared section. */
+function lockfile({ importers = {}, shared = "lockfileVersion: '9.0'" } = {}) {
+	let out = `${shared}\n\nimporters:\n`;
+	for (const [dir, deps] of Object.entries(importers)) {
+		out += `\n  ${dir}:\n`;
+		for (const [name, version] of Object.entries(deps)) {
+			out += `    dependencies:\n      ${name}:\n        specifier: ${version}\n        version: ${version}\n`;
+		}
+	}
+	return out;
+}
+
+test("the lockfile is split into importers and the shared remainder", () => {
+	const parsed = splitLockfile(
+		lockfile({
+			importers: { ".": { prettier: "^3.0.0" }, "apps/aspen": { svelte: "^5.0.0" } },
+			// `packages:` is the shared half — outside the importers section.
+			shared:
+				"lockfileVersion: '9.0'\n\npackages:\n\n  svelte@5.0.0:\n    resolution: {integrity: sha512-x}",
+		}),
+	);
+
+	assert.deepEqual([...parsed.importers.keys()], [".", "apps/aspen"]);
+	assert.match(parsed.shared, /^lockfileVersion/);
+	assert.match(parsed.shared, /packages:/);
+});
+
+test("a lockfile with no importers section is not scoped", () => {
+	assert.equal(splitLockfile("lockfileVersion: '9.0'\n"), null);
+	assert.deepEqual(diffLockfile(null, "anything"), {
+		sharedChanged: true,
+		changedImporters: [],
+	});
+});
+
+test("diffLockfile names only the importers that moved", () => {
+	const before = lockfile({
+		importers: { ".": { prettier: "^3.0.0" }, "libs/lyra": { zod: "^3.0.0" } },
+	});
+	const after = lockfile({
+		importers: { ".": { prettier: "^3.0.0" }, "libs/lyra": { zod: "^4.0.0" } },
+	});
+
+	assert.deepEqual(diffLockfile(before, after), {
+		sharedChanged: false,
+		changedImporters: ["libs/lyra"],
+	});
+});
+
+test("a moved re-export is shared, not importer-scoped", () => {
+	// The #1793 shape: many packages affected because the lockfile changed. Only
+	// one importer moved, so only that package (and its consumers) should be.
+	const root = standardWorkspace({
+		"libs/lyra/package.json": {
+			name: "@autumnsgrove/lyra",
+			scripts: { check: "tsc", "test:run": "vitest run" },
+			dependencies: { zod: "^3.0.0" },
+		},
+		"libs/lyra/tsconfig.json": "{}",
+		"workers/lyra-user/package.json": {
+			name: "lyra-user",
+			scripts: { check: "tsc" },
+			dependencies: { "@autumnsgrove/lyra": "workspace:*" },
+		},
+		"workers/lyra-user/src/index.ts": "",
+	});
+	try {
+		const packages = discoverPackages(root);
+		const result = detectAffected({
+			entries: files(["pnpm-lock.yaml"]),
+			packages,
+			root,
+			lockfile: { sharedChanged: false, changedImporters: ["libs/lyra"] },
+		});
+
+		assert.equal(result.runAll, false, "one importer must not span the workspace");
+		assert.deepEqual(result.affectedPackages, ["libs/lyra", "workers/lyra-user"]);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("a shared lockfile resolution still invalidates every package", () => {
+	const root = standardWorkspace();
+	try {
+		const packages = discoverPackages(root);
+		const result = detectAffected({
+			entries: files(["pnpm-lock.yaml"]),
+			packages,
+			root,
+			lockfile: { sharedChanged: true, changedImporters: [] },
+		});
+
+		assert.equal(result.runAll, true);
+		assert.equal(result.affectedPackages.length, packages.size);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("a lockfile change with no importer detail stays conservative", () => {
+	// No `lockfile` argument means the caller could not read both sides. Running
+	// everything is the only safe answer: over-running costs time, under-running
+	// ships a broken install with green checks.
+	const root = standardWorkspace();
+	try {
+		const result = detectAffected({
+			entries: files(["pnpm-lock.yaml"]),
+			packages: discoverPackages(root),
+			root,
+		});
+		assert.equal(result.runAll, true);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("a root importer change is shared, because everyone installs it", () => {
+	const root = standardWorkspace();
+	try {
+		const result = detectAffected({
+			entries: files(["pnpm-lock.yaml"]),
+			packages: discoverPackages(root),
+			root,
+			// `.` is the root manifest's importer; it is not a package directory.
+			lockfile: { sharedChanged: false, changedImporters: ["."] },
+		});
+		assert.equal(result.runAll, true);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("a lockfile change that touches no importer affects nothing", () => {
+	const root = standardWorkspace();
+	try {
+		const result = detectAffected({
+			entries: files(["pnpm-lock.yaml"]),
+			packages: discoverPackages(root),
+			root,
+			lockfile: { sharedChanged: false, changedImporters: [] },
+		});
+		assert.equal(result.runAll, false);
+		assert.deepEqual(result.affectedPackages, []);
 	} finally {
 		rmSync(root, { recursive: true, force: true });
 	}
