@@ -256,7 +256,10 @@ export function sessionPayload(
 	return {
 		valid,
 		user: {
-			id: user.id ?? "user-example-owner",
+			// Unique by default: rate-limit counters are keyed by user id and
+			// survive between tests, so a shared id would spend one test's budget
+			// in another.
+			id: user.id ?? `user-${crypto.randomUUID().slice(0, 8)}`,
 			email: user.email ?? "example@grove.place",
 			name: user.name ?? "Example Owner",
 			isAdmin: user.isAdmin ?? false,
