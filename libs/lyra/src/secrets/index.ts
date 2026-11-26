@@ -3,3 +3,10 @@
  */
 
 export { createTenantSecretsSlot, TIMELINE_SECRETS, type TenantSecretsSlotConfig } from "./slot.js";
+export {
+	AI_SECRETS,
+	MISSING_AI_KEY_MESSAGE,
+	resolveOpenRouterKey,
+	type AiOpenRouterKey,
+	type SecretReader,
+} from "./ai-key.js";
