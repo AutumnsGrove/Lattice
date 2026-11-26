@@ -670,6 +670,8 @@ const ENGINE_EXPORTS = {
 		default: "./dist/platform/config/index.js",
 	},
 	"./platform/config/*": { default: "./dist/platform/config/*.js" },
+	"./styles/tokens.css": { default: "./dist/styles/tokens.css" },
+	"./styles/*": { default: "./dist/styles/*" },
 };
 
 function engineWorkspace(overrides = {}) {
@@ -693,11 +695,17 @@ function engineWorkspace(overrides = {}) {
 		"libs/engine/src/lib/platform/config/index.ts": 'export * from "./tiers.js";',
 		"libs/engine/src/lib/platform/config/tiers.ts": "export const TIERS = {};",
 		"libs/engine/src/lib/private/helper.ts": "export const helper = 1;",
+		"libs/engine/src/lib/styles/tokens.css": ":root { --grove: green; }",
 
 		...withEngine("uses-config"),
 		"apps/uses-config/src/a.ts": 'import { TIERS } from "@autumnsgrove/lattice/platform/config";',
 		...withEngine("uses-root"),
 		"apps/uses-root/src/a.ts": 'import { GlassCard } from "@autumnsgrove/lattice";',
+		...withEngine("uses-styles"),
+		// A stylesheet has no `from`. Both Aspen and Plant pull engine styles this
+		// way, so a scan that only reads `from` misses them entirely.
+		"apps/uses-styles/src/a.svelte":
+			'<script>\n\timport "@autumnsgrove/lattice/styles/tokens.css";\n</script>',
 
 		"services/unrelated/package.json": { name: "unrelated", scripts: { check: "tsc" } },
 		...overrides,
@@ -745,6 +753,7 @@ test("the root barrel reaches the root importers, and the manifest reaches every
 	assert.deepEqual(detectEngineChange("libs/engine/package.json").affectedPackages, [
 		"apps/uses-config",
 		"apps/uses-root",
+		"apps/uses-styles",
 		"libs/engine",
 	]);
 });
@@ -753,6 +762,17 @@ test("a file no export names revalidates nothing beyond the engine", () => {
 	// Nothing outside the engine can import it, so no consumer's types can move.
 	const result = detectEngineChange("libs/engine/src/lib/private/helper.ts");
 	assert.deepEqual(result.affectedPackages, ["libs/engine"]);
+});
+
+test("a stylesheet imported for its side effect reaches its importer", () => {
+	// The regression a review caught on this PR: `import ".../tokens.css"` has no
+	// `from` clause, so a scan for `from ` marked nobody affected and a token
+	// change would have shipped with green checks.
+	const result = detectEngineChange("libs/engine/src/lib/styles/tokens.css");
+	assert.ok(
+		result.affectedPackages.includes("apps/uses-styles"),
+		`expected uses-styles, got ${result.affectedPackages.join(", ")}`,
+	);
 });
 
 test("an unreadable exports map widens instead of narrowing", () => {
@@ -764,7 +784,12 @@ test("an unreadable exports map widens instead of narrowing", () => {
 			scripts: { check: "svelte-check" },
 		},
 	});
-	assert.deepEqual(result.affectedPackages, ["apps/uses-config", "apps/uses-root", "libs/engine"]);
+	assert.deepEqual(result.affectedPackages, [
+		"apps/uses-config",
+		"apps/uses-root",
+		"apps/uses-styles",
+		"libs/engine",
+	]);
 });
 
 test("an engine content change revalidates the engine and stops there", () => {
@@ -845,6 +870,20 @@ test("the real workspace discovers every package that has its own checks", () =>
 	// assertion together.
 	assert.equal(packages.get("services/email-render").typecheck, null);
 	assert.equal(packages.get("workers/paused").typecheck, null);
+});
+
+test("the real workspace flags the packages that side-effect-import engine styles", () => {
+	// Aspen and Plant both do `import '.../styles/tokens.css'` with no `from`, and
+	// they are the only two. This is the exact case a review caught on this PR: it
+	// looked like nothing was affected because nothing matched `from`.
+	const result = detectAffected({
+		entries: files(["libs/engine/src/lib/styles/tokens.css"]),
+		packages: discoverPackages(),
+	});
+
+	assert.ok(result.affectedPackages.includes("apps/aspen"), "aspen imports the tokens");
+	assert.ok(result.affectedPackages.includes("apps/plant"), "plant imports the tokens");
+	assert.ok(result.affectedPackages.includes("libs/engine"));
 });
 
 test("every package in the real workspace gets a test command that will exit", () => {

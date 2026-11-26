@@ -16,7 +16,8 @@
  *      makes public. Wildcard subpaths (`./platform/config/*`) are pattern
  *      matches instead: anything under that path is directly importable.
  *   2. `importedSpecifiers` reads a consumer package and collects the
- *      `@autumnsgrove/lattice` specifiers it actually uses.
+ *      `@autumnsgrove/lattice` specifiers it actually uses — including the
+ *      side-effect form a stylesheet is pulled in by, which has no `from`.
  *
  * Only re-exports are followed, not imports. An import cannot widen what a
  * consumer can name, and a file that is imported but not re-exported can only
@@ -43,8 +44,17 @@ const INDEX_FILES = ["index.ts", "index.tsx", "index.js", "index.svelte"];
 const REEXPORT_RE =
 	/export\s+(?:type\s+)?(?:\*(?:\s+as\s+[\w$]+)?|\{[^}]*\})\s*from\s*["']([^"']+)["']/g;
 
-/** `from "@autumnsgrove/lattice…"` and `import("@autumnsgrove/lattice…")`. */
-const CONSUMER_RE = /(?:from\s*|import\s*\(\s*)["']@autumnsgrove\/lattice([^"']*)["']/g;
+/**
+ * Every way a consumer can name an engine subpath.
+ *
+ * `from` is the usual one, but a stylesheet is imported for its side effect and
+ * has no `from` at all: `import "@autumnsgrove/lattice/styles/tokens.css"`. Those
+ * are not rare here — Aspen and Plant both pull the engine's design tokens that
+ * way, so missing them meant a token change reached neither. CSS gets its own
+ * spelling, `@import` (with or without `url()`).
+ */
+const CONSUMER_RE =
+	/(?:from\s*|import\s*\(\s*|import\s+|@import\s+(?:url\(\s*)?)["']@autumnsgrove\/lattice([^"']*)["']/g;
 
 /**
  * Normalise an emitted path so it can be compared with a source path.
@@ -305,7 +315,9 @@ export function importedSpecifiers(root, packageDir, cache = new Map()) {
 				if (!SKIP_DIRS.has(dirent.name)) walk(rel);
 				continue;
 			}
-			if (!/\.(?:tsx?|jsx?|mjs|cjs|svelte)$/.test(dirent.name)) continue;
+			// `.css` is walked because a design token or a base stylesheet is a real
+			// dependency with no `from` clause to find it by.
+			if (!/\.(?:tsx?|jsx?|mjs|cjs|svelte|css)$/.test(dirent.name)) continue;
 
 			let text;
 			try {

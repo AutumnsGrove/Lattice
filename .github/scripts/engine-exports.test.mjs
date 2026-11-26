@@ -38,6 +38,8 @@ const ENGINE_EXPORTS = {
 	"./ui": { types: "./dist/ui/index.d.ts", default: "./dist/ui/index.js" },
 	"./ui/*": { types: "./dist/ui/*.d.ts", default: "./dist/ui/*.js" },
 	"./ui/*.svelte": { types: "./dist/ui/*.svelte.d.ts", default: "./dist/ui/*.svelte" },
+	"./styles/tokens.css": { default: "./dist/styles/tokens.css" },
+	"./styles/*": { default: "./dist/styles/*" },
 	"./platform/config": {
 		types: "./dist/platform/config/index.d.ts",
 		default: "./dist/platform/config/index.js",
@@ -73,6 +75,8 @@ function engineWorkspace(overrides = {}) {
 		"libs/engine/src/lib/platform/config/domain-blocklist.ts": "export const BLOCKED = [];",
 		"libs/engine/src/lib/platform/config/unbarrelled.ts": "export const X = 1;",
 		"libs/engine/src/lib/server/internal.ts": "export const internal = 1;",
+		"libs/engine/src/lib/styles/tokens.css": ":root { --grove: green; }",
+		"libs/engine/src/lib/styles/fonts.css": "@font-face { }",
 		...overrides,
 	});
 }
@@ -228,6 +232,30 @@ test("consumer specifiers are collected in export-key form", () => {
 			"./platform/config",
 			"./server/internal",
 			"./ui",
+		]);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("a stylesheet imported for its side effect still counts", () => {
+	// `import "@autumnsgrove/lattice/styles/tokens.css"` has no `from`, and both
+	// Aspen and Plant pull the engine's design tokens exactly this way. Missing it
+	// meant a token change reached neither of them.
+	const root = engineWorkspace({
+		"apps/site/package.json": { name: "site" },
+		"apps/site/src/a.svelte":
+			'<script>\n\timport "@autumnsgrove/lattice/styles/tokens.css";\n</script>',
+		"apps/site/src/b.css": '@import "@autumnsgrove/lattice/styles/fonts.css";',
+		"apps/site/src/c.css": '@import url("@autumnsgrove/lattice/ui/styles/grove.css");',
+		"apps/site/src/d.ts": 'import x from "@autumnsgrove/lattice/ui";',
+	});
+	try {
+		assert.deepEqual([...importedSpecifiers(root, "apps/site")].sort(), [
+			"./styles/fonts.css",
+			"./styles/tokens.css",
+			"./ui",
+			"./ui/styles/grove.css",
 		]);
 	} finally {
 		rmSync(root, { recursive: true, force: true });
