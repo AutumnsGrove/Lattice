@@ -1,19 +1,20 @@
 // Centralized configuration for Domain Finder
-// Using DeepSeek v3.2 via OpenRouter for zero-data-retention compliance
-// Model IDs should match lumen-models.json in libs/engine/src/lib/data/
+// DeepSeek V3.2 via OpenRouter, for zero-data-retention compliance. The IDs come
+// from the model registry rather than being typed here, because a second copy of
+// a model ID is a copy that drifts (#1602).
+
+import { getModel, MODELS as REGISTRY } from "@autumnsgrove/lumen-registry";
 
 export const MODELS = {
-	DRIVER: "deepseek/deepseek-v3.2",
-	SWARM: "deepseek/deepseek-v3.2",
+	DRIVER: REGISTRY.DEEPSEEK_V3_2,
+	SWARM: REGISTRY.DEEPSEEK_V3_2,
 } as const;
 
-export const DRIVER_MODEL_OPTIONS = [
-	{ value: "deepseek/deepseek-v3.2", label: "DeepSeek V3.2 (via OpenRouter)" },
-] as const;
+const V3_2_LABEL = `${getModel(REGISTRY.DEEPSEEK_V3_2)?.name ?? "DeepSeek V3.2"} (via OpenRouter)`;
 
-export const SWARM_MODEL_OPTIONS = [
-	{ value: "deepseek/deepseek-v3.2", label: "DeepSeek V3.2 (via OpenRouter)" },
-] as const;
+export const DRIVER_MODEL_OPTIONS = [{ value: MODELS.DRIVER, label: V3_2_LABEL }] as const;
+
+export const SWARM_MODEL_OPTIONS = [{ value: MODELS.SWARM, label: V3_2_LABEL }] as const;
 
 // Default search configuration
 export const SEARCH_DEFAULTS = {

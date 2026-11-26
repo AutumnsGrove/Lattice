@@ -8,6 +8,7 @@
 		"@autumnsgrove/grove-markdown": "workspace:*",
 		"@autumnsgrove/infra": "workspace:*",
 		"@autumnsgrove/loom": "workspace:*",
+		"@autumnsgrove/lumen-registry": "workspace:*",
 		"@autumnsgrove/prism": "workspace:*",
 		"@react-email/components": "^1.0.10",
 		"@react-email/render": "^2.0.4",

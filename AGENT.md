@@ -92,7 +92,7 @@ TypeScript-as-config is valid — compile-time validation is an advantage over r
 **Concrete rules:**
 
 - Tier names, limits, and pricing only in `platform/config/tiers.ts` — never bare tier strings or magic limits in route handlers
-- Model names and metadata only in `lumen-models.json` + `lumen/config.ts` — never a bare model string in application code
+- Model names and metadata only in `libs/lumen-registry` — never a bare model string in application code (`pnpm models:ids` enforces it)
 - Error codes and messages only in Signpost catalogs (`errors/*.ts`) — never ad-hoc error strings duplicated across endpoints
 - Design tokens only in Prism (`libs/prism/`) — never hardcoded hex colors, and never the same color value in two files
 - Rate limit definitions only in Threshold/Thorn config — never hand-rolled limit constants in route handlers

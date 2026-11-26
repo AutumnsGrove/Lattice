@@ -364,6 +364,9 @@ importers:
       '@autumnsgrove/lattice':
         specifier: workspace:*
         version: link:../../libs/engine
+      '@autumnsgrove/lumen-registry':
+        specifier: workspace:*
+        version: link:../../libs/lumen-registry
       '@lucide/svelte':
         specifier: ^1.33.0
         version: 1.33.0(svelte@5.55.3(@typescript-eslint/types@8.58.2))
@@ -623,6 +626,9 @@ importers:
       '@autumnsgrove/grove-errors':
         specifier: workspace:*
         version: link:../grove-errors
+      '@autumnsgrove/lumen-registry':
+        specifier: workspace:*
+        version: link:../lumen-registry
       '@autumnsgrove/lyra':
         specifier: ^0.3.1
         version: 0.3.1
@@ -675,6 +681,9 @@ importers:
       '@autumnsgrove/loom':
         specifier: workspace:*
         version: link:../loom
+      '@autumnsgrove/lumen-registry':
+        specifier: workspace:*
+        version: link:../lumen-registry
       '@autumnsgrove/prism':
         specifier: workspace:*
         version: link:../prism
@@ -1099,6 +1108,15 @@ importers:
         specifier: ^4.1.0
         version: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0)(yaml@2.9.1))
 
+  libs/lumen-registry:
+    devDependencies:
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.0
+        version: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0)(yaml@2.9.1))
+
   libs/lyra:
     dependencies:
       '@autumnsgrove/grove-crypto':
@@ -1144,6 +1162,10 @@ importers:
         version: 4.1.4(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.4)(@vitest/ui@4.1.4)(happy-dom@20.9.0)(jsdom@27.4.0(@noble/hashes@2.2.0)(canvas@3.2.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.4.2)(tsx@4.21.0)(yaml@2.9.1))
 
   libs/shutter/cloudflare:
+    dependencies:
+      '@autumnsgrove/lumen-registry':
+        specifier: workspace:*
+        version: link:../../lumen-registry
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20260317.1
@@ -1279,6 +1301,9 @@ importers:
       '@autumnsgrove/loom':
         specifier: workspace:*
         version: link:../../libs/loom
+      '@autumnsgrove/lumen-registry':
+        specifier: workspace:*
+        version: link:../../libs/lumen-registry
     devDependencies:
       '@cloudflare/workers-types':
         specifier: ^4.20260317.1

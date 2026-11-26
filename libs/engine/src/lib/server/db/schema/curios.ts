@@ -13,6 +13,7 @@
 
 import { sqliteTable, text, integer, real, uniqueIndex } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
+import { MODELS } from "@autumnsgrove/lumen-registry";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TIMELINE
@@ -24,7 +25,7 @@ export const timelineCurioConfig = sqliteTable("timeline_curio_config", {
 	githubUsername: text("github_username"),
 	githubTokenEncrypted: text("github_token_encrypted"),
 	openrouterKeyEncrypted: text("openrouter_key_encrypted"),
-	openrouterModel: text("openrouter_model").default("deepseek/deepseek-v4-flash-0731"),
+	openrouterModel: text("openrouter_model").default(MODELS.DEEPSEEK_V4_FLASH_0731),
 	voicePreset: text("voice_preset").default("professional"),
 	customSystemPrompt: text("custom_system_prompt"),
 	customSummaryInstructions: text("custom_summary_instructions"),

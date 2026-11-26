@@ -49,7 +49,7 @@
 	let githubUsername = $state("");
 	let githubToken = $state("");
 	let openrouterKey = $state("");
-	let openrouterModel = $state("deepseek/deepseek-v4-flash-0731");
+	let openrouterModel = $state("");
 	let voicePreset = $state("professional");
 	let customSystemPrompt = $state("");
 	let customSummaryInstructions = $state("");
@@ -64,7 +64,9 @@
 		if (data.config) {
 			enabled = data.config.enabled ?? false;
 			githubUsername = data.config.githubUsername ?? "";
-			openrouterModel = data.config.openrouterModel ?? "deepseek/deepseek-v4-flash-0731";
+			// The server always sends one: the tenant's saved model, or the timeline default
+			// from the registry. A second literal here was a third place to change a model (#1602).
+			openrouterModel = data.config.openrouterModel ?? "";
 			voicePreset = data.config.voicePreset ?? "professional";
 			customSystemPrompt = data.config.customSystemPrompt ?? "";
 			customSummaryInstructions = data.config.customSummaryInstructions ?? "";
@@ -91,6 +93,27 @@
 	let githubTokenResult = $state<{ ok: boolean; message: string } | null>(null);
 	let openrouterKeySaving = $state(false);
 	let openrouterKeyResult = $state<{ ok: boolean; message: string } | null>(null);
+
+	// A saved model the picker no longer offers still has to appear, or the select
+	// renders blank and looks like nothing was chosen.
+	const modelOptions = $derived.by(() => {
+		const models = data.models ?? [];
+		if (openrouterModel === "" || models.some((model) => model.id === openrouterModel)) {
+			return models;
+		}
+		return [
+			{
+				id: openrouterModel,
+				name: `${openrouterModel} (not offered any more)`,
+				quality: "medium",
+				speed: "medium",
+				inputCostPer1M: 0,
+				outputCostPer1M: 0,
+				isDefault: false,
+			},
+			...models,
+		];
+	});
 
 	// Check if using custom voice
 	const isCustomVoice = $derived(voicePreset === "custom");
@@ -437,7 +460,7 @@
 					bind:value={openrouterModel}
 					class="field-select"
 				>
-					{#each data.models as model}
+					{#each modelOptions as model}
 						<option value={model.id}>
 							{model.name} — ${model.inputCostPer1M}/M in, ${model.outputCostPer1M}/M out{model.isDefault
 								? " (Recommended)"

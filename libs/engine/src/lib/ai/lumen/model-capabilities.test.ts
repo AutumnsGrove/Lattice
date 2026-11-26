@@ -7,11 +7,11 @@
  */
 
 import { describe, it, expect } from "vitest";
-import modelData from "../../data/lumen-models.json";
+import { MODEL_REGISTRY } from "./config.js";
 import { assertToolSupport, getModelCapabilities, MODELS, TASK_REGISTRY } from "./config.js";
 import type { LumenTask } from "./types.js";
 
-const entries = Object.values(modelData.models) as Array<{
+const entries = Object.values(MODEL_REGISTRY) as Array<{
 	id: string;
 	provider: string;
 	category: string;
@@ -20,7 +20,7 @@ const entries = Object.values(modelData.models) as Array<{
 	contextWindow?: number;
 }>;
 
-describe("lumen-models.json capability flags", () => {
+describe("registry capability flags", () => {
 	it("says whether every model supports tools", () => {
 		for (const entry of entries) {
 			expect(typeof entry.supportsTools, `${entry.id} supportsTools`).toBe("boolean");

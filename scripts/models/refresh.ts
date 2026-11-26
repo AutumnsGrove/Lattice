@@ -9,23 +9,19 @@
  * The snapshot is committed so a deploy is reproducible and the check needs no
  * network. This script is the only thing that talks to OpenRouter; the rules
  * about what the catalog means live in the engine, next to the data
- * (`libs/engine/src/lib/ai/lumen/model-catalog.ts`).
+ * (`libs/lumen-registry/src/catalog.ts`).
  */
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import {
-	CATALOG_URL,
-	openRouterIds,
-	parseCatalog,
-} from "../../libs/engine/src/lib/ai/lumen/model-catalog.js";
-import type { Catalog, Registry } from "../../libs/engine/src/lib/ai/lumen/model-catalog.js";
+import { CATALOG_URL, openRouterIds, parseCatalog } from "../../libs/lumen-registry/src/catalog.js";
+import type { Catalog, Registry } from "../../libs/lumen-registry/src/catalog.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const DATA = resolve(HERE, "../../libs/engine/src/lib/data");
-const CATALOG_PATH = join(DATA, "model-catalog.json");
-const REGISTRY_PATH = join(DATA, "lumen-models.json");
+const DATA = resolve(HERE, "../../libs/lumen-registry/src/data");
+const CATALOG_PATH = join(DATA, "catalog.json");
+const REGISTRY_PATH = join(DATA, "models.json");
 
 const TIMEOUT_MS = 30_000;
 
@@ -80,17 +76,35 @@ function compare(previous: Catalog, next: Catalog): string[] {
 	return changes;
 }
 
+/**
+ * What `--check` reports.
+ *
+ * 0 — the snapshot matches. 1 — prices or windows have moved (the weekly job
+ * opens an issue for this). 2 — the check could not run at all: no network, an
+ * error response, or a model OpenRouter has delisted. Those are a different
+ * thing from drift, and filing them as "prices moved" would be a lie in the
+ * issue tracker.
+ */
+const EXIT_DRIFT = 1;
+const EXIT_COULD_NOT_CHECK = 2;
+
 async function main(): Promise<number> {
 	const check = process.argv.includes("--check");
 	const registry = readJson<Registry>(REGISTRY_PATH);
 	const ids = openRouterIds(registry);
 
-	const live = parseCatalog(await fetchLive(), ids, new Date().toISOString());
+	let live: Catalog;
+	try {
+		live = parseCatalog(await fetchLive(), ids, new Date().toISOString());
+	} catch (error) {
+		console.error(error instanceof Error ? error.message : String(error));
+		return EXIT_COULD_NOT_CHECK;
+	}
 
 	if (!check) {
 		writeJson(CATALOG_PATH, live);
-		console.log(`Wrote ${ids.length} models to model-catalog.json, fetched ${live.fetchedAt}.`);
-		console.log("Run `pnpm models:sync` to carry the prices into lumen-models.json.");
+		console.log(`Wrote ${ids.length} models to catalog.json, fetched ${live.fetchedAt}.`);
+		console.log("Run `pnpm models:sync` to carry the prices into models.json.");
 		return 0;
 	}
 
@@ -111,7 +125,7 @@ async function main(): Promise<number> {
 			"Run `pnpm models:refresh && pnpm models:sync`, then review the diff.",
 		].join("\n"),
 	);
-	return 1;
+	return EXIT_DRIFT;
 }
 
 main().then(

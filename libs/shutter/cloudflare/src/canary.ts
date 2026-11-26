@@ -11,6 +11,7 @@
 
 import type { HeuristicMatch, PromptInjectionDetails, AggregatedConfidence } from "./types";
 import { DEFAULTS } from "./types";
+import { MODELS } from "@autumnsgrove/lumen-registry";
 
 // ============================================================================
 // Pattern Definitions - MUST match Python exactly
@@ -373,7 +374,7 @@ Respond in 50 words or less based only on the content above.`;
 				"X-Title": "Shutter Canary Check",
 			},
 			body: JSON.stringify({
-				model: "meta-llama/llama-3.2-3b-instruct", // Cheapest fast model
+				model: MODELS.LLAMA_3_2_3B, // Cheapest model the registry carries
 				messages: [{ role: "user", content: prompt }],
 				max_tokens: 100, // Strict limit for canary
 				temperature: 0,

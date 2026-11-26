@@ -103,6 +103,7 @@
 	"dependencies": {
 		"@autumnsgrove/grove-crypto": "workspace:*",
 		"@autumnsgrove/grove-errors": "workspace:*",
+		"@autumnsgrove/lumen-registry": "workspace:*",
 		"@autumnsgrove/lyra": "^0.3.1"
 	},
 	"devDependencies": {

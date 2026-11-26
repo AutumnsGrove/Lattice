@@ -12,7 +12,8 @@
 	},
 	"dependencies": {
 		"@autumnsgrove/lattice": "workspace:*",
-		"@autumnsgrove/loom": "workspace:*"
+		"@autumnsgrove/loom": "workspace:*",
+		"@autumnsgrove/lumen-registry": "workspace:*"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20260317.1",

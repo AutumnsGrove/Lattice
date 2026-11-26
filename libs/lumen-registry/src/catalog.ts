@@ -2,19 +2,19 @@
  * The model catalog: what a model actually is, as opposed to what we decided
  * about it.
  *
- * `libs/engine/src/lib/data/lumen-models.json` carries both, which is why it
- * went wrong: prices and context windows change under us, and hand-typing them
- * meant every timeline run's reported cost was wrong in both directions (#1822).
+ * `src/data/models.json` carries both, which is why it went wrong: prices and
+ * context windows change under us, and hand-typing them meant every timeline
+ * run's reported cost was wrong in both directions (#1822).
  *
  * So there are two files now:
  *
- * - `model-catalog.json` — facts, pinned from OpenRouter's own list by
+ * - `src/data/catalog.json` — facts, pinned from OpenRouter's own list by
  *   `pnpm models:refresh`. Committed, so a deploy is reproducible and a check
  *   needs no network.
- * - `lumen-models.json` — the Grove overlay. Still hand-written, because it is
- *   the part that is a decision: which model a task uses, which providers are
- *   approved, what quality label a picker shows. Its `cost` and `contextWindow`
- *   are filled in from the catalog by `pnpm models:sync`.
+ * - `src/data/models.json` — the Grove overlay. Still hand-written, because it
+ *   is the part that is a decision: which model a task uses, which providers
+ *   are approved, what quality label a picker shows. Its `cost` and
+ *   `contextWindow` are filled in from the catalog by `pnpm models:sync`.
  *
  * `pnpm models:check` fails when the two disagree, and the engine's own test
  * suite asserts the same thing, so CI notices when only the data file changes.

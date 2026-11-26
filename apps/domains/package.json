@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "@autumnsgrove/lattice": "workspace:*",
+    "@autumnsgrove/lumen-registry": "workspace:*",
     "@lucide/svelte": "^1.33.0",
     "resend": "^4.8.0"
   }

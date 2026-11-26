@@ -12,14 +12,14 @@
 import { readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { describeDrift, findDrift } from "../../libs/engine/src/lib/ai/lumen/model-catalog.js";
-import type { Catalog, Registry } from "../../libs/engine/src/lib/ai/lumen/model-catalog.js";
+import { describeDrift, findDrift } from "../../libs/lumen-registry/src/catalog.js";
+import type { Catalog, Registry } from "../../libs/lumen-registry/src/catalog.js";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const DATA = resolve(HERE, "../../libs/engine/src/lib/data");
+const DATA = resolve(HERE, "../../libs/lumen-registry/src/data");
 
-const registry = JSON.parse(readFileSync(join(DATA, "lumen-models.json"), "utf8")) as Registry;
-const catalog = JSON.parse(readFileSync(join(DATA, "model-catalog.json"), "utf8")) as Catalog;
+const registry = JSON.parse(readFileSync(join(DATA, "models.json"), "utf8")) as Registry;
+const catalog = JSON.parse(readFileSync(join(DATA, "catalog.json"), "utf8")) as Catalog;
 
 const drift = findDrift(registry, catalog);
 

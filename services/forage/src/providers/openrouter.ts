@@ -13,12 +13,13 @@ import type {
 } from "./types";
 import { toOpenAITool } from "./tools";
 import { FORAGE_ERRORS, logForageError } from "../errors";
+import { MODELS } from "@autumnsgrove/lumen-registry";
 
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 export class OpenRouterProvider implements AIProvider {
 	readonly name = "openrouter";
-	readonly defaultModel = "deepseek/deepseek-v3.2";
+	readonly defaultModel = MODELS.DEEPSEEK_V3_2;
 	readonly supportsTools = true;
 
 	private apiKey: string;

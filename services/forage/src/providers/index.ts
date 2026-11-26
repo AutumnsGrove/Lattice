@@ -7,6 +7,7 @@ import type { AIProvider, ProviderName } from "./types";
 import { DeepSeekProvider } from "./deepseek";
 import { OpenRouterProvider } from "./openrouter";
 import { FORAGE_ERRORS, logForageError } from "../errors";
+import { MODELS } from "@autumnsgrove/lumen-registry";
 
 // Re-export types
 export type {
@@ -42,19 +43,13 @@ export function getProvider(name: ProviderName, env: Env, model?: string): AIPro
 }
 
 /**
- * Default models per provider
- * OpenRouter is primary (ZDR compliant), DeepSeek is fallback
- * Model IDs should match lumen-models.json in libs/engine/src/lib/data/
+ * Default models per provider.
+ *
+ * OpenRouter is primary (ZDR compliant), DeepSeek is the fallback. The
+ * OpenRouter ID comes from the model registry; the direct DeepSeek provider
+ * names DeepSeek's own model, which the registry does not cover (#1602).
  */
 export const PROVIDER_DEFAULTS: Record<ProviderName, string> = {
 	deepseek: "deepseek-chat", // Fallback only
-	openrouter: "deepseek/deepseek-v3.2", // Primary — matches lumen-models.json DEEPSEEK_V3
-};
-
-/**
- * Cost per 1M tokens (input, output) in USD
- */
-export const PROVIDER_COSTS: Record<ProviderName, { input: number; output: number }> = {
-	deepseek: { input: 0.28, output: 0.42 },
-	openrouter: { input: 0.28, output: 0.42 }, // Same as DeepSeek via OpenRouter
+	openrouter: MODELS.DEEPSEEK_V3_2, // Primary
 };

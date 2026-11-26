@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import catalogData from "../../data/model-catalog.json";
-import registryData from "../../data/lumen-models.json";
-import { applyCatalog, findDrift, formatRegistryJson, parseCatalog } from "./model-catalog.js";
-import type { Catalog, Registry } from "./model-catalog.js";
+import catalogData from "./data/catalog.json";
+import registryData from "./data/models.json";
+import { applyCatalog, findDrift, formatRegistryJson, parseCatalog } from "./catalog.js";
+import type { Catalog, Registry } from "./catalog.js";
 
 /** A slice of OpenRouter's response shape, prices as per-token strings. */
 function payload(): unknown {
@@ -232,7 +232,7 @@ describe("formatRegistryJson", () => {
 describe("the committed files", () => {
 	it("agree: every price and window in the registry came from the catalog", () => {
 		// This is the guard, and it runs where the data lives: a change to
-		// lumen-models.json alone is an engine change, so CI runs this even when no
+		// models.json alone is an engine change, so CI runs this even when no
 		// script moved (#1822). `pnpm models:check` is the same check by hand.
 		expect(findDrift(registryData as Registry, catalogData as Catalog)).toEqual([]);
 	});
