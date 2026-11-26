@@ -23,6 +23,11 @@ import type { TimelineVine } from "@autumnsgrove/curios/timeline/render";
 import { createSecretsManager } from "@autumnsgrove/grove-crypto/secrets";
 import type { GroveContext } from "@autumnsgrove/infra";
 import { createLumenModelSlot } from "@autumnsgrove/lyra-lumen/lumen";
+import {
+	MISSING_AI_KEY_MESSAGE,
+	resolveOpenRouterKey,
+	type SecretReader,
+} from "@autumnsgrove/lyra-lumen/secrets";
 import { buildComparisonPage, type NewDay, type OldDay } from "./compare-page";
 import type { Env } from "./config";
 import { getTenantConfig } from "./generator";
@@ -53,17 +58,20 @@ export async function compareDay(
 	}
 
 	const secrets = await createSecretsManager({ DB: env.DB, GROVE_KEK: env.GROVE_KEK });
-	const [githubToken, openrouterKey] = await Promise.all([
-		secrets.safeGetSecret(config.tenantId, "timeline_github_token"),
-		secrets.safeGetSecret(config.tenantId, "timeline_openrouter_key"),
-	]);
+	// One AI key, canonical first — the same order Warden resolves (#1801).
+	const readSecret: SecretReader = async (name) =>
+		(await secrets.safeGetSecret(config.tenantId, name)) ?? undefined;
+	const githubToken = await secrets.safeGetSecret(config.tenantId, "timeline_github_token");
+	const openrouter = await resolveOpenRouterKey(readSecret);
 
 	if (!githubToken) {
 		throw new Error("GitHub token not found in tenant_secrets (key: timeline_github_token)");
 	}
-	if (!openrouterKey) {
-		throw new Error("OpenRouter key not found in tenant_secrets (key: timeline_openrouter_key)");
+	if (!openrouter) {
+		throw new Error(MISSING_AI_KEY_MESSAGE);
 	}
+
+	const openrouterKey = openrouter.key;
 
 	const model = createLumenModelSlot({
 		// The binding answers the request; the URL is what the slot builds the path
