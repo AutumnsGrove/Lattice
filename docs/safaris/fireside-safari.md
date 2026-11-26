@@ -290,6 +290,12 @@ from before Lyra, before BYOK, and in one place before the idea that a conversat
 **Core decision:** the prompts survive, the plumbing is replaced by what now exists. Lyra gives
 the loop, compaction and tools; #1856 gives the key; the session tables (Stop 5) give the history.
 
+> **A correction to the shape of the whole feature.** This engine was built when Wisp was *the*
+> AI in Grove and everything hung off it. That is no longer true: **Lumen is where AI enters the
+> grove**, Lyra runs on Lumen, and Wisp and Fireside are two sibling features on that floor.
+> Nothing here should route through Wisp, and nothing here is "the Wisp API with a chat action" —
+> it is the fireside route, talking to Lumen through Lyra, like the timeline does.
+
 #### 1. The key is the Wanderer's, resolved like every other feature
 
 `OPENROUTER_API_KEY` disappears from this path. The route resolves the tenant's key through
@@ -345,20 +351,50 @@ A `fireside` recipe, in the same form as `libs/curios/src/timeline/recipe`:
 - **no tool may write prose.** The draft stays a separate step with its own prompt — the one
   place the words are assembled
 
-#### 4. Two prompts, two temperatures, kept
+#### 4. The draft rule: keep the spine, loosen the joints
+
+*"Use only their words"* is the feature's spine and it stays — it is what makes this Fireside
+and not a ghostwriter. But it is written as a prohibition, and a prohibition cannot tell the
+difference between *padding* and *one connector*: a writer who arrives with fragments
+("the rain, the dog, that phone call") needs *"and"*, *"but then"*, *"the next morning"* — small
+words that carry their meaning forward without adding any of their own.
+
+Safari-approved: keep the rule, and name the exception in it — **connective tissue yes, new
+content no.** Existing text: *"AVOID adding transition phrases unless absolutely necessary …
+NEVER add stylized phrases like 'And that's the thing—'"*. That stays; what gets added is one
+sentence granting plain connectors (*and, but, so, then, later, the next day*) when the input is
+a fragment.
+
+This is a **test it, then judge it** decision, not a settled one: build the system with the
+spine intact, run it against a genuinely fragmentary session, and see whether the loosening
+produces writers' words with joints or writes a paragraph for them. If it drifts, tighten it
+back and let the writer ask for help instead.
+
+#### 5. Two prompts, two temperatures, kept
 
 Reply: `150` output tokens, `0.7`, warm and short. Draft: `2,000` output tokens, `0.3`, strict
 instructions, JSON out, fallback-to-raw with the existing warning. These numbers were chosen by
 someone paying attention; do not "improve" them without a run to back it.
 
-#### 5. The limits are re-decided, once, in the open
+#### 6. No spending limits — the limit is their key
 
-| Limit | Was | Safari-approved |
-| --- | --- | --- |
-| Turns | 10 requests/hour (all verbs) | **30 turns/hour per user**, 10 sessions/day |
-| Drafts | counted in the same 10 | **6 drafts/hour** |
-| Conversation length | 120k estimated tokens, then refuse | **compaction**, plus 60 turns/session soft ceiling |
-| Monthly spend | `COST_CAP` existed, never applied here | not enforced — it is the Wanderer's own key (#1801 out of scope). The session record carries cost so a usage page can show it |
+Automated by an earlier model of Grove: when inference was going to be a Grove service, a cap
+made sense, so `COST_CAP` and a 10-requests-an-hour `RATE_LIMIT` were written. Both belonged to
+a world where **Grove pays**. It does not:
+
+- **BYOK features** (Fireside, the timeline) run on the Wanderer's own OpenRouter key. The spend
+  ceiling already exists — it is their provider account. A second, Grove-side cap would be a
+  copy of a number they can see better than we can.
+- **Platform services** (text and image moderation, Thorn) are Grove's cost, and they stay a
+  platform concern with a platform budget.
+
+So Fireside gets **no cost cap, no per-turn quota, no per-session budget**. The old `RATE_LIMIT`
+block comes out entirely, and this stop contributes nothing to `Threshold`.
+
+The one thing that is *not* about money: a request flood is still load on Lumen, D1 and the
+workers. If that ever shows up as a real problem it belongs in a platform-wide guard in Lumen,
+not as a per-feature number invented here. Per-Wanderer spending limits, if they want a lower
+ceiling than their provider gives them, are a **Lumen setting** — filed as #1867, for another day.
 
 #### Route fixes
 
@@ -368,7 +404,8 @@ someone paying attention; do not "improve" them without a run to back it.
 - [ ] Move from `/api/grove/wisp/fireside` to `/api/fireside/*`
 - [ ] Load and append history server-side; never accept it from the body
 - [ ] Tenant boundary on every route, `404` for someone else's session
-- [ ] Keep `checkFeatureAccess(…, "ai")` fail-open; keep `Threshold` fail-closed with the new numbers
+- [ ] Keep `checkFeatureAccess(…, "ai")` fail-open — that is a plan gate, not a spend cap
+- [ ] Remove the `RATE_LIMIT`/`Threshold` block from this route (BYOK: the ceiling is their key)
 - [ ] Log replies as well as drafts to `wisp_requests`, with the session id, so a session's cost is
       the sum of its rows
 
