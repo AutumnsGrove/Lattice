@@ -387,6 +387,79 @@ test("a lockfile change that touches no importer affects nothing", () => {
 	}
 });
 
+// ─── The sweep (#1797) ──────────────────────────────────────────────
+
+// Affected-only detection is how a package stays broken for months: its job
+// never runs, so nothing says it is red. The sweep is the same matrix with the
+// detection switched off, and that is the only thing that has to differ.
+test("a sweep checks every package, changed or not", () => {
+	const root = standardWorkspace();
+	try {
+		const packages = discoverPackages(root);
+		const result = detectAffected({
+			// No diff at all: what a scheduled run in a quiet week looks like.
+			entries: [],
+			packages,
+			root,
+			sweep: true,
+		});
+
+		assert.equal(result.sweep, true);
+		assert.equal(result.runAll, true);
+		assert.deepEqual(result.affectedPackages, [...packages.keys()].sort());
+		assert.deepEqual(
+			result.testMatrix.map((m) => m.name),
+			["uses-engine", "engine", "tiny", "standalone"],
+		);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("a sweep runs the gated jobs, whose gates read a diff that is not there", () => {
+	const root = standardWorkspace();
+	try {
+		const result = detectAffected({
+			entries: [],
+			packages: discoverPackages(root),
+			root,
+			sweep: true,
+		});
+
+		// Barrel exports, accent colours and repo tooling are path-gated. On a sweep
+		// the path is untouched, so without this they skip — and a scheduled run that
+		// silently skips the check is worse than no scheduled run.
+		assert.deepEqual(result.scope, {
+			engine: true,
+			ui: true,
+			tooling: true,
+			structure: false,
+		});
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("the sweep produces exactly the matrix a global change would", () => {
+	const root = standardWorkspace();
+	try {
+		const packages = discoverPackages(root);
+		const swept = detectAffected({ entries: [], packages, root, sweep: true });
+		const global = detectAffected({
+			entries: files(["pnpm-workspace.yaml"]),
+			packages,
+			root,
+		});
+
+		// One matrix definition, two ways in. If these ever diverge, the weekly run
+		// stops being evidence about what a PR would do.
+		assert.deepEqual(swept.testMatrix, global.testMatrix);
+		assert.deepEqual(swept.typecheckMatrix, global.typecheckMatrix);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
 test("a data file under scripts/ is not a global input", () => {
 	// The regression from #1783: scripts/db/migration-drift-baseline.json
 	// expanded a two-package PR into every package in the monorepo.
