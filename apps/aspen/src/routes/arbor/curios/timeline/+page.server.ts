@@ -15,6 +15,9 @@ import {
 	hasTimelineToken,
 	TIMELINE_SECRET_KEYS,
 } from "@autumnsgrove/curios/timeline/secrets.server";
+import { createSecretsManager } from "@autumnsgrove/lattice/server/secrets";
+import { AI_SECRETS } from "@autumnsgrove/lyra-lumen/secrets";
+import { readAiKeySource } from "$lib/server/ai-key";
 
 interface TimelineConfigRow {
 	enabled: number | null;
@@ -84,11 +87,9 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 		};
 
 		const hasGithub = await hasTimelineToken(env, tenantId, TIMELINE_SECRET_KEYS.GITHUB_TOKEN);
-		const hasOpenrouter = await hasTimelineToken(
-			env,
-			tenantId,
-			TIMELINE_SECRET_KEYS.OPENROUTER_KEY,
-		);
+		// The AI key may have been set in Settings instead of here (#1801), so ask
+		// the shared lookup rather than this screen's own name.
+		const hasOpenrouter = Boolean(await readAiKeySource(platform?.env, tenantId));
 
 		parsedConfig = {
 			enabled: Boolean(config.enabled),
@@ -251,20 +252,20 @@ export const actions: Actions = {
 			// else: null/undefined/empty = preserve existing (COALESCE handles this)
 
 			if (openrouterKey === CLEAR_TOKEN_VALUE) {
-				// Explicit clear request
+				// Clearing here clears the one key, wherever it was set — leaving the
+				// Settings copy behind would make this button do nothing (#1801).
+				const secrets = await createSecretsManager(env);
+				await secrets.deleteSecret(tenantId, AI_SECRETS.openRouterKey);
 				await deleteTimelineToken(env, tenantId, TIMELINE_SECRET_KEYS.OPENROUTER_KEY);
 				openrouterKeyForDb = "";
 			} else if (openrouterKey?.trim()) {
-				// New token value - save via SecretsManager, clear the legacy column
+				// Saved under the canonical name, because that is what every feature
+				// now reads and what Settings writes. The column stays cleared.
 				const rawKey = openrouterKey.trim();
-				const result = await setTimelineToken(
-					env,
-					tenantId,
-					TIMELINE_SECRET_KEYS.OPENROUTER_KEY,
-					rawKey,
-				);
+				const secrets = await createSecretsManager(env);
+				await secrets.setSecret(tenantId, AI_SECRETS.openRouterKey, rawKey);
 				openrouterKeyForDb = "";
-				console.warn(`[Timeline Config] OpenRouter key saved via ${result.system}`);
+				console.warn("[Timeline Config] OpenRouter key saved as the shared AI key");
 			}
 
 			await db
