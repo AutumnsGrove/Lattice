@@ -1,4 +1,18 @@
 import { json, error } from "@sveltejs/kit";
+
+/**
+ * Re-throw an HTTP error thrown by a workspace package.
+ *
+ * `throwGroveError()` calls `error()` from the engine's copy of SvelteKit, and a
+ * thrown `HttpError` only satisfies `isHttpError()` from that same copy — so a
+ * `catch` here sees an error it cannot recognise and flattens a 400 into a 500.
+ * Rebuilding it with this app's `error()` makes the status survive.
+ */
+function rethrowHttpError(err: unknown): void {
+	const status = (err as { status?: number }).status;
+	if (typeof status !== "number" || status < 400 || status > 599) return;
+	throw error(status, (err as { body?: App.Error }).body);
+}
 import { sanitizeObject } from "@autumnsgrove/lattice/utils/validation";
 import type { RequestHandler } from "./$types";
 import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
@@ -200,7 +214,12 @@ export const PUT: RequestHandler = async ({ request, platform, locals }) => {
 			updated_at: now,
 		});
 	} catch (err) {
-		if (err instanceof Error && "status" in err) throw err;
+		// A non-owner must not learn the grove exists: ownership refusals are
+		// reported as 404, not 403 (tenant-boundary rule).
+		if ((err as { status?: number }).status === 403) {
+			throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
+		}
+		rethrowHttpError(err);
 		console.error("Settings update error:", err);
 		throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
 	}
