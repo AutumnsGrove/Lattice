@@ -198,6 +198,15 @@ leave the fire, and the answer is stored with the post (Stop 8 renders it).
 - [ ] Drop `min-height: 500px` in favour of the container's own sizing
 - [ ] `onDraft` carries `sessionId` + `transcriptPublic`
 
+#### Where it appears (decided at the campfire)
+
+**Its own button in the editor, opening a chat window** — not a mode that replaces the editor,
+and not a panel bolted to the side of an empty post. The writer clicks *Fireside* wherever they
+are in the editor and a conversation opens over it; accepting a draft puts the words in the
+editor they were already looking at. The exact entry point (toolbar, empty-state card, both) is
+**Stop 6's** to settle, with one constraint from here: the button must be reachable from a post
+that already has words in it, because "I froze halfway" is as common as "I froze at the start".
+
 #### Kept exactly as-is
 
 - [x] the ASCII fire, the subtitle, the philosophy line
@@ -208,3 +217,177 @@ leave the fire, and the answer is stored with the post (Stop 8 renders it).
 #### Migration needs
 
 None from this stop. Stops 5 and 8 own the session tables and the footer rendering.
+
+## 2. The Old Engine
+
+**Character**: Three strong vertebrae and a spinal column that ends in mid-air. The prompts are
+the philosophy written as instructions, and they are good enough to survive a rewrite nearly
+verbatim. The plumbing under them — where the key comes from, who owns the conversation — is
+from before Lyra, before BYOK, and in one place before the idea that a conversation is data.
+
+### Safari findings: What exists today
+
+**The route** — `+server.ts`, 142 lines:
+
+- [x] Auth first (401 before anything else)
+- [x] Subscription gate via `checkFeatureAccess(db, tenantId, "ai")`, fail-**open** on a billing
+      error — the right bias for a check that is about a plan, not about safety
+- [x] Body validation with the Grove error envelope (`error` + `error_code`)
+- [x] `Threshold` rate limit, fail-**closed**, per user
+- [x] Thin routing layer: all logic in the service, all errors through `logGroveError`
+- [ ] **It needs Grove's own OpenRouter key.** `platform?.env?.OPENROUTER_API_KEY` — a
+      worker-global secret — and 503s without it. Not the Wanderer's key, not BYOK, not the one
+      that shipped yesterday (#1856). Whether Aspen has ever had that secret is invisible from
+      the repo (it is not in `wrangler.toml` and not in env validation), which is itself the
+      finding: a feature whose ability to run cannot be answered by reading the code.
+- [ ] **`action` multiplexing** — `start` / `respond` / `draft` in one POST body. Three verbs,
+      three lifetimes, one URL.
+- [ ] **The URL no longer exists.** `POST /api/grove/wisp/fireside` — there is no `/api/grove`
+      namespace in Aspen any more. Restored as-is, the old component would 404.
+- [ ] **`RATE_LIMIT.maxRequestsPerHour = 10`** on key `wisp:<user>` for the whole hour, covering
+      start + every turn + the draft. Three exchanges and a draft is five calls: two conversations
+      an hour, maximum.
+- [ ] **No monthly cap.** `COST_CAP` ($5) exists in `platform/config/wisp.ts` and was enforced by
+      `wisp/+server.ts` — which is in the junk drawer too. Fireside never enforced it.
+
+**The service** — `fireside-service.ts`, 272 lines:
+
+- [x] `handleStart` returns a starter prompt and a conversation id, nothing else — no ceremony
+- [x] The reply prompt is the spec in prose: ask, never write, keep it 1–3 sentences, redirect
+      *"If they ask you to write something, gently redirect"*, and it wraps user text in
+      `USER MESSAGE START ---` delimiters so a message cannot impersonate the system
+- [x] The draft prompt is the best artefact in the territory. *Use only their words. Preserve
+      their phrasing exactly. If the input is brief, the output MUST be brief. Suggest a title
+      in their voice.* Plus `secureUserContent()` around the writer's words
+- [x] `maxTokens: 150` for replies — short by design, and it works
+- [x] A JSON parse failure falls back to the raw response with an honest warning
+      (*"The draft formatting may be a bit rough"*) rather than losing the draft
+- [x] Draft cost logged to `wisp_requests` with `fireside_session_id` (the only persistence, by
+      design, and only for the draft)
+- [ ] **The conversation lives on the client.** Every turn re-sends the whole history from the
+      browser; the server validates nothing about it and stores nothing. Any "earlier message"
+      can be fabricated, and closing the tab ends the session
+- [ ] **No compaction.** The whole history is re-sent every turn inside a 120,000-token ceiling
+      estimated at 4 chars/token — a wall, not a strategy. The timeline already paid for this
+      lesson: re-sending full history cost $0.086 for a single day until compaction was wired
+- [ ] **One shape for both jobs.** A conversational reply and a 2,000-token draft are the same
+      `lumen.run` call with different prompts; there is no step limit, no tools, no budget
+- [ ] **No tenant scoping on spend.** `wisp_requests` has `user_id` and no `tenant_id`
+- [ ] **`conversationId` is trusted from the body** for the usage row — validated for *shape*,
+      never for ownership
+
+**The pure module** — `fireside.ts`, 169 lines:
+
+- [x] `selectStarterPrompt` — 12 genuinely good prompts, deterministic per user+day, so it
+      changes daily without a database read
+- [x] `canDraft` — 3 user messages **and** 150 estimated tokens. Cheap, predictable, no model call
+- [x] `estimateTokens` documents its own limitations honestly
+- [x] `isValidConversationId` / `generateMessageId` / `isConversationTooLong`
+- [ ] Client-generated ids mean the server cannot mint or verify a session identity
+
+### Design spec (safari-approved)
+
+**Core decision:** the prompts survive, the plumbing is replaced by what now exists. Lyra gives
+the loop, compaction and tools; #1856 gives the key; the session tables (Stop 5) give the history.
+
+#### 1. The key is the Wanderer's, resolved like every other feature
+
+`OPENROUTER_API_KEY` disappears from this path. The route resolves the tenant's key through
+`resolveOpenRouterKey()` and builds a model slot exactly as the timeline's generate route does:
+
+```ts
+const openrouter = await resolveOpenRouterKey(readTenantSecret);
+if (!openrouter) return 400 + MISSING_AI_KEY_MESSAGE;   // names Settings → AI
+const model = createLumenModelSlot({
+  baseUrl: "https://grove-lumen", fetcher: env.LUMEN, apiKey: env.LUMEN_API_KEY,
+  tenantId, tenantApiKey: openrouter.key,
+});
+```
+
+That one change makes Fireside possible on the beta deployment without Grove paying, and makes
+"the key is missing" a sentence a person can act on instead of a 503.
+
+#### 2. The server owns the conversation
+
+`POST /api/fireside` creates the session and its first message. Every later call takes a
+**session id in the URL**, loads history from the database, and appends both sides. The browser
+stops sending history, which removes the fabrication surface and lets the loop see the real
+conversation for compaction.
+
+REST instead of an `action` field:
+
+| Verb | Path | Does |
+| --- | --- | --- |
+| `POST` | `/api/fireside` | start a session (mints the id, returns the first prompt) |
+| `GET` | `/api/fireside/[id]` | resume: messages, draft-unlock state, whether a draft was accepted |
+| `POST` | `/api/fireside/[id]/turn` | say something → one reply |
+| `POST` | `/api/fireside/[id]/draft` | organize the writer's own words |
+| `POST` | `/api/fireside/[id]/accept` | record acceptance (`fireside_assisted`, transcript opt-in) |
+| `DELETE` | `/api/fireside/[id]` | let it go |
+
+Every one of them applies the tenant-boundary rule: right tenant/right session `200`, someone
+else's session `404` (never `403` — a 403 confirms it exists).
+
+#### 3. The loop, in the timeline's shape
+
+A `fireside` recipe, in the same form as `libs/curios/src/timeline/recipe`:
+
+- **instructions**: the existing reply prompt, cleaned up — plus what the tools make possible
+- **tools** (three, and only three):
+  - `read_my_recent_posts` — the writer's own published excerpts, so Wisp can hear the voice
+    instead of being told to have one
+  - `read_draft` — the post they were editing when they opened the fire (this is why the button
+    works mid-post)
+  - `suggest_title` — a proposal, never applied
+- **step limit**: 8 per turn (a reply is a short conversation, not a day of research)
+- **compaction**: 32k window / 12k kept, the timeline's numbers, because the same Lumen message
+  cap applies
+- **no tool may write prose.** The draft stays a separate step with its own prompt — the one
+  place the words are assembled
+
+#### 4. Two prompts, two temperatures, kept
+
+Reply: `150` output tokens, `0.7`, warm and short. Draft: `2,000` output tokens, `0.3`, strict
+instructions, JSON out, fallback-to-raw with the existing warning. These numbers were chosen by
+someone paying attention; do not "improve" them without a run to back it.
+
+#### 5. The limits are re-decided, once, in the open
+
+| Limit | Was | Safari-approved |
+| --- | --- | --- |
+| Turns | 10 requests/hour (all verbs) | **30 turns/hour per user**, 10 sessions/day |
+| Drafts | counted in the same 10 | **6 drafts/hour** |
+| Conversation length | 120k estimated tokens, then refuse | **compaction**, plus 60 turns/session soft ceiling |
+| Monthly spend | `COST_CAP` existed, never applied here | not enforced — it is the Wanderer's own key (#1801 out of scope). The session record carries cost so a usage page can show it |
+
+#### Route fixes
+
+- [ ] Drop `OPENROUTER_API_KEY`; resolve the tenant key via `resolveOpenRouterKey()`
+- [ ] Build the slot with `createLumenModelSlot`, `tenantId` included
+- [ ] Replace `action` multiplexing with the six routes above
+- [ ] Move from `/api/grove/wisp/fireside` to `/api/fireside/*`
+- [ ] Load and append history server-side; never accept it from the body
+- [ ] Tenant boundary on every route, `404` for someone else's session
+- [ ] Keep `checkFeatureAccess(…, "ai")` fail-open; keep `Threshold` fail-closed with the new numbers
+- [ ] Log replies as well as drafts to `wisp_requests`, with the session id, so a session's cost is
+      the sum of its rows
+
+#### Service fixes
+
+- [ ] `handleStart` creates the session row; `handleRespond` becomes one Lyra turn
+- [ ] `handleDraft` reads the conversation from the database, keeps the prompt and the fallback
+- [ ] Record turn count, cost and model on the session as it goes
+
+#### Kept exactly as-is
+
+- [x] both prompt bodies, nearly verbatim (they *are* the feature)
+- [x] `secureUserContent()` around user text, and the `USER MESSAGE START ---` delimiters
+- [x] the JSON fallback + "formatting may be a bit rough" warning
+- [x] `canDraft` (3 messages, 150 tokens) and `selectStarterPrompt`'s daily rotation
+- [x] `estimateTokens` — still the right cheap estimator for the draft gate
+- [x] `maxTokens: 150` / `0.7` for replies, `2000` / `0.3` for drafts
+
+#### Migration needs (for Stop 5 to own)
+
+- [ ] session + message tables in the tenant DB
+- [ ] `wisp_requests` gains a tenant column, or is joined through the session
