@@ -24,6 +24,7 @@
  *   node affected-packages.mjs <base-ref>
  *   node affected-packages.mjs main            # compare against main
  *   node affected-packages.mjs HEAD~1          # compare against the last commit
+ *   node affected-packages.mjs --all           # weekly sweep: skip detection
  *
  * Output: JSON — affected packages, per-package check/test matrices for GitHub
  * Actions, and scope flags for path-gating whole CI jobs.
@@ -385,8 +386,12 @@ export function classifyScope(entries) {
  * `lockfile` carries the result of `diffLockfile` when the caller could read
  * both sides. Omitting it while `pnpm-lock.yaml` is in the diff keeps the old,
  * safe behaviour: everything is affected.
+ *
+ * `sweep` bypasses the affected detection entirely and checks every package and
+ * every gated job. Nothing is wrong with the diff — the point is that "nothing
+ * changed" is exactly how a package stays broken for months (#1797).
  */
-export function detectAffected({ entries, packages, root = REPO_ROOT, lockfile }) {
+export function detectAffected({ entries, packages, root = REPO_ROOT, lockfile, sweep }) {
 	const files = entries.map((e) => e.path);
 	const lockfileChanged = files.includes(LOCKFILE);
 	const lockfileScoped =
@@ -397,7 +402,9 @@ export function detectAffected({ entries, packages, root = REPO_ROOT, lockfile }
 	const unscopable = lockfileScoped && lockfile.changedImporters.some((dir) => !packages.has(dir));
 
 	const runAll =
-		files.some((f) => GLOBAL_FILES.has(f)) || (lockfileChanged && (!lockfileScoped || unscopable));
+		sweep ||
+		files.some((f) => GLOBAL_FILES.has(f)) ||
+		(lockfileChanged && (!lockfileScoped || unscopable));
 
 	// Every changed file revalidates the package that owns it. A changed
 	// lockfile importer is a structural change to that package: its own
@@ -484,9 +491,15 @@ export function detectAffected({ entries, packages, root = REPO_ROOT, lockfile }
 		affectedPackages: [...affected].sort(),
 		runAll,
 		needsEngine,
+		sweep: Boolean(sweep),
 		testMatrix,
 		typecheckMatrix,
-		scope: classifyScope(entries, packages),
+		// A sweep has no diff worth reading scope from, so every gated job runs
+		// too — a scheduled barrel or accent check that skipped is a package that
+		// stays broken with nobody looking at it.
+		scope: sweep
+			? { engine: true, ui: true, tooling: true, structure: false }
+			: classifyScope(entries, packages),
 	};
 }
 
@@ -564,7 +577,11 @@ export function readLockfilePair(baseRef) {
 }
 
 function main() {
-	const baseRef = process.argv[2] || "main";
+	// `--all` is what the weekly sweep (and `workflow_dispatch` with run-all) uses:
+	// no diff is worth scoping against, so every package and every gated job runs.
+	const args = process.argv.slice(2);
+	const sweep = args.includes("--all");
+	const baseRef = args.find((a) => !a.startsWith("--")) || "main";
 	const entries = getChangedEntries(baseRef);
 	const packages = discoverPackages(REPO_ROOT);
 
@@ -576,18 +593,19 @@ function main() {
 	}
 
 	const result =
-		entries.length === 0
+		entries.length === 0 && !sweep
 			? {
 					changedFiles: 0,
 					directlyChanged: [],
 					affectedPackages: [],
 					runAll: false,
 					needsEngine: false,
+					sweep: false,
 					testMatrix: [],
 					typecheckMatrix: [],
 					scope: { engine: false, ui: false, tooling: false, structure: false },
 				}
-			: detectAffected({ entries, packages, root: REPO_ROOT, lockfile });
+			: detectAffected({ entries, packages, root: REPO_ROOT, lockfile, sweep });
 
 	console.log(JSON.stringify(result));
 }
