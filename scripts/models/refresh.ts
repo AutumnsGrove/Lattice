@@ -125,7 +125,7 @@ async function main(): Promise<number> {
 			"Run `pnpm models:refresh && pnpm models:sync`, then review the diff.",
 		].join("\n"),
 	);
-	return 1;
+	return EXIT_DRIFT;
 }
 
 main().then(
