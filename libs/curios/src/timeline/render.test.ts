@@ -102,6 +102,49 @@ describe("line anchors", () => {
 		expect(html).toContain("line-vine");
 	});
 
+	it("keeps a paragraph's note with the paragraph, not with a later bullet", () => {
+		// Only looking for the next `</li>` would attach this note to the bullet
+		// below the paragraph — a line it does not belong to.
+		const html = renderTimelineHtml({
+			markdown: "### repo\n\nA paragraph <!-- anchor:l1 -->with a note.\n\n- a bullet",
+			gutterItems: [vine("anchor:l1", "paragraph note")],
+		});
+
+		const note = html.indexOf("paragraph note");
+		// Under the paragraph it comments on, and above the list that follows.
+		expect(note).toBeGreaterThan(html.indexOf("</p>"));
+		expect(note).toBeLessThan(html.indexOf("<ul"));
+	});
+
+	it("gives a parent line its note above its sub-bullets", () => {
+		const html = renderTimelineHtml({
+			markdown: "### repo\n- parent <!-- anchor:l1 -->\n  - child",
+			gutterItems: [vine("anchor:l1", "parent note")],
+		});
+
+		const note = html.indexOf("parent note");
+		expect(note).toBeGreaterThan(html.indexOf("parent"));
+		// Above the nested list, not at the end of the child's item.
+		const nestedList = html.indexOf("<ul", html.indexOf("parent") + 1);
+		expect(nestedList).toBeGreaterThan(-1);
+		expect(note).toBeLessThan(nestedList);
+	});
+
+	it("gives a sub-bullet its own note inside the sub-bullet", () => {
+		const html = renderTimelineHtml({
+			markdown: "### repo\n- parent\n  - child <!-- anchor:l2 -->",
+			gutterItems: [vine("anchor:l2", "child note")],
+		});
+
+		const note = html.indexOf("child note");
+		const child = html.indexOf("child");
+		expect(note).toBeGreaterThan(child);
+		// The child's own `</li>` is the nearest one after the note.
+		expect(html.indexOf("</li>", note)).toBeGreaterThan(note);
+		// And the parent item is still open after it, so the note did not escape.
+		expect(html.lastIndexOf("</li>", note)).toBeLessThan(note);
+	});
+
 	it("drops a vine whose marker is not in the day", () => {
 		const html = renderTimelineHtml({
 			markdown: day,

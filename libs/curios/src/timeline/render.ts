@@ -118,13 +118,46 @@ function placeOnHeading(html: string, anchor: string, vines: string): string {
 }
 
 /**
+ * Where a line's vines go: the end of the list item that holds the marker.
+ *
+ * The marker sits at the start of the line's own words, so inserting beside it
+ * would put the note in front of the sentence it comments on. The item's end is
+ * the first of these after the marker — whichever comes first:
+ *
+ * - `</li>` — the item itself closes.
+ * - `<ul` / `<ol` — a nested list starts, and the note belongs to the parent
+ *   line, above its sub-bullets rather than after them.
+ *
+ * `null` means the marker is not inside a list item at all (a paragraph, in a
+ * day written before the bullet format). The note then goes after that
+ * paragraph: a block element inside a `<p>` would break the paragraph in the
+ * browser, and the note would land in the middle of its own sentence.
+ *
+ * Only looking for the next `</li>` is not enough: a paragraph marker followed
+ * by any list would attach its note to whichever bullet came next, and a parent
+ * with a nested list would attach it to the child's `</li>`.
+ */
+function endOfListItem(html: string, from: number): number | null {
+	const openItem = html.lastIndexOf("<li", from);
+	const closedItem = html.lastIndexOf("</li>", from);
+
+	// Not inside an item: no item opened, or the last one had already closed.
+	if (openItem === -1 || openItem < closedItem) {
+		return null;
+	}
+
+	const candidates = ["</li>", "<ul", "<ol"]
+		.map((closer) => html.indexOf(closer, from))
+		.filter((at) => at !== -1);
+
+	return candidates.length === 0 ? null : Math.min(...candidates);
+}
+
+/**
  * Place a group at the end of the list item that holds the marker, so the vine
  * sits under the line's own words rather than in front of them.
  *
- * Returns the html unchanged when the marker is absent. A marker that is not in
- * a list item — a paragraph, in a day written before the bullet format — still
- * gets its vine after the marker: a block there reads as the next row, and
- * dropping it would lose a note that was really written.
+ * Returns the html unchanged when the marker is absent.
  */
 function placeOnMarker(html: string, name: string, vines: string): string {
 	const marker = markerHtml(name);
@@ -133,8 +166,10 @@ function placeOnMarker(html: string, name: string, vines: string): string {
 		return html;
 	}
 
-	const itemEnd = html.indexOf("</li>", index);
-	const at = itemEnd === -1 ? index + marker.length : itemEnd;
+	const paragraphEnd = html.indexOf("</p>", index);
+	const at =
+		endOfListItem(html, index) ??
+		(paragraphEnd === -1 ? index + marker.length : paragraphEnd + "</p>".length);
 
 	return `${html.slice(0, at)}${vines}${html.slice(at)}`;
 }
