@@ -94,6 +94,27 @@
 	let openrouterKeySaving = $state(false);
 	let openrouterKeyResult = $state<{ ok: boolean; message: string } | null>(null);
 
+	// A saved model the picker no longer offers still has to appear, or the select
+	// renders blank and looks like nothing was chosen.
+	const modelOptions = $derived.by(() => {
+		const models = data.models ?? [];
+		if (openrouterModel === "" || models.some((model) => model.id === openrouterModel)) {
+			return models;
+		}
+		return [
+			{
+				id: openrouterModel,
+				name: `${openrouterModel} (not offered any more)`,
+				quality: "medium",
+				speed: "medium",
+				inputCostPer1M: 0,
+				outputCostPer1M: 0,
+				isDefault: false,
+			},
+			...models,
+		];
+	});
+
 	// Check if using custom voice
 	const isCustomVoice = $derived(voicePreset === "custom");
 
@@ -439,7 +460,7 @@
 					bind:value={openrouterModel}
 					class="field-select"
 				>
-					{#each data.models as model}
+					{#each modelOptions as model}
 						<option value={model.id}>
 							{model.name} — ${model.inputCostPer1M}/M in, ${model.outputCostPer1M}/M out{model.isDefault
 								? " (Recommended)"

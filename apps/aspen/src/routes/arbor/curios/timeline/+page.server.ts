@@ -93,7 +93,11 @@ export const load: PageServerLoad = async ({ platform, locals }) => {
 		parsedConfig = {
 			enabled: Boolean(config.enabled),
 			githubUsername: config.github_username as string | null,
-			openrouterModel: config.openrouter_model as string,
+			// A row can hold NULL (the column defaults only apply on insert), and the
+			// picker has no blank option — so the fallback belongs here rather than in
+			// the page, which would otherwise render an empty select (#1602).
+			openrouterModel:
+				(config.openrouter_model as string | null) ?? DEFAULT_TIMELINE_CONFIG.openrouterModel,
 			voicePreset: config.voice_preset as string,
 			customSystemPrompt: config.custom_system_prompt as string | null,
 			customSummaryInstructions: config.custom_summary_instructions as string | null,
