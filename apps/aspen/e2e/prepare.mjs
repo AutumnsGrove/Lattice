@@ -40,6 +40,15 @@ function wrangler(args) {
 	});
 }
 
+// The Durable Objects worker needs its local config (a throwaway migration that
+// enables SQLite storage). dev-stack generates the same file; on a cold runner
+// nothing has, so the shared script is called here too.
+console.log("[e2e] writing local durable-objects config");
+execFileSync("bash", [path.join(repo, "scripts/repo/write-local-do-config.sh")], {
+	cwd: repo,
+	stdio: "inherit",
+});
+
 // The worker wrangler dev serves is the build output, not the source.
 console.log("[e2e] building aspen");
 execFileSync("pnpm", ["run", "build"], {

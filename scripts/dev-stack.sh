@@ -421,28 +421,10 @@ wait_for_port() {
 }
 
 # ── Local DO config ──────────────────────────────────────────────────
-# Production's durable-objects wrangler.toml deliberately has no [[migrations]]
-# (history was reset 2026-06-27; the classes already exist in Cloudflare), but
-# miniflare only enables SQLite for classes a migration declares. Without one,
-# every Loom DO fails locally with "SQL is not enabled for this Durable Object
-# class". Write a throwaway copy with a migration appended; class names come
-# from the config's own bindings so there's still one source of truth.
+# Written by a shared script so Aspen's e2e fixture — which runs on a cold CI
+# runner — generates the same file from the same rule.
 write_local_do_config() {
-    local src="services/durable-objects/wrangler.toml"
-    local dst="services/durable-objects/wrangler.local.toml"
-    local classes
-    classes=$(sed -n 's/^class_name = "\(.*\)"/"\1"/p' "$src" | paste -sd, - | sed 's/,/, /g')
-    {
-        cat "$src"
-        printf '\n[[migrations]]\ntag = "local-sqlite"\nnew_sqlite_classes = [%s]\n' "$classes"
-        # The post-removal probe asks the public origin by default (#1762). Locally
-        # that finds no such subdomain — correctly, it never existed — and reports
-        # "gone", passing a step nobody tested. Point it at Aspen's dev server,
-        # which reads the tenant from ?subdomain= on localhost. This is only safe
-        # while the source config declares no [vars] table of its own, which
-        # wrangler would reject as a duplicate.
-        printf '\n[vars]\nSITE_ORIGIN = "http://localhost:5173/?subdomain={subdomain}"\n'
-    } >"$dst"
+    bash scripts/repo/write-local-do-config.sh
 }
 
 start_workers() {
