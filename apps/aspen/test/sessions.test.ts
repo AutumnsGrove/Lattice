@@ -89,6 +89,29 @@ describe("sessions", () => {
 			expect(stillSignedIn.html).toContain(OWNER_ONLY);
 		});
 
+		it("revokes every other session in one call", async () => {
+			const cookie = await signIn(undefined, { email: OWNER_EMAIL });
+			await setService("auth", {
+				"/session/validate": {
+					body: {
+						valid: true,
+						user: { id: "user-owner", email: OWNER_EMAIL, name: "Owner", isAdmin: false },
+					},
+				},
+				"/session/revoke-all": { body: { revokedCount: 2 } },
+			});
+
+			const result = await json<{ revokedCount: number }>("/api/auth/sessions/revoke-all", {
+				tenant: TENANTS.midnightBloom,
+				cookie,
+				method: "POST",
+				headers: { origin: `https://${TENANTS.midnightBloom}.grove.place` },
+			});
+
+			expect(result.status).toBe(200);
+			expect(result.body.revokedCount).toBe(2);
+		});
+
 		it("logs out: the session is revoked and the cookies are cleared", async () => {
 			const cookie = await signIn(undefined, { email: OWNER_EMAIL });
 
@@ -111,6 +134,36 @@ describe("sessions", () => {
 			const result = await json("/api/auth/sessions", { tenant: TENANTS.midnightBloom });
 
 			expect(result.status).toBe(401);
+		});
+
+		it("refuses revoke-all without a session", async () => {
+			const result = await json("/api/auth/sessions/revoke-all", {
+				tenant: TENANTS.midnightBloom,
+				method: "POST",
+				headers: { origin: `https://${TENANTS.midnightBloom}.grove.place` },
+			});
+
+			expect(result.status).toBe(401);
+		});
+
+		it("passes Heartwood's rate limit through instead of swallowing it", async () => {
+			const cookie = await signIn(undefined, { email: OWNER_EMAIL });
+			await setService("auth", {
+				"/session/validate": {
+					body: {
+						valid: true,
+						user: { id: "user-owner", email: OWNER_EMAIL, name: "Owner", isAdmin: false },
+					},
+				},
+				"/session/list": { status: 429, body: { error: "rate_limited" } },
+			});
+
+			const result = await json("/api/auth/sessions", {
+				tenant: TENANTS.midnightBloom,
+				cookie,
+			});
+
+			expect(result.status).toBe(429);
 		});
 
 		it("passes a garbage cookie through as 401, not 500", async () => {
