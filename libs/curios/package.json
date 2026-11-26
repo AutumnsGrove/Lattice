@@ -1,7 +1,7 @@
 {
 	"name": "@autumnsgrove/curios",
 	"version": "0.1.1",
-	"description": "Grove Curios — gallery, guestbook, polls, timeline interactive widgets.",
+	"description": "Grove Curios \u2014 gallery, guestbook, polls, timeline interactive widgets.",
 	"author": "AutumnsGrove",
 	"license": "AGPL-3.0-only",
 	"repository": {
@@ -103,6 +103,7 @@
 	"dependencies": {
 		"@autumnsgrove/grove-crypto": "workspace:*",
 		"@autumnsgrove/grove-errors": "workspace:*",
+		"@autumnsgrove/lumen-registry": "workspace:*",
 		"@autumnsgrove/lyra": "^0.3.1"
 	},
 	"devDependencies": {

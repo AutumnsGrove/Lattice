@@ -1,10 +1,15 @@
 /**
- * Cerebras RDAP Domain Availability Checker
+ * Model-based RDAP Domain Availability Checker
  *
- * Uses Cerebras models via OpenRouter to check domain availability.
- * Faster than traditional RDAP but may have lower accuracy.
+ * Asks a fast model, through OpenRouter, whether a domain is registered. Faster
+ * than traditional RDAP but less accurate, so it is off unless
+ * `USE_CEREBRAS_RDAP` is set.
+ *
+ * The model it named stopped existing at OpenRouter, which is the failure the
+ * registry guard exists for (#1602); it now uses Forage's own default.
  */
 
+import { MODELS } from "@autumnsgrove/lumen-registry";
 import { OpenRouterProvider } from "./providers/openrouter";
 import type { Env } from "./types";
 
@@ -21,7 +26,7 @@ export class CerebrasRDAPChecker {
 	private provider: OpenRouterProvider;
 	private model: string;
 
-	constructor(env: Env, model = "cerebras/btlm-3b-8k-base") {
+	constructor(env: Env, model: string = MODELS.DEEPSEEK_V3_2) {
 		this.provider = new OpenRouterProvider(env, model);
 		this.model = model;
 	}

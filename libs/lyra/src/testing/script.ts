@@ -11,10 +11,10 @@
  * shape would let the fake invent a reply the pipeline could never produce.
  */
 
-import { calculateCost } from "@autumnsgrove/lattice/ai/lumen/config";
+import { calculateCost, MODELS } from "@autumnsgrove/lattice/ai/lumen/config";
 
 /** The model the `agent` task runs on, and the one every script defaults to. */
-export const SCRIPT_MODEL = "deepseek/deepseek-v4.1-flash";
+export const SCRIPT_MODEL = MODELS.DEEPSEEK_V4_1_FLASH;
 
 export type ScriptFinishReason = "stop" | "length" | "tool_calls" | "content_filter" | "other";
 

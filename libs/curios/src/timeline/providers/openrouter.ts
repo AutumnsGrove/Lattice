@@ -7,14 +7,18 @@
  * @see https://openrouter.ai/docs
  */
 
+import { DEFAULT_OPENROUTER_MODEL, listPickableModels } from "@autumnsgrove/lumen-registry";
+
+export { DEFAULT_OPENROUTER_MODEL };
+
 // =============================================================================
 // Types
 // =============================================================================
 
 export interface OpenRouterModel {
 	name: string;
-	quality: "highest" | "high" | "good";
-	speed: "fastest" | "fast" | "medium";
+	quality: "highest" | "high" | "medium";
+	speed: "fast" | "medium" | "slow";
 	inputCostPer1M: number;
 	outputCostPer1M: number;
 }
@@ -66,84 +70,35 @@ interface OpenRouterKeyResponse {
 // Model Definitions — curated subset for Timeline
 // =============================================================================
 
-export const OPENROUTER_MODELS: Record<string, OpenRouterModel> = {
-	"deepseek/deepseek-v4.1-flash-1017": {
-		name: "DeepSeek V4.1 Flash (1017)",
-		quality: "high",
-		speed: "fast",
-		inputCostPer1M: 0.03,
-		outputCostPer1M: 0.2,
-	},
-	"deepseek/deepseek-v4-flash-0731": {
-		name: "DeepSeek V4 Flash",
-		quality: "high",
-		speed: "fast",
-		inputCostPer1M: 0.046,
-		outputCostPer1M: 0.3,
-	},
-	"deepseek/deepseek-v4-pro-0813": {
-		name: "DeepSeek V4 Pro",
-		quality: "highest",
-		speed: "medium",
-		inputCostPer1M: 0.6026,
-		outputCostPer1M: 1.808,
-	},
-	"xiaomi/mimo-v2.5": {
-		name: "MiMo V2.5",
-		quality: "high",
-		speed: "fast",
-		inputCostPer1M: 0.119,
-		outputCostPer1M: 0.238,
-	},
-	"xiaomi/mimo-v2.5-pro": {
-		name: "MiMo V2.5 Pro",
-		quality: "highest",
-		speed: "medium",
-		inputCostPer1M: 0.3045,
-		outputCostPer1M: 0.609,
-	},
-	"minimax/minimax-m3": {
-		name: "MiniMax M3",
-		quality: "highest",
-		speed: "fast",
-		inputCostPer1M: 0.23,
-		outputCostPer1M: 0.96,
-	},
-	"anthropic/claude-haiku-4.5": {
-		name: "Claude Haiku 4.5",
-		quality: "highest",
-		speed: "fast",
-		inputCostPer1M: 1.0,
-		outputCostPer1M: 5.0,
-	},
-	"openai/gpt-oss-120b": {
-		name: "GPT-OSS 120B",
-		quality: "high",
-		speed: "fast",
-		inputCostPer1M: 0.04,
-		outputCostPer1M: 0.19,
-	},
-};
-
-export const DEFAULT_OPENROUTER_MODEL = "deepseek/deepseek-v4-flash-0731";
+/**
+ * What a picker may offer, derived from the model registry (#1602).
+ *
+ * This used to be a second, hand-kept table with its own prices — and by the
+ * time it was compared against the registry it listed two models OpenRouter no
+ * longer serves and disagreed on several prices.
+ */
+export const OPENROUTER_MODELS: Record<string, OpenRouterModel> = Object.fromEntries(
+	listPickableModels().map((model) => [
+		model.id,
+		{
+			name: model.name,
+			quality: model.quality as OpenRouterModel["quality"],
+			speed: model.speed as OpenRouterModel["speed"],
+			inputCostPer1M: model.inputCostPer1M,
+			outputCostPer1M: model.outputCostPer1M,
+		},
+	]),
+);
 
 // =============================================================================
 // UI Utilities (kept for model picker and key validation)
 // =============================================================================
 
 /**
- * Get list of recommended OpenRouter models for the UI
+ * Get list of recommended OpenRouter models for the UI, cheapest first.
  */
 export function getOpenRouterModels() {
-	return Object.entries(OPENROUTER_MODELS).map(([id, config]) => ({
-		id,
-		name: config.name,
-		quality: config.quality,
-		speed: config.speed,
-		inputCostPer1M: config.inputCostPer1M,
-		outputCostPer1M: config.outputCostPer1M,
-		isDefault: id === DEFAULT_OPENROUTER_MODEL,
-	}));
+	return listPickableModels();
 }
 
 /**
