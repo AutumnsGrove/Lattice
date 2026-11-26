@@ -1,0 +1,4 @@
+# Playwright e2e (state dir, artifacts)
+.e2e-state
+.e2e-results
+playwright-report
