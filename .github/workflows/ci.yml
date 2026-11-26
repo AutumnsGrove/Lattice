@@ -151,6 +151,15 @@ jobs:
         run: pnpm exec svelte-kit sync
         working-directory: ${{ matrix.package }}
 
+      # Aspen's `routes` test project boots the built SvelteKit worker, and that
+      # build imports `@autumnsgrove/gossamer/svelte` through the engine's dist.
+      # The shared setup builds the engine but not gossamer, so it is built here
+      # for Aspen only.
+      - name: Build gossamer for Aspen's test build
+        if: matrix.package == 'apps/aspen'
+        run: pnpm run build
+        working-directory: libs/gossamer
+
       - name: Run tests
         run: ${{ matrix.command }}
         working-directory: ${{ matrix.package }}

@@ -8,15 +8,17 @@
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
+		"build:test": "CI=true vite build",
 		"preview": "wrangler dev",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"deploy": "pnpm run build && wrangler deploy",
-		"test": "vitest",
-		"test:run": "vitest run",
-		"test:coverage": "vitest run --coverage"
+		"test": "pnpm run build:test && vitest",
+		"test:run": "pnpm run build:test && vitest run",
+		"test:coverage": "pnpm run build:test && vitest run --coverage"
 	},
 	"devDependencies": {
 		"@cloudflare/vite-plugin": "^1.54.0",
+		"@cloudflare/vitest-plugin": "^1.9.2",
 		"@cloudflare/workers-types": "^4.20260317.1",
 		"@sveltejs/adapter-cloudflare": "^7.2.6",
 		"@sveltejs/kit": "^2.50.2",

@@ -231,9 +231,9 @@ belongs to the test as much as the code.
 real bucket semantics, Durable Objects are real DOs. No Cloudflare credentials, no
 network, no account ID. The configuration API is unchanged across the rename.
 
-The repository currently has `@cloudflare/vitest-pool-workers@^0.13.3` in three packages,
-exactly one of which is live (`workers/lumen`). Migration is a dependency and import
-rename, plus a codemod for the config.
+The repository has `@cloudflare/vitest-plugin@^1.9.2` in `workers/lumen` and `apps/aspen`
+(the migration is a dependency and import rename; the config API is unchanged). `workers/lumen`
+was the working reference the Aspen harness was built from.
 
 **The phase order: Aspen, then services, then libs.**
 
@@ -276,8 +276,18 @@ fidelity that belongs in their own test suites. The stubs return realistic respo
 including failure responses, because a stub that only ever succeeds cannot test a sad
 path.
 
-`workers/lumen` already does this, and its config comment documents why. Phase 1
-generalises that pattern into a shared Aspen harness rather than repeating it per file.
+`workers/lumen` already does this, and its config comment documents why. The Aspen
+harness (`apps/aspen/vitest.config.ts`) built on it, with two projects: a Node pool for
+pure logic (`unit`) and a workerd pool for routes (`routes`). Tests in the `routes`
+project dispatch real requests at the built adapter artifact
+(`.svelte-kit/cloudflare/_worker.js`), because a SvelteKit route is only whole after the
+adapter has composed the router, `hooks.server.ts`, and the bindings. Requests address
+their tenant with an `X-Forwarded-Host` header, the way grove-router does — an in-worker
+request has no `Host` header, so the local `?subdomain=` branch cannot fire.
+
+Durable Objects are declared in the pool with `useSQLite: true`. Loom's DOs keep state
+in `state.storage.sql`, and without that flag the first `initialize()` throws and the DO
+degrades to a cache miss — which reads as a routing bug two layers away.
 
 ---
 
