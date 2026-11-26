@@ -284,7 +284,10 @@ export async function updatePost(
 		html_content,
 		gutter_content: data.gutter_content || "[]",
 		font: data.font || "default",
-		status: data.status,
+		// A PUT that does not mention status leaves the post as it was. Passing
+		// `undefined` through put a JS undefined into a D1 binding, which D1
+		// rejects outright — the update answered 500 instead of 400 or 200.
+		status: data.status ?? currentPost.status,
 		updated_at: unixNow,
 		featured_image: data.featured_image || null,
 	};

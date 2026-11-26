@@ -114,6 +114,9 @@ export default defineConfig({
 					// race on the same rows and on the stub control keys, so they run
 					// in turn and each file resets what it touched.
 					fileParallelism: false,
+					// Real workerd, real SQLite, real DOs: a create-and-read cycle
+					// occasionally crosses the 5s default.
+					testTimeout: 20_000,
 					globalSetup: ["./test/global-setup.ts"],
 					setupFiles: ["./test/setup-d1.ts"],
 				},
