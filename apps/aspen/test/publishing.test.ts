@@ -1,7 +1,7 @@
 import { evictAllDurableObjects } from "cloudflare:test";
 import { env } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
-import { createTenant, json, page, setService, signIn, tenantIdFor } from "./harness";
+import { createTenant, json, page, signIn, tenantIdFor } from "./harness";
 
 /**
  * The write path: a writer puts words in and they come out the other side.
