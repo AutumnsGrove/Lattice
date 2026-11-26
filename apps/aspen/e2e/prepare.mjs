@@ -10,6 +10,7 @@
  * re-inserts its own rows.
  */
 import { execFileSync } from "node:child_process";
+import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -39,6 +40,17 @@ function wrangler(args) {
 		env: { ...process.env, CI: "true" },
 	});
 }
+
+// CI has no Cloudflare credentials, and an AI binding always resolves remotely —
+// wrangler refuses to start without a token. The journey never touches AI, so it
+// runs against a copy of the config with that one binding removed. Generated
+// rather than hand-kept, so the two cannot drift.
+const wranglerToml = await readFile(path.join(aspen, "wrangler.toml"), "utf-8");
+const withoutAi = wranglerToml.replace(/^\[ai\]\n(?:[^\[].*\n)*/m, "");
+if (withoutAi === wranglerToml) {
+	throw new Error("expected to strip an [ai] block from wrangler.toml; none found");
+}
+await writeFile(path.join(aspen, "wrangler.e2e.toml"), withoutAi);
 
 // The Durable Objects worker needs its local config (a throwaway migration that
 // enables SQLite storage). dev-stack generates the same file; on a cold runner
