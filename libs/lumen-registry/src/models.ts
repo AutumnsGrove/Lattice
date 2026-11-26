@@ -33,6 +33,11 @@ export interface ModelEntry {
 	toolChoice?: ModelToolChoice[];
 	contextWindow?: number;
 	/**
+	 * The longest completion the provider will return. A request that asks for
+	 * more is refused rather than clamped (#1707).
+	 */
+	maxOutputTokens?: number;
+	/**
 	 * Whether a person may pick this model in a settings page.
 	 *
 	 * A decision, so it lives here rather than being inferred from price or
@@ -106,6 +111,12 @@ export interface ModelCapabilities {
 	acceptedToolChoices: ModelToolChoice[];
 	/** Context window in tokens. Null when the concept does not apply (speech). */
 	contextWindow: number | null;
+	/**
+	 * Longest completion the provider will return, or null when the registry does
+	 * not say. A candidate that cannot fit the requested `max_tokens` is skipped
+	 * rather than sent to be refused (#1707).
+	 */
+	maxOutputTokens: number | null;
 }
 
 const CAPABILITIES_BY_ID = new Map<string, ModelCapabilities>(
@@ -116,6 +127,7 @@ const CAPABILITIES_BY_ID = new Map<string, ModelCapabilities>(
 			supportsTools: model.supportsTools ?? false,
 			acceptedToolChoices: model.toolChoice ?? ["auto"],
 			contextWindow: model.contextWindow ?? null,
+			maxOutputTokens: model.maxOutputTokens ?? null,
 		},
 	]),
 );
@@ -146,10 +158,10 @@ export interface PickableModel {
  * The model a picker starts on: the timeline's default, and the one the
  * "recommended" badge marks.
  */
-export const DEFAULT_OPENROUTER_MODEL = MODELS.DEEPSEEK_V4_FLASH_0731;
+export const DEFAULT_OPENROUTER_MODEL = MODELS.DEEPSEEK_V4_1_FLASH_1017;
 
 /**
- * Models a person may choose between: OpenRouter's generative ones, cheapest
+ * Models a person may choose between: the three the `picker` flag marks, cheapest
  * first so the cost of a choice is visible.
  */
 export function listPickableModels(): PickableModel[] {

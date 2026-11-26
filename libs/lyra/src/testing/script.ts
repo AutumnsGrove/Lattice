@@ -14,7 +14,7 @@
 import { calculateCost, MODELS } from "@autumnsgrove/lattice/ai/lumen/config";
 
 /** The model the `agent` task runs on, and the one every script defaults to. */
-export const SCRIPT_MODEL = MODELS.DEEPSEEK_V4_1_FLASH;
+export const SCRIPT_MODEL = MODELS.DEEPSEEK_V4_1_FLASH_1017;
 
 export type ScriptFinishReason = "stop" | "length" | "tool_calls" | "content_filter" | "other";
 

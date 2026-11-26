@@ -20,8 +20,9 @@ export type {
 export {
 	applyCatalog,
 	CATALOG_URL,
+	endpointsUrl,
 	findDrift,
 	formatRegistryJson,
 	openRouterIds,
-	parseCatalog,
+	parseModelFacts,
 } from "./catalog.js";

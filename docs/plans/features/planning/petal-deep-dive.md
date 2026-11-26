@@ -178,8 +178,7 @@ For AI-generated images only. Re-runs Layer 2 classification on output.
 | Provider | Model | Timeout | Role | ZDR |
 |----------|-------|---------|------|-----|
 | `openrouter_haiku` | Claude Haiku 5.5 | 20s | Primary | No |
-| `openrouter_gemma` | Gemma 4 26B | 20s | Fallback | No |
-| `workers_ai_llama4` | Llama 4 Scout (Cloudflare Workers AI) | 15s | Final fallback | Yes |
+| `workers_ai_llama4` | Llama 4 Scout (Cloudflare Workers AI) | 15s | Fallback | Yes |
 
 Models come from Lumen's registry; the source of truth is `PETAL_PROVIDERS` in
 `libs/engine/src/lib/platform/config/petal.ts`. OpenRouter and Cloudflare Workers AI are the

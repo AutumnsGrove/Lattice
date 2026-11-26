@@ -7,7 +7,7 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { routeTask, executeWithFallback, executeEmbedding, executeModeration } from "./router.js";
-import { getTaskConfig, MODELS } from "./config.js";
+import { getModelCapabilities, getTaskConfig, MODELS } from "./config.js";
 import { AllProvidersFailedError, ProviderError } from "./errors.js";
 import type { ProviderRegistry, LumenProvider } from "./providers/index.js";
 
@@ -72,7 +72,7 @@ describe("Task Routing", () => {
 			const result = routeTask("generation", providers);
 
 			expect(result.provider).toBe("openrouter");
-			expect(result.model).toBe(MODELS.DEEPSEEK_V4_1_FLASH);
+			expect(result.model).toBe(MODELS.DEEPSEEK_V4_1_FLASH_1017);
 		});
 
 		it("should use first available fallback when primary unavailable", () => {
@@ -377,6 +377,75 @@ describe("Specialized Execution", () => {
  * timeline path there is no fallback to catch it, because the caller named a
  * model explicitly.
  */
+describe("executeWithFallback - models that cannot fit the request (#1707)", () => {
+	const messages = [{ role: "user" as const, content: "Hello" }];
+
+	it("clamps a request to the model's ceiling instead of sending it to be refused", async () => {
+		// gpt-oss-120b tops out at 117,964 completion tokens. A caller asking for
+		// 900,000 would be refused by the provider; clamping keeps the call and
+		// still produces output. Skipping the model instead would fail outright when
+		// every candidate is capped below the request (raised in review on #1851).
+		const provider = createMockProvider("openrouter");
+		const providers: ProviderRegistry = { openrouter: provider };
+		const ceiling = getModelCapabilities(MODELS.GPT_OSS_120B)?.maxOutputTokens;
+
+		const result = await executeWithFallback("generation", messages, providers, {
+			model: MODELS.GPT_OSS_120B,
+			maxTokens: 900_000,
+		});
+
+		expect(result.response.content).toContain("openrouter");
+		expect(provider.inference).toHaveBeenCalledTimes(1);
+		expect(provider.inference).toHaveBeenCalledWith(
+			MODELS.GPT_OSS_120B,
+			expect.any(Array),
+			expect.objectContaining({ maxTokens: ceiling }),
+		);
+	});
+
+	it("still sends a request the chain can serve", async () => {
+		const mockProvider = createMockProvider("openrouter");
+		const providers: ProviderRegistry = { openrouter: mockProvider };
+
+		await executeWithFallback("generation", messages, providers, { maxTokens: 4_096 });
+
+		expect(mockProvider.inference).toHaveBeenCalledTimes(1);
+	});
+
+	it("says when a fallback answered, so a downgrade is attributable", async () => {
+		let call = 0;
+		const flaky = {
+			inference: vi.fn().mockImplementation(async () => {
+				call += 1;
+				if (call === 1) {
+					throw new ProviderError("openrouter", "primary is down", 503);
+				}
+				return {
+					content: "answered by the fallback",
+					usage: { input: 10, output: 5, cost: 0 },
+					model: "fallback",
+				};
+			}),
+		} as unknown as LumenProvider;
+		const providers: ProviderRegistry = { openrouter: flaky };
+
+		const result = await executeWithFallback("generation", messages, providers);
+
+		expect(result.usedFallback).toBe(true);
+		expect(result.fallbackFrom).toBe(getTaskConfig("generation").primaryModel);
+		expect(result.model).toBe(getTaskConfig("generation").fallbackChain[0].model);
+	});
+
+	it("does not call a primary answer a fallback", async () => {
+		const providers: ProviderRegistry = { openrouter: createMockProvider("openrouter") };
+
+		const result = await executeWithFallback("generation", messages, providers);
+
+		expect(result.usedFallback).toBe(false);
+		expect(result.fallbackFrom).toBeUndefined();
+	});
+});
+
 describe("executeWithFallback - oversized max_tokens", () => {
 	const messages = [{ role: "user" as const, content: "Hello" }];
 

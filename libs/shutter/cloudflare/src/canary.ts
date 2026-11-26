@@ -374,7 +374,7 @@ Respond in 50 words or less based only on the content above.`;
 				"X-Title": "Shutter Canary Check",
 			},
 			body: JSON.stringify({
-				model: MODELS.LLAMA_3_2_3B, // Cheapest model the registry carries
+				model: MODELS.GPT_OSS_120B, // One cheap call to prove the key works
 				messages: [{ role: "user", content: prompt }],
 				max_tokens: 100, // Strict limit for canary
 				temperature: 0,

@@ -15,6 +15,7 @@ import {
 	getModelCost,
 	calculateCost,
 	getModelsForProvider,
+	getModelCapabilities,
 } from "./config.js";
 import type { LumenTask, LumenProviderName } from "./types.js";
 
@@ -47,14 +48,13 @@ describe("Provider Configuration", () => {
 describe("Model Definitions", () => {
 	it("should have all required OpenRouter models", () => {
 		// Generation
+		expect(MODELS.DEEPSEEK_V4_1_FLASH_1017).toContain("deepseek");
 		expect(MODELS.DEEPSEEK_V4_1_FLASH).toContain("deepseek");
 		expect(MODELS.QWEN3_8_FLASH).toContain("qwen");
-		expect(MODELS.LLAMA_3_1_8B).toContain("llama");
-		expect(MODELS.KIMI_K2_7_CODE).toContain("kimi");
+		expect(MODELS.GPT_OSS_120B).toContain("gpt-oss");
 
 		// Vision
 		expect(MODELS.CLAUDE_HAIKU_55).toContain("claude");
-		expect(MODELS.GEMMA_4_26B).toContain("gemma");
 
 		// Moderation
 		expect(MODELS.GPT_OSS_SAFEGUARD).toContain("gpt-oss-safeguard");
@@ -65,10 +65,12 @@ describe("Model Definitions", () => {
 		expect(MODELS.BGE_M3).toContain("bge");
 	});
 
-	it("should have Cloudflare fallback models", () => {
-		expect(MODELS.CF_SHIELDGEMMA).toContain("@");
-		expect(MODELS.CF_BGE_BASE).toContain("@cf/");
-		expect(MODELS.CF_LLAMAGUARD_3).toContain("@cf/");
+	it("keeps only the Cloudflare models something still uses", () => {
+		// Vision fallback and speech-to-text: the moderation and embedding models are
+		// gone, along with the second-hand AMD/µA availability that made them a poor
+		// thing to depend on.
+		expect(MODELS.CF_LLAMA4_SCOUT).toContain("@cf/");
+		expect(MODELS.CF_WHISPER_TURBO).toContain("@cf/");
 	});
 
 	it("should use proper model ID format", () => {
@@ -77,7 +79,7 @@ describe("Model Definitions", () => {
 		expect(MODELS.CLAUDE_HAIKU_55).toMatch(/^[a-z-]+\/[a-z0-9.-]+$/i);
 
 		// Cloudflare models: @cf/ or @hf/ prefix
-		expect(MODELS.CF_BGE_BASE).toMatch(/^@(cf|hf)\//);
+		expect(MODELS.CF_LLAMA4_SCOUT).toMatch(/^@(cf|hf)\//);
 	});
 });
 
@@ -162,19 +164,35 @@ describe("Task Registry", () => {
 
 describe("Task-Specific Configuration", () => {
 	describe("Generation Tasks", () => {
-		it("should use DeepSeek V4.1 Flash as primary", () => {
-			expect(TASK_REGISTRY.generation.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH);
-			expect(TASK_REGISTRY.summary.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH);
-			expect(TASK_REGISTRY.chat.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH);
+		it("should use the newest DeepSeek V4.1 Flash snapshot as primary", () => {
+			// 1017 is the newer snapshot (17 Oct) of the same family; the unversioned
+			// id is the older base model and stays only as a cheap moderation fallback.
+			expect(TASK_REGISTRY.generation.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH_1017);
+			expect(TASK_REGISTRY.summary.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH_1017);
+			expect(TASK_REGISTRY.chat.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH_1017);
 		});
 
-		it("should have consistent fallback chain", () => {
-			const genFallbacks = TASK_REGISTRY.generation.fallbackChain;
-			const sumFallbacks = TASK_REGISTRY.summary.fallbackChain;
+		it("falls back to models of the same class, not to the cheap ones (#1707)", () => {
+			// A fallback is only useful if what it produces is still worth having.
+			// The 8B-class models could not hold a detailed-section format or a JSON
+			// envelope, so they are not fallbacks for a generative task — they are
+			// just cheaper ways to fail. Context window is the proxy for "class".
+			for (const task of ["generation", "summary", "chat"] as const) {
+				for (const fallback of TASK_REGISTRY[task].fallbackChain) {
+					const window = getModelCapabilities(fallback.model)?.contextWindow ?? 0;
+					expect(window, `${task} → ${fallback.model}`).toBeGreaterThanOrEqual(128_000);
+				}
+			}
 
-			// Generation and summary should have similar fallbacks
-			expect(genFallbacks.some((f) => f.model === MODELS.QWEN3_8_FLASH)).toBe(true);
-			expect(sumFallbacks.some((f) => f.model === MODELS.QWEN3_8_FLASH)).toBe(true);
+			// One chain for the generative tasks, so they cannot drift apart: chat and
+			// code answer the same shape of request as generation and summary.
+			const chain = TASK_REGISTRY.generation.fallbackChain.map((f) => f.model);
+			for (const task of ["summary", "chat", "code"] as const) {
+				expect(
+					TASK_REGISTRY[task].fallbackChain.map((f) => f.model),
+					`${task} chain`,
+				).toEqual(chain);
+			}
 		});
 	});
 
@@ -228,9 +246,11 @@ describe("Task-Specific Configuration", () => {
 			expect(TASK_REGISTRY.image.primaryModel).toBe(MODELS.CLAUDE_HAIKU_55);
 		});
 
-		it("should have Gemma 4 as fallback", () => {
+		it("should fall back to the Cloudflare vision model", () => {
+			// Gemma was the second fallback and is no longer in the registry; Scout is
+			// the only other vision model left, and it is free.
 			const fallbacks = TASK_REGISTRY.image.fallbackChain;
-			expect(fallbacks.some((f) => f.model === MODELS.GEMMA_4_26B)).toBe(true);
+			expect(fallbacks.map((f) => f.model)).toEqual([MODELS.CF_LLAMA4_SCOUT]);
 		});
 
 		it("should use low temperature for accurate descriptions", () => {
@@ -240,7 +260,7 @@ describe("Task-Specific Configuration", () => {
 
 	describe("Code Task", () => {
 		it("should use DeepSeek as primary", () => {
-			expect(TASK_REGISTRY.code.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH);
+			expect(TASK_REGISTRY.code.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH_1017);
 		});
 
 		it("should use very low temperature for accuracy", () => {
@@ -263,18 +283,17 @@ describe("Model Costs", () => {
 	});
 
 	it("should have Cloudflare models at zero cost", () => {
-		expect(MODEL_COSTS[MODELS.CF_SHIELDGEMMA].input).toBe(0);
-		expect(MODEL_COSTS[MODELS.CF_BGE_BASE].input).toBe(0);
-		expect(MODEL_COSTS[MODELS.CF_LLAMAGUARD_3].input).toBe(0);
+		expect(MODEL_COSTS[MODELS.CF_LLAMA4_SCOUT].input).toBe(0);
+		expect(MODEL_COSTS[MODELS.CF_WHISPER_TURBO].input).toBe(0);
 	});
 
-	it("should have reasonable cost ratios", () => {
-		// The last-resort fallback should be the cheapest paid model
-		const deepseekCost = MODEL_COSTS[MODELS.DEEPSEEK_V4_1_FLASH];
-		const llamaCost = MODEL_COSTS[MODELS.LLAMA_3_1_8B];
+	it("prices a run from the cheapest provider, not the model owner's list price", () => {
+		// 1017 is listed at $0.15/$0.60 and served from $0.04/$0.10; the catalog takes
+		// the endpoints' cheapest pair, and this pins that it did.
+		const flash = MODEL_COSTS[MODELS.DEEPSEEK_V4_1_FLASH_1017];
 
-		expect(llamaCost.input).toBeLessThan(deepseekCost.input);
-		expect(llamaCost.output).toBeLessThan(deepseekCost.output);
+		expect(flash.input).toBeLessThan(0.1);
+		expect(flash.output).toBeLessThan(0.3);
 	});
 });
 
@@ -320,7 +339,7 @@ describe("calculateCost", () => {
 	});
 
 	it("should return 0 for Cloudflare models", () => {
-		const cost = calculateCost(MODELS.CF_BGE_BASE, 1_000_000, 0);
+		const cost = calculateCost(MODELS.CF_LLAMA4_SCOUT, 1_000_000, 0);
 		expect(cost).toBe(0);
 	});
 });
@@ -333,7 +352,7 @@ describe("getTaskConfig", () => {
 	it("should return correct config for task", () => {
 		const config = getTaskConfig("generation");
 
-		expect(config.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH);
+		expect(config.primaryModel).toBe(MODELS.DEEPSEEK_V4_1_FLASH_1017);
 		expect(config.primaryProvider).toBe("openrouter");
 	});
 });
@@ -342,7 +361,7 @@ describe("getModelsForProvider", () => {
 	it("should return all OpenRouter models", () => {
 		const models = getModelsForProvider("openrouter");
 
-		expect(models).toContain(MODELS.DEEPSEEK_V4_1_FLASH);
+		expect(models).toContain(MODELS.DEEPSEEK_V4_1_FLASH_1017);
 		expect(models).toContain(MODELS.CLAUDE_HAIKU_55);
 		expect(models).toContain(MODELS.GPT_OSS_SAFEGUARD);
 		expect(models).toContain(MODELS.LLAMAGUARD_4);

@@ -42,7 +42,7 @@ function mockOpenRouterResponse(content: string, model?: string) {
 			completion_tokens: 50,
 			total_tokens: 200,
 		},
-		model: model ?? MODELS.DEEPSEEK_V4_1_FLASH,
+		model: model ?? MODELS.DEEPSEEK_V4_1_FLASH_1017,
 	};
 }
 
@@ -83,7 +83,7 @@ describe("Integration: Wisp Generation Path", () => {
 
 		// Verify response is normalized
 		expect(response.content).toContain("grammar");
-		expect(response.model).toBe(MODELS.DEEPSEEK_V4_1_FLASH);
+		expect(response.model).toBe(MODELS.DEEPSEEK_V4_1_FLASH_1017);
 		expect(response.provider).toBe("openrouter");
 		expect(response.usage.input).toBe(150);
 		expect(response.usage.output).toBe(50);
@@ -159,7 +159,7 @@ describe("Integration: Wisp Generation Path", () => {
 		const fetchCall = fetchMock.mock.calls[0];
 		const requestBody = JSON.parse(fetchCall[1].body);
 
-		expect(requestBody.model).toBe(MODELS.DEEPSEEK_V4_1_FLASH);
+		expect(requestBody.model).toBe(MODELS.DEEPSEEK_V4_1_FLASH_1017);
 		expect(requestBody.max_tokens).toBe(2048); // generation default
 		expect(requestBody.temperature).toBe(0.7); // generation default
 	});
@@ -188,7 +188,7 @@ describe("Integration: Wisp Generation Path", () => {
 
 		// DeepSeek V4.1 Flash: $0.30/M input, $1.20/M output
 		// Read from the registry: (1000/1M * input) + (500/1M * output)
-		const { input, output } = MODEL_COSTS[MODELS.DEEPSEEK_V4_1_FLASH];
+		const { input, output } = MODEL_COSTS[MODELS.DEEPSEEK_V4_1_FLASH_1017];
 		expect(response.usage.cost).toBeCloseTo(
 			(1000 / 1_000_000) * input + (500 / 1_000_000) * output,
 			5,

@@ -28,12 +28,10 @@ const OPENROUTER_HOST = "openrouter.ai";
 // =============================================================================
 
 describe("the provider cascade", () => {
-	it("is OpenRouter twice, then Workers AI", () => {
-		expect([...PETAL_PROVIDER_CASCADE]).toEqual([
-			"openrouter_haiku",
-			"openrouter_gemma",
-			"workers_ai_llama4",
-		]);
+	it("is OpenRouter, then Workers AI", () => {
+		// Gemma was the middle entry and left with the model (#1707 follow-up): two
+		// providers is the cascade now, and the registry no longer carries it.
+		expect([...PETAL_PROVIDER_CASCADE]).toEqual(["openrouter_haiku", "workers_ai_llama4"]);
 	});
 
 	it("ends at Cloudflare Workers AI", () => {
