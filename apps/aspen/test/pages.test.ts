@@ -1,7 +1,15 @@
 import { evictDurableObject } from "cloudflare:test";
 import { env } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
-import { CACHE_KEYS, TENANTS, clearGardenCache, page, waitForCacheKey } from "./harness";
+import {
+	CACHE_KEYS,
+	TENANTS,
+	clearGardenCache,
+	createTenant,
+	page,
+	tenantIdFor,
+	waitForCacheKey,
+} from "./harness";
 
 /**
  * The pages a stranger sees: home, the listing, a post, about, and a 404.
@@ -112,21 +120,14 @@ describe("reading pages", () => {
 		});
 
 		it("renders a one-post listing without breaking", async () => {
-			const [keep] = await env.DB.prepare(
-				"SELECT slug FROM posts WHERE tenant_id = ? AND status = 'published' ORDER BY slug LIMIT 1",
-			)
-				.bind("example-tenant-002")
-				.first<{ slug: string }>()
-				.then((row) => (row ? [row.slug] : []));
+			const tenant = await createTenant({
+				posts: [{ slug: "only-post", title: "The Only Post" }],
+			});
 
-			await env.DB.prepare("DELETE FROM posts WHERE tenant_id = ? AND slug != ?")
-				.bind("example-tenant-002", keep)
-				.run();
-
-			const result = await page("/garden", { tenant: TENANTS.driftwoodInk });
+			const result = await page("/garden", { tenant });
 
 			expect(result.status).toBe(200);
-			expect(result.html).toContain(`/garden/${keep}`);
+			expect(result.html).toContain("/garden/only-post");
 			expect(result.html).not.toContain("yet");
 		});
 
@@ -167,38 +168,43 @@ describe("reading pages", () => {
 			// assumed — the day invalidation is added this test fails and should
 			// be rewritten to the new contract. Tracked as #1835, against the
 			// publish path, where a purge belongs.
-			const published = await page(`/garden/${POST.slug}`, {
-				tenant: TENANTS.midnightBloom,
+			const tenant = await createTenant({
+				posts: [{ slug: "cache-me", title: "Read Me Once", body: "cached words" }],
 			});
-			expect(published.status).toBe(200);
-			expect(await waitForCacheKey(CACHE_KEYS.post("example-tenant-001", POST.slug))).toBe(true);
+			const tenantId = await tenantIdFor(tenant);
 
-			await env.DB.prepare("UPDATE posts SET status = 'draft' WHERE slug = ?")
-				.bind(POST.slug)
+			const published = await page("/garden/cache-me", { tenant });
+			expect(published.status).toBe(200);
+			expect(await waitForCacheKey(CACHE_KEYS.post(tenantId, "cache-me"))).toBe(true);
+
+			await env.DB.prepare("UPDATE posts SET status = 'draft' WHERE tenant_id = ? AND slug = ?")
+				.bind(tenantId, "cache-me")
 				.run();
 
-			const cached = await page(`/garden/${POST.slug}`, {
-				tenant: TENANTS.midnightBloom,
-			});
+			const cached = await page("/garden/cache-me", { tenant });
 
 			expect(cached.status).toBe(200);
-			expect(cached.html).toContain(POST.body);
+			expect(cached.html).toContain("cached words");
 		});
 
 		it("does not serve a draft at its public slug", async () => {
-			// Cache writes are fire-and-forget, so a key from an earlier test can
-			// still be in KV. Clear it: this asserts the route, not the cache.
-			await clearGardenCache("example-tenant-001", POST.slug);
-			await env.DB.prepare("UPDATE posts SET status = 'draft' WHERE slug = ?")
-				.bind(POST.slug)
-				.run();
+			const tenant = await createTenant({
+				posts: [
+					{
+						slug: "hidden-draft",
+						title: "Hidden Draft",
+						body: "words nobody should see yet",
+						status: "draft",
+					},
+				],
+			});
 
-			const post = await page(`/garden/${POST.slug}`, { tenant: TENANTS.midnightBloom });
-			const listing = await page("/garden", { tenant: TENANTS.midnightBloom });
+			const post = await page("/garden/hidden-draft", { tenant });
+			const listing = await page("/garden", { tenant });
 
 			expect(post.status).toBe(404);
-			expect(post.html).not.toContain(POST.body);
-			expect(listing.html).not.toContain(`/garden/${POST.slug}`);
+			expect(post.html).not.toContain("words nobody should see yet");
+			expect(listing.html).not.toContain("/garden/hidden-draft");
 		});
 	});
 });
