@@ -857,10 +857,16 @@ CREATE UNIQUE INDEX idx_fireside_messages_session_seq
 - [ ] The new spec says this out loud, because a table called `wisp_requests` sitting next to a
       cost-bearing session is exactly the kind of thing someone "helpfully" starts writing to
 
-#### 6. The grafts stay off
+#### 6. The grafts stay off — and the premise is retired
 
-- [ ] Do not re-enable `fireside_mode` / `wisp_enabled` / `scribe_mode`. The gate is the beta
-      deployment (`isBetaDeployment()`), not a flag — two gates for one decision is how a feature
+The graft system was an attempt to answer "should this tenant see this" that grew into three
+different ideas at once (a flag, a component naming convention, an allowlist). It never answered
+the question cleanly here, and it is not the mechanism any more: **features go to the beta
+deployment** (`isBetaDeployment()`, `<tenant>-beta.grove.place`), where a person can try the real
+thing and fall back to mainline Aspen by walking through the other door.
+
+- [ ] Do not re-enable `fireside_mode` / `wisp_enabled` / `scribe_mode`, and do not add a new one
+      for Fireside. The gate is the beta deployment — two gates for one decision is how a feature
       ships to everyone by accident
 - [ ] Leave the rows (they are the audit trail); leave the inert `tenant_settings` keys from 016
 
@@ -881,3 +887,144 @@ CREATE UNIQUE INDEX idx_fireside_messages_session_seq
 - [ ] `content.ts` — `posts.firesideAssisted`
 - [ ] `platform.ts` — leave `wispRequests` deprecated and stop pretending it is a live ledger
 - [ ] Data migration: **none**. There are no conversations to migrate, which is the one mercy here
+
+## 6. The Watering Hole
+
+**Character**: A room with four doors and no chair by the fire. The editor is a good, long-standing
+tool — 2,299 lines across two pages, with autosave, zen mode, a gutter panel, image upload and a
+preview — and there is nowhere in it to sit down and talk. Not a broken surface. A surface with no
+invitation on it.
+
+### Safari findings: What exists today
+
+**The editor component** — `libs/engine/src/lib/content/editor/MarkdownEditor.svelte`:
+
+- [x] One component, four consumers: `arbor/garden/new`, `arbor/garden/edit/[slug]`,
+      `arbor/pages/create`, `arbor/pages/edit/[slug]`
+- [x] Real features that a chat overlay must not disturb: `useDraftManager` (localStorage + server
+      sync), zen mode, scroll sync, line numbers, `write | split | preview`, gutter inserts,
+      image upload
+- [x] A clean prop surface — `content` is bindable, `onSave`, `saving`, `readonly`, `flags`,
+      `configuredCurios`
+- [x] **A precedent for exactly this problem**: `uploadAccessUrl` is a prop the *app* builds,
+      documented as *"only it knows the tenant; the editor just renders the door"*
+- [ ] **No slot for app-provided actions.** The toolbar is internal (`insertHeading`, `insertLink`,
+      `insertFootnote`, image upload), so an Aspen-only button has nowhere to go without either
+      a new prop on a shared component or duplicating markup into both pages
+- [ ] No awareness of any AI feature — correct, and worth keeping that way
+
+**The two post pages** — `garden/new` (941) and `garden/edit/[slug]` (1358):
+
+- [x] Both have a page header with `header-actions` — a natural home for a button that opens a
+      drawer, if the button is allowed to be page-level
+- [x] Both mount the editor in `editor-main` with the gutter as a sibling — so an overlay that
+      does not replace the editor keeps autosave alive underneath
+- [x] `garden/new` hardcodes `fireside_assisted: 0` at two call sites (Stop 5)
+- [ ] Two copies of any header button, if it lives in the pages rather than the editor
+- [ ] Nothing anywhere checks `isBetaDeployment()` in an editor page today
+
+**What already exists to build the overlay with:**
+
+- [x] `Sheet.svelte` — a shadcn/bits-ui drawer with focus trap, `Escape`, `aria-modal` and
+      `side="left|right|top|bottom"` for free
+- [x] `Dialog.svelte`, `GlassOverlay.svelte`, `GlassConfirmDialog.svelte`
+- [ ] Nothing that is a chat *drawer* — the pieces are there, the assembly is not
+
+### Design spec (safari-approved)
+
+**Core decision:** the fire is a **drawer over the editor**, opened by **one button that the engine
+offers a slot for and Aspen fills**, and accepting a draft never silently replaces words that are
+already there.
+
+#### 1. The engine gets a slot, not a feature
+
+`MarkdownEditorProps` gains one optional snippet:
+
+```ts
+/** App-provided controls, rendered at the right of the toolbar. */
+editorActions?: Snippet;
+```
+
+- Rendered inside the toolbar next to the existing buttons; renders nothing when absent, so the
+  four consumers are untouched
+- The engine learns nothing about Fireside, tenants or AI — the same rule `uploadAccessUrl`
+  already follows
+- Aspen passes a button; the button opens Aspen's sheet
+
+This is the whole integration. Everything else lives in `apps/aspen`.
+
+#### 2. Two labels, depending on what is already there
+
+| Editor state | Label | Where |
+| --- | --- | --- |
+| Empty | **Start with a conversation** | the editor's empty state, and the toolbar |
+| Has words | **Fireside** | toolbar only |
+
+Both open the same drawer. The empty-state card exists because a blank page is the exact moment
+the feature is for; the toolbar button exists for *"I froze halfway"*, which is equally common.
+Keyboard: `Cmd/Ctrl+Shift+F` toggles from either.
+
+#### 3. The drawer
+
+- **Desktop**: `Sheet side="right"`, ~28rem, full height, editor still visible to its left
+- **Mobile**: `Sheet side="bottom"` at ~90vh, full width — a chat needs vertical room and a
+  composer pinned above the keyboard, not a 28rem column
+- **The editor stays mounted** underneath. This matters more than it looks: unmounting would fire
+  `useDraftManager`'s teardown and could lose a half-saved paragraph
+- **Focus**: the composer takes focus on open; `Escape` closes (the Sheet's own behaviour); focus
+  returns to the button on close; the message list is the live region (Stop 4's accessibility table)
+- **Resume**: on open, if an unfinished session exists (Stop 1 §4), the drawer opens into it with
+  *"You were here yesterday. Pick up, or start over?"* above the messages
+
+#### 4. Accepting a draft is a merge, not an overwrite
+
+The one place this feature can destroy work, so it is decided here rather than left to the
+implementation:
+
+| Editor state | On accept |
+| --- | --- |
+| Empty | title + content set, `fireside_assisted = true`, saved through the page's existing handler |
+| Has words | a three-way choice — **Insert at top**, **Replace everything**, **Cancel** — with the draft preview still visible behind it |
+| Editing an existing post | same three-way, plus `fireside_assisted` set on save |
+
+No default that silently wins. The autosave manager and the server must agree afterwards, so accept
+routes through the page's own save function rather than writing `content` and hoping the debounce
+notices — #1586's lesson was that a write-only sync with no read-back loses work.
+
+#### 5. Beta is the gate
+
+- [ ] No graft, no flag. The page's `load` passes `firesideEnabled: isBetaDeployment(locals, url)`
+- [ ] On mainline, the slot renders nothing and the shortcut does nothing — the code is present,
+      the door is not
+- [ ] `Cmd/Ctrl+Shift+F` is still bound on prod (harmless), but a no-op without the button
+
+#### 6. Posts only, for now
+
+`fireside_assisted` is a `posts` column and the marker is a post concept. **Pages (`pages/create`,
+`pages/edit`) do not get the button in this pass** — a page is a standing document, not a dated
+post, and inventing marker semantics for it is a decision with no user behind it yet. The engine
+slot makes that a prop, not a fork, when the day comes.
+
+#### Editor fixes
+
+- [ ] `MarkdownEditorProps`: add `editorActions?: Snippet`; render it in the toolbar; nothing else
+- [ ] Empty state: a "Start with a conversation" card that only appears when the slot is filled
+- [ ] `garden/new`: pass the button; stop hardcoding `fireside_assisted: 0` (Stop 5's flag flows
+      through the accept path instead)
+- [ ] `garden/edit/[slug]`: pass the button; accept merges into existing content
+- [ ] Bind `Cmd/Ctrl+Shift+F` at the page level, not the editor, so it works in zen mode too
+
+#### Drawer fixes
+
+- [ ] Build `FiresideDrawer.svelte` in Aspen on `Sheet` (right on desktop, bottom on mobile)
+- [ ] Keep the editor mounted; no teardown on open
+- [ ] Focus the composer on open, return focus to the button on close
+- [ ] Resume an unfinished session instead of always starting fresh
+- [ ] The accept step asks the three-way question and sets the marker + transcript opt-in (Stop 1 §7)
+- [ ] Route accept through the page's save handler so autosave and server agree
+
+#### Not in this pass
+
+- Pages (`pages/*`) — see §6
+- A Fireside tab inside the old Wisp panel — the panel is junk-drawered and Wisp is a sibling
+  feature, not a host (Stop 4)
