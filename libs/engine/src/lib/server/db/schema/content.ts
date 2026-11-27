@@ -7,6 +7,7 @@
 import { sqliteTable, text, integer, uniqueIndex, index } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 import { tenants } from "./platform.js";
+import { firesideSessions } from "./fireside.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CORE: Posts
@@ -47,6 +48,15 @@ export const posts = sqliteTable(
 
 		// Beta authorship tracking (118) — was this post created via the beta deployment?
 		isBeta: integer("is_beta").default(0),
+
+		// Fireside attribution — 027 added this column but this schema never learned
+		// about it, so every typed query has been reading it blind.
+		firesideAssisted: integer("fireside_assisted").default(0),
+		// Fireside (128) — the post owns its transcript: deleting the post takes the
+		// conversation, an expired session leaves the attribution and sets this NULL.
+		firesideSessionId: text("fireside_session_id").references(() => firesideSessions.id, {
+			onDelete: "set null",
+		}),
 
 		// Timestamps
 		publishedAt: integer("published_at"),
