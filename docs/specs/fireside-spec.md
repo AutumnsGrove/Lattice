@@ -291,6 +291,19 @@ not see in the preview. Bounds: six vines, ~280 characters each. Vines are aside
 **Accept writes two columns**: `markdown_content` and `gutter_content`. A draft accepted without its
 vines is half accepted.
 
+### Acceptance is part of the save
+
+The page does not save and then confirm: the save **is** the confirmation. A create or update may
+carry `fireside: { sessionId, transcriptPublic }`, and the route
+
+1. verifies the session belongs to this writer in this grove (**`404`** otherwise, before any write),
+2. writes the post with `fireside_assisted = 1` and `fireside_session_id` in the same insert,
+3. marks the session `accepted` and records the transcript choice behind it.
+
+The order matters: the post carries the truth before the session is updated, so the only failure left
+is a session still marked `drafted` — which re-accepting fixes. The reverse would leave a post that
+cannot say where it came from.
+
 ### The routes
 
 ```
@@ -558,11 +571,13 @@ a sentence in a prompt.
    the nightly sweep that lets go of what was never published. **Built.**
 5. **The drawer** — after the visual design session. **Built as the inline fire** (see "Where it
    appears"); it was rejected on sight and rebuilt rather than designed from a description.
+   **The fire also opens on an existing post** (`arbor/garden/edit/[slug]`), which is where a merge
+   into words the writer already has actually matters.
 6. **Beta** — merge to `beta`, deploy, live in it. **Not yet.** Migration 128 still has to be applied
    to production by hand.
 
-In parallel from step 4: **the privacy docs** (#1868), because the transcript is what makes the
-current policy text wrong.
+In parallel from step 4: **the privacy docs** (#1868) — done, because the transcript is what made the
+old policy text wrong: it claimed nothing of yours was ever held by an AI feature.
 
 ---
 
@@ -582,13 +597,20 @@ Written plainly, because a future reader will otherwise restore these in good fa
 
 ---
 
+## Settled, 2026-11-27
+
+Autumn's calls, so a later reader does not reopen them.
+
+| Question | Answer | Why |
+| --- | --- | --- |
+| **Accept's ordering** | **The save carries the acceptance.** The post, `fireside_assisted` and `fireside_session_id` land in one insert; the session is accepted behind them. | Saving first and calling `/accept` second left a post with no marker when the second call failed — a lie of omission nobody would notice. `/accept` still exists for a client that records it separately, but the app no longer depends on it. |
+| **Retention** | **90 days**, confirmed rather than assumed. Unpublished conversations only. | What the start route stamps, what the sweep enforces, and the number published in the help center. Changing it now changes one constant and one sweep. |
+| **Where the disclosure renders** | **On every deployment, not only beta.** | Beta shares the database, so the post a conversation produced is already on the writer's real site. Hiding the marker there would let the page claim it was hand-written. What stays beta-only is the *ability to change* it. |
+| **What had to exist before beta** | **The fire on an existing post, and corrected privacy docs (#1868).** | The fire only on a blank page is the one writing problem Fireside was not built for, and the policy said conversations are never stored. |
+
 ## Open questions
 
-- **The 90-day retention number.** A starting guess, not a decision — it is what the start route
-  stamps and what the nightly sweep enforces, so changing it changes one constant and one sweep.
 - **Per-message transcript sharing.** Full transcript now; selecting messages later.
-- **Accept's ordering.** The page merges the proposal, saves the post, *then* calls `/accept`. If that
-  call fails there is a post without its attribution. Block, retry, or surface — undecided.
 - **`search_my_posts`** — the better "hear my voice" tool for a long archive; v1.1.
 - **`read_past_session`** — "last time we talked about…" is only possible because history exists; later.
 - **A session scratchpad (`remember`)** — attractive for long conversations, invisible in the
