@@ -18,7 +18,16 @@
 
 import { env } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
-import { createTenant, json, request, signIn, tenantIdFor } from "./harness";
+import {
+	CACHE_KEYS,
+	createTenant,
+	json,
+	page,
+	request,
+	signIn,
+	tenantIdFor,
+	waitForCacheKey,
+} from "./harness";
 
 interface StartBody {
 	sessionId: string;
@@ -151,6 +160,99 @@ describe("fireside", () => {
 			expect(session?.expires_at).toBeNull();
 		});
 
+		it("publishes the conversation later, and purges the page that showed it private", async () => {
+			const who = await grove({ posts: [{ slug: "tea-shop", title: "The tea shop" }] });
+			const started = await start(who);
+			const tenantId = await tenantIdFor(who.subdomain);
+
+			// Accepted privately: the marker, and nothing else.
+			await json(`/api/fireside/${started.sessionId}/accept`, {
+				tenant: who.beta,
+				cookie: who.cookie,
+				method: "POST",
+				headers: who.write(),
+				body: JSON.stringify({ slug: "tea-shop", transcriptPublic: false }),
+			});
+
+			// One thing the writer said, so the transcript has both sides in it.
+			await env.DB.prepare(
+				`INSERT INTO fireside_messages (id, session_id, tenant_id, role, kind, content, seq)
+				 VALUES (?, ?, ?, 'user', 'turn', ?, 2)`,
+			)
+				.bind("msg-the-sign", started.sessionId, tenantId, "The sign says eight.")
+				.run();
+
+			// Warm the cache with the private page — the state a purged key has to fix.
+			await page("/garden/tea-shop", { tenant: who.beta });
+			expect(await waitForCacheKey(CACHE_KEYS.post(tenantId, "tea-shop"))).toBe(true);
+
+			const published = await json<{
+				transcriptPublic: boolean;
+				slug: string;
+				transcript: { entries: { role: string; kind: string; content?: string }[] } | null;
+			}>(`/api/fireside/${started.sessionId}/transcript`, {
+				tenant: who.beta,
+				cookie: who.cookie,
+				method: "POST",
+				headers: who.write(),
+				body: JSON.stringify({ public: true }),
+			});
+
+			expect(published.status).toBe(200);
+			expect(published.body.transcriptPublic).toBe(true);
+			expect(published.body.slug).toBe("tea-shop");
+			// Both sides, oldest first, and the writer's own words exactly.
+			expect(published.body.transcript?.entries.map((entry) => entry.role)).toEqual([
+				"wisp",
+				"user",
+			]);
+			expect(published.body.transcript?.entries[1]?.content).toBe("The sign says eight.");
+
+			// A disclosure that stays cached is a disclosure that stays wrong.
+			expect(await env.CACHE_KV.get(CACHE_KEYS.post(tenantId, "tea-shop"))).toBeNull();
+
+			const live = await env.DB.prepare(
+				`SELECT transcript_public, transcript_published_at, expires_at
+				   FROM fireside_sessions WHERE id = ?`,
+			)
+				.bind(started.sessionId)
+				.first<{
+					transcript_public: number;
+					transcript_published_at: number;
+					expires_at: number | null;
+				}>();
+
+			expect(live?.transcript_public).toBe(1);
+			expect(live?.transcript_published_at).toBeGreaterThan(0);
+			expect(live?.expires_at).toBeNull();
+
+			// And back down again: the page stops showing it, the date it first went
+			// public does not move.
+			const hidden = await json<{ transcriptPublic: boolean; transcript: unknown }>(
+				`/api/fireside/${started.sessionId}/transcript`,
+				{
+					tenant: who.beta,
+					cookie: who.cookie,
+					method: "POST",
+					headers: who.write(),
+					body: JSON.stringify({ public: false }),
+				},
+			);
+
+			expect(hidden.status).toBe(200);
+			expect(hidden.body.transcriptPublic).toBe(false);
+			expect(hidden.body.transcript).toBeNull();
+
+			const after = await env.DB.prepare(
+				`SELECT transcript_public, transcript_published_at FROM fireside_sessions WHERE id = ?`,
+			)
+				.bind(started.sessionId)
+				.first<{ transcript_public: number; transcript_published_at: number }>();
+
+			expect(after?.transcript_public).toBe(0);
+			expect(after?.transcript_published_at).toBe(live?.transcript_published_at);
+		});
+
 		it("lets a session go, and takes its messages with it", async () => {
 			const who = await grove();
 			const started = await start(who);
@@ -208,6 +310,7 @@ describe("fireside", () => {
 				[`/api/fireside/${started.sessionId}/turn`, "POST"],
 				[`/api/fireside/${started.sessionId}/draft`, "POST"],
 				[`/api/fireside/${started.sessionId}/accept`, "POST"],
+				[`/api/fireside/${started.sessionId}/transcript`, "POST"],
 			] as const) {
 				const result = await json(route, {
 					tenant: who.subdomain, // no -beta
@@ -286,6 +389,30 @@ describe("fireside", () => {
 			});
 			expect(result.status).toBe(400);
 		});
+
+		it("refuses a transcript toggle that is neither yes nor no", async () => {
+			const who = await grove({ posts: [{ slug: "tea-shop", title: "The tea shop" }] });
+			const started = await start(who);
+
+			await json(`/api/fireside/${started.sessionId}/accept`, {
+				tenant: who.beta,
+				cookie: who.cookie,
+				method: "POST",
+				headers: who.write(),
+				body: JSON.stringify({ slug: "tea-shop" }),
+			});
+
+			// "on" is not a yes: a string that reads like one would let a client
+			// publish a conversation by accident.
+			const result = await json(`/api/fireside/${started.sessionId}/transcript`, {
+				tenant: who.beta,
+				cookie: who.cookie,
+				method: "POST",
+				headers: who.write(),
+				body: JSON.stringify({ public: "on" }),
+			});
+			expect(result.status).toBe(400);
+		});
 	});
 
 	describe("sad", () => {
@@ -301,6 +428,7 @@ describe("fireside", () => {
 				[`/api/fireside/${started.sessionId}/turn`, "POST"],
 				[`/api/fireside/${started.sessionId}/draft`, "POST"],
 				[`/api/fireside/${started.sessionId}/accept`, "POST"],
+				[`/api/fireside/${started.sessionId}/transcript`, "POST"],
 			] as const) {
 				const result = await json(route, {
 					tenant: theirs.beta,
@@ -359,6 +487,22 @@ describe("fireside", () => {
 				.bind(started.sessionId)
 				.first<{ content: string }>();
 			expect(saved?.content).toBe("The sign says eight.");
+		});
+
+		it("is a 404 for a session that never became a post", async () => {
+			const who = await grove();
+			const started = await start(who);
+
+			// Nothing was accepted, so there is no page to disclose a conversation on —
+			// a toggle here would promise a reader something that does not exist.
+			const result = await json(`/api/fireside/${started.sessionId}/transcript`, {
+				tenant: who.beta,
+				cookie: who.cookie,
+				method: "POST",
+				headers: who.write(),
+				body: JSON.stringify({ public: true }),
+			});
+			expect(result.status).toBe(404);
 		});
 
 		it("hides every route from an unsigned caller just as it hides them off beta", async () => {
