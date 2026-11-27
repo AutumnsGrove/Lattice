@@ -95,6 +95,15 @@
 	let transcriptPublic = $state(false);
 	let proposal = $state<Proposal | null>(null);
 	let canDraft = $state(false);
+	/**
+	 * What happened after the fire opened — the panel's own memory of the post, not
+	 * the page's. `accepted` is what makes the sharing line below meaningful: there is
+	 * nothing to share under until a draft became a post.
+	 */
+	let accepted = $state(false);
+	let acceptedPublic = $state(false);
+	let sharingBusy = $state(false);
+	let sharingError = $state<string | null>(null);
 	let error = $state<string | null>(null);
 	let unavailable = $state(false);
 
@@ -224,6 +233,10 @@
 			await onaccept(proposal, merge, transcriptPublic, sessionId);
 			accepting = false;
 			draftOpen = false;
+			// The post now exists, so the conversation may be published under it — and
+			// the panel that asked the question is the honest place to change the answer.
+			accepted = true;
+			acceptedPublic = transcriptPublic;
 		} catch (cause) {
 			settle(cause);
 		} finally {
@@ -238,6 +251,32 @@
 		canDraft = body?.canDraft === true;
 	}
 
+	/**
+	 * The second of the two places a writer may change their mind (the post page is
+	 * the first). Same route, so both ends write one column and purge one page.
+	 */
+	async function toggleSharing() {
+		if (sessionId === null || sharingBusy) return;
+		const want = !acceptedPublic;
+		sharingBusy = true;
+		sharingError = null;
+		try {
+			const result = await post<{ transcriptPublic?: boolean }>(
+				`/api/fireside/${sessionId}/transcript`,
+				{ public: want },
+			);
+			// The server's answer, not the request: if it disagrees, it is right.
+			acceptedPublic = result.transcriptPublic === true;
+		} catch (cause) {
+			sharingError =
+				cause instanceof Error && cause.message !== ""
+					? `That didn't go through. ${cause.message}`
+					: "That didn't go through. Try again in a moment.";
+		} finally {
+			sharingBusy = false;
+		}
+	}
+
 	/** The conversation as the database has it, which is also what `canDraft` is about. */
 	async function refresh(forSession = sessionId) {
 		if (forSession === null) return;
@@ -245,12 +284,18 @@
 		const body = await read<{
 			messages: { id: string; role: "user" | "wisp"; kind: "turn" | "draft"; content: string }[];
 			canDraft: boolean;
+			session?: { transcriptPublic?: boolean };
+			acceptance?: { accepted?: boolean };
 		}>(`/api/fireside/${forSession}`);
 		if (!body) return;
 		// A read that started before the writer said something must not land after it:
 		// adopting a stale transcript would erase a turn the server has already taken.
 		if (messages.length !== before) return;
 		canDraft = body.canDraft;
+		// A resumed fire knows whether its draft became a post, and whether that post
+		// publishes the conversation — otherwise a reload offers the same draft twice.
+		accepted = body.acceptance?.accepted === true;
+		acceptedPublic = body.session?.transcriptPublic === true;
 		if (body.messages.length === 0) return; // nothing to adopt; keep what is on screen
 		messages = body.messages.map((message) => {
 			if (message.kind !== "draft") return message;
@@ -586,6 +631,22 @@
 
 					{#if error}
 						<p class="fs-error" role="alert">{error}</p>
+					{/if}
+
+					{#if accepted}
+						<div class="fs-sharing">
+							<p class="fs-sharing-note">
+								{acceptedPublic
+									? "This conversation is shared under the post."
+									: "This conversation stays private."}
+							</p>
+							<button class="fs-link" disabled={sharingBusy} onclick={() => void toggleSharing()}>
+								{acceptedPublic ? "Stop sharing it" : "Share how this was written"}
+							</button>
+							{#if sharingError}
+								<p class="fs-error" role="status">{sharingError}</p>
+							{/if}
+						</div>
 					{/if}
 
 					<div class="fs-composer">
@@ -1081,6 +1142,30 @@
 		color: var(--color-text);
 		background: var(--color-bg-secondary, #f5f5f5);
 		border-top: 1px solid var(--color-border, #ddd);
+	}
+
+	/* The decision after the decision: one quiet line, one quiet link. */
+	.fs-sharing {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0.5rem;
+		padding: 0.5rem 1.25rem;
+		border-top: 1px solid var(--color-border, #ddd);
+	}
+
+	.fs-sharing-note {
+		margin: 0;
+		font-size: 0.75rem;
+		color: var(--color-text-subtle);
+	}
+
+	.fs-sharing .fs-error {
+		padding: 0;
+		background: none;
+		border: 0;
+		font-size: 0.75rem;
+		flex-basis: 100%;
 	}
 
 	/* ── Composer ──────────────────────────────────────────────────────── */

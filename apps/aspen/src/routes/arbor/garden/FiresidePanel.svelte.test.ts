@@ -176,6 +176,57 @@ describe("FiresidePanel", () => {
 				"session-1",
 			);
 		});
+
+		it("lets a resumed fire take the conversation down from the panel", async () => {
+			const net = stubFetch({
+				"/api/fireside": { body: { sessionId: "session-1", opening: OPENING } },
+				"/api/fireside/session-1": {
+					body: {
+						messages: [{ id: "m1", role: "wisp", kind: "turn", content: OPENING }],
+						canDraft: false,
+						session: { transcriptPublic: true },
+						acceptance: { accepted: true, slug: "tea-shop" },
+					},
+				},
+				"/api/fireside/session-1/transcript": {
+					body: { transcriptPublic: false, transcript: null },
+				},
+			});
+
+			render(FiresidePanel, {
+				open: true,
+				mode: "solo",
+				draftPreview: "",
+				hasKey: true,
+				onaccept: vi.fn(async () => {}),
+			});
+
+			// The fire remembers what happened to its draft, so a reload does not offer
+			// the draft a second time, and the sharing choice is still the writer's.
+			await waitFor(() => expect(screen.getByText(/shared under the post/)).toBeTruthy());
+
+			await fireEvent.click(screen.getByText("Stop sharing it"));
+
+			await waitFor(() => expect(screen.getByText(/stays private/)).toBeTruthy());
+			const [toggle] = net.callsTo("/api/fireside/session-1/transcript");
+			expect(toggle?.body).toEqual({ public: false });
+		});
+
+		it("waits for a post before offering to share anything under it", async () => {
+			stubFetch({ "/api/fireside": { body: { sessionId: "session-1", opening: OPENING } } });
+
+			render(FiresidePanel, {
+				open: true,
+				mode: "solo",
+				draftPreview: "",
+				hasKey: true,
+				onaccept: vi.fn(async () => {}),
+			});
+			await waitFor(() => expect(screen.getByText(OPENING)).toBeTruthy());
+
+			expect(screen.queryByText(/stays private/)).toBeNull();
+			expect(screen.queryByText("Share how this was written")).toBeNull();
+		});
 	});
 
 	describe("bad", () => {
