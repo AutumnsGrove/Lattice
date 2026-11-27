@@ -192,12 +192,12 @@
 		}, 900);
 	}
 
+	/** Enter sends, Shift+Enter is a newline. Escape is the page's job (window). */
 	function onKeydown(event: KeyboardEvent) {
 		if (event.key === "Enter" && !event.shiftKey) {
 			event.preventDefault();
 			send();
 		}
-		if (event.key === "Escape") onclose?.();
 	}
 
 	function accept(mode: "top" | "replace") {
@@ -233,7 +233,6 @@
 		class:collapsed={mode === "above" && !bodyOpen}
 		class:dragging
 		style:height={mode === "above" && bodyOpen && heightPx ? `${heightPx}px` : null}
-		onkeydown={onKeydown}
 		role="region"
 		aria-label="Fireside"
 	>
@@ -410,13 +409,11 @@
 		{/if}
 
 		{#if mode === "above" && bodyOpen}
-			<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-			<div
+			<button
+				type="button"
 				class="fs-grabber"
-				role="separator"
-				aria-orientation="horizontal"
 				aria-label="Resize the conversation"
-				tabindex="0"
+				title="Drag to resize"
 				onpointerdown={grabDown}
 				onpointermove={grabMove}
 				onpointerup={grabUp}
@@ -431,7 +428,7 @@
 						nudgeHeight(32);
 					}
 				}}
-			><span></span></div>
+			><span></span></button>
 		{/if}
 	</div>
 {/if}
@@ -480,10 +477,13 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		width: 100%;
 		height: 0.5rem;
+		padding: 0;
+		border: none;
+		border-top: 1px solid var(--editor-border, var(--color-border, #e3ded4));
 		cursor: row-resize;
 		background: var(--color-bg-secondary, #f5f5f5);
-		border-top: 1px solid var(--editor-border, var(--color-border, #e3ded4));
 		touch-action: none;
 	}
 

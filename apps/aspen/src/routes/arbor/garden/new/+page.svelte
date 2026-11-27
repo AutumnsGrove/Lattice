@@ -51,6 +51,12 @@
 		if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key.toLowerCase() === "f") {
 			event.preventDefault();
 			firesideOpen = !firesideOpen;
+			return;
+		}
+		// Escape closes the fire — bound here, on the window, rather than on a
+		// non-interactive element inside the panel.
+		if (event.key === "Escape" && firesideOpen) {
+			firesideOpen = false;
 		}
 	}
 	let featuredImage = $state("");
