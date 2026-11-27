@@ -277,6 +277,33 @@ describe("fireside", () => {
 			expect(await env.CACHE_KV.get(CACHE_KEYS.post(tenantId, "tea-shop"))).toBeNull();
 		});
 
+		it("puts the marker on a cached page even when the transcript stays private", async () => {
+			const who = await grove({ posts: [{ slug: "tea-shop", title: "The tea shop" }] });
+			const started = await start(who);
+			const tenantId = await tenantIdFor(who.subdomain);
+
+			// Cached before the accept, which is the state the purge has to fix: the
+			// marker is derived from the flag, and the flag rides in that payload.
+			await page("/garden/tea-shop", { tenant: who.beta });
+			expect(await waitForCacheKey(CACHE_KEYS.post(tenantId, "tea-shop"))).toBe(true);
+
+			const accepted = await json(`/api/fireside/${started.sessionId}/accept`, {
+				tenant: who.beta,
+				cookie: who.cookie,
+				method: "POST",
+				headers: who.write(),
+				body: JSON.stringify({ slug: "tea-shop", transcriptPublic: false }),
+			});
+			expect(accepted.status).toBe(200);
+
+			expect(await env.CACHE_KV.get(CACHE_KEYS.post(tenantId, "tea-shop"))).toBeNull();
+
+			// And the page a visitor gets next says so, without the conversation.
+			const after = await page("/garden/tea-shop", { tenant: who.beta });
+			expect(after.html).toContain("written fireside with Wisp");
+			expect(after.html).not.toContain("Read how this was written");
+		});
+
 		it("takes a published conversation off the page when the session is deleted", async () => {
 			const who = await grove({ posts: [{ slug: "tea-shop", title: "The tea shop" }] });
 			const started = await start(who);

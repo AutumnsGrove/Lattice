@@ -24,6 +24,7 @@ import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import { requireFireside } from "$lib/server/fireside/guard";
 import { setTranscriptPublic } from "$lib/server/fireside/publish";
 import { loadOwnedSession } from "$lib/server/fireside/session";
+import { invalidatePostCaches } from "../../../blooms/[slug]/bloom-service";
 
 export const POST: RequestHandler = async (event) => {
 	const { db, tenantId, userId } = await requireFireside(event);
@@ -97,6 +98,11 @@ export const POST: RequestHandler = async (event) => {
 			env: event.platform?.env,
 			waitUntil: event.platform?.context?.waitUntil.bind(event.platform.context),
 		});
+	} else {
+		// The marker lives in the cached payload too. Accepting and leaving the
+		// transcript private still changes what the page says, so this purge is not
+		// conditional on the transcript.
+		await invalidatePostCaches(event.platform?.env?.CACHE_KV, tenantId, slug);
 	}
 
 	return json({ accepted: true, slug, assisted: true, transcriptPublic });
