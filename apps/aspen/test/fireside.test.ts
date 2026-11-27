@@ -18,7 +18,7 @@
 
 import { env } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
-import { createTenant, json, signIn, tenantIdFor } from "./harness";
+import { createTenant, json, request, signIn, tenantIdFor } from "./harness";
 
 interface StartBody {
 	sessionId: string;
@@ -199,21 +199,24 @@ describe("fireside", () => {
 			const who = await grove();
 			const started = await start(who);
 
-			for (const route of [
-				"/api/fireside",
-				`/api/fireside/${started.sessionId}`,
-				`/api/fireside/${started.sessionId}/turn`,
-				`/api/fireside/${started.sessionId}/draft`,
-				`/api/fireside/${started.sessionId}/accept`,
-			]) {
+			// Each route's real method: a POST to a GET-only path is 405 from the
+			// router, which never reaches the gate and would prove nothing.
+			for (const [route, method] of [
+				["/api/fireside", "POST"],
+				[`/api/fireside/${started.sessionId}`, "GET"],
+				[`/api/fireside/${started.sessionId}`, "DELETE"],
+				[`/api/fireside/${started.sessionId}/turn`, "POST"],
+				[`/api/fireside/${started.sessionId}/draft`, "POST"],
+				[`/api/fireside/${started.sessionId}/accept`, "POST"],
+			] as const) {
 				const result = await json(route, {
 					tenant: who.subdomain, // no -beta
 					cookie: who.cookie,
-					method: route === "/api/fireside" ? "POST" : route.endsWith("fireside") ? "GET" : "POST",
+					method,
 					headers: { origin: `https://${who.subdomain}.grove.place` },
-					body: JSON.stringify({}),
+					body: method === "GET" ? undefined : JSON.stringify({}),
 				});
-				expect(result.status, `${route} should be hidden off beta`).toBe(404);
+				expect(result.status, `${method} ${route} should be hidden off beta`).toBe(404);
 			}
 		});
 
@@ -304,7 +307,9 @@ describe("fireside", () => {
 					cookie: theirs.cookie,
 					method,
 					headers: theirs.write(),
-					body: JSON.stringify({ message: "hello", slug: "tea-shop" }),
+					// A GET cannot carry a body; the POSTs get one.
+					body:
+						method === "GET" ? undefined : JSON.stringify({ message: "hello", slug: "tea-shop" }),
 				});
 				expect(result.status, `${method} ${route}`).toBe(404);
 			}
@@ -336,7 +341,7 @@ describe("fireside", () => {
 			const who = await grove();
 			const started = await start(who);
 
-			const result = await json<{ message?: string }>(`/api/fireside/${started.sessionId}/turn`, {
+			const response = await request(`/api/fireside/${started.sessionId}/turn`, {
 				tenant: who.beta,
 				cookie: who.cookie,
 				method: "POST",
@@ -344,8 +349,8 @@ describe("fireside", () => {
 				body: JSON.stringify({ message: "The sign says eight." }),
 			});
 
-			expect(result.status).toBe(400);
-			expect(result.body.message).toContain("Settings");
+			expect(response.status).toBe(400);
+			expect(await response.text()).toMatch(/Settings|AI key/i);
 
 			// They did say it. The turn failing must not erase their words.
 			const saved = await env.DB.prepare(

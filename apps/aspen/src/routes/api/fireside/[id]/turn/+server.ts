@@ -27,7 +27,11 @@ import type { RequestHandler } from "./$types";
 import { runTask } from "@autumnsgrove/lyra";
 import { memoryStorage } from "@autumnsgrove/lyra/memory";
 import { createLumenModelSlot } from "@autumnsgrove/lyra-lumen";
-import { createTenantSecretsSlot, resolveOpenRouterKey } from "@autumnsgrove/lyra-lumen/secrets";
+import {
+	createTenantSecretsSlot,
+	MISSING_AI_KEY_MESSAGE,
+	resolveOpenRouterKey,
+} from "@autumnsgrove/lyra-lumen/secrets";
 import {
 	API_ERRORS,
 	ARBOR_ERRORS,
@@ -108,9 +112,12 @@ export const POST: RequestHandler = async (event) => {
 	});
 
 	if (!aiKey) {
-		throwGroveError(400, API_ERRORS.FEATURE_DISABLED, "Fireside", {
-			detail: "no AI key is set for this grove",
-		});
+		// A configuration the writer can fix, so it is a body they can act on rather
+		// than an error page. `MISSING_AI_KEY_MESSAGE` names Settings → AI.
+		return json(
+			{ error: "openrouter_key_missing", message: MISSING_AI_KEY_MESSAGE },
+			{ status: 400 },
+		);
 	}
 
 	const lumen = env.LUMEN;
