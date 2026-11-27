@@ -2,26 +2,40 @@
 	/**
 	 * Fireside — the fire lives inside the editor, not over it.
 	 *
-	 * DESIGN SESSION SCAFFOLD. Structure comes from docs/specs/fireside-spec.md; the
-	 * surface is what Autumn is deciding. Two modes, one surface:
+	 * Structure comes from `docs/specs/fireside-spec.md`; the API is the six routes
+	 * under `/api/fireside`. Two modes, one surface:
 	 *
 	 *   solo  — no words yet: the conversation IS the editor surface.
 	 *   above — there is substance: the fire sits above your words instead of
 	 *           replacing them, so a draft you care about is never hidden.
 	 *
-	 * Everything runs on local fixture state: no routes, no model, no writes.
-	 * When the surface is agreed the fixtures come out and `/api/fireside/*` goes in.
+	 * What this component does not do is write the editor. Accepting a proposal calls
+	 * `onaccept`, and the page merges and saves — a component that held the editor's
+	 * content would be a second writer racing autosave.
 	 */
 	import { actionIcons, navIcons, stateIcons, toolIcons } from "@autumnsgrove/prism/icons";
+
+	/** A proposal, as `POST /draft` returns it (anchors already resolved by the tool). */
+	export interface Proposal {
+		title: string;
+		body: string;
+		vines: { anchor: string; text: string }[];
+	}
 
 	interface Props {
 		open?: boolean;
 		mode?: "solo" | "above";
-		/** What is already in the editor — decides the accept question, not the mode. */
+		/** What is already in the editor. Sent with each turn so `read_draft` can read it. */
 		draftPreview?: string;
 		/** False when the Wanderer has no OpenRouter key yet. The door still opens. */
 		hasKey?: boolean;
 		onclose?: () => void;
+		/** The page merges the proposal into the editor and saves. */
+		onaccept?: (
+			proposal: Proposal,
+			mode: "replace" | "top",
+			transcriptPublic: boolean,
+		) => Promise<void>;
 	}
 
 	let {
@@ -30,10 +44,8 @@
 		draftPreview = "",
 		hasKey = true,
 		onclose,
+		onaccept,
 	}: Props = $props();
-
-	// Real routing lands with the routes; the settings page shipped with #1856.
-	const AI_SETTINGS_HREF = "/arbor/settings/ai";
 
 	const Flame = toolIcons.fireside;
 	const Send = actionIcons.send;
@@ -41,72 +53,220 @@
 	const ChevronUp = navIcons.chevronUp;
 	const ChevronDown = navIcons.chevronDown;
 
-	type Kind = "turn" | "draft";
+	const AI_SETTINGS_HREF = "/arbor/settings/ai";
 
-	interface Fixture {
+	interface Message {
 		id: string;
 		role: "user" | "wisp";
-		kind: Kind;
+		kind: "turn" | "draft";
 		content: string;
-		words?: number;
-		lines?: string[];
 	}
 
-	let messages = $state<Fixture[]>([
-		{
-			id: "m1",
-			role: "wisp",
-			kind: "turn",
-			content:
-				"You opened the door — what's the thing you keep circling back to? Not the conclusion. The thing you noticed first.",
-		},
-		{
-			id: "m2",
-			role: "user",
-			kind: "turn",
-			content:
-				"That the tea shop never actually closes. The sign says eight, but the lights stay on and nobody asks you to leave.",
-		},
-		{
-			id: "m3",
-			role: "wisp",
-			kind: "turn",
-			content:
-				"That's the sentence. Do you want to write about the shop, or about being someone who stays too long?",
-		},
-		{
-			id: "m4",
-			role: "user",
-			kind: "turn",
-			content: "The second one. I don't know how to start it, though.",
-		},
-		{
-			id: "m5",
-			role: "wisp",
-			kind: "draft",
-			content: "Built from your sentences above, and the two paragraphs you'd already written.",
-			words: 1240,
-			lines: [
-				"The sign says eight. The lights say otherwise.",
-				"I have been the last one in the room more times than I can count,",
-				"and I have never once been the one who turned the key.",
-			],
-		},
-	]);
-
-	let resumed = $state(true);
+	let sessionId = $state<string | null>(null);
+	let messages = $state<Message[]>([]);
 	let input = $state("");
 	let thinking = $state(false);
+	let starting = $state(false);
 	let draftOpen = $state(false);
 	let accepting = $state(false);
-	let bodyOpen = $state(true);
+	let acceptingBusy = $state(false);
+	let transcriptPublic = $state(false);
+	let proposal = $state<Proposal | null>(null);
+	let canDraft = $state(false);
+	let error = $state<string | null>(null);
+	let unavailable = $state(false);
 
 	let logEl = $state<HTMLDivElement | null>(null);
 	let rootEl = $state<HTMLDivElement | null>(null);
 	let everScrolled = false;
 
-	// Above the words, the fire's height is the writer's call: start roomy and
-	// let the grab handle pull it between a floor and 85% of the editor frame.
+	const hasWords = $derived(draftPreview.trim().length > 0);
+	const placeholder = $derived(
+		hasWords ? "What are you trying to say here?" : "Say what you're stuck on…",
+	);
+
+	/** The fire is taller than the space left under the page header; the page scrolls. */
+	$effect(() => {
+		if (!open || !rootEl) return;
+		queueMicrotask(() => rootEl?.scrollIntoView({ block: "nearest", behavior: "smooth" }));
+	});
+
+	// Keep the newest turn in view: on send, on a proposal, on accept. Not on the
+	// first open — the greeting is the point of a blank page.
+	$effect(() => {
+		void messages.length;
+		void draftOpen;
+		void accepting;
+		void bodyOpen;
+		if (!open || !logEl) return;
+		if (!everScrolled) {
+			everScrolled = true;
+			return;
+		}
+		queueMicrotask(() => logEl?.scrollTo({ top: logEl.scrollHeight, behavior: "smooth" }));
+	});
+
+	// Lighting the fire happens once per session, and only when the panel opens with
+	// a key. A resume after that is a GET, so a refresh does not fork the conversation.
+	$effect(() => {
+		if (!open || !hasKey || sessionId !== null || starting) return;
+		void begin();
+	});
+
+	let bodyOpen = $state(true);
+
+	async function begin() {
+		starting = true;
+		error = null;
+		try {
+			const started = await post<{ sessionId: string; opening: string }>("/api/fireside", {
+				draft: draftPreview,
+			});
+			sessionId = started.sessionId;
+			messages = [wispMessage(started.opening)];
+		} catch (cause) {
+			settle(cause);
+		} finally {
+			starting = false;
+		}
+	}
+
+	async function send() {
+		const text = input.trim();
+		if (text === "" || thinking || sessionId === null) return;
+
+		input = "";
+		error = null;
+		messages = [
+			...messages,
+			{ id: `local-${Date.now()}`, role: "user", kind: "turn", content: text },
+		];
+		thinking = true;
+
+		try {
+			const reply = await post<{ reply: string }>(`/api/fireside/${sessionId}/turn`, {
+				message: text,
+				draft: draftPreview,
+			});
+			messages = [
+				...messages.filter((m) => !m.id.startsWith("local-") || m.content !== text),
+				wispMessage(reply.reply),
+			];
+		} catch (cause) {
+			// The writer's sentence stays in the transcript: they did say it.
+			settle(cause);
+		} finally {
+			thinking = false;
+		}
+	}
+
+	async function shapeIntoDraft() {
+		if (sessionId === null) return;
+		thinking = true;
+		error = null;
+		try {
+			const result = await post<{ drafted: boolean; proposal?: Proposal; message?: string }>(
+				`/api/fireside/${sessionId}/draft`,
+				{ draft: draftPreview },
+			);
+			if (!result.drafted || !result.proposal) {
+				error = result.message ?? "Not yet.";
+				return;
+			}
+			proposal = result.proposal;
+			draftOpen = true;
+			messages = [
+				...messages,
+				{ id: `draft-${Date.now()}`, role: "wisp", kind: "draft", content: result.proposal.title },
+			];
+		} catch (cause) {
+			settle(cause);
+		} finally {
+			thinking = false;
+		}
+	}
+
+	async function accept(merge: "replace" | "top") {
+		if (!proposal || !onaccept || sessionId === null) return;
+		acceptingBusy = true;
+		error = null;
+		try {
+			await onaccept(proposal, merge, transcriptPublic, sessionId);
+			accepting = false;
+			draftOpen = false;
+		} catch (cause) {
+			settle(cause);
+		} finally {
+			acceptingBusy = false;
+		}
+	}
+
+	function wispMessage(content: string): Message {
+		return { id: `wisp-${crypto.randomUUID()}`, role: "wisp", kind: "turn", content };
+	}
+
+	/**
+	 * Every failure the panel can meet, said in the writer's terms.
+	 *
+	 * `404` is not an error here: Fireside ships on beta, so a `404` means this
+	 * deployment does not have it, and saying "not found" would read as a bug.
+	 */
+	function settle(cause: unknown) {
+		const failure = cause as { status?: number; body?: { error?: string; message?: string } };
+		if (failure?.status === 404) {
+			unavailable = true;
+			return;
+		}
+		if (failure?.body?.error === "openrouter_key_missing") {
+			hasKey = false;
+			return;
+		}
+		error = failure?.body?.message ?? "Something went wrong. Try again in a moment.";
+	}
+
+	function wordCount(text: string): number {
+		return text.trim().split(/\s+/).filter(Boolean).length;
+	}
+
+	/** The first few paragraphs, for a preview the writer can judge. */
+	function openingParagraphs(body: string): string[] {
+		return body
+			.split(/\n\s*\n/)
+			.map((paragraph) => paragraph.trim())
+			.filter(Boolean)
+			.slice(0, 3);
+	}
+
+	async function post<T>(url: string, payload: unknown): Promise<T> {
+		const response = await fetch(url, {
+			method: "POST",
+			headers: { "content-type": "application/json" },
+			body: JSON.stringify(payload),
+		});
+		const body = (await response.json().catch(() => ({}))) as T & {
+			error?: string;
+			message?: string;
+		};
+		if (!response.ok) throw { status: response.status, body };
+		return body as T;
+	}
+
+	/** Enter sends, Shift+Enter is a newline. Escape is the page's job (window). */
+	function onKeydown(event: KeyboardEvent) {
+		if (event.key === "Enter" && !event.shiftKey) {
+			event.preventDefault();
+			void send();
+		}
+	}
+
+	function nudgeHeight(step: number) {
+		if (mode !== "above" || !rootEl) return;
+		const current = rootEl.getBoundingClientRect().height;
+		heightPx = clampHeight(current + step);
+	}
+
+	// Above the words, the fire's height is the writer's call: start roomy and let
+	// the grab handle pull it between a floor and 85% of the viewport.
 	let heightPx = $state<number | null>(null);
 	let dragging = $state(false);
 	let dragFrom = { y: 0, h: 0 };
@@ -115,7 +275,6 @@
 	const MAX_FRACTION = 0.85;
 
 	function clampHeight(next: number) {
-		// The page scrolls, so the ceiling is the viewport, not the editor frame.
 		const ceiling = Math.round(window.innerHeight * MAX_FRACTION);
 		return Math.max(MIN_H, Math.min(next, ceiling));
 	}
@@ -138,90 +297,6 @@
 		dragging = false;
 		(event.currentTarget as HTMLElement).releasePointerCapture(event.pointerId);
 	}
-
-	function nudgeHeight(step: number) {
-		if (mode !== "above" || !rootEl) return;
-		const current = rootEl.getBoundingClientRect().height;
-		heightPx = clampHeight(current + step);
-	}
-
-	// The fire is taller than whatever space is left under the page header, and the
-	// page scrolls — so opening it brings the panel (composer included) into view
-	// rather than leaving the box you type into below the fold.
-	$effect(() => {
-		if (!open || !rootEl) return;
-		queueMicrotask(() => rootEl?.scrollIntoView({ block: "nearest", behavior: "smooth" }));
-	});
-
-	// Keep the newest turn in view: on send, on a draft, on accept. Not on the
-	// first open — the greeting is the point of the blank page.
-	$effect(() => {
-		void messages.length;
-		void draftOpen;
-		void accepting;
-		void bodyOpen;
-		if (!open || !logEl) return;
-		if (!everScrolled) {
-			everScrolled = true;
-			return;
-		}
-		queueMicrotask(() => {
-			logEl?.scrollTo({ top: logEl.scrollHeight, behavior: "smooth" });
-		});
-	});
-
-	function send() {
-		const text = input.trim();
-		if (!text || thinking) return;
-		input = "";
-		resumed = false;
-		messages = [...messages, { id: `u${Date.now()}`, role: "user", kind: "turn", content: text }];
-		thinking = true;
-		setTimeout(() => {
-			thinking = false;
-			messages = [
-				...messages,
-				{
-					id: `w${Date.now()}`,
-					role: "wisp",
-					kind: "turn",
-					content:
-						"(design fixture) — the real reply comes from Lumen. This is here so the shape of a turn is visible.",
-				},
-			];
-		}, 900);
-	}
-
-	/** Enter sends, Shift+Enter is a newline. Escape is the page's job (window). */
-	function onKeydown(event: KeyboardEvent) {
-		if (event.key === "Enter" && !event.shiftKey) {
-			event.preventDefault();
-			send();
-		}
-	}
-
-	function accept(mode: "top" | "replace") {
-		accepting = false;
-		draftOpen = false;
-		messages = [
-			...messages,
-			{
-				id: `a${Date.now()}`,
-				role: "wisp",
-				kind: "turn",
-				content:
-					mode === "top"
-						? "(design fixture) — inserted at the top of your draft. Your words are still underneath."
-						: "(design fixture) — replaced. Undo is one keystroke, and nothing was saved yet.",
-			},
-		];
-	}
-
-	const hasWords = $derived(draftPreview.trim().length > 0);
-
-	const placeholder = $derived(
-		hasWords ? "What are you trying to say here?" : "Say what you're stuck on…",
-	);
 </script>
 
 {#if open}
@@ -257,7 +332,12 @@
 						{#if bodyOpen}<ChevronDown size={15} />{:else}<ChevronUp size={15} />{/if}
 					</button>
 				{/if}
-				<button class="fs-icon-btn" onclick={() => onclose?.()} aria-label="Close Fireside" title="Close">
+				<button
+					class="fs-icon-btn"
+					onclick={() => onclose?.()}
+					aria-label="Close Fireside"
+					title="Close"
+				>
 					<stateIcons.x size={15} />
 				</button>
 			</div>
@@ -276,8 +356,8 @@
 
 						<figure class="fs-nokey-sample">
 							<blockquote>
-								"You opened the door — what's the thing you keep circling back to? Not the conclusion.
-								The thing you noticed first."
+								"You opened the door — what's the thing you keep circling back to? Not the
+								conclusion. The thing you noticed first."
 							</blockquote>
 							<figcaption>What it sounds like, once it's lit.</figcaption>
 						</figure>
@@ -287,123 +367,171 @@
 							<button class="fs-btn fs-btn-quiet" onclick={() => onclose?.()}>Not now</button>
 						</div>
 					</div>
+				{:else if unavailable}
+					<div class="fs-nokey">
+						<span class="fs-nokey-flame" aria-hidden="true"><Flame size={20} /></span>
+						<h3>Fireside isn't switched on here yet.</h3>
+						<p class="fs-nokey-copy">
+							It's on the beta deployment while it's being built. Nothing is wrong with this grove —
+							there's just nothing here to light.
+						</p>
+						<div class="fs-nokey-actions">
+							<button class="fs-btn fs-btn-quiet" onclick={() => onclose?.()}>Close</button>
+						</div>
+					</div>
 				{:else}
-				<div class="fs-log" bind:this={logEl} role="log" aria-live="polite" aria-label="Fireside conversation">
-					{#if mode === "solo"}
-						<div class="fs-greeting">
-							<p>The page is blank. That's the good part.</p>
-							<p class="fs-greeting-sub">Tell me what you noticed first — you'll do the writing.</p>
-						</div>
-					{/if}
+					<div
+						class="fs-log"
+						bind:this={logEl}
+						role="log"
+						aria-live="polite"
+						aria-label="Fireside conversation"
+					>
+						{#if mode === "solo" && messages.length === 0}
+							<div class="fs-greeting">
+								<p>The page is blank. That's the good part.</p>
+								<p class="fs-greeting-sub">
+									Tell me what you noticed first — you'll do the writing.
+								</p>
+							</div>
+						{/if}
 
-					{#if resumed}
-						<div class="fs-resume">
-							<span>You were here yesterday.</span>
-							<button class="fs-link" onclick={() => (resumed = false)}>Pick up</button>
-							<span class="fs-dot" aria-hidden="true">·</span>
-							<button
-								class="fs-link fs-quiet"
-								onclick={() => {
-									resumed = false;
-									messages = messages.slice(0, 1);
-								}}>start over</button
-							>
-						</div>
-					{/if}
+						{#each messages as message (message.id)}
+							{#if message.kind === "draft"}
+								<article class="fs-draft" class:open={draftOpen}>
+									<p class="fs-draft-kicker">Wisp proposed a draft</p>
+									<p class="fs-draft-meta">
+										{message.content} · {wordCount(proposal?.body ?? "")}&nbsp;words
+									</p>
 
-					{#each messages as message (message.id)}
-						{#if message.kind === "draft"}
-							<article class="fs-draft" class:open={draftOpen}>
-								<p class="fs-draft-kicker">Wisp proposed a draft</p>
-								<p class="fs-draft-meta">{message.words?.toLocaleString()} words</p>
-								<p class="fs-draft-note">{message.content}</p>
+									{#if draftOpen && proposal}
+										<div class="fs-draft-preview">
+											{#each openingParagraphs(proposal.body) as paragraph}
+												<p>{paragraph}</p>
+											{/each}
+											<p class="fs-draft-more">…</p>
+										</div>
 
-								{#if draftOpen}
-									<div class="fs-draft-preview">
-										{#each message.lines ?? [] as line}
-											<p>{line}</p>
-										{/each}
-										<p class="fs-draft-more">…</p>
-									</div>
-
-									{#if accepting}
-										<div class="fs-accept">
-											<p class="fs-accept-question">
-												You already have words here. What should happen to them?
-											</p>
-											<div class="fs-accept-buttons">
-												<button class="fs-btn fs-btn-primary" onclick={() => accept("top")}>
-													Insert at top
+										{#if accepting}
+											<div class="fs-accept">
+												<p class="fs-accept-question">
+													{hasWords
+														? "You already have words here. What should happen to them?"
+														: "Nothing is on the page yet. Ready for it?"}
+												</p>
+												<label class="fs-check">
+													<input type="checkbox" bind:checked={transcriptPublic} />
+													<span
+														>Publish this conversation under the post, so readers see how it was
+														written</span
+													>
+												</label>
+												<div class="fs-accept-buttons">
+													{#if hasWords}
+														<button
+															class="fs-btn fs-btn-primary"
+															disabled={acceptingBusy}
+															onclick={() => void accept("top")}
+														>
+															Insert at top
+														</button>
+														<button
+															class="fs-btn"
+															disabled={acceptingBusy}
+															onclick={() => void accept("replace")}
+														>
+															Replace everything
+														</button>
+													{:else}
+														<button
+															class="fs-btn fs-btn-primary"
+															disabled={acceptingBusy}
+															onclick={() => void accept("replace")}
+														>
+															Use it
+														</button>
+													{/if}
+													<button
+														class="fs-btn fs-btn-quiet"
+														disabled={acceptingBusy}
+														onclick={() => (accepting = false)}
+													>
+														Cancel
+													</button>
+												</div>
+											</div>
+										{:else}
+											<div class="fs-draft-actions">
+												<button class="fs-btn fs-btn-primary" onclick={() => (accepting = true)}>
+													<Check size={13} />
+													Use this draft
 												</button>
-												<button class="fs-btn" onclick={() => accept("replace")}>Replace everything</button>
-												<button class="fs-btn fs-btn-quiet" onclick={() => (accepting = false)}>
-													Cancel
+												<button class="fs-btn fs-btn-quiet" onclick={() => (draftOpen = false)}>
+													Keep talking
 												</button>
 											</div>
-										</div>
+										{/if}
 									{:else}
 										<div class="fs-draft-actions">
-											<button
-												class="fs-btn fs-btn-primary"
-												onclick={() => {
-													// Blank page: nothing to merge with, so it goes straight in.
-													// Words already there: ask before touching them.
-													if (hasWords) accepting = true;
-													else accept("replace");
-												}}
-												aria-label="Use this draft"
+											<button class="fs-btn" onclick={() => (draftOpen = true)}>Read it</button>
+											<button class="fs-btn fs-btn-quiet" onclick={() => (draftOpen = false)}
+												>Not yet</button
 											>
-												<Check size={13} />
-												Use this draft
-											</button>
-											<button class="fs-btn fs-btn-quiet" onclick={() => (draftOpen = false)}>
-												Keep talking
-											</button>
 										</div>
 									{/if}
-								{:else}
-									<div class="fs-draft-actions">
-										<button class="fs-btn" onclick={() => (draftOpen = true)}>Read it</button>
-										<button class="fs-btn fs-btn-quiet" onclick={() => (draftOpen = false)}>Not yet</button>
-									</div>
-								{/if}
-							</article>
-						{:else if message.role === "wisp"}
-							<div class="fs-turn fs-wisp"><p>{message.content}</p></div>
-						{:else}
-							<div class="fs-turn fs-user"><p>{message.content}</p></div>
+								</article>
+							{:else if message.role === "wisp"}
+								<div class="fs-turn fs-wisp"><p>{message.content}</p></div>
+							{:else}
+								<div class="fs-turn fs-user"><p>{message.content}</p></div>
+							{/if}
+						{/each}
+
+						{#if thinking}
+							<div class="fs-turn fs-wisp fs-thinking" aria-label="Wisp is thinking">
+								<span></span><span></span><span></span>
+							</div>
 						{/if}
-					{/each}
-
-					{#if thinking}
-						<div class="fs-turn fs-wisp fs-thinking" aria-label="Wisp is thinking">
-							<span></span><span></span><span></span>
-						</div>
-					{/if}
-				</div>
-
-				<div class="fs-composer">
-					<div class="fs-input-row">
-						<textarea
-							bind:value={input}
-							onkeydown={onKeydown}
-							rows={mode === "solo" ? 3 : 1}
-							{placeholder}
-							aria-label="Message Wisp"
-						></textarea>
-						<button class="fs-send" onclick={send} disabled={!input.trim() || thinking} aria-label="Send">
-							<Send size={15} />
-						</button>
 					</div>
-					{#if mode === "solo"}
-						<div class="fs-hint-row">
-							<p class="fs-hint">Wisp asks. You write. Nothing enters your draft until you say so.</p>
-							<button class="fs-link fs-quiet" onclick={() => onclose?.()}>
-								or start writing instead
+
+					{#if error}
+						<p class="fs-error" role="alert">{error}</p>
+					{/if}
+
+					<div class="fs-composer">
+						<div class="fs-input-row">
+							<textarea
+								bind:value={input}
+								onkeydown={onKeydown}
+								rows={mode === "solo" ? 3 : 1}
+								{placeholder}
+								aria-label="Message Wisp"
+								disabled={starting || sessionId === null}
+							></textarea>
+							<button
+								class="fs-send"
+								onclick={() => void send()}
+								disabled={!input.trim() || thinking || sessionId === null}
+								aria-label="Send"
+							>
+								<Send size={15} />
 							</button>
 						</div>
-					{/if}
-				</div>
+						<div class="fs-hint-row">
+							<p class="fs-hint">
+								Wisp asks. You write. Nothing enters your draft until you say so.
+							</p>
+							{#if canDraft && !proposal}
+								<button class="fs-link" onclick={() => void shapeIntoDraft()}
+									>Shape it into a draft</button
+								>
+							{:else if mode === "solo"}
+								<button class="fs-link fs-quiet" onclick={() => onclose?.()}>
+									or start writing instead
+								</button>
+							{/if}
+						</div>
+					</div>
 				{/if}
 			</div>
 		{/if}
@@ -427,8 +555,8 @@
 						e.preventDefault();
 						nudgeHeight(32);
 					}
-				}}
-			><span></span></button>
+				}}><span></span></button
+			>
 		{/if}
 	</div>
 {/if}
@@ -861,6 +989,31 @@
 
 	.fs-nokey-actions a.fs-btn {
 		text-decoration: none;
+	}
+
+	.fs-check {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.5rem;
+		margin: 0 0 0.625rem;
+		font-size: 0.75rem;
+		line-height: 1.5;
+		color: var(--color-text-muted);
+		cursor: pointer;
+	}
+
+	.fs-check input {
+		margin-top: 0.1875rem;
+		accent-color: var(--grove-accent);
+	}
+
+	.fs-error {
+		margin: 0;
+		padding: 0.5rem 1.25rem;
+		font-size: 0.8125rem;
+		color: var(--color-text);
+		background: var(--color-bg-secondary, #f5f5f5);
+		border-top: 1px solid var(--color-border, #ddd);
 	}
 
 	/* ── Composer ──────────────────────────────────────────────────────── */

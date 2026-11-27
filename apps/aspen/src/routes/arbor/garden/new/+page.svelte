@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { goto, beforeNavigate } from "$app/navigation";
-	import { page } from "$app/state";
 	import { browser } from "$app/environment";
 	import { onMount } from "svelte";
 	import MarkdownEditor from "@autumnsgrove/lattice/content/editor/MarkdownEditor.svelte";
@@ -43,9 +42,6 @@
 	// DESIGN SESSION: the drawer is wired with fixture state so the surface can be
 	// looked at. The beta gate (isBetaDeployment) and the /api/fireside routes come with it.
 	let firesideOpen = $state(false);
-	// DESIGN SESSION: real check is `hasOpenRouterKey()` from libs/lyra (presence only,
-	// never decrypts), resolved in the page load. `?nokey=1` previews the empty state.
-	const hasAiKey = $derived(page.url.searchParams.get("nokey") !== "1");
 
 	function handleFiresideKey(event: KeyboardEvent) {
 		if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key.toLowerCase() === "f") {
@@ -174,27 +170,39 @@
 			.filter((tag) => tag.length > 0);
 	}
 
+	/**
+	 * The page's one write path.
+	 *
+	 * `handleSave` navigates afterwards; accepting a Fireside draft calls this first and
+	 * then records the acceptance against the slug. Both go through it so autosave and
+	 * the server agree — #1586's lesson was a write-only sync with no read-back losing
+	 * work.
+	 */
+	async function saveBloom() {
+		return api.post("/api/blooms", {
+			title: title.trim() || "",
+			slug: slug.trim() || "",
+			date,
+			description: description.trim(),
+			tags: parseTags(tagsInput),
+			font,
+			markdown_content: content,
+			gutter_content: JSON.stringify(gutterItems),
+			fireside_assisted: 0,
+			status: "draft",
+			featured_image: featuredImage.trim() || null,
+			meadow_exclude: 0,
+			blaze: selectedBlaze,
+		});
+	}
+
 	/** Save as draft — zero validation, API handles untitled naming */
 	async function handleSave() {
 		error = null;
 		saving = true;
 
 		try {
-			const result = await api.post("/api/blooms", {
-				title: title.trim() || "",
-				slug: slug.trim() || "",
-				date,
-				description: description.trim(),
-				tags: parseTags(tagsInput),
-				font,
-				markdown_content: content,
-				gutter_content: JSON.stringify(gutterItems),
-				fireside_assisted: 0,
-				status: "draft",
-				featured_image: featuredImage.trim() || null,
-				meadow_exclude: 0,
-				blaze: selectedBlaze,
-			});
+			const result = await saveBloom();
 
 			editorRef?.clearDraft();
 			if (browser) sessionStorage.removeItem("grove-new-post-draft-id");
@@ -209,6 +217,62 @@
 			const errorMessage = err instanceof Error ? err.message : String(err);
 			error = errorMessage;
 			toast.error(`Failed to save draft`, { description: errorMessage });
+		} finally {
+			saving = false;
+		}
+	}
+
+	/**
+	 * Accepting a Fireside draft.
+	 *
+	 * The merge happens here, not in the panel: the page owns the editor's content, the
+	 * vine list and the save handler, and a component that wrote them would be a second
+	 * writer racing autosave.
+	 *
+	 * `markdown_content` and `gutter_content` are written together — a draft accepted
+	 * without its vines is half accepted (the spec's own words).
+	 */
+	async function handleAcceptDraft(
+		proposal: { title: string; body: string; vines: { anchor: string; text: string }[] },
+		merge: "replace" | "top",
+		transcriptPublic: boolean,
+		sessionId: string,
+	) {
+		if (merge === "replace") {
+			title = proposal.title;
+			content = proposal.body;
+		} else {
+			content = `${proposal.body}\n\n${content}`.trim();
+			if (!title.trim()) title = proposal.title;
+		}
+
+		gutterItems = [
+			...gutterItems,
+			...proposal.vines.map((vine) => ({
+				type: "comment" as const,
+				anchor: vine.anchor,
+				content: vine.text,
+			})),
+		];
+
+		saving = true;
+		try {
+			const saved = await saveBloom();
+
+			// The flag and the post's link to the conversation. A failure here leaves a post
+			// that exists without its attribution, which must not be swallowed silently.
+			await api.post(`/api/fireside/${sessionId}/accept`, {
+				slug: saved.slug,
+				transcriptPublic,
+			});
+
+			editorRef?.clearDraft();
+			if (browser) sessionStorage.removeItem("grove-new-post-draft-id");
+			navigatingAfterSave = true;
+			toast.success("Fireside's draft is in", {
+				description: `"${saved.title}" is saved as a draft.`,
+			});
+			goto(`/arbor/garden/edit/${saved.slug}`);
 		} finally {
 			saving = false;
 		}
@@ -495,8 +559,13 @@
 		<!-- Editor -->
 		<main class="editor-main">
 			<div class="editor-with-gutter">
-				<div class="editor-section" class:fireside-open={firesideOpen} class:fireside-above={firesideOpen && !!content.trim()} class:fireside-closed={!firesideOpen}>
-					{#if !firesideOpen}
+				<div
+					class="editor-section"
+					class:fireside-open={firesideOpen}
+					class:fireside-above={firesideOpen && !!content.trim()}
+					class:fireside-closed={!firesideOpen}
+				>
+					{#if !firesideOpen && data.firesideEnabled}
 						<button
 							type="button"
 							class="fireside-entry"
@@ -511,8 +580,9 @@
 						bind:open={firesideOpen}
 						mode={content.trim() ? "above" : "solo"}
 						draftPreview={content}
-						hasKey={hasAiKey}
+						hasKey={data.firesideHasKey}
 						onclose={() => (firesideOpen = false)}
+						onaccept={handleAcceptDraft}
 					/>
 					<MarkdownEditor
 						bind:this={editorRef}
@@ -549,7 +619,6 @@
 			</button>
 		</main>
 	</div>
-
 </div>
 
 <style>
