@@ -197,4 +197,147 @@ describe("reading pages", () => {
 			expect(listing.html).not.toContain("/garden/hidden-draft");
 		});
 	});
+
+	/**
+	 * The disclosure: a marker always, a conversation only when the writer shared it.
+	 *
+	 * This is the one surface where Fireside's promises become visible to someone who
+	 * did not agree to anything — so it is the surface where a mistake is not a bug
+	 * report but a broken trust. Both halves are checked from outside the process.
+	 */
+	describe("the fireside disclosure", () => {
+		const SLUG = "the-sign-said-eight";
+		const PROPOSAL = JSON.stringify({
+			title: "The sign said eight",
+			body: "Eight, and nobody believed it.",
+			vines: [{ anchor: "paragraph:1", text: "a vine nobody should read twice" }],
+		});
+
+		async function firesidePost(transcriptPublic: boolean) {
+			const tenant = await createTenant({
+				posts: [
+					{
+						slug: SLUG,
+						title: "The sign said eight",
+						body: "Nobody believed it.",
+					},
+				],
+			});
+			const tenantId = await tenantIdFor(tenant);
+			const sessionId = crypto.randomUUID();
+
+			await env.DB.prepare(
+				`INSERT INTO fireside_sessions
+				   (id, tenant_id, user_id, status, transcript_public, transcript_published_at)
+				 VALUES (?, ?, 'writer-1', 'accepted', ?, ?)`,
+			)
+				.bind(
+					sessionId,
+					tenantId,
+					transcriptPublic ? 1 : 0,
+					transcriptPublic ? Math.floor(Date.now() / 1000) : null,
+				)
+				.run();
+
+			for (const [index, message] of [
+				{ role: "wisp", kind: "turn", content: "What did you notice first?" },
+				{ role: "user", kind: "turn", content: "The sign said eight, and nobody believed it." },
+				{ role: "wisp", kind: "draft", content: PROPOSAL },
+			].entries()) {
+				await env.DB.prepare(
+					`INSERT INTO fireside_messages
+					   (id, session_id, tenant_id, role, kind, content, seq)
+					 VALUES (?, ?, ?, ?, ?, ?, ?)`,
+				)
+					.bind(
+						crypto.randomUUID(),
+						sessionId,
+						tenantId,
+						message.role,
+						message.kind,
+						message.content,
+						index + 1,
+					)
+					.run();
+			}
+
+			await env.DB.prepare(
+				`UPDATE posts SET fireside_assisted = 1, fireside_session_id = ?
+				  WHERE tenant_id = ? AND slug = ?`,
+			)
+				.bind(sessionId, tenantId, SLUG)
+				.run();
+
+			return { tenant, tenantId, sessionId };
+		}
+
+		describe("happy", () => {
+			it("says a post was written fireside, and shows the conversation when it is public", async () => {
+				const { tenant } = await firesidePost(true);
+
+				const result = await page(`/garden/${SLUG}`, { tenant });
+
+				expect(result.status).toBe(200);
+				expect(result.html).toContain("written fireside with Wisp");
+				expect(result.html).toContain("Read how this was written");
+				// Both sides, verbatim — including the writer's own sentence.
+				expect(result.html).toContain("What did you notice first?");
+				expect(result.html).toContain("The sign said eight, and nobody believed it.");
+			});
+
+			it("counts a proposal rather than reprinting it", async () => {
+				const { tenant } = await firesidePost(true);
+
+				const result = await page(`/garden/${SLUG}`, { tenant });
+
+				expect(result.html).toContain("Wisp proposed a draft");
+				expect(result.html).toContain("5 words");
+				expect(result.html).toContain("The writer accepted this one.");
+				// The stored payload is not a thing a reader may ever be shown.
+				expect(result.html).not.toContain("paragraph:1");
+				expect(result.html).not.toContain("nobody should read twice");
+			});
+		});
+
+		describe("bad", () => {
+			it("keeps the conversation off the page when the writer left it private", async () => {
+				const { tenant } = await firesidePost(false);
+
+				const result = await page(`/garden/${SLUG}`, { tenant });
+
+				expect(result.status).toBe(200);
+				// The attribution is not a reward for sharing; it is a fact about the post.
+				expect(result.html).toContain("written fireside with Wisp");
+				expect(result.html).not.toContain("Read how this was written");
+				expect(result.html).not.toContain("What did you notice first?");
+			});
+
+			it("leaves a post that never went near the fire entirely alone", async () => {
+				const tenant = await createTenant({
+					posts: [{ slug: "by-hand", title: "Written by hand", body: "Every word mine." }],
+				});
+
+				const result = await page("/garden/by-hand", { tenant });
+
+				expect(result.status).toBe(200);
+				expect(result.html).not.toContain("written fireside");
+			});
+		});
+
+		describe("sad", () => {
+			it("shows the marker without a conversation when the session is gone", async () => {
+				const { tenant, sessionId } = await firesidePost(true);
+
+				// A session that expires or is deleted leaves the post its attribution and
+				// nothing to disclose — `posts.fireside_session_id` is `ON DELETE SET NULL`.
+				await env.DB.prepare(`DELETE FROM fireside_sessions WHERE id = ?`).bind(sessionId).run();
+
+				const result = await page(`/garden/${SLUG}`, { tenant });
+
+				expect(result.status).toBe(200);
+				expect(result.html).toContain("written fireside with Wisp");
+				expect(result.html).not.toContain("Read how this was written");
+			});
+		});
+	});
 });

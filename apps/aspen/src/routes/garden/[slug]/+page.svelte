@@ -1,6 +1,7 @@
 <script lang="ts">
 	import ContentWithGutter from "@autumnsgrove/lattice/ui/components/custom/ContentWithGutter.svelte";
 	import ReedsThread from "@autumnsgrove/lattice/components/reeds/ReedsThread.svelte";
+	import FiresideAttribution from "$lib/components/FiresideAttribution.svelte";
 	import Button from "@autumnsgrove/lattice/ui/components/ui/Button.svelte";
 	import Badge from "@autumnsgrove/lattice/ui/components/ui/Badge.svelte";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
@@ -213,6 +214,15 @@
 			</header>
 		{/snippet}
 	</ContentWithGutter>
+
+	<!-- The disclosure sits between the article and the discussion: it is about the
+	     words above, and it belongs to them rather than to the comments. -->
+	<FiresideAttribution
+		assisted={data.post.firesideAssisted}
+		transcript={data.post.firesideTranscript}
+		author={data.post.author}
+		transcriptSwitch={data.transcriptSwitch}
+	/>
 
 	<!-- Reeds: Comments section -->
 	<div class="reeds-container">
