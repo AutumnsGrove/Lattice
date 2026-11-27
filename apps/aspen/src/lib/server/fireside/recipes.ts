@@ -13,7 +13,7 @@
  * - **Steps are derived, never declared.** `2 × tools + 2` is one call and one
  *   retry per tool, plus the opening turn and the final answer. A run that reaches
  *   it parks, which is visible and resumable — the correct failure for a guard.
- *   `finish` counts as a tool, so the turn run is 6 steps, not the spec's 4.
+ *   The turn run is 4 steps: one tool, one retry, the opening turn, the answer.
  * - **No cost, token or time limit.** The key is the writer's own (BYOK), so a
  *   limit here would be Grove deciding how much of their money to spend.
  *
@@ -22,7 +22,7 @@
  * loop arguing with a correct finish.
  */
 
-import { createFinishTool, defineRecipe, type JsonObject, type Recipe } from "@autumnsgrove/lyra";
+import { defineRecipe, type JsonObject, type Recipe } from "@autumnsgrove/lyra";
 import { buildDraftInstructions, buildTurnInstructions } from "./instructions";
 import {
 	createProposeDraftTool,
@@ -86,28 +86,19 @@ export interface TurnRecipeOptions {
 /**
  * One reply, in prose.
  *
- * **`finish` is required, and the spec says it should not be.** The spec's row for
- * this recipe reads "Finish: prose with no tool call", which reads like Lyra ends a
- * run when the model simply stops calling tools. It does not: `runTask` treats a
- * reply with no tool call as "stopped without finishing" — it nudges when the stuck
- * safeguard has reminders, and otherwise fails the run (`run.js`, the `calls.length
- * === 0` branch). So a sentinel `finish` is the only way a turn can end `done`, and
- * the model is told to say its piece *then* finish.
+ * `ending: "reply"` is the whole of it: the model's own answer is the deliverable, so
+ * a reply with no tool calls ends the run `done` and there is no sentinel `finish` to
+ * forget. Before Lyra 0.4.0 there was no way to say that — a prose reply read as
+ * "stopped without finishing" — so this recipe carried a no-op finish tool and told
+ * the model to call it after speaking. Both are gone, and the step budget is back to
+ * the spec's `2 × 1 + 2 = 4`.
  *
- * The check always passes: the turn's job is to say one true thing, and no state
- * can make that false. Two consequences worth knowing: the step budget is now
- * `2 × 2 + 2 = 6` rather than the spec's 4, and a model that replies without
- * finishing parks the run instead of quietly succeeding.
+ * Everything the stuck safeguard does besides that nudge still applies: a tool failing
+ * the same way repeatedly still parks the run.
  */
 export function createFiresideTurnRecipe({ draft }: TurnRecipeOptions): Recipe<FiresideState> {
 	const hasDraft = draft.trim().length > 0;
-	const tools = [
-		createReadDraftTool(draft),
-		createFinishTool({
-			check: () => ({ ok: true }),
-			content: "that's your turn — the writer has it.",
-		}),
-	];
+	const tools = [createReadDraftTool(draft)];
 
 	return defineRecipe({
 		name: FIRESIDE_TURN_RECIPE,
@@ -127,6 +118,9 @@ export function createFiresideTurnRecipe({ draft }: TurnRecipeOptions): Recipe<F
 		tools,
 		limits: { steps: stepsFor(tools.length) },
 		compaction: FIRESIDE_COMPACTION,
+		// Prose is the answer, so the "stopped without finishing" nudge has nothing to
+		// ask for; the reply *is* the finish.
+		ending: "reply",
 		stuck: { reminders: 0 },
 	});
 }

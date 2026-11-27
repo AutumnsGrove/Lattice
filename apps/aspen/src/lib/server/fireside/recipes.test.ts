@@ -51,6 +51,8 @@ async function run(
 		clock,
 		ids: counterIds(),
 		limits: recipe.limits,
+		// The ending travels with the run, like limits and compaction do.
+		ending: (recipe as { ending?: "reply" | "done-check" }).ending,
 		signal: new AbortController().signal,
 	});
 
@@ -67,8 +69,8 @@ describe("the step budget", () => {
 		const turn = createFiresideTurnRecipe({ draft: DRAFT });
 		const draft = createFiresideDraftRecipe({ draft: DRAFT });
 
-		// `finish` is a tool too: two for a turn, three for a draft.
-		expect(turn.tools).toHaveLength(2);
+		// One tool for a turn, three for a draft — the turn's reply is its own ending.
+		expect(turn.tools).toHaveLength(1);
 		expect(draft.tools).toHaveLength(3);
 		expect(turn.limits?.steps).toBe(stepsFor(turn.tools.length));
 		expect(draft.limits?.steps).toBe(stepsFor(draft.tools.length));
@@ -77,8 +79,12 @@ describe("the step budget", () => {
 		expect(turn.limits).not.toHaveProperty("timeMs");
 	});
 
-	it("nudges no one: prose is a correct finish here", () => {
-		expect(createFiresideTurnRecipe({ draft: "" }).stuck?.reminders).toBe(0);
+	it("nudges no one, and says its reply is the ending", () => {
+		const turn = createFiresideTurnRecipe({ draft: "" });
+		expect(turn.stuck?.reminders).toBe(0);
+		// 0.4.0's ending: the reply finishes the run, so no sentinel tool and no nudge.
+		expect((turn as { ending?: string }).ending).toBe("reply");
+		expect(turn.tools.some((tool) => tool.finish === true)).toBe(false);
 	});
 });
 
@@ -86,9 +92,9 @@ describe("fireside-turn", () => {
 	it("reads the draft, then answers in prose and ends", async () => {
 		const { result, record } = await run(createFiresideTurnRecipe({ draft: DRAFT }), [
 			{ toolCalls: [{ id: "t1", name: "read_draft" }] },
+			// No tool call: with `ending: "reply"` the sentence *is* the end of the run.
 			{
 				text: "That's the sentence. Do you want to write about the shop, or about staying too long?",
-				toolCalls: [{ id: "f1", name: "finish" }],
 			},
 		]);
 
@@ -100,10 +106,7 @@ describe("fireside-turn", () => {
 
 	it("opens on a blank page without asking the model to read one", async () => {
 		const { result, record } = await run(createFiresideTurnRecipe({ draft: "" }), [
-			{
-				text: "The page is blank. What did you notice first?",
-				toolCalls: [{ id: "f1", name: "finish" }],
-			},
+			{ text: "The page is blank. What did you notice first?" },
 		]);
 
 		expect(result.reason).toBe("done");

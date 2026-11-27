@@ -152,6 +152,9 @@ export const POST: RequestHandler = async (event) => {
 		ids: { next: (prefix) => `${prefix}_${crypto.randomUUID()}` },
 		limits: recipe.limits,
 		compaction: recipe.compaction,
+		// The recipe says how its run ends; the run has to be told. Without this the
+		// turn's prose would read as "stopped without finishing".
+		ending: recipe.ending,
 		stuck: recipe.stuck,
 		signal: event.request.signal,
 		onEvent: (event) => {
