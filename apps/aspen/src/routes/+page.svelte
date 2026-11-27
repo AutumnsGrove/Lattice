@@ -1,5 +1,5 @@
 <script lang="ts">
-	import InternalsPostViewer from "@autumnsgrove/lattice/components/custom/InternalsPostViewer.svelte";
+	import InternalsPostViewer from "@autumnsgrove/lattice/ui/components/custom/InternalsPostViewer.svelte";
 	import Button from "@autumnsgrove/lattice/ui/components/ui/Button.svelte";
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";

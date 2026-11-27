@@ -10,7 +10,12 @@
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
 	import PassageTransition from "@autumnsgrove/lattice/ui/components/ui/PassageTransition.svelte";
 	import { fontMap, DEFAULT_FONT } from "@autumnsgrove/lattice/ui/tokens/fonts";
-	import { FONT_SCALE, fontScaleMultiplier } from "@autumnsgrove/lattice/platform/config/presets";
+	import {
+		FONT_SCALE,
+		fontScaleMultiplier,
+		cssColor,
+		DEFAULT_ACCENT_COLOR,
+	} from "@autumnsgrove/lattice/platform/config/presets";
 	import { getSeasonFavicons } from "@autumnsgrove/lattice/ui/season-meta";
 	import { buildPorchUrl } from "@autumnsgrove/lattice/platform/config/porch";
 	import type { Season } from "@autumnsgrove/lattice/ui/types/season";
@@ -223,16 +228,25 @@
 	<!-- Inject site owner's accent + vine color on :root so the Prism accent scale
 	     resolves correctly. The scale tokens (--grove-accent-10, etc.) are defined
 	     on :root — --user-accent MUST be set at :root scope, not on a child element,
-	     because color-mix() evaluates where the property is defined. (#1512) -->
-	{@html `<style>:root{--user-accent:${data.siteSettings?.accent_color || "#16a34a"};--color-primary:${data.siteSettings?.accent_color || "#16a34a"};}</style>`}<!-- accent-ok — definition point for accent tokens -->
+	     because color-mix() evaluates where the property is defined. (#1512)
+
+	     The colours go through `cssColor` first, so what interpolation sees is a
+	     #hex string and never a stored value — the settings API validates on write,
+	     but this is the point where a string becomes markup, and a row written
+	     before that check existed still has to be harmless.
+	     accent-ok: definition point for accent tokens -->
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -- values pass cssColor above -->
+	{@html `<style>:root{--user-accent:${cssColor(data.siteSettings?.accent_color, DEFAULT_ACCENT_COLOR)};--color-primary:${cssColor(data.siteSettings?.accent_color, DEFAULT_ACCENT_COLOR)};}</style>`}
 	{#if data.siteSettings?.vine_color}
-		{@html `<style>:root{--grove-vine-color:${data.siteSettings.vine_color};}</style>`}
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -- value passes cssColor above -->
+		{@html `<style>:root{--grove-vine-color:${cssColor(data.siteSettings.vine_color, DEFAULT_ACCENT_COLOR)};}</style>`}
 	{/if}
 	<!-- The grove's text size (#1369), rendered on the server so the first paint is already
 	     the right size. Only the validated multiplier is interpolated, never the stored string.
 	     The property name is written out, not interpolated: the Svelte CSS preprocessor reads this
 	     <style> and cannot parse `${...}` in the property position. layout-font-scale.test.ts
 	     checks it matches FONT_SCALE.cssVar. -->
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -- only a validated number is interpolated -->
 	{@html `<style>:root{--grove-font-scale:${fontScaleMultiplier(data.siteSettings?.[FONT_SCALE.settingKey])};}</style>`}
 	{#if context?.type === "tenant"}
 		<title>{siteName}</title>

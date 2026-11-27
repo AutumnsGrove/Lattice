@@ -19,6 +19,10 @@ import {
 	fileToPackage,
 	isContentOnly,
 	classifyScope,
+	splitLockfile,
+	diffLockfile,
+	isOneShot,
+	testCommandFor,
 } from "./affected-packages.mjs";
 
 // ─── Fixtures ───────────────────────────────────────────────────────
@@ -91,6 +95,32 @@ test("content-only files: docs, tests, migrations, data", () => {
 		"apps/landing/static/logo.svg",
 	]) {
 		assert.equal(isContentOnly(path), true, `${path} should not cascade`);
+	}
+});
+
+test("a svelte config without the SvelteKit dependency is not SvelteKit", () => {
+	// `libs/gossamer` is this case in the real workspace: a `svelte.config.js` for
+	// `svelte-package`, no `@sveltejs/kit`, and so no `svelte-kit` binary for the
+	// CI sync step to run. Found when the Lumen adapter made gossamer affected.
+	const root = workspace({
+		"libs/gossamer/package.json": {
+			name: "@autumnsgrove/gossamer",
+			scripts: { "test:run": "vitest run" },
+			devDependencies: { svelte: "^5.0.0" },
+		},
+		"libs/gossamer/svelte.config.js": "",
+		"libs/with-kit/package.json": {
+			name: "with-kit",
+			devDependencies: { "@sveltejs/kit": "^2.0.0" },
+		},
+		"libs/with-kit/svelte.config.js": "",
+	});
+	try {
+		const packages = discoverPackages(root);
+		assert.equal(packages.get("libs/gossamer").isSvelteKit, false);
+		assert.equal(packages.get("libs/with-kit").isSvelteKit, true);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
 	}
 });
 
@@ -192,12 +222,7 @@ test("global inputs invalidate every package", () => {
 	const root = standardWorkspace();
 	try {
 		const packages = discoverPackages(root);
-		for (const path of [
-			"pnpm-lock.yaml",
-			"pnpm-workspace.yaml",
-			"tsconfig.base.json",
-			"package.json",
-		]) {
+		for (const path of ["pnpm-workspace.yaml", "tsconfig.base.json", "package.json"]) {
 			const result = detectAffected({ entries: files([path]), packages, root });
 			assert.equal(result.runAll, true, `${path} should run everything`);
 			assert.equal(
@@ -206,6 +231,230 @@ test("global inputs invalidate every package", () => {
 				`${path} should affect every package`,
 			);
 		}
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+// ─── Lockfile scope (#1795) ─────────────────────────────────────────
+
+/** A pnpm lockfile with the given importers and shared section. */
+function lockfile({ importers = {}, shared = "lockfileVersion: '9.0'" } = {}) {
+	let out = `${shared}\n\nimporters:\n`;
+	for (const [dir, deps] of Object.entries(importers)) {
+		out += `\n  ${dir}:\n`;
+		for (const [name, version] of Object.entries(deps)) {
+			out += `    dependencies:\n      ${name}:\n        specifier: ${version}\n        version: ${version}\n`;
+		}
+	}
+	return out;
+}
+
+test("the lockfile is split into importers and the shared remainder", () => {
+	const parsed = splitLockfile(
+		lockfile({
+			importers: { ".": { prettier: "^3.0.0" }, "apps/aspen": { svelte: "^5.0.0" } },
+			// `packages:` is the shared half — outside the importers section.
+			shared:
+				"lockfileVersion: '9.0'\n\npackages:\n\n  svelte@5.0.0:\n    resolution: {integrity: sha512-x}",
+		}),
+	);
+
+	assert.deepEqual([...parsed.importers.keys()], [".", "apps/aspen"]);
+	assert.match(parsed.shared, /^lockfileVersion/);
+	assert.match(parsed.shared, /packages:/);
+});
+
+test("a lockfile with no importers section is not scoped", () => {
+	assert.equal(splitLockfile("lockfileVersion: '9.0'\n"), null);
+	assert.deepEqual(diffLockfile(null, "anything"), {
+		sharedChanged: true,
+		changedImporters: [],
+	});
+});
+
+test("diffLockfile names only the importers that moved", () => {
+	const before = lockfile({
+		importers: { ".": { prettier: "^3.0.0" }, "libs/lyra": { zod: "^3.0.0" } },
+	});
+	const after = lockfile({
+		importers: { ".": { prettier: "^3.0.0" }, "libs/lyra": { zod: "^4.0.0" } },
+	});
+
+	assert.deepEqual(diffLockfile(before, after), {
+		sharedChanged: false,
+		changedImporters: ["libs/lyra"],
+	});
+});
+
+test("a moved re-export is shared, not importer-scoped", () => {
+	// The #1793 shape: many packages affected because the lockfile changed. Only
+	// one importer moved, so only that package (and its consumers) should be.
+	const root = standardWorkspace({
+		"libs/lyra/package.json": {
+			name: "@autumnsgrove/lyra",
+			scripts: { check: "tsc", "test:run": "vitest run" },
+			dependencies: { zod: "^3.0.0" },
+		},
+		"libs/lyra/tsconfig.json": "{}",
+		"workers/lyra-user/package.json": {
+			name: "lyra-user",
+			scripts: { check: "tsc" },
+			dependencies: { "@autumnsgrove/lyra": "workspace:*" },
+		},
+		"workers/lyra-user/src/index.ts": "",
+	});
+	try {
+		const packages = discoverPackages(root);
+		const result = detectAffected({
+			entries: files(["pnpm-lock.yaml"]),
+			packages,
+			root,
+			lockfile: { sharedChanged: false, changedImporters: ["libs/lyra"] },
+		});
+
+		assert.equal(result.runAll, false, "one importer must not span the workspace");
+		assert.deepEqual(result.affectedPackages, ["libs/lyra", "workers/lyra-user"]);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("a shared lockfile resolution still invalidates every package", () => {
+	const root = standardWorkspace();
+	try {
+		const packages = discoverPackages(root);
+		const result = detectAffected({
+			entries: files(["pnpm-lock.yaml"]),
+			packages,
+			root,
+			lockfile: { sharedChanged: true, changedImporters: [] },
+		});
+
+		assert.equal(result.runAll, true);
+		assert.equal(result.affectedPackages.length, packages.size);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("a lockfile change with no importer detail stays conservative", () => {
+	// No `lockfile` argument means the caller could not read both sides. Running
+	// everything is the only safe answer: over-running costs time, under-running
+	// ships a broken install with green checks.
+	const root = standardWorkspace();
+	try {
+		const result = detectAffected({
+			entries: files(["pnpm-lock.yaml"]),
+			packages: discoverPackages(root),
+			root,
+		});
+		assert.equal(result.runAll, true);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("a root importer change is shared, because everyone installs it", () => {
+	const root = standardWorkspace();
+	try {
+		const result = detectAffected({
+			entries: files(["pnpm-lock.yaml"]),
+			packages: discoverPackages(root),
+			root,
+			// `.` is the root manifest's importer; it is not a package directory.
+			lockfile: { sharedChanged: false, changedImporters: ["."] },
+		});
+		assert.equal(result.runAll, true);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("a lockfile change that touches no importer affects nothing", () => {
+	const root = standardWorkspace();
+	try {
+		const result = detectAffected({
+			entries: files(["pnpm-lock.yaml"]),
+			packages: discoverPackages(root),
+			root,
+			lockfile: { sharedChanged: false, changedImporters: [] },
+		});
+		assert.equal(result.runAll, false);
+		assert.deepEqual(result.affectedPackages, []);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+// ─── The sweep (#1797) ──────────────────────────────────────────────
+
+// Affected-only detection is how a package stays broken for months: its job
+// never runs, so nothing says it is red. The sweep is the same matrix with the
+// detection switched off, and that is the only thing that has to differ.
+test("a sweep checks every package, changed or not", () => {
+	const root = standardWorkspace();
+	try {
+		const packages = discoverPackages(root);
+		const result = detectAffected({
+			// No diff at all: what a scheduled run in a quiet week looks like.
+			entries: [],
+			packages,
+			root,
+			sweep: true,
+		});
+
+		assert.equal(result.sweep, true);
+		assert.equal(result.runAll, true);
+		assert.deepEqual(result.affectedPackages, [...packages.keys()].sort());
+		assert.deepEqual(
+			result.testMatrix.map((m) => m.name),
+			["uses-engine", "engine", "tiny", "standalone"],
+		);
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("a sweep runs the gated jobs, whose gates read a diff that is not there", () => {
+	const root = standardWorkspace();
+	try {
+		const result = detectAffected({
+			entries: [],
+			packages: discoverPackages(root),
+			root,
+			sweep: true,
+		});
+
+		// Barrel exports, accent colours and repo tooling are path-gated. On a sweep
+		// the path is untouched, so without this they skip — and a scheduled run that
+		// silently skips the check is worse than no scheduled run.
+		assert.deepEqual(result.scope, {
+			engine: true,
+			ui: true,
+			tooling: true,
+			structure: false,
+		});
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
+test("the sweep produces exactly the matrix a global change would", () => {
+	const root = standardWorkspace();
+	try {
+		const packages = discoverPackages(root);
+		const swept = detectAffected({ entries: [], packages, root, sweep: true });
+		const global = detectAffected({
+			entries: files(["pnpm-workspace.yaml"]),
+			packages,
+			root,
+		});
+
+		// One matrix definition, two ways in. If these ever diverge, the weekly run
+		// stops being evidence about what a PR would do.
+		assert.deepEqual(swept.testMatrix, global.testMatrix);
+		assert.deepEqual(swept.typecheckMatrix, global.typecheckMatrix);
 	} finally {
 		rmSync(root, { recursive: true, force: true });
 	}
@@ -301,6 +550,87 @@ test("fileToPackage prefers the longest matching directory", () => {
 	}
 });
 
+// ─── The test command (#1796) ──────────────────────────────────────
+
+// The detector used to admit a package on `test` and then have the job run
+// `test:run`, which is how `libs/gossamer` and `libs/shutter/cloudflare` kept
+// suites CI could never run. One script name is no longer the contract.
+test("test:run wins when a package has both scripts", () => {
+	assert.equal(testCommandFor({ "test:run": "vitest run", test: "vitest" }), "pnpm test:run");
+});
+
+test("a test script is used only when it cannot watch", () => {
+	assert.equal(testCommandFor({ test: "vitest run" }), "pnpm test");
+	assert.equal(testCommandFor({ test: "vitest" }), null);
+	assert.equal(testCommandFor({ test: "vitest --watch" }), null);
+});
+
+test("a package with no runnable suite stays out of the matrix", () => {
+	assert.equal(testCommandFor({}), null);
+	assert.equal(testCommandFor({ build: "tsc" }), null);
+	assert.equal(testCommandFor({ test: "vitest" }) !== null, false);
+});
+
+test("watchers and one-shot runners are told apart by the runner's own arguments", () => {
+	const oneShot = [
+		"vitest run",
+		"vitest run --coverage",
+		"vitest --run",
+		"jest --ci",
+		"jest --runInBand",
+		"cross-env NODE_ENV=test vitest run",
+		"c8 vitest run",
+		"node --test src/*.test.ts",
+		"tsx --test src/*.test.ts",
+		"playwright test",
+		"tsc --noEmit",
+	];
+	for (const command of oneShot) {
+		assert.equal(isOneShot(command), true, `${command} should be one-shot`);
+	}
+
+	const watching = [
+		"vitest",
+		"vitest --watch",
+		"vitest --ui",
+		"vitest -w",
+		"jest --watchAll",
+		"mocha --watch",
+		"vitest run --watch",
+		// A `run` earlier on the line does not make the runner one-shot.
+		"npm run build && vitest",
+	];
+	for (const command of watching) {
+		assert.equal(isOneShot(command), false, `${command} should not be run in CI`);
+	}
+});
+
+test("the test matrix carries the command, not a hardcoded script name", () => {
+	const root = standardWorkspace({
+		"workers/plain-vitest/package.json": {
+			name: "plain-vitest",
+			scripts: { test: "vitest run" },
+		},
+		"workers/bare-vitest/package.json": {
+			name: "bare-vitest",
+			scripts: { test: "vitest" },
+		},
+	});
+	try {
+		const result = detectAffected({
+			entries: files(["workers/plain-vitest/src/a.ts", "workers/bare-vitest/src/a.ts"]),
+			packages: discoverPackages(root),
+			root,
+		});
+
+		const byDir = Object.fromEntries(result.testMatrix.map((m) => [m.package, m.command]));
+		assert.equal(byDir["workers/plain-vitest"], "pnpm test");
+		assert.equal(byDir["workers/bare-vitest"], undefined, "a watcher must not enter the matrix");
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+});
+
 test("needsEngine is true only when an engine consumer is affected", () => {
 	const root = standardWorkspace();
 	try {
@@ -322,6 +652,149 @@ test("needsEngine is true only when an engine consumer is affected", () => {
 	} finally {
 		rmSync(root, { recursive: true, force: true });
 	}
+});
+
+// ─── Engine subpath scope (#1786) ───────────────────────────────────
+
+/**
+ * An engine that behaves like the real one: 144 subpath exports over one source
+ * tree, a root barrel that re-exports `ui` wholesale, and a `platform/config`
+ * barrel that re-exports its own files.
+ */
+const ENGINE_EXPORTS = {
+	".": { types: "./dist/index.d.ts", default: "./dist/index.js" },
+	"./ui/*": { default: "./dist/ui/*.js" },
+	"./ui/*.svelte": { default: "./dist/ui/*.svelte" },
+	"./platform/config": {
+		types: "./dist/platform/config/index.d.ts",
+		default: "./dist/platform/config/index.js",
+	},
+	"./platform/config/*": { default: "./dist/platform/config/*.js" },
+	"./styles/tokens.css": { default: "./dist/styles/tokens.css" },
+	"./styles/*": { default: "./dist/styles/*" },
+};
+
+function engineWorkspace(overrides = {}) {
+	const withEngine = (name) => ({
+		[`apps/${name}/package.json`]: {
+			name,
+			scripts: { check: "tsc" },
+			dependencies: { "@autumnsgrove/lattice": "workspace:*" },
+		},
+	});
+
+	return workspace({
+		"libs/engine/package.json": {
+			name: "@autumnsgrove/lattice",
+			scripts: { check: "svelte-check", "test:run": "vitest run" },
+			exports: ENGINE_EXPORTS,
+		},
+		"libs/engine/src/lib/index.ts": 'export * from "./ui/index";',
+		"libs/engine/src/lib/ui/index.ts": 'export * from "./GlassCard.svelte";',
+		"libs/engine/src/lib/ui/GlassCard.svelte": "<div />",
+		"libs/engine/src/lib/platform/config/index.ts": 'export * from "./tiers.js";',
+		"libs/engine/src/lib/platform/config/tiers.ts": "export const TIERS = {};",
+		"libs/engine/src/lib/private/helper.ts": "export const helper = 1;",
+		"libs/engine/src/lib/styles/tokens.css": ":root { --grove: green; }",
+
+		...withEngine("uses-config"),
+		"apps/uses-config/src/a.ts": 'import { TIERS } from "@autumnsgrove/lattice/platform/config";',
+		...withEngine("uses-root"),
+		"apps/uses-root/src/a.ts": 'import { GlassCard } from "@autumnsgrove/lattice";',
+		...withEngine("uses-styles"),
+		// A stylesheet has no `from`. Both Aspen and Plant pull engine styles this
+		// way, so a scan that only reads `from` misses them entirely.
+		"apps/uses-styles/src/a.svelte":
+			'<script>\n\timport "@autumnsgrove/lattice/styles/tokens.css";\n</script>',
+
+		"services/unrelated/package.json": { name: "unrelated", scripts: { check: "tsc" } },
+		...overrides,
+	});
+}
+
+function detectEngineChange(path, overrides) {
+	const root = engineWorkspace(overrides);
+	try {
+		return detectAffected({
+			entries: files([path]),
+			packages: discoverPackages(root),
+			root,
+		});
+	} finally {
+		rmSync(root, { recursive: true, force: true });
+	}
+}
+
+test("an engine helper reaches only the packages that import its subpath", () => {
+	// The whole point: `./platform/config` is an export, so its consumers are a
+	// subset of the workspace, not all 27 packages that depend on the engine.
+	const result = detectEngineChange("libs/engine/src/lib/platform/config/tiers.ts");
+	assert.deepEqual(result.affectedPackages, ["apps/uses-config", "libs/engine"]);
+	assert.equal(result.needsEngine, true);
+});
+
+test("an engine file the root barrel re-exports still reaches every consumer", () => {
+	// `index.ts` says `export * from "./ui/index"`, so a grep for GlassCard in the
+	// barrel finds nothing while every root-importing package can see it. Missing
+	// this would ship a broken import with green checks.
+	const result = detectEngineChange("libs/engine/src/lib/ui/GlassCard.svelte");
+	assert.deepEqual(result.affectedPackages, ["apps/uses-root", "libs/engine"]);
+});
+
+test("the root barrel reaches the root importers, and the manifest reaches everyone", () => {
+	// `index.ts` changes the shape of one export, `.`, so only the packages that
+	// import the root see a different surface. `package.json` can change how every
+	// subpath resolves, so it is the one that actually widens.
+	assert.deepEqual(detectEngineChange("libs/engine/src/lib/index.ts").affectedPackages, [
+		"apps/uses-root",
+		"libs/engine",
+	]);
+
+	assert.deepEqual(detectEngineChange("libs/engine/package.json").affectedPackages, [
+		"apps/uses-config",
+		"apps/uses-root",
+		"apps/uses-styles",
+		"libs/engine",
+	]);
+});
+
+test("a file no export names revalidates nothing beyond the engine", () => {
+	// Nothing outside the engine can import it, so no consumer's types can move.
+	const result = detectEngineChange("libs/engine/src/lib/private/helper.ts");
+	assert.deepEqual(result.affectedPackages, ["libs/engine"]);
+});
+
+test("a stylesheet imported for its side effect reaches its importer", () => {
+	// The regression a review caught on this PR: `import ".../tokens.css"` has no
+	// `from` clause, so a scan for `from ` marked nobody affected and a token
+	// change would have shipped with green checks.
+	const result = detectEngineChange("libs/engine/src/lib/styles/tokens.css");
+	assert.ok(
+		result.affectedPackages.includes("apps/uses-styles"),
+		`expected uses-styles, got ${result.affectedPackages.join(", ")}`,
+	);
+});
+
+test("an unreadable exports map widens instead of narrowing", () => {
+	// Over-running costs time; under-running ships a broken import. A surface we
+	// cannot describe is a surface we must not narrow.
+	const result = detectEngineChange("libs/engine/src/lib/private/helper.ts", {
+		"libs/engine/package.json": {
+			name: "@autumnsgrove/lattice",
+			scripts: { check: "svelte-check" },
+		},
+	});
+	assert.deepEqual(result.affectedPackages, [
+		"apps/uses-config",
+		"apps/uses-root",
+		"apps/uses-styles",
+		"libs/engine",
+	]);
+});
+
+test("an engine content change revalidates the engine and stops there", () => {
+	const result = detectEngineChange("libs/engine/README.md");
+	assert.deepEqual(result.affectedPackages, ["libs/engine"]);
 });
 
 // ─── Scope flags for gating whole jobs ───────────────────────────────
@@ -397,4 +870,51 @@ test("the real workspace discovers every package that has its own checks", () =>
 	// assertion together.
 	assert.equal(packages.get("services/email-render").typecheck, null);
 	assert.equal(packages.get("workers/paused").typecheck, null);
+});
+
+test("the real workspace flags the packages that side-effect-import engine styles", () => {
+	// Aspen and Plant both do `import '.../styles/tokens.css'` with no `from`, and
+	// they are the only two. This is the exact case a review caught on this PR: it
+	// looked like nothing was affected because nothing matched `from`.
+	const result = detectAffected({
+		entries: files(["libs/engine/src/lib/styles/tokens.css"]),
+		packages: discoverPackages(),
+	});
+
+	assert.ok(result.affectedPackages.includes("apps/aspen"), "aspen imports the tokens");
+	assert.ok(result.affectedPackages.includes("apps/plant"), "plant imports the tokens");
+	assert.ok(result.affectedPackages.includes("libs/engine"));
+});
+
+test("an engine type re-exported through `$lib` reaches that subpath's consumers", () => {
+	// The real-engine regression a review caught: `server/petal/types.ts` re-exports
+	// `$lib/types/petal`, so the alias is the difference between a public type and
+	// one classed as internal.
+	const result = detectAffected({
+		entries: files(["libs/engine/src/lib/types/petal.ts"]),
+		packages: discoverPackages(),
+	});
+
+	assert.ok(result.affectedPackages.includes("libs/engine"));
+	assert.ok(
+		result.affectedPackages.length > 1,
+		"a type change on a public subpath must reach at least one consumer",
+	);
+});
+
+test("every package in the real workspace gets a test command that will exit", () => {
+	// A job that hangs until the runner kills it is a red check with no verdict
+	// in it, which is worse than no check at all (#1796).
+	const packages = discoverPackages();
+	let suites = 0;
+
+	for (const pkg of packages.values()) {
+		if (!pkg.hasTests) continue;
+		suites++;
+		const script = pkg.testCommand === "pnpm test:run" ? pkg.scripts["test:run"] : pkg.scripts.test;
+		assert.ok(script, `${pkg.dir} is in the matrix with no test script`);
+		assert.equal(isOneShot(script), true, `${pkg.dir} would not exit in CI: ${script}`);
+	}
+
+	assert.ok(suites > 0, "the workspace should have test suites");
 });

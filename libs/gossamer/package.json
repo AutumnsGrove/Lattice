@@ -25,6 +25,7 @@
 		"build": "svelte-package -i src -o dist",
 		"check": "svelte-check --tsconfig ./tsconfig.json",
 		"test": "vitest run",
+		"test:run": "vitest run",
 		"test:watch": "vitest",
 		"test:coverage": "vitest run --coverage",
 		"clean": "rm -rf dist",

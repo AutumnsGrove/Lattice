@@ -10,7 +10,18 @@
  * - DELETE: Remove a secret
  */
 
-import { json } from "@sveltejs/kit";
+import { json, error } from "@sveltejs/kit";
+
+/**
+ * Re-throw an HTTP error thrown by a workspace package — see the same helper in
+ * `api/admin/settings`. `throwGroveError()` throws an `HttpError` from the
+ * engine's copy of SvelteKit, which `isHttpError()` here cannot recognise.
+ */
+function rethrowHttpError(err: unknown): void {
+	const status = (err as { status?: number }).status;
+	if (typeof status !== "number" || status < 400 || status > 599) return;
+	throw error(status, (err as { body?: App.Error }).body);
+}
 import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
 import { createSecretsManager } from "@autumnsgrove/lattice/server/secrets";
 import { API_ERRORS, throwGroveError, logGroveError } from "@autumnsgrove/lattice/errors";
@@ -53,7 +64,12 @@ export async function GET({
 			secrets: list,
 		});
 	} catch (err) {
-		if ((err as { status?: number }).status) throw err;
+		// Ownership failures arrive as a plain Error carrying `status`. A
+		// non-owner must not learn the grove exists, so the ownership refusal is
+		// reported as 404 — the tenant-boundary rule, not 403.
+		const status = (err as { status?: number }).status;
+		if (status === 403) throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
+		rethrowHttpError(err);
 		logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
 		throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
 	}
@@ -119,7 +135,12 @@ export async function PUT({
 			message: `Secret '${body.keyName}' saved`,
 		});
 	} catch (err) {
-		if ((err as { status?: number }).status) throw err;
+		// Ownership failures arrive as a plain Error carrying `status`. A
+		// non-owner must not learn the grove exists, so the ownership refusal is
+		// reported as 404 — the tenant-boundary rule, not 403.
+		const status = (err as { status?: number }).status;
+		if (status === 403) throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
+		rethrowHttpError(err);
 		logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
 		throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
 	}
@@ -175,7 +196,12 @@ export async function DELETE({
 			message: `Secret '${body.keyName}' deleted`,
 		});
 	} catch (err) {
-		if ((err as { status?: number }).status) throw err;
+		// Ownership failures arrive as a plain Error carrying `status`. A
+		// non-owner must not learn the grove exists, so the ownership refusal is
+		// reported as 404 — the tenant-boundary rule, not 403.
+		const status = (err as { status?: number }).status;
+		if (status === 403) throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
+		rethrowHttpError(err);
 		logGroveError("API", API_ERRORS.OPERATION_FAILED, { cause: err });
 		throwGroveError(500, API_ERRORS.OPERATION_FAILED, "API", { cause: err });
 	}

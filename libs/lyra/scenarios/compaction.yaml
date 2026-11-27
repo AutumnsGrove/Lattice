@@ -1,0 +1,46 @@
+name: a long run compacts twice and still finishes
+task: scenario-compaction
+input: read the file four times, then finish
+tools:
+  - { name: read, behavior: ok, content: the file, all of it, in one line }
+compaction:
+  context_window: 600
+  reserve_tokens: 100
+  keep_tokens: 2
+  summaries:
+    - { text: the run so far, first update }
+    - { text: the run so far, second update }
+model:
+  - {
+      tool_calls: [{ id: c1, name: read, args: {} }],
+      usage: { input_tokens: 400, output_tokens: 10 },
+    }
+  - {
+      tool_calls: [{ id: c2, name: read, args: {} }],
+      usage: { input_tokens: 450, output_tokens: 10 },
+    }
+  - {
+      tool_calls: [{ id: c3, name: read, args: {} }],
+      usage: { input_tokens: 500, output_tokens: 10 },
+    }
+  - {
+      tool_calls: [{ id: c4, name: read, args: {} }],
+      usage: { input_tokens: 550, output_tokens: 10 },
+    }
+  - {
+      tool_calls: [{ id: c5, name: finish, args: {} }],
+      usage: { input_tokens: 600, output_tokens: 10 },
+    }
+expect_events:
+  - { type: run_start }
+  - { type: turn_end, turn: 3 }
+  - { type: compaction }
+  - { type: compaction }
+  - { type: tool_end, call_id: c5, is_error: false }
+  - { type: run_end, reason: done }
+expect_record:
+  - { type: user_message, label: task }
+  - { type: compaction, trigger: auto, model: scripted/model }
+  - { type: compaction, trigger: auto }
+  - { type: tool_message, toolCallId: c5, isError: false }
+  - { type: status, state: done }

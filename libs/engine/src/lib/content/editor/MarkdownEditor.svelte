@@ -27,8 +27,6 @@
 	import type { MarkdownEditorProps } from "./markdown-editor.types.js";
 	import { useImageUpload } from "./useImageUpload.svelte.js";
 
-	interface Props extends MarkdownEditorProps {}
-
 	// Props
 	let {
 		content = $bindable(""),
@@ -45,7 +43,7 @@
 		configuredCurios = [],
 		serverDraftSlug = null,
 		uploadAccessUrl = null,
-	}: Props = $props();
+	}: MarkdownEditorProps = $props();
 
 	// Derived flags
 	const uploadsEnabled = $derived(flags?.image_uploads ?? true);

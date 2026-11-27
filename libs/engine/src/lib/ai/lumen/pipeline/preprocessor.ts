@@ -187,7 +187,23 @@ const VALID_TASKS: LumenTask[] = [
 	"agent",
 ];
 
-const MAX_MESSAGES = 100; // Max messages in a conversation
+/**
+ * The most messages one request may carry (#1817).
+ *
+ * An agent loop grows by *tool calls*, one assistant message and one result per
+ * call, so a run with a tool per line of work reaches a few hundred messages long
+ * before it is anywhere near a model's context window. A cap of 100 therefore
+ * refused runs that were nowhere close to too big — the timeline's first real
+ * day died at turn 12 with the page three-quarters written, and every recipe had
+ * to discover the number in production and guess a small compaction window as a
+ * proxy for it.
+ *
+ * The bound stays, because an unbounded array is a memory promise nobody can
+ * keep. 400 is a shape a real agent run can reach without being a denial of
+ * service, and it is exported so the worker's wire schema, this check and any
+ * client that wants to read it are all the same number.
+ */
+export const MAX_REQUEST_MESSAGES = 400;
 
 /**
  * Maximum serialized input, in characters.
@@ -241,9 +257,9 @@ export function validateRequest(request: LumenRequest): void {
 	}
 
 	// Check message count
-	if (Array.isArray(request.input) && request.input.length > MAX_MESSAGES) {
+	if (Array.isArray(request.input) && request.input.length > MAX_REQUEST_MESSAGES) {
 		throw new LumenError(
-			`Too many messages (${request.input.length}). Maximum: ${MAX_MESSAGES}`,
+			`Too many messages (${request.input.length}). Maximum: ${MAX_REQUEST_MESSAGES}`,
 			"INVALID_INPUT",
 			{ task: request.task },
 		);

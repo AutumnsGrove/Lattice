@@ -258,6 +258,8 @@ Lumen currently supports two providers:
 
 Tenants can provide their own OpenRouter API key through `options.tenantApiKey`. The request still flows through Lumen's full pipeline (routing, PII scrubbing, logging, normalization) but bills to the tenant's own account. Set `options.skipQuota: true` for BYOK users since they're paying directly.
 
+**Where the key lives:** one secret per tenant, `openrouter_api_key`, set at Arbor → Settings → AI. Features do not own keys and do not invent names for them; they resolve through `resolveOpenRouterKey()` in `@autumnsgrove/lyra-lumen/secrets`, which asks for `openrouter_api_key` first and the timeline's older `timeline_openrouter_key` second. That is the same order and the same two names Warden's alias chain carries, so a feature that goes through Warden and a feature that reads `tenant_secrets` directly find the same key. When there is none, the failure says so and names Settings — not a provider 401.
+
 ---
 
 ## Tool Calling

@@ -7,7 +7,9 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Hono } from "hono";
+import { validateRequest } from "@autumnsgrove/lattice/ai/lumen/pipeline/preprocessor";
 import type { Env, LumenWorkerResponse } from "../types";
+import { MAX_REQUEST_MESSAGES, toLumenMessages } from "../types";
 import { inference } from "./inference";
 
 // =============================================================================
@@ -59,6 +61,93 @@ function postRaw(body: string) {
 		body,
 	});
 }
+
+describe("the request's message allowance", () => {
+	function body(messages: number) {
+		return {
+			task: "agent",
+			input: Array.from({ length: messages }, (_, index) => ({
+				role: index % 2 === 0 ? "user" : "assistant",
+				content: `message ${index}`,
+			})),
+		};
+	}
+
+	it("accepts a conversation an agent loop can actually produce", async () => {
+		// 300 messages is ~100 tool calls with their results: ordinary for a recipe that
+		// asks for one tool per line of work, and refused by the old cap of 100.
+		mockRun.mockResolvedValue({
+			content: "fine",
+			model: "deepseek/v3",
+			provider: "openrouter",
+			usage: { input: 1, output: 1, cost: 0 },
+		});
+		const response = await createApp().request(
+			"/inference",
+			{
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(body(300)),
+			},
+			mockEnv,
+		);
+
+		expect(response.status).toBe(200);
+	});
+
+	it("agrees with the pipeline behind it about the cap", () => {
+		// The regression this pins (#1817): the wire schema said 400 while the engine's
+		// `validateRequest` still refused anything over 100, so the endpoint accepted a
+		// conversation and the client then failed it as INVALID_INPUT. The 300-message
+		// test above passed anyway, because the client is mocked here — which is exactly
+		// how the two numbers drifted apart unnoticed.
+		const conversation = toLumenMessages(body(300).input as never);
+
+		expect(() => validateRequest({ task: "agent", input: conversation })).not.toThrow();
+		expect(() =>
+			validateRequest({
+				task: "agent",
+				input: toLumenMessages(body(MAX_REQUEST_MESSAGES + 1).input as never),
+			}),
+		).toThrow("Too many messages");
+	});
+
+	it("tells the caller the cap, on the answer", async () => {
+		// A client loop should be able to read the limit instead of guessing a
+		// compaction window and finding out in production.
+		mockRun.mockResolvedValue({
+			content: "fine",
+			model: "deepseek/v3",
+			provider: "openrouter",
+			usage: { input: 1, output: 1, cost: 0 },
+		});
+		const response = await createApp().request(
+			"/inference",
+			{
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(body(4)),
+			},
+			mockEnv,
+		);
+
+		expect(response.headers.get("X-Lumen-Max-Messages")).toBe(String(MAX_REQUEST_MESSAGES));
+	});
+
+	it("still refuses a conversation nobody could need", async () => {
+		const response = await createApp().request(
+			"/inference",
+			{
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(body(MAX_REQUEST_MESSAGES + 1)),
+			},
+			mockEnv,
+		);
+
+		expect(response.status).toBe(400);
+	});
+});
 
 describe("POST /inference", () => {
 	beforeEach(() => {

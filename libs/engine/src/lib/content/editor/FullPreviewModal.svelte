@@ -1,5 +1,5 @@
 <script lang="ts">
-	import ContentWithGutter from "$lib/components/custom/ContentWithGutter.svelte";
+	import ContentWithGutter from "$lib/ui/components/custom/ContentWithGutter.svelte";
 	import type { GutterItem as GutterItemProp } from "$lib/utils/gutter";
 
 	interface Props {

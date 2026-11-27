@@ -25,13 +25,16 @@ let DOMPurify: DOMPurifyInstance | null = null;
 if (BROWSER) {
 	import("dompurify")
 		.then((module) => {
-			DOMPurify = module.default;
-
-			// A test or SSR-ish environment can resolve this module without the
-			// DOMPurify instance (module.default is not the factory result). Guard
-			// it: an unhandled rejection here fails the whole suite at teardown,
-			// which is a much worse failure than a missing hook.
-			if (typeof DOMPurify?.addHook !== "function") return;
+			// Assign only a real instance. In a Worker, `BROWSER` can be true (esm-env
+			// picks its browser entry) while the dynamic import resolves to something
+			// that is not an instance, and assigning it made `sanitizeHTML` call
+			// `DOMPurify.sanitize` — not a function. Null is what sends the call down
+			// the sanitize-html path instead.
+			const loaded = module.default;
+			if (typeof loaded?.sanitize !== "function" || typeof loaded.addHook !== "function") {
+				return;
+			}
+			DOMPurify = loaded;
 
 			// Add hook to enforce rel="noopener noreferrer" on external links
 			// This prevents reverse tabnabbing attacks where a linked page could

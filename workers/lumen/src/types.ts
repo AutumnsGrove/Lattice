@@ -6,6 +6,7 @@
  */
 
 import type { GroveContext } from "@autumnsgrove/infra";
+import { MAX_REQUEST_MESSAGES } from "@autumnsgrove/lattice/ai/lumen/pipeline/preprocessor";
 import type { LumenMessage } from "@autumnsgrove/lattice/ai/lumen/types";
 import { z } from "zod";
 
@@ -36,6 +37,12 @@ export interface Env {
 	LUMEN_API_KEY: string;
 	/** Lumen's registered agent API key for Warden auth */
 	WARDEN_API_KEY: string;
+	/**
+	 * A provider key for the local dev stack only, set in `.dev.vars` and never in
+	 * a deployed environment. The dev stack runs no Warden, so without this a
+	 * local Lumen has no way to reach a provider at all.
+	 */
+	DEV_OPENROUTER_API_KEY?: string;
 }
 
 // =============================================================================
@@ -125,10 +132,21 @@ const ToolChoiceSchema = z.union([
 	}),
 ]);
 
+/**
+ * The most messages one request may carry.
+ *
+ * Re-exported from the engine rather than declared here. It was 400 in this file
+ * and still 100 in the pipeline behind it, so the wire schema accepted a
+ * conversation the pipeline then refused with `INVALID_INPUT` — a 300-message
+ * test passed because the client was mocked, and the cap that actually refused
+ * the request was invisible to it (#1817).
+ */
+export { MAX_REQUEST_MESSAGES };
+
 /** POST /inference request body */
 export const InferenceRequestSchema = z.object({
 	task: LumenTaskSchema,
-	input: z.union([z.string().max(102400), z.array(MessageSchema).min(1).max(100)]),
+	input: z.union([z.string().max(102400), z.array(MessageSchema).min(1).max(MAX_REQUEST_MESSAGES)]),
 	tenant_id: z.string().optional(),
 	tier: z.enum(["wanderer", "seedling", "sapling", "oak", "evergreen"]).optional(),
 	options: z

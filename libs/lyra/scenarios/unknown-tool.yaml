@@ -1,0 +1,14 @@
+name: a tool the run does not have is refused with the tools it does
+task: scenario-unknown
+input: search the web
+tools:
+  - { name: read, behavior: ok, content: the issue body }
+model:
+  - tool_calls: [{ id: c1, name: search_the_web, args: { query: lyra } }]
+  - tool_calls: [{ id: c2, name: finish, args: {} }]
+expect_events:
+  - { type: tool_end, call_id: c1, is_error: true }
+  - { type: run_end, reason: done }
+expect_record:
+  - { type: tool_message, toolCallId: c1, isError: true }
+  - { type: status, state: done }

@@ -52,9 +52,7 @@ UI MANIFEST:
 
 **Gate check after return:**
 
-```bash
-gw dev ci --affected --fail-fast
-```
+Run the VERIFICATION.md's self-verification protocol (affected typechecks, affected tests, `pnpm lint`).
 
 Must compile. If it fails, resume the Chameleon with the error.
 
@@ -109,9 +107,7 @@ A11Y REPORT:
 
 **Gate check after return:**
 
-```bash
-gw dev ci --affected --fail-fast
-```
+Run the VERIFICATION.md's self-verification protocol (affected typechecks, affected tests, `pnpm lint`).
 
 Must still compile after a11y fixes.
 

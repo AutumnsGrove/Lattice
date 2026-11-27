@@ -83,7 +83,7 @@ export interface LumenProvider {
 	/**
 	 * Run inference (chat completion)
 	 *
-	 * @param model - Model identifier (e.g., "deepseek/deepseek-chat")
+	 * @param model - Model identifier, as the registry names it (`MODELS.*`)
 	 * @param messages - Chat messages
 	 * @param options - Inference options
 	 * @returns Generated content and usage stats

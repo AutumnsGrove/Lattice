@@ -105,7 +105,7 @@ Dispatch an **opus subagent** to implement authentication. The Spider receives O
 
 **Handoff to conductor:** Auth file list (every file created/modified), auth summary (what was implemented, key decisions), integration points.
 
-**Gate check:** Run `gw dev ci --affected --fail-fast` — must compile. If build fails, resume the Spider agent with error output.
+**Gate check:** Run the VERIFICATION.md's self-verification protocol — must compile. If build fails, resume the Spider agent with error output.
 
 ---
 
@@ -130,7 +130,7 @@ Dispatch a **sonnet subagent** to audit the codebase. The Raccoon receives the f
 
 **Handoff to conductor:** Audit report (findings, fixes applied, remaining concerns), updated file list.
 
-**Gate check:** Run `gw dev ci --affected --fail-fast` — must still compile after audit fixes. If broken, resume Raccoon agent.
+**Gate check:** Run the VERIFICATION.md's self-verification protocol — must still compile after audit fixes. If broken, resume Raccoon agent.
 
 ---
 
@@ -159,7 +159,7 @@ Dispatch an **opus subagent** for adversarial security hardening. The Turtle rec
 
 **Handoff to conductor:** Hardening report (vulnerabilities found, fixes applied, defense layers, remaining risks), updated file list.
 
-**Gate check:** Run `gw dev ci --affected --fail-fast` — must still compile after hardening.
+**Gate check:** Run the VERIFICATION.md's self-verification protocol — must still compile after hardening.
 
 ---
 
@@ -212,7 +212,9 @@ The conductor runs final verification:
 
 ```bash
 pnpm install
-gw dev ci --affected --fail-fast --diagnose
+node .github/scripts/affected-packages.mjs origin/main \
+  | jq '{testMatrix, typecheckMatrix}'
+# then run what it prints, and pnpm lint
 ```
 
 **Validation Checklist:**
@@ -256,7 +258,7 @@ GATE LOG
   After Raccoon:  ✅ compiles clean, audit findings resolved
   After Turtle:   ✅ compiles clean, hardening applied
   Iterations:     [N iterations, all resolved / none needed]
-  Final CI:       ✅ gw dev ci --affected passes
+  Final CI:       ✅ verification protocol clean
 
 HARDENING SUMMARY
   | Defense Layer    | Status | Details                    |

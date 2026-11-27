@@ -1,0 +1,22 @@
+name: a bad repo name is rejected, corrected, and the run finishes
+recipe: timeline-test
+input:
+  repos: [lattice]
+  commits:
+    - { repo: lattice, sha: abc123, message: Fix the thing }
+model:
+  - tool_calls: [{ id: t1, name: start_project, args: { repo: not-a-repo } }]
+  - tool_calls: [{ id: t2, name: start_project, args: { repo: lattice } }]
+  - tool_calls:
+      [{ id: t3, name: add_line, args: { project: lattice, text: Fixed it, cites: [c1] } }]
+  - tool_calls: [{ id: t4, name: finish, args: {} }]
+expect_events:
+  - { type: run_start }
+  - { type: tool_end, call_id: t1, is_error: true }
+  - { type: tool_end, call_id: t2, is_error: false }
+  - { type: tool_end, call_id: t3, is_error: false }
+  - { type: tool_end, call_id: t4, is_error: false }
+  - { type: run_end, reason: done }
+expect_record:
+  - { type: user_message, label: task }
+  - { type: status, state: done }

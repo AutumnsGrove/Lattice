@@ -595,8 +595,7 @@
 		margin-bottom: 1.5rem;
 	}
 
-	.customization-section h4,
-	.customization-section h5 {
+	.customization-section h4 {
 		font-size: 0.875rem;
 		font-weight: 600;
 		margin: 0 0 0.75rem 0;

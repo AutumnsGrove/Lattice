@@ -39,6 +39,7 @@
 
 	import { saveTokenIndividually as saveTokenApi } from "./timeline-api";
 	import TimelineBackfillSection from "./TimelineBackfillSection.svelte";
+	import TimezonePicker from "./TimezonePicker.svelte";
 	import TimelineGenerateSection from "./TimelineGenerateSection.svelte";
 
 	const { data, form }: { data: PageData; form: ActionData } = $props();
@@ -48,7 +49,7 @@
 	let githubUsername = $state("");
 	let githubToken = $state("");
 	let openrouterKey = $state("");
-	let openrouterModel = $state("deepseek/deepseek-v4-flash-0731");
+	let openrouterModel = $state("");
 	let voicePreset = $state("professional");
 	let customSystemPrompt = $state("");
 	let customSummaryInstructions = $state("");
@@ -63,7 +64,9 @@
 		if (data.config) {
 			enabled = data.config.enabled ?? false;
 			githubUsername = data.config.githubUsername ?? "";
-			openrouterModel = data.config.openrouterModel ?? "deepseek/deepseek-v4-flash-0731";
+			// The server always sends one: the tenant's saved model, or the timeline default
+			// from the registry. A second literal here was a third place to change a model (#1602).
+			openrouterModel = data.config.openrouterModel ?? "";
 			voicePreset = data.config.voicePreset ?? "professional";
 			customSystemPrompt = data.config.customSystemPrompt ?? "";
 			customSummaryInstructions = data.config.customSummaryInstructions ?? "";
@@ -91,26 +94,29 @@
 	let openrouterKeySaving = $state(false);
 	let openrouterKeyResult = $state<{ ok: boolean; message: string } | null>(null);
 
-	// Common timezones
-	const timezones = [
-		{ value: "America/New_York", label: "Eastern Time (US)" },
-		{ value: "America/Chicago", label: "Central Time (US)" },
-		{ value: "America/Denver", label: "Mountain Time (US)" },
-		{ value: "America/Los_Angeles", label: "Pacific Time (US)" },
-		{ value: "America/Phoenix", label: "Arizona (US)" },
-		{ value: "Europe/London", label: "London (UK)" },
-		{ value: "Europe/Paris", label: "Paris (France)" },
-		{ value: "Europe/Berlin", label: "Berlin (Germany)" },
-		{ value: "Asia/Tokyo", label: "Tokyo (Japan)" },
-		{ value: "Asia/Shanghai", label: "Shanghai (China)" },
-		{ value: "Australia/Sydney", label: "Sydney (Australia)" },
-		{ value: "Pacific/Auckland", label: "Auckland (New Zealand)" },
-	];
+	// A saved model the picker no longer offers still has to appear, or the select
+	// renders blank and looks like nothing was chosen.
+	const modelOptions = $derived.by(() => {
+		const models = data.models ?? [];
+		if (openrouterModel === "" || models.some((model) => model.id === openrouterModel)) {
+			return models;
+		}
+		return [
+			{
+				id: openrouterModel,
+				name: `${openrouterModel} (not offered any more)`,
+				quality: "medium",
+				speed: "medium",
+				inputCostPer1M: 0,
+				outputCostPer1M: 0,
+				isDefault: false,
+			},
+			...models,
+		];
+	});
 
 	// Check if using custom voice
 	const isCustomVoice = $derived(voicePreset === "custom");
-
-
 
 	async function saveTokenIndividually(type: "github" | "openrouter") {
 		const value = type === "github" ? githubToken : openrouterKey;
@@ -251,12 +257,7 @@
 
 			<div class="field-group">
 				<label for="timezone" class="field-label">Timezone</label>
-				<select id="timezone" name="timezone" bind:value={timezone} class="field-select">
-					{#each timezones as tz}
-						<option value={tz.value}>{tz.label}</option>
-					{/each}
-				</select>
-				<p class="field-help">Summaries are generated based on your local midnight.</p>
+				<TimezonePicker bind:value={timezone} saved={data.config?.timezoneIsSaved ?? false} />
 			</div>
 		</GlassCard>
 
@@ -459,7 +460,7 @@
 					bind:value={openrouterModel}
 					class="field-select"
 				>
-					{#each data.models as model}
+					{#each modelOptions as model}
 						<option value={model.id}>
 							{model.name} — ${model.inputCostPer1M}/M in, ${model.outputCostPer1M}/M out{model.isDefault
 								? " (Recommended)"

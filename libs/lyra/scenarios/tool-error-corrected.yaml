@@ -1,0 +1,16 @@
+name: a tool error is handed back and the model corrects itself
+task: scenario-corrected
+input: read the repo
+tools:
+  - { name: read, behavior: error, content: "no such repo; the repos are lattice and engine" }
+model:
+  - tool_calls: [{ id: c1, name: read, args: { repo: not-a-repo } }]
+  - tool_calls: [{ id: c2, name: finish, args: {} }]
+expect_events:
+  - { type: tool_end, call_id: c1, is_error: true }
+  - { type: message_end }
+  - { type: run_end, reason: done }
+expect_record:
+  - { type: assistant_message, finish_reason: tool_calls }
+  - { type: tool_message, toolCallId: c1, isError: true }
+  - { type: status, state: done }

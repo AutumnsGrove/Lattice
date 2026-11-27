@@ -31,15 +31,6 @@ export const PETAL_PROVIDERS: Record<string, PetalProviderConfig> = {
 		model: MODELS.CLAUDE_HAIKU_55,
 		timeoutMs: 20000,
 	},
-	openrouter_gemma: {
-		name: "OpenRouter - Gemma 4 26B",
-		type: "external_api",
-		role: "fallback",
-		zdr: false,
-		csamScan: false,
-		model: MODELS.GEMMA_4_26B,
-		timeoutMs: 20000,
-	},
 	workers_ai_llama4: {
 		name: "Cloudflare Workers AI - Llama 4 Scout",
 		type: "workers_ai",
@@ -56,11 +47,7 @@ export const PETAL_PROVIDERS: Record<string, PetalProviderConfig> = {
 /**
  * Provider fallback cascade for content classification
  */
-export const PETAL_PROVIDER_CASCADE = [
-	"openrouter_haiku",
-	"openrouter_gemma",
-	"workers_ai_llama4",
-] as const;
+export const PETAL_PROVIDER_CASCADE = ["openrouter_haiku", "workers_ai_llama4"] as const;
 
 // ============================================================================
 // Content Categories

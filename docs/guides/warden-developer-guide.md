@@ -112,6 +112,8 @@ If neither exists, Warden returns a `NO_CREDENTIAL` error with HTTP 503.
 
 Some services have multiple key names because different parts of the system saved credentials under different names historically. For example, OpenRouter checks `openrouter_api_key` first, then `timeline_openrouter_key`. The alias chain in `TENANT_CREDENTIAL_ALIASES` handles this transparently.
 
+`openrouter_api_key` is now the canonical home: Arbor → Settings → AI writes it, and the timeline's settings screen writes it too. The timeline's `save-token` endpoint is the one place that still writes both names, so the legacy one stays in step until nothing reads it. Code that reads `tenant_secrets` directly instead of asking Warden uses `resolveOpenRouterKey()` from `@autumnsgrove/lyra-lumen/secrets`, which carries the same two names in the same order — so the two paths cannot disagree about which key a tenant has.
+
 ### Global Credential Map
 
 Every `WardenService` maps to exactly one environment variable:

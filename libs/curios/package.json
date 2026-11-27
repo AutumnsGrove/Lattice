@@ -39,6 +39,30 @@
 			"types": "./src/timeline/index.ts",
 			"default": "./src/timeline/index.ts"
 		},
+		"./timeline/day": {
+			"types": "./src/timeline/day/index.ts",
+			"default": "./src/timeline/day/index.ts"
+		},
+		"./timeline/recipe": {
+			"types": "./src/timeline/recipe/index.ts",
+			"default": "./src/timeline/recipe/index.ts"
+		},
+		"./timeline/render": {
+			"types": "./src/timeline/render.ts",
+			"default": "./src/timeline/render.ts"
+		},
+		"./timeline/record": {
+			"types": "./src/timeline/record/index.ts",
+			"default": "./src/timeline/record/index.ts"
+		},
+		"./timeline/generate": {
+			"types": "./src/timeline/generate.ts",
+			"default": "./src/timeline/generate.ts"
+		},
+		"./timeline/summary": {
+			"types": "./src/timeline/summary.ts",
+			"default": "./src/timeline/summary.ts"
+		},
 		"./timeline/secrets.server": {
 			"types": "./src/timeline/secrets.server.ts",
 			"default": "./src/timeline/secrets.server.ts"
@@ -78,7 +102,9 @@
 	},
 	"dependencies": {
 		"@autumnsgrove/grove-crypto": "workspace:*",
-		"@autumnsgrove/grove-errors": "workspace:*"
+		"@autumnsgrove/grove-errors": "workspace:*",
+		"@autumnsgrove/lumen-registry": "workspace:*",
+		"@autumnsgrove/lyra": "^0.3.1"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20260317.1",

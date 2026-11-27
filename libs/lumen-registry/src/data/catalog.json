@@ -1,0 +1,138 @@
+{
+	"source": "https://openrouter.ai/api/v1/models/{id}/endpoints",
+	"fetchedAt": "2026-11-26T21:24:21.713Z",
+	"models": {
+		"deepseek/deepseek-v4.1-flash-1017": {
+			"id": "deepseek/deepseek-v4.1-flash-1017",
+			"name": "DeepSeek: DeepSeek V4.1 Flash 1017",
+			"contextWindow": 1048576,
+			"maxOutputTokens": 943718,
+			"pricing": {
+				"input": 0.04,
+				"output": 0.1
+			},
+			"tiered": true
+		},
+		"deepseek/deepseek-v4.1-flash": {
+			"id": "deepseek/deepseek-v4.1-flash",
+			"name": "DeepSeek: DeepSeek V4.1 Flash",
+			"contextWindow": 1048576,
+			"maxOutputTokens": 943718,
+			"pricing": {
+				"input": 0.0507,
+				"output": 0.2028
+			},
+			"tiered": true
+		},
+		"deepseek/deepseek-v4-flash-0731": {
+			"id": "deepseek/deepseek-v4-flash-0731",
+			"name": "DeepSeek: DeepSeek V4 Flash 0731",
+			"contextWindow": 1048576,
+			"maxOutputTokens": 943718,
+			"pricing": {
+				"input": 0.04532,
+				"output": 0.13596
+			},
+			"tiered": true
+		},
+		"deepseek/deepseek-v3.2": {
+			"id": "deepseek/deepseek-v3.2",
+			"name": "DeepSeek: DeepSeek V3.2",
+			"contextWindow": 163840,
+			"maxOutputTokens": 147456,
+			"pricing": {
+				"input": 0.26,
+				"output": 0.38
+			},
+			"tiered": false
+		},
+		"minimax/minimax-m3": {
+			"id": "minimax/minimax-m3",
+			"name": "MiniMax: MiniMax M3",
+			"contextWindow": 1048576,
+			"maxOutputTokens": 524288,
+			"pricing": {
+				"input": 0.224,
+				"output": 0.88
+			},
+			"tiered": false
+		},
+		"openai/gpt-oss-120b": {
+			"id": "openai/gpt-oss-120b",
+			"name": "OpenAI: gpt-oss-120b",
+			"contextWindow": 131072,
+			"maxOutputTokens": 117964,
+			"pricing": {
+				"input": 0.03,
+				"output": 0.15
+			},
+			"tiered": false
+		},
+		"qwen/qwen3.8-flash": {
+			"id": "qwen/qwen3.8-flash",
+			"name": "Qwen: Qwen3.8 Flash",
+			"contextWindow": 1000000,
+			"maxOutputTokens": 131072,
+			"pricing": {
+				"input": 0.15,
+				"output": 0.47
+			},
+			"tiered": false
+		},
+		"anthropic/claude-haiku-5.5": {
+			"id": "anthropic/claude-haiku-5.5",
+			"name": "Anthropic: Claude Haiku 5.5",
+			"contextWindow": 1000000,
+			"maxOutputTokens": 128000,
+			"pricing": {
+				"input": 0.1,
+				"output": 0.5
+			},
+			"tiered": true
+		},
+		"openai/gpt-oss-safeguard-20b": {
+			"id": "openai/gpt-oss-safeguard-20b",
+			"name": "OpenAI: gpt-oss-safeguard-20b",
+			"contextWindow": 131072,
+			"maxOutputTokens": 117964,
+			"pricing": {
+				"input": 0.07,
+				"output": 0.2
+			},
+			"tiered": false
+		},
+		"meta-llama/llama-guard-4-12b": {
+			"id": "meta-llama/llama-guard-4-12b",
+			"name": "Meta: Llama Guard 4 12B",
+			"contextWindow": 163840,
+			"maxOutputTokens": 147456,
+			"pricing": {
+				"input": 0.144,
+				"output": 0.144
+			},
+			"tiered": false
+		},
+		"perplexity/pplx-embed-v1-0.6b": {
+			"id": "perplexity/pplx-embed-v1-0.6b",
+			"name": "Perplexity: Embed V1 0.6B",
+			"contextWindow": 32000,
+			"maxOutputTokens": 28800,
+			"pricing": {
+				"input": 0.004,
+				"output": 0
+			},
+			"tiered": false
+		},
+		"baai/bge-m3": {
+			"id": "baai/bge-m3",
+			"name": "BAAI: bge-m3",
+			"contextWindow": 8194,
+			"maxOutputTokens": 7374,
+			"pricing": {
+				"input": 0.01,
+				"output": 0
+			},
+			"tiered": false
+		}
+	}
+}

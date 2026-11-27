@@ -12,15 +12,19 @@
  *   1. Files that can only be data — docs, tests, migrations, JSON, images —
  *      revalidate their own package. They do not cascade to every consumer,
  *      because no consumer's types can change because a value did.
- *   2. Only changes to genuinely global inputs (the lockfile, the workspace
- *      manifest, the shared tsconfig, the engine's term manifest) invalidate
- *      every package. A data file that happens to live under `scripts/` is not
- *      one of those.
+ *   2. Only changes to genuinely global inputs (the workspace manifest, the
+ *      shared tsconfig, the engine's term manifest) invalidate every package.
+ *      A data file that happens to live under `scripts/` is not one of those.
+ *   3. A lockfile change is only as wide as the importers it touched. Two
+ *      packages gaining a dependency does not revalidate the other twenty-five
+ *      — unless a `packages:`/`snapshots:` entry moved, which is a genuinely
+ *      shared resolution and still invalidates everything (#1795).
  *
  * Usage:
  *   node affected-packages.mjs <base-ref>
  *   node affected-packages.mjs main            # compare against main
  *   node affected-packages.mjs HEAD~1          # compare against the last commit
+ *   node affected-packages.mjs --all           # weekly sweep: skip detection
  *
  * Output: JSON — affected packages, per-package check/test matrices for GitHub
  * Actions, and scope flags for path-gating whole CI jobs.
@@ -30,6 +34,12 @@ import { execSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import {
+	exposedBy,
+	importedSpecifiers,
+	loadEngineSurface,
+	specifierMatches,
+} from "./engine-exports.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..", "..");
@@ -58,9 +68,51 @@ const CHECK_OVERRIDES = {
 };
 
 /**
+ * Whether a script is a single run rather than a watcher.
+ *
+ * A bare `vitest` (or `jest`, `mocha`, `ava`) sits and waits for file changes on
+ * a CI runner, where nothing ever changes, until the job times out — a red check
+ * with no verdict in it. The runner only leaves when the command names a mode
+ * that exits, so that is what this looks for (#1796).
+ *
+ * A command with no watcher-capable runner in it at all — `tsc --noEmit`,
+ * `node --test`, `playwright test` — already exits, and is left alone.
+ */
+export function isOneShot(command) {
+	const WATCHERS = /(?:^|[\s/])(?:vitest|jest|mocha|ava|tap)(?=$|[\s/])/;
+	const WATCH_FLAGS = /(?:^|\s)(?:-w|--watch|--watchAll|--ui)(?=$|[\s=])/;
+	const ONCE_MODES = /(?:^|\s)(?:run|--run|--runInBand|--ci|--single-run)(?=$|\s)/;
+
+	const watcher = WATCHERS.exec(command);
+	if (!watcher) return true;
+
+	// Only the runner's own arguments decide. `npm run build && vitest` must not
+	// be read as `vitest run` because a `run` appears earlier on the line.
+	const args = command.slice(watcher.index + watcher[0].length);
+	if (WATCH_FLAGS.test(args)) return false;
+	return ONCE_MODES.test(args);
+}
+
+/**
+ * The command that runs a package's tests in CI, or null if it has no runnable
+ * suite.
+ *
+ * `test:run` first, because that name already means "the one CI runs". Falling
+ * back to `test` is only safe when that script cannot watch — the mismatch
+ * between a detector admitting a package on `test` and the job running
+ * `test:run` is what let `libs/gossamer` and `libs/shutter/cloudflare` carry
+ * suites CI could never run.
+ */
+export function testCommandFor(scripts) {
+	if (scripts["test:run"]) return "pnpm test:run";
+	if (scripts.test && isOneShot(scripts.test)) return "pnpm test";
+	return null;
+}
+
+/**
  * A package directory turned into the metadata the matrix needs.
  * Commands are derived from the package's own scripts so there is exactly one
- * source of truth for "how do I check this package".
+ * source of truth for "how do I check this package" and "how do I test it".
  */
 function describePackage(root, dir) {
 	const abs = join(root, dir);
@@ -75,6 +127,7 @@ function describePackage(root, dir) {
 	}
 
 	const scripts = pkg.scripts || {};
+	const testCommand = testCommandFor(scripts);
 	const deps = {
 		...pkg.peerDependencies,
 		...pkg.devDependencies,
@@ -97,9 +150,24 @@ function describePackage(root, dir) {
 		scripts,
 		deps,
 		typecheck,
-		hasTests: Boolean(scripts["test:run"] || scripts.test),
-		isSvelteKit: existsSync(join(abs, "svelte.config.js")),
+		testCommand,
+		hasTests: testCommand !== null,
+		// A config file alone does not make a package SvelteKit-capable: `libs/gossamer`
+		// has one and no `@sveltejs/kit`, so `pnpm exec svelte-kit sync` there is
+		// "Command svelte-kit not found". The sync step needs the binary, and the
+		// binary comes from the dependency, so that is what this asks.
+		isSvelteKit: existsSync(join(abs, "svelte.config.js")) && declaresKit(pkg),
 	};
+}
+
+/** Whether a package declares SvelteKit itself rather than inheriting it. */
+function declaresKit(pkg) {
+	for (const field of ["dependencies", "devDependencies", "peerDependencies"]) {
+		if (pkg[field] && Object.hasOwn(pkg[field], "@sveltejs/kit")) {
+			return true;
+		}
+	}
+	return false;
 }
 
 /** Every workspace package, keyed by its directory. */
@@ -146,10 +214,11 @@ export function buildDependents(packages) {
 // ─── What a changed file means ──────────────────────────────────────
 
 // Changes to these invalidate the whole workspace: they are build inputs for
-// every package, not content for one of them.
+// every package, not content for one of them. `pnpm-lock.yaml` is deliberately
+// absent — it is global only when a shared resolution moved, so it is scoped by
+// importer instead (see `diffLockfile` below).
 const GLOBAL_FILES = new Set([
 	"package.json",
-	"pnpm-lock.yaml",
 	"pnpm-workspace.yaml",
 	"tsconfig.base.json",
 	// libs/engine's `prepackage` step regenerates the term manifest from this
@@ -202,6 +271,88 @@ export function fileToPackage(file, packages) {
 	return match;
 }
 
+// ─── Lockfile scope ─────────────────────────────────────────────────
+
+const LOCKFILE = "pnpm-lock.yaml";
+
+/**
+ * Split a pnpm lockfile into its `importers:` section and everything else.
+ *
+ * Both halves matter and they mean different things: `importers:` records what
+ * each workspace package asked for, so a change inside one entry is scoped to
+ * that package. Anything outside it — `packages:`, `snapshots:`, `settings:`,
+ * `overrides:` — is a resolution every importer shares, which is the only way a
+ * lockfile change is genuinely global (#1795).
+ *
+ * Returns null when the text has no recognisable `importers:` section, which is
+ * the cue for every caller to fall back to "this could be anything".
+ */
+export function splitLockfile(text) {
+	const lines = text.split("\n");
+	const start = lines.findIndex((line) => /^importers:\s*$/.test(line));
+	if (start === -1) return null;
+
+	const importers = new Map();
+	let current = null;
+	let end = lines.length;
+
+	for (let i = start + 1; i < lines.length; i++) {
+		const line = lines[i];
+		if (line.trim() === "") continue;
+		// Back to column 0: the importers section closed (e.g. `packages:`).
+		if (!/^\s/.test(line)) {
+			end = i;
+			break;
+		}
+		// An importer key sits at two-space indent: `  apps/aspen:` — optionally
+		// quoted, and usually followed by a blank line and its nested entries.
+		const key = /^ {2}(?:'([^']+)'|"([^"]+)"|([^:\s][^:]*)):\s*(?:#.*)?$/.exec(line);
+		if (key) {
+			current = (key[1] ?? key[2] ?? key[3]).trim();
+			importers.set(current, []);
+			continue;
+		}
+		if (current) importers.get(current).push(line);
+	}
+
+	if (importers.size === 0) return null;
+
+	// Everything that is not part of an importer entry: before the section,
+	// after it, and the section header itself.
+	const shared = [...lines.slice(0, start), ...lines.slice(end)].join("\n");
+
+	return { importers, shared };
+}
+
+/**
+ * What a lockfile change actually touched.
+ *
+ * `sharedChanged` is the conservative answer: a resolution every package sees
+ * moved, or the file could not be read/parsed, so nothing narrower is safe.
+ * Otherwise `changedImporters` lists the workspace directories whose own
+ * dependency block moved, and the caller cascades from those.
+ */
+export function diffLockfile(before, after) {
+	const oldSide = before == null ? null : splitLockfile(before);
+	const newSide = after == null ? null : splitLockfile(after);
+
+	// Added, deleted, or unrecognisable: assume the worst rather than ship a
+	// broken install with green checks.
+	if (!oldSide || !newSide) return { sharedChanged: true, changedImporters: [] };
+	if (oldSide.shared !== newSide.shared) return { sharedChanged: true, changedImporters: [] };
+
+	const changed = new Set();
+	for (const [dir, body] of newSide.importers) {
+		const previous = oldSide.importers.get(dir);
+		if (!previous || previous.join("\n") !== body.join("\n")) changed.add(dir);
+	}
+	for (const dir of oldSide.importers.keys()) {
+		if (!newSide.importers.has(dir)) changed.add(dir);
+	}
+
+	return { sharedChanged: false, changedImporters: [...changed].sort() };
+}
+
 // ─── Scope flags for path-gating whole jobs ─────────────────────────
 /**
  * Booleans for jobs that are useful only for some kinds of change.
@@ -221,12 +372,12 @@ export function classifyScope(entries) {
 	);
 
 	return {
-		engine: touched(/^libs\/engine\//) || files.some((f) => GLOBAL_FILES.has(f)),
+		engine: touched(/^libs\/engine\//) || files.some((f) => GLOBAL_FILES.has(f) || f === LOCKFILE),
 		ui: touched(/\.(svelte|css)$/),
 		tooling:
 			touched(/^(\.github|tools|scripts)\//) ||
 			touched(/(^|\/)README/) ||
-			files.some((f) => GLOBAL_FILES.has(f)) ||
+			files.some((f) => GLOBAL_FILES.has(f) || f === LOCKFILE) ||
 			structure,
 		structure,
 	};
@@ -235,35 +386,138 @@ export function classifyScope(entries) {
 // ─── The decision ───────────────────────────────────────────────────
 
 /**
+ * Which packages a set of changed engine files can actually reach.
+ *
+ * The engine is a library with 144 subpath exports over one source tree, so
+ * "something in the engine changed" is not the same question as "every consumer
+ * is affected". A helper under `src/lib/platform/config` is visible to the
+ * packages that import `lattice/platform/config` (or a file under it); a
+ * component the root barrel re-exports wholesale is visible to everyone.
+ *
+ * Returns null when the engine did not change, and a `global` scope when the
+ * change cannot be narrowed — the root barrel, `package.json`, a build config,
+ * or an `exports` map we could not read. Narrowing on a guess is the one
+ * failure mode that ships a broken import with green checks, so anything
+ * unattributable widens instead.
+ */
+function scopeEngineCascade({ entries, packages, root, engineDir, dependents }) {
+	if (!engineDir) return null;
+
+	const engineDependents = dependents.get(engineDir) || [];
+	const structural = entries
+		.filter((entry) => fileToPackage(entry.path, packages) === engineDir)
+		.map((entry) => entry.path)
+		.filter((file) => !isContentOnly(file));
+
+	// A README or a migration cannot move a type, so it reaches nobody. Answering
+	// that before reading the exports map keeps the cheap case cheap.
+	if (structural.length === 0) return { global: false, dependents: [] };
+
+	const surface = loadEngineSurface(root);
+	if (!surface) return { global: true, dependents: engineDependents };
+
+	const exposedKeys = new Set();
+	let global = false;
+	for (const file of structural) {
+		const exposed = exposedBy(surface, file);
+		// Nothing names it and nothing re-exports it: no consumer's types can move.
+		if (exposed.size === 0) continue;
+		// `*` is "could not be attributed" — package.json, a build config, a file
+		// outside `src/lib`. `.` is *not* that: it is one export key like any other,
+		// visible to the packages that import the root and to nobody else.
+		if (exposed.has("*")) {
+			global = true;
+			break;
+		}
+		for (const key of exposed) exposedKeys.add(key);
+	}
+
+	if (global) return { global: true, dependents: engineDependents };
+	if (exposedKeys.size === 0) return { global: false, dependents: [] };
+
+	const cache = new Map();
+	const reached = engineDependents.filter((dir) => {
+		for (const specifier of importedSpecifiers(root, dir, cache)) {
+			for (const key of exposedKeys) {
+				if (specifierMatches(specifier, key)) return true;
+			}
+		}
+		return false;
+	});
+
+	return { global: false, dependents: reached };
+}
+
+/**
  * Pure core of the detector: given changed files (and their git status),
  * return the affected set and the matrices CI needs.
+ *
+ * `lockfile` carries the result of `diffLockfile` when the caller could read
+ * both sides. Omitting it while `pnpm-lock.yaml` is in the diff keeps the old,
+ * safe behaviour: everything is affected.
+ *
+ * `sweep` bypasses the affected detection entirely and checks every package and
+ * every gated job. Nothing is wrong with the diff — the point is that "nothing
+ * changed" is exactly how a package stays broken for months (#1797).
  */
-export function detectAffected({ entries, packages, root = REPO_ROOT }) {
+export function detectAffected({ entries, packages, root = REPO_ROOT, lockfile, sweep }) {
 	const files = entries.map((e) => e.path);
+	const lockfileChanged = files.includes(LOCKFILE);
+	const lockfileScoped =
+		lockfileChanged && lockfile && !lockfile.sharedChanged && lockfile.changedImporters;
 
-	const runAll = files.some((f) => GLOBAL_FILES.has(f));
+	// Importers that no longer map onto a package (the root `.` importer, a
+	// package that moved) cannot be scoped to anyone, so they are shared.
+	const unscopable = lockfileScoped && lockfile.changedImporters.some((dir) => !packages.has(dir));
 
-	// Every changed file revalidates the package that owns it.
+	const runAll =
+		sweep ||
+		files.some((f) => GLOBAL_FILES.has(f)) ||
+		(lockfileChanged && (!lockfileScoped || unscopable));
+
+	// Every changed file revalidates the package that owns it. A changed
+	// lockfile importer is a structural change to that package: its own
+	// dependencies moved, so its types can move with them.
 	const directlyChanged = new Set();
 	for (const file of files) {
 		const dir = fileToPackage(file, packages);
 		if (dir) directlyChanged.add(dir);
 	}
+	if (lockfileScoped && !unscopable) {
+		for (const dir of lockfile.changedImporters) directlyChanged.add(dir);
+	}
 
 	// Only structural changes cascade to consumers.
+	const engineDir = [...packages.values()].find((p) => p.name === "@autumnsgrove/lattice")?.dir;
+	const dependents = buildDependents(packages);
+
+	// Engine caveats only the packages that can actually import what moved. Its
+	// 144 subpath exports are not one surface, and which one a file lands in is
+	// read from the package's own `exports` map rather than assumed (#1786).
+	const engineScope = runAll
+		? null
+		: scopeEngineCascade({ entries, packages, root, engineDir, dependents });
+
 	const cascadeSources = new Set();
 	for (const file of files) {
 		if (isContentOnly(file)) continue;
 		const dir = fileToPackage(file, packages);
-		if (dir) cascadeSources.add(dir);
+		// Engine's fan-out is decided per file in `scopeEngineCascade`. Queueing the
+		// directory here would put all 27 of its dependents back on the critical
+		// path for a change to one helper.
+		if (dir && dir !== engineDir) cascadeSources.add(dir);
 	}
-
-	const dependents = buildDependents(packages);
+	if (lockfileScoped && !unscopable) {
+		for (const dir of lockfile.changedImporters) cascadeSources.add(dir);
+	}
 
 	const affected = runAll ? new Set(packages.keys()) : new Set(directlyChanged);
 	if (!runAll) {
+		const engineDependents = engineScope?.dependents ?? [];
+		for (const dir of engineDependents) affected.add(dir);
+
 		const walked = new Set();
-		const queue = [...cascadeSources];
+		const queue = [...cascadeSources, ...engineDependents];
 		while (queue.length > 0) {
 			const dir = queue.shift();
 			if (walked.has(dir)) continue;
@@ -277,7 +531,6 @@ export function detectAffected({ entries, packages, root = REPO_ROOT }) {
 
 	// Engine is a library: any package that imports it needs its dist built
 	// before its own typecheck can resolve `@autumnsgrove/lattice`.
-	const engineDir = [...packages.values()].find((p) => p.name === "@autumnsgrove/lattice")?.dir;
 	const needsEngine =
 		runAll ||
 		(engineDir !== undefined &&
@@ -296,7 +549,12 @@ export function detectAffected({ entries, packages, root = REPO_ROOT }) {
 		const name = dir.split("/").pop();
 
 		if (pkg.hasTests) {
-			testMatrix.push({ package: dir, name, isSvelteKit: pkg.isSvelteKit });
+			testMatrix.push({
+				package: dir,
+				name,
+				command: pkg.testCommand,
+				isSvelteKit: pkg.isSvelteKit,
+			});
 		}
 
 		if (pkg.typecheck) {
@@ -315,9 +573,15 @@ export function detectAffected({ entries, packages, root = REPO_ROOT }) {
 		affectedPackages: [...affected].sort(),
 		runAll,
 		needsEngine,
+		sweep: Boolean(sweep),
 		testMatrix,
 		typecheckMatrix,
-		scope: classifyScope(entries, packages),
+		// A sweep has no diff worth reading scope from, so every gated job runs
+		// too — a scheduled barrel or accent check that skipped is a package that
+		// stays broken with nobody looking at it.
+		scope: sweep
+			? { engine: true, ui: true, tooling: true, structure: false }
+			: classifyScope(entries, packages),
 	};
 }
 
@@ -353,24 +617,77 @@ export function getChangedEntries(baseRef) {
 
 // ─── CLI ────────────────────────────────────────────────────────────
 
+/** The lockfile as it stood at a ref, or null when it cannot be read. */
+function lockfileAt(ref) {
+	try {
+		return execSync(`git show ${ref}:${LOCKFILE}`, {
+			encoding: "utf8",
+			cwd: REPO_ROOT,
+			maxBuffer: 256 * 1024 * 1024,
+			stdio: ["ignore", "pipe", "ignore"],
+		});
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * Both sides of the lockfile for the diff being measured.
+ *
+ * The three-dot diff `getChangedEntries` uses compares against the merge base,
+ * so the lockfile has to be read from that same commit — reading `baseRef`
+ * would fold in every dependency change `main` picked up since the branch was
+ * cut and widen the scope for no reason.
+ */
+export function readLockfilePair(baseRef) {
+	let mergeBase = baseRef;
+	try {
+		mergeBase = execSync(`git merge-base ${baseRef} HEAD`, {
+			encoding: "utf8",
+			cwd: REPO_ROOT,
+			stdio: ["ignore", "pipe", "ignore"],
+		}).trim();
+	} catch {
+		// Not a commit, or not fetched: `baseRef` itself is the best we have.
+	}
+
+	const path = join(REPO_ROOT, LOCKFILE);
+	return {
+		before: lockfileAt(mergeBase),
+		after: existsSync(path) ? readFileSync(path, "utf8") : null,
+	};
+}
+
 function main() {
-	const baseRef = process.argv[2] || "main";
+	// `--all` is what the weekly sweep (and `workflow_dispatch` with run-all) uses:
+	// no diff is worth scoping against, so every package and every gated job runs.
+	const args = process.argv.slice(2);
+	const sweep = args.includes("--all");
+	const baseRef = args.find((a) => !a.startsWith("--")) || "main";
 	const entries = getChangedEntries(baseRef);
 	const packages = discoverPackages(REPO_ROOT);
 
+	// Only pay for reading a ~1MB lockfile twice when it is actually in the diff.
+	let lockfile;
+	if (entries.some((e) => e.path === LOCKFILE)) {
+		const { before, after } = readLockfilePair(baseRef);
+		lockfile = diffLockfile(before, after);
+	}
+
 	const result =
-		entries.length === 0
+		entries.length === 0 && !sweep
 			? {
 					changedFiles: 0,
 					directlyChanged: [],
 					affectedPackages: [],
 					runAll: false,
 					needsEngine: false,
+					sweep: false,
 					testMatrix: [],
 					typecheckMatrix: [],
 					scope: { engine: false, ui: false, tooling: false, structure: false },
 				}
-			: detectAffected({ entries, packages, root: REPO_ROOT });
+			: detectAffected({ entries, packages, root: REPO_ROOT, lockfile, sweep });
 
 	console.log(JSON.stringify(result));
 }

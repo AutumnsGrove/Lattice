@@ -329,6 +329,39 @@ describe("Worker HTTP Handler", () => {
 			expect(data).toHaveProperty("tenants");
 		});
 
+		it("counts a tenant as ready when only the canonical AI key is saved", async () => {
+			// A key set in Settings → AI lives under openrouter_api_key. A diagnostic
+			// that only knew the timeline's old name would report that tenant as
+			// broken, which is worse than reporting nothing (#1801).
+			(getEnabledTenants as any).mockResolvedValue([createMockTenant()]);
+
+			const env = createMockEnv({
+				DB: {
+					prepare: () => ({
+						bind: () => ({
+							first: async () => ({ encrypted_dek: "wrapped" }),
+							all: async () => ({
+								results: [
+									{ key_name: "timeline_github_token" },
+									{ key_name: "openrouter_api_key" },
+								],
+							}),
+						}),
+					}),
+				} as unknown as D1Database,
+			});
+
+			const request = new Request("http://localhost/debug", {
+				method: "GET",
+				headers: AUTH_HEADERS,
+			});
+
+			const response = await worker.fetch(request, env);
+			const data = (await response.json()) as any;
+
+			expect(data.tenants.secrets[0]).toMatchObject({ hasOpenrouterSecret: true });
+		});
+
 		it("checks KEK presence and length", async () => {
 			(getEnabledTenants as any).mockResolvedValue([]);
 

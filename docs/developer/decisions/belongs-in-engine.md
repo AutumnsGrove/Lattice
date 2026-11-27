@@ -313,7 +313,7 @@ import { Button } from "@autumnsgrove/lattice/ui";
 
 **Domain Components**:
 
-- `/libs/engine/src/lib/components/custom/*`
+- `/libs/engine/src/lib/ui/components/custom/*`
 - `/libs/engine/src/lib/components/admin/*`
 - `/libs/engine/src/lib/components/gallery/*`
 

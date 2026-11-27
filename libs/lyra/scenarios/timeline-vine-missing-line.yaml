@@ -1,0 +1,20 @@
+name: a vine on a line that does not exist is refused
+recipe: timeline-test
+input:
+  repos: [lyra]
+  commits:
+    - { repo: lyra, sha: abc123, message: Fix the loop }
+model:
+  - tool_calls: [{ id: t1, name: start_project, args: { repo: lyra } }]
+  - tool_calls: [{ id: t2, name: add_vine, args: { line: l9, text: finally } }]
+  - tool_calls:
+      [{ id: t3, name: add_line, args: { project: lyra, text: Fixed the loop, cites: [c1] } }]
+  - tool_calls: [{ id: t4, name: add_vine, args: { line: l1, text: finally } }]
+  - tool_calls: [{ id: t5, name: finish, args: {} }]
+expect_events:
+  - { type: tool_end, call_id: t2, is_error: true }
+  - { type: tool_end, call_id: t4, is_error: false }
+  - { type: run_end, reason: done }
+expect_record:
+  - { type: tool_message, toolCallId: t2, isError: true }
+  - { type: status, state: done }

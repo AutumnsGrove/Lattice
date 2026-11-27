@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { getModelForTier, buildExtractionPrompt, extractContent } from "./extraction";
+import { MODELS } from "@autumnsgrove/lumen-registry";
 
 describe("extraction module", () => {
 	beforeEach(() => {
@@ -11,29 +12,26 @@ describe("extraction module", () => {
 	// ============================================================================
 
 	describe("getModelForTier", () => {
+		// These read the registry rather than repeating an ID: the point is that each
+		// tier resolves to its model, not that the model is frozen here (#1602).
 		it("returns fast tier model", () => {
-			const result = getModelForTier("fast");
-			expect(result).toBe("openai/gpt-oss-120b");
+			expect(getModelForTier("fast")).toBe(MODELS.GPT_OSS_120B);
 		});
 
 		it("returns accurate tier model", () => {
-			const result = getModelForTier("accurate");
-			expect(result).toBe("deepseek/deepseek-v3.2");
+			expect(getModelForTier("accurate")).toBe(MODELS.DEEPSEEK_V3_2);
 		});
 
 		it("returns research tier model", () => {
-			const result = getModelForTier("research");
-			expect(result).toBe("alibaba/tongyi-deepresearch-30b-a3b");
+			expect(getModelForTier("research")).toBe(MODELS.DEEPSEEK_V4_1_FLASH_1017);
 		});
 
 		it("returns code tier model", () => {
-			const result = getModelForTier("code");
-			expect(result).toBe("minimax/minimax-m2.1");
+			expect(getModelForTier("code")).toBe(MODELS.MINIMAX_M3);
 		});
 
 		it("falls back to fast model for unknown tier", () => {
-			const result = getModelForTier("unknown-tier");
-			expect(result).toBe("openai/gpt-oss-120b");
+			expect(getModelForTier("unknown-tier")).toBe(MODELS.GPT_OSS_120B);
 		});
 	});
 
@@ -88,7 +86,7 @@ describe("extraction module", () => {
 					}),
 				),
 			);
-			global.fetch = mockFetch;
+			globalThis.fetch = mockFetch;
 
 			const result = await extractContent("Page content goes here", "Extract something", "api-key");
 			expect(result.extracted).toBe("The extracted information");
@@ -102,7 +100,7 @@ describe("extraction module", () => {
 				.mockResolvedValue(
 					new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 }),
 				);
-			global.fetch = mockFetch;
+			globalThis.fetch = mockFetch;
 
 			await expect(extractContent("Page content", "Extract", "api-key")).rejects.toThrow();
 		});
@@ -122,7 +120,7 @@ describe("extraction module", () => {
 					}),
 				),
 			);
-			global.fetch = mockFetch;
+			globalThis.fetch = mockFetch;
 
 			await expect(extractContent("Page content", "Extract", "api-key")).rejects.toThrow(
 				"empty response",
@@ -138,7 +136,7 @@ describe("extraction module", () => {
 					}),
 				),
 			);
-			global.fetch = mockFetch;
+			globalThis.fetch = mockFetch;
 
 			await extractContent("content", "query", "api-key", "accurate");
 			const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
@@ -154,7 +152,7 @@ describe("extraction module", () => {
 					}),
 				),
 			);
-			global.fetch = mockFetch;
+			globalThis.fetch = mockFetch;
 
 			await extractContent("content", "query", "api-key");
 			const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
@@ -170,7 +168,7 @@ describe("extraction module", () => {
 					}),
 				),
 			);
-			global.fetch = mockFetch;
+			globalThis.fetch = mockFetch;
 
 			await extractContent("content", "query", "test-api-key");
 			const headers = mockFetch.mock.calls[0][1].headers;
@@ -186,7 +184,7 @@ describe("extraction module", () => {
 					}),
 				),
 			);
-			global.fetch = mockFetch;
+			globalThis.fetch = mockFetch;
 
 			const result = await extractContent("content", "query", "api-key");
 			// Prompt will be built from content and query

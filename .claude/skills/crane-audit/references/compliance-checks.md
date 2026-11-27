@@ -24,7 +24,7 @@ This is the most important category. Everything else is secondary.
 | Data | Source of Truth | Import |
 |------|----------------|--------|
 | Tier definitions (names, limits, pricing) | `platform/config/tiers.ts` | `@autumnsgrove/lattice/platform/config` |
-| AI model names and metadata | `lumen-models.json` + `lumen/config.ts` | `@autumnsgrove/lattice/ai/lumen` |
+| AI model names and metadata | `libs/lumen-registry/src/data/models.json` | `@autumnsgrove/lumen-registry` |
 | Error codes and messages | Signpost catalogs (`errors/*.ts`) | `@autumnsgrove/lattice/errors` |
 | Design tokens and colors | Prism (`libs/prism/`) | `@autumnsgrove/prism` |
 | Rate limit definitions | Threshold/Thorn config | `@autumnsgrove/lattice/platform/threshold` |

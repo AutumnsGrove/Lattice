@@ -1,14 +1,38 @@
 ---
 name: CI
 
+# Affected-only detection keeps a PR cheap, and that cheapness has a blind spot:
+# a package nobody edits never has its job run, so it can be broken for months
+# and surface in the middle of a stranger's PR where it is indistinguishable
+# from their own breakage (#1797). #1793 had eleven failures and nine of them
+# were other people's.
+#
+# So once a week the same workflow runs with the detection bypassed. Same
+# matrix, same commands, same gates — the only difference is that nothing is
+# skipped for being unrelated to a diff. A red sweep is meant to be looked at
+# before a contributor finds it for us.
+
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+  schedule:
+    # Mondays, 07:41 UTC — before the working day, and deliberately off the
+    # hour so it does not queue behind every other cron in the org.
+    - cron: "41 7 * * 1"
+  workflow_dispatch:
+    inputs:
+      run-all:
+        description: "Check every package, not just affected ones"
+        type: boolean
+        default: true
 
+# The event name is part of the group: a scheduled sweep resolves to
+# `refs/heads/main` like a push does, and without this a weekly job could cancel
+# a real main build mid-flight (or be cancelled by one).
 concurrency:
-  group: ci-${{ github.head_ref || github.ref }}
+  group: ci-${{ github.event_name }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -24,6 +48,7 @@ jobs:
       has-tests: ${{ steps.affected.outputs.has_tests }}
       has-typechecks: ${{ steps.affected.outputs.has_typechecks }}
       run-all: ${{ steps.affected.outputs.run_all }}
+      sweep: ${{ steps.affected.outputs.sweep }}
       # Scope flags. A job that can only fail for one kind of change waits for
       # that kind of change instead of running on every PR (#1783).
       engine: ${{ steps.affected.outputs.engine }}
@@ -39,13 +64,16 @@ jobs:
       - name: Detect affected packages
         id: affected
         run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            BASE="${{ github.event.pull_request.base.sha }}"
+          if [ "${{ github.event_name }}" = "schedule" ] || \
+             [ "${{ inputs.run-all }}" = "true" ]; then
+            ARGS="--all"
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
+            ARGS="${{ github.event.pull_request.base.sha }}"
           else
-            BASE="HEAD~1"
+            ARGS="HEAD~1"
           fi
 
-          RESULT=$(node .github/scripts/affected-packages.mjs "$BASE")
+          RESULT=$(node .github/scripts/affected-packages.mjs $ARGS)
           echo "Full result: $RESULT"
 
           PACKAGES=$(echo "$RESULT" | jq -c '.affectedPackages')
@@ -53,6 +81,7 @@ jobs:
           TC_MATRIX=$(echo "$RESULT" | jq -c '.typecheckMatrix')
           NEEDS_ENGINE=$(echo "$RESULT" | jq -r '.needsEngine')
           RUN_ALL=$(echo "$RESULT" | jq -r '.runAll')
+          SWEEP=$(echo "$RESULT" | jq -r '.sweep')
           ENGINE=$(echo "$RESULT" | jq -r '.scope.engine')
           UI=$(echo "$RESULT" | jq -r '.scope.ui')
           TOOLING=$(echo "$RESULT" | jq -r '.scope.tooling')
@@ -68,11 +97,21 @@ jobs:
           echo "has_tests=$HAS_TESTS" >> $GITHUB_OUTPUT
           echo "has_typechecks=$HAS_TC" >> $GITHUB_OUTPUT
           echo "run_all=$RUN_ALL" >> $GITHUB_OUTPUT
+          echo "sweep=$SWEEP" >> $GITHUB_OUTPUT
           echo "engine=$ENGINE" >> $GITHUB_OUTPUT
           echo "ui=$UI" >> $GITHUB_OUTPUT
           echo "tooling=$TOOLING" >> $GITHUB_OUTPUT
 
           # Summary for the Actions UI
+          if [ "$SWEEP" = "true" ]; then
+            echo "### Full sweep" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Affected-detection bypassed: every package and every job runs," \
+              >> $GITHUB_STEP_SUMMARY
+            echo "so a package nobody has touched still gets a verdict." \
+              >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
           echo "### Affected Packages" >> $GITHUB_STEP_SUMMARY
           echo "$RESULT" | jq -r '.affectedPackages[]' | \
             while read pkg; do
@@ -112,9 +151,64 @@ jobs:
         run: pnpm exec svelte-kit sync
         working-directory: ${{ matrix.package }}
 
+      # Aspen's `routes` test project boots the built SvelteKit worker, and that
+      # build imports `@autumnsgrove/gossamer/svelte` through the engine's dist.
+      # The shared setup builds the engine but not gossamer, so it is built here
+      # for Aspen only.
+      - name: Build gossamer for Aspen's test build
+        if: matrix.package == 'apps/aspen'
+        run: pnpm run build
+        working-directory: libs/gossamer
+
       - name: Run tests
-        run: pnpm test:run
+        run: ${{ matrix.command }}
         working-directory: ${{ matrix.package }}
+
+  # One full journey in a real browser. Kept apart from the test matrix: it
+  # builds the app, seeds a database and boots a worker before the first
+  # assertion, so it costs minutes and only earns them when Aspen changed.
+  e2e:
+    name: "E2E: aspen journey"
+    needs: detect
+    if: >-
+      needs.detect.outputs.run-all == 'true' ||
+      contains(needs.detect.outputs.affected, 'apps/aspen')
+    runs-on: ubuntu-latest
+    env:
+      DEMO_MODE_SECRET: e2e-demo-secret
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup workspace
+        uses: ./.github/actions/grove-setup
+        with:
+          build-engine: "true"
+          # The e2e build imports gossamer through the engine's dist.
+          build-gossamer: "true"
+
+      - name: Sync SvelteKit
+        run: pnpm exec svelte-kit sync
+        working-directory: apps/aspen
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+        working-directory: apps/aspen
+
+      - name: Run the journey
+        run: pnpm test:e2e
+        working-directory: apps/aspen
+
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aspen-e2e-results
+          path: |
+            apps/aspen/.e2e-results
+            apps/aspen/playwright-report
+          retention-days: 7
 
   # Type check only affected packages
   typecheck:
@@ -219,6 +313,12 @@ jobs:
       - name: Test the affected-package detector
         run: node --test .github/scripts/affected-packages.test.mjs
 
+      # How far an engine change fans out is decided by resolving the package's
+      # own `exports` map and re-export graph (#1786). Under-answering that ships
+      # a broken import with green checks, so it is tested like any other logic.
+      - name: Test the engine export resolver
+        run: node --test .github/scripts/engine-exports.test.mjs
+
       # README had meadow, terrarium and ivy in its tables for a year after they
       # were gone, and Aspen missing entirely (#1705). Cheaper to check than to
       # rediscover.
@@ -244,6 +344,14 @@ jobs:
 
       - name: Run linters
         id: lint
+        # `shell: bash` is the fix, not decoration. GitHub's *default* shell on
+        # Linux is `bash -e {0}` — no pipefail — so this step's exit status was
+        # `tee`'s, which is always 0. `steps.lint.outcome` could never be
+        # `failure`, which made the two steps below dead code and reported a red
+        # lint as green on every PR. The `bash` shell is
+        # `bash --noprofile --norc -eo pipefail`, so the pipeline now fails when
+        # the linters do.
+        shell: bash
         run: |
           pnpm lint 2>&1 | tee /tmp/lint-output.txt
         continue-on-error: true

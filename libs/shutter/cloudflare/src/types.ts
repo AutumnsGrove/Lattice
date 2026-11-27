@@ -4,6 +4,8 @@
  * These mirror the Python dataclasses but with TypeScript conventions (camelCase).
  */
 
+import { MODELS } from "@autumnsgrove/lumen-registry";
+
 // ============================================================================
 // Request Types
 // ============================================================================
@@ -209,12 +211,19 @@ export interface OpenRouterResponse {
 // Constants
 // ============================================================================
 
-/** Model tier to OpenRouter model ID mapping */
+/**
+ * Model tier to model ID mapping.
+ *
+ * The IDs come from the registry (#1602). Two of these tiers used to name models
+ * OpenRouter had already retired — a Tongyi deep-research model and MiniMax
+ * m2.1 — so they now point at the nearest live model in the family, and
+ * `research` at the reasoning model the registry carries.
+ */
 export const MODEL_TIERS: Record<string, string> = {
-	fast: "openai/gpt-oss-120b", // Cerebras ~2000 tok/s
-	accurate: "deepseek/deepseek-v3.2",
-	research: "alibaba/tongyi-deepresearch-30b-a3b",
-	code: "minimax/minimax-m2.1",
+	fast: MODELS.GPT_OSS_120B, // Cerebras ~2000 tok/s
+	accurate: MODELS.DEEPSEEK_V3_2,
+	research: MODELS.DEEPSEEK_V4_1_FLASH_1017,
+	code: MODELS.MINIMAX_M3,
 };
 
 /** Default values */
