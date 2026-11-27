@@ -162,11 +162,11 @@ export async function updatePost(
 	const tenantDbEarly = getTenantDb(db, { tenantId });
 
 	// Fetch current post state
-	const currentPost = await tenantDbEarly.queryOne<{ status: string; published_at: number | null }>(
-		"posts",
-		"slug = ?",
-		[slug],
-	);
+	const currentPost = await tenantDbEarly.queryOne<{
+		status: string;
+		published_at: number | null;
+		fireside_session_id: string | null;
+	}>("posts", "slug = ?", [slug]);
 
 	if (!currentPost) {
 		throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
@@ -302,10 +302,12 @@ export async function updatePost(
 	if (data.spark_prompt !== undefined) updateData.spark_prompt = data.spark_prompt;
 
 	// `= 1`, never a literal: the marker cannot be cleared, and nothing else in this
-	// update is allowed to touch it.
+	// update is allowed to touch it. The link keeps the first conversation that
+	// produced this post — re-pointing it would silently retire a transcript the page
+	// may already be showing.
 	if (fireside && firesideSession) {
 		updateData.fireside_assisted = 1;
-		updateData.fireside_session_id = fireside.sessionId;
+		if (!currentPost.fireside_session_id) updateData.fireside_session_id = fireside.sessionId;
 	}
 
 	// Update with blaze column fallback

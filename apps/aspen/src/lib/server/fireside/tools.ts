@@ -105,12 +105,23 @@ export function createReadRecentPostsTool(posts: readonly RecentPost[]): Tool {
 	});
 }
 
-/** The proposal's payload, which is the shape the accept step reads. */
-const DRAFT_PAYLOAD: JsonObject = {
+/**
+ * The proposal's payload, which is the shape the accept step reads.
+ *
+ * Exported so a test can prove the largest legal proposal still fits the row it is
+ * stored in. `fireside_messages.content` is capped at 8,000 characters by the
+ * schema, and the stored content *is* this payload serialised — so the bounds here
+ * and the CHECK there are one contract, tested as one.
+ */
+export const PROPOSAL_SCHEMA: JsonObject = {
 	type: "object",
 	properties: {
 		title: { type: "string", minLength: 1, maxLength: 120 },
-		body: { type: "string", minLength: 1 },
+		// 3,000 characters is ~400 words at the budget the prompt states, with room
+		// for the long words real prose sometimes has. Six vines' worth of quotes and
+		// notes plus the title and the payload's own JSON still leave headroom under
+		// the 8,000-character row.
+		body: { type: "string", minLength: 1, maxLength: 3000 },
 		vines: {
 			type: "array",
 			maxItems: 6,
@@ -149,7 +160,7 @@ export function createProposeDraftTool({ draft, maxWords }: ProposeDraftOptions)
 		name: "propose_draft",
 		description:
 			"Propose a draft for the writer to accept, revise, or refuse. Ends the run: they decide afterwards.",
-		payload: DRAFT_PAYLOAD,
+		payload: PROPOSAL_SCHEMA,
 	});
 
 	return {

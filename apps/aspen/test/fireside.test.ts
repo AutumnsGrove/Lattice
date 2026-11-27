@@ -497,6 +497,38 @@ describe("fireside", () => {
 			expect(after.html).not.toContain("Read how this was written");
 		});
 
+		it("keeps the first conversation a post was written from", async () => {
+			const who = await grove({ posts: [{ slug: "tea-shop", title: "The tea shop" }] });
+			const first = await start(who);
+			const second = await start(who);
+
+			await json(`/api/fireside/${first.sessionId}/accept`, {
+				tenant: who.beta,
+				cookie: who.cookie,
+				method: "POST",
+				headers: who.write(),
+				body: JSON.stringify({ slug: "tea-shop", transcriptPublic: true }),
+			});
+
+			// A second accept must not re-point the post: that would retire the transcript
+			// the page is already showing, with nobody having said so.
+			await json(`/api/fireside/${second.sessionId}/accept`, {
+				tenant: who.beta,
+				cookie: who.cookie,
+				method: "POST",
+				headers: who.write(),
+				body: JSON.stringify({ slug: "tea-shop", transcriptPublic: false }),
+			});
+
+			const post = await env.DB.prepare(
+				`SELECT fireside_session_id FROM posts WHERE tenant_id = ? AND slug = ?`,
+			)
+				.bind(await tenantIdFor(who.subdomain), "tea-shop")
+				.first<{ fireside_session_id: string }>();
+
+			expect(post?.fireside_session_id).toBe(first.sessionId);
+		});
+
 		it("takes a published conversation off the page when the session is deleted", async () => {
 			const who = await grove({ posts: [{ slug: "tea-shop", title: "The tea shop" }] });
 			const started = await start(who);

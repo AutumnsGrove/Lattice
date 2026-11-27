@@ -162,14 +162,28 @@ export const POST: RequestHandler = async (event) => {
 
 	// The proposal is Wisp's message in the transcript, so a resume shows that it
 	// happened without re-running the model to find out.
-	await appendMessage(db, {
-		id: crypto.randomUUID(),
-		sessionId,
-		tenantId,
-		role: "wisp",
-		kind: "draft",
-		content: JSON.stringify(proposal),
-	});
+	//
+	// The run is already paid for, so a persistence failure must not throw the
+	// proposal away: the writer gets it, can accept it, and only the resume history
+	// is poorer for it. The schema bounds keep this unreachable; this keeps it from
+	// being expensive if it ever happens.
+	let persisted = true;
+	try {
+		await appendMessage(db, {
+			id: crypto.randomUUID(),
+			sessionId,
+			tenantId,
+			role: "wisp",
+			kind: "draft",
+			content: JSON.stringify(proposal),
+		});
+	} catch (cause) {
+		persisted = false;
+		logGroveError("Fireside", ARBOR_ERRORS.DB_NOT_AVAILABLE, {
+			detail: "the proposal could not be stored; returning it anyway",
+			cause,
+		});
+	}
 
 	await db
 		.prepare(
@@ -178,7 +192,7 @@ export const POST: RequestHandler = async (event) => {
 		.bind(sessionId)
 		.run();
 
-	return json({ drafted: true, proposal });
+	return json({ drafted: true, proposal, persisted });
 };
 
 /** The writer's published posts, so the draft run can hear their voice. */

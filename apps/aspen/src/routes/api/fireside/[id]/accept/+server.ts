@@ -61,11 +61,16 @@ export const POST: RequestHandler = async (event) => {
 
 	// The flag cannot be cleared: `= 1` rather than a literal, so re-accepting a post
 	// that already carries it is a no-op instead of a reset.
+	//
+	// The link follows one rule too: **the first conversation wins.** A later accept
+	// on the same post cannot re-point it, because that would retire whatever
+	// transcript the post was already showing — including a published one — with
+	// nobody having said so.
 	await db
 		.prepare(
 			`UPDATE posts
 			    SET fireside_assisted = 1,
-			        fireside_session_id = ?,
+			        fireside_session_id = COALESCE(fireside_session_id, ?),
 			        updated_at = unixepoch()
 			  WHERE id = ? AND tenant_id = ?`,
 		)

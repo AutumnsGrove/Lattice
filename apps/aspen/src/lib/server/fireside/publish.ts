@@ -89,7 +89,15 @@ export async function setTranscriptPublic(options: PublishOptions): Promise<void
 	if (!firstPublish) return;
 
 	const env = options.env;
-	if (!env?.AI || !options.waitUntil) return;
+	if (!env?.AI || !options.waitUntil) {
+		// Publishing fails open only for a deployment misconfiguration. Say so: a
+		// transcript going live unmoderated must be a line somebody can find.
+		console.warn(
+			"[Fireside] publishing a transcript without moderation: " +
+				(!env?.AI ? "no AI binding" : "no waitUntil"),
+		);
+		return;
+	}
 
 	const messages = options.messages ?? (await listMessages(db, tenantId, sessionId));
 
