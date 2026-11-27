@@ -1196,7 +1196,7 @@ timeline's own rule (`tools.ts`: the model never types a repo name, a hash, a li
 | --- | --- | --- | --- | --- |
 | `read_draft` | turn + draft | reads | first ~400 words + "the post continues; ask about a section" | mid-post Fireside is half the feature; without it Wisp is guessing |
 | `read_my_recent_posts` | turn + draft | reads | 2–3 titles + first ~80 words each | so Wisp *hears* the voice instead of being told to have one |
-| `propose_draft` | draft only | proposes | schema: `title` (≤120 chars), `body` (≤ the draft's token budget) | the only writer of prose, and it stops and asks |
+| `propose_draft` | draft only | proposes | schema: `title` (≤120 chars), `body` (≤ the draft's token budget), `vines` (≤6) | the only writer of prose, and it stops and asks |
 
 **Rejected, with reasons:**
 
@@ -1234,6 +1234,58 @@ does not re-guess it. Three ways to carry that, cheapest first:
 So: titles get talked about freely, the proposal carries one, and the writer edits it where they
 already edit everything else. If a long title negotiation later feels lossy, the middle row is the
 answer, not the bottom one.
+
+#### 6c. Vines come with the draft
+
+Autumn, late at night and rightly: *"what about the premise of vines? I don't think we have any
+planned support for them, but it would make the most sense to have it here."*
+
+Vines are Grove's margin notes: `posts.gutter_content`, an array of gutter items, the ones the editor
+manages with `GutterManager`. A textual one is `{ type: "comment", anchor, content }` rendered as
+markdown in the margin. Anchors come in three shapes and the editor already offers all of them:
+
+| Anchor | Means |
+| --- | --- |
+| `Some Heading Text` | attach to that header |
+| `paragraph:3` | attach to the fourth top-level paragraph |
+| `anchor:name` | attach to an explicit `<!-- anchor:name -->` the writer placed |
+
+A fireside draft that arrives with no vines is a draft the writer has to decorate afterwards — the
+whole point of the fire is helping someone who is stuck, and margin notes are part of how a Grove
+post breathes. So the draft carries them.
+
+**The rule is the timeline's: the model never types an id.** It is excellent at quoting its own text
+and unreliable at counting paragraphs after a dozen edits. So the payload is quote-based:
+
+```ts
+propose_draft({
+  title: "Resonance, not proximity",
+  body: "…## Finding each other
+
+You don't connect with people because they live nearby…",
+  vines: [{ quote: "You don't connect with people because they live nearby", text: "This is the line I want the whole post to earn." }]
+})
+```
+
+The tool:
+
+1. finds the quoted fragment in `body` (exact match, whitespace-normalised)
+2. resolves it to the **top-level paragraph** containing it and writes `paragraph:N`
+3. emits `{ type: "comment", anchor: "paragraph:N", content: text }` into `gutter_content` on accept
+
+A quote that is not in the body is **refused with a message naming what is** — *"that phrase isn't in
+the draft; quote the sentence you mean"* — and the model corrects inside the loop, exactly as
+`add_line` refuses an uncited claim on the timeline. Nothing lands that the writer did not see in the
+preview.
+
+Bounds: **six vines**, each `text` under ~280 characters. Vines are asides, not a second post.
+
+Two consequences worth naming:
+
+- **The draft preview shows them in the margin**, or accepting is a surprise. That is a
+  design-session item for the drawer (Stop 6) rather than something to invent in code.
+- **Accept writes two columns**: `markdown_content` *and* `gutter_content`. A draft accepted without
+  its vines is a half-accepted draft, which is the kind of bug nobody reports and everybody notices.
 
 #### 6b. Two runs
 
