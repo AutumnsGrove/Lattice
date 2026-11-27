@@ -4,7 +4,7 @@ description: "A conversational writing mode that helps a frozen writer say what 
 category: specs
 specCategory: "content-community"
 icon: flame
-lastUpdated: "2026-11-26"
+lastUpdated: "2026-11-27"
 status: planned
 aliases:
   - fireside
@@ -187,7 +187,7 @@ real session.
 
 ## How it is built
 
-Two Lyra recipes on top of Lumen, six routes, two tables, one column, one cron.
+Two Lyra recipes on top of Lumen, seven routes, two tables, one column, one cron.
 
 ### The two recipes
 
@@ -197,8 +197,13 @@ Two Lyra recipes on top of Lumen, six routes, two tables, one column, one cron.
 | Tools | `read_draft` | `read_draft`, `read_my_recent_posts`, `propose_draft` |
 | Steps | `2 × 1 + 2 = 4` | `2 × 3 + 2 = 8` |
 | Output | ≤150 tokens, temperature 0.7 | a validated proposal, temperature 0.3 |
-| Finish | prose with no tool call | `propose_draft` |
+| Finish | `ending: "reply"` — prose *is* the finish | `propose_draft` |
 | Stuck | `reminders: 0`, `sameFailure: 2` | `reminders: 0`, `sameFailure: 2` |
+
+**`ending` has to reach `runTask`.** Declaring it on the recipe is inert: the run config carries it
+beside `limits` and `compaction`, and a run told to end on a reply but not given `ending: "reply"`
+finishes exactly like a run that stopped without finishing. Lyra 0.4.0 removed the sentinel `finish`
+the earlier draft of this spec relied on.
 
 **Steps are derived, never declared.** `2 × tools + 2` covers one call and one retry per tool, plus
 the opening turn and the final answer. A run that reaches its limit **parks** (Lyra's behaviour),
@@ -294,8 +299,12 @@ GET    /api/fireside/[id]               resume: messages, canDraft, whether a dr
 POST   /api/fireside/[id]/turn          say something → one reply
 POST   /api/fireside/[id]/draft         organize the writer's own words → a proposal
 POST   /api/fireside/[id]/accept        record acceptance: post link, marker, transcript opt-in
+POST   /api/fireside/[id]/transcript    publish the conversation under its post, or take it down
 DELETE /api/fireside/[id]               let it go (messages cascade)
 ```
+
+The seventh route is the same question accept asks, asked later: the writer changes their mind from
+the post or from the editor, and one route keeps both ends writing one column and purging one page.
 
 - **History is never accepted from the request body.** It is loaded from the database, which removes
   the fabrication surface the original design had (every turn re-sent the client's own history).
@@ -392,13 +401,13 @@ without the attribution lying about what happened.
 
 ### The transcript
 
-Off by default, asked once at accept, in the drawer, in plain words.
+Off by default, asked once at accept, in the fire, in plain words.
 
 ```
 … the article …
 ──────────────────────────────────────────
 *~ written fireside with Wisp ~*          ← always, when the flag is set
-[ How this post was written ⌄ ]           ← only when the transcript is public
+[ Read how this was written ⌄ ]           ← only when the transcript is public
 ──────────────────────────────────────────
 [ comments ]
 ```
@@ -419,7 +428,14 @@ Off by default, asked once at accept, in the drawer, in plain words.
 
 ### Where it appears
 
-**Its own button in the editor, opening a chat drawer** — not a mode that replaces the editor.
+**Inline in the editor's own frame** — not a sheet over it, and not a mode that replaces it.
+
+> **Overturned in a live session.** The earlier draft of this spec called for `Sheet side="right"` on
+desktop and `Sheet side="bottom"` on mobile. It was built, looked at, and rejected: a sheet puts a
+second surface over the one the writer is working in, and Fireside is a conversation *about* those
+words, so the words have to stay in sight. What shipped is a panel inside the editor's frame with a
+fixed height — **70vh when the page is blank, 60vh when there are words above it** — a drag handle to
+resize it, and no dimming behind it.
 
 | Editor state | Label |
 | --- | --- |
@@ -428,21 +444,31 @@ Off by default, asked once at accept, in the drawer, in plain words.
 
 - The engine (`MarkdownEditor`) gains one optional `editorActions?: Snippet` and learns nothing about
   Fireside — the same rule `uploadAccessUrl` already follows. Aspen fills the slot.
-- Desktop: `Sheet side="right"`, ~28rem. Mobile: `Sheet side="bottom"`, ~90vh.
 - **The editor stays mounted underneath** — unmounting would fire the draft manager's teardown.
-- `Cmd/Ctrl+Shift+F` toggles; `Escape` closes; focus goes to the composer on open and back to the
-  button on close.
+- `Cmd/Ctrl+Shift+F` toggles; `Escape` closes (bound on the window, because the fire does not own
+  focus); the resize handle is a real control with arrow keys, not a mouse-only affordance.
 - **Accepting a draft is a merge, not an overwrite:** empty editor → set title/body/vines; editor with
   words → **Insert at top / Replace everything / Cancel**, with the preview still visible. It routes
   through the page's own save handler so autosave and the server agree.
 - **The draft preview shows vines in the margin**, or accepting is a surprise.
 
-> **The drawer's surface is not designed yet.** The structure above is settled; a visual design
-> session comes before it is built, because a conversation surface cannot be approved from a
-> description.
-
 Posts only, for now: `fireside_assisted` is a `posts` column and the marker is a post concept. Pages
 get the button the day someone wants it, and the engine slot makes that a prop rather than a fork.
+
+### The disclosure on the post
+
+The post page is the one surface Fireside reaches for someone who agreed to nothing, so its two
+halves are deliberately unequal: the marker always, the conversation only when the writer published
+it.
+
+- **Derived, never stored in the prose.** `posts.fireside_assisted` decides; nothing is appended to
+  `markdown_content` and there is no string an edit could remove.
+- **A missing transcript is not a broken page.** The load logs and degrades to the marker alone — a
+  post that cannot say how it was written is still a post.
+- **The owner's switch is per request, beta only.** The session belongs to a person, so it is looked
+  up for the signed-in owner and never rides in the payload every reader shares.
+- **A published transcript is exempt from the sweep**; taking it back down does not re-arm the clock
+  and does not erase the day it first went public, which is when the writer decided.
 
 ### The gate
 
@@ -523,13 +549,17 @@ a sentence in a prompt.
 ## Build order
 
 1. **Schema** — migration 128, `posts.fireside_assisted` + `posts.fireside_session_id` in the Drizzle
-   schema. Lands alone, breaks nothing.
+   schema. Lands alone, breaks nothing. **Built.**
 2. **The recipes and tools** — `fireside-turn`, `fireside-draft`, three tools, `propose_draft` with
-   vine resolution. Testable against a fake model slot before a route exists.
-3. **The routes** — six routes, tenant `404`s, beta gate, the three suites.
-4. **The marker and the transcript** — derived attribution, `<details>`, two toggles, cache purge.
-5. **The drawer** — after the visual design session.
-6. **Beta** — merge to `beta`, deploy, live in it.
+   vine resolution. Testable against a fake model slot before a route exists. **Built.**
+3. **The routes** — seven routes (the transcript toggle arrived with step 4), tenant `404`s, beta gate,
+   the three suites. **Built.**
+4. **The marker and the transcript** — derived attribution, `<details>`, two toggles, cache purge, and
+   the nightly sweep that lets go of what was never published. **Built.**
+5. **The drawer** — after the visual design session. **Built as the inline fire** (see "Where it
+   appears"); it was rejected on sight and rebuilt rather than designed from a description.
+6. **Beta** — merge to `beta`, deploy, live in it. **Not yet.** Migration 128 still has to be applied
+   to production by hand.
 
 In parallel from step 4: **the privacy docs** (#1868), because the transcript is what makes the
 current policy text wrong.
@@ -554,9 +584,11 @@ Written plainly, because a future reader will otherwise restore these in good fa
 
 ## Open questions
 
-- **The drawer's surface.** Needs a visual design session; the structure is settled, the look is not.
+- **The 90-day retention number.** A starting guess, not a decision — it is what the start route
+  stamps and what the nightly sweep enforces, so changing it changes one constant and one sweep.
 - **Per-message transcript sharing.** Full transcript now; selecting messages later.
-- **The 90-day retention number.** A starting guess, not a decision.
+- **Accept's ordering.** The page merges the proposal, saves the post, *then* calls `/accept`. If that
+  call fails there is a post without its attribution. Block, retry, or surface — undecided.
 - **`search_my_posts`** — the better "hear my voice" tool for a long archive; v1.1.
 - **`read_past_session`** — "last time we talked about…" is only possible because history exists; later.
 - **A session scratchpad (`remember`)** — attractive for long conversations, invisible in the
