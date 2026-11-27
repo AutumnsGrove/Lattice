@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto, beforeNavigate } from "$app/navigation";
+	import { page } from "$app/state";
 	import { browser } from "$app/environment";
 	import { onMount } from "svelte";
 	import MarkdownEditor from "@autumnsgrove/lattice/content/editor/MarkdownEditor.svelte";
@@ -10,8 +11,9 @@
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 	import { resolveTermString } from "@autumnsgrove/lattice/ui/utils/grove-term-resolve";
 	import { api } from "@autumnsgrove/lattice/utils";
-	import { navIcons, stateIcons } from "@autumnsgrove/prism/icons";
+	import { navIcons, stateIcons, toolIcons } from "@autumnsgrove/prism/icons";
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
+	import FiresidePanel from "../FiresidePanel.svelte";
 	import { Blaze } from "@autumnsgrove/lattice/social/blazes/components";
 	import { GLOBAL_BLAZE_DEFAULTS } from "@autumnsgrove/lattice/social/blazes";
 	import {
@@ -38,6 +40,19 @@
 	let font = $state("default");
 	let content = $state("");
 	let gutterItems = $state<GutterItem[]>([]);
+	// DESIGN SESSION: the drawer is wired with fixture state so the surface can be
+	// looked at. The beta gate (isBetaDeployment) and the /api/fireside routes come with it.
+	let firesideOpen = $state(false);
+	// DESIGN SESSION: real check is `hasOpenRouterKey()` from libs/lyra (presence only,
+	// never decrypts), resolved in the page load. `?nokey=1` previews the empty state.
+	const hasAiKey = $derived(page.url.searchParams.get("nokey") !== "1");
+
+	function handleFiresideKey(event: KeyboardEvent) {
+		if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key.toLowerCase() === "f") {
+			event.preventDefault();
+			firesideOpen = !firesideOpen;
+		}
+	}
 	let featuredImage = $state("");
 	let selectedBlaze = $state<string | null>(null);
 
@@ -272,7 +287,7 @@
 	}
 </script>
 
-<svelte:window onbeforeunload={handleBeforeUnload} />
+<svelte:window onbeforeunload={handleBeforeUnload} onkeydown={handleFiresideKey} />
 
 <div class="new-post-page">
 	<header class="page-header">
@@ -474,7 +489,25 @@
 		<!-- Editor -->
 		<main class="editor-main">
 			<div class="editor-with-gutter">
-				<div class="editor-section">
+				<div class="editor-section" class:fireside-open={firesideOpen} class:fireside-above={firesideOpen && !!content.trim()} class:fireside-closed={!firesideOpen}>
+					{#if !firesideOpen}
+						<button
+							type="button"
+							class="fireside-entry"
+							onclick={() => (firesideOpen = true)}
+							title="Fireside (⌘⇧F)"
+						>
+							<toolIcons.fireside size={14} />
+							<span>{content.trim() ? "Fireside" : "Start with a conversation"}</span>
+						</button>
+					{/if}
+					<FiresidePanel
+						bind:open={firesideOpen}
+						mode={content.trim() ? "above" : "solo"}
+						draftPreview={content}
+						hasKey={hasAiKey}
+						onclose={() => (firesideOpen = false)}
+					/>
 					<MarkdownEditor
 						bind:this={editorRef}
 						bind:content
@@ -510,14 +543,49 @@
 			</button>
 		</main>
 	</div>
+
 </div>
 
 <style>
+	/* The door to Fireside, above the editor — never in the formatting toolbar,
+	   where it would compete with the heading buttons for space. */
+	.fireside-entry {
+		display: flex;
+		position: relative;
+		z-index: 1;
+		align-items: center;
+		gap: 0.5rem;
+		width: 100%;
+		padding: 0.4375rem 0.75rem;
+		background: var(--color-bg-secondary, #f5f5f5);
+		border: 1px solid var(--editor-border, var(--color-border));
+		border-bottom: none;
+		border-radius: 8px 8px 0 0;
+		color: var(--grove-accent);
+		font: inherit;
+		font-size: 0.8125rem;
+		cursor: pointer;
+		text-align: left;
+		transition: background 120ms ease;
+	}
+
+	.fireside-entry:hover {
+		background: var(--grove-accent-8);
+	}
+
+	/* The editor and whatever sits above it share one frame. */
+	.editor-section.fireside-closed :global(.editor-container),
+	.editor-section.fireside-above :global(.editor-container) {
+		border-top-left-radius: 0;
+		border-top-right-radius: 0;
+	}
 	.new-post-page {
 		display: flex;
 		flex-direction: column;
-		height: calc(100vh - 8rem);
-		min-height: 600px;
+		/* Was a fixed viewport height, which capped everything below it — the fire
+		   could never be taller than the space left over. The page scrolls, so let
+		   it grow to whatever the editor and the conversation actually need. */
+		min-height: calc(100vh - 8rem);
 	}
 	.page-header {
 		display: flex;
@@ -822,6 +890,7 @@
 	.editor-main {
 		flex: 1;
 		min-width: 0;
+		min-height: 0;
 		display: flex;
 		flex-direction: column;
 	}
@@ -836,6 +905,28 @@
 		min-width: 0;
 		display: flex;
 		flex-direction: column;
+		min-height: 0;
+	}
+
+	/* ── Fireside, inside the editor ──────────────────────────────────────
+	   Blank page: the conversation IS the surface, editor hidden underneath
+	   (still mounted, so the draft manager never tears down).
+	   Words on the page: the fire sits above them and the editor shrinks,
+	   joined into one frame with squared shared corners. */
+	.editor-section.fireside-open:not(.fireside-above) :global(.editor-container) {
+		display: none;
+	}
+
+	.editor-section.fireside-above :global(.editor-container) {
+		flex: 1;
+		height: auto;
+		min-height: 0;
+		border-top: none;
+		border-radius: 0 0 8px 8px;
+	}
+
+	.editor-section.fireside-closed :global(.editor-container) {
+		border-top: none;
 	}
 	.gutter-section {
 		width: 300px;
