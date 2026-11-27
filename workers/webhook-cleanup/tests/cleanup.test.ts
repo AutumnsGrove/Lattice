@@ -3,7 +3,11 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { cleanupExpiredExports, cleanupExpiredWebhooks } from "../src/index.js";
+import {
+	cleanupExpiredExports,
+	cleanupExpiredFiresideSessions,
+	cleanupExpiredWebhooks,
+} from "../src/index.js";
 import type { GroveContext } from "@autumnsgrove/infra";
 
 vi.mock("@autumnsgrove/lattice/errors", () => ({
@@ -247,5 +251,62 @@ describe("cleanupExpiredWebhooks", () => {
 
 		expect(result.totalDeleted).toBe(0);
 		expect(result.batchCount).toBe(1);
+	});
+});
+
+describe("cleanupExpiredFiresideSessions", () => {
+	const meta = (changes: number) => ({
+		changes,
+		duration: 1,
+		last_row_id: 0,
+		rows_read: changes,
+		rows_written: changes,
+	});
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
+	it("deletes what has expired, and spares a published transcript", async () => {
+		const ctx = createTestContext({
+			executeResults: [{ results: [], meta: meta(3) }],
+		});
+
+		const deleted = await cleanupExpiredFiresideSessions(ctx);
+
+		expect(deleted).toBe(3);
+
+		// The exemption is in the statement, not in a caller's memory: an expired
+		// published transcript is still a promise to a reader.
+		const [sql, params] = (ctx.db.execute as unknown as ReturnType<typeof vi.fn>).mock.calls[0] as [
+			string,
+			unknown[],
+		];
+		expect(sql).toContain("transcript_public = 0");
+		expect(sql).toContain("expires_at < ?");
+		expect(params[1]).toBe(500);
+	});
+
+	it("says nothing changed when there was nothing to let go", async () => {
+		const ctx = createTestContext({
+			executeResults: [{ results: [], meta: meta(0) }],
+		});
+
+		expect(await cleanupExpiredFiresideSessions(ctx)).toBe(0);
+	});
+
+	it("survives a database that does not have the table yet", async () => {
+		// Production runs this worker before migration 128 lands. A missing table
+		// must not take the webhook and export cleanup beside it down with it.
+		const ctx = createTestContext();
+		(ctx.db.execute as unknown as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+			new Error("D1_ERROR: no such table: fireside_sessions"),
+		);
+
+		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+		const deleted = await cleanupExpiredFiresideSessions(ctx);
+		consoleSpy.mockRestore();
+
+		expect(deleted).toBe(0);
 	});
 });
