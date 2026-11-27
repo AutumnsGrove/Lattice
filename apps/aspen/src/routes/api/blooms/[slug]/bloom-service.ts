@@ -389,12 +389,38 @@ export async function deletePost(
 ): Promise<void> {
 	const tenantDb = getTenantDb(db, { tenantId });
 
-	const existing = await tenantDb.exists("posts", "slug = ?", [slug]);
+	const existing = await tenantDb.queryOne<{ fireside_session_id: string | null }>(
+		"posts",
+		"slug = ?",
+		[slug],
+	);
 	if (!existing) {
 		throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "API");
 	}
 
 	await tenantDb.delete("posts", "slug = ?", [slug]);
+
+	// The post owns its transcript, so deleting the post deletes the conversation.
+	// The foreign key cannot do this: it runs from the post to the session
+	// (`ON DELETE SET NULL`), which is what lets a session expire without taking the
+	// post's attribution with it — but it means nothing cascades *this* way.
+	//
+	// Without this, a published transcript would be exempt from the nightly sweep
+	// forever and unreachable from the UI, because every way back to a conversation
+	// goes through the post that just stopped existing.
+	if (existing.fireside_session_id) {
+		try {
+			await db
+				.prepare(`DELETE FROM fireside_sessions WHERE id = ? AND tenant_id = ?`)
+				.bind(existing.fireside_session_id, tenantId)
+				.run();
+		} catch (err) {
+			// The post is already gone; failing the request now would report a delete
+			// that did happen. The orphan is swept by nothing, so say so loudly.
+			console.error("[Fireside] Failed to delete the conversation behind a deleted post:", err);
+		}
+	}
+
 	await invalidatePostCaches(kv, tenantId, slug);
 
 	emitPulseEvent("post.deleted", {

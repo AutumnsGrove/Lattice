@@ -191,6 +191,42 @@ describe("accepting a draft by saving the post", () => {
 		expect(post?.fireside_session_id).toBe(started.sessionId);
 	});
 
+	it("deletes the conversation when the post it belongs to is deleted", async () => {
+		const who = await grove();
+		const started = await start(who);
+
+		// Published, because that is the case nothing else collects: the nightly
+		// sweep spares a public transcript, and every route back to the conversation
+		// goes through the post. Deleting the post has to be the collection.
+		const created = await saveBloom(who, {
+			title: "The sign said eight",
+			markdown_content: "Eight, and nobody believed it.",
+			status: "published",
+			fireside: { sessionId: started.sessionId, transcriptPublic: true },
+		});
+		expect(created.status).toBe(200);
+
+		const deleted = await json(`/api/blooms/${created.body.slug}`, {
+			tenant: who.beta,
+			cookie: who.cookie,
+			method: "DELETE",
+			headers: who.write(),
+		});
+		expect(deleted.status).toBe(200);
+
+		const session = await env.DB.prepare(`SELECT COUNT(*) AS n FROM fireside_sessions WHERE id = ?`)
+			.bind(started.sessionId)
+			.first<{ n: number }>();
+		expect(session?.n).toBe(0);
+
+		const messages = await env.DB.prepare(
+			`SELECT COUNT(*) AS n FROM fireside_messages WHERE session_id = ?`,
+		)
+			.bind(started.sessionId)
+			.first<{ n: number }>();
+		expect(messages?.n).toBe(0);
+	});
+
 	describe("bad", () => {
 		it("refuses a fireside block with no session, before writing anything", async () => {
 			const who = await grove();
