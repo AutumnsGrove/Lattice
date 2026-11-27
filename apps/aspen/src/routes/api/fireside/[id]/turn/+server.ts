@@ -44,8 +44,11 @@ import {
 } from "$lib/server/fireside/session";
 import { createFiresideTurnRecipe } from "$lib/server/fireside/recipes";
 
-/** The spec's ceiling. Longer than this is not a message, it is a paste. */
-export const MAX_MESSAGE_CHARS = 2_000;
+/**
+ * The spec's ceiling. Longer than this is not a message, it is a paste.
+ * (Not exported: SvelteKit treats a route module's exports as endpoints.)
+ */
+const MAX_MESSAGE_CHARS = 2_000;
 
 export const POST: RequestHandler = async (event) => {
 	const { db, tenantId, userId } = await requireFireside(event);
