@@ -3,6 +3,8 @@ import { getTenantDb } from "@autumnsgrove/lattice/server/services/database";
 import { loadCurioStatus } from "@autumnsgrove/curios/status";
 import matter from "@11ty/gray-matter";
 import type { PageServerLoad } from "./$types.js";
+import { isBetaDeployment } from "$lib/server/beta";
+import { readAiKeySource } from "$lib/server/ai-key";
 
 interface PostRecord {
 	slug: string;
@@ -20,7 +22,7 @@ interface PostRecord {
 	blaze?: string | null;
 }
 
-export const load: PageServerLoad = async ({ params, platform, locals }) => {
+export const load: PageServerLoad = async ({ params, platform, locals, url }) => {
 	// Auth check happens in admin layout
 	// Feature flags are loaded by admin layout and cascaded via data.flags
 	const { slug } = params;
@@ -48,6 +50,11 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
 				const curios = await loadCurioStatus(platform.env.DB, locals.tenantId);
 				return {
 					source: "d1",
+					// The fire is available on an existing post for the same reason it is
+					// on a new one: the writer may be stuck on the words they already have.
+					// Presence, never the key.
+					firesideEnabled: isBetaDeployment(locals, url),
+					firesideHasKey: (await readAiKeySource(platform.env, locals.tenantId)) !== undefined,
 					post: {
 						...post,
 						tags: post.tags ? JSON.parse(post.tags as string) : [],
@@ -90,6 +97,8 @@ export const load: PageServerLoad = async ({ params, platform, locals }) => {
 		// For now, return empty gutter for filesystem posts
 		return {
 			source: "filesystem",
+			firesideEnabled: false,
+			firesideHasKey: false,
 			post: {
 				slug,
 				title: (data.title as string) || "Untitled",

@@ -162,6 +162,35 @@ describe("accepting a draft by saving the post", () => {
 		});
 	});
 
+	it("accepts into a post that already exists, on the same door", async () => {
+		const who = await grove({ posts: [{ slug: "already-here", title: "Already here" }] });
+		const started = await start(who);
+
+		const updated = await json<{ slug?: string }>("/api/blooms/already-here", {
+			tenant: who.beta,
+			cookie: who.cookie,
+			method: "PUT",
+			headers: who.write(),
+			body: JSON.stringify({
+				title: "Already here",
+				markdown_content: "Eight, and nobody believed it.",
+				status: "published",
+				fireside: { sessionId: started.sessionId, transcriptPublic: false },
+			}),
+		});
+		expect(updated.status).toBe(200);
+
+		const post = await env.DB.prepare(
+			`SELECT fireside_assisted, fireside_session_id FROM posts
+				 WHERE tenant_id = ? AND slug = ?`,
+		)
+			.bind(await tenantIdFor(who.subdomain), "already-here")
+			.first<{ fireside_assisted: number; fireside_session_id: string }>();
+
+		expect(post?.fireside_assisted).toBe(1);
+		expect(post?.fireside_session_id).toBe(started.sessionId);
+	});
+
 	describe("bad", () => {
 		it("refuses a fireside block with no session, before writing anything", async () => {
 			const who = await grove();
@@ -203,6 +232,35 @@ describe("accepting a draft by saving the post", () => {
 				.first<{ n: number }>();
 			expect(rows?.n).toBe(0);
 		});
+	});
+});
+
+/**
+ * The fire on a post that already exists.
+ *
+ * The spec's hardest case lives here: accepting into words the writer already has
+ * is a merge, and the door has to exist on the page where the words are — not only
+ * on a blank one.
+ */
+describe("the fire on an existing post", () => {
+	it("is offered on beta, and nowhere else", async () => {
+		const who = await grove({ posts: [{ slug: "already-here", title: "Already here" }] });
+
+		const beta = await page("/arbor/garden/edit/already-here", {
+			tenant: who.beta,
+			cookie: who.cookie,
+		});
+		expect(beta.status).toBe(200);
+		expect(beta.html).toContain("Fireside (⌘⇧F)");
+
+		// The same page off beta: no door, no shortcut. A hidden button is not a gate,
+		// so this is the gate — and the routes behind it are `404` here too.
+		const plain = await page("/arbor/garden/edit/already-here", {
+			tenant: who.subdomain,
+			cookie: who.cookie,
+		});
+		expect(plain.status).toBe(200);
+		expect(plain.html).not.toContain("Fireside (⌘⇧F)");
 	});
 });
 
