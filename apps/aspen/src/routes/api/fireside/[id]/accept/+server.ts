@@ -51,9 +51,9 @@ export const POST: RequestHandler = async (event) => {
 
 	// Scoped to the tenant, so a slug from another grove cannot be claimed.
 	const post = await db
-		.prepare(`SELECT id FROM posts WHERE tenant_id = ? AND slug = ?`)
+		.prepare(`SELECT id, fireside_session_id FROM posts WHERE tenant_id = ? AND slug = ?`)
 		.bind(tenantId, slug)
-		.first<{ id: string }>();
+		.first<{ id: string; fireside_session_id: string | null }>();
 
 	if (!post) {
 		throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "Fireside");
@@ -88,6 +88,17 @@ export const POST: RequestHandler = async (event) => {
 		.bind(sessionId, tenantId)
 		.run();
 
+	/**
+	 * Whether *this* conversation is the post's.
+	 *
+	 * The link keeps the first conversation that produced the post, so accepting a
+	 * second one leaves it unlinked — and a transcript published on an unlinked
+	 * session would render nowhere while still being public, exempt from the sweep,
+	 * and impossible to take down (the toggle finds its post through the link). So
+	 * publishing only happens for the session the post actually points at.
+	 */
+	const linked = (post.fireside_session_id ?? sessionId) === sessionId;
+
 	// The transcript columns and everything that follows from them belong to one
 	// place: publishing here used to skip both the cache purge and Thorn, which made
 	// this the short path to a public conversation nobody moderated.
@@ -98,7 +109,7 @@ export const POST: RequestHandler = async (event) => {
 			userId,
 			sessionId,
 			slug,
-			publish: true,
+			publish: linked,
 			wasPublic: session.transcript_public === 1,
 			env: event.platform?.env,
 			waitUntil: event.platform?.context?.waitUntil.bind(event.platform.context),
@@ -110,5 +121,12 @@ export const POST: RequestHandler = async (event) => {
 		await invalidatePostCaches(event.platform?.env?.CACHE_KV, tenantId, slug);
 	}
 
-	return json({ accepted: true, slug, assisted: true, transcriptPublic });
+	return json({
+		accepted: true,
+		slug,
+		assisted: true,
+		// What the post will actually show: a conversation that is not this post's
+		// cannot be published under it, however the request was phrased.
+		transcriptPublic: transcriptPublic && linked,
+	});
 };

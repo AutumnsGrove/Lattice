@@ -200,6 +200,12 @@ export async function recordAcceptance(options: {
 	slug: string;
 	transcriptPublic: boolean;
 	session: FiresideSessionRow;
+	/**
+	 * Whether the post ended up pointing at this session. The link keeps the first
+	 * conversation, so a later accept is recorded but published nowhere — and a public
+	 * transcript with no post to take it down is the one state nobody can fix.
+	 */
+	linked: boolean;
 	env?: PublishEnvironment;
 	waitUntil?: (promise: Promise<unknown>) => void;
 }): Promise<void> {
@@ -212,7 +218,7 @@ export async function recordAcceptance(options: {
 		.bind(options.sessionId, options.tenantId)
 		.run();
 
-	if (options.transcriptPublic) {
+	if (options.transcriptPublic && options.linked) {
 		await setTranscriptPublic({
 			db: options.db,
 			tenantId: options.tenantId,
@@ -224,5 +230,10 @@ export async function recordAcceptance(options: {
 			env: options.env,
 			waitUntil: options.waitUntil,
 		});
+	} else if (options.transcriptPublic) {
+		console.warn(
+			`[Fireside] transcript not published: session ${options.sessionId} is not the post's ` +
+				`conversation (${options.slug} keeps its first)`,
+		);
 	}
 }

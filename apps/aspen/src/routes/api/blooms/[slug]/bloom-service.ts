@@ -337,6 +337,10 @@ export async function updatePost(
 			slug: newSlug || slug,
 			transcriptPublic: fireside.transcriptPublic,
 			session: firesideSession,
+			// The link keeps the first conversation; this update only owns it if the
+			// post had none or already pointed here.
+			linked:
+				!currentPost.fireside_session_id || currentPost.fireside_session_id === fireside.sessionId,
 			env: platformEnv,
 			waitUntil,
 		});

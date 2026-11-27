@@ -500,7 +500,7 @@ describe("fireside", () => {
 		it("keeps the first conversation a post was written from", async () => {
 			const who = await grove({ posts: [{ slug: "tea-shop", title: "The tea shop" }] });
 			const first = await start(who);
-			const second = await start(who);
+			const secondSession = await start(who);
 
 			await json(`/api/fireside/${first.sessionId}/accept`, {
 				tenant: who.beta,
@@ -512,12 +512,14 @@ describe("fireside", () => {
 
 			// A second accept must not re-point the post: that would retire the transcript
 			// the page is already showing, with nobody having said so.
-			await json(`/api/fireside/${second.sessionId}/accept`, {
+			await json(`/api/fireside/${secondSession.sessionId}/accept`, {
 				tenant: who.beta,
 				cookie: who.cookie,
 				method: "POST",
 				headers: who.write(),
-				body: JSON.stringify({ slug: "tea-shop", transcriptPublic: false }),
+				// It asks to publish. The answer must be no: this conversation is not the
+				// post's, so there is no page for its transcript to appear on.
+				body: JSON.stringify({ slug: "tea-shop", transcriptPublic: true }),
 			});
 
 			const post = await env.DB.prepare(
@@ -527,6 +529,16 @@ describe("fireside", () => {
 				.first<{ fireside_session_id: string }>();
 
 			expect(post?.fireside_session_id).toBe(first.sessionId);
+
+			// And the orphaned conversation stays private: a public transcript on a
+			// session the post does not point at would render nowhere, escape the sweep,
+			// and have no post through which the writer could take it down.
+			const second = await env.DB.prepare(
+				`SELECT transcript_public FROM fireside_sessions WHERE id = ?`,
+			)
+				.bind(secondSession.sessionId)
+				.first<{ transcript_public: number }>();
+			expect(second?.transcript_public).toBe(0);
 		});
 
 		it("takes a published conversation off the page when the session is deleted", async () => {

@@ -430,6 +430,8 @@ export const POST: RequestHandler = async ({ request, platform, locals, url }) =
 				slug,
 				transcriptPublic: fireside.transcriptPublic,
 				session: firesideSession,
+				// A create always links: the post was born carrying this conversation.
+				linked: true,
 				env: platform.env,
 				waitUntil: platform.context?.waitUntil.bind(platform.context),
 			});
