@@ -782,6 +782,35 @@ describe("fireside", () => {
 			expect(result.status).toBe(404);
 		});
 
+		it("keeps a failed turn from being said twice", async () => {
+			const who = await grove();
+			const started = await start(who);
+
+			// No key is set in this grove, so both attempts refuse before the model. The
+			// first keeps the writer's words; the retry must not print them again, or the
+			// transcript lies about how much they said and `canDraft` counts doubles.
+			for (let attempt = 0; attempt < 2; attempt += 1) {
+				const response = await request(`/api/fireside/${started.sessionId}/turn`, {
+					tenant: who.beta,
+					cookie: who.cookie,
+					method: "POST",
+					headers: who.write(),
+					body: JSON.stringify({ message: "The sign says eight." }),
+				});
+				expect(response.status).toBe(400);
+			}
+
+			const saved = await env.DB.prepare(
+				`SELECT content FROM fireside_messages
+				  WHERE session_id = ? AND role = 'user'`,
+			)
+				.bind(started.sessionId)
+				.all<{ content: string }>();
+
+			expect(saved.results).toHaveLength(1);
+			expect(saved.results[0]?.content).toBe("The sign says eight.");
+		});
+
 		it("hides every route from an unsigned caller just as it hides them off beta", async () => {
 			const who = await grove();
 			for (const route of ROUTES) {

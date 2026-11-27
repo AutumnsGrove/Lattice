@@ -85,15 +85,33 @@ export const POST: RequestHandler = async (event) => {
 
 	// The editor's words, for `read_draft`. Optional: a blank page is a normal turn.
 	const draft = typeof body.draft === "string" ? body.draft : "";
-	const history = renderTranscript(await listMessages(db, tenantId, sessionId));
+	const messages = await listMessages(db, tenantId, sessionId);
 
-	await appendMessage(db, {
-		id: crypto.randomUUID(),
-		sessionId,
-		tenantId,
-		role: "user",
-		content: text,
-	});
+	/**
+	 * A turn that never got answered leaves the writer's sentence as the last message
+	 * — that is the point of keeping it. Retrying should try again, not say it a
+	 * second time: duplicates would inflate `canDraft` (which counts their messages)
+	 * and print the same words twice in a published transcript.
+	 *
+	 * A deliberate repeat is not this case: it would follow Wisp's reply.
+	 */
+	const unanswered = messages[messages.length - 1];
+	const alreadySaid = unanswered?.role === "user" && unanswered.content.trim() === text;
+
+	if (alreadySaid) {
+		// Already in the transcript; the run gets it as the input, not twice in history.
+		messages.pop();
+	} else {
+		await appendMessage(db, {
+			id: crypto.randomUUID(),
+			sessionId,
+			tenantId,
+			role: "user",
+			content: text,
+		});
+	}
+
+	const history = renderTranscript(messages);
 
 	if (!env?.GROVE_KEK) {
 		throwGroveError(500, ARBOR_ERRORS.DB_NOT_AVAILABLE, "Fireside", {
