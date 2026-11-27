@@ -185,7 +185,7 @@ export function createProposeDraftTool({ draft, maxWords }: ProposeDraftOptions)
 					// what the page already held when this was proposed.
 					proposedAgainst: draft.length,
 				},
-			} as JsonObject;
+			} as unknown as JsonObject;
 
 			return base.execute(rewritten, ctx);
 		},

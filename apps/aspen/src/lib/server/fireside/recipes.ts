@@ -62,11 +62,18 @@ export const FIRESIDE_COMPACTION = {
 } as const;
 
 /** What a run needs to know about the page before it starts. */
-/** Both runs take one thing: the page. The conversation history is not an input. */
+/**
+ * Both runs take the page, and optionally the conversation so far.
+ *
+ * `history` is *rendered by the route* from `fireside_messages` — never accepted
+ * from a request body — and is already wrapped by `secureUserContent` when it
+ * arrives. It is optional so the first turn of a session needs no plumbing.
+ */
 const DRAFT_INPUT: JsonObject = {
 	type: "object",
 	properties: {
 		draft: { type: "string" },
+		history: { type: "string" },
 	},
 	required: ["draft"],
 };
@@ -107,12 +114,16 @@ export function createFiresideTurnRecipe({ draft }: TurnRecipeOptions): Recipe<F
 		version: FIRESIDE_RECIPE_VERSION,
 		instructions: buildTurnInstructions({ hasDraft }),
 		input: DRAFT_INPUT,
-		setup: (input) => ({
-			message: hasDraft
-				? `The writer is ${new Set(draft.trim().split(/\s+/)).size} words into a draft and has opened the conversation.`
-				: "The writer has opened a new, empty post and started a conversation.",
-			state: { draft: (input as { draft?: string }).draft ?? draft },
-		}),
+		setup: (input) => {
+			const { draft: inputDraft, history } = input as { draft?: string; history?: string };
+			const page = hasDraft
+				? `The writer has ${inputDraft?.trim().split(/\s+/).filter(Boolean).length ?? 0} words on the page and is mid-draft. \`read_draft\` shows you what they have.`
+				: "The page is blank — the writer has not started writing yet.";
+			return {
+				message: history === undefined || history === "" ? page : `${history}\n\n${page}`,
+				state: { draft: inputDraft ?? draft },
+			};
+		},
 		tools,
 		limits: { steps: stepsFor(tools.length) },
 		compaction: FIRESIDE_COMPACTION,
@@ -152,11 +163,15 @@ export function createFiresideDraftRecipe({
 			hasRecentPosts: recentPosts.length > 0,
 		}),
 		input: DRAFT_INPUT,
-		setup: (input) => ({
-			message:
-				"The writer has asked you to organise what is already here into a draft. Read the page, then propose.",
-			state: { draft: (input as { draft?: string }).draft ?? draft },
-		}),
+		setup: (input) => {
+			const { draft: inputDraft, history } = input as { draft?: string; history?: string };
+			const ask =
+				"The writer has asked you to organise what is already here into a draft. Read the page, then propose.";
+			return {
+				message: history === undefined || history === "" ? ask : `${history}\n\n${ask}`,
+				state: { draft: inputDraft ?? draft },
+			};
+		},
 		tools,
 		limits: { steps: stepsFor(tools.length) },
 		compaction: FIRESIDE_COMPACTION,
