@@ -1,4 +1,6 @@
 import { cloudflareTest } from "@cloudflare/vitest-plugin";
+import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { svelteTesting } from "@testing-library/svelte/vite";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { defineConfig } from "vitest/config";
@@ -38,6 +40,29 @@ export default defineConfig({
 					name: "unit",
 					environment: "node",
 					include: ["src/**/*.test.ts"],
+					// Component tests are the `components` project's job: they need a DOM and
+					// the Svelte plugin, which this one deliberately does not load.
+					exclude: ["**/node_modules/**", "src/**/*.svelte.test.ts"],
+				},
+			},
+			{
+				/**
+				 * Component tests: a real Svelte component in a real DOM (jsdom), with
+				 * `fetch` stubbed at the boundary. Nothing below the boundary is mocked —
+				 * the routes have their own suites in workerd.
+				 *
+				 * This project exists because the panel is the one piece the route tests
+				 * cannot reach: it mirrors state the server already owns (which message is
+				 * local, whether a proposal was accepted) and gets that wrong silently.
+				 */
+				// `svelteTesting` points resolution at the browser build: without it
+				// `mount()` is the server version and every render throws.
+				plugins: [svelte(), svelteTesting()],
+				test: {
+					name: "components",
+					environment: "jsdom",
+					include: ["src/**/*.svelte.test.ts"],
+					setupFiles: ["test/component-setup.ts"],
 				},
 			},
 			{

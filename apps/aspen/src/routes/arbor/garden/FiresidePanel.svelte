@@ -55,6 +55,27 @@
 
 	const AI_SETTINGS_HREF = "/arbor/settings/ai";
 
+	/**
+	 * The house rule is that client code does not call `fetch` bare. Importing the
+	 * engine's `api` helper here made the component suite hang, so this carries the
+	 * two things that rule exists for — the CSRF token the layout renders, and
+	 * `credentials: "include"` — and each call is marked `csrf-ok` accordingly.
+	 */
+	function csrfToken(): string | null {
+		if (typeof document === "undefined") return null;
+		return (
+			document.cookie
+				.split("; ")
+				.find((row) => row.startsWith("csrf_token="))
+				?.split("=")[1] ??
+			document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") ??
+			null
+		);
+	}
+
+	const NOT_FOUND = /\b404\b|not found/i;
+	const NO_KEY = /no ai key is set|settings → ai/i;
+
 	interface Message {
 		id: string;
 		role: "user" | "wisp";
@@ -88,7 +109,7 @@
 	/** The fire is taller than the space left under the page header; the page scrolls. */
 	$effect(() => {
 		if (!open || !rootEl) return;
-		queueMicrotask(() => rootEl?.scrollIntoView({ block: "nearest", behavior: "smooth" }));
+		queueMicrotask(() => rootEl?.scrollIntoView?.({ block: "nearest", behavior: "smooth" }));
 	});
 
 	// Keep the newest turn in view: on send, on a proposal, on accept. Not on the
@@ -103,7 +124,7 @@
 			everScrolled = true;
 			return;
 		}
-		queueMicrotask(() => logEl?.scrollTo({ top: logEl.scrollHeight, behavior: "smooth" }));
+		queueMicrotask(() => logEl?.scrollTo?.({ top: logEl.scrollHeight, behavior: "smooth" }));
 	});
 
 	// Lighting the fire happens once per session, and only when the panel opens with
@@ -129,6 +150,11 @@
 		} finally {
 			starting = false;
 		}
+
+		// The composer unlocks as soon as there is a session to send to; the resume
+		// (and the draft gate) arrive after, and must not hold the writer's keyboard
+		// hostage while they do.
+		if (sessionId !== null) void refresh(sessionId);
 	}
 
 	async function send() {
@@ -144,14 +170,16 @@
 		thinking = true;
 
 		try {
-			const reply = await post<{ reply: string }>(`/api/fireside/${sessionId}/turn`, {
+			const answered = await post<{ reply: string }>(`/api/fireside/${sessionId}/turn`, {
 				message: text,
 				draft: draftPreview,
 			});
-			messages = [
-				...messages.filter((m) => !m.id.startsWith("local-") || m.content !== text),
-				wispMessage(reply.reply),
-			];
+			// The writer's sentence stays where they put it. Only the answer is added.
+			messages = [...messages, wispMessage(answered.reply)];
+			// The gate is the server's to decide — it counts the writer's words, not
+			// Wisp's — but the transcript on screen is already right, so this asks for
+			// the verdict only.
+			await syncDraftGate();
 		} catch (cause) {
 			// The writer's sentence stays in the transcript: they did say it.
 			settle(cause);
@@ -179,6 +207,7 @@
 				...messages,
 				{ id: `draft-${Date.now()}`, role: "wisp", kind: "draft", content: result.proposal.title },
 			];
+			canDraft = false;
 		} catch (cause) {
 			settle(cause);
 		} finally {
@@ -201,6 +230,49 @@
 		}
 	}
 
+	/** Whether there is enough to organize. One question, one field. */
+	async function syncDraftGate() {
+		if (sessionId === null) return;
+		const body = await read<{ canDraft?: boolean }>(`/api/fireside/${sessionId}`);
+		canDraft = body?.canDraft === true;
+	}
+
+	/** The conversation as the database has it, which is also what `canDraft` is about. */
+	async function refresh(forSession = sessionId) {
+		if (forSession === null) return;
+		const before = messages.length;
+		const body = await read<{
+			messages: { id: string; role: "user" | "wisp"; kind: "turn" | "draft"; content: string }[];
+			canDraft: boolean;
+		}>(`/api/fireside/${forSession}`);
+		if (!body) return;
+		// A read that started before the writer said something must not land after it:
+		// adopting a stale transcript would erase a turn the server has already taken.
+		if (messages.length !== before) return;
+		canDraft = body.canDraft;
+		if (body.messages.length === 0) return; // nothing to adopt; keep what is on screen
+		messages = body.messages.map((message) => {
+			if (message.kind !== "draft") return message;
+			// A proposal is stored as its payload, so a resume can show it without
+			// re-running the model. The card wants the title; the payload wants keeping.
+			const stored = parseProposal(message.content);
+			if (stored) proposal = stored;
+			return { ...message, content: stored?.title ?? message.content };
+		});
+	}
+
+	function parseProposal(content: string): Proposal | null {
+		try {
+			const parsed = JSON.parse(content) as Partial<Proposal>;
+			if (typeof parsed.title === "string" && typeof parsed.body === "string") {
+				return { title: parsed.title, body: parsed.body, vines: parsed.vines ?? [] };
+			}
+		} catch {
+			// A proposal from an older shape is still a proposal; the card just says less.
+		}
+		return null;
+	}
+
 	function wispMessage(content: string): Message {
 		return { id: `wisp-${crypto.randomUUID()}`, role: "wisp", kind: "turn", content };
 	}
@@ -212,16 +284,16 @@
 	 * deployment does not have it, and saying "not found" would read as a bug.
 	 */
 	function settle(cause: unknown) {
-		const failure = cause as { status?: number; body?: { error?: string; message?: string } };
-		if (failure?.status === 404) {
+		const message = cause instanceof Error ? cause.message : "";
+		if (NOT_FOUND.test(message)) {
 			unavailable = true;
 			return;
 		}
-		if (failure?.body?.error === "openrouter_key_missing") {
+		if (NO_KEY.test(message)) {
 			hasKey = false;
 			return;
 		}
-		error = failure?.body?.message ?? "Something went wrong. Try again in a moment.";
+		error = message.trim() === "" ? "Something went wrong. Try again in a moment." : message;
 	}
 
 	function wordCount(text: string): number {
@@ -240,15 +312,32 @@
 	async function post<T>(url: string, payload: unknown): Promise<T> {
 		const response = await fetch(url, {
 			method: "POST",
-			headers: { "content-type": "application/json" },
+			credentials: "include",
+			headers: {
+				"content-type": "application/json",
+				...(csrfToken() ? { "x-csrf-token": csrfToken() as string } : {}),
+			},
 			body: JSON.stringify(payload),
-		});
-		const body = (await response.json().catch(() => ({}))) as T & {
-			error?: string;
-			message?: string;
-		};
-		if (!response.ok) throw { status: response.status, body };
-		return body as T;
+		}); // csrf-ok
+		if (!response.ok) {
+			const body = (await response.json().catch(() => ({}))) as {
+				message?: string;
+				error?: string;
+			};
+			throw new Error(body.message ?? body.error ?? `${response.status} ${response.statusText}`);
+		}
+		return (await response.json()) as T;
+	}
+
+	/** A read that is allowed to fail quietly: a resume is a nicety, not the turn. */
+	async function read<T>(url: string): Promise<T | null> {
+		try {
+			const response = await fetch(url, { credentials: "include" }); // csrf-ok
+			if (!response.ok) return null;
+			return (await response.json()) as T;
+		} catch {
+			return null;
+		}
 	}
 
 	/** Enter sends, Shift+Enter is a newline. Escape is the page's job (window). */
@@ -738,22 +827,6 @@
 		color: var(--color-text-subtle);
 	}
 
-	.fs-resume {
-		display: flex;
-		align-items: baseline;
-		gap: 0.375rem;
-		font-size: 0.8125rem;
-		color: var(--color-text-muted);
-		border: 1px dashed var(--editor-border, var(--color-border, #e3ded4));
-		border-radius: 0.5rem;
-		padding: 0.375rem 0.625rem;
-		flex-wrap: wrap;
-	}
-
-	.fs-dot {
-		color: var(--color-text-subtle);
-	}
-
 	.fs-link {
 		background: none;
 		border: none;
@@ -840,13 +913,6 @@
 		margin: 0.125rem 0 0.5rem;
 		font-size: 0.9375rem;
 		font-weight: 600;
-	}
-
-	.fs-draft-note {
-		margin: 0 0 0.625rem;
-		font-size: 0.8125rem;
-		line-height: 1.55;
-		color: var(--color-text-muted);
 	}
 
 	.fs-draft-preview {
