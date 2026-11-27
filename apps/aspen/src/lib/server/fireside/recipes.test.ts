@@ -17,7 +17,6 @@ import { fakeClock, scriptedModel, type ScriptedTurn } from "@autumnsgrove/lyra/
 import { describe, expect, it } from "vitest";
 import {
 	FIRESIDE_DRAFT_RECIPE,
-	FIRESIDE_TURN_RECIPE,
 	createFiresideDraftRecipe,
 	createFiresideTurnRecipe,
 	stepsFor,
