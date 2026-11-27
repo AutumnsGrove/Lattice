@@ -23,11 +23,10 @@
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
-import { moderatePublishedContent } from "@autumnsgrove/thorn/hooks";
-import { invalidatePostCaches } from "../../../blooms/[slug]/bloom-service";
 import { requireFireside } from "$lib/server/fireside/guard";
+import { setTranscriptPublic } from "$lib/server/fireside/publish";
 import { listMessages, loadOwnedSession } from "$lib/server/fireside/session";
-import { buildTranscript, transcriptTextForModeration } from "$lib/server/fireside/transcript";
+import { buildTranscript } from "$lib/server/fireside/transcript";
 
 export const POST: RequestHandler = async (event) => {
 	const { db, tenantId, userId } = await requireFireside(event);
@@ -68,32 +67,25 @@ export const POST: RequestHandler = async (event) => {
 	}
 
 	const publish = body.public;
-	const firstPublish = publish && session.transcript_public !== 1;
-
-	await db
-		.prepare(
-			`UPDATE fireside_sessions
-			    SET transcript_public = ?,
-			        -- The date it first went public. Re-publishing keeps the first one:
-			        -- this is when the writer decided, not when they last clicked.
-			        transcript_published_at = CASE
-			            WHEN ? = 1 THEN COALESCE(transcript_published_at, unixepoch())
-			            ELSE transcript_published_at
-			        END,
-			        -- A public transcript is exempt from the sweep. Coming back down
-			        -- does not re-arm it: the conversation has been on the page.
-			        expires_at = CASE WHEN ? = 1 THEN NULL ELSE expires_at END,
-			        updated_at = unixepoch()
-			  WHERE id = ? AND tenant_id = ?`,
-		)
-		.bind(publish ? 1 : 0, publish ? 1 : 0, publish ? 1 : 0, sessionId, tenantId)
-		.run();
-
-	await invalidatePostCaches(env?.CACHE_KV, tenantId, post.slug);
 
 	// The conversation comes back with the answer, so the footer can show it without
-	// reloading the page it is already on.
+	// reloading the page it is already on. Loaded before the write so the shared
+	// helper can moderate it without a second read.
 	const messages = publish ? await listMessages(db, tenantId, sessionId) : [];
+
+	await setTranscriptPublic({
+		db,
+		tenantId,
+		userId,
+		sessionId,
+		slug: post.slug,
+		publish,
+		wasPublic: session.transcript_public === 1,
+		messages,
+		env,
+		waitUntil: event.platform?.context?.waitUntil.bind(event.platform.context),
+	});
+
 	const transcript =
 		publish && messages.length > 0
 			? {
@@ -102,22 +94,6 @@ export const POST: RequestHandler = async (event) => {
 					entries: buildTranscript(messages, { accepted: session.status === "accepted" }),
 				}
 			: null;
-
-	if (firstPublish && env?.AI && event.platform?.context) {
-		event.platform.context.waitUntil(
-			moderatePublishedContent({
-				content: transcriptTextForModeration(messages),
-				ai: env.AI,
-				db,
-				openrouterApiKey: env.OPENROUTER_API_KEY,
-				tenantId,
-				userId,
-				contentType: "blog_post",
-				hookPoint: "on_publish",
-				contentRef: post.slug,
-			}),
-		);
-	}
 
 	return json({ transcriptPublic: publish, slug: post.slug, transcript });
 };

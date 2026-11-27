@@ -13,6 +13,7 @@ import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import { requireFireside } from "$lib/server/fireside/guard";
 import { canDraft } from "$lib/server/fireside/opening";
 import { listMessages, loadOwnedSession } from "$lib/server/fireside/session";
+import { invalidatePostCaches } from "../../blooms/[slug]/bloom-service";
 
 export const GET: RequestHandler = async (event) => {
 	const { db, tenantId, userId } = await requireFireside(event);
@@ -72,6 +73,18 @@ export const DELETE: RequestHandler = async (event) => {
 		throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "Fireside");
 	}
 
+	// Read the post's end of the link *before* the delete, because deleting the
+	// session is what nulls it. Without this the post page keeps serving a transcript
+	// that no longer exists, from its cache, for the rest of the TTL.
+	const post = await db
+		.prepare(
+			`SELECT slug FROM posts
+			  WHERE fireside_session_id = ? AND tenant_id = ?
+			  LIMIT 1`,
+		)
+		.bind(sessionId, tenantId)
+		.first<{ slug: string }>();
+
 	// Messages cascade. The post keeps its attribution: `posts.fireside_session_id`
 	// is `ON DELETE SET NULL`, so deleting the conversation does not erase the
 	// fact that the post was written with help.
@@ -79,6 +92,10 @@ export const DELETE: RequestHandler = async (event) => {
 		.prepare(`DELETE FROM fireside_sessions WHERE id = ? AND tenant_id = ?`)
 		.bind(sessionId, tenantId)
 		.run();
+
+	if (post) {
+		await invalidatePostCaches(event.platform?.env?.CACHE_KV, tenantId, post.slug);
+	}
 
 	return json({ deleted: true });
 };

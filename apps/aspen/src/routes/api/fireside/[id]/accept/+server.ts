@@ -22,6 +22,7 @@ import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import { requireFireside } from "$lib/server/fireside/guard";
+import { setTranscriptPublic } from "$lib/server/fireside/publish";
 import { loadOwnedSession } from "$lib/server/fireside/session";
 
 export const POST: RequestHandler = async (event) => {
@@ -75,22 +76,28 @@ export const POST: RequestHandler = async (event) => {
 	await db
 		.prepare(
 			`UPDATE fireside_sessions
-			    SET status = 'accepted',
-			        transcript_public = ?,
-			        transcript_published_at = CASE WHEN ? = 1 THEN unixepoch() ELSE NULL END,
-			        -- A published transcript is exempt from expiry; nothing else is.
-			        expires_at = CASE WHEN ? = 1 THEN NULL ELSE expires_at END,
-			        updated_at = unixepoch()
+			    SET status = 'accepted', updated_at = unixepoch()
 			  WHERE id = ? AND tenant_id = ?`,
 		)
-		.bind(
-			transcriptPublic ? 1 : 0,
-			transcriptPublic ? 1 : 0,
-			transcriptPublic ? 1 : 0,
-			sessionId,
-			tenantId,
-		)
+		.bind(sessionId, tenantId)
 		.run();
+
+	// The transcript columns and everything that follows from them belong to one
+	// place: publishing here used to skip both the cache purge and Thorn, which made
+	// this the short path to a public conversation nobody moderated.
+	if (transcriptPublic) {
+		await setTranscriptPublic({
+			db,
+			tenantId,
+			userId,
+			sessionId,
+			slug,
+			publish: true,
+			wasPublic: session.transcript_public === 1,
+			env: event.platform?.env,
+			waitUntil: event.platform?.context?.waitUntil.bind(event.platform.context),
+		});
+	}
 
 	return json({ accepted: true, slug, assisted: true, transcriptPublic });
 };

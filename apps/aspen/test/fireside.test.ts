@@ -253,6 +253,63 @@ describe("fireside", () => {
 			expect(after?.transcript_published_at).toBe(live?.transcript_published_at);
 		});
 
+		it("publishes through the same door when accept is the first yes", async () => {
+			const who = await grove({ posts: [{ slug: "tea-shop", title: "The tea shop" }] });
+			const started = await start(who);
+			const tenantId = await tenantIdFor(who.subdomain);
+
+			// The writer saved the post before accept called in, so the page is sitting
+			// in the cache without a transcript — the state accept has to invalidate.
+			await page("/garden/tea-shop", { tenant: who.beta });
+			expect(await waitForCacheKey(CACHE_KEYS.post(tenantId, "tea-shop"))).toBe(true);
+
+			const accepted = await json(`/api/fireside/${started.sessionId}/accept`, {
+				tenant: who.beta,
+				cookie: who.cookie,
+				method: "POST",
+				headers: who.write(),
+				body: JSON.stringify({ slug: "tea-shop", transcriptPublic: true }),
+			});
+			expect(accepted.status).toBe(200);
+
+			// Accept is the same door as the toggle: the cached payload cannot keep
+			// serving a post that does not disclose what it now discloses.
+			expect(await env.CACHE_KV.get(CACHE_KEYS.post(tenantId, "tea-shop"))).toBeNull();
+		});
+
+		it("takes a published conversation off the page when the session is deleted", async () => {
+			const who = await grove({ posts: [{ slug: "tea-shop", title: "The tea shop" }] });
+			const started = await start(who);
+			const tenantId = await tenantIdFor(who.subdomain);
+
+			await json(`/api/fireside/${started.sessionId}/accept`, {
+				tenant: who.beta,
+				cookie: who.cookie,
+				method: "POST",
+				headers: who.write(),
+				body: JSON.stringify({ slug: "tea-shop", transcriptPublic: true }),
+			});
+
+			await page("/garden/tea-shop", { tenant: who.beta });
+			expect(await waitForCacheKey(CACHE_KEYS.post(tenantId, "tea-shop"))).toBe(true);
+
+			const deleted = await json<{ deleted: boolean }>(`/api/fireside/${started.sessionId}`, {
+				tenant: who.beta,
+				cookie: who.cookie,
+				method: "DELETE",
+				headers: who.write(),
+			});
+			expect(deleted.status).toBe(200);
+
+			// Deleting the conversation must not leave it readable from the cache until
+			// the TTL runs out: the writer took it down.
+			expect(await env.CACHE_KV.get(CACHE_KEYS.post(tenantId, "tea-shop"))).toBeNull();
+
+			const after = await page("/garden/tea-shop", { tenant: who.beta });
+			expect(after.html).toContain("written fireside with Wisp");
+			expect(after.html).not.toContain("Read how this was written");
+		});
+
 		it("lets a session go, and takes its messages with it", async () => {
 			const who = await grove();
 			const started = await start(who);
