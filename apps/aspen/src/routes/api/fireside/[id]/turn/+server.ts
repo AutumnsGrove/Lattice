@@ -199,15 +199,27 @@ export const POST: RequestHandler = async (event) => {
 		});
 	}
 
-	await appendMessage(db, {
-		id: crypto.randomUUID(),
-		sessionId,
-		tenantId,
-		role: "wisp",
-		content: reply,
-	});
+	// The run is paid for, so a reply that cannot be stored is still a reply the writer
+	// gets. The row is capped at 8,000 characters by the schema and the recipe's budget
+	// is far below it; this keeps that a cheaper accident than a `500` with a bill.
+	let persisted = true;
+	try {
+		await appendMessage(db, {
+			id: crypto.randomUUID(),
+			sessionId,
+			tenantId,
+			role: "wisp",
+			content: reply,
+		});
+	} catch (cause) {
+		persisted = false;
+		logGroveError("Fireside", ARBOR_ERRORS.DB_NOT_AVAILABLE, {
+			detail: "the reply could not be stored; returning it anyway",
+			cause,
+		});
+	}
 
-	return json({ reply, turns: result.turns });
+	return json({ reply, turns: result.turns, persisted });
 };
 
 /** A worker has no fake clock; a turn simply takes as long as it takes. */

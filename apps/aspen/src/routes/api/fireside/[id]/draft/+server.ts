@@ -185,11 +185,16 @@ export const POST: RequestHandler = async (event) => {
 		});
 	}
 
+	// Never back from `accepted`: asking for another draft on a session whose post
+	// already exists must not un-accept it, or the transcript loses its "this became
+	// the post" line on the next cache rebuild.
 	await db
 		.prepare(
-			`UPDATE fireside_sessions SET status = 'drafted', updated_at = unixepoch() WHERE id = ?`,
+			`UPDATE fireside_sessions
+			    SET status = 'drafted', updated_at = unixepoch()
+			  WHERE id = ? AND tenant_id = ? AND status != 'accepted'`,
 		)
-		.bind(sessionId)
+		.bind(sessionId, tenantId)
 		.run();
 
 	return json({ drafted: true, proposal, persisted });
