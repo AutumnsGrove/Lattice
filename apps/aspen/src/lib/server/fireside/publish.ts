@@ -20,8 +20,14 @@
  */
 
 import { moderatePublishedContent } from "@autumnsgrove/thorn/hooks";
-import { invalidatePostCaches } from "../../../routes/api/blooms/[slug]/bloom-service";
-import { listMessages, type FiresideMessageRow } from "./session";
+import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
+import { invalidatePostCaches } from "$lib/server/post-cache";
+import {
+	listMessages,
+	loadOwnedSession,
+	type FiresideMessageRow,
+	type FiresideSessionRow,
+} from "./session";
 import { transcriptTextForModeration } from "./transcript";
 
 /** Only the bindings this decision needs, so a caller can pass `platform.env`. */
@@ -100,4 +106,115 @@ export async function setTranscriptPublic(options: PublishOptions): Promise<void
 			contentRef: slug,
 		}),
 	);
+}
+
+/**
+ * Acceptance, as a save request carries it.
+ *
+ * The page used to save the post and *then* call `/accept`. If that second call
+ * failed, the post existed with no marker and no link — a lie of omission with no
+ * error anybody would notice. So the save now carries the acceptance, and the
+ * attribution lands in the same INSERT as the post: a post that exists because a
+ * conversation happened says so, or it does not exist.
+ *
+ * The reverse order (mark the session accepted, then insert) cannot fail that way:
+ * if the session update is lost, the post still carries the truth and the session
+ * is merely still `drafted`, which re-accepting fixes.
+ */
+
+export interface FiresideInput {
+	sessionId: string;
+	transcriptPublic: boolean;
+}
+
+/**
+ * Read the optional `fireside` block out of a save payload.
+ *
+ * `null` when absent — most posts have nothing to do with Fireside. A block that is
+ * present must be exact: `transcriptPublic` is a yes or a no, never "on".
+ */
+export function readFiresideInput(value: unknown): FiresideInput | null {
+	if (value === undefined || value === null) return null;
+	if (typeof value !== "object") {
+		throwGroveError(400, API_ERRORS.VALIDATION_FAILED, "API", {
+			detail: "fireside must be an object with a sessionId",
+		});
+	}
+
+	const { sessionId, transcriptPublic } = value as {
+		sessionId?: unknown;
+		transcriptPublic?: unknown;
+	};
+
+	if (typeof sessionId !== "string" || sessionId.trim() === "") {
+		throwGroveError(400, API_ERRORS.MISSING_REQUIRED_FIELDS, "API", {
+			detail: "fireside needs the session it came from",
+		});
+	}
+
+	return {
+		sessionId: sessionId.trim(),
+		transcriptPublic: transcriptPublic === true,
+	};
+}
+
+/**
+ * The session behind an acceptance, or `404`.
+ *
+ * Verified *before* the post is written, so a save carrying someone else's session
+ * creates nothing at all. Scoped on tenant and writer, like every other lookup:
+ * the conversation belongs to a person, not to an editor shared within a grove.
+ */
+export async function requireOwnedFiresideSession(
+	db: D1Database,
+	tenantId: string,
+	userId: string,
+	sessionId: string,
+): Promise<FiresideSessionRow> {
+	const session = await loadOwnedSession(db, tenantId, userId, sessionId);
+	if (!session) {
+		throwGroveError(404, API_ERRORS.RESOURCE_NOT_FOUND, "Fireside");
+	}
+	return session;
+}
+
+/**
+ * After the post exists: accept the session, and publish the transcript if asked.
+ *
+ * Called by both save routes (create and update) so an accepted draft behaves the
+ * same whether the post was new or already on the page.
+ */
+export async function recordAcceptance(options: {
+	db: D1Database;
+	tenantId: string;
+	userId: string;
+	sessionId: string;
+	slug: string;
+	transcriptPublic: boolean;
+	session: FiresideSessionRow;
+	env?: PublishEnvironment;
+	waitUntil?: (promise: Promise<unknown>) => void;
+}): Promise<void> {
+	await options.db
+		.prepare(
+			`UPDATE fireside_sessions
+			    SET status = 'accepted', updated_at = unixepoch()
+			  WHERE id = ? AND tenant_id = ?`,
+		)
+		.bind(options.sessionId, options.tenantId)
+		.run();
+
+	if (options.transcriptPublic) {
+		await setTranscriptPublic({
+			db: options.db,
+			tenantId: options.tenantId,
+			userId: options.userId,
+			sessionId: options.sessionId,
+			slug: options.slug,
+			publish: true,
+			wasPublic: options.session.transcript_public === 1,
+			env: options.env,
+			waitUntil: options.waitUntil,
+		});
+	}
 }

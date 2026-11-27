@@ -10,12 +10,18 @@ import { sanitizeObject } from "@autumnsgrove/lattice/utils/validation";
 import { getTenantDb, queryOne } from "@autumnsgrove/lattice/server/services/database";
 import { getVerifiedTenantId } from "@autumnsgrove/lattice/auth/session";
 import * as cache from "@autumnsgrove/lattice/server/services/cache";
+import { invalidatePostCaches } from "$lib/server/post-cache";
 import { moderatePublishedContent } from "@autumnsgrove/thorn/hooks";
 import { updateLastActivity } from "@autumnsgrove/lattice/server/activity-tracking";
 import { emitPulseEvent } from "@autumnsgrove/lattice/pulse";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import { TIERS, type TierKey, isValidTier } from "@autumnsgrove/lattice/platform/config/tiers";
 import { isHttpError } from "@sveltejs/kit";
+import {
+	readFiresideInput,
+	recordAcceptance,
+	requireOwnedFiresideSession,
+} from "$lib/server/fireside/publish";
 
 // ============================================================================
 // Types
@@ -50,28 +56,18 @@ interface PostInput {
 	republish?: boolean;
 	blaze?: string | null;
 	spark_prompt?: string | null;
+	/** The conversation this post was written from, when there was one. */
+	fireside?: { sessionId?: string; transcriptPublic?: boolean };
 }
 
 // ============================================================================
 // Cache Invalidation
 // ============================================================================
+// Defined in `$lib/server/post-cache` and re-exported here, so the two callers
+// that reach for it through this module keep working — and so Fireside can purge
+// the same keys without importing this file (which would be a cycle).
 
-export async function invalidatePostCaches(
-	kv: KVNamespace | undefined,
-	tenantId: string,
-	slug: string,
-): Promise<void> {
-	if (!kv) return;
-
-	try {
-		await Promise.all([
-			cache.del(kv, `garden:${tenantId}:${slug}`),
-			cache.del(kv, `garden:list:${tenantId}`),
-		]);
-	} catch (err) {
-		console.error("[Cache] Failed to invalidate post caches:", err);
-	}
-}
+export { invalidatePostCaches };
 
 // ============================================================================
 // GET - Fetch Post
@@ -155,6 +151,13 @@ export async function updatePost(
 	waitUntil?: (promise: Promise<unknown>) => void,
 ): Promise<{ slug: string }> {
 	const data = sanitizeObject(requestData) as PostInput;
+
+	// Acceptance rides on the save here too. Checked before any write, so a save
+	// carrying another writer's conversation changes nothing at all.
+	const fireside = readFiresideInput(data.fireside);
+	const firesideSession = fireside
+		? await requireOwnedFiresideSession(db, tenantId, userId, fireside.sessionId)
+		: null;
 
 	const tenantDbEarly = getTenantDb(db, { tenantId });
 
@@ -298,6 +301,13 @@ export async function updatePost(
 	if (published_at !== undefined) updateData.published_at = published_at;
 	if (data.spark_prompt !== undefined) updateData.spark_prompt = data.spark_prompt;
 
+	// `= 1`, never a literal: the marker cannot be cleared, and nothing else in this
+	// update is allowed to touch it.
+	if (fireside && firesideSession) {
+		updateData.fireside_assisted = 1;
+		updateData.fireside_session_id = fireside.sessionId;
+	}
+
 	// Update with blaze column fallback
 	try {
 		await tenantDb.update("posts", updateData, "slug = ?", [slug]);
@@ -313,6 +323,22 @@ export async function updatePost(
 	}
 
 	updateLastActivity(db, tenantId);
+
+	// The post carries its attribution; now record the acceptance behind it. A lost
+	// update here leaves the post true and the session still `drafted`.
+	if (fireside && firesideSession) {
+		await recordAcceptance({
+			db,
+			tenantId,
+			userId,
+			sessionId: fireside.sessionId,
+			slug: newSlug || slug,
+			transcriptPublic: fireside.transcriptPublic,
+			session: firesideSession,
+			env: platformEnv,
+			waitUntil,
+		});
+	}
 
 	// Invalidate caches
 	await invalidatePostCaches(platformEnv.CACHE_KV, tenantId, slug);

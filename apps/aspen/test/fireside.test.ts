@@ -41,11 +41,16 @@ interface ResumeBody {
 	acceptance: { accepted: boolean; slug?: string };
 }
 
+/** The writer signed in for these tests: the tenant's owner, by email. */
+const OWNER_EMAIL = "writer@example.test";
+
 /** A grove, and the two hostnames it answers on. */
 async function grove(options: { posts?: { slug: string; title: string }[] } = {}) {
 	const subdomain = `fireside-${crypto.randomUUID().slice(0, 8)}`;
-	const id = await createTenant({ subdomain, posts: options.posts });
-	const cookie = await signIn();
+	const id = await createTenant({ subdomain, posts: options.posts, ownerEmail: OWNER_EMAIL });
+	// Signed in as the owner: the save routes verify the caller owns the tenant,
+	// which the Fireside routes never had to ask before.
+	const cookie = await signIn(undefined, { email: OWNER_EMAIL });
 	const beta = `${subdomain}-beta`;
 	return {
 		id,
@@ -70,6 +75,136 @@ async function start(who: Awaited<ReturnType<typeof grove>>): Promise<StartBody>
 }
 
 const ROUTES = ["/api/fireside", "/api/fireside/anything", "/api/fireside/anything/turn"];
+
+/**
+ * The acceptance rides on the save.
+ *
+ * This is the property the whole change exists for: a post that exists because a
+ * conversation happened must not be able to exist without saying so. The old flow
+ * saved the post and then asked `/accept`; a failed second call left a post whose
+ * provenance was missing and nobody saw an error.
+ */
+describe("accepting a draft by saving the post", () => {
+	async function saveBloom(who: Awaited<ReturnType<typeof grove>>, body: Record<string, unknown>) {
+		return json<{ slug?: string; error?: string }>("/api/blooms", {
+			tenant: who.beta,
+			cookie: who.cookie,
+			method: "POST",
+			headers: who.write(),
+			body: JSON.stringify(body),
+		});
+	}
+
+	describe("happy", () => {
+		it("writes the post and its attribution together", async () => {
+			const who = await grove();
+			const started = await start(who);
+
+			const created = await saveBloom(who, {
+				title: "The sign said eight",
+				markdown_content: "Eight, and nobody believed it.",
+				fireside: { sessionId: started.sessionId, transcriptPublic: false },
+			});
+
+			expect(created.status).toBe(200);
+			expect(created.body.slug).toBe("the-sign-said-eight");
+
+			const post = await env.DB.prepare(
+				`SELECT fireside_assisted, fireside_session_id FROM posts
+				 WHERE tenant_id = ? AND slug = ?`,
+			)
+				.bind(await tenantIdFor(who.subdomain), created.body.slug)
+				.first<{ fireside_assisted: number; fireside_session_id: string }>();
+
+			expect(post?.fireside_assisted).toBe(1);
+			expect(post?.fireside_session_id).toBe(started.sessionId);
+
+			const session = await env.DB.prepare(
+				`SELECT status, transcript_public FROM fireside_sessions WHERE id = ?`,
+			)
+				.bind(started.sessionId)
+				.first<{ status: string; transcript_public: number }>();
+
+			expect(session?.status).toBe("accepted");
+			// The writer said no, so the page carries the marker and nothing else.
+			expect(session?.transcript_public).toBe(0);
+		});
+
+		it("publishes the transcript when the writer said yes in the same breath", async () => {
+			const who = await grove();
+			const started = await start(who);
+
+			const created = await saveBloom(who, {
+				title: "The sign said eight",
+				markdown_content: "Eight, and nobody believed it.",
+				status: "published",
+				fireside: { sessionId: started.sessionId, transcriptPublic: true },
+			});
+			expect(created.status).toBe(200);
+
+			const session = await env.DB.prepare(
+				`SELECT transcript_public, transcript_published_at, expires_at
+				   FROM fireside_sessions WHERE id = ?`,
+			)
+				.bind(started.sessionId)
+				.first<{
+					transcript_public: number;
+					transcript_published_at: number;
+					expires_at: number | null;
+				}>();
+
+			expect(session?.transcript_public).toBe(1);
+			expect(session?.transcript_published_at).toBeGreaterThan(0);
+			expect(session?.expires_at).toBeNull();
+
+			const page = await request(`/garden/${created.body.slug}`, { tenant: who.beta });
+			expect(await page.text()).toContain("Read how this was written");
+		});
+	});
+
+	describe("bad", () => {
+		it("refuses a fireside block with no session, before writing anything", async () => {
+			const who = await grove();
+
+			const created = await saveBloom(who, {
+				title: "No session",
+				markdown_content: "words",
+				fireside: { transcriptPublic: true },
+			});
+			expect(created.status).toBe(400);
+
+			const rows = await env.DB.prepare(
+				`SELECT COUNT(*) AS n FROM posts WHERE tenant_id = ? AND slug = ?`,
+			)
+				.bind(await tenantIdFor(who.subdomain), "no-session")
+				.first<{ n: number }>();
+			expect(rows?.n).toBe(0);
+		});
+	});
+
+	describe("sad", () => {
+		it("writes nothing at all when the conversation belongs to another grove", async () => {
+			const mine = await grove();
+			const theirs = await grove();
+			const started = await start(mine);
+
+			const created = await saveBloom(theirs, {
+				title: "Not mine",
+				markdown_content: "words",
+				fireside: { sessionId: started.sessionId, transcriptPublic: false },
+			});
+			expect(created.status).toBe(404);
+
+			// The post must not exist half-made: the session was checked before the insert.
+			const rows = await env.DB.prepare(
+				`SELECT COUNT(*) AS n FROM posts WHERE tenant_id = ? AND slug = ?`,
+			)
+				.bind(await tenantIdFor(theirs.subdomain), "not-mine")
+				.first<{ n: number }>();
+			expect(rows?.n).toBe(0);
+		});
+	});
+});
 
 describe("fireside", () => {
 	describe("happy", () => {

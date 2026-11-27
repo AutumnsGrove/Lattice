@@ -178,7 +178,7 @@
 	 * the server agree — #1586's lesson was a write-only sync with no read-back losing
 	 * work.
 	 */
-	async function saveBloom() {
+	async function saveBloom(fireside?: { sessionId: string; transcriptPublic: boolean }) {
 		return api.post("/api/blooms", {
 			title: title.trim() || "",
 			slug: slug.trim() || "",
@@ -193,6 +193,9 @@
 			featured_image: featuredImage.trim() || null,
 			meadow_exclude: 0,
 			blaze: selectedBlaze,
+			// The attribution rides on the save, so a post that exists because a
+			// conversation happened cannot exist without saying so.
+			...(fireside ? { fireside } : {}),
 		});
 	}
 
@@ -257,14 +260,10 @@
 
 		saving = true;
 		try {
-			const saved = await saveBloom();
-
-			// The flag and the post's link to the conversation. A failure here leaves a post
-			// that exists without its attribution, which must not be swallowed silently.
-			await api.post(`/api/fireside/${sessionId}/accept`, {
-				slug: saved.slug,
-				transcriptPublic,
-			});
+			// One write: the post, its marker and its link to the conversation, with the
+			// transcript choice recorded behind them. This used to be a save followed by
+			// `/accept`, and a failed second call left an unattributed post behind.
+			const saved = await saveBloom({ sessionId, transcriptPublic });
 
 			editorRef?.clearDraft();
 			if (browser) sessionStorage.removeItem("grove-new-post-draft-id");
