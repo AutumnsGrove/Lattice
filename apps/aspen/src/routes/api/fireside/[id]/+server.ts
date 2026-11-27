@@ -27,12 +27,16 @@ export const GET: RequestHandler = async (event) => {
 	const messages = await listMessages(db, tenantId, sessionId);
 
 	// The post's end of the link, so the panel can say "already used" rather than
-	// offering a draft the writer has already accepted.
+	// offering a draft the writer has already accepted. Tenant-scoped like every
+	// other lookup here: the session check already settled ownership, but one rule
+	// applied everywhere is what keeps the next reader of this file from guessing.
 	const post = await db
 		.prepare(
-			`SELECT slug, title, fireside_assisted FROM posts WHERE fireside_session_id = ? LIMIT 1`,
+			`SELECT slug, title, fireside_assisted FROM posts
+			  WHERE fireside_session_id = ? AND tenant_id = ?
+			  LIMIT 1`,
 		)
-		.bind(sessionId)
+		.bind(sessionId, tenantId)
 		.first<{ slug: string; title: string; fireside_assisted: number }>();
 
 	return json({
