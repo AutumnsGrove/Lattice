@@ -18,6 +18,7 @@
 	 * one thing the reader's copy of the page needs to know about it.
 	 */
 	import { navIcons } from "@autumnsgrove/prism/icons";
+	import type { Snippet } from "svelte";
 	import type { TranscriptEntry } from "$lib/server/fireside/transcript";
 
 	interface Props {
@@ -29,9 +30,15 @@
 		author: string;
 		/** The owner's switch, per request and beta only. Null for everyone else. */
 		transcriptSwitch: { sessionId: string; transcriptPublic: boolean } | null;
+		/**
+		 * The way to the article that explains this. Rendered by the page, not here: the
+		 * help trigger is an engine component, and importing it into this one drags the
+		 * engine's aliases into the component suite, which cannot resolve them.
+		 */
+		help?: Snippet;
 	}
 
-	let { assisted, transcript, author, transcriptSwitch }: Props = $props();
+	let { assisted, transcript, author, transcriptSwitch, help }: Props = $props();
 
 	const ChevronDown = navIcons.chevronDown;
 
@@ -132,6 +139,7 @@
 					{#if written(shown.publishedAt)}
 						on {written(shown.publishedAt)}
 					{/if}. Wisp asked; the writing was theirs.
+					{@render help?.()}
 				</p>
 
 				<ol class="fireside-turns">

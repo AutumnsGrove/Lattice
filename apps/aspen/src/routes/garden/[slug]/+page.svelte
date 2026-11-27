@@ -5,6 +5,7 @@
 	import Button from "@autumnsgrove/lattice/ui/components/ui/Button.svelte";
 	import Badge from "@autumnsgrove/lattice/ui/components/ui/Badge.svelte";
 	import GroveTerm from "@autumnsgrove/lattice/components/terminology/GroveTerm.svelte";
+	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
 	import { featureIcons } from "@autumnsgrove/prism/icons";
 	import { fontMap } from "@autumnsgrove/lattice/ui/tokens/fonts";
 	import { Blaze } from "@autumnsgrove/lattice/social/blazes/components";
@@ -222,7 +223,11 @@
 		transcript={data.post.firesideTranscript}
 		author={data.post.author}
 		transcriptSwitch={data.transcriptSwitch}
-	/>
+	>
+		{#snippet help()}
+			<Waystone slug="understanding-your-privacy" label="What Grove keeps" inline />
+		{/snippet}
+	</FiresideAttribution>
 
 	<!-- Reeds: Comments section -->
 	<div class="reeds-container">

@@ -109,6 +109,8 @@ We don't build profiles. We don't track behavior across sessions.
 | IP addresses | 60 seconds |
 | Error logs | 7 days |
 | Your blog content | Until you delete it |
+| AI conversations (Fireside) | 90 days if you never publish them; until you delete the post if you do |
+| Your AI provider key | Until you remove it, encrypted and never readable back |
 | Account data | Until you close your account |
 | Backups | 30 days after deletion |
 | Payment records | 7 years (legal requirement) |
@@ -120,7 +122,8 @@ Grove uses a small number of third-party services:
 - **Cloudflare** — CDN and security (no persistent tracking)
 - **Stripe** — Payment processing (required for subscriptions)
 - **Google** — OAuth authentication only, and only if you choose to sign in with Google
-- **AI providers** — Content moderation with zero data retention
+- **AI providers** — Content moderation, and the AI features you switch on. All of
+  them are zero-data-retention providers: the request is processed and not stored
 
 We don't sell data to anyone. We don't use advertising networks. We don't share your information except as required to provide the service.
 
@@ -131,6 +134,15 @@ Grove uses AI for content moderation (checking for harmful content). This is don
 - **Zero data retention** — Your content is processed and immediately forgotten
 - **No training** — Your words aren't used to train AI models
 - **Minimal processing** — Only what's necessary for safety
+
+The AI features you switch on — [[fireside]] conversations, the timeline agent — run
+on a provider key you add yourself, on the same zero-retention terms. What they keep
+lives in **your grove's database**, not with the provider: an unpublished
+conversation is let go after 90 days, a published transcript stays until you take it
+down or delete the post, and you can delete any of it yourself at any time.
+
+That means a conversation is **your data under this policy**. You can ask for it,
+export it, or delete it, the same as your posts.
 
 For details, see [Understanding Your Privacy](/knowledge/help/understanding-your-privacy).
 

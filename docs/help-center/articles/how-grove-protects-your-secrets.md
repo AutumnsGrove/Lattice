@@ -55,6 +55,19 @@ The original value never sits in our database unprotected. Not even for a moment
 
 ---
 
+## Your AI provider key
+
+If you turn on an AI feature, you add your own provider key in Settings → AI. It is
+encrypted the same way everything else here is — per grove, with your own key — and
+it is never readable back: the settings page can tell you whether a key is set, not
+what it is. Requests to the provider are made on your behalf and nothing is kept by
+them.
+
+You can replace or remove it at any time. Removing it turns the features off; it
+does not delete anything you already wrote.
+
+---
+
 ## What You Can Trust
 
 **Your secrets are isolated.** Each account has its own encryption key. One account's data can't decrypt another's.
