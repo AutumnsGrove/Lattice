@@ -13,6 +13,12 @@ import type { RequestHandler } from "./$types.js";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import { TIERS, type TierKey, isValidTier } from "@autumnsgrove/lattice/platform/config/tiers";
 import { isBetaDeployment } from "$lib/server/beta";
+import {
+	assertConversationUnclaimed,
+	readFiresideInput,
+	recordAcceptance,
+	requireOwnedFiresideSession,
+} from "$lib/server/fireside/publish";
 
 interface PostRecord {
 	id?: string;
@@ -35,6 +41,8 @@ interface PostInput {
 	gutter_content?: string;
 	font?: string;
 	fireside_assisted?: number;
+	/** The conversation this post was written from, when there was one. */
+	fireside?: { sessionId?: string; transcriptPublic?: boolean };
 	status?: "draft" | "published";
 	featured_image?: string;
 	meadow_exclude?: number;
@@ -189,6 +197,25 @@ export const POST: RequestHandler = async ({ request, platform, locals, url }) =
 		});
 
 		const data = sanitizeObject(await request.json()) as PostInput;
+
+		// Acceptance rides on the save so the post cannot exist without its
+		// attribution. The session is checked here, before the insert, so a save
+		// carrying someone else's conversation writes nothing at all.
+		const fireside = readFiresideInput(data.fireside);
+		const firesideSession = fireside
+			? await requireOwnedFiresideSession(
+					platform.env.DB,
+					tenantId,
+					locals.user.id,
+					fireside.sessionId,
+				)
+			: null;
+
+		// A conversation belongs to one post. Claiming a spent one would leave two
+		// posts on one row, and deleting either would take the other's transcript.
+		if (fireside) {
+			await assertConversationUnclaimed(platform.env.DB, tenantId, fireside.sessionId);
+		}
 
 		// Tier-based limit enforcement (isolated — DB failures fail open)
 		// Run all queries in parallel to minimize latency (per AGENT.md parallelization pattern)
@@ -359,7 +386,11 @@ export const POST: RequestHandler = async ({ request, platform, locals, url }) =
 			status: data.status || "draft",
 			word_count: wordCount,
 			reading_time: readingTime,
-			fireside_assisted: data.fireside_assisted || 0,
+			// The link column only appears when there is a conversation to link, so a
+			// post written by hand never names a column the migration has to add.
+			...(firesideSession && fireside
+				? { fireside_assisted: 1, fireside_session_id: fireside.sessionId }
+				: { fireside_assisted: data.fireside_assisted || 0 }),
 			featured_image: data.featured_image || null,
 			meadow_exclude: data.meadow_exclude ?? 0,
 			blaze: blazeSlug,
@@ -394,6 +425,24 @@ export const POST: RequestHandler = async ({ request, platform, locals, url }) =
 
 		// Track activity for inactivity reclamation
 		updateLastActivity(platform.env.DB, tenantId);
+
+		// The post exists with its attribution; now record the acceptance behind it. If
+		// this is lost the post is still true — the session is merely still `drafted`.
+		if (fireside && firesideSession) {
+			await recordAcceptance({
+				db: platform.env.DB,
+				tenantId,
+				userId: locals.user.id,
+				sessionId: fireside.sessionId,
+				slug,
+				transcriptPublic: fireside.transcriptPublic,
+				session: firesideSession,
+				// A create always links: the post was born carrying this conversation.
+				linked: true,
+				env: platform.env,
+				waitUntil: platform.context?.waitUntil.bind(platform.context),
+			});
+		}
 
 		// Invalidate post list cache so the new post appears in listings
 		if (kv) {

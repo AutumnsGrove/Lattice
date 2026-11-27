@@ -14,8 +14,15 @@
 	import { toast } from "@autumnsgrove/lattice/ui/components/ui/toast";
 	import { resolveTermString } from "@autumnsgrove/lattice/ui/utils/grove-term-resolve";
 	import { api } from "@autumnsgrove/lattice/utils";
-	import { navIcons, stateIcons, actionIcons, featureIcons } from "@autumnsgrove/prism/icons";
+	import {
+		navIcons,
+		stateIcons,
+		actionIcons,
+		featureIcons,
+		toolIcons,
+	} from "@autumnsgrove/prism/icons";
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
+	import FiresidePanel from "../FiresidePanel.svelte";
 	import { Blaze } from "@autumnsgrove/lattice/social/blazes/components";
 	import { GLOBAL_BLAZE_DEFAULTS } from "@autumnsgrove/lattice/social/blazes";
 	import {
@@ -42,6 +49,22 @@
 	let font = $state("default");
 	let content = $state("");
 	let gutterItems = $state<GutterItem[]>([]);
+	// DESIGN SESSION: the drawer is wired with fixture state so the surface can be
+	// looked at. The beta gate (isBetaDeployment) and the /api/fireside routes come with it.
+	let firesideOpen = $state(false);
+
+	function handleFiresideKey(event: KeyboardEvent) {
+		if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key.toLowerCase() === "f") {
+			event.preventDefault();
+			firesideOpen = !firesideOpen;
+			return;
+		}
+		// Escape closes the fire — bound here, on the window, rather than on a
+		// non-interactive element inside the panel.
+		if (event.key === "Escape" && firesideOpen) {
+			firesideOpen = false;
+		}
+	}
 	let featuredImage = $state("");
 	let selectedBlaze = $state<string | null>(null);
 
@@ -192,28 +215,42 @@
 			.filter((tag) => tag.length > 0);
 	}
 
+	/**
+	 * The page's one write path.
+	 *
+	 * `handleSave` navigates afterwards; accepting a Fireside draft calls this first and
+	 * then records the acceptance against the slug. Both go through it so autosave and
+	 * the server agree — #1586's lesson was a write-only sync with no read-back losing
+	 * work.
+	 */
+	async function saveBloom(fireside?: { sessionId: string; transcriptPublic: boolean }) {
+		return api.post("/api/blooms", {
+			title: title.trim() || "",
+			slug: slug.trim() || "",
+			date,
+			description: description.trim(),
+			tags: parseTags(tagsInput),
+			font,
+			markdown_content: content,
+			gutter_content: JSON.stringify(gutterItems),
+			fireside_assisted: 0,
+			status: "draft",
+			featured_image: featuredImage.trim() || null,
+			meadow_exclude: 0,
+			blaze: selectedBlaze,
+			// The attribution rides on the save, so a post that exists because a
+			// conversation happened cannot exist without saying so.
+			...(fireside ? { fireside } : {}),
+		});
+	}
+
 	/** Save as draft — zero validation, API handles untitled naming */
 	async function handleSave() {
 		error = null;
 		saving = true;
 
 		try {
-			const result = await api.post("/api/blooms", {
-				title: title.trim() || "",
-				slug: slug.trim() || "",
-				date,
-				description: description.trim(),
-				tags: parseTags(tagsInput),
-				font,
-				markdown_content: content,
-				gutter_content: JSON.stringify(gutterItems),
-				fireside_assisted: 0,
-				status: "draft",
-				featured_image: featuredImage.trim() || null,
-				meadow_exclude: 0,
-				blaze: selectedBlaze,
-				spark_prompt: pinnedPrompt,
-			});
+			const result = await saveBloom();
 
 			editorRef?.clearDraft();
 			if (browser) sessionStorage.removeItem("grove-new-post-draft-id");
@@ -228,6 +265,58 @@
 			const errorMessage = err instanceof Error ? err.message : String(err);
 			error = errorMessage;
 			toast.error(`Failed to save draft`, { description: errorMessage });
+		} finally {
+			saving = false;
+		}
+	}
+
+	/**
+	 * Accepting a Fireside draft.
+	 *
+	 * The merge happens here, not in the panel: the page owns the editor's content, the
+	 * vine list and the save handler, and a component that wrote them would be a second
+	 * writer racing autosave.
+	 *
+	 * `markdown_content` and `gutter_content` are written together — a draft accepted
+	 * without its vines is half accepted (the spec's own words).
+	 */
+	async function handleAcceptDraft(
+		proposal: { title: string; body: string; vines: { anchor: string; text: string }[] },
+		merge: "replace" | "top",
+		transcriptPublic: boolean,
+		sessionId: string,
+	) {
+		if (merge === "replace") {
+			title = proposal.title;
+			content = proposal.body;
+		} else {
+			content = `${proposal.body}\n\n${content}`.trim();
+			if (!title.trim()) title = proposal.title;
+		}
+
+		gutterItems = [
+			...gutterItems,
+			...proposal.vines.map((vine) => ({
+				type: "comment" as const,
+				anchor: vine.anchor,
+				content: vine.text,
+			})),
+		];
+
+		saving = true;
+		try {
+			// One write: the post, its marker and its link to the conversation, with the
+			// transcript choice recorded behind them. This used to be a save followed by
+			// `/accept`, and a failed second call left an unattributed post behind.
+			const saved = await saveBloom({ sessionId, transcriptPublic });
+
+			editorRef?.clearDraft();
+			if (browser) sessionStorage.removeItem("grove-new-post-draft-id");
+			navigatingAfterSave = true;
+			toast.success("Fireside's draft is in", {
+				description: `"${saved.title}" is saved as a draft.`,
+			});
+			goto(`/arbor/garden/edit/${saved.slug}`);
 		} finally {
 			saving = false;
 		}
@@ -313,7 +402,7 @@
 	}
 </script>
 
-<svelte:window onbeforeunload={handleBeforeUnload} />
+<svelte:window onbeforeunload={handleBeforeUnload} onkeydown={handleFiresideKey} />
 
 <div class="new-post-page">
 	<header class="page-header">
@@ -376,11 +465,13 @@
 				</div>
 				<div class="spark-reference-actions">
 					{#if pinnedPrompt}
-						<button type="button" class="spark-ref-btn" onclick={unpinSparkPrompt}>
-							Unpin
-						</button>
+						<button type="button" class="spark-ref-btn" onclick={unpinSparkPrompt}> Unpin </button>
 					{:else}
-						<button type="button" class="spark-ref-btn spark-ref-btn-accent" onclick={pinSparkPrompt}>
+						<button
+							type="button"
+							class="spark-ref-btn spark-ref-btn-accent"
+							onclick={pinSparkPrompt}
+						>
 							<PinIcon class="w-3 h-3" />
 							Pin this
 						</button>
@@ -419,7 +510,31 @@
 		<!-- Editor -->
 		<main class="editor-main">
 			<div class="editor-with-gutter">
-				<div class="editor-section">
+				<div
+					class="editor-section"
+					class:fireside-open={firesideOpen}
+					class:fireside-above={firesideOpen && !!content.trim()}
+					class:fireside-closed={!firesideOpen}
+				>
+					{#if !firesideOpen && data.firesideEnabled}
+						<button
+							type="button"
+							class="fireside-entry"
+							onclick={() => (firesideOpen = true)}
+							title="Fireside (⌘⇧F)"
+						>
+							<toolIcons.fireside size={14} />
+							<span>{content.trim() ? "Fireside" : "Start with a conversation"}</span>
+						</button>
+					{/if}
+					<FiresidePanel
+						bind:open={firesideOpen}
+						mode={content.trim() ? "above" : "solo"}
+						draftPreview={content}
+						hasKey={data.firesideHasKey}
+						onclose={() => (firesideOpen = false)}
+						onaccept={handleAcceptDraft}
+					/>
 					<MarkdownEditor
 						bind:this={editorRef}
 						bind:content
@@ -605,11 +720,45 @@
 />
 
 <style>
+	/* The door to Fireside, above the editor — never in the formatting toolbar,
+	   where it would compete with the heading buttons for space. */
+	.fireside-entry {
+		display: flex;
+		position: relative;
+		z-index: 1;
+		align-items: center;
+		gap: 0.5rem;
+		width: 100%;
+		padding: 0.4375rem 0.75rem;
+		background: var(--color-bg-secondary, #f5f5f5);
+		border: 1px solid var(--editor-border, var(--color-border));
+		border-bottom: none;
+		border-radius: 8px 8px 0 0;
+		color: var(--grove-accent);
+		font: inherit;
+		font-size: 0.8125rem;
+		cursor: pointer;
+		text-align: left;
+		transition: background 120ms ease;
+	}
+
+	.fireside-entry:hover {
+		background: var(--grove-accent-8);
+	}
+
+	/* The editor and whatever sits above it share one frame. */
+	.editor-section.fireside-closed :global(.editor-container),
+	.editor-section.fireside-above :global(.editor-container) {
+		border-top-left-radius: 0;
+		border-top-right-radius: 0;
+	}
 	.new-post-page {
 		display: flex;
 		flex-direction: column;
-		height: calc(100vh - 8rem);
-		min-height: 600px;
+		/* Was a fixed viewport height, which capped everything below it — the fire
+		   could never be taller than the space left over. The page scrolls, so let
+		   it grow to whatever the editor and the conversation actually need. */
+		min-height: calc(100vh - 8rem);
 	}
 	.page-header {
 		display: flex;
@@ -994,6 +1143,7 @@
 	.editor-main {
 		flex: 1;
 		min-width: 0;
+		min-height: 0;
 		display: flex;
 		flex-direction: column;
 	}
@@ -1009,6 +1159,28 @@
 		min-width: 0;
 		display: flex;
 		flex-direction: column;
+		min-height: 0;
+	}
+
+	/* ── Fireside, inside the editor ──────────────────────────────────────
+	   Blank page: the conversation IS the surface, editor hidden underneath
+	   (still mounted, so the draft manager never tears down).
+	   Words on the page: the fire sits above them and the editor shrinks,
+	   joined into one frame with squared shared corners. */
+	.editor-section.fireside-open:not(.fireside-above) :global(.editor-container) {
+		display: none;
+	}
+
+	.editor-section.fireside-above :global(.editor-container) {
+		flex: 1;
+		height: auto;
+		min-height: 0;
+		border-top: none;
+		border-radius: 0 0 8px 8px;
+	}
+
+	.editor-section.fireside-closed :global(.editor-container) {
+		border-top: none;
 	}
 
 	.field-full {

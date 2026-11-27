@@ -13,7 +13,7 @@
 	import { resolveTermString } from "@autumnsgrove/lattice/ui/utils/grove-term-resolve";
 	import { api } from "@autumnsgrove/lattice/utils";
 	import { clickOutside } from "@autumnsgrove/lattice/actions/clickOutside";
-	import { navIcons, actionIcons } from "@autumnsgrove/prism/icons";
+	import { navIcons, actionIcons, toolIcons } from "@autumnsgrove/prism/icons";
 	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
 	import { Blaze } from "@autumnsgrove/lattice/social/blazes/components";
 	import { GLOBAL_BLAZE_DEFAULTS } from "@autumnsgrove/lattice/social/blazes";
@@ -22,6 +22,7 @@
 		FONT_CATEGORY_LABELS,
 	} from "@autumnsgrove/lattice/platform/config/presets";
 	import type { GutterItem } from "@autumnsgrove/grove-markdown";
+	import FiresidePanel from "../../FiresidePanel.svelte";
 
 	// Canonical font list — single source of truth, keeps this select in sync
 	// with the fonts actually loaded on the site (libs/engine/.../tokens/fonts.ts)
@@ -39,6 +40,21 @@
 	let font = $state("default");
 	let content = $state("");
 	let gutterItems = $state<GutterItem[]>([]);
+	/** The fire, on the post the writer is already looking at. */
+	let firesideOpen = $state(false);
+
+	function handleFiresideKey(event: KeyboardEvent) {
+		if ((event.metaKey || event.ctrlKey) && event.shiftKey && event.key.toLowerCase() === "f") {
+			event.preventDefault();
+			firesideOpen = !firesideOpen;
+			return;
+		}
+		// Escape closes the fire — bound on the window, like the new-post page, because
+		// the fire does not own focus while the writer is typing in the editor.
+		if (event.key === "Escape" && firesideOpen) {
+			firesideOpen = false;
+		}
+	}
 	let status = $state("draft");
 	let featuredImage = $state("");
 	let originalSlug = $state("");
@@ -157,6 +173,80 @@
 		slugError = "";
 	}
 
+	/**
+	 * The one write for this post.
+	 *
+	 * `fireside` rides along when the save is the result of accepting a draft, so the
+	 * marker, the link and the words land together — the same rule the new-post page
+	 * follows, and the reason this is a function rather than a payload spelled out in
+	 * each handler.
+	 */
+	async function saveBloom(fireside?: { sessionId: string; transcriptPublic: boolean }) {
+		const saveSlug = originalSlug; // Use original slug for the URL
+		return api.put(`/api/blooms/${saveSlug}`, {
+			title: title.trim() || "",
+			description: description.trim(),
+			tags: parseTags(tagsInput),
+			font,
+			markdown_content: content,
+			gutter_content: JSON.stringify(gutterItems),
+			status,
+			featured_image: featuredImage.trim() || null,
+			meadow_exclude: 0,
+			slug: slug !== originalSlug ? slug : undefined,
+			blaze: selectedBlaze,
+			spark_prompt: sparkPrompt,
+			...(fireside ? { fireside } : {}),
+		});
+	}
+
+	/**
+	 * Accepting a draft into a post that already exists.
+	 *
+	 * A merge, never a silent overwrite: the panel asks which when there are words
+	 * already, and the vines it proposed land with the words it proposed.
+	 */
+	async function handleAcceptDraft(
+		proposal: { title: string; body: string; vines: { anchor: string; text: string }[] },
+		merge: "replace" | "top",
+		transcriptPublic: boolean,
+		sessionId: string,
+	) {
+		if (merge === "replace") {
+			title = proposal.title;
+			content = proposal.body;
+		} else {
+			content = `${proposal.body}\n\n${content}`.trim();
+			if (!title.trim()) title = proposal.title;
+		}
+
+		gutterItems = [
+			...gutterItems,
+			...proposal.vines.map((vine) => ({
+				type: "comment" as const,
+				anchor: vine.anchor,
+				content: vine.text,
+			})),
+		];
+
+		saving = true;
+		try {
+			await saveBloom({ sessionId, transcriptPublic });
+			editorRef?.clearDraft();
+			hasUnsavedChanges = false;
+			toast.success("Fireside's draft is in", {
+				description: `"${title}" is saved.`,
+			});
+		} catch (err) {
+			toast.error(
+				err instanceof Error ? err.message : `Failed to save ${resolveTermString("bloom", "post")}`,
+			);
+			throw err;
+		} finally {
+			saving = false;
+		}
+	}
+
 	/** Save — for drafts, zero validation; for published, title + content required */
 	async function handleSave() {
 		if (status === "published") {
@@ -178,21 +268,7 @@
 		saving = true;
 
 		try {
-			const saveSlug = originalSlug; // Use original slug for the URL
-			await api.put(`/api/blooms/${saveSlug}`, {
-				title: title.trim() || "",
-				description: description.trim(),
-				tags: parseTags(tagsInput),
-				font,
-				markdown_content: content,
-				gutter_content: JSON.stringify(gutterItems),
-				status,
-				featured_image: featuredImage.trim() || null,
-				meadow_exclude: 0,
-				slug: slug !== originalSlug ? slug : undefined,
-				blaze: selectedBlaze,
-				spark_prompt: sparkPrompt,
-			});
+			await saveBloom();
 
 			editorRef?.clearDraft();
 			toast.success(`${resolveTermString("Bloom", "Post")} saved successfully!`);
@@ -403,7 +479,7 @@
 	});
 </script>
 
-<svelte:window onbeforeunload={handleBeforeUnload} />
+<svelte:window onbeforeunload={handleBeforeUnload} onkeydown={handleFiresideKey} />
 
 <div class="edit-post-page">
 	<header class="page-header">
@@ -531,7 +607,31 @@
 		<!-- Editor -->
 		<main class="editor-main">
 			<div class="editor-with-gutter">
-				<div class="editor-section">
+				<div
+					class="editor-section"
+					class:fireside-open={firesideOpen}
+					class:fireside-above={firesideOpen && !!content.trim()}
+					class:fireside-closed={!firesideOpen}
+				>
+					{#if !firesideOpen && data.firesideEnabled}
+						<button
+							type="button"
+							class="fireside-entry"
+							onclick={() => (firesideOpen = true)}
+							title="Fireside (⌘⇧F)"
+						>
+							<toolIcons.fireside size={14} />
+							<span>{content.trim() ? "Fireside" : "Start with a conversation"}</span>
+						</button>
+					{/if}
+					<FiresidePanel
+						bind:open={firesideOpen}
+						mode={content.trim() ? "above" : "solo"}
+						draftPreview={content}
+						hasKey={data.firesideHasKey}
+						onclose={() => (firesideOpen = false)}
+						onaccept={handleAcceptDraft}
+					/>
 					<MarkdownEditor
 						bind:this={editorRef}
 						bind:content
@@ -714,7 +814,10 @@
 										<span class="info-label">Published:</span>
 										<span class="info-value">
 											{formatTimestamp(
-												(data.post as Record<string, unknown>).published_at as number | string | null,
+												(data.post as Record<string, unknown>).published_at as
+													| number
+													| string
+													| null,
 											)}
 										</span>
 									</p>
@@ -1219,6 +1322,86 @@
 		min-width: 0;
 		display: flex;
 		flex-direction: column;
+	}
+
+	/* ── Fireside, inside the editor ──────────────────────────────────────
+	   The same frame the new-post page uses: the door above the editor, and the
+	   fire opened above the words rather than over them. */
+	.fireside-entry {
+		display: flex;
+		position: relative;
+		z-index: 1;
+		align-items: center;
+		gap: 0.5rem;
+		width: 100%;
+		padding: 0.4375rem 0.75rem;
+		background: var(--color-bg-secondary, #f5f5f5);
+		border: 1px solid var(--editor-border, var(--color-border));
+		border-bottom: none;
+		border-radius: 8px 8px 0 0;
+		color: var(--grove-accent);
+		font: inherit;
+		font-size: 0.8125rem;
+		cursor: pointer;
+		text-align: left;
+		transition: background 120ms ease;
+	}
+
+	.fireside-entry:hover {
+		background: var(--grove-accent-8);
+	}
+
+	.editor-section.fireside-closed :global(.editor-container),
+	.editor-section.fireside-above :global(.editor-container) {
+		border-top-left-radius: 0;
+		border-top-right-radius: 0;
+	}
+
+	.editor-section.fireside-open:not(.fireside-above) :global(.editor-container) {
+		display: none;
+	}
+
+	.editor-section.fireside-above :global(.editor-container) {
+		flex: 1;
+		height: auto;
+		min-height: 0;
+		border-top: none;
+		border-radius: 0 0 8px 8px;
+	}
+
+	.editor-section.fireside-closed :global(.editor-container) {
+		border-top: none;
+	}
+	.gutter-section {
+		width: 300px;
+		flex-shrink: 0;
+		overflow-y: auto;
+	}
+	.toggle-vines-btn {
+		margin-top: 0.75rem;
+		padding: 0.5rem 1rem;
+		background: var(--grove-accent-10);
+		border: 1px solid var(--grove-accent-20);
+		border-radius: var(--border-radius-button);
+		color: var(--color-primary);
+		font-size: 0.85rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.15s ease;
+		align-self: flex-end;
+	}
+	.toggle-vines-btn:hover {
+		background: var(--grove-accent-20);
+		border-color: var(--grove-accent-35);
+	}
+	:global(.dark) .toggle-vines-btn {
+		background: var(--grove-accent-12);
+		border-color: var(--grove-accent-20);
+		color: var(--grove-accent);
+	}
+	:global(.dark) .toggle-vines-btn:hover {
+		background: var(--grove-accent-20);
+		border-color: var(--grove-accent-35);
 	}
 
 	/* Responsive */

@@ -551,7 +551,7 @@ start_workers() {
             -c services/zephyr/wrangler.toml \
             --persist-to "$shared_state" \
             --port 8790 \
-            --inspector-port 9230 \
+            --inspector-port 9233 \
             2>&1 | sed "s/^/  ${DIM}[workers]${RESET} /" &
         PIDS+=("$!")
 
@@ -592,11 +592,19 @@ start_workers() {
     # independently tries to claim the default inspector port and doesn't
     # reliably auto-increment past a collision when several start close
     # together, so a bare default risks one process failing to bind.
+    #
+    # They must also be unique ACROSS the whole stack, not just within a
+    # multi-config group: this one shared 9230 with Lumen, and the losing
+    # process died at startup with "Address already in use (127.0.0.1:9230)"
+    # rather than degrading. The map is
+    #   heartwood 9229 · lumen 9230 · plant 9231 · landing 9232
+    #   aspen group (full mode) and the DO/zephyr group (fast mode) 9233
+    # The last two share a number because they never run in the same mode.
     wrangler dev \
         -c apps/aspen/wrangler.toml \
         -c services/durable-objects/wrangler.local.toml \
         -c services/zephyr/wrangler.toml \
-        --inspector-port 9230 \
+        --inspector-port 9233 \
         2>&1 &
     WRANGLER_PID=$!
     PIDS+=("$WRANGLER_PID")

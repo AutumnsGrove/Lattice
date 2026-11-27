@@ -59,6 +59,8 @@ We need IP addresses briefly for rate limiting (preventing abuse). After 60 seco
 | IP addresses | 60 seconds |
 | Error logs | 7 days |
 | Your blog content | Until you delete it |
+| AI conversations (Fireside) | 90 days if you never publish them — see below |
+| Your AI provider key | Until you remove it, encrypted and never readable back |
 | Account data | Until you close your account |
 | Backups | 30 days after deletion |
 
@@ -77,7 +79,7 @@ If you want to know how your blog is doing, Grove offers privacy-respecting anal
 
 You can see trends without surveilling your readers.
 
-## Content moderation and AI
+## Content moderation
 
 Grove uses two automated systems to keep the community safe:
 
@@ -95,6 +97,41 @@ We chose providers specifically because they offer these guarantees.
 **About image moderation:** [[petal]] includes mandatory CSAM (child sexual abuse material) detection as required by federal law. If illegal content is detected, we're legally required to report it to authorities and retain the image hash (a mathematical fingerprint). This is the only exception to our zero-retention policy, and it's a legal requirement for all platforms.
 
 For the full technical details, see [[zdr]]
+
+## The AI features you turn on
+
+Moderation is not the only place Grove uses AI. It is the only place that runs on
+its own, and the difference matters: **the rest is optional.** Nothing reads your
+writing unless you ask it to.
+
+**You bring the key.** Features like [[fireside]] and the timeline agent run on a
+provider key you add yourself, in Settings → AI. We store it encrypted, per grove,
+and we never read it back. Your usage is yours to control, and a feature that
+spends your money should be one you switched on.
+
+**Zero retention, even where it costs more.** Every AI provider Grove uses agrees to
+keep nothing. They process the request, they do not store it, and they do not train
+on it. That is the rule we choose providers by — it costs us more than the
+alternative, and it is not open for a cheaper trade.
+
+**A conversation is the one thing that gets kept, and here is exactly how.**
+
+- **It lives in your grove**, in the same database as your words, so you can come
+  back to it tomorrow. Nobody at Grove reads conversations; even the moderation of
+  AI output is automated.
+- **An unpublished conversation is let go after 90 days.** You can delete it sooner
+  from the fire itself, and deleting it deletes it — the messages go with it.
+- **A transcript is off by default.** The conversation is between you and Wisp until
+  you choose otherwise. If you publish a transcript, the whole conversation — both
+  sides, in your own words — appears under the post, and it is moderated like any
+  other published page. Turning it off takes it back down. Deleting the post deletes
+  its transcript; deleting the conversation takes the transcript with it.
+- **The timeline agent keeps its runs**, each with what it cost, in your grove's
+  database. That is what makes "where did this page come from?" answerable later.
+
+**Why we tell you this at all.** A feature that keeps a conversation is a feature
+that has to say so, in the same breath as the promise that nothing else does. We
+would rather write the narrower, slightly more complicated sentence.
 
 ## Your writing is invisible to AI crawlers
 
@@ -118,7 +155,7 @@ This matters more than most people realize. As the web gets scraped into dataset
 
 **Want the full technical details?** See [[shade]] for a deep dive into our layered protection system, including verification steps for technically-minded users.
 
-*We use AI carefully and transparently for content moderation (Thorn for text, Petal for images). We refuse to let external AI harvest what you create. There's a difference, and we think it's an important one.*
+*We use AI carefully and transparently: moderation (Thorn for text, Petal for images) runs on its own, and the features you switch on run on your key, on providers that keep nothing. We refuse to let external AI harvest what you create. There's a difference, and we think it's an important one.*
 
 ## What we'll never do
 

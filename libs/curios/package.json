@@ -104,7 +104,7 @@
 		"@autumnsgrove/grove-crypto": "workspace:*",
 		"@autumnsgrove/grove-errors": "workspace:*",
 		"@autumnsgrove/lumen-registry": "workspace:*",
-		"@autumnsgrove/lyra": "^0.3.1"
+		"@autumnsgrove/lyra": "^0.4.0"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20260317.1",
