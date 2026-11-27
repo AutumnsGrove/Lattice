@@ -35,6 +35,7 @@
 			proposal: Proposal,
 			mode: "replace" | "top",
 			transcriptPublic: boolean,
+			sessionId: string,
 		) => Promise<void>;
 	}
 
