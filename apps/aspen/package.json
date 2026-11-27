@@ -44,7 +44,7 @@
 		"@autumnsgrove/grove-markdown": "workspace:*",
 		"@autumnsgrove/infra": "workspace:*",
 		"@autumnsgrove/lattice": "workspace:*",
-		"@autumnsgrove/lyra": "^0.3.1",
+		"@autumnsgrove/lyra": "^0.4.0",
 		"@autumnsgrove/lyra-lumen": "workspace:*",
 		"@autumnsgrove/prism": "workspace:*",
 		"@autumnsgrove/thorn": "workspace:*",

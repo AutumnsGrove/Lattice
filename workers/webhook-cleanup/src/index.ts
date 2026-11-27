@@ -6,6 +6,7 @@
  * Cleans up:
  * 1. Expired webhook events (120-day retention)
  * 2. Expired zip exports (7-day retention) — deletes R2 objects and updates D1 status
+ * 3. Expired Fireside conversations (90 days, unless the transcript is published)
  *
  * First consumer of the Infra SDK — all D1/R2 access goes through GroveContext.
  */
@@ -36,6 +37,14 @@ const MAX_BATCHES = 50;
  * Each requires an R2 delete, so keep this modest.
  */
 const EXPORT_CLEANUP_LIMIT = 50;
+
+/**
+ * Maximum expired conversations to let go per invocation.
+ *
+ * A session is a handful of rows and they cascade, so this is a ceiling against a
+ * backlog, not against cost.
+ */
+const FIRESIDE_CLEANUP_LIMIT = 500;
 
 /**
  * Create an Infra SDK context from the Worker env, wired with an observer.
@@ -145,6 +154,55 @@ export async function cleanupExpiredWebhooks(ctx: GroveContext): Promise<{
 	return { totalDeleted, batchCount };
 }
 
+/**
+ * Let go of Fireside conversations that were never published.
+ *
+ * A conversation is kept for ninety days so a writer can come back to it, and then
+ * it goes. One thing is exempt, and it is the whole reason the sweep exists rather
+ * than a bare TTL: **a published transcript is a promise to a reader**, and it may
+ * not evaporate because a timer ran out.
+ *
+ * Deleting the session does not touch the post. `posts.fireside_session_id` is
+ * `ON DELETE SET NULL`, so the post keeps its attribution — the marker stays true
+ * even when the conversation behind it is gone.
+ *
+ * Fails quietly on a database without the table: production carries this worker
+ * before migration 128 is applied, and a missing table must not take down the
+ * webhook and export cleanup that runs beside it.
+ */
+export async function cleanupExpiredFiresideSessions(ctx: GroveContext): Promise<number> {
+	const now = Math.floor(Date.now() / 1000);
+
+	try {
+		const result = await ctx.db.execute(
+			`DELETE FROM fireside_sessions
+       WHERE id IN (
+         SELECT id FROM fireside_sessions
+         WHERE expires_at IS NOT NULL
+           AND expires_at < ?
+           AND transcript_public = 0
+         LIMIT ?
+       )`,
+			[now, FIRESIDE_CLEANUP_LIMIT],
+		);
+
+		const deleted = result.meta.changes;
+		if (deleted > 0) {
+			console.log(`[Fireside Cleanup] Let go of ${deleted} unpublished conversation(s)`);
+		} else {
+			console.log("[Fireside Cleanup] No expired conversations to clean up");
+		}
+
+		return deleted;
+	} catch (err) {
+		console.error(
+			"[Fireside Cleanup] Failed to sweep expired conversations:",
+			err instanceof Error ? err.message : String(err),
+		);
+		return 0;
+	}
+}
+
 export default {
 	/**
 	 * Cron trigger handler - called by Cloudflare Cron
@@ -174,6 +232,9 @@ export default {
 
 		// 2. Clean up expired exports (R2 + D1)
 		await cleanupExpiredExports(ctx);
+
+		// 3. Let go of unpublished conversations
+		await cleanupExpiredFiresideSessions(ctx);
 	},
 
 	/**
@@ -189,13 +250,16 @@ export default {
 		try {
 			const { totalDeleted, batchCount } = await cleanupExpiredWebhooks(ctx);
 			const exportsCleaned = await cleanupExpiredExports(ctx);
+			const conversationsCleaned = await cleanupExpiredFiresideSessions(ctx);
 
 			return jsonResponse({
 				webhooks: { deleted: totalDeleted, batches: batchCount },
 				exports: { cleaned: exportsCleaned },
+				fireside: { cleaned: conversationsCleaned },
 				message:
-					totalDeleted > 0 || exportsCleaned > 0
-						? `Deleted ${totalDeleted} expired webhooks, cleaned ${exportsCleaned} expired exports`
+					totalDeleted > 0 || exportsCleaned > 0 || conversationsCleaned > 0
+						? `Deleted ${totalDeleted} expired webhooks, cleaned ${exportsCleaned} expired exports, ` +
+							`let go of ${conversationsCleaned} expired conversations`
 						: "Nothing to clean up",
 			});
 		} catch (err) {

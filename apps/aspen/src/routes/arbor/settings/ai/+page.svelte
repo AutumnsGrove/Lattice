@@ -2,6 +2,7 @@
 	import { authIcons, phaseIcons } from "@autumnsgrove/prism/icons";
 	import { ArborSection } from "@autumnsgrove/lattice/ui/arbor";
 	import GlassCard from "@autumnsgrove/lattice/ui/components/ui/GlassCard.svelte";
+	import Waystone from "@autumnsgrove/lattice/ui/components/ui/Waystone.svelte";
 
 	let { data, form } = $props();
 
@@ -37,17 +38,25 @@
 		</div>
 
 		<p class="explainer">
-			Grove's AI features run on your own OpenRouter key, so the spending is yours and the
-			requests are billed to you — not to the grove. Get a key from
+			Grove's AI features run on your own OpenRouter key, so the spending is yours and the requests
+			are billed to you — not to the grove. Get a key from
 			<a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer">
 				openrouter.ai/keys
 			</a>.
 		</p>
 
+		<p class="explainer">
+			The key is stored encrypted for your grove and never read back — this page can tell you
+			whether one is set, not what it is. Every provider Grove uses keeps nothing, and the one thing
+			an AI feature does keep (a Fireside conversation) lives in your own grove, for 90 days unless
+			you publish it.
+			<Waystone slug="understanding-your-privacy" label="What Grove keeps" inline />
+		</p>
+
 		{#if savedInTimeline}
 			<p class="note">
-				Your timeline saved this key before this page existed, so it is the one in use. Saving
-				one here takes over for every feature; the timeline's own key stops being read.
+				Your timeline saved this key before this page existed, so it is the one in use. Saving one
+				here takes over for every feature; the timeline's own key stops being read.
 			</p>
 		{/if}
 
@@ -72,8 +81,7 @@
 				class="field-input"
 			/>
 			<p class="field-hint">
-				Pasted once and never shown again. Grove stores it encrypted and cannot read it back to
-				you.
+				Pasted once and never shown again. Grove stores it encrypted and cannot read it back to you.
 			</p>
 			<button type="submit" class="btn btn-primary">Save key</button>
 		</form>
@@ -82,8 +90,8 @@
 			<form method="POST" action="?/remove" class="remove-form">
 				<button type="submit" class="btn btn-quiet">Remove key</button>
 				<span class="field-hint">
-					AI features stop working until you add one. Your key itself is unaffected — it is
-					still at openrouter.ai.
+					AI features stop working until you add one. Your key itself is unaffected — it is still at
+					openrouter.ai.
 				</span>
 			</form>
 		{/if}

@@ -12,6 +12,7 @@
  *   social.ts     — meadow (deprecated), reeds (comments), feedback (11 tables)
  *   media.ts      — uploads, images, storage, amber (9 tables)
  *   monitoring.ts — thorn, petal, sentinel (11 tables)
+ *   fireside.ts   — the conversation before the words exist (2 tables)
  *
  * Curio tables (045 tables) → see curios.ts
  * Observability tables (010 tables) → see observability.ts
@@ -24,3 +25,4 @@ export * from "./billing.js";
 export * from "./social.js";
 export * from "./media.js";
 export * from "./monitoring.js";
+export * from "./fireside.js";

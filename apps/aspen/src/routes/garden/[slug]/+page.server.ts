@@ -18,6 +18,9 @@ import {
 } from "@autumnsgrove/lattice/server/services/reeds";
 import type { PageServerLoad } from "./$types.js";
 import { linkPolicyFromContext } from "$lib/server/link-policy";
+import { isBetaDeployment } from "$lib/server/beta";
+import { listMessages } from "$lib/server/fireside/session";
+import { buildTranscript, type TranscriptEntry } from "$lib/server/fireside/transcript";
 
 // Disable prerendering - D1 posts are fetched dynamically at runtime
 export const prerender = false;
@@ -44,6 +47,8 @@ interface PostRecord {
 	featured_image?: string;
 	blaze?: string;
 	spark_prompt?: string | null;
+	fireside_assisted?: number;
+	fireside_session_id?: string | null;
 }
 
 /** Resolved blaze definition (label, icon, color) */
@@ -71,12 +76,33 @@ interface CachedPost {
 	blaze?: string | null;
 	blazeDefinition?: BlazeDefinition | null;
 	spark_prompt?: string | null;
+	/** Derived attribution: the flag is the truth, the marker is presentation. */
+	firesideAssisted: boolean;
+	firesideTranscript: PublicTranscript | null;
+}
+
+/**
+ * The published conversation behind a post, when the writer chose to share it.
+ *
+ * It rides along with the post in the cache — the spec's own instruction — which
+ * is why turning the transcript off has to purge `garden:<tenant>:<slug>`: a stale
+ * disclosure is worse than either honest answer.
+ */
+interface PublicTranscript {
+	publishedAt: number | null;
+	entries: TranscriptEntry[];
+}
+
+/** The owner's end of the disclosure: which session, and whether it is public. */
+interface TranscriptSwitch {
+	sessionId: string;
+	transcriptPublic: boolean;
 }
 
 /** Cache configuration */
 const CACHE_TTL_SECONDS = 300; // 5 minutes for KV cache
 
-export const load: PageServerLoad = async ({ params, locals, platform, setHeaders }) => {
+export const load: PageServerLoad = async ({ params, locals, platform, setHeaders, url }) => {
 	const { slug } = params;
 	const tenantId = locals?.tenantId;
 
@@ -96,6 +122,14 @@ export const load: PageServerLoad = async ({ params, locals, platform, setHeader
 
 	// Cache key includes tenant for multi-tenant isolation
 	const cacheKey = tenantId ? `garden:${tenantId}:${slug}` : `garden:_:${slug}`;
+
+	// The writer's own switch for the transcript. Read per request and never cached:
+	// the session belongs to a person, so it must not ride in the payload every
+	// visitor shares. Beta only, because the route that flips it is 404 elsewhere.
+	const transcriptSwitch =
+		isOwner && tenantId && platform?.env?.DB && isBetaDeployment(locals, url)
+			? await readTranscriptSwitch(platform.env.DB, tenantId, slug)
+			: null;
 
 	try {
 		// Try to get from KV cache first, or compute from D1/filesystem
@@ -135,6 +169,7 @@ export const load: PageServerLoad = async ({ params, locals, platform, setHeader
 					commentTotal,
 					commentSettings,
 					noindex: tenantLinkPolicy.noindex,
+					transcriptSwitch,
 				};
 			}
 		} else if (db && tenantId) {
@@ -149,6 +184,7 @@ export const load: PageServerLoad = async ({ params, locals, platform, setHeader
 					commentTotal,
 					commentSettings,
 					noindex: tenantLinkPolicy.noindex,
+					transcriptSwitch,
 				};
 			}
 		}
@@ -168,11 +204,14 @@ export const load: PageServerLoad = async ({ params, locals, platform, setHeader
 						blaze: null as string | null,
 						blazeDefinition: null as BlazeDefinition | null,
 						spark_prompt: null as string | null,
+						firesideAssisted: false,
+						firesideTranscript: null,
 					},
 					isOwner: isOwner || false,
 					comments: [],
 					commentTotal: 0,
 					commentSettings: null,
+					transcriptSwitch: null,
 				};
 			}
 		}
@@ -375,5 +414,95 @@ async function fetchAndProcessPost(
 		blaze: (post.blaze as string) || null,
 		blazeDefinition,
 		spark_prompt: post.spark_prompt || null,
+		firesideAssisted: post.fireside_assisted === 1,
+		firesideTranscript: await loadTranscript(db, tenantId, post),
 	};
+}
+
+/**
+ * The conversation a post is allowed to show, or `null`.
+ *
+ * Two gates, both on the reader's side: the post carries the link (it was
+ * accepted) and the session is public (the writer opted in). Off either one there
+ * is no transcript, which is why the drawer can say "off by default" and mean it.
+ *
+ * A failure here is a disclosure, not the page: a post that cannot say how it was
+ * written is still a post, so this degrades to the marker alone and says so in the
+ * log rather than turning a reader away.
+ */
+async function loadTranscript(
+	db: D1Database,
+	tenantId: string,
+	post: PostRecord,
+): Promise<PublicTranscript | null> {
+	const sessionId = post.fireside_session_id;
+	if (post.fireside_assisted !== 1 || !sessionId) return null;
+
+	try {
+		// Tenant-scoped on the session too: the post's link is not a capability, and a
+		// row from another grove must read as absence, not as a shared conversation.
+		const session = await db
+			.prepare(
+				`SELECT status, transcript_public, transcript_published_at
+				   FROM fireside_sessions
+				  WHERE id = ? AND tenant_id = ?`,
+			)
+			.bind(sessionId, tenantId)
+			.first<{
+				status: string;
+				transcript_public: number;
+				transcript_published_at: number | null;
+			}>();
+
+		if (!session || session.transcript_public !== 1) return null;
+
+		const messages = await listMessages(db, tenantId, sessionId);
+		if (messages.length === 0) return null;
+
+		return {
+			publishedAt: session.transcript_published_at,
+			entries: buildTranscript(messages, { accepted: session.status === "accepted" }),
+		};
+	} catch (err) {
+		console.error(`[garden/${post.slug}] FIRESIDE_TRANSCRIPT_FAILED`, {
+			tenantId,
+			error: err instanceof Error ? err.message : String(err),
+		});
+		return null;
+	}
+}
+
+/**
+ * The session a post points at, if this grove's post points at one.
+ *
+ * Read for the owner only, and only on beta: it exists so the writer's switch can
+ * name the session the route needs, without ever putting a session id in the
+ * payload every reader shares.
+ */
+async function readTranscriptSwitch(
+	db: D1Database,
+	tenantId: string,
+	slug: string,
+): Promise<TranscriptSwitch | null> {
+	try {
+		const row = await db
+			.prepare(
+				`SELECT s.id, s.transcript_public
+				   FROM posts p
+				   JOIN fireside_sessions s ON s.id = p.fireside_session_id
+				  WHERE p.tenant_id = ? AND p.slug = ? AND s.tenant_id = ?`,
+			)
+			.bind(tenantId, slug, tenantId)
+			.first<{ id: string; transcript_public: number }>();
+
+		if (!row) return null;
+		return { sessionId: row.id, transcriptPublic: row.transcript_public === 1 };
+	} catch (err) {
+		// A pre-migration database, or a post with no session: no switch, no page error.
+		console.error(`[garden/${slug}] FIRESIDE_SWITCH_FAILED`, {
+			tenantId,
+			error: err instanceof Error ? err.message : String(err),
+		});
+		return null;
+	}
 }
