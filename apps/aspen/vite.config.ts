@@ -16,6 +16,13 @@ function getGitBranch(): string {
 }
 
 export default createGroveViteConfig({
+	// Two peer-variant copies of @sveltejs/kit can land in node_modules; SvelteKit's
+	// request store then comes from a different copy than `sequence()`, which fails
+	// every request with "Could not get the request store". Dedupe forces one copy
+	// for the dev server. (TEMP, dev-stack only — revert if it doesn't help.)
+	resolve: {
+		dedupe: ["@sveltejs/kit"],
+	},
 	define: {
 		__GIT_BRANCH__: JSON.stringify(getGitBranch()),
 	},
