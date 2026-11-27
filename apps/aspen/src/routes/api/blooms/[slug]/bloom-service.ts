@@ -18,6 +18,7 @@ import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import { TIERS, type TierKey, isValidTier } from "@autumnsgrove/lattice/platform/config/tiers";
 import { isHttpError } from "@sveltejs/kit";
 import {
+	assertConversationUnclaimed,
 	readFiresideInput,
 	recordAcceptance,
 	requireOwnedFiresideSession,
@@ -158,6 +159,12 @@ export async function updatePost(
 	const firesideSession = fireside
 		? await requireOwnedFiresideSession(db, tenantId, userId, fireside.sessionId)
 		: null;
+
+	// The conversation belongs to this post or to none; claiming a spent one would
+	// leave two posts on one row.
+	if (fireside) {
+		await assertConversationUnclaimed(db, tenantId, fireside.sessionId, slug);
+	}
 
 	const tenantDbEarly = getTenantDb(db, { tenantId });
 

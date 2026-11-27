@@ -121,7 +121,8 @@ export async function cleanupExpiredExports(ctx: GroveContext): Promise<number> 
 
 /**
  * Delete expired webhooks in batches via Infra SDK.
- */ export async function cleanupExpiredWebhooks(ctx: GroveContext): Promise<{
+ */
+export async function cleanupExpiredWebhooks(ctx: GroveContext): Promise<{
 	totalDeleted: number;
 	batchCount: number;
 }> {

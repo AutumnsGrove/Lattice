@@ -248,6 +248,35 @@ describe("accepting a draft by saving the post", () => {
 	});
 
 	describe("sad", () => {
+		it("refuses to let one conversation become two posts", async () => {
+			const who = await grove();
+			const started = await start(who);
+
+			const first = await saveBloom(who, {
+				title: "The first post",
+				markdown_content: "Words.",
+				fireside: { sessionId: started.sessionId, transcriptPublic: true },
+			});
+			expect(first.status).toBe(200);
+
+			// Two posts on one session means deleting either one deletes the
+			// conversation, nulls the other's link, and takes a transcript off a page
+			// nobody touched.
+			const second = await saveBloom(who, {
+				title: "The second post",
+				markdown_content: "More words.",
+				fireside: { sessionId: started.sessionId, transcriptPublic: false },
+			});
+			expect(second.status).toBe(409);
+
+			const rows = await env.DB.prepare(
+				`SELECT COUNT(*) AS n FROM posts WHERE tenant_id = ? AND slug = ?`,
+			)
+				.bind(await tenantIdFor(who.subdomain), "the-second-post")
+				.first<{ n: number }>();
+			expect(rows?.n).toBe(0);
+		});
+
 		it("writes nothing at all when the conversation belongs to another grove", async () => {
 			const mine = await grove();
 			const theirs = await grove();

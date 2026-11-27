@@ -187,6 +187,41 @@ export async function requireOwnedFiresideSession(
 }
 
 /**
+ * A conversation becomes one post. This refuses the second.
+ *
+ * Both halves of the link are unique in intent but not in the database: a post may
+ * only have one conversation (that is enforced in the callers), and a conversation
+ * may only have one post. Without the second rule a writer who accepts the same
+ * session into a second post ends up with two posts pointing at one row — and then
+ * deleting either post deletes the conversation, nulls the other post's link, and
+ * takes a transcript off a page nobody touched.
+ *
+ * Scoped by tenant, and compared against the post being saved so a re-save of the
+ * same post is not a conflict with itself.
+ */
+export async function assertConversationUnclaimed(
+	db: D1Database,
+	tenantId: string,
+	sessionId: string,
+	currentSlug?: string,
+): Promise<void> {
+	const claimed = await db
+		.prepare(
+			`SELECT slug FROM posts
+			  WHERE fireside_session_id = ? AND tenant_id = ? AND slug != ?
+			  LIMIT 1`,
+		)
+		.bind(sessionId, tenantId, currentSlug ?? "")
+		.first<{ slug: string }>();
+
+	if (claimed) {
+		throwGroveError(409, API_ERRORS.VALIDATION_FAILED, "Fireside", {
+			detail: `that conversation already became "${claimed.slug}"; a conversation belongs to one post`,
+		});
+	}
+}
+
+/**
  * After the post exists: accept the session, and publish the transcript if asked.
  *
  * Called by both save routes (create and update) so an accepted draft behaves the

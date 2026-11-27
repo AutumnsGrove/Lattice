@@ -22,7 +22,7 @@ import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import { requireFireside } from "$lib/server/fireside/guard";
-import { setTranscriptPublic } from "$lib/server/fireside/publish";
+import { assertConversationUnclaimed, setTranscriptPublic } from "$lib/server/fireside/publish";
 import { loadOwnedSession } from "$lib/server/fireside/session";
 import { invalidatePostCaches } from "../../../blooms/[slug]/bloom-service";
 
@@ -97,6 +97,10 @@ export const POST: RequestHandler = async (event) => {
 	 * and impossible to take down (the toggle finds its post through the link). So
 	 * publishing only happens for the session the post actually points at.
 	 */
+	// A conversation belongs to one post: accepting a spent one here would leave two
+	// posts on one row, and deleting either would take the other's transcript.
+	await assertConversationUnclaimed(db, tenantId, sessionId, slug);
+
 	const linked = (post.fireside_session_id ?? sessionId) === sessionId;
 
 	// The transcript columns and everything that follows from them belong to one

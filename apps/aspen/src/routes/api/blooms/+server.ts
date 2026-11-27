@@ -14,6 +14,7 @@ import { API_ERRORS, throwGroveError } from "@autumnsgrove/lattice/errors";
 import { TIERS, type TierKey, isValidTier } from "@autumnsgrove/lattice/platform/config/tiers";
 import { isBetaDeployment } from "$lib/server/beta";
 import {
+	assertConversationUnclaimed,
 	readFiresideInput,
 	recordAcceptance,
 	requireOwnedFiresideSession,
@@ -209,6 +210,12 @@ export const POST: RequestHandler = async ({ request, platform, locals, url }) =
 					fireside.sessionId,
 				)
 			: null;
+
+		// A conversation belongs to one post. Claiming a spent one would leave two
+		// posts on one row, and deleting either would take the other's transcript.
+		if (fireside) {
+			await assertConversationUnclaimed(platform.env.DB, tenantId, fireside.sessionId);
+		}
 
 		// Tier-based limit enforcement (isolated — DB failures fail open)
 		// Run all queries in parallel to minimize latency (per AGENT.md parallelization pattern)
