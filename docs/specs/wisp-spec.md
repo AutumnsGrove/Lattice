@@ -287,11 +287,6 @@ Wisp uses the **Songbird Pattern**: a three-layer defense system against prompt 
 
 See: `docs/specs/songbird-pattern.md` for full implementation details.
 
-**Fireside Mode uses Songbird for:**
-
-- Every user message in conversation
-- The final draft generation request
-
 Together, Canary and Kestrel cost ~$0.0004 per request: negligible insurance against compromised responses.
 
 ### Rate Limiting
