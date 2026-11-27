@@ -477,7 +477,9 @@ describe("updatePost", () => {
 describe("deletePost", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		mockTenantDb.exists.mockResolvedValue(true);
+		// The post is read (not just `exists`d) because deleting it has to take the
+		// Fireside conversation behind it, and the link lives on the row.
+		mockTenantDb.queryOne.mockResolvedValue({ fireside_session_id: null });
 		mockTenantDb.delete.mockResolvedValue(1);
 	});
 
@@ -488,11 +490,52 @@ describe("deletePost", () => {
 	});
 
 	it("throws 404 when post does not exist", async () => {
-		mockTenantDb.exists.mockResolvedValueOnce(false);
+		mockTenantDb.queryOne.mockResolvedValueOnce(null);
 
 		await expect(deletePost(SLUG, mockDb, TENANT)).rejects.toMatchObject({ status: 404 });
 
 		expect(mockTenantDb.delete).not.toHaveBeenCalled();
+	});
+
+	it("takes the conversation with it, since nothing else collects a published one", async () => {
+		const prepared: { sql: string; params: unknown[] }[] = [];
+		const db = {
+			prepare: (sql: string) => ({
+				bind: (...params: unknown[]) => ({
+					run: async () => {
+						prepared.push({ sql, params });
+					},
+				}),
+			}),
+		} as unknown as D1Database;
+
+		mockTenantDb.queryOne.mockResolvedValue({ fireside_session_id: "session-1" });
+
+		await deletePost(SLUG, db, TENANT);
+
+		// The FK runs from the post to the session, so nothing cascades this way. The
+		// sweep spares a published transcript, and every route back to the conversation
+		// went through the post that just stopped existing.
+		expect(prepared).toHaveLength(1);
+		expect(prepared[0]?.sql).toContain("DELETE FROM fireside_sessions");
+		expect(prepared[0]?.params).toEqual(["session-1", TENANT]);
+	});
+
+	it("still deletes the post when the conversation cannot be removed", async () => {
+		const db = {
+			prepare: () => {
+				throw new Error("D1 unavailable");
+			},
+		} as unknown as D1Database;
+
+		mockTenantDb.queryOne.mockResolvedValue({ fireside_session_id: "session-1" });
+		const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+		await expect(deletePost(SLUG, db, TENANT)).resolves.toBeUndefined();
+		consoleSpy.mockRestore();
+
+		// The post is gone; failing the request now would report a delete that happened.
+		expect(mockTenantDb.delete).toHaveBeenCalledOnce();
 	});
 
 	it("invalidates caches after successful deletion", async () => {
