@@ -36,7 +36,7 @@ Core  Tools  Docs
 
 # Grove Specifications
 
-66 technical specifications covering every component, service, and tool in the Grove ecosystem. Organized by domain, linked to source files, kept current.
+72 technical specifications covering every component, service, and tool in the Grove ecosystem. Organized by domain, linked to source files, kept current.
 
 ---
 
@@ -191,6 +191,7 @@ Core  Tools  Docs
 | **[Lumen](lumen-spec.md)** | Unified AI routing layer with task-based provider selection | Active |
 | **[AI Gateway](../developer/integration/grove-ai-gateway-integration.md)** | Central AI observability and per-tenant quota management | Active |
 | **[Wisp](wisp-spec.md)** | Ethical writing assistant | Cut (2026-08-26) — Fireside Mode survives as its own standalone feature |
+| **[Fireside](fireside-spec.md)** | Conversational writing mode: your words, organized — with receipts | Planned |
 | **[Scribe](scribe-voice-transcription-spec.md)** | Voice-to-text transcription via Lumen | Active |
 | **[Shutter](shutter-spec.md)** | Web content distillation with prompt injection defense | Active |
 | **[Release Summaries](release-summaries-spec.md)** | Automated LLM release note generation | Active |
