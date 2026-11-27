@@ -54,7 +54,7 @@ Wisp is Grove's ethical AI writing tool. It helps you polish your voice without 
 
 An ethical AI writing tool that helps users polish their voice without replacing it. The assistant analyzes existing content for grammar, tone, and readability - it will **never** generate, expand, or brainstorm content.
 
-**Fireside Mode** extends this philosophy for writers who freeze at the blank page. Through guided conversation, Wisp helps users discover what they want to say, and then organizes _their own words_ into a draft. The fire doesn't tell the story. It just creates the space where stories emerge.
+**Fireside Mode** extends this philosophy for writers who freeze at the blank page (it now has [its own spec](fireside-spec.md)). Through guided conversation, Wisp helps users discover what they want to say, and then organizes _their own words_ into a draft. The fire doesn't tell the story. It just creates the space where stories emerge.
 
 This specification unifies:
 
